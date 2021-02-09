@@ -1,0 +1,8 @@
+{
+  "include": ["admin-ui/**/*"],
+  "compilerOptions": {
+    "jsx": "react",
+    "esModuleInterop": true,
+    "lib": ["ES2020", "DOM"]
+  }
+}
