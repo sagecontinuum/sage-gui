@@ -30,9 +30,10 @@ export default function TableControls(props: Props) {
         // value={value}
         onChange={e => { setQuery(e.target.value) }}
         InputProps={{
-          style: { height: 30, width: '230px'},
+          style: { width: '230px'},
           startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
         }}
+        size="small"
         variant="outlined"
       />
     </>

@@ -3,6 +3,7 @@
   "compilerOptions": {
     "jsx": "react",
     "esModuleInterop": true,
-    "lib": ["ES2020", "DOM"]
+    "lib": ["ES2020", "DOM"],
+    "downlevelIteration": true
   }
 }

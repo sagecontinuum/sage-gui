@@ -202,10 +202,6 @@ export default function ColumnMenu(props: Props) {
               <div className={classes.text}>
                 {option.label || option.id}
               </div>
-              <CloseIcon
-                className={classes.close}
-                style={{ visibility: selected ? 'visible' : 'hidden' }}
-              />
             </>
           )}
           options={[...options].sort((a, b) => {
