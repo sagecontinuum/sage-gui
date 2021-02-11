@@ -1,5 +1,7 @@
 node_modules/
 test-data/
 
+*token*
+
 dist/
 .parcel-cache/

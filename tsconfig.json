@@ -1,5 +1,5 @@
 {
-  "include": ["admin-ui/**/*"],
+  "include": ["admin-ui/**/*", "components/**/*"],
   "compilerOptions": {
     "jsx": "react",
     "esModuleInterop": true,

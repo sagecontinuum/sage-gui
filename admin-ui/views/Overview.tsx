@@ -2,11 +2,13 @@ import React, { useState, useEffect, useReducer } from 'react'
 import styled from 'styled-components'
 
 import Table from '../../components/table/Table'
-
-import Filter from './Filter'
+import Filter from '../../components/Filter'
+import Map from '../../components/Map'
 
 import config from '../config'
 const url = config.beekeeper
+
+const ENABLE_MAP = true
 
 
 const columns = [
@@ -127,8 +129,8 @@ const filterReducer = (state, action) => {
 }
 
 
-type Option = {id: string, label: string}
 
+type Option = {id: string, label: string}
 
 function Overview() {
   const [data, setData] = useState(null)
@@ -150,7 +152,6 @@ function Overview() {
     fetch(`${url}/blades.json`)
       .then(res => res.json())
       .then(data => {
-        console.log('raw data:', data)
         // add state and regions
         let rows = mockState(data)
         setData(rows)
@@ -188,14 +189,15 @@ function Overview() {
 
   // todo(nc): support multi-select (via components), likely
   const handleFilterChange = (type, field, val) => {
-    console.log({type, field, val})
     dispatch({type, field, val})
   }
 
 
   return (
     <Root>
-      <TopContainer></TopContainer>
+      <TopContainer>
+        {ENABLE_MAP && <Map data={filtered} />}
+      </TopContainer>
 
       <TableContainer>
         {filtered &&
@@ -223,7 +225,7 @@ const Root = styled.div`
 `
 
 const TopContainer = styled.div`
-  height: 10px;
+  height: 500px;
 `
 
 const TableContainer = styled.div`
