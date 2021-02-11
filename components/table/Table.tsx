@@ -503,7 +503,6 @@ export default function TableComponent(props: Props) {
   return (
     <Root>
       <CtrlContainer>
-
         {onSearch &&
           <TableSearch
             value={props.search}
@@ -524,21 +523,17 @@ export default function TableComponent(props: Props) {
               component="div"
               rowsPerPage={props.limit}
               page={page}
-
               backIconButtonProps={{
                 disableRipple: true,
                 'aria-label': 'previous page',
-                // size: 'small',
                 style: {marginLeft: '2px'}
               }}
               nextIconButtonProps={{
                 disableRipple: true,
                 'aria-label': 'next page',
-                // size: 'small'
               }}
               count={props.total || (rows && rows.length) || 0}
               onChangePage={onChangePage}
-              // onChangeRowsPerPage={handleChangeRowsPerPage}
             />
             <Divider orientation="vertical" flexItem style={{margin: '10px 5px'}} />
           </>
@@ -622,11 +617,9 @@ const Root = styled.div`
 
 const CtrlContainer = styled.div`
   border-bottom: 2px solid #f2f2f2;
+  padding-bottom: 10px;
   display: flex;
   flex: 1;
-  align-items: center;
-  justify-content: left;
-  padding-bottom: 10px;
 `
 
 

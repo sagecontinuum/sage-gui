@@ -221,11 +221,12 @@ function Overview() {
 }
 
 const Root = styled.div`
-  padding: 10px;
 `
 
 const TopContainer = styled.div`
-  height: 500px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0;
 `
 
 const TableContainer = styled.div`
