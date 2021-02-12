@@ -249,7 +249,7 @@ const TableHeadComponent = (props) => {
   )
 }
 
-// todo(nc): use types
+
 const clientSideSort = (data, id, direction) => {
   const isArrayCol = Array.isArray(data[0][id])
   const isNumeric = typeof data[0][id] === 'number'
@@ -274,9 +274,6 @@ const clientSideSort = (data, id, direction) => {
         : b[id].localeCompare(a[id])
     )
   }
-
-  // re-index
-  data = data.map((row, i) => ({...row, rowID: i}))
 
   return data
 }
@@ -309,6 +306,7 @@ const getVisibleColumns = (columns, activeColumns = null) => {
 
 
 type Props = {
+  primaryKey: string
   rows: object[]
   columns: object[]
   page?: number | string  // for ajax pagination
@@ -350,6 +348,7 @@ type Rows = Row[]
 
 export default function TableComponent(props: Props) {
   const {
+    primaryKey = 'rowID',
     pagination, offsetHeight, checkboxes, emptyNotice,
     middleComponent, rightComponent, stripes = true,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
@@ -385,8 +384,15 @@ export default function TableComponent(props: Props) {
 
   // when rows change, add row ids
   useEffect(() => {
-    // todo: primary ids?
-    setRows(props.rows.map((row, i) => ({...row, rowID: i})))
+    let newRows = props.rows.map((row, i) => ({...row, rowID: row[primaryKey]}))
+
+    // need to re-sort if updating table dynamically
+    const sortID = Object.keys(sortBy).length ?
+      Object.keys(sortBy)[0] : null
+    if (sortID)
+      newRows = clientSideSort(newRows, sortID, sortBy[sortID])
+
+    setRows(newRows)
   }, [props.rows])
 
   // listen to columns
@@ -540,10 +546,13 @@ export default function TableComponent(props: Props) {
         }
 
         {onColumnMenuChange &&
-          <ColumnMenu
-            options={props.columns} // all columns
-            onChange={onColumnChange}
-          />
+          <div style={{marginLeft: 'auto'}}>
+            <ColumnMenu
+              options={props.columns} // all columns
+              onChange={onColumnChange}
+            />
+          </div>
+
         }
 
         {rightComponent &&
@@ -619,6 +628,7 @@ const CtrlContainer = styled.div`
   border-bottom: 2px solid #f2f2f2;
   padding-bottom: 10px;
   display: flex;
+  align-items: center;
   flex: 1;
 `
 

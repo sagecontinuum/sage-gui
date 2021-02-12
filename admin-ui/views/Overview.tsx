@@ -9,6 +9,7 @@ import config from '../config'
 const url = config.beekeeper
 
 const ENABLE_MAP = true
+const TIME_OUT = 2000
 
 
 const columns = [
@@ -19,13 +20,17 @@ const columns = [
   },
   {id: 'Node CNAME', label: 'Name'},
   {id: 'NODE_ID', label: 'Node ID'},
+  {
+    id: 'cpu', label: 'CPU',
+    format: (val) => <b>{val}</b>
+  },
   {id: 'rSSH'},
   {id: 'iDRAC IP'},
   {id: 'iDRAC Port'},
   {id: 'eno1 address'},
   {id: 'eno2 address', hide: true},
   {id: 'Provisioning Date (version)', label: 'Provisioning Date'},
-  {id: 'OS Version'},
+  {id: 'OS Version', hide: true},
   {id: 'Service Tag'},
   {id: 'Special Devices'},
   {id: 'VSN', hide: true},
@@ -56,13 +61,26 @@ const Icon = styled.span`
 `
 
 
+const randomTime = () => `${Math.floor(Math.random() * 6).toFixed(2)}s`
+const randomMetric = () => (Math.random() * 100).toFixed(2)
 
 const mockState = (data: object[]) => {
   return data.map(obj => ({
     ...obj,
     status: obj['Status'] == 'Up' ? 'active' : 'inactive',
     region: obj['Location'].slice(obj['Location'].indexOf(',') + 1),
-    project: obj['Node CNAME'].slice(obj['Node CNAME'].indexOf('-') + 1, obj['Node CNAME'].lastIndexOf('-'))
+    project: obj['Node CNAME'].slice(obj['Node CNAME'].indexOf('-') + 1, obj['Node CNAME'].lastIndexOf('-')),
+    lastUpdated: randomTime(),
+    cpu: randomMetric()
+  }))
+}
+
+
+const mockUpdate = (data: object[]) => {
+  return data.map(obj => ({
+    ...obj,
+    lastUpdated: randomTime(),
+    cpu: randomMetric()
   }))
 }
 
@@ -129,7 +147,6 @@ const filterReducer = (state, action) => {
 }
 
 
-
 type Option = {id: string, label: string}
 
 function Overview() {
@@ -149,24 +166,40 @@ function Overview() {
 
   // load data
   useEffect(() => {
-    fetch(`${url}/blades.json`)
-      .then(res => res.json())
-      .then(data => {
-        // add state and regions
-        let rows = mockState(data)
-        setData(rows)
+    let handle
 
-        updateAll(rows)
-      })
+    (async () => {
+      const res = await fetch(`${url}/blades.json`)
+      const data = await res.json()
 
+      const rows = mockState(data)
+      setData(rows)
+      updateAll(rows)
+      handle = mockPings(rows)
+    })()
+
+    return () => {
+      clearTimeout(handle)
+    }
   }, [])
 
 
-  // effect for state change
+  // effect for local state change
   useEffect(() => {
     if (!data) return
     updateAll(data)
-  }, [query, filterState])
+  }, [query, filterState, data])
+
+
+  // this will be handled via polling or websockets
+  const mockPings = (rows) => {
+    const handle = setTimeout(() => {
+      setData(mockUpdate(rows))
+      mockPings(rows)
+    }, TIME_OUT)
+
+    return handle
+  }
 
 
   // filter data
@@ -182,11 +215,6 @@ function Overview() {
   }
 
 
-  const handleColumnChange = () => {
-
-  }
-
-
   // todo(nc): support multi-select (via components), likely
   const handleFilterChange = (type, field, val) => {
     dispatch({type, field, val})
@@ -197,15 +225,17 @@ function Overview() {
     <Root>
       <TopContainer>
         {ENABLE_MAP && <Map data={filtered} />}
+        {!ENABLE_MAP && <div style={{height: 475, width: 700, background: '#ccc'}} />}
       </TopContainer>
 
       <TableContainer>
         {filtered &&
           <Table
+            primaryKey="Node CNAME"
             rows={filtered}
             columns={columns}
             onSearch={({query}) => setQuery(query)}
-            onColumnMenuChange={handleColumnChange}
+            onColumnMenuChange={() => {}}
             middleComponent={
               <>
                 {statuses && <Filter id="status" label="Status" options={statuses} onChange={handleFilterChange} />}

@@ -112,7 +112,7 @@ const getGeoSpec = (data) => {
 // todo: resize
 const mapStyles = {
   border: '1px solid #ccc',
-  width: 600,
+  width: 700,
   height: 475
 }
 

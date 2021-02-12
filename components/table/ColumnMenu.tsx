@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 100,
     fontSize: 13,
     color: '#586069',
-    backgroundColor: '#f6f8fa',
+    backgroundColor: '#f6f8fa'
   },
   header: {
     borderBottom: '1px solid #e1e4e8',
@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: 'none',
     margin: 0,
     color: '#586069',
-    fontSize: 13,
+    fontSize: 13
   },
   option: {
     minHeight: 'auto',
@@ -148,7 +148,7 @@ export default function ColumnMenu(props: Props) {
   const id = open ? 'column-search' : undefined
 
   return (
-    <>
+    <div>
       {ButtonComponent ?
         React.cloneElement(ButtonComponent, {onClick: handleClick}) :
         <Tooltip title="Show/hide columns" placement="top">
@@ -225,7 +225,7 @@ export default function ColumnMenu(props: Props) {
           {...rest}
         />
       </Popper>
-    </>
+    </div>
   )
 }
 
