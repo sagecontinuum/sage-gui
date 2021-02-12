@@ -8,7 +8,7 @@ import Map from '../../components/Map'
 import config from '../config'
 const url = config.beekeeper
 
-const ENABLE_MAP = true
+const ENABLE_MAP = false
 const TIME_OUT = 2000
 
 
@@ -122,6 +122,17 @@ const getOptions = (data: object[], field: string) =>
     .map(name => ({id: name, label: name}))
 
 
+type OverviewProps = {
+
+}
+
+function Overview(props) {
+
+  return (
+    <></>
+  )
+}
+
 
 const initialState = {
   status: [],
@@ -146,10 +157,9 @@ const filterReducer = (state, action) => {
   }
 }
 
-
 type Option = {id: string, label: string}
 
-function Overview() {
+function StatusView() {
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
 
@@ -162,7 +172,10 @@ function Overview() {
 
   // filter state
   const [filterState, dispatch] = useReducer(filterReducer, initialState)
+  const [updateID, setUpdateID] = useState(0)
 
+  // selected
+  const [selected, setSelected] = useState(null)
 
   // load data
   useEffect(() => {
@@ -215,16 +228,30 @@ function Overview() {
   }
 
 
+  const handleQuery = ({query}) => {
+    setQuery(query)
+    setUpdateID(prev => prev + 1)
+  }
+
+
   // todo(nc): support multi-select (via components), likely
   const handleFilterChange = (type, field, val) => {
     dispatch({type, field, val})
+    setUpdateID(prev => prev + 1)
+  }
+
+
+  const handleSelect = (sel) => {
+    setSelected(sel.objs[0])
   }
 
 
   return (
     <Root>
       <TopContainer>
-        {ENABLE_MAP && <Map data={filtered} />}
+        <Overview selected={selected}/>
+
+        {ENABLE_MAP && <Map data={filtered} updateID={updateID} />}
         {!ENABLE_MAP && <div style={{height: 475, width: 700, background: '#ccc'}} />}
       </TopContainer>
 
@@ -234,8 +261,10 @@ function Overview() {
             primaryKey="Node CNAME"
             rows={filtered}
             columns={columns}
-            onSearch={({query}) => setQuery(query)}
+            enableSorting
+            onSearch={handleQuery}
             onColumnMenuChange={() => {}}
+            onSelect={handleSelect}
             middleComponent={
               <>
                 {statuses && <Filter id="status" label="Status" options={statuses} onChange={handleFilterChange} />}
@@ -251,6 +280,7 @@ function Overview() {
 }
 
 const Root = styled.div`
+  margin: 65px 10px 10px 10px;
 `
 
 const TopContainer = styled.div`
@@ -264,4 +294,4 @@ const TableContainer = styled.div`
 `
 
 
-export default Overview
+export default StatusView

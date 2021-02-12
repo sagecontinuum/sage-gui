@@ -3,9 +3,11 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import token from '../mapbox-token'
+import { SettingsInputHdmi } from '@material-ui/icons'
 
 const center = [-100, 50]
 const initialZoom = 1.5
+
 
 const loadMap = (domRef) => {
 	mapboxgl.accessToken = token
@@ -48,6 +50,10 @@ const renderMarkers = (map, data) => {
 }
 
 
+const clearMarkers = (markers) =>
+  (markers || []).forEach(marker => marker.remove())
+
+
 const recenter = (map) => {
   flyTo(map, center[0], center[1], initialZoom)
 }
@@ -64,7 +70,7 @@ const flyTo = (map, lon, lat, zoom = 10) => {
 
 const fitBounds = (map, bbox) => {
   map.fitBounds(bbox, {
-    padding: {top: 10, bottom:25, left: 15, right: 5},
+    padding: {top: 35, bottom: 35, left: 35, right: 35},
     maxZoom: 10
   })
 }
@@ -119,18 +125,21 @@ const mapStyles = {
 
 type Props = {
   data: {Lon: number, Lat: number}[] // todo: update definition with actual schema
+  updateID: number
 }
 
 
 function Map(props: Props) {
-  const {data = null} = props
+  const {data = null, updateID} = props
 
   const ref = useRef()
-
   const [init, setInit] = useState(false)
   const [map, setMap] = useState()
   const [markers, setMarkers] = useState()
   const [total, setTotal] = useState(null)
+
+  // keep track of primary keys
+  const [lastID, setLastID] = useState(-1)
 
   useEffect(() => {
     const map = loadMap(ref)
@@ -138,10 +147,27 @@ function Map(props: Props) {
   }, [])
 
   useEffect(() => {
-    if (!data || !map) return
+    if (!data || !map)
+      return
 
+    // if no matches, just clear the map
+    if (!data.length) {
+      clearMarkers(markers)
+      return
+    }
+
+    // do a manual comparison for dynamic ping updates
+    if (lastID == updateID)
+      return
+
+    // fly to box containing new data
     if (init && data != total) {
       const coords = getValidCoords(data)
+
+      if (!coords.length) {
+        return
+      }
+
       const bbox = getBBox(coords)
       fitBounds(map, bbox)
     } else {
@@ -149,7 +175,7 @@ function Map(props: Props) {
     }
 
     // remove markers (todo: probably should use layers?)
-    (markers || []).forEach(marker => marker.remove())
+    clearMarkers(markers)
 
     const geoSpec = getGeoSpec(data)
     const newMarkers = renderMarkers(map, geoSpec)
@@ -157,6 +183,7 @@ function Map(props: Props) {
 
     setInit(true)
     setTotal(data.length)
+    setLastID(updateID)
   }, [data, map])
 
   return (

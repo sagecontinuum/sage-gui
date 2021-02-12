@@ -320,6 +320,7 @@ type Props = {
   checkboxes?: boolean
   searchPlaceholder?: string
   stripes?: boolean
+  enableSorting?: boolean
 
   onSearch?: ({query: string}) => void
   onSort?: (string) => void       // for ajax pagination
@@ -350,7 +351,7 @@ export default function TableComponent(props: Props) {
   const {
     primaryKey = 'rowID',
     pagination, offsetHeight, checkboxes, emptyNotice,
-    middleComponent, rightComponent, stripes = true,
+    middleComponent, rightComponent, stripes = true, enableSorting = false,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
@@ -389,8 +390,9 @@ export default function TableComponent(props: Props) {
     // need to re-sort if updating table dynamically
     const sortID = Object.keys(sortBy).length ?
       Object.keys(sortBy)[0] : null
-    if (sortID)
+    if (sortID) {
       newRows = clientSideSort(newRows, sortID, sortBy[sortID])
+    }
 
     setRows(newRows)
   }, [props.rows])
@@ -480,11 +482,11 @@ export default function TableComponent(props: Props) {
     const newState = {[id]: direction}
 
     // if server-side sorting
-    if (onSort) {
+    if (onSort)
       onSort(decodeSort(newState))
 
-    // if client-side sorting
-    } else  {
+    // client-side sorting
+    if (enableSorting) {
       setRows(clientSideSort(rows, id, direction))
       setSortBy(newState)
     }
@@ -701,6 +703,7 @@ const Container = styled(TableContainer)`
     background-color: #fff;
     user-select: none;
     padding: 6px 12px 6px 2px;
+    font-weight: 800;
   }
 `
 

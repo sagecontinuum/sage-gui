@@ -1,10 +1,14 @@
 
-
 body {
-  font-family: "Roboto", Arial, Helvetica, sans-serif;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: initial !important;
+  font-weight: initial !important;
+  line-height: initial !important;
+  letter-spacing: initial !important;
+  background-color: #fff !important;
 }
 
-.success { color: hsl(150, 87%, 26%); }
+.success { color: #3ac37e }
 .warning { color: hsl(41, 83%, 35%); }
 .failed { color: hsl(0, 83%, 35%); }
-.inactive { color: hsl(0, 0%, 15%); }
+.inactive { color: #888; }
