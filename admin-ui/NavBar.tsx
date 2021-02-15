@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import flower from 'url:../admin-ui/assets/sage-drawing.png'
+import sage from 'url:./assets/sage-drawing.png'
 import Divider from '@material-ui/core/Divider'
 
 type Props = {
@@ -12,7 +12,7 @@ const NavBar = (props: Props) => {
 
   return (
     <Root>
-      <img src={flower} height="35"/>
+      <img src={sage} height="35"/>
       <Logo>
         Sage
       </Logo>
@@ -37,7 +37,7 @@ const Root = styled.div`
 `
 
 const Logo = styled.span`
-  font-size: 2em;
+  font-size: 2.2em;
   font-family: 'Open sans', sans-serif;
   font-weight: 800;
   color: #87baa6; //#48771f; // #889b77;
@@ -50,8 +50,9 @@ const Logo = styled.span`
 `
 
 const Title = styled.span`
+  margin-top: 10px;
   margin-left: 20px;
-  font-weight: 400;
+  font-weight: 600;
 `
 
 export default NavBar

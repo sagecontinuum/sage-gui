@@ -6,15 +6,15 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 
-import NavBar from '../components/NavBar'
-import Overview from './views/StatusView'
+import NavBar from './NavBar
+import Overview from './views/status/StatusView'
 
 import './assets/styles.scss'
 
 
 
 function App() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const darkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const theme = React.useMemo(
     () =>
@@ -23,14 +23,15 @@ function App() {
           fontFamily: [
             'Nunito'
           ].join(','),
-          body1: {
-            fontWeight: 800,
-          },
+          button: {
+            textTransform: "none",
+            fontWeight: 800
+          }
         },
         palette: {
-          type: 'light', //prefersDarkMode ? 'dark' : 'light',
+          type: 'light', // darkMode ? 'dark' : 'light',
           primary: {
-            main: '#9e7dc4',
+            main: '#8166a0',
           },
           secondary: {
             main: '#056600',
@@ -38,11 +39,18 @@ function App() {
         },
         props: {
           MuiButtonBase: {
-            disableRipple: true, // No more ripple, on the whole application 💣!
-          }
-        }
+            disableRipple: true,
+         },
+        },
+        overrides: {
+          MuiButton: {
+            text: {
+              textTransform: 'none',
+            },
+          },
+        },
       }),
-    [prefersDarkMode],
+    [darkMode]
   )
 
 

@@ -438,8 +438,9 @@ export default function TableComponent(props: Props) {
 
 
   useClickOutside(tableRef, () => {
-    dispatch({type: 'CLEAR'})
-  }, ['button', 'a', 'input', '.meta-sidebar', '.MuiDialog-container', '.MuiAutocomplete-popper'])
+    // dispatch({type: 'CLEAR'})
+  }, ['button', 'a', 'input', '.meta-sidebar',
+    '.MuiDialog-container', '.MuiAutocomplete-popper', 'MuiDrawer-root'])
 
 
   const onChangePage = (event, newPage) => {

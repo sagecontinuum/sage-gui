@@ -12,3 +12,17 @@ body {
 .warning { color: hsl(41, 83%, 35%); }
 .failed { color: hsl(0, 83%, 35%); }
 .inactive { color: #888; }
+
+
+/*
+h1,h2,h3,h4,h5,h6 {
+  font-family: 'Roboto';
+}
+*/
+
+table.key-value-table {
+  tr td:first-child {
+    font-weight: bold;
+    padding-right: 15px;
+  }
+}

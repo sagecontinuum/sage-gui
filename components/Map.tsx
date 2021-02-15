@@ -118,7 +118,7 @@ const getGeoSpec = (data) => {
 // todo: resize
 const mapStyles = {
   border: '1px solid #ccc',
-  width: 700,
+  width: 900,
   height: 475
 }
 
@@ -157,8 +157,10 @@ function Map(props: Props) {
     }
 
     // do a manual comparison for dynamic ping updates
-    if (lastID == updateID)
+    if (lastID == updateID) {
+      console.log('no update')
       return
+    }
 
     // fly to box containing new data
     if (init && data != total) {
