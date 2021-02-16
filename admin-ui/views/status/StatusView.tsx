@@ -2,9 +2,6 @@ import React, { useState, useEffect, useReducer } from 'react'
 import styled from 'styled-components'
 
 import Button from '@material-ui/core/Button'
-import Drawer from '@material-ui/core/Drawer'
-import TextField from '@material-ui/core/TextField'
-
 
 import Table from '../../../components/table/Table'
 import Filter from '../../../components/Filter'
@@ -12,11 +9,11 @@ import Map from '../../../components/Map'
 import Overview from './Overview'
 
 import config from '../../config'
+import DetailsSidebar from './DetailsSidebar'
 
 const url = config.beekeeper
 
-
-const ENABLE_MAP = true
+const ENABLE_MAP = false
 const TIME_OUT = 2000
 
 const MOCK_DOWN_NODE = 'Sage-NEON-04'
@@ -103,9 +100,10 @@ const randomTime = () => Math.floor(Math.random() * 12) + 1
 const randomMetric = () => (Math.random() * 100).toFixed(2)
 const randomMem = () => (Math.random() * 192).toFixed(2)
 
-const mockState = (data: object[]) => {
+const mockData = (data: object[]) => {
   return data.map(obj => ({
     ...obj,
+    id: obj['Node CNAME'],
     status: obj['Node CNAME'] == MOCK_DOWN_NODE ? 'failed' : (obj['Status'] == 'Up' ? 'active' : 'inactive'),
     region: obj['Location'].slice(obj['Location'].indexOf(',') + 1),
     project: obj['Node CNAME'].slice(obj['Node CNAME'].indexOf('-') + 1, obj['Node CNAME'].lastIndexOf('-')),
@@ -191,7 +189,10 @@ const filterReducer = (state, action) => {
   }
 }
 
-type Option = {id: string, label: string}
+type Option = {
+  id: string,
+  label: string
+}
 
 function StatusView() {
   const [data, setData] = useState(null)
@@ -210,7 +211,6 @@ function StatusView() {
 
   // selected
   const [selected, setSelected] = useState(null)
-  const [selectedIDs, setSelectedIDs] = useState([])
   const [showDetails, setShowDetails] = useState(false)
 
   // load data
@@ -221,7 +221,7 @@ function StatusView() {
       const res = await fetch(`${url}/blades.json`)
       const data = await res.json()
 
-      const rows = mockState(data)
+      const rows = mockData(data)
       setData(rows)
       updateAll(rows)
       handle = mockPings(rows)
@@ -280,16 +280,9 @@ function StatusView() {
 
   const handleSelect = (sel) => {
     if (sel.objs.length)
-      setSelected(sel.objs[0])
+      setSelected(sel.objs)
     else
       setSelected(null)
-
-    console.log('selecting')
-    if (sel.objs.length) {
-      setSelectedIDs(sel.objs.map(o => o[PRIMARY_KEY]))
-    } else {
-      setSelectedIDs([])
-    }
 
     setUpdateID(prev => prev + 1)
   }
@@ -298,11 +291,15 @@ function StatusView() {
   return (
     <Root>
       <TopContainer>
-        <Overview data={filtered} selected={selected}/>
+        <Overview
+          data={filtered}
+          selected={selected}
+        />
 
         {ENABLE_MAP && filtered &&
           <Map
-            data={selectedIDs.length ? filtered.filter(o => selectedIDs.includes(o[PRIMARY_KEY]) ) : filtered }
+            data={data}
+            selected={selected}
             updateID={updateID}
           />}
         {!ENABLE_MAP && <div style={{height: 450, width: 700, background: '#ccc'}} />}
@@ -331,43 +328,11 @@ function StatusView() {
       </TableContainer>
 
       {showDetails &&
-        <Drawer anchor="right" open={true} onClose={() => setShowDetails(false)}>
-          <Details>
-            <h3>{selected['Node CNAME']}</h3>
-
-            <table className="key-value-table">
-              <tbody>
-                <tr>
-                  <td>Status</td>
-                  <td className={selected['status'] == 'active' ? 'success' : ''}>
-                    <b>{selected['status']}</b>
-                  </td>
-                </tr>
-
-                {columns
-                  .filter(o => !['status', 'Contact', 'Notes'].includes(o.id))
-                  .map(o =>
-                    <tr><td>{o.label || o.id}</td><td>{selected[o.id]}</td></tr>
-                )}
-
-                <tr><td colSpan={2}>Contact</td></tr>
-                <tr>
-                  <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{selected['Contact']}</td>
-                </tr>
-              </tbody>
-            </table>
-            <br/><br/>
-            <TextField
-              id={`sage-${selected['Node CNAME']}-notes`}
-              label="Notes"
-              multiline
-              rows={4}
-              defaultValue={selected['Notes']}
-              variant="outlined"
-              fullWidth
-            />
-          </Details>
-        </Drawer>
+        <DetailsSidebar
+          columns={columns}
+          selected={selected}
+          onClose={() => setShowDetails(false)}
+        />
       }
     </Root>
   )
@@ -395,13 +360,6 @@ const TopContainer = styled.div`
 
 const TableContainer = styled.div`
 
-`
-
-
-const Details = styled.div`
-  margin-top: 70px;
-  max-width: 385px;
-  padding: 0 20px;
 `
 
 

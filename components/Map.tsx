@@ -124,13 +124,14 @@ const mapStyles = {
 
 
 type Props = {
-  data: {Lon: number, Lat: number}[] // todo: update definition with actual schema
+  data: {id: string, Lon: number, Lat: number}[] // todo: update definition with actual schema
+  selected: {id: string, Lon: number, Lat: number}[]
   updateID: number
 }
 
 
 function Map(props: Props) {
-  const {data = null, updateID} = props
+  const {data = null, selected, updateID} = props
 
   const ref = useRef()
   const [init, setInit] = useState(false)
@@ -158,13 +159,16 @@ function Map(props: Props) {
 
     // do a manual comparison for dynamic ping updates
     if (lastID == updateID) {
-      console.log('no update')
       return
     }
 
+    // filter selected if needed
+    const filteredData = selected ?
+      data.filter(obj => selected.map(o => o.id).includes(obj.id) ) : data
+
     // fly to box containing new data
     if (init && data != total) {
-      const coords = getValidCoords(data)
+      const coords = getValidCoords(filteredData)
 
       if (!coords.length) {
         return
@@ -179,7 +183,7 @@ function Map(props: Props) {
     // remove markers (todo: probably should use layers?)
     clearMarkers(markers)
 
-    const geoSpec = getGeoSpec(data)
+    const geoSpec = getGeoSpec(filteredData)
     const newMarkers = renderMarkers(map, geoSpec)
     setMarkers(newMarkers)
 

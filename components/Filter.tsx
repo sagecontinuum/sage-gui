@@ -8,7 +8,7 @@ type Option = {id: string, label: string}
 
 type Ops = 'SET_FILTER' | 'CLEAR_FILTER'
 
-type FiltersProps = {
+type FilterProps = {
   id: string
   label: string
   options: Option[]
@@ -17,7 +17,7 @@ type FiltersProps = {
 }
 
 
-function Filter(props: FiltersProps) {
+function Filter(props: FilterProps) {
   const {id, label, options, width, onChange} = props
 
   return (

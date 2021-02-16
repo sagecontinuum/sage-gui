@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import Button from '@material-ui/core/Button'
 
 import 'chartjs-plugin-datalabels';
-import {Bar, HorizontalBar} from 'react-chartjs-2';
+import {Bar, HorizontalBar} from 'react-chartjs-2'
 
 
 
@@ -36,10 +35,12 @@ type Props = {
 }
 
 function Overview(props: Props) {
-  const {data} = props
+  const {data, selected} = props
 
 
-  const [selected, setSelected] = useState(props.selected ? [props.selected].map(o => o['Node CNAME']) : null)
+  const [selectedIDs, setSelectedIDs] = useState(
+    selected ? selected.map(o => o.id) : null
+  )
 
   const [statuses, setStatuses] = useState([])
   const [cpuState, setCpuState] = useState([])
@@ -48,9 +49,14 @@ function Overview(props: Props) {
 
 
   useEffect(() => {
-    if (!data && !selected) return
+    setSelectedIDs(selected ? selected.map(o => o.id) : null)
+  }, [selected])
 
-    let d = selected ? data.filter(o => selected.includes(o['Node CNAME'])) : data
+
+  useEffect(() => {
+    if (!data && !selectedIDs) return
+
+    let d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
 
     const statuses = getStatuses(d)
     const cpuState = aggregateOnField(d, 'cpu')
@@ -61,20 +67,21 @@ function Overview(props: Props) {
     setCpuState([cpuState])
     setMemState([memState])
     setStorageState([storageState])
-  }, [data, selected])
+  }, [data, selectedIDs])
 
-
-
-  useEffect(() => {
-    setSelected(props.selected ? [props.selected].map(o => o['Node CNAME']) : null)
-  }, [props.selected])
 
 
   if (!data) return <></>
 
   return (
     <Root>
-      {selected?.length && <h3>{selected[0]}</h3>}
+      {selectedIDs?.length == 1 &&
+        <h3>{selected[0].id}</h3>
+      }
+
+      {selectedIDs?.length > 1 &&
+        <h3>{selectedIDs.join(', ')}</h3>
+      }
 
       {!selected &&
         <h3 style={{margin: '0 0 10px 15px'}}>
