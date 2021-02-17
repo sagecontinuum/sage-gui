@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import Button from '@material-ui/core/Button'
 
+import columns from './columns'
 import Table from '../../../components/table/Table'
 import Filter from '../../../components/Filter'
 import Map from '../../../components/Map'
@@ -13,86 +14,18 @@ import DetailsSidebar from './DetailsSidebar'
 
 const url = config.beekeeper
 
-const ENABLE_MAP = false
+const ENABLE_MAP = true
 const TIME_OUT = 2000
 
 const MOCK_DOWN_NODE = 'Sage-NEON-04'
-const PRIMARY_KEY = 'Node CNAME'
+const PRIMARY_KEY = 'name'
 
 
-const columns = [
-  {
-    id: 'status',
-    label: 'Status',
-    format: (val) => getStateIcon(val)
-  },
-  {id: 'Node CNAME', label: 'Name'},
-  {id: 'NODE_ID', label: 'Node ID'},
-  {
-    id: 'lastUpdated', label: 'Last Updated',
-    format: (val) =>
-      <b className={getUpdatedColor(val)}>
-        {val == 'N/A' ? val : `${val}s`}
-      </b>
-  },
-  {
-    id: 'mem', label: 'Mem',
-    format: (val) => <b>{val}gb</b>
-  },
-  {
-    id: 'cpu', label: '% CPU',
-    format: (val) => <b>{val}</b>
-  },
-  {
-    id: 'storage', label: 'Storage',
-    format: (val) =>
-      <b>
-        {val == 'N/A' ? val : `${val}%`}
-      </b>
-  },
-  {id: 'rSSH'},
-  {id: 'iDRAC IP'},
-  {id: 'iDRAC Port'},
-  {id: 'eno1 address'},
-  {id: 'eno2 address', hide: true},
-  {id: 'Provisioning Date (version)', label: 'Provisioning Date'},
-  {id: 'OS Version', hide: true},
-  {id: 'Service Tag'},
-  {id: 'Special Devices'},
-  {id: 'VSN', hide: true},
-  {id: 'BIOS Version', hide: true},
-  {id: 'Lat', hide: true},
-  {id: 'Lon', hide: true},
-  {id: 'Location', hide: true},
-  {id: 'Contact', hide: true},
-  {id: 'Notes', hide: true}
-]
-
-
-type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive'
-
-const getStateIcon = (status: NodeStatus) => {
-  if (status == 'active')
-    return <Icon className="material-icons success">check_circle</Icon>
-  else if (status == 'warning')
-    return <Icon className="material-icons warning">warning_amber</Icon>
-  else if (status == 'failed')
-    return <Icon className="material-icons failed">error</Icon>
-  else
-    return <Icon className="material-icons inactive">remove_circle_outline</Icon>
+type Row = {
+  [key: string]: any
 }
 
-const Icon = styled.span`
-  margin-left: 10px;
-`
-
-
-const getUpdatedColor = (val) => {
-  if (val == 'N/A') return 'failed'
-  if (val > 11) return 'failed'
-  if (val >= 8) return 'warning'
-  return 'success'
-}
+type Data = Row[]
 
 
 
@@ -100,18 +33,22 @@ const randomTime = () => Math.floor(Math.random() * 12) + 1
 const randomMetric = () => (Math.random() * 100).toFixed(2)
 const randomMem = () => (Math.random() * 192).toFixed(2)
 
-const mockData = (data: object[]) => {
-  return data.map(obj => ({
-    ...obj,
-    id: obj['Node CNAME'],
-    status: obj['Node CNAME'] == MOCK_DOWN_NODE ? 'failed' : (obj['Status'] == 'Up' ? 'active' : 'inactive'),
-    region: obj['Location'].slice(obj['Location'].indexOf(',') + 1),
-    project: obj['Node CNAME'].slice(obj['Node CNAME'].indexOf('-') + 1, obj['Node CNAME'].lastIndexOf('-')),
-    lastUpdated: randomTime(),
-    mem: randomMem(),
-    cpu: randomMetric(),
-    storage: randomMetric()
-  }))
+const mockData = (data: Data) => {
+  return data.map(obj => {
+    const {name, location, status} = obj
+
+    return {
+      ...obj,
+      id: name,
+      status: name == MOCK_DOWN_NODE ? 'failed' : (status == 'Up' ? 'active' : 'inactive'),
+      region: location.slice(location.indexOf(',') + 1),
+      project: name.slice(name.indexOf('-') + 1, name.lastIndexOf('-')),
+      lastUpdated: randomTime(),
+      mem: randomMem(),
+      cpu: randomMetric(),
+      storage: randomMetric()
+    }
+  })
 }
 
 
@@ -119,10 +56,10 @@ const mockUpdate = (data: any[]) => {
   return data.map((obj, i) => {
     return {
       ...obj,
-      lastUpdated: obj['Node CNAME'] == MOCK_DOWN_NODE ? 'N/A' : (obj['lastUpdated'] + TIME_OUT / 1000) % 16,
+      lastUpdated: obj.name == MOCK_DOWN_NODE ? 'N/A' : (obj.lastUpdated + TIME_OUT / 1000) % 16,
       mem: obj.mem % 4 == 0 ? randomMem() : obj.mem,
       cpu: randomMetric(),
-      storage: obj['lastUpdated'] % 5 == 0 ? randomMetric(): obj.storage
+      storage: obj.lastUpdated % 5 == 0 ? randomMetric(): obj.storage
     }
   })
 }

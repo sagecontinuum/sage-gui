@@ -8,21 +8,14 @@ type defaultSettings = {
 }
 
 type UISettings = {
-  showDetails: boolean
-  showFilters: boolean
+  exampleState: boolean
 }
 
-type UISettingsKeys =
-  'showDetails' |
-  'showFilters' |
-  'showHiddenFiles'
-
+type UISettingsKeys = 'someKey'
 
 const defaultSettings = {
   uiSettings: {
-    showDetails: false,
-    showFilters: true,
-    showHiddenFiles: false
+    exampleState: false,
   }
 }
 
@@ -32,7 +25,7 @@ function useLocalStorage (storageKey: StorageEntries, key: UISettingsKeys) {
 
   const initial = useMemo(() => {
     const jsonStr = localStorage.getItem(storageKey)
-    // todo: throw runtime error if defaults aren't there
+    // todo: throw runtime error if defaults aren't there?
 
     let init
     try {
@@ -47,7 +40,6 @@ function useLocalStorage (storageKey: StorageEntries, key: UISettingsKeys) {
 
 
   const [state, setState] = useState<object>(initial)
-
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(state))

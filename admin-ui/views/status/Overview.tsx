@@ -76,7 +76,7 @@ function Overview(props: Props) {
   return (
     <Root>
       {selectedIDs?.length == 1 &&
-        <h3>{selected[0].id}</h3>
+        <h3>{selectedIDs[0]}</h3>
       }
 
       {selectedIDs?.length > 1 &&

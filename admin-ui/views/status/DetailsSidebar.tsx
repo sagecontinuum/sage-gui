@@ -5,7 +5,7 @@ import Drawer from '@material-ui/core/Drawer'
 import TextField from '@material-ui/core/TextField'
 
 type Props = {
-  selected: object
+  selected: any[]
   columns: any[]
   onClose: () => void
 }
@@ -13,7 +13,9 @@ type Props = {
 export default function DetailsSidebar(props: Props) {
   const {selected, columns, onClose} = props
 
-  const name = selected['Node CNAME']
+  const item = selected[0]
+  const {name} = item
+
 
   return (
     <Root>
@@ -26,30 +28,33 @@ export default function DetailsSidebar(props: Props) {
             <tbody>
               <tr>
                 <td>Status</td>
-                <td className={selected['status'] == 'active' ? 'success' : ''}>
-                  <b>{selected['status']}</b>
+                <td className={item.status == 'active' ? 'success' : ''}>
+                  <b>{item.status}</b>
                 </td>
               </tr>
 
               {columns
-                .filter(o => !['status', 'Contact', 'Notes'].includes(o.id))
+                .filter(o => !['status', 'contact', 'notes'].includes(o.id))
                 .map(o =>
-                  <tr><td>{o.label || o.id}</td><td>{selected[o.id]}</td></tr>
-              )}
+                  <tr key={o.id}><td>{o.label || o.id}</td><td>{item[o.id]}</td></tr>
+                )
+              }
 
               <tr><td colSpan={2}>Contact</td></tr>
               <tr>
-                <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{selected['Contact']}</td>
+                <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{item.contact}</td>
               </tr>
             </tbody>
           </table>
+
           <br/><br/>
+
           <TextField
             id={`sage-${name}-notes`}
             label="Notes"
             multiline
             rows={4}
-            defaultValue={selected['Notes']}
+            defaultValue={item.notes}
             variant="outlined"
             fullWidth
           />

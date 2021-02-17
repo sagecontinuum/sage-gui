@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import token from '../mapbox-token'
-import { SettingsInputHdmi } from '@material-ui/icons'
+
 
 const center = [-100, 50]
 const initialZoom = 1.5
@@ -59,9 +59,9 @@ const recenter = (map) => {
 }
 
 
-const flyTo = (map, lon, lat, zoom = 10) => {
+const flyTo = (map, lng, lat, zoom = 10) => {
   map.flyTo({
-    center: [lon, lat],
+    center: [lng, lat],
     essential: true,
     zoom
   })
@@ -77,35 +77,35 @@ const fitBounds = (map, bbox) => {
 
 
 const getBBox = (coordinates) => {
-  const lons = coordinates.map(o => o.lon)
+  const lngs = coordinates.map(o => o.lng)
   const lats = coordinates.map(o => o.lat)
 
-  const lonMin = Math.min(...lons)
-  const lonMax = Math.max(...lons)
+  const lngMin = Math.min(...lngs)
+  const lngMax = Math.max(...lngs)
   const latMin = Math.min(...lats)
   const latMax = Math.max(...lats)
 
-  return [[lonMin, latMin], [lonMax, latMax]]
+  return [[lngMin, latMin], [lngMax, latMax]]
 }
 
 
 
 const getValidCoords = (data) =>
-  data.filter(({Lat, Lon}) => Lat && Lon && Lat != 'N/A' && Lon != 'N/A')
-    .map(({Lat, Lon}) => ({lon: Lon, lat: Lat}))
+  data.filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
+    .map(({lat, lng}) => ({lng, lat}))
 
 
 
 
 const getGeoSpec = (data) => {
   const nodes = data
-    .filter(({Lat, Lon}) => Lat && Lon && Lat != 'N/A' && Lon != 'N/A')
+    .filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
     .map(obj => ({
       type: "FeatureCollection",
       status: obj.status,
       geometry: {
         type: 'Point',
-        coordinates: [obj.Lon, obj.Lat]
+        coordinates: [obj.lng, obj.lat]
       }
     }))
 
@@ -123,9 +123,11 @@ const mapStyles = {
 }
 
 
+type Data = {id: string, lng: number, lat: number}[]
+
 type Props = {
-  data: {id: string, Lon: number, Lat: number}[] // todo: update definition with actual schema
-  selected: {id: string, Lon: number, Lat: number}[]
+  data: Data
+  selected: Data
   updateID: number
 }
 
@@ -180,9 +182,10 @@ function Map(props: Props) {
       recenter(map)
     }
 
-    // remove markers (todo: probably should use layers?)
+    // remove markers (todo: probably use layers?)
     clearMarkers(markers)
 
+    // add new markers
     const geoSpec = getGeoSpec(filteredData)
     const newMarkers = renderMarkers(map, geoSpec)
     setMarkers(newMarkers)
