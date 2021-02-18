@@ -14,7 +14,7 @@ import DetailsSidebar from './DetailsSidebar'
 
 const url = config.beekeeper
 
-const ENABLE_MAP = true
+const ENABLE_MAP = false
 const TIME_OUT = 2000
 
 const MOCK_DOWN_NODE = 'Sage-NEON-04'
@@ -53,7 +53,7 @@ const mockData = (data: Data) => {
 
 
 const mockUpdate = (data: any[]) => {
-  return data.map((obj, i) => {
+  return data.map(obj => {
     return {
       ...obj,
       lastUpdated: obj.name == MOCK_DOWN_NODE ? 'N/A' : (obj.lastUpdated + TIME_OUT / 1000) % 16,
@@ -131,7 +131,7 @@ type Option = {
   label: string
 }
 
-function StatusView() {
+export default function Dashbaord() {
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
 
@@ -239,7 +239,9 @@ function StatusView() {
             selected={selected}
             updateID={updateID}
           />}
-        {!ENABLE_MAP && <div style={{height: 450, width: 700, background: '#ccc'}} />}
+        {!ENABLE_MAP &&
+          <div style={{height: 450, width: 700, background: '#ccc'}} />
+        }
       </TopContainer>
 
       <TableContainer>
@@ -299,5 +301,3 @@ const TableContainer = styled.div`
 
 `
 
-
-export default StatusView

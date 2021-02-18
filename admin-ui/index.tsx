@@ -1,19 +1,19 @@
 import React from 'react'
 import ReactDom from 'react-dom'
+import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom'
 
 import useMediaQuery from '@material-ui/core/useMediaQuery'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
-
 import NavBar from './NavBar'
-import Overview from './views/status/StatusView'
+import Dashboard from './views/status/Dashboard'
 
 import './assets/styles.scss'
 
 
 
-function App() {
+export default function App() {
   const darkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const theme = React.useMemo(
@@ -57,16 +57,22 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <NavBar />
 
-      <Overview />
+      <BrowserRouter>
+        <NavBar />
+
+        <Switch>
+          <Route exact path="/">
+            <Redirect to="/status" />
+          </Route>
+          <Route path="/status">
+            <Dashboard />
+          </Route>
+        </Switch>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }
-
-
-
-
 
 
 ReactDom.render(<App />, document.getElementById('app'))
