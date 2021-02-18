@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useReducer } from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
+import {useLocation, useHistory} from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
 
@@ -11,6 +12,7 @@ import Overview from './Overview'
 
 import config from '../../config'
 import DetailsSidebar from './DetailsSidebar'
+
 
 const url = config.beekeeper
 
@@ -103,28 +105,26 @@ const getOptions = (data: object[], field: string) =>
 
 
 
+const useParams = () => new URLSearchParams(useLocation().search);
+
+
 const initialState = {
   status: [],
   project: [],
   region: []
 }
 
-const filterReducer = (state, action) => {
-  switch (action.type) {
-    case 'SET_FILTER':
-      return {...state, [action.field]: [action.val]}
-    case 'ADD_FILTER':
-      return {...state, [action.field]: [...state[action.field], action.val]}
-    case 'RM_FILTER':
-      return {...state, [action.field]: state[action.field].filter(val => val != action.val) }
-    case 'CLEAR_FILTER':
-      return {...state, [action.field]: []}
-    case 'CLEAR_ALL':
-      return initialState
-    default:
-      throw new Error('Invalid filter reducer action')
+
+const getFilterState = (params) => {
+  let init = {...initialState}
+  for (const [key, val] of params) {
+    if (key == 'query') continue
+    init[key] = [val]
   }
+
+  return init
 }
+
 
 type Option = {
   id: string,
@@ -132,10 +132,16 @@ type Option = {
 }
 
 export default function Dashbaord() {
+  let params = useParams()
+  let history = useHistory()
+
+  const query = params.get('query') || ''
+  const status = params.get('status')
+  const project = params.get('project')
+  const region = params.get('region')
+
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
-
-  const [query, setQuery] = useState('')
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
@@ -143,12 +149,12 @@ export default function Dashbaord() {
   const [regions, setRegions] = useState<Option[]>()
 
   // filter state
-  const [filterState, dispatch] = useReducer(filterReducer, initialState)
   const [updateID, setUpdateID] = useState(0)
 
   // selected
   const [selected, setSelected] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
+
 
   // load data
   useEffect(() => {
@@ -174,7 +180,7 @@ export default function Dashbaord() {
   useEffect(() => {
     if (!data) return
     updateAll(data)
-  }, [query, filterState, data])
+  }, [data, query, status, project, region])
 
 
   // this will be handled via polling or websockets
@@ -191,6 +197,7 @@ export default function Dashbaord() {
 
   // filter data
   const updateAll = (data) => {
+    const filterState = getFilterState(params)
     let filteredData = queryData(data, query)
     filteredData = filterData(filteredData, filterState)
 
@@ -203,15 +210,20 @@ export default function Dashbaord() {
 
 
   const handleQuery = ({query}) => {
-    setQuery(query)
     setUpdateID(prev => prev + 1)
+
+    if (query) params.set('query', query)
+    else params.delete('query')
+    history.push({search: params.toString()})
   }
 
 
-  // todo(nc): support multi-select (via components), likely
   const handleFilterChange = (type, field, val) => {
-    dispatch({type, field, val})
     setUpdateID(prev => prev + 1)
+
+    if (val) params.set(field, val)
+    else params.delete(field)
+    history.push({search: params.toString()})
   }
 
 
@@ -251,15 +263,41 @@ export default function Dashbaord() {
             rows={filtered}
             columns={columns}
             enableSorting
+            search={query}
             onSearch={handleQuery}
             onColumnMenuChange={() => {}}
             onSelect={handleSelect}
             middleComponent={
               <>
-                {statuses && <Filter id="status" label="Status" options={statuses} onChange={handleFilterChange} />}
-                {projects && <Filter id="project" label="Project" options={projects} width={175} onChange={handleFilterChange} />}
-                {regions && <Filter id="region" label="Region" options={regions} width={200} onChange={handleFilterChange} />}
-                {selected && <Button className="details-btn" variant="contained" color="primary" onClick={() => setShowDetails(true)}>Details</Button>}
+                {statuses &&
+                  <Filter id="status"
+                    label="Status"
+                    options={statuses}
+                    value={status}
+                    onChange={handleFilterChange}
+                  />}
+                {projects &&
+                  <Filter
+                    id="project"
+                    label="Project"
+                    options={projects}
+                    width={175}
+                    value={project}
+                    onChange={handleFilterChange} />}
+                {regions &&
+                  <Filter
+                    id="region"
+                    label="Region"
+                    options={regions}
+                    width={200}
+                    value={region}
+                    onChange={handleFilterChange}
+                    />}
+                {selected &&
+                  <Button className="details-btn" variant="contained" color="primary" onClick={() => setShowDetails(true)}>
+                    Details
+                  </Button>
+                }
               </>
             }
           />

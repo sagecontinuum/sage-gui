@@ -14,20 +14,24 @@ type Props = {
 }
 
 export default function TableControls(props: Props) {
-  const {value, onSearch, searchPlaceholder} = props
+  const {onSearch, searchPlaceholder} = props
 
-  const [query, setQuery] = useState(value || '')
+  const [query, setQuery] = useState(props.value || '')
   const debounceQuery = useDebounce(query, 300)
 
   useEffect(() => {
     onSearch({query})
   }, [debounceQuery])
 
+  useEffect(() => {
+    setQuery(props.value)
+  }, [props.value])
+
   return (
     <>
       <Search
         placeholder={searchPlaceholder || 'Search'}
-        // value={value}
+        value={query}
         onChange={e => { setQuery(e.target.value) }}
         InputProps={{
           style: { width: '230px'},
