@@ -30,7 +30,6 @@ type Row = {
 type Data = Row[]
 
 
-
 const randomTime = () => Math.floor(Math.random() * 12) + 1
 const randomMetric = () => (Math.random() * 100).toFixed(2)
 const randomMem = () => (Math.random() * 192).toFixed(2)
@@ -316,8 +315,6 @@ export default function Dashbaord() {
 }
 
 const Root = styled.div`
-  margin: 65px 10px 10px 10px;
-
   && .MuiDrawer-paper {
     margin-top: 60px;
   }

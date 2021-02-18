@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 
 
 type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive'
@@ -33,26 +34,31 @@ const columns = [
     id: 'status',
     label: 'Status',
     format: (val) => getStateIcon(val)
-  },
-  {id: 'name', label: 'Name'},
-  {id: 'node_id', label: 'Node ID'},
-  {
-    id: 'lastUpdated', label: 'Last Updated',
+  }, {
+    id: 'name',
+    label: 'Name',
+    format: val => <Link to={`/node/${val}`}>{val}</Link>
+  }, {
+    id: 'node_id',
+    label: 'Node ID'
+  }, {
+    id: 'lastUpdated',
+    label: 'Last Updated',
     format: (val) =>
       <b className={getUpdatedColor(val)}>
         {val == 'N/A' ? val : `${val}s`}
       </b>
-  },
-  {
-    id: 'mem', label: 'Mem',
+  }, {
+    id: 'mem',
+    label: 'Mem',
     format: (val) => <b>{val}gb</b>
-  },
-  {
-    id: 'cpu', label: '% CPU',
+  }, {
+    id: 'cpu',
+    label: '% CPU',
     format: (val) => <b>{val}</b>
-  },
-  {
-    id: 'storage', label: 'Storage',
+  }, {
+    id: 'storage',
+    label: 'Storage',
     format: (val) =>
       <b>
         {val == 'N/A' ? val : `${val}%`}
