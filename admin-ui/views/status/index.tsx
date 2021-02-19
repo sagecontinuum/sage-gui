@@ -16,7 +16,7 @@ import DetailsSidebar from './DetailsSidebar'
 
 const url = config.beekeeper
 
-const ENABLE_MAP = false
+const ENABLE_MAP = true
 const TIME_OUT = 2000
 
 const MOCK_DOWN_NODE = 'Sage-NEON-04'
@@ -38,6 +38,10 @@ const mockData = (data: Data) => {
   return data.map(obj => {
     const {name, location, status} = obj
 
+    const mem = randomMem(),
+      cpu = randomMetric(),
+      storage = randomMetric()
+
     return {
       ...obj,
       id: name,
@@ -45,9 +49,9 @@ const mockData = (data: Data) => {
       region: location.slice(location.indexOf(',') + 1),
       project: name.slice(name.indexOf('-') + 1, name.lastIndexOf('-')),
       lastUpdated: randomTime(),
-      mem: randomMem(),
-      cpu: randomMetric(),
-      storage: randomMetric()
+      cpu,
+      mem,
+      storage
     }
   })
 }
@@ -107,6 +111,30 @@ const getOptions = (data: object[], field: string) =>
 const useParams = () => new URLSearchParams(useLocation().search);
 
 
+const initialNodeActivity = {
+  cpu: [],
+  mem: [],
+  storage: []
+}
+
+const getAppendedActivity = (prev, rows) => {
+  let id
+  let d
+  for (const row of rows) {
+    id = row.id
+    d = id in prev ? prev[id] : initialNodeActivity
+
+    prev[id] = {
+      cpu: [...d.cpu, row.cpu],
+      mem: [...d.mem, row.mem],
+      storage: [...d.storage, row.storage],
+    }
+  }
+
+  return prev
+}
+
+
 const initialState = {
   status: [],
   project: [],
@@ -130,6 +158,7 @@ type Option = {
   label: string
 }
 
+
 export default function Dashbaord() {
   let params = useParams()
   let history = useHistory()
@@ -139,6 +168,7 @@ export default function Dashbaord() {
   const project = params.get('project')
   const region = params.get('region')
 
+  // all data and current state of filtered data
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
 
@@ -155,6 +185,9 @@ export default function Dashbaord() {
   const [showDetails, setShowDetails] = useState(false)
 
 
+  // keep a ticker of recent activity
+  const [activity, setActivity] = useState({})
+
   // load data
   useEffect(() => {
     let handle
@@ -166,6 +199,8 @@ export default function Dashbaord() {
       const rows = mockData(data)
       setData(rows)
       updateAll(rows)
+
+      setActivity(prev => getAppendedActivity(prev, rows))
       handle = mockPings(rows)
     })()
 
@@ -187,6 +222,11 @@ export default function Dashbaord() {
     const handle = setTimeout(() => {
       const newRows = mockUpdate(rows)
       setData(newRows)
+
+      // update activity
+      setActivity(prev => getAppendedActivity(prev, newRows))
+
+      // recursive
       mockPings(newRows)
     }, TIME_OUT)
 
@@ -242,6 +282,7 @@ export default function Dashbaord() {
         <Overview
           data={filtered}
           selected={selected}
+          activity={activity}
         />
 
         {ENABLE_MAP && filtered &&

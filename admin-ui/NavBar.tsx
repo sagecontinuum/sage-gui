@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import sage from 'url:./assets/sage-drawing.png'
+// import sage from 'url:./assets/sage-drawing.png'
 import Divider from '@material-ui/core/Divider'
 
 type Props = {
@@ -12,7 +12,7 @@ const NavBar = (props: Props) => {
 
   return (
     <Root>
-      <img src={sage} height="35"/>
+      {/*<img src={sage} height="35"/>*/}
       <Logo>
         Sage
       </Logo>
