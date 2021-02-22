@@ -10,6 +10,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import IconButton from '@material-ui/core/IconButton'
 import InputBase from '@material-ui/core/InputBase'
 import Tooltip from '@material-ui/core/Tooltip'
+import createMixins from '@material-ui/core/styles/createMixins'
 
 
 /* example options
@@ -106,6 +107,7 @@ type Option = {
 
 type Props = {
   options: Option[]
+  value: Option[]
   ButtonComponent?: JSX.Element
   header?: boolean
   headerText?: string
@@ -126,9 +128,17 @@ export default function ColumnMenu(props: Props) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
 
-  const [value, setValue] = useState(options.filter(obj => !obj.hide))
+  const [value, setValue] = useState(props.value.map(field => ({id: field})))
 
-  const handleClick = (event) => {
+
+  useEffect(() => {
+    console.log('props.value', props.value)
+    //console.log('props.value', props.value)
+    //setValue(props.value ? props.value : [])
+    setValue(props.value.map(field => ({id: field})))
+  }, [props.value])
+
+  const handleClick = (event, val) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -137,7 +147,6 @@ export default function ColumnMenu(props: Props) {
       return
     }
 
-    // setValue(pendingValue)
     if (anchorEl) {
       anchorEl.focus()
     }
@@ -145,35 +154,25 @@ export default function ColumnMenu(props: Props) {
   }
 
   const open = Boolean(anchorEl)
-  const id = open ? 'column-search' : undefined
+  // const id = open ? 'column-search' : undefined
 
   return (
     <div>
       {ButtonComponent ?
-        React.cloneElement(ButtonComponent, {onClick: handleClick}) :
-        <Tooltip title="Show/hide columns" placement="top">
-          <IconButton
-            size="small"
-            onClick={handleClick}
-            disableRipple
-          >
-            <SettingsIcon  />
-          </IconButton>
-        </Tooltip>
+        React.cloneElement(ButtonComponent, {onClick: handleClick}) : []
       }
 
       <Popper
-        id={id}
         open={open}
         anchorEl={anchorEl}
         placement="bottom-start"
         className={classes.popper}
       >
-        {header &&
+        {/*header &&
           <div className={classes.header}>
             {headerText ? headerText : 'Select columns for this view'}
           </div>
-        }
+        */}
         <Autocomplete
           open
           onClose={handleClose}
@@ -185,15 +184,15 @@ export default function ColumnMenu(props: Props) {
           }}
           value={value}
           onChange={(event, newValue) => {
-            // @ts-ignore
-            setValue(newValue)
+            console.log('newvalue', newValue)
             onChange(newValue)
           }}
           disableCloseOnSelect
           disablePortal
           renderTags={() => null}
           noOptionsText="No labels"
-          renderOption={(option, { selected }) => (
+          renderOption={(option, { selected }) => {
+            return (
             <>
               <DoneIcon
                 className={classes.iconSelected}
@@ -203,7 +202,7 @@ export default function ColumnMenu(props: Props) {
                 {option.label || option.id}
               </div>
             </>
-          )}
+          )}}
           options={[...options].sort((a, b) => {
             // Display the selected labels first.
             let ai = value.indexOf(a)
@@ -228,6 +227,5 @@ export default function ColumnMenu(props: Props) {
     </div>
   )
 }
-
 
 

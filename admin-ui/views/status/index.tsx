@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
+import "regenerator-runtime"
 
 import Button from '@material-ui/core/Button'
 
 import columns from './columns'
 import Table from '../../../components/table/Table'
-import Filter from '../../../components/Filter'
+import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
 import Overview from './Overview'
 
@@ -57,7 +58,7 @@ const mockData = (data: Data) => {
 }
 
 
-const mockUpdate = (data: any[]) => {
+const mockUpdate = (data: Data) => {
   return data.map(obj => {
     return {
       ...obj,
@@ -102,13 +103,29 @@ const filterData = (data: object[], state: object) => {
 
 
 
-const getOptions = (data: object[], field: string) =>
+const getOptions = (data: object[], field: string) : Option[] =>
   [...new Set(data.map(obj => obj[field])) ]
     .map(name => ({id: name, label: name}))
 
 
 
-const useParams = () => new URLSearchParams(useLocation().search);
+const useParams = () =>
+  new URLSearchParams(useLocation().search)
+
+
+function mergeParams(params: URLSearchParams, field: string, val: string) : string  {
+
+  const str = params.get(field)
+  const existing = str?.length ? str.split(',') : []
+
+  if (existing.includes(val)) {
+    existing.splice(existing.indexOf(val), 1)
+    return existing.join(',')
+  }
+
+  console.log('val', val)
+  return [...existing, val].join(',')
+}
 
 
 const initialNodeActivity = {
@@ -146,8 +163,10 @@ const getFilterState = (params) => {
   let init = {...initialState}
   for (const [key, val] of params) {
     if (key == 'query') continue
-    init[key] = [val]
+    init[key] = val.split(',')
   }
+
+  console.log('new filterstate', init)
 
   return init
 }
@@ -168,9 +187,12 @@ export default function Dashbaord() {
   const project = params.get('project')
   const region = params.get('region')
 
+
   // all data and current state of filtered data
+
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
+  const [filterState, setFilterState] = useState(null)
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
@@ -241,10 +263,12 @@ export default function Dashbaord() {
     filteredData = filterData(filteredData, filterState)
 
     setFiltered(filteredData)
+    setFilterState(filterState)
 
-    setStatuses(getOptions(filteredData, 'status'))
-    setProjects(getOptions(filteredData, 'project'))
-    setRegions(getOptions(filteredData, 'region'))
+    setStatuses(getOptions(data, 'status'))
+    setProjects(getOptions(data, 'project'))
+    setRegions(getOptions(data, 'region'))
+    setUpdateID(prev => prev + 1)
   }
 
 
@@ -257,12 +281,18 @@ export default function Dashbaord() {
   }
 
 
-  const handleFilterChange = (type, field, val) => {
-    setUpdateID(prev => prev + 1)
+  const handleFilterChange = (field, vals) => {
+    const val = vals[vals.length - 1].id
+    const newStr = mergeParams(params, field, val)
 
-    if (val) params.set(field, val)
-    else params.delete(field)
+    if (!newStr.length) params.delete(field)
+    else params.set(field, newStr)
     history.push({search: params.toString()})
+  }
+
+
+  const handleRemoveFilters = () => {
+    history.push({search: ''})
   }
 
 
@@ -271,8 +301,6 @@ export default function Dashbaord() {
       setSelected(sel.objs)
     else
       setSelected(null)
-
-    setUpdateID(prev => prev + 1)
   }
 
 
@@ -292,7 +320,7 @@ export default function Dashbaord() {
             updateID={updateID}
           />}
         {!ENABLE_MAP &&
-          <div style={{height: 450, width: 700, background: '#ccc'}} />
+          <div style={{height: 450, width: 800, background: '#ccc'}} />
         }
       </TopContainer>
 
@@ -309,30 +337,56 @@ export default function Dashbaord() {
             onSelect={handleSelect}
             middleComponent={
               <>
-                {statuses &&
-                  <Filter id="status"
-                    label="Status"
+                {statuses ?
+                  <FilterMenu
                     options={statuses}
-                    value={status}
-                    onChange={handleFilterChange}
-                  />}
+                    value={filterState.status}
+                    onChange={vals => handleFilterChange('status', vals)}
+                    ButtonComponent={
+                      <Button style={{marginLeft: 10}}>
+                        Status
+                        <span className="material-icons">
+                          expand_more
+                        </span>
+                      </Button>
+                    }
+                  /> : <></>
+                }
                 {projects &&
-                  <Filter
-                    id="project"
-                    label="Project"
+                  <FilterMenu
                     options={projects}
-                    width={175}
-                    value={project}
-                    onChange={handleFilterChange} />}
+                    value={filterState.project}
+                    onChange={vals => handleFilterChange('project', vals)}
+                    ButtonComponent={
+                      <Button>
+                        Project
+                        <span className="material-icons">
+                          expand_more
+                        </span>
+                      </Button>
+                    }
+                  />
+                }
                 {regions &&
-                  <Filter
-                    id="region"
-                    label="Region"
+                  <FilterMenu
                     options={regions}
-                    width={200}
-                    value={region}
-                    onChange={handleFilterChange}
-                    />}
+                    value={filterState.region}
+                    onChange={vals => handleFilterChange('region', vals)}
+                    ButtonComponent={
+                      <Button>
+                        Region
+                        <span className="material-icons">
+                          expand_more
+                        </span>
+                      </Button>
+                    }
+                  />
+                }
+                {filtered.length != data.length &&
+                  <Button className="details-btn" onClick={handleRemoveFilters}>
+                    <span className="material-icons">undo</span> Remove filters
+                  </Button>
+                }
                 {selected &&
                   <Button className="details-btn" variant="contained" color="primary" onClick={() => setShowDetails(true)}>
                     Details

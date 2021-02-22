@@ -49,13 +49,13 @@ const columns = [
         {val == 'N/A' ? val : `${val}s`}
       </b>
   }, {
-    id: 'mem',
-    label: 'Mem',
-    format: (val) => <b>{val}gb</b>
-  }, {
     id: 'cpu',
     label: '% CPU',
     format: (val) => <b>{val}</b>
+  }, {
+    id: 'mem',
+    label: 'Mem',
+    format: (val) => <b>{val}gb</b>
   }, {
     id: 'storage',
     label: 'Storage',

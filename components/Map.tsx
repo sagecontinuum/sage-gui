@@ -161,6 +161,7 @@ function Map(props: Props) {
 
     // do a manual comparison for dynamic ping updates
     if (lastID == updateID) {
+      console.log('returning')
       return
     }
 

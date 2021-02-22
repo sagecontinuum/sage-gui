@@ -6,10 +6,22 @@ import { Doughnut, Line} from 'react-chartjs-2'
 
 
 const PIE_PADDING = 15
+const ACTIVITY_LENGTH = 50
 
 
 const defaultOptions = {
   maintainAspectRatio: false,
+  animation: {
+    duration: 0
+  },
+  layout: {
+    padding: {
+        left: 0,
+        right: 5,
+        top: 20,
+        bottom: 0
+    }
+  },
   elements: {
     point:{
         radius: 0
@@ -20,7 +32,8 @@ const defaultOptions = {
   },
   plugins: {
     datalabels: {
-      align: 'top',
+      anchor: 'center',
+      align:  -120,
       display: (context) => {
         return context.dataIndex == context.dataset.data.length - 1
       },
@@ -81,9 +94,9 @@ const aggregateOnData = (data, activity) => {
   const storageActivities = activities.map(obj => obj.storage)
 
   return {
-    cpu: sumArrays(cpuActivities, cpuActivities[0].length),
-    mem: sumArrays(memActivities, memActivities[0].length),
-    storage: avgArrays(storageActivities, storageActivities[0].length)
+    cpu: sumArrays(cpuActivities, cpuActivities[0].length).slice(-ACTIVITY_LENGTH),
+    mem: sumArrays(memActivities, memActivities[0].length).slice(-ACTIVITY_LENGTH),
+    storage: avgArrays(storageActivities, storageActivities[0].length).slice(-ACTIVITY_LENGTH)
   }
 }
 
