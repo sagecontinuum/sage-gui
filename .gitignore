@@ -3,6 +3,7 @@ test-data/
 
 *token*
 
+build/
 dist/
 .cache/
 .parcel-cache/
