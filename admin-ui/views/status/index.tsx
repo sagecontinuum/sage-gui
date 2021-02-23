@@ -10,6 +10,7 @@ import Table from '../../../components/table/Table'
 import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
 import Overview from './Overview'
+import QueryViewer from './QueryViewer'
 
 import config from '../../config'
 import DetailsSidebar from './DetailsSidebar'
@@ -381,10 +382,13 @@ export default function Dashbaord() {
                   />
                 }
                 {filtered.length != data.length &&
-                  <Button className="details-btn" onClick={handleRemoveFilters}>
-                    <span className="material-icons">undo</span> Remove filters
+                  <Button variant="outlined" onClick={handleRemoveFilters}>
+                    <span className="material-icons">clear</span> Clear filters
                   </Button>
                 }
+
+                <QueryViewer filterState={filterState} />
+
                 {selected &&
                   <Button className="details-btn" variant="contained" color="primary" onClick={() => setShowDetails(true)}>
                     Details
