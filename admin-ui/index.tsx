@@ -43,7 +43,10 @@ export default function App() {
         props: {
           MuiButtonBase: {
             disableRipple: true,
-         },
+          }
+        },
+        transitions: {
+          create: () => 'none',
         },
         overrides: {
           MuiButton: {
