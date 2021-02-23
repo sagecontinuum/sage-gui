@@ -114,7 +114,6 @@ const useParams = () =>
 
 
 function mergeParams(params: URLSearchParams, field: string, val: string) : string  {
-
   const str = params.get(field)
   const existing = str?.length ? str.split(',') : []
 
@@ -123,7 +122,6 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
     return existing.join(',')
   }
 
-  console.log('val', val)
   return [...existing, val].join(',')
 }
 
@@ -165,8 +163,6 @@ const getFilterState = (params) => {
     if (key == 'query') continue
     init[key] = val.split(',')
   }
-
-  console.log('new filterstate', init)
 
   return init
 }
@@ -301,6 +297,8 @@ export default function Dashbaord() {
       setSelected(sel.objs)
     else
       setSelected(null)
+
+    setUpdateID(prev => prev + 1)
   }
 
 

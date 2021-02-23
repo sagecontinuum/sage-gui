@@ -2,15 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import { fade, makeStyles } from '@material-ui/core/styles'
 import Popper from '@material-ui/core/Popper'
-import SettingsIcon from '@material-ui/icons/SettingsOutlined'
-import CloseIcon from '@material-ui/icons/Close'
 import DoneIcon from '@material-ui/icons/Done'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
-import IconButton from '@material-ui/core/IconButton'
 import InputBase from '@material-ui/core/InputBase'
-import Tooltip from '@material-ui/core/Tooltip'
-import createMixins from '@material-ui/core/styles/createMixins'
+
 
 
 /* example options
@@ -99,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
 
 // todo(nc): figure out what is happening with typing here.
 type Option = {
-  id?: string
+  id: string
   label?: string
   hide?: boolean
   type?: string
@@ -109,7 +105,6 @@ type Props = {
   options: Option[]
   value: Option[]
   ButtonComponent?: JSX.Element
-  header?: boolean
   headerText?: string
   noOptionsText?: string
   onChange: (opt: (string | Option)[]) => void
@@ -120,29 +115,25 @@ export default function ColumnMenu(props: Props) {
     options,
     onChange,
     ButtonComponent,
-    header = true,
     headerText,
+    noOptionsText,
     ...rest
   } = props
 
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
 
-  const [value, setValue] = useState(props.value.map(field => ({id: field})))
-
+  const [value, setValue] = useState(props.value)
 
   useEffect(() => {
-    console.log('props.value', props.value)
-    //console.log('props.value', props.value)
-    //setValue(props.value ? props.value : [])
-    setValue(props.value.map(field => ({id: field})))
+    setValue(props.value)
   }, [props.value])
 
-  const handleClick = (event, val) => {
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const handleClose = (event, reason) => {
+  const handleClose = (evt, reason) => {
     if (reason === 'toggleInput') {
       return
     }
@@ -154,7 +145,7 @@ export default function ColumnMenu(props: Props) {
   }
 
   const open = Boolean(anchorEl)
-  // const id = open ? 'column-search' : undefined
+  const id = open ? 'auto-complete-filter' : undefined
 
   return (
     <div>
@@ -163,16 +154,17 @@ export default function ColumnMenu(props: Props) {
       }
 
       <Popper
+        id={id}
         open={open}
         anchorEl={anchorEl}
         placement="bottom-start"
         className={classes.popper}
       >
-        {/*header &&
+        {headerText &&
           <div className={classes.header}>
-            {headerText ? headerText : 'Select columns for this view'}
+            {headerText}
           </div>
-        */}
+        }
         <Autocomplete
           open
           onClose={handleClose}
@@ -184,30 +176,28 @@ export default function ColumnMenu(props: Props) {
           }}
           value={value}
           onChange={(event, newValue) => {
-            console.log('newvalue', newValue)
             onChange(newValue)
           }}
           disableCloseOnSelect
           disablePortal
           renderTags={() => null}
-          noOptionsText="No labels"
-          renderOption={(option, { selected }) => {
-            return (
+          noOptionsText={noOptionsText || 'No items found'}
+          renderOption={(option: Option) => (
             <>
               <DoneIcon
                 className={classes.iconSelected}
-                style={{ visibility: selected ? 'visible' : 'hidden' }}
+                style={{ visibility: value.includes(option.id) ? 'visible' : 'hidden' }}
               />
               <div className={classes.text}>
                 {option.label || option.id}
               </div>
             </>
-          )}}
+          )}
           options={[...options].sort((a, b) => {
             // Display the selected labels first.
-            let ai = value.indexOf(a)
+            let ai = value.indexOf(a.id)
             ai = ai === -1 ? value.length + options.indexOf(a) : ai
-            let bi = value.indexOf(b)
+            let bi = value.indexOf(b.id)
             bi = bi === -1 ? value.length + options.indexOf(b) : bi
             return ai - bi
           })}
