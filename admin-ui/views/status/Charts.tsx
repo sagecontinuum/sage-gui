@@ -139,7 +139,7 @@ type Props = {
 }
 
 
-function Overview(props: Props) {
+export default function Charts(props: Props) {
   const {data, selected, activity} = props
 
   const [selectedIDs, setSelectedIDs] = useState(
@@ -202,12 +202,14 @@ function Overview(props: Props) {
       }
 
       {!selected &&
-        <h3 style={{margin: '0 0 10px 15px'}}>
-          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''}
-        </h3>
+        <MainTitle>
+          {data.length == 34 &&
+            'All '}{data.length} Node{data.length > 1 ? 's' : ''
+          }
+        </MainTitle>
       }
 
-      <Charts>
+      <ChartsContainer>
         <TopCharts>
           {!selected &&
             <Doughnut
@@ -258,7 +260,7 @@ function Overview(props: Props) {
         {aggActivity &&
           <BottomCharts>
 
-            <Title>% cpu</Title>
+            <ChartTitle>% cpu</ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -294,7 +296,7 @@ function Overview(props: Props) {
               />
             </div>
 
-            <Title>mem (gb)</Title>
+            <ChartTitle>mem (gb)</ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -331,7 +333,7 @@ function Overview(props: Props) {
               />
             </div>
 
-            <Title>storage%</Title>
+            <ChartTitle>storage%</ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -368,7 +370,7 @@ function Overview(props: Props) {
             </div>
           </BottomCharts>
         }
-      </Charts>
+      </ChartsContainer>
     </Root>
   )
 }
@@ -376,17 +378,20 @@ function Overview(props: Props) {
 const Root = styled.div`
   height: 300px;
   width: 500px;
-
 `
 
-const Charts = styled.div`
+const MainTitle = styled.h3`
+  margin: 0 0 0px 15px;
+`
+
+
+const ChartsContainer = styled.div`
   display: flex;
   flex-direction: column;
 `
 
 const TopCharts = styled.div`
   width: 300px;
-
 `
 
 const BottomCharts = styled.div`
@@ -402,13 +407,12 @@ const BottomCharts = styled.div`
   }
 `
 
-const Title = styled.div`
+const ChartTitle = styled.div`
   font-size: .8em;
   font-weight: 800;
   color: #666;
   margin-left: 50px;
 `
 
-export default Overview
 
 

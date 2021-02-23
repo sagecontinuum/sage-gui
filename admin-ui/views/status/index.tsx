@@ -9,7 +9,7 @@ import columns from './columns'
 import Table from '../../../components/table/Table'
 import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
-import Overview from './Overview'
+import Charts from './Charts'
 import QueryViewer from './QueryViewer'
 
 import config from '../../config'
@@ -228,18 +228,21 @@ export default function Dashbaord() {
   }, [])
 
 
-  // effect for local state change
+  // effect for updating on state changes
+  useEffect(() => {
+    if (!data) return
+    updateAll(data)
+
+    // force mapbox rerender and avoid unnecessary rerenders
+    setUpdateID(prev => prev + 1)
+  }, [query, status, project, region])
+
+
+  // effect for activity updates
   useEffect(() => {
     if (!data) return
     updateAll(data)
   }, [data])
-
-
-  useEffect(() => {
-    if (!data) return
-    setUpdateID(prev => prev + 1)
-    updateAll(data)
-  }, [query, status, project, region])
 
 
   // this will be handled via polling or websockets
@@ -275,8 +278,6 @@ export default function Dashbaord() {
 
 
   const handleQuery = ({query}) => {
-    setUpdateID(prev => prev + 1)
-
     if (query) params.set('query', query)
     else params.delete('query')
     history.push({search: params.toString()})
@@ -286,7 +287,6 @@ export default function Dashbaord() {
   const handleFilterChange = (field, vals) => {
     const val = vals[vals.length - 1].id
     const newStr = mergeParams(params, field, val)
-
 
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
@@ -300,17 +300,15 @@ export default function Dashbaord() {
 
 
   const handleSelect = (sel) => {
-    if (sel.objs.length)
-      setSelected(sel.objs)
-    else
-      setSelected(null)
+    setSelected(sel.objs.length ? sel.objs : null)
+    setUpdateID(prev => prev + 1)
   }
 
 
   return (
     <Root>
       <TopContainer>
-        <Overview
+        <Charts
           data={filtered}
           selected={selected}
           activity={activity}
@@ -318,13 +316,12 @@ export default function Dashbaord() {
 
         {ENABLE_MAP && filtered &&
           <Map
-            data={data}
+            data={filtered}
             selected={selected}
             updateID={updateID}
-          />}
-        {!ENABLE_MAP &&
-          <div style={{height: 450, width: 800, background: '#ccc'}} />
+          />
         }
+        {!ENABLE_MAP && <MapPlaceholder />}
       </TopContainer>
 
       <TableContainer>
@@ -437,4 +434,9 @@ const TableContainer = styled.div`
 
 `
 
+const MapPlaceholder = styled.div`
+  height: 450px;
+  width: 800px;
+  background: #ccc;
+`
 

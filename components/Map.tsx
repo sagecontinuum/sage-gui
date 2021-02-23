@@ -193,7 +193,7 @@ function Map(props: Props) {
     setInit(true)
     setTotal(data.length)
     setLastID(updateID)
-  }, [data, map, updateID])
+  }, [map, data, selected, updateID])
 
   return (
     <Root>
