@@ -43,10 +43,6 @@ const Logo = styled.span`
   color: #87baa6; //#48771f; // #889b77;
   padding-right: 20px;
   padding-left: 2px;
-
-  //background: linear-gradient(to right,#c2a5e4,  #7e67a4, #c2a5e4);  /* fallback for old browsers */
-  //-webkit-background-clip: text;
-  // -webkit-text-fill-color: transparent;
 `
 
 const Title = styled.span`

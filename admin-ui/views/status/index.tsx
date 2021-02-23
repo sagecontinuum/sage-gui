@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
-import "regenerator-runtime"
+import 'regenerator-runtime'
 
 import Button from '@material-ui/core/Button'
 
@@ -15,11 +15,11 @@ import QueryViewer from './QueryViewer'
 import config from '../../config'
 import DetailsSidebar from './DetailsSidebar'
 
-
 const url = config.beekeeper
 
 const ENABLE_MAP = true
 const TIME_OUT = 2000
+const ACTIVITY_LENGTH = config.ui.activityLength
 
 const MOCK_DOWN_NODE = 'Sage-NEON-04'
 const PRIMARY_KEY = 'name'
@@ -141,9 +141,9 @@ const getAppendedActivity = (prev, rows) => {
     d = id in prev ? prev[id] : initialNodeActivity
 
     prev[id] = {
-      cpu: [...d.cpu, row.cpu],
-      mem: [...d.mem, row.mem],
-      storage: [...d.storage, row.storage],
+      cpu: [...d.cpu, row.cpu].slice(-ACTIVITY_LENGTH),
+      mem: [...d.mem, row.mem].slice(-ACTIVITY_LENGTH),
+      storage: [...d.storage, row.storage].slice(-ACTIVITY_LENGTH),
     }
   }
 
@@ -186,7 +186,6 @@ export default function Dashbaord() {
 
 
   // all data and current state of filtered data
-
   const [data, setData] = useState(null)
   const [filtered, setFiltered] = useState(null)
   const [filterState, setFilterState] = useState(null)

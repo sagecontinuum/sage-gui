@@ -5,9 +5,10 @@ import 'chartjs-plugin-datalabels'
 import { Doughnut, Line} from 'react-chartjs-2'
 import chartTooltip from './chartTooltip'
 
+import config from '../../config'
 
 const PIE_PADDING = 15
-const ACTIVITY_LENGTH = 50
+const ACTIVITY_LENGTH = config.ui.activityLength
 
 
 const defaultOptions = {
@@ -107,9 +108,9 @@ const aggregateOnData = (data, activity) => {
   const storageActivities = activities.map(obj => obj.storage)
 
   return {
-    cpu: sumArrays(cpuActivities, cpuActivities[0].length).slice(-ACTIVITY_LENGTH),
-    mem: sumArrays(memActivities, memActivities[0].length).slice(-ACTIVITY_LENGTH),
-    storage: avgArrays(storageActivities, storageActivities[0].length).slice(-ACTIVITY_LENGTH)
+    cpu: sumArrays(cpuActivities, cpuActivities[0].length),
+    mem: sumArrays(memActivities, memActivities[0].length),
+    storage: avgArrays(storageActivities, storageActivities[0].length)
   }
 }
 
