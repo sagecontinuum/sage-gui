@@ -233,7 +233,14 @@ export default function Dashbaord() {
   useEffect(() => {
     if (!data) return
     updateAll(data)
-  }, [data, query, status, project, region])
+  }, [data])
+
+
+  useEffect(() => {
+    if (!data) return
+    setUpdateID(prev => prev + 1)
+    updateAll(data)
+  }, [query, status, project, region])
 
 
   // this will be handled via polling or websockets
@@ -265,7 +272,6 @@ export default function Dashbaord() {
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
     setRegions(getOptions(data, 'region'))
-    setUpdateID(prev => prev + 1)
   }
 
 
@@ -281,6 +287,7 @@ export default function Dashbaord() {
   const handleFilterChange = (field, vals) => {
     const val = vals[vals.length - 1].id
     const newStr = mergeParams(params, field, val)
+
 
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
@@ -298,8 +305,6 @@ export default function Dashbaord() {
       setSelected(sel.objs)
     else
       setSelected(null)
-
-    setUpdateID(prev => prev + 1)
   }
 
 
@@ -432,4 +437,5 @@ const TopContainer = styled.div`
 const TableContainer = styled.div`
 
 `
+
 

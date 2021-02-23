@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 import 'chartjs-plugin-datalabels'
 import { Doughnut, Line} from 'react-chartjs-2'
+import chartTooltip from './chartTooltip'
 
 
 const PIE_PADDING = 15
@@ -18,7 +19,7 @@ const defaultOptions = {
     padding: {
         left: 0,
         right: 5,
-        top: 20,
+        top: 5,
         bottom: 0
     }
   },
@@ -39,6 +40,18 @@ const defaultOptions = {
       },
       formatter: value => {
         return value.toFixed(2)
+      }
+    }
+  },
+  hover: {intersect: false},
+  tooltips: {
+    intersect: false,
+    enabled: false, // disable the on-canvas tooltip
+    custom: chartTooltip,
+    bodyAlign: 'center',
+    callbacks: {
+      label: (tt, data) => {
+        return `${data.datasets[0].label}: ${tt.yLabel.toFixed(2)}`
       }
     }
   }
@@ -98,6 +111,23 @@ const aggregateOnData = (data, activity) => {
     mem: sumArrays(memActivities, memActivities[0].length).slice(-ACTIVITY_LENGTH),
     storage: avgArrays(storageActivities, storageActivities[0].length).slice(-ACTIVITY_LENGTH)
   }
+}
+
+
+// helper function to pad unused label space nulls
+const getLabels = (vals: number[]) => {
+  return [
+    ...new Array(ACTIVITY_LENGTH - vals.length).fill(null),
+    ...vals.map((_, i) => i)
+  ]
+}
+
+// helper function to pad data with null values
+const getData = (vals: number[]) => {
+  return [
+    ...new Array(ACTIVITY_LENGTH - vals.length).fill(null),
+    ...vals
+  ]
 }
 
 
@@ -211,18 +241,10 @@ function Overview(props: Props) {
                     borderRadius: 25,
                     borderWidth: 2,
                     color: 'white',
-                    display: function(context) {
-                      var dataset = context.dataset;
-                      var count = dataset.data.length;
-                      var value = dataset.data[context.dataIndex];
-                      // return value > count * 1.5;
-                      return true
-                    },
                     font: {
                       weight: 'bold'
                     },
-                    padding: 6,
-                    formatter: Math.round
+                    padding: 6
                   }
                 },
                 legend: {position: 'right'}
@@ -231,18 +253,19 @@ function Overview(props: Props) {
             />
           }
         </TopCharts>
-        <br/>
+
         {aggActivity &&
           <BottomCharts>
 
-            <div>
+            <Title>% cpu</Title>
+            <div className="chart">
               <Line
                 data={{
-                  labels: aggActivity.cpu.map((_, i) => -i),
+                  labels: getLabels(aggActivity.cpu),
                   datasets: [
                     {
                       label: '% cpu',
-                      data: aggActivity.cpu,
+                      data: getData(aggActivity.cpu),
                       fill: true,
                       backgroundColor: 'rgb(32, 153, 209, .7)',
                       borderColor: 'rgba(0, 0, 0, 0.2)',
@@ -258,25 +281,27 @@ function Overview(props: Props) {
                       ticks: {
                         max: 100 * (selected ? selected.length : data.length),
                         min: 0,
-                        steps: 2
-                      },
+                        maxTicksLimit: 1
+                      }
                     }],
-                    xAxes: [{ ticks: {
-                      display: false,
-                    }}]
-                  }
+                    xAxes: [{
+                      ticks: { display: false },
+                      gridLines: { lineWidth: 0 }
+                    }]
+                  },
                 }}
               />
             </div>
 
-            <div>
+            <Title>mem (gb)</Title>
+            <div className="chart">
               <Line
                 data={{
-                  labels: aggActivity.mem.map((_, i) => -i),
+                  labels: getLabels(aggActivity.mem),
                   datasets: [
                     {
                       label: 'mem (gb)',
-                      data: aggActivity.mem,
+                      data: getData(aggActivity.mem),
                       fill: true,
                       backgroundColor: 'rgb(209, 32, 71, .7)',
                       borderColor: 'rgba(0, 0, 0, 0.2)',
@@ -292,26 +317,28 @@ function Overview(props: Props) {
                       ticks: {
                         max: 192 * (selected ? selected.length : data.length),
                         min: 0,
-                        steps: 2
+                        maxTicksLimit: 1
                       }
                     }],
-                    xAxes: [{ ticks: {
-                      display: false,
-                    }}]
+                    xAxes: [{
+                      ticks: { display: false },
+                      gridLines: { lineWidth: 0 }
+                    }]
                   },
 
                 }}
               />
             </div>
 
-            <div>
+            <Title>storage%</Title>
+            <div className="chart">
               <Line
                 data={{
-                  labels: aggActivity.storage.map((_, i) => -i),
+                  labels: getLabels(aggActivity.storage),
                   datasets: [
                     {
-                      label: 'storage',
-                      data: aggActivity.storage,
+                      label: 'storage%',
+                      data: getData(aggActivity.storage),
                       fill: true,
                       backgroundColor: 'rgb(55, 55, 55, .7)',
                       borderColor: 'rgba(0, 0, 0, 0.2)',
@@ -327,23 +354,20 @@ function Overview(props: Props) {
                       ticks: {
                         max: 100,
                         min: 0,
-                        steps: 100
+                        maxTicksLimit: 1
                       },
                     }],
-                    xAxes: [{ ticks: {
-                      display: false,
-                    }}]
+                    xAxes: [{
+                      ticks: { display: false },
+                      gridLines: { lineWidth: 0 }
+                    }]
                   }
                 }}
               />
             </div>
           </BottomCharts>
         }
-
-
-        {selected?.length && <h3 style={{margin: '40px auto 40px auto'}}>What should go in this pane?</h3>}
       </Charts>
-
     </Root>
   )
 }
@@ -369,15 +393,19 @@ const BottomCharts = styled.div`
   flex-direction: column;
   height: 100%;
 
-  div {
+  div.chart {
     width: 500px;
     height: 75px;
     margin-left: 14px;
-  }
-
-  div {
     margin-right: 20px;
   }
+`
+
+const Title = styled.div`
+  font-size: .8em;
+  font-weight: 800;
+  color: #666;
+  margin-left: 50px;
 `
 
 export default Overview
