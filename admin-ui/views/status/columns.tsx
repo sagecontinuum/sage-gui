@@ -76,7 +76,7 @@ const columns = [
   {id: 'VSN', hide: true},
   {id: 'bios_version', label: 'BIOS Version', hide: true},
   {id: 'lat', label: 'Lat', hide: true},
-  {id: 'lon', label: 'Lon', hide: true},
+  {id: 'lng', label: 'Lng', hide: true},
   {id: 'location', label: 'Location', hide: true},
   {id: 'contact', label: 'Contact', hide: true},
   {id: 'notes', label: 'Notes', hide: true}

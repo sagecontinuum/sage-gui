@@ -28,13 +28,13 @@ const loadMap = (domRef) => {
 
 const getMarkerColor = (status) => {
   if (status == 'active')
-    return '#4ddb94'
+    return '#3ac37e'
   else if (status == 'degraded')
     return 'hsl(41, 83%, 35%)'
   else if (status == 'failed')
-    return 'hsl(0, 83%, 35%)'
+    return '#d72020'
   else
-    return 'hsl(0, 0%, 52.156862745098046%)'
+    return '#aaa'
 }
 
 

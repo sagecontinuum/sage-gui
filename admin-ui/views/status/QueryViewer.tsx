@@ -37,7 +37,7 @@ export default function (props: Props) {
 }
 
 const Root = styled.div`
-  margin: 0 20px;
+  margin: 0 10px;
 `
 
 const FilterSet = styled.span`

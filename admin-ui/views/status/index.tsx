@@ -4,6 +4,10 @@ import {useLocation, useHistory} from 'react-router-dom'
 import 'regenerator-runtime'
 
 import Button from '@material-ui/core/Button'
+import Divider from '@material-ui/core/Divider'
+import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
+import InfoIcon from '@material-ui/icons/InfoOutlined'
+import UndoIcon from '@material-ui/icons/UndoRounded'
 
 import columns from './columns'
 import Table from '../../../components/table/Table'
@@ -14,6 +18,7 @@ import QueryViewer from './QueryViewer'
 
 import config from '../../config'
 import DetailsSidebar from './DetailsSidebar'
+
 
 const url = config.beekeeper
 
@@ -176,8 +181,8 @@ type Option = {
 
 
 export default function Dashbaord() {
-  let params = useParams()
-  let history = useHistory()
+  const params = useParams()
+  const history = useHistory()
 
   const query = params.get('query') || ''
   const status = params.get('status')
@@ -235,6 +240,7 @@ export default function Dashbaord() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
+    console.log('region', region)
   }, [query, status, project, region])
 
 
@@ -345,9 +351,7 @@ export default function Dashbaord() {
                     ButtonComponent={
                       <Button style={{marginLeft: 10}}>
                         Status
-                        <span className="material-icons">
-                          expand_more
-                        </span>
+                        <CaretIcon />
                       </Button>
                     }
                   /> : <></>
@@ -359,10 +363,7 @@ export default function Dashbaord() {
                     onChange={vals => handleFilterChange('project', vals)}
                     ButtonComponent={
                       <Button>
-                        Project
-                        <span className="material-icons">
-                          expand_more
-                        </span>
+                        Project <CaretIcon />
                       </Button>
                     }
                   />
@@ -374,27 +375,42 @@ export default function Dashbaord() {
                     onChange={vals => handleFilterChange('region', vals)}
                     ButtonComponent={
                       <Button>
-                        Region
-                        <span className="material-icons">
-                          expand_more
-                        </span>
+                        Region <CaretIcon />
                       </Button>
                     }
                   />
                 }
+
+                {selected &&
+                  <>
+                    <VertDivider />
+                    <Button variant="contained"
+                      color="primary"
+                      onClick={() => setShowDetails(true)}
+                      startIcon={<InfoIcon />}
+                      size="small"
+                    >
+                      Details
+                    </Button>
+                  </>
+                }
+
                 {filtered.length != data.length &&
-                  <Button variant="outlined" onClick={handleRemoveFilters}>
-                    <span className="material-icons">clear</span> Clear filters
-                  </Button>
+                  <>
+                    <VertDivider />
+                    <Button variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleRemoveFilters}
+                      style={{backgroundColor: '#1c8cc9'}}
+                      startIcon={<UndoIcon />}
+                    >
+                      Clear
+                    </Button>
+                  </>
                 }
 
                 <QueryViewer filterState={filterState} />
-
-                {selected &&
-                  <Button className="details-btn" variant="contained" color="primary" onClick={() => setShowDetails(true)}>
-                    Details
-                  </Button>
-                }
               </>
             }
           />
@@ -412,21 +428,21 @@ export default function Dashbaord() {
   )
 }
 
+
+const VertDivider = (props) =>
+  <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
+
+
 const Root = styled.div`
   && .MuiDrawer-paper {
     margin-top: 60px;
   }
-  .details-btn {
-    margin-left: 20px;
-  }
-
 `
 
 const TopContainer = styled.div`
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-
   padding: 10px 0;
 `
 

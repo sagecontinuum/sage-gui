@@ -108,9 +108,9 @@ const aggregateOnData = (data, activity) => {
   const storageActivities = activities.map(obj => obj.storage)
 
   return {
-    cpu: sumArrays(cpuActivities, cpuActivities[0].length),
-    mem: sumArrays(memActivities, memActivities[0].length),
-    storage: avgArrays(storageActivities, storageActivities[0].length)
+    cpu: sumArrays(cpuActivities, cpuActivities[0]?.length),
+    mem: sumArrays(memActivities, memActivities[0]?.length),
+    storage: avgArrays(storageActivities, storageActivities[0]?.length)
   }
 }
 
