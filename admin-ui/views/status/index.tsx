@@ -441,9 +441,7 @@ const Root = styled.div`
 
 const TopContainer = styled.div`
   display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  padding: 10px 0;
+  padding: 5px 0 10px 0;
 `
 
 const TableContainer = styled.div`

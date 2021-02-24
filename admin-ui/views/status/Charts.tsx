@@ -203,9 +203,7 @@ export default function Charts(props: Props) {
 
       {!selected &&
         <MainTitle>
-          {data.length == 34 &&
-            'All '}{data.length} Node{data.length > 1 ? 's' : ''
-          }
+          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''}
         </MainTitle>
       }
 
@@ -218,7 +216,6 @@ export default function Charts(props: Props) {
                 datasets: [
                 {
                   label: 'Count',
-                  //borderColor: 'rgba(0,0,0,1)',
                   borderWidth: 1,
                   data: statuses.slice(0, 3),
                   backgroundColor: ['#3ac37e', '#d72020', '#aaa', '#5ddba9'],
@@ -260,7 +257,9 @@ export default function Charts(props: Props) {
         {aggActivity &&
           <BottomCharts>
 
-            <ChartTitle>% cpu</ChartTitle>
+            <ChartTitle>
+              % cpu | {(100 * (selected ? selected.length : data.length)).toLocaleString()} total
+            </ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -284,6 +283,7 @@ export default function Charts(props: Props) {
                       ticks: {
                         max: 100 * (selected ? selected.length : data.length),
                         min: 0,
+                        display: false,
                         maxTicksLimit: 1
                       }
                     }],
@@ -296,7 +296,9 @@ export default function Charts(props: Props) {
               />
             </div>
 
-            <ChartTitle>mem (gb)</ChartTitle>
+            <ChartTitle>
+              mem | {(192 * (selected ? selected.length : data.length)).toLocaleString()} GB available
+            </ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -317,9 +319,10 @@ export default function Charts(props: Props) {
                   ...defaultOptions,
                   scales: {
                     yAxes: [{
-                      ticks: {
+                    ticks: {
                         max: 192 * (selected ? selected.length : data.length),
                         min: 0,
+                        display: false,
                         maxTicksLimit: 1
                       }
                     }],
@@ -333,7 +336,9 @@ export default function Charts(props: Props) {
               />
             </div>
 
-            <ChartTitle>storage%</ChartTitle>
+            <ChartTitle>
+              storage%
+            </ChartTitle>
             <div className="chart">
               <Line
                 data={{
@@ -357,6 +362,7 @@ export default function Charts(props: Props) {
                       ticks: {
                         max: 100,
                         min: 0,
+                        display: false,
                         maxTicksLimit: 1
                       },
                     }],
@@ -376,8 +382,8 @@ export default function Charts(props: Props) {
 }
 
 const Root = styled.div`
+  flex-grow: 1;
   height: 300px;
-  width: 500px;
 `
 
 const MainTitle = styled.h3`
@@ -397,7 +403,6 @@ const TopCharts = styled.div`
 const BottomCharts = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
 
   div.chart {
     width: 500px;
@@ -411,7 +416,7 @@ const ChartTitle = styled.div`
   font-size: .8em;
   font-weight: 800;
   color: #666;
-  margin-left: 50px;
+  margin-left: 15px;
 `
 
 

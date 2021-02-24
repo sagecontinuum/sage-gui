@@ -19,6 +19,10 @@ const loadMap = (domRef) => {
       zoom: initialZoom
   })
 
+  map.on('load', () => {
+    map.resize()
+  })
+
   map.addControl(new mapboxgl.FullscreenControl({container: domRef.current}));
 
   return map
@@ -115,12 +119,6 @@ const getGeoSpec = (data) => {
   }
 }
 
-// todo: resize
-const mapStyles = {
-  border: '1px solid #ccc',
-  width: 900,
-  height: 475
-}
 
 
 type Data = {id: string, lng: number, lat: number}[]
@@ -137,7 +135,7 @@ function Map(props: Props) {
 
   const ref = useRef()
   const [init, setInit] = useState(false)
-  const [map, setMap] = useState()
+  const [map, setMap] = useState(null)
   const [markers, setMarkers] = useState()
   const [total, setTotal] = useState(null)
 
@@ -195,19 +193,24 @@ function Map(props: Props) {
     setLastID(updateID)
   }, [map, data, selected, updateID])
 
+
   return (
     <Root>
-      <div id="map"
-        ref={ref}
-        style={mapStyles}
-      >
-      </div>
+      <MapContainer id="map" ref={ref} />
     </Root>
   )
 }
 
 const Root = styled.div`
+  width: 100%;
+  flex-grow: 4;
+`
 
+
+const MapContainer = styled.div`
+  border: 1px solid #ccc;
+  width: 100%;
+  height: 475px;
 `
 
 export default Map
