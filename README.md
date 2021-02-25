@@ -15,8 +15,18 @@ npm install
 
 ## Development
 
-Start the development server:
+Test data is currently needed for development.  Run the following to fetch the manifest, do some column renaming, and save as `test-data/blades.json`:
 
+```
+./scripts/get-mock-data.sh test-data/blades.json
+```
+
+Start server for mock data:
+```
+npm run mock-beekeeper
+```
+
+Start the development server:
 ```
 npm start
 ```

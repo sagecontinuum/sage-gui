@@ -69,7 +69,7 @@ const mockUpdate = (data: Data) => {
     return {
       ...obj,
       lastUpdated: obj.name == MOCK_DOWN_NODE ? 'N/A' : (obj.lastUpdated + TIME_OUT / 1000) % 16,
-      mem: obj.mem % 4 == 0 ? randomMem() : obj.mem,
+      mem: obj.lastUpdated % 16 == 0 ? randomMem() : obj.mem,
       cpu: randomMetric(),
       storage: obj.lastUpdated % 5 == 0 ? randomMetric(): obj.storage
     }

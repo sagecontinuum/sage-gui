@@ -249,7 +249,6 @@ export default function Charts(props: Props) {
                 },
                 legend: {position: 'right'}
               }}
-
             />
           }
         </TopCharts>
