@@ -15,7 +15,7 @@ Build/run:
 
 ```
 docker build --no-cache -t sage-admin-ui .
-docker run -dp 8080:80 sage-admin-ui sage-admin-ui
+docker run -dp 8080:80 sage-admin-ui
 ```
 
 
