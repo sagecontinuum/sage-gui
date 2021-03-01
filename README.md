@@ -3,7 +3,23 @@
 React.js components for the Sage Admin UI and more.
 
 
-## Installation
+## Docker Quick Start
+
+Get some test data:
+
+```
+./scripts/get-mock-data.sh test-data/blades.json
+```
+
+Build/run:
+
+```
+docker build --no-cache -t sage-admin-ui .
+docker run -dp 8080:80 sage-admin-ui sage-admin-ui
+```
+
+
+## Development
 
 Requires [node.js](https://nodejs.org) v14+
 
@@ -12,8 +28,6 @@ Clone, then:
 ```
 npm install
 ```
-
-## Development
 
 Test data is currently needed for development.  Run the following to fetch the manifest, do some column renaming, and save as `test-data/blades.json`:
 
@@ -30,6 +44,7 @@ Start the development server:
 ```
 npm start
 ```
+
 
 ## Build
 

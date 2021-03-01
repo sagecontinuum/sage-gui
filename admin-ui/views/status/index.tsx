@@ -20,7 +20,7 @@ import config from '../../config'
 import DetailsSidebar from './DetailsSidebar'
 
 
-const url = config.beekeeper
+// const url = config.beekeeper
 
 const ENABLE_MAP = true
 const TIME_OUT = 2000
@@ -216,7 +216,7 @@ export default function Dashbaord() {
     let handle
 
     (async () => {
-      const res = await fetch(`${url}/blades.json`)
+      const res = await fetch(`blades.json`)
       const data = await res.json()
 
       const rows = mockData(data)
