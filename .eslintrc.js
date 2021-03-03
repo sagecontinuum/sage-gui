@@ -6,8 +6,7 @@ module.exports = {
   'extends': [
     'eslint:recommended',
     'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    "plugin:prettier/recommended"
+    'plugin:react-hooks/recommended'
   ],
   'parser': '@typescript-eslint/parser',
   'parserOptions': {
@@ -38,6 +37,7 @@ module.exports = {
     'DOMParser': true,
     'event': true,
     'XMLHttpRequest': true,
-    'FormData': true
+    'FormData': true,
+    'JSX': true
   }
 }

@@ -17,7 +17,7 @@ import './assets/styles.scss'
 
 
 export default function App() {
-  const darkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const darkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
   const theme = React.useMemo(
     () =>
