@@ -38,6 +38,11 @@ module.exports = {
     'event': true,
     'XMLHttpRequest': true,
     'FormData': true,
-    'JSX': true
+    'JSX': true,
+    'fetch': true
+
+    'jest': true,
+    'test': true,
+    'describe': true,
   }
 }

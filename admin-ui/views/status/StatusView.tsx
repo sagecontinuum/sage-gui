@@ -180,7 +180,7 @@ type Option = {
 }
 
 
-export default function Dashbaord() {
+export default function StatusView() {
   const params = useParams()
   const history = useHistory()
 

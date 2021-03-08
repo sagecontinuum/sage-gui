@@ -8,7 +8,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from './NavBar'
-import Dashboard from './views/status'
+import StatusView from './views/status/StatusView'
 import NodeView from './views/node'
 import NotFound from './404'
 
@@ -63,26 +63,26 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-        <NavBar />
+      <NavBar />
 
-        <Container>
-          <BrowserRouter>
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/status" />
-              </Route>
-              <Route path="/status">
-                <Dashboard />
-              </Route>
-              <Route path="/node/:node">
-                <NodeView />
-              </Route>
-              <Route path="*">
-                <NotFound />
-              </Route>
-            </Switch>
-          </BrowserRouter>
-        </Container>
+      <Container>
+        <BrowserRouter>
+          <Switch>
+            <Route exact path="/">
+              <Redirect to="/status" />
+            </Route>
+            <Route path="/status">
+              <StatusView />
+            </Route>
+            <Route path="/node/:node">
+              <NodeView />
+            </Route>
+            <Route path="*">
+              <NotFound />
+            </Route>
+          </Switch>
+        </BrowserRouter>
+      </Container>
     </ThemeProvider>
   )
 }
