@@ -16,10 +16,10 @@ import Map from '../../../components/Map'
 import Charts from './Charts'
 import QueryViewer from './QueryViewer'
 
-import config from '../../config'
+import config from '../../../config'
 import DetailsSidebar from './DetailsSidebar'
 
-
+// import fetchStatus from './fetchStatus'
 // const url = config.beekeeper
 
 const ENABLE_MAP = true
@@ -216,6 +216,7 @@ export default function StatusView() {
     let handle
 
     (async () => {
+      // const bhStatus = await fetchStatus({start: '-10s'})
       const res = await fetch(`blades.json`)
       const data = await res.json()
 

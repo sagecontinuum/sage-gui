@@ -7,12 +7,12 @@ import useMediaQuery from '@material-ui/core/useMediaQuery'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
-import NavBar from './NavBar'
+import NavBar from '../components/NavBar'
 import StatusView from './views/status/StatusView'
 import NodeView from './views/node'
-import NotFound from './404'
+import NotFound from '../components/404'
 
-import './assets/styles.scss'
+import '../assets/styles.scss'
 
 
 

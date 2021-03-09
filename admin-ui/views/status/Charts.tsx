@@ -5,7 +5,7 @@ import 'chartjs-plugin-datalabels'
 import { Doughnut, Line} from 'react-chartjs-2'
 import chartTooltip from './chartTooltip'
 
-import config from '../../config'
+import config from '../../../config'
 
 const PIE_PADDING = 15
 const ACTIVITY_LENGTH = config.ui.activityLength

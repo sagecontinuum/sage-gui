@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import sage from 'url:./assets/sage-drawing.png'
+import sage from 'url:../assets/sage-drawing.png'
 import Divider from '@material-ui/core/Divider'
 
 
