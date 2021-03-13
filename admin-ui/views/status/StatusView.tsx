@@ -217,7 +217,7 @@ export default function StatusView() {
 
     (async () => {
       // const bhStatus = await fetchStatus({start: '-10s'})
-      const res = await fetch(`blades.json`)
+      const res = await fetch(`/static/blades.json`)
       const data = await res.json()
 
       const rows = mockData(data)

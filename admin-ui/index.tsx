@@ -66,7 +66,7 @@ export default function App() {
       <NavBar />
 
       <Container>
-        <BrowserRouter>
+        <BrowserRouter basename="/admin-ui">
           <Switch>
             <Route exact path="/">
               <Redirect to="/status" />

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "./node_modules/parcel/lib/bin.js serve ./admin-ui/index.html --dist-dir build/",
     "build": "./node_modules/parcel/lib/bin.js build ./admin-ui/index.html",
+    "django-build": "./node_modules/parcel/lib/bin.js build ./admin-ui/index.html --no-content-hash",
     "test": "node_modules/jest/bin/jest.js admin-ui/ --notify",
     "clean": "rm -rf .parcel-cache/ && rm -rf dist/ && rm -rf .cache/",
     "mock-beekeeper": "http-server -p 8888 --cors test-data/",
