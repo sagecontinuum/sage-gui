@@ -9,7 +9,7 @@ import VerifiedIcon from '@material-ui/icons/VerifiedUserRounded'
 
 
 
-export default function () {
+export default function Sidebar() {
   return (
     <Root>
       <Item to="my-apps"><UserIcon/> My Apps</Item>

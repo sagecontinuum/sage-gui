@@ -39,8 +39,7 @@ module.exports = {
     'XMLHttpRequest': true,
     'FormData': true,
     'JSX': true,
-    'fetch': true
-
+    'fetch': true,
     'jest': true,
     'test': true,
     'describe': true,

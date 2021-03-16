@@ -2,7 +2,6 @@
 // no trailing slashes in endpoints, please
 
 export default  {
-  //beekeeper: '/',
   beehive: 'https://sdr.honeyhouse.one/api/v1',
   ecr: 'http://localhost:5000',
   ui: {

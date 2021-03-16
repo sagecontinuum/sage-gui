@@ -6,19 +6,12 @@ import styled from 'styled-components'
 
 import Button from '@material-ui/core/Button'
 import AddIcon from '@material-ui/icons/AddRounded'
+import Alert from '@material-ui/lab/Alert'
 
 import Table from '../../../components/table/Table'
 
-import config from '../../../config'
-const url = config.ecr
+import { listApps } from '../../api/ecr'
 
-import testToken from '../../../testToken'
-
-const options = {
-  headers: {
-    Authorization: `sage ${testToken}`
-  }
-}
 
 const columns = [
   {id: 'name', label: 'Name'},
@@ -32,23 +25,24 @@ type Row = {
 }
 
 
-export default function PluginView() {
-
+export default function AppList() {
   const [rows, setRows] = useState<Row[]>()
+  const [error, setError] = useState(null)
+
 
   useEffect(() => {
-    (async () => {
-      const res = await fetch(`${url}/apps/sage/simple`, options)
-      const data = await res.json()
-      setRows([data])
-    })()
+    listApps()
+      .then(data => setRows([data]))
+      .catch(error => setError(error.message))
   }, [])
+
 
   return (
     <Root>
       <Button component={Link} to="/apps/create-app" variant="outlined" color="primary" startIcon={<AddIcon/>}>
         New App
       </Button>
+
       <h3>My Apps</h3>
 
       {rows &&
@@ -56,6 +50,10 @@ export default function PluginView() {
           columns={columns}
           rows={rows}
         />
+      }
+
+      {error &&
+        <Alert severity="error">{error}</Alert>
       }
     </Root>
   )

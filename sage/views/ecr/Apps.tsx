@@ -7,12 +7,7 @@ import AppList from './AppList'
 import CreateApp from './CreateApp'
 
 
-type Props = {
-
-}
-
-export default function (props: Props) {
-
+export default function Apps() {
   let { view } = useParams()
 
   return (
