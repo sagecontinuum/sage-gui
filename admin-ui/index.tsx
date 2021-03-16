@@ -15,6 +15,8 @@ import NotFound from '../components/404'
 import '../assets/styles.scss'
 
 
+const NavMenu = () => <div className="title">Admin UI</div>
+
 
 export default function App() {
   const darkMode = useMediaQuery('(prefers-color-scheme: dark)')
@@ -63,7 +65,7 @@ export default function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <NavBar />
+      <NavBar Menu={NavMenu} />
 
       <Container>
         <BrowserRouter>

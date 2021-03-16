@@ -3,12 +3,12 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom'
 import styled from 'styled-components'
 
-import useMediaQuery from '@material-ui/core/useMediaQuery'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
-import PluginView from './views/ecr/PluginView'
+import AppList from './views/ecr/AppList'
+import CreateApp from './views/ecr/CreateApp'
 import NotFound from '../components/404'
 
 import '../assets/styles.scss'
@@ -51,22 +51,28 @@ const theme = createMuiTheme({
 })
 
 
+const NavMenu = () => <div className="title">Apps</div>
+
+
 export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <NavBar />
+      <NavBar Menu={NavMenu} />
 
       <Container>
-        <BrowserRouter>
+        <BrowserRouter basename="/">
           <Switch>
             <Route exact path="/">
-              <Redirect to="/home" />
+              <Redirect to="/apps" />
             </Route>
-            <Route path="/home">
-              <PluginView />
+            <Route path="/apps">
+              <AppList />
             </Route>
+            <Route path="/apps/create-app">
+              <CreateApp />
+            </Route>            
             <Route path="*">
               <NotFound />
             </Route>

@@ -4,8 +4,13 @@ import sage from 'url:../assets/sage-drawing.png'
 import Divider from '@material-ui/core/Divider'
 
 
-export default function NavBar() {
+type Props = {
+  Menu?: React.FC
+}
 
+export default function NavBar(props: Props) {
+  const { Menu } = props
+  
   return (
     <Root>
       <LogoImg src={sage} height="35" />
@@ -13,7 +18,7 @@ export default function NavBar() {
         Sage
       </Logo>
       <Divider orientation="vertical" flexItem style={{margin: '10px 0' }} />
-      <Title>Admin Dash</Title>
+      {Menu && <Menu />}
     </Root>
   )
 }
@@ -30,6 +35,12 @@ const Root = styled.div`
   height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow:  0px 2px 4px -1px rgb(0 0 0 / 0%), 0px 4px 5px 0px rgb(0 0 0 / 0%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+  
+  .title {
+    margin-top: 11px;
+    margin-left: 20px;
+    font-weight: 600;
+  }
 `
 
 const LogoImg = styled.img`
@@ -46,9 +57,4 @@ const Logo = styled.span`
   padding-left: 2px;
 `
 
-const Title = styled.span`
-  margin-top: 11px;
-  margin-left: 20px;
-  font-weight: 600;
-`
 

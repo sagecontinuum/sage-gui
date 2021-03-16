@@ -2,8 +2,6 @@ import config from '../../../config'
 const url = config.beehive
 
 export default async function fetchStatus(data = {}) {
-  console.log('data', data)
-
   let res
   try {
     res = await fetch(`${url}/query`, {
@@ -14,12 +12,8 @@ export default async function fetchStatus(data = {}) {
       },
       body: JSON.stringify(data)
     })
+    return res.json()
   } catch(e) {
-    console.log('e', e)
-
+    console.error('error:', e)
   }
-
-//  const json = await response.json()
-  console.log('res', res.json())
-  return res.json()
 }
