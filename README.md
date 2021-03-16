@@ -42,7 +42,7 @@ npm run mock-beekeeper
 
 Start the development server:
 ```
-npm start
+npm run start-admin
 ```
 
 
@@ -51,5 +51,5 @@ npm start
 To create a build in `dist/` using [parcel](https://parceljs.org/) v2:
 
 ```
-npm run build
+npm run build-admin
 ```
