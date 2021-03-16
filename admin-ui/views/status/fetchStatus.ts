@@ -6,13 +6,9 @@ export default async function fetchStatus(data = {}) {
   try {
     res = await fetch(`${url}/query`, {
       method: 'POST',
-      mode: 'cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(data)
     })
-    return res.json()
+    return res.text()
   } catch(e) {
     console.error('error:', e)
   }

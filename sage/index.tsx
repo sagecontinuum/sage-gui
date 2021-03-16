@@ -7,8 +7,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
-import AppList from './views/ecr/AppList'
-import CreateApp from './views/ecr/CreateApp'
+import Apps from './views/ecr/Apps'
 import NotFound from '../components/404'
 
 import '../assets/styles.scss'
@@ -36,10 +35,13 @@ const theme = createMuiTheme({
   props: {
     MuiButtonBase: {
       disableRipple: true,
+    },
+    MuiTextField: {
+      margin: 'dense',
+      variant: 'outlined'
     }
   },
   transitions: {
-    create: () => 'none',
   },
   overrides: {
     MuiButton: {
@@ -65,14 +67,11 @@ export default function App() {
         <BrowserRouter basename="/">
           <Switch>
             <Route exact path="/">
-              <Redirect to="/apps" />
+              <Redirect to="/apps/my-apps" />
             </Route>
-            <Route path="/apps">
-              <AppList />
+            <Route path="/apps/:view">
+              <Apps />
             </Route>
-            <Route path="/apps/create-app">
-              <CreateApp />
-            </Route>            
             <Route path="*">
               <NotFound />
             </Route>
@@ -84,7 +83,8 @@ export default function App() {
 }
 
 const Container = styled.div`
-  margin: 70px 10px 10px 10px;
+  margin: 60px 0 0 0;
+  width: 100%;
 `
 
 

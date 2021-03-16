@@ -1,5 +1,11 @@
+
+
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+
+import Button from '@material-ui/core/Button'
+import AddIcon from '@material-ui/icons/AddRounded'
 
 import Table from '../../../components/table/Table'
 
@@ -40,8 +46,10 @@ export default function PluginView() {
 
   return (
     <Root>
-      <br/>
-      <h3>My Plugins</h3>
+      <Button component={Link} to="/apps/create-app" variant="outlined" color="primary" startIcon={<AddIcon/>}>
+        New App
+      </Button>
+      <h3>My Apps</h3>
 
       {rows &&
         <Table
@@ -54,6 +62,6 @@ export default function PluginView() {
 }
 
 const Root = styled.div`
-
+  margin-top: 50px;
 `
 

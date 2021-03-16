@@ -10,7 +10,7 @@ type Props = {
 
 export default function NavBar(props: Props) {
   const { Menu } = props
-  
+
   return (
     <Root>
       <LogoImg src={sage} height="35" />
@@ -24,6 +24,7 @@ export default function NavBar(props: Props) {
 }
 
 const Root = styled.div`
+  flex-shrink: 0;
   position: fixed;
   top: 0;
   width: 100%;
@@ -35,7 +36,7 @@ const Root = styled.div`
   height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow:  0px 2px 4px -1px rgb(0 0 0 / 0%), 0px 4px 5px 0px rgb(0 0 0 / 0%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
-  
+
   .title {
     margin-top: 11px;
     margin-left: 20px;
