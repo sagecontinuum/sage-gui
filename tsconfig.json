@@ -1,5 +1,5 @@
 {
-  "include": ["admin-ui/**/*", "components/**/*", "config.tsx"],
+  "include": ["admin-ui/**/*", "components/**/*", "config.ts"],
   "compilerOptions": {
     "jsx": "react",
     "esModuleInterop": true,

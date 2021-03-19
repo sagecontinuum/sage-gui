@@ -16,10 +16,10 @@ import '../assets/styles.scss'
 const theme = createMuiTheme({
   typography: {
     fontFamily: [
-      'Nunito'
+      'Roboto'
     ].join(','),
     button: {
-      textTransform: "none",
+      textTransform: 'none',
       fontWeight: 800
     }
   },

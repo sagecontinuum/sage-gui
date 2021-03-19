@@ -21,8 +21,8 @@ export default function Sidebar() {
 }
 
 const Root = styled.div`
-  padding-top: 20px;
-  width: 200px;
+  padding-top: 35px;
+  min-width: 200px;
   border-right: 1px solid #ddd;
 `
 

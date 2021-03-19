@@ -10,7 +10,7 @@ import Alert from '@material-ui/lab/Alert'
 
 import Table from '../../../components/table/Table'
 
-import { listApps } from '../../api/ecr'
+import * as ECR from '../../api/ecr'
 
 
 const columns = [
@@ -31,7 +31,7 @@ export default function AppList() {
 
 
   useEffect(() => {
-    listApps()
+    ECR.listApps()
       .then(data => setRows([data]))
       .catch(error => setError(error.message))
   }, [])
@@ -39,11 +39,11 @@ export default function AppList() {
 
   return (
     <Root>
-      <Button component={Link} to="/apps/create-app" variant="outlined" color="primary" startIcon={<AddIcon/>}>
-        New App
-      </Button>
-
       <h3>My Apps</h3>
+
+      <Button component={Link} to="/apps/create-app" variant="outlined" color="primary" startIcon={<AddIcon/>}>
+        Add App
+      </Button>
 
       {rows &&
         <Table

@@ -8,7 +8,7 @@
     "start-admin": "./node_modules/parcel/lib/bin.js serve ./admin-ui/index.html --dist-dir build/",
     "build-admin": "./node_modules/parcel/lib/bin.js build ./admin-ui/index.html",
     "test": "node_modules/jest/bin/jest.js admin-ui/ --notify",
-    "clean": "rm -rf .parcel-cache/ && rm -rf dist/ && rm -rf .cache/",
+    "clean": "rm -rf .build/ && rm -rf dist/ && rm -rf .cache/",
     "mock-beekeeper": "http-server -p 8888 --cors test-data/",
     "docker": "docker build -t sage-admin-ui .",
     "docker-run": "docker run -dp 8080:80 sage-admin-ui"
