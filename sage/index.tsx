@@ -53,7 +53,7 @@ const theme = createMuiTheme({
 })
 
 
-const NavMenu = () => <div className="title">Apps</div>
+const NavMenu = () => <div className="title">My Apps</div>
 
 
 export default function App() {

@@ -3,7 +3,7 @@ FROM node:14.16 AS build
 WORKDIR /app
 COPY . .
 RUN npm install -s
-RUN npm run build
+RUN npm run build-admin
 
 # server
 FROM nginx:1.18-alpine

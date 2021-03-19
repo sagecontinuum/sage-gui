@@ -69,29 +69,32 @@ function a11yProps(index) {
 
 
 
-// sample repo: https://github.com/waggle-sensor/plugin-helloworld-ml
-
 export default function CreateApp() {
   const [tabIndex, setTabIndex] = useState(0)
 
   // repo config state
-  const [repo, setRepo] = useState(null)
+  const [repo, setRepo] = useState('')
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
   // app config state
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'>(null)
-  const [config, setConfig] = useState(null)
+  const [config, setConfig] = useState('')
 
   const [building, setBuilding] = useState(false)
 
-  const handleRepoVerify = () => {
-    const path = repo.split('.com')[1].replace('.git', '').slice(1)
 
-    // todo: add rate limit check, add branch
+
+  const handleRepoVerify = (evt) => {
+    evt.preventDefault()
+
+    const path = repo.split('.com')[1]
+      .replace('.git', '').slice(1)
+
+    // todo: add rate limit notice, add branch?
     setValidating(true)
     fetch(`https://api.github.com/repos/${path}`)
-      .then(() => setIsValid(true))
+      .then(res => res.ok ? setIsValid(true) : setIsValid(false))
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
       .then(async () => {
@@ -119,19 +122,28 @@ export default function CreateApp() {
       .then(() => setBuilding(false))
   }
 
+  const handleExample = () => {
+    setRepo('https://github.com/waggle-sensor/plugin-helloworld-ml')
+  }
+
 
   return (
     <Root>
       <Main>
-        <StepTitle icon="1" active={true} label="Add New App" />
-        <div className="step step-1">
+        <StepTitle icon="1" active={true} label="Add New App"/>
+
+        <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
             label="GitHub/GitLab repo URL"
             onChange={evt => setRepo(evt.target.value)}
+            value={repo}
+            error={isValid == false}
+            helperText={isValid == false ? 'Sorry, we could not verify github repo' : ''}
             style={{width: 500}}
           />
 
           {repo &&
+
             <Button
               onClick={handleRepoVerify}
               variant="contained"
@@ -141,9 +153,10 @@ export default function CreateApp() {
             </Button>
           }
 
-          {isValid && <CheckIcon />}
-          {isValid == false && 'not valid!'}
-        </div>
+          {isValid &&
+            <CheckIcon className="success" />
+          }
+        </form>
 
 
         <StepTitle icon="2" active={true} label="App Configuration" />
@@ -179,7 +192,7 @@ export default function CreateApp() {
             onClick={handleBuild}
             variant="contained"
             color="primary"
-            disabled={!repo || !config}
+            disabled={!repo || !config || building}
           >
             {building ? 'Building...' : 'Build App'}
           </Button>
@@ -190,9 +203,16 @@ export default function CreateApp() {
       <Help>
         <h3 className="no-margin">Help</h3>
         <hr/>
-        <a href="https://github.com/waggle-sensor/plugin-helloworld-ml/blob/master/README.md" target="_blank" rel="noreferrer" >
-          Getting Started
-        </a>
+        <ul className="no-padding list-none">
+          <li>
+            <a href="https://github.com/waggle-sensor/plugin-helloworld-ml/blob/master/README.md" target="_blank" rel="noreferrer" >
+              Getting Started
+            </a>
+          </li>
+          <li>
+            <a onClick={handleExample}>Use Example Now</a>
+          </li>
+        </ul>
       </Help>
     </Root>
   )
@@ -213,7 +233,7 @@ const Main = styled.div`
   .step-1 {
     display: flex;
     align-items: center;
-    button {
+    button, svg {
       margin-left: 10px;
     }
   }

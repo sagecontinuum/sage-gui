@@ -28,6 +28,7 @@ body {
 a {
   color: #0080c7;
   text-decoration: none;
+  cursor: pointer;
 }
 
 a:hover {
@@ -50,8 +51,9 @@ table.key-value-table {
 .failed { color: hsl(0, 83%, 35%); }
 .inactive { color: #888; }
 
-.no-margin {
-  margin: 0;
-}
+
+.no-margin { margin: 0; }
+.no-padding { padding: 0; }
+.list-none { list-style-type: none; }
 
 
