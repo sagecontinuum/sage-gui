@@ -9,26 +9,39 @@ const options = {
   }
 }
 
-async function get(endpoint: string) {
-  const res = await fetch(endpoint, options)
-  const data = await res.json()
-  return data
+
+function handleErrors(res) {
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(errorObj => {
+    throw Error(errorObj.error)
+  })
 }
 
-function post(endpoint: string, data = '') {
-  return fetch(endpoint, {method: 'POST', body: data, ...options})
+
+function get(endpoint: string) {
+  return fetch(endpoint, options)
+    .then(handleErrors)
     .then(res => res.json())
 }
 
 
-export async function listApps()  {
-  return await get(`${url}/apps/sage/simple`)
+function post(endpoint: string, data = '') {
+  return fetch(endpoint, {method: 'POST', body: data, ...options})
+    .then(handleErrors)
+    .then(res => res.json())
 }
 
 
-function register(appConfig) {
+export function listApps()  {
+  return get(`${url}/apps/sage/simple`)
+}
+
+
+export function register(appConfig) {
   return post(`${url}/submit`, appConfig)
-    .then(data => data.id)
 }
 
 

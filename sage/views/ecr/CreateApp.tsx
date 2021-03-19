@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { withStyles } from '@material-ui/core/styles'
@@ -12,7 +13,17 @@ import Tooltip from '@material-ui/core/Tooltip'
 import CheckIcon from '@material-ui/icons/Check'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
+import { useSnackbar } from 'notistack'
+
 import * as ECR from '../../api/ecr'
+
+
+const GITHUB_API = 'https://api.github.com'
+const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
+
+// Todo: need better examples
+const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
+const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
 
 
 function StepTitle(props) {
@@ -70,6 +81,9 @@ function a11yProps(index) {
 
 
 export default function CreateApp() {
+  let history = useHistory()
+  const { enqueueSnackbar } = useSnackbar()
+
   const [tabIndex, setTabIndex] = useState(0)
 
   // repo config state
@@ -81,29 +95,36 @@ export default function CreateApp() {
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'>(null)
   const [config, setConfig] = useState('')
 
-  const [building, setBuilding] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
 
 
+  // remove all verification/error state on changes
+  useEffect(() => {
+    setIsValid(null)
+    setError(null)
+  }, [repo, config])
 
-  const handleRepoVerify = (evt) => {
-    evt.preventDefault()
+
+  const handleRepoVerify = (evt = null) => {
+    if (evt) evt.preventDefault()
 
     const path = repo.split('.com')[1]
       .replace('.git', '').slice(1)
 
     // todo: add rate limit notice, add branch?
     setValidating(true)
-    fetch(`https://api.github.com/repos/${path}`)
+    fetch(`${GITHUB_API}/repos/${path}`)
       .then(res => res.ok ? setIsValid(true) : setIsValid(false))
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
       .then(async () => {
-        const res = await fetch(`https://raw.githubusercontent.com/${path}/master/sage.json`)
+        const res = await fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.json`)
         setConfig(await res.text())
         setConfigType('json')
       })
       .catch(async () => {
-        const res = await fetch(`https://raw.githubusercontent.com/${path}/master/sage.yaml`)
+        const res = await fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.yaml`)
         setConfig(await res.text())
         setConfigType('yaml')
       })
@@ -117,26 +138,47 @@ export default function CreateApp() {
 
 
   const handleBuild = () => {
-    setBuilding(true)
+    setIsSubmitting(true)
     ECR.registerAndBuild(config)
-      .then(() => setBuilding(false))
+      .then(() => {
+        setIsSubmitting(false)
+        enqueueSnackbar('Build started')
+        history.push('/apps/my-apps')
+      }).catch(error => {
+        setIsSubmitting(false)
+        setError(error.message)
+      })
+
   }
 
-  const handleExample = () => {
-    setRepo('https://github.com/waggle-sensor/plugin-helloworld-ml')
+
+  const onExampleOne = () => {
+    setConfig('')
+    setRepo(EXAMPLE_REPO_1)
   }
+
+
+  // Todo: for demonstration, there's an error in example 1
+  const onExampleTwo = async () => {
+    setRepo(EXAMPLE_REPO_2)
+    setIsValid(true)
+    const res = await fetch(`${GITHUB_STATIC_URL}/sagecontinuum/sage-ecr/master/example_app.yaml`)
+    setConfig(await res.text())
+    setConfigType('yaml')
+  }
+
 
 
   return (
     <Root>
       <Main>
-        <StepTitle icon="1" active={true} label="Add New App"/>
 
+        <StepTitle icon="1" active={true} label="Add New App"/>
         <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
             label="GitHub/GitLab repo URL"
-            onChange={evt => setRepo(evt.target.value)}
             value={repo}
+            onChange={evt => setRepo(evt.target.value)}
             error={isValid == false}
             helperText={isValid == false ? 'Sorry, we could not verify github repo' : ''}
             style={{width: 500}}
@@ -157,6 +199,7 @@ export default function CreateApp() {
             <CheckIcon className="success" />
           }
         </form>
+
 
 
         <StepTitle icon="2" active={true} label="App Configuration" />
@@ -180,10 +223,12 @@ export default function CreateApp() {
           <TextField
             id="config-input"
             multiline
+            fullWidth
             rows={20}
             value={config}
             onChange={evt => setConfig(evt.target.value)}
-            fullWidth
+            error={error}
+            helperText={error}
           />
         </div>
 
@@ -192,13 +237,13 @@ export default function CreateApp() {
             onClick={handleBuild}
             variant="contained"
             color="primary"
-            disabled={!repo || !config || building}
+            disabled={!repo || !config || isSubmitting || error}
           >
-            {building ? 'Building...' : 'Build App'}
+            {isSubmitting ? 'Submitting...' : 'Build App'}
           </Button>
         </div>
-
       </Main>
+
 
       <Help>
         <h3 className="no-margin">Help</h3>
@@ -209,8 +254,13 @@ export default function CreateApp() {
               Getting Started
             </a>
           </li>
+        </ul>
+        <ul className="no-padding list-none">
           <li>
-            <a onClick={handleExample}>Use Example Now</a>
+            <a onClick={onExampleOne}>Use Example One</a>
+          </li>
+          <li>
+            <a onClick={onExampleTwo}>Use Example Two</a>
           </li>
         </ul>
       </Help>

@@ -10,6 +10,8 @@ import NavBar from '../components/NavBar'
 import Apps from './views/ecr/Apps'
 import NotFound from '../components/404'
 
+import { SnackbarProvider } from 'notistack'
+
 import '../assets/styles.scss'
 
 
@@ -63,21 +65,23 @@ export default function App() {
       <CssBaseline/>
       <NavBar Menu={NavMenu} />
 
-      <Container>
-        <BrowserRouter basename="/">
-          <Switch>
-            <Route exact path="/">
-              <Redirect to="/apps/my-apps" />
-            </Route>
-            <Route path="/apps/:view">
-              <Apps />
-            </Route>
-            <Route path="*">
-              <NotFound />
-            </Route>
-          </Switch>
-        </BrowserRouter>
-      </Container>
+      <SnackbarProvider>
+        <Container>
+          <BrowserRouter basename="/">
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/apps/my-apps" />
+              </Route>
+              <Route path="/apps/:view">
+                <Apps />
+              </Route>
+              <Route path="*">
+                <NotFound />
+              </Route>
+            </Switch>
+          </BrowserRouter>
+        </Container>
+      </SnackbarProvider>
     </ThemeProvider>
   )
 }
