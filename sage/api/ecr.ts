@@ -40,6 +40,27 @@ function post(endpoint: string, data = '') {
 }
 
 
+
+export function register(appConfig) {
+  return post(`${url}/submit`, appConfig)
+}
+
+
+
+export function build(app) {
+  return post(`${url}/builds/${app}`)
+}
+
+
+
+export async function registerAndBuild(appConfig, version = '1.0') {
+  await register(appConfig)
+  const res = await build(`sage/simple/${version}`)
+  return res
+}
+
+
+
 type Repo = {
   name: string
   namespace: string
@@ -90,22 +111,7 @@ export async function listAll(params: ListAllProps)  {
 
 
 
-export function register(appConfig) {
-  return post(`${url}/submit`, appConfig)
+export function getApp(path) {
+  return get(`${url}/apps/${path}`)
 }
-
-
-
-export function build(app) {
-  return post(`${url}/builds/${app}`)
-}
-
-
-
-export async function registerAndBuild(appConfig, version = '1.0') {
-  await register(appConfig)
-  const res = await build(`sage/simple/${version}`)
-  return res
-}
-
 

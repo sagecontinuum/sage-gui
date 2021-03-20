@@ -4,6 +4,7 @@ import { useParams} from 'react-router-dom'
 
 import Sidebar from './Sidebar'
 import AppList from './AppList'
+import App from './App'
 import CreateApp from './CreateApp'
 
 
@@ -20,6 +21,9 @@ export default function Apps() {
         }
         {view == 'create-app' &&
           <CreateApp />
+        }
+        {view.split('/').length == 4 &&
+          <App app={view.split('/').slice(1).join('/')} />
         }
       </Container>
     </Root>

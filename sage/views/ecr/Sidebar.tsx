@@ -12,10 +12,10 @@ import VerifiedIcon from '@material-ui/icons/VerifiedUserRounded'
 export default function Sidebar() {
   return (
     <Root>
-      <Item to="my-apps"><UserIcon/> My Apps</Item>
-      <Item to="shared-with-me"><SharedIcon /> Shared with Me</Item>
-      <Item to="public"><PublicIcon /> Public</Item>
-      <Item to="certified-apps"><VerifiedIcon /> Certified Apps</Item>
+      <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
+      <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
+      <Item to="/apps/public"><PublicIcon /> Public</Item>
+      <Item to="/apps/certified-apps"><VerifiedIcon /> Certified Apps</Item>
     </Root>
   )
 }

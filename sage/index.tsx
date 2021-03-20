@@ -8,6 +8,7 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
 import Apps from './views/ecr/Apps'
+import App from './views/ecr/App'
 import NotFound from '../components/404'
 
 import { SnackbarProvider } from 'notistack'
@@ -58,7 +59,7 @@ const theme = createMuiTheme({
 const NavMenu = () => <div className="title">My Apps</div>
 
 
-export default function App() {
+export default function Sage() {
 
   return (
     <ThemeProvider theme={theme}>
@@ -72,7 +73,7 @@ export default function App() {
               <Route exact path="/">
                 <Redirect to="/apps/my-apps" />
               </Route>
-              <Route path="/apps/:view">
+              <Route path="/apps/:view+">
                 <Apps />
               </Route>
               <Route path="*">
@@ -92,4 +93,4 @@ const Container = styled.div`
 `
 
 
-ReactDom.render(<App />, document.getElementById('app'))
+ReactDom.render(<Sage />, document.getElementById('app'))

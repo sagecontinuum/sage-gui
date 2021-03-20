@@ -1,5 +1,4 @@
-
-
+/* eslint-disable react/display-name */
 import React, { useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { Link } from 'react-router-dom'
@@ -22,7 +21,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 
 const columns = [
-  {id: 'name', label: 'Name'},
+  {id: 'name', label: 'Name',
+    format: (name, o) => <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
+  },
   {id: 'namespace', label: 'Namespace'},
   {id: 'owner_id', label: 'Owner'},
   {id: 'version', label: 'Version'},
@@ -92,24 +93,29 @@ export default function AppList() {
 
   return (
     <Root>
-      <h3>My Apps</h3>
+      <h3>
+        My Apps
+      </h3>
+
+      <Button
+        component={Link}
+        to="/apps/create-app"
+        variant="outlined"
+        color="primary"
+        startIcon={<AddIcon/>}
+        size="small"
+      >
+        Add App
+      </Button>
+
+      <br/>
+      <br/>
 
       <Controls>
         <TableSearch
           value={query}
           onSearch={onSearch}
         />
-
-        <Button
-          component={Link}
-          to="/apps/create-app"
-          variant="outlined"
-          color="primary"
-          startIcon={<AddIcon/>}
-          size="small"
-        >
-          Add App
-        </Button>
 
         <FormControlLabel
           control={
@@ -170,7 +176,8 @@ const Controls = styled.div`
   display: flex;
   align-items: center;
 
-  [role="button"] {
+  .MuiButton-root,
+  .MuiFormControlLabel-root {
     margin: 0 10px;
   }
 
