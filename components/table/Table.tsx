@@ -516,7 +516,7 @@ export default function TableComponent(props: Props) {
           <TableSearch
             value={props.search}
             onSearch={onSearch}
-            searchPlaceholder={props.searchPlaceholder}
+            placeholder={props.searchPlaceholder}
           />
         }
 

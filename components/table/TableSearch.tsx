@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback} from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import SearchIcon from '@material-ui/icons/SearchOutlined'
 import TextField from '@material-ui/core/TextField'
@@ -9,12 +9,12 @@ import useDebounce from '../hooks/useDebounce'
 
 type Props = {
   value: string
-  searchPlaceholder: string
+  placeholder?: string
   onSearch: ({query: string}) => void
 }
 
-export default function TableControls(props: Props) {
-  const {onSearch, searchPlaceholder} = props
+export default function TableSearch(props: Props) {
+  const {onSearch, placeholder} = props
 
   const [query, setQuery] = useState(props.value || '')
   const debounceQuery = useDebounce(query, 300)
@@ -30,7 +30,7 @@ export default function TableControls(props: Props) {
   return (
     <>
       <Search
-        placeholder={searchPlaceholder || 'Search'}
+        placeholder={placeholder || 'Search'}
         value={query}
         onChange={e => { setQuery(e.target.value) }}
         InputProps={{
