@@ -665,9 +665,6 @@ const Container = styled(TableContainer)`
     */
 
     font-size: 13px;
-
-    /* size="small" */
-    padding: 6px 12px 6px 2px;
   }
 
   ${props => props.stripes ?
@@ -676,10 +673,10 @@ const Container = styled(TableContainer)`
     }` : ''}
 
   td.MuiTableCell-sizeSmall {
-    padding: 6px 12px 6px 2px;
+    padding: 6px 12px 6px 6px;
   }
   th.MuiTableCell-sizeSmall {
-    padding: 1px 15px 6px 2px;
+    padding: 1px 15px 6px 6px;
   }
 
   tr.MuiTableRow-root:hover {

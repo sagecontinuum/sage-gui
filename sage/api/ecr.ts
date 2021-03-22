@@ -61,6 +61,12 @@ export async function registerAndBuild(appConfig, version = '1.0') {
 
 
 
+export function listPermissions(app: string) {
+  return get(`${url}/permissions/${app}`)
+}
+
+
+
 type Repo = {
   name: string
   namespace: string
@@ -73,26 +79,39 @@ type Repo = {
   }]
 }
 
+type Permission = {
+  grantee: string
+  granteeType: 'USER' | 'GROUP'
+  permission: 'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
+  resourceName: string
+  resourceType: 'string'
+}
+
 type ListAllProps = {
   namespace: string
   includeVersions?: boolean
+  includePermissions?: boolean
 }
 
 export async function listAll(params: ListAllProps)  {
-  const {namespace, includeVersions = true} = params
+  const {
+    namespace,
+    includeVersions = true,
+    includePermissions = true
+  } = params
 
   if (!namespace)
     throw Error('listApps: must provide a namespace (for now)')
 
   const obj = await get(`${url}/apps/${namespace}`)
+  let repos = obj.repositories
+  const names = repos.map(repo => repo.name)
 
-  // todo: check performance/scalability
+
+  // todo: add api method?
   if (includeVersions) {
-    const repos = obj.repositories
-    const names = repos.map(repo => repo.name)
-
     const objs: Repo[] = await Promise.all(
-      names.map(name => get(`${url}/apps/${namespace}/${name}`))
+      names.map(name => getApp(`${namespace}/${name}`))
     )
 
     let allApps = []
@@ -103,10 +122,20 @@ export async function listAll(params: ListAllProps)  {
       const apps = versions.map(info => ({...repo, ...info}))
       allApps.push(...apps)
     }
-    return allApps
+    repos = allApps
   }
 
-  return obj
+  // todo: add api method?
+  if (includePermissions) {
+    const perms: Permission[][] = await Promise.all(
+      repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
+    )
+
+    // add in permissions
+    repos = repos.map((obj, i) => ({...obj, permissions: perms[i]}))
+  }
+
+  return repos
 }
 
 

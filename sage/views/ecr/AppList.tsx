@@ -25,8 +25,14 @@ const columns = [
     format: (name, o) => <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
   },
   {id: 'namespace', label: 'Namespace'},
-  {id: 'owner_id', label: 'Owner'},
   {id: 'version', label: 'Version'},
+  {id: 'owner_id', label: 'Owner'},
+  {id: 'permissions', label: 'Members',
+    format: (perms) => {
+      if (!perms) return `Only me`
+      return perms.length == 1 ? `Only me` : `${perms.length} members`
+    }
+  },
   {id: 'id', label: 'Version', hide: true},
 ]
 
