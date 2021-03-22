@@ -4,12 +4,13 @@ import { useLocation, useHistory } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import Checkbox from '@material-ui/core/Checkbox'
 import AddIcon from '@material-ui/icons/AddRounded'
 import ViewComfyIcom from '@material-ui/icons/ViewComfy'
-import ViewHeadlineIcom from '@material-ui/icons/ViewHeadline'
+import SpaciousIcon from '@material-ui/icons/ViewStream'
 import GithubIcon from '@material-ui/icons/GitHub'
 import Alert from '@material-ui/lab/Alert'
 
@@ -17,8 +18,9 @@ import Alert from '@material-ui/lab/Alert'
 import Table from '../../../components/table/Table'
 import TableSearch from '../../../components/table/TableSearch'
 
+import FancyLayout from './FancyLayout'
+
 import * as ECR from '../../api/ecr'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 
 const columns = [
@@ -34,8 +36,8 @@ const columns = [
       return perms.length == 1 ? `Only me` : `${perms.length} members`
     }
   },
-  {id: 'details', label: 'Repo',
-    format: (obj) => {
+  {id: 'repo', label: 'Repo',
+    format: (_, {details: obj}) => {
       const url = obj.source.url
 
       return (
@@ -79,7 +81,7 @@ export default function AppList() {
   const [error, setError] = useState(null)
 
   const [showLatestVers, setShowLatestVers] = useState(true)
-  const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('compact')
+  const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
 
 
   useEffect(() => {
@@ -112,29 +114,22 @@ export default function AppList() {
 
   return (
     <Root>
-      <h3>
-        My Apps
-      </h3>
-
-      <Button
-        component={Link}
-        to="/apps/create-app"
-        variant="outlined"
-        color="primary"
-        startIcon={<AddIcon/>}
-        size="small"
-      >
-        Add App
-      </Button>
-
-      <br/>
-      <br/>
-
       <Controls>
         <TableSearch
           value={query}
           onSearch={onSearch}
         />
+
+        <Button
+          component={Link}
+          to="/apps/create-app"
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon/>}
+          size="small"
+        >
+          New App
+        </Button>
 
         <FormControlLabel
           control={
@@ -161,7 +156,7 @@ export default function AppList() {
             color={viewStyle == 'spacious' ? 'primary' : 'default'}
             size="small"
           >
-            <ViewHeadlineIcom />
+            <SpaciousIcon />
           </IconButton>
         </div>
       </Controls>
@@ -176,8 +171,11 @@ export default function AppList() {
         />
       }
 
-      {viewStyle == 'spacious' &&
-        <p>Not implemented yet</p>
+      {rows && viewStyle == 'spacious' &&
+        <FancyLayout
+          columns={columns}
+          rows={rows}
+        />
       }
 
       {error &&
@@ -188,7 +186,7 @@ export default function AppList() {
 }
 
 const Root = styled.div`
-  margin-top: 50px;
+  margin-top: 20px;
 `
 
 const Controls = styled.div`

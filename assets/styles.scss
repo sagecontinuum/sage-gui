@@ -59,6 +59,8 @@ table.key-value-table {
 .list-none { list-style-type: none; }
 
 .flex { display: flex; }
+.flex.column { flex-direction: column; }
+.flex.row { flex-direction: row; }
 
 .items-start { align-items: flex-start; }
 .items-end { align-items: flex-end; }

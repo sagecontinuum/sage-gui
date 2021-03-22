@@ -118,7 +118,6 @@ export async function listAll(params: ListAllProps)  {
 
     let allApps = []
     for (const repo of objs) {
-      console.log('repo', repo)
       const versions = repo.versions
       delete repo.versions
 
