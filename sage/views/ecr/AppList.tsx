@@ -10,6 +10,7 @@ import Checkbox from '@material-ui/core/Checkbox'
 import AddIcon from '@material-ui/icons/AddRounded'
 import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import ViewHeadlineIcom from '@material-ui/icons/ViewHeadline'
+import GithubIcon from '@material-ui/icons/GitHub'
 import Alert from '@material-ui/lab/Alert'
 
 
@@ -31,6 +32,18 @@ const columns = [
     format: (perms) => {
       if (!perms) return `Only me`
       return perms.length == 1 ? `Only me` : `${perms.length} members`
+    }
+  },
+  {id: 'details', label: 'Repo',
+    format: (obj) => {
+      const url = obj.source.url
+
+      return (
+        <a href={url} target="_blank" rel="noreferrer" className="flex items-center">
+          <GithubIcon fontSize="small" className="text-color" />&nbsp;
+          {url.slice(url.lastIndexOf('/') + 1).replace('.git', '')}
+        </a>
+      )
     }
   },
   {id: 'id', label: 'Version', hide: true},

@@ -91,13 +91,15 @@ type ListAllProps = {
   namespace: string
   includeVersions?: boolean
   includePermissions?: boolean
+  includeStatus?: boolean
 }
 
 export async function listAll(params: ListAllProps)  {
   const {
     namespace,
     includeVersions = true,
-    includePermissions = true
+    includeDetails = true,
+    includeStatus = true
   } = params
 
   if (!namespace)
@@ -116,6 +118,7 @@ export async function listAll(params: ListAllProps)  {
 
     let allApps = []
     for (const repo of objs) {
+      console.log('repo', repo)
       const versions = repo.versions
       delete repo.versions
 
@@ -125,15 +128,30 @@ export async function listAll(params: ListAllProps)  {
     repos = allApps
   }
 
-  // todo: add api method?
-  if (includePermissions) {
+  // todo: add api method(s)?
+  if (includeDetails) {
     const perms: Permission[][] = await Promise.all(
       repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
     )
 
-    // add in permissions
-    repos = repos.map((obj, i) => ({...obj, permissions: perms[i]}))
+    const details: any[] = await Promise.all(
+      repos.map(o => getApp(`${o.namespace}/${o.name}/${o.version}`))
+    )
+
+    // add in permissions and app info
+    repos = repos.map((obj, i) => ({
+      ...obj,
+      permissions: perms[i],
+      details: details[i]
+    }))
   }
+
+
+  // todo: add api method?
+  if (includeStatus) {
+    // implement
+  }
+
 
   return repos
 }

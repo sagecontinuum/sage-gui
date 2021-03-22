@@ -1,4 +1,4 @@
-
+$text-color: rgba(0, 0, 0, 0.87);
 
 html {
   height: 100%;
@@ -55,6 +55,15 @@ table.key-value-table {
 
 .no-margin { margin: 0; }
 .no-padding { padding: 0; }
+.text-color { color: $text-color; }
 .list-none { list-style-type: none; }
+
+.flex { display: flex; }
+
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.items-center { align-items: center; }
+.items-baseline { align-items: baseline; }
+.items-stretch { align-items: stretch; }
 
 

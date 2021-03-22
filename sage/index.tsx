@@ -8,7 +8,6 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
 import Apps from './views/ecr/Apps'
-import App from './views/ecr/App'
 import NotFound from '../components/404'
 
 import { SnackbarProvider } from 'notistack'
