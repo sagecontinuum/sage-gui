@@ -32,10 +32,11 @@ export function VersionTooltip(props: VerTooltipProps) {
   const {versions} = props
 
   return (
-    <Tooltip arrow
+    <Tooltip
+      arrow
       title={
         <>
-          <b>Versions:</b><br/>
+          <div>Versions:</div>
           {versions.map(o => <div key={o.version}>{o.version}</div>)}
         </>
       }
@@ -73,8 +74,8 @@ const columns = [
   {id: 'repo', label: 'Repo',
     format: (_, {details: obj}) => {
       if (!obj.source) return <></>
-      const url = obj.source.url
 
+      const url = obj.source.url
       return (
         <a href={url} target="_blank" rel="noreferrer" className="flex items-center">
           <GithubIcon fontSize="small" className="text-color" />&nbsp;
