@@ -94,7 +94,7 @@ type App = {
 
 // special, client-side version of a "repo"
 type Repo = App & {
-  versions: [{
+  versions?: [{
     id: string,
     name: string,
     namespace: string,
@@ -104,15 +104,11 @@ type Repo = App & {
 
 
 type ListAppsParams = {
-  includeVersions?: boolean
-  includeDetails?: boolean
   includeStatus?: boolean
 }
 
 export async function listApps(params: ListAppsParams = {})  {
   const {
-    includeVersions = true,
-    includeDetails = true,
     includeStatus = true
   } = params
 
@@ -124,43 +120,33 @@ export async function listApps(params: ListAppsParams = {})  {
   )
 
   // join all repos
-  let repos = objs.reduce((acc, obj) => [...acc, ...obj.repositories], [])
+  let repos: Repo[] = objs.reduce((acc, obj) => [...acc, ...obj.repositories], [])
 
-  // todo: add api method?
-  if (includeVersions) {
-    const objs: Repo[] = await Promise.all(
-      repos.map(repo => getApp(`${repo.namespace}/${repo.name}`))
+  // include versions
+  repos = await Promise.all(
+    repos.map(o => getApp(o.namespace, o.name))
+  )
+
+  // get permissions
+  const perms = await Promise.all(
+    repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
+  )
+
+  // get app info
+  const details: any[] = await Promise.all(
+    repos.map(o => o.versions.length ?
+      getApp(o.namespace, o.name, o.versions[o.versions.length-1].version) : {}
     )
+  )
 
-    let allApps = []
-    for (const repo of objs) {
-      const versions = repo.versions
-      delete repo.versions
-
-      const apps = versions.map(info => ({...repo, ...info}))
-      allApps.push(...apps)
-    }
-    repos = allApps
-  }
-
-
-  // todo: add api method(s)?
-  if (includeDetails) {
-    const perms = await Promise.all(
-      repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
-    )
-
-    const details: any[] = await Promise.all(
-      repos.map(o => getApp(`${o.namespace}/${o.name}/${o.version}`))
-    )
-
-    // add in permissions and app info
-    repos = repos.map((obj, i) => ({
-      ...obj,
-      permissions: perms[i],
-      details: details[i]
-    }))
-  }
+  // merge in all the of the above
+  repos = repos.map((obj, i) => ({
+    ...obj,
+    permissions: perms[i],
+    details: details[i],
+    version: obj.versions.length ? obj.versions[obj.versions.length-1].version : null,
+    id: details[i].id || `id-${i}`
+  }))
 
 
   // todo: add api method?
@@ -172,7 +158,9 @@ export async function listApps(params: ListAppsParams = {})  {
 }
 
 
-export function getApp(path) : Promise<App> {
-  return get(`${url}/apps/${path}`)
+export function getApp(namespace: string, name: string, version?: string) : Promise<App> {
+  if (version)
+    return get(`${url}/apps/${namespace}/${name}/${version}`)
+  else
+    return get(`${url}/apps/${namespace}/${name}`)
 }
-

@@ -5,17 +5,12 @@ html {
 }
 
 body,
-body > div {
+body > #app {
   height: 100%;
 }
 
 
 body {
-  color: rgba(0, 0, 0, 0.87);
-  font-size: initial !important;
-  font-weight: initial !important;
-  line-height: initial !important;
-  letter-spacing: initial !important;
   background-color: #fff !important;
 }
 

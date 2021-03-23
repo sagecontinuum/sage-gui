@@ -20,7 +20,7 @@ import config from '../../../config'
 import DetailsSidebar from './DetailsSidebar'
 
 // import fetchStatus from './fetchStatus'
-// const url = config.beekeeper
+const beekeeper = config.beekeeper
 
 const ENABLE_MAP = true
 const TIME_OUT = 2000
@@ -217,7 +217,7 @@ export default function StatusView() {
 
     (async () => {
       // const bhStatus = await fetchStatus({start: '-10s'})
-      const res = await fetch(`blades.json`)
+      const res = await fetch(`${beekeeper}/blades.json`)
       const data = await res.json()
 
       const rows = mockData(data)

@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { VersionTooltip } from './AppList'
 
 
 
@@ -23,8 +24,13 @@ function Row(props) {
       </div>
 
       <div className="flex row">
-        {getFormatter('repo', spec)(null, data)}&nbsp;|&nbsp;
-        {getFormatter('permissions', spec)(data.permissions)}
+        {getFormatter('repo', spec)(null, data)}
+        {data.versions.length != 0 &&
+          <>&nbsp;|&nbsp; <VersionTooltip versions={data.versions}/></>
+        }
+        {data.permissions.length > 1 ?
+          <>&nbsp;|&nbsp;{getFormatter('permissions', spec)(data.permissions)}</> : <></>
+        }
       </div>
 
       <p>

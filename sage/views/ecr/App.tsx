@@ -9,11 +9,12 @@ type Props = {
 
 export default function App(props: Props) {
   const { app } = props
+  const [namepsace, name, version] = app.split('/')
 
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    ECR.getApp(app)
+    ECR.getApp(namepsace, name, version)
       .then(data => {
         setData(data)
       })

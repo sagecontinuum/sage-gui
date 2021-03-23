@@ -11,10 +11,11 @@ type Props = {
   value: string
   placeholder?: string
   onSearch: ({query: string}) => void
+  [rest: string]: any
 }
 
 export default function TableSearch(props: Props) {
-  const {onSearch, placeholder} = props
+  const {onSearch, placeholder, ...rest} = props
 
   const [query, setQuery] = useState(props.value || '')
   const debounceQuery = useDebounce(query, 300)
@@ -34,11 +35,12 @@ export default function TableSearch(props: Props) {
         value={query}
         onChange={e => { setQuery(e.target.value) }}
         InputProps={{
-          style: { width: '230px'},
+          style: { width: rest.width || '230px'},
           startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
         }}
         size="small"
         variant="outlined"
+        {...rest}
       />
     </>
   )
