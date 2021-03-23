@@ -24,7 +24,7 @@ function Row(props) {
 
       <div className="flex row">
         {getFormatter('repo', spec)(null, data)}&nbsp;|&nbsp;
-        {getFormatter('permissions', spec)(null, data)}
+        {getFormatter('permissions', spec)(data.permissions)}
       </div>
 
       <p>

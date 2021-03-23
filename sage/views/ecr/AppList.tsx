@@ -85,10 +85,11 @@ export default function AppList() {
 
 
   useEffect(() => {
-    ECR.listAll({namespace: 'sage'})
+    ECR.listApps()
       .then(data => setData(data))
       .catch(error => setError(error.message))
   }, [])
+
 
   useEffect(() => {
     if (!data) return

@@ -61,24 +61,6 @@ export async function registerAndBuild(appConfig, version = '1.0') {
 
 
 
-export function listPermissions(app: string) {
-  return get(`${url}/permissions/${app}`)
-}
-
-
-
-type Repo = {
-  name: string
-  namespace: string
-  owner_id: string
-  versions: [{
-    id: string,
-    name: string,
-    namespace: string,
-    version: string
-  }]
-}
-
 type Permission = {
   grantee: string
   granteeType: 'USER' | 'GROUP'
@@ -87,33 +69,67 @@ type Permission = {
   resourceType: 'string'
 }
 
-type ListAllProps = {
+export function listPermissions(app: string) : Promise<Permission[][]> {
+  return get(`${url}/permissions/${app}`)
+}
+
+
+type Namespace = {
+  id: string
+  owner_id: string
+  type: string
+}
+
+
+export function listNamespaces() : Promise<Namespace[]>{
+  return get(`${url}/apps`)
+}
+
+
+type App = {
+  name: string
   namespace: string
+  owner_id: string
+}
+
+// special, client-side version of a "repo"
+type Repo = App & {
+  versions: [{
+    id: string,
+    name: string,
+    namespace: string,
+    version: string
+  }]
+}
+
+
+type ListAppsParams = {
   includeVersions?: boolean
-  includePermissions?: boolean
+  includeDetails?: boolean
   includeStatus?: boolean
 }
 
-export async function listAll(params: ListAllProps)  {
+export async function listApps(params: ListAppsParams = {})  {
   const {
-    namespace,
     includeVersions = true,
     includeDetails = true,
     includeStatus = true
   } = params
 
-  if (!namespace)
-    throw Error('listApps: must provide a namespace (for now)')
+  // first get namespaces
+  const nsObjs = await listNamespaces()
+  const namespaces = nsObjs.map(o => o.id)
+  const objs = await Promise.all(
+    namespaces.map(namespace => get(`${url}/apps/${namespace}`))
+  )
 
-  const obj = await get(`${url}/apps/${namespace}`)
-  let repos = obj.repositories
-  const names = repos.map(repo => repo.name)
-
+  // join all repos
+  let repos = objs.reduce((acc, obj) => [...acc, ...obj.repositories], [])
 
   // todo: add api method?
   if (includeVersions) {
     const objs: Repo[] = await Promise.all(
-      names.map(name => getApp(`${namespace}/${name}`))
+      repos.map(repo => getApp(`${repo.namespace}/${repo.name}`))
     )
 
     let allApps = []
@@ -127,9 +143,10 @@ export async function listAll(params: ListAllProps)  {
     repos = allApps
   }
 
+
   // todo: add api method(s)?
   if (includeDetails) {
-    const perms: Permission[][] = await Promise.all(
+    const perms = await Promise.all(
       repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
     )
 
@@ -151,13 +168,11 @@ export async function listAll(params: ListAllProps)  {
     // implement
   }
 
-
   return repos
 }
 
 
-
-export function getApp(path) {
+export function getApp(path) : Promise<App> {
   return get(`${url}/apps/${path}`)
 }
 
