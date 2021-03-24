@@ -31,7 +31,7 @@ const theme = createMuiTheme({
       main: '#8166a0',
     },
     secondary: {
-      main: '#056600',
+      main: '#24a08a' //'#056600',
     }
   },
   props: {

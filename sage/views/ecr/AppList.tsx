@@ -54,7 +54,7 @@ const columns = [
   {id: 'namespace', label: 'Namespace'},
   {id: 'versions', label: 'Version',
     format: (versions) => {
-      if (!versions.length) return ''
+      if (!versions.length) return '-'
 
       return (
         <>
@@ -67,7 +67,6 @@ const columns = [
   {id: 'owner_id', label: 'Owner'},
   {id: 'permissions', label: 'Members',
     format: (perms) => {
-      if (!perms) return `Only me`
       return perms.length == 1 ? `Only me` : `${perms.length} members`
     }
   },
@@ -82,6 +81,11 @@ const columns = [
           {url.slice(url.lastIndexOf('/') + 1).replace('.git', '')}
         </a>
       )
+    }
+  },
+  {id: 'details', label: 'Last Update',
+    format: (details) => {
+      return details.last_update_time
     }
   },
   {id: 'id', label: 'Version', hide: true},
@@ -162,10 +166,9 @@ export default function AppList() {
           component={Link}
           to="/apps/create-app"
           variant="contained"
-          color="primary"
-          startIcon={<AddIcon/>}
+          color="secondary"
         >
-          New App
+          <AddIcon/> New App
         </Button>
 
         {/*
@@ -225,7 +228,7 @@ export default function AppList() {
 }
 
 const Root = styled.div`
-  margin-top: 20px;
+
 `
 
 const Controls = styled.div`

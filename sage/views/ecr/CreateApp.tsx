@@ -13,6 +13,8 @@ import Tooltip from '@material-ui/core/Tooltip'
 import CheckIcon from '@material-ui/icons/Check'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
+import ConfigForm from './ConfigForm'
+
 import { useSnackbar } from 'notistack'
 
 import * as ECR from '../../api/ecr'
@@ -221,19 +223,26 @@ export default function CreateApp() {
 
           <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
             <CustomTab label="Raw Config" {...a11yProps(0)} />
-            <CustomTab label="Preview" {...a11yProps(1)} />
+            <CustomTab label="Form" {...a11yProps(1)} />
+            <CustomTab label="Preview" {...a11yProps(2)} />
           </CustomTabs>
 
-          <TextField
-            id="config-input"
-            multiline
-            fullWidth
-            rows={20}
-            value={config}
-            onChange={evt => setConfig(evt.target.value)}
-            error={error}
-            helperText={error}
-          />
+          {tabIndex == 0 &&
+            <TextField
+              id="config-input"
+              multiline
+              fullWidth
+              rows={20}
+              value={config}
+              onChange={evt => setConfig(evt.target.value)}
+              error={error}
+              helperText={error}
+            />
+          }
+
+          {tabIndex == 1 &&
+            <ConfigForm />
+          }
         </div>
 
         <div className="step">

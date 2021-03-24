@@ -41,7 +41,7 @@ function Row(props) {
 }
 
 const AppRow = styled.div`
-  margin-bottom: 20px;
+  margin: 20px 0;
 
   svg {
     font-size: 1em;
@@ -62,9 +62,11 @@ export default function FancyLayout(props: Props) {
     <Root>
       <Divider />
       <Rows>
-        {rows.map(row => {
+        {rows.map((row, i) => {
           return (
-            <Row key={row.details.id} spec={columns} data={row} />
+            <>
+              <Row key={row.details.id} spec={columns} data={row} />
+            </>
           )
         })}
       </Rows>
@@ -76,8 +78,8 @@ const Root = styled.div`
   margin-top: 1em;
 `
 
-const Divider = styled.hr`
-   border-top: 1px solid #ccc;
+const Divider = styled.div`
+   border-top: 1px solid #ddd;
 `
 
 const Rows = styled.div`

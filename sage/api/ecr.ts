@@ -1,11 +1,11 @@
 import config from '../../config'
 const url = config.ecr
 
-import testToken from '../../testToken'
+import user from '../../testToken'
 
 const options = {
   headers: {
-    Authorization: `sage ${testToken}`
+    Authorization: `sage ${user.token}`
   }
 }
 
@@ -127,6 +127,12 @@ export async function listApps(params: ListAppsParams = {})  {
     repos.map(o => getApp(o.namespace, o.name))
   )
 
+  // sort versions
+  repos = repos.map(obj => ({
+    ...obj,
+    versions: obj.versions.sort((a, b) => b.version.localeCompare(a.version))
+  }))
+
   // get permissions
   const perms = await Promise.all(
     repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
@@ -135,7 +141,7 @@ export async function listApps(params: ListAppsParams = {})  {
   // get app info
   const details: any[] = await Promise.all(
     repos.map(o => o.versions.length ?
-      getApp(o.namespace, o.name, o.versions[o.versions.length-1].version) : {}
+      getApp(o.namespace, o.name, o.versions[0].version) : {}
     )
   )
 
@@ -144,7 +150,7 @@ export async function listApps(params: ListAppsParams = {})  {
     ...obj,
     permissions: perms[i],
     details: details[i],
-    version: obj.versions.length ? obj.versions[obj.versions.length-1].version : null,
+    version: obj.versions.length ? obj.versions[0].version : null,
     id: details[i].id || `id-${i}`
   }))
 
