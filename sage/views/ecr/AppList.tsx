@@ -21,7 +21,7 @@ import TableSearch from '../../../components/table/TableSearch'
 
 import FancyLayout from './FancyLayout'
 
-import * as ECR from '../../api/ecr'
+import * as ECR from '../../apis/ecr'
 
 
 type VerTooltipProps = {

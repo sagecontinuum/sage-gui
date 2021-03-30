@@ -19,66 +19,19 @@ import QueryViewer from './QueryViewer'
 import config from '../../../config'
 import DetailsSidebar from './DetailsSidebar'
 
-// import fetchStatus from './fetchStatus'
-const beekeeper = config.beekeeper
+import * as BK from '../../apis/beekeeper'
+import * as BH from '../../apis/beehive'
+
 
 const ENABLE_MAP = true
+const ELASPED_THRES = 90000
 const TIME_OUT = 2000
 const ACTIVITY_LENGTH = config.ui.activityLength
-
-const MOCK_DOWN_NODE = 'Sage-NEON-04'
-const PRIMARY_KEY = 'name'
-
-
-type Row = {
-  [key: string]: any
-}
-
-type Data = Row[]
-
-
-const randomTime = () => Math.floor(Math.random() * 12) + 1
-const randomMetric = () => (Math.random() * 100).toFixed(2)
-const randomMem = () => (Math.random() * 192).toFixed(2)
-
-const mockData = (data: Data) => {
-  return data.map(obj => {
-    const {name, location, status} = obj
-
-    const mem = randomMem(),
-      cpu = randomMetric(),
-      storage = randomMetric()
-
-    return {
-      ...obj,
-      id: name,
-      status: name == MOCK_DOWN_NODE ? 'failed' : (status == 'Up' ? 'active' : 'inactive'),
-      region: location.slice(location.indexOf(',') + 1),
-      project: name.slice(name.indexOf('-') + 1, name.lastIndexOf('-')),
-      lastUpdated: randomTime(),
-      cpu,
-      mem,
-      storage
-    }
-  })
-}
-
-
-const mockUpdate = (data: Data) => {
-  return data.map(obj => {
-    return {
-      ...obj,
-      lastUpdated: obj.name == MOCK_DOWN_NODE ? 'N/A' : (obj.lastUpdated + TIME_OUT / 1000) % 16,
-      mem: obj.lastUpdated % 16 == 0 ? randomMem() : obj.mem,
-      cpu: randomMetric(),
-      storage: obj.lastUpdated % 5 == 0 ? randomMetric(): obj.storage
-    }
-  })
-}
+const PRIMARY_KEY = 'id'
 
 
 
-const queryData = (data: object[], query: string) => {
+function queryData(data: object[], query: string) {
   return data.filter(row =>
     Object.values(row)
       .join('').toLowerCase()
@@ -87,8 +40,7 @@ const queryData = (data: object[], query: string) => {
 }
 
 
-
-const filterData = (data: object[], state: object) => {
+function filterData(data: object[], state: object) {
   const filteredRows = data.filter(row => {
 
     let keep = true
@@ -132,27 +84,60 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
 }
 
 
-const initialNodeActivity = {
-  cpu: [],
-  mem: [],
-  storage: []
+
+function getMetric(
+  metrics: AggMetrics,
+  nodeID: string,
+  metricName: string,
+  latestOnly = true
+) {
+  const metricObjs = metrics[nodeID]
+
+  const valueObj = {}
+  Object.keys(metricObjs).forEach(host => {
+    const m = metricObjs[host][metricName]
+
+    // get latest value
+    let val
+    if (latestOnly)
+      val = m[m.length - 1].value
+    else
+      val = m.map(o => o)
+
+    if (host.includes('ws-nxcore'))
+      valueObj['nx'] = val
+    else if (host.includes('ws-rpi'))
+      valueObj['rpi'] = val
+    else
+      valueObj['unknown'] = val
+  })
+
+  return valueObj
 }
 
-const getAppendedActivity = (prev, rows) => {
-  let id
-  let d
-  for (const row of rows) {
-    id = row.id
-    d = id in prev ? prev[id] : initialNodeActivity
 
-    prev[id] = {
-      cpu: [...d.cpu, row.cpu].slice(-ACTIVITY_LENGTH),
-      mem: [...d.mem, row.mem].slice(-ACTIVITY_LENGTH),
-      storage: [...d.storage, row.storage].slice(-ACTIVITY_LENGTH),
+// join some beehive and beekeeper data
+function joinData(data, metrics) {
+  const joinedData = data.map(nodeObj => {
+    const id = nodeObj.id.toLowerCase()
+    if (!(id in metrics)) return nodeObj
+
+    const memFree = getMetric(metrics, id, 'sys.mem.free', false)
+    const timestamp = memFree.rpi[memFree.rpi.length - 1].timestamp
+    const elaspedTime = (new Date().getTime() - new Date(timestamp).getTime())
+
+    return {
+      ...nodeObj,
+      status: elaspedTime > ELASPED_THRES ? 'failed' : 'active',
+      uptimes: getMetric(metrics, id, 'sys.uptime'),
+      sysTimes: getMetric(metrics, id, 'sys.time'),
+      cpu: getMetric(metrics, id, 'sys.cpu_seconds', false),
+      memTotal: getMetric(metrics, id, 'sys.mem.total', false),
+      memFree: memFree
     }
-  }
+  })
 
-  return prev
+  return joinedData
 }
 
 
@@ -163,7 +148,7 @@ const initialState = {
 }
 
 
-const getFilterState = (params) => {
+function getFilterState(params) {
   let init = {...initialState}
   for (const [key, val] of params) {
     if (key == 'query') continue
@@ -211,27 +196,29 @@ export default function StatusView() {
   // keep a ticker of recent activity
   const [activity, setActivity] = useState({})
 
-  // load data
+
+  /**
+   * load data
+   */
   useEffect(() => {
     let handle
 
     (async () => {
-      // const bhStatus = await fetchStatus({start: '-10s'})
-      const res = await fetch(`${beekeeper}/blades.json`)
-      const data = await res.json()
+      const data = await BK.fetchStatus()
+      setData(data)
 
-      const rows = mockData(data)
-      setData(rows)
-      updateAll(rows)
+      const metrics = await BH.getLatestMetrics()
+      const allData = joinData(data, metrics)
+      setData(allData)
 
-      setActivity(prev => getAppendedActivity(prev, rows))
-      handle = mockPings(rows)
+      handle = ping(data)
     })()
 
     return () => {
       clearTimeout(handle)
     }
   }, [])
+
 
 
   // effect for updating on state changes
@@ -241,7 +228,6 @@ export default function StatusView() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-    console.log('region', region)
   }, [query, status, project, region])
 
 
@@ -252,17 +238,14 @@ export default function StatusView() {
   }, [data])
 
 
-  // this will be handled via polling or websockets
-  const mockPings = (rows) => {
-    const handle = setTimeout(() => {
-      const newRows = mockUpdate(rows)
-      setData(newRows)
-
-      // update activity
-      setActivity(prev => getAppendedActivity(prev, newRows))
+  // latestMetrics
+  const ping = (data) => {
+    const handle = setTimeout(async () => {
+      const metrics = await BH.getLatestMetrics()
+      setData(joinData(data, metrics))
 
       // recursive
-      mockPings(newRows)
+      ping(data)
     }, TIME_OUT)
 
     return handle
@@ -357,7 +340,7 @@ export default function StatusView() {
                     }
                   /> : <></>
                 }
-                {projects &&
+                {/*projects &&
                   <FilterMenu
                     options={projects}
                     value={filterState.project}
@@ -380,7 +363,7 @@ export default function StatusView() {
                       </Button>
                     }
                   />
-                }
+                */}
 
                 {selected &&
                   <>

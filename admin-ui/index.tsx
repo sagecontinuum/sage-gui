@@ -91,6 +91,7 @@ export default function App() {
 
 const Container = styled.div`
   margin: 70px 10px 10px 10px;
+  width: 100%;
 `
 
 

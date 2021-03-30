@@ -3,9 +3,9 @@
 
 export default  {
   beehive: 'https://sdr.honeyhouse.one/api/v1',
-  beekeeper: 'http://localhost:8888',
-  ecr: 'http://localhost:5000', // 'http://localhost:8000/ecr/api',
+  beekeeper: 'https://beekeeper.honeyhouse.one/api',
+  ecr: 'http://localhost:5000',
   ui: {
-    activityLength: 50 // number of data points to store for activitiy monitoring of each node
+    activityLength: 50 // number of data points to store for activity monitoring of each node
   }
 }

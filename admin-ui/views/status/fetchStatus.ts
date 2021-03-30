@@ -2,14 +2,18 @@ import config from '../../../config'
 const url = config.beehive
 
 export default async function fetchStatus(data = {}) {
-  let res
-  try {
-    res = await fetch(`${url}/query`, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-    return res.text()
-  } catch(e) {
-    console.error('error:', e)
-  }
+  const res = await fetch(`${url}/query`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+  const text = await res.text()
+
+  if (!text)
+    return null
+
+  const metrics = text.trim()
+    .split('\n')
+    .map(str => JSON.parse(str))
+
+  return metrics
 }

@@ -18,15 +18,15 @@ const defaultOptions = {
   },
   layout: {
     padding: {
-        left: 0,
-        right: 5,
-        top: 5,
-        bottom: 0
+      left: 0,
+      right: 5,
+      top: 5,
+      bottom: 0
     }
   },
   elements: {
     point:{
-        radius: 0
+      radius: 0
     }
   },
   legend:{
@@ -60,12 +60,12 @@ const defaultOptions = {
 
 
 const getStatuses = (data) => {
-    const statuses = data.reduce((acc, o) =>[
-      acc[0] + (o.status == 'active' ? 1 : 0),
-      acc[1] + (o.status == 'failed' ? 1 : 0),
-      acc[2] + (o.status == 'inactive' ? 1 : 0),
-      acc[3] + (o.status == 'testing' ? 1 : 0)
-    ]
+  const statuses = data.reduce((acc, o) =>[
+    acc[0] + (o.status == 'active' ? 1 : 0),
+    acc[1] + (o.status == 'failed' ? 1 : 0),
+    acc[2] + (o.status == 'inactive' ? 1 : 0),
+    acc[3] + (o.status == 'testing' ? 1 : 0)
+  ]
   , [0, 0 ,0 ,0])
 
   return statuses
@@ -214,20 +214,20 @@ export default function Charts(props: Props) {
               data={{
                 labels: ['active', 'failed', 'inactive'],
                 datasets: [
-                {
-                  label: 'Count',
-                  borderWidth: 1,
-                  data: statuses.slice(0, 3),
-                  backgroundColor: ['#3ac37e', '#d72020', '#aaa', '#5ddba9'],
-                }
-              ]}}
+                  {
+                    label: 'Count',
+                    borderWidth: 1,
+                    data: statuses.slice(0, 3),
+                    backgroundColor: ['#3ac37e', '#d72020', '#aaa', '#5ddba9'],
+                  }
+                ]}}
               options={{
                 layout: {
                   padding: {
-                      left: PIE_PADDING,
-                      right: PIE_PADDING,
-                      top: PIE_PADDING,
-                      bottom: PIE_PADDING
+                    left: PIE_PADDING,
+                    right: PIE_PADDING,
+                    top: PIE_PADDING,
+                    bottom: PIE_PADDING
                   }
                 },
                 maintainAspectRatio: false,
@@ -318,7 +318,7 @@ export default function Charts(props: Props) {
                   ...defaultOptions,
                   scales: {
                     yAxes: [{
-                    ticks: {
+                      ticks: {
                         max: 192 * (selected ? selected.length : data.length),
                         min: 0,
                         display: false,
