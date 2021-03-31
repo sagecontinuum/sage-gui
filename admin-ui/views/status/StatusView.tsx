@@ -321,7 +321,6 @@ export default function StatusView() {
             rows={filtered}
             columns={columns}
             enableSorting
-            search={query}
             onSearch={handleQuery}
             onColumnMenuChange={() => {}}
             onSelect={handleSelect}
