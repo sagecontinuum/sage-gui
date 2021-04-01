@@ -43,15 +43,20 @@ export default function DetailsSidebar(props: Props) {
 
             {columns
               .filter(o => !['status', 'contact', 'notes'].includes(o.id))
-              .map(o =>
-                <tr key={o.id}><td>{o.label || o.id}</td><td>{item[o.id]}</td></tr>
-              )
+              .filter(o => typeof item[o.id] != 'object')
+              .map(o => {
+                return <tr key={o.id}><td>{o.label || o.id}</td><td>{item[o.id]}</td></tr>
+              })
             }
 
-            <tr><td colSpan={2}>Contact</td></tr>
-            <tr>
-              <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{item.contact}</td>
-            </tr>
+            {item.contact &&
+              <>
+                <tr><td colSpan={2}>Contact</td></tr>
+                <tr>
+                  <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{item.contact}</td>
+                </tr>
+              </>
+            }
           </tbody>
         </table>
 

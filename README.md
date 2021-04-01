@@ -5,16 +5,11 @@ React.js components for the Sage Admin UI and more.
 
 ## Docker Quick Start
 
-Get some test data:
-
-```
-./scripts/get-mock-data.sh test-data/blades.json
-```
-
 Build/run:
 
 ```
-docker build -t sage-admin-ui .
+export MAPBOX_TOKEN=<token_string>
+docker build --build-arg MAPBOX_TOKEN -t sage-admin-ui .
 docker run -dp 8080:80 sage-admin-ui
 ```
 
@@ -29,7 +24,24 @@ Clone, then:
 npm install
 ```
 
-Test data is currently needed for development.  Run the following to fetch the manifest, do some column renaming, and save as `test-data/blades.json`:
+Start the development server:
+```
+npm run start-admin
+```
+
+
+## Dev Mapbox token
+
+If you want to use mapbox:
+```
+export MAPBOX_TOKEN=<token_string>
+npm run start-admin
+```
+
+
+### Legacy testing
+
+Run the following to fetch the test data manifest, do some column renaming, and save as `test-data/blades.json`:
 
 ```
 ./scripts/get-mock-data.sh test-data/blades.json

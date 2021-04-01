@@ -15,12 +15,14 @@ import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
 import Charts from './Charts'
 import QueryViewer from './QueryViewer'
+import Alert from '@material-ui/lab/Alert'
 
 import config from '../../../config'
 import DetailsSidebar from './DetailsSidebar'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
+
 
 
 const ENABLE_MAP = true
@@ -219,6 +221,7 @@ export default function StatusView() {
 
   // all data and current state of filtered data
   const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
   const [filterState, setFilterState] = useState(null)
 
@@ -249,7 +252,7 @@ export default function StatusView() {
    */
   useEffect(() => {
     // get latest metrics
-    function ping(data) {
+    function ping() {
       const handle = setTimeout(async () => {
         const metrics = await BH.getLatestMetrics()
         setData(joinData(dataRef.current, metrics))
@@ -258,25 +261,24 @@ export default function StatusView() {
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
-        ping(data)
+        ping()
       }, TIME_OUT)
 
       return handle
     }
 
     let handle
-    (async () => {
-      const data = await BK.fetchState()
-      setData(data)
+    Promise.all([BK.fetchState(), BH.getLatestMetrics()])
+      .then(([state, metrics]) => {
+        setData(state)
 
-      const metrics = await BH.getLatestMetrics()
-      const allData = joinData(data, metrics)
-      setData(allData)
+        const allData = joinData(state, metrics)
+        setData(allData)
 
-      setActivity(prev => getAppendedActivity(prev, allData))
-      setLastUpdate(new Date().toLocaleTimeString('en-US'))
-      handle = ping(data)
-    })()
+        setActivity(prev => getAppendedActivity(prev, allData))
+        setLastUpdate(new Date().toLocaleTimeString('en-US'))
+        handle = ping()
+      }).catch(err => setError(err))
 
     return () => {
       clearTimeout(handle)
@@ -450,6 +452,10 @@ export default function StatusView() {
           />
         }
       </TableContainer>
+
+      {error &&
+        <Alert severity="error">{error.message}</Alert>
+      }
 
       {showDetails &&
         <DetailsSidebar

@@ -10,7 +10,7 @@ const initialZoom = 1.5
 
 
 const loadMap = (domRef) => {
-  mapboxgl.accessToken = token
+  mapboxgl.accessToken = process.env.MAPBOX_TOKEN || token
 
   const map = new mapboxgl.Map({
     container: domRef.current,

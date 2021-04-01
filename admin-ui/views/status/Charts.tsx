@@ -173,15 +173,6 @@ export default function Charts(props: Props) {
     const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
     const statuses = getStatuses(d)
     setStatuses(statuses)
-
-    /*
-    const cpuVal = aggregateOnField(d, 'cpu')
-    const memVal = aggregateOnField(d, 'mem')
-    const storageVal = getAverage(d, 'storage')
-    setCpuState([cpuVal])
-    setMemState([memVal])
-    setStorageState([storageVal])
-    */
   }, [data, selectedIDs])
 
 

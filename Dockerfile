@@ -1,8 +1,9 @@
 # build
 FROM node:14.16 AS build
+ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
 WORKDIR /app
 COPY . .
-RUN npm install -s
+RUN npm install -s --production
 RUN npm run build-admin
 
 # server

@@ -25,11 +25,8 @@ export default function App() {
     () =>
       createMuiTheme({
         typography: {
-          fontFamily: [
-            'Nunito'
-          ].join(','),
           button: {
-            textTransform: "none",
+            textTransform: 'none',
             fontWeight: 800
           }
         },
