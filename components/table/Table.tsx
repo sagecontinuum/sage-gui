@@ -24,7 +24,6 @@ import ArrowUp from '@material-ui/icons/ArrowDropUp'
 
 import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
-// import Checkbox from '../forms/Checkbox'
 
 import selectedReducer, { SelectedState, initialSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
@@ -325,7 +324,7 @@ type Props = {
   onSearch?: ({query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
-  onSelect?: (SelectedState) => void        // todo: define
+  onSelect?: (state: SelectedState) => void        // todo: define
   onDoubleClick?: (evt: MouseEvent, row: object) => void
   onColumnMenuChange?: (any) => void | boolean
   onShowDetails?: () => void      // useful for details sidebar

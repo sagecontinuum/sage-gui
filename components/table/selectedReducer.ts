@@ -23,7 +23,7 @@ export const initialSelectedState = {
 
 
 // handles selection of rows
-const selectedReducer = (state: SelectedState, action: Action) => {
+export default function selectedReducer(state: SelectedState, action: Action) {
 
   const {type} = action
 
@@ -77,5 +77,3 @@ const selectedReducer = (state: SelectedState, action: Action) => {
     throw `selected object reducer: theres no action for '${action.type}`
   }
 }
-
-export default selectedReducer
