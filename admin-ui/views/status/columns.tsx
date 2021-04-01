@@ -7,6 +7,12 @@ import * as utils from '../../../components/utils/units'
 
 import { NodeStatus } from '../../node.d'
 
+import config from '../../../config'
+const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
+const HOST_NAMES = Object.values(HOST_SUFFIX_MAPPING)
+
+
+
 
 const getStateIcon = (status: NodeStatus) => {
   if (!status)
@@ -37,7 +43,7 @@ const getUpdatedColor = (val) => {
 
 
 function fsAggregator(data) {
-  return data.reduce((acc, o) => {
+  return data?.reduce((acc, o) => {
     const key = o.meta.fstype + ':' + o.meta.mountpoint
     acc[key] = o.value
     return acc
@@ -46,6 +52,7 @@ function fsAggregator(data) {
 
 
 function FSPercent({aggFSSize, aggFSAvail}) {
+  if (!aggFSSize || !aggFSAvail) return <></>
   return (
     <div>{
       Object.keys(aggFSSize).map(key => {
@@ -59,6 +66,8 @@ function FSPercent({aggFSSize, aggFSAvail}) {
   )
 }
 
+
+
 // todo(nc): remove assumptions about hosts
 const columns = [
   {
@@ -70,14 +79,12 @@ const columns = [
     id: 'elaspedTimes',
     label: 'Last Updated',
     format: (val) => {
-      if (!val) return
+      if (!val) return '-'
 
-      const {rpi, nx} = val
-      return  (
-        <>
-          rpi: <b className={getUpdatedColor(rpi)}>{utils.msToTime(rpi)}</b><br/>
-          nx: <b className={getUpdatedColor(nx)}>{utils.msToTime(nx)}</b>
-        </>
+      return HOST_NAMES.map(host =>
+        <div key={host}>
+          {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
+        </div>
       )
     }
   }, {
@@ -88,16 +95,10 @@ const columns = [
     id: 'uptimes',
     label: 'Uptime',
     format: (val) => {
-      if (!val)
-        return '-'
-      else if (val.unknown)
-        return utils.prettyUptime(val.unknown)
+      if (!val) return '-'
 
-      return (
-        <>
-          rpi: {utils.prettyUptime(val.rpi)}<br/>
-          nx: {utils.prettyUptime(val.nx)}
-        </>
+      return HOST_NAMES.map(host =>
+        <div key={host}>rpi: {utils.prettyUptime(val[host])}</div>
       )
     }
   }, {
@@ -106,11 +107,8 @@ const columns = [
     format: (val, obj) => {
       if (!val) return '-'
 
-      return (
-        <>
-          {val.rpi.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
-          {val.nx.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
-        </>
+      return HOST_NAMES.map(host =>
+        <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
       )
     }
   },
@@ -120,29 +118,23 @@ const columns = [
     format: (val, obj) => {
       if (!val) return '-'
 
-      const rpiTotal = obj.memTotal.rpi[0].value,
-        rpiFree = obj.memFree.rpi[0].value,
-        nxTotal = obj.memTotal.nx[0].value,
-        nxFree = obj.memFree.nx[0].value
+      return HOST_NAMES.map(host => {
+        const total = (obj.memTotal[host] || [])[0]?.value
+        const free = (obj.memFree[host] || [])[0]?.value
 
-      return(
-        <>
-          {utils.bytesToSizeIEC(rpiTotal - rpiFree)} / {utils.bytesToSizeIEC(rpiTotal)}<br/>
-          {utils.bytesToSizeIEC(nxTotal - nxFree)} / {utils.bytesToSizeIEC(nxTotal)}<br/>
-        </>
-      )
+        return <div key={host}>{utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}</div>
+      })
     }
   }, {
     id: 'fsSize',
     label: 'FS Utilization',
     format: (val, obj) => {
-      if (!obj.fsSize) return '-'
+      if (!val) return '-'
 
-      const rpiAggFSSize = fsAggregator(obj.fsSize.rpi)
-      const rpiAggFSAvail = fsAggregator(obj.fsAvail.rpi)
-
-      const nxAggFSSize = fsAggregator(obj.fsSize.nx)
-      const nxAggFSAvail = fsAggregator(obj.fsAvail.nx)
+      const rpiAggFSSize = fsAggregator(obj.fsSize?.rpi)
+      const rpiAggFSAvail = fsAggregator(obj.fsAvail?.rpi)
+      const nxAggFSSize = fsAggregator(obj.fsSize?.nx)
+      const nxAggFSAvail = fsAggregator(obj.fsAvail?.nx)
 
       return (
         <>
@@ -156,16 +148,12 @@ const columns = [
     id: 'sysTimes',
     label: 'Sys Times',
     format: (val) => {
-      if (!val)
-        return '-'
-      else if (val.unknown)
-        return new Date(val.unknown * 1000).toISOString()
+      if (!val) return '-'
 
-      return(
-        <>
-          {new Date(val.rpi * 1000).toISOString()}<br/>
-          {new Date(val.nx * 1000).toISOString()}
-        </>
+      return HOST_NAMES.map(host =>
+        <div key={host}>
+          {val[host] && new Date(val[host] * 1000).toISOString()}
+        </div>
       )
     }
   },

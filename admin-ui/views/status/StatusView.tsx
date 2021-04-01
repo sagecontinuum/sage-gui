@@ -31,10 +31,11 @@ const TIME_OUT = 5000
 const ACTIVITY_LENGTH = config.ui.activityLength
 const PRIMARY_KEY = 'id'
 
-const HOST_SUFFIX_MAPPING = {
-  'ws-nxcore': 'nx',
-  'ws-rpi': 'rpi'
-}
+const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
+
+const HOST_NAMES = Object.values(HOST_SUFFIX_MAPPING)
+const HOST_COUNT = HOST_NAMES.length
+
 
 
 function queryData(data: object[], query: string) {
@@ -153,9 +154,13 @@ function getMetric(
 }
 
 
-const determineStatus = (elaspedTimes: {[host: string]: number}) =>
-  Object.values(elaspedTimes).some(val => val > ELASPED_THRES) ? 'failed' : 'active'
-
+const determineStatus = (elaspedTimes: {[host: string]: number}) => {
+  if (Object.values(elaspedTimes).length !== HOST_COUNT)
+    return 'failed'
+  else if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
+    return 'failed'
+  return 'active'
+}
 
 
 // join some beehive and beekeeper data
