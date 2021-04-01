@@ -2,9 +2,10 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import * as utils from '../../../components/utils/units'
 
+import { NodeStatus } from '../../node.d'
 
-type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive' | 'loading'
 
 const getStateIcon = (status: NodeStatus) => {
   if (!status)
@@ -34,31 +35,6 @@ const getUpdatedColor = (val) => {
 }
 
 
-const prettyUptime = (secs: number) => {
-  return new Date(secs * 1000).toISOString().substr(11, 8)
-}
-
-
-function bytesToSizeIEC(bytes) {
-  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB']
-  if (bytes == 0) return '0 Byte'
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i]
-}
-
-
-// https://stackoverflow.com/a/32180863
-function msToTime(ms) {
-  let secs = Number( (ms / 1000).toFixed(1))
-  let mins = Number( (ms / (1000 * 60)).toFixed(1) )
-  let hours = Number( (ms / (1000 * 60 * 60)).toFixed(1) )
-  let days = Number( (ms / (1000 * 60 * 60 * 24)).toFixed(1) )
-  if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
-  else if (mins < 60) return mins + ' min ago'
-  else if (hours < 24) return hours + ' hrs ago'
-  else return days + ' says ago'
-}
-
 
 // todo(nc): remove assumptions about hosts
 const columns = [
@@ -72,12 +48,12 @@ const columns = [
     label: 'Last Updated',
     format: (val) => {
       if (!val) return
-      console.log('val', val)
+
       const {rpi, nx} = val
       return  (
         <>
-          <b className={getUpdatedColor(rpi)}>{msToTime(rpi)}</b><br/>
-          <b className={getUpdatedColor(nx)}>{msToTime(nx)}</b>
+          <b className={getUpdatedColor(rpi)}>{utils.msToTime(rpi)}</b><br/>
+          <b className={getUpdatedColor(nx)}>{utils.msToTime(nx)}</b>
         </>
       )
     }
@@ -92,12 +68,12 @@ const columns = [
       if (!val)
         return '-'
       else if (val.unknown)
-        return prettyUptime(val.unknown)
+        return utils.prettyUptime(val.unknown)
 
       return (
         <>
-          rpi: {prettyUptime(val.rpi)}<br/>
-          nx: {prettyUptime(val.nx)}
+          rpi: {utils.prettyUptime(val.rpi)}<br/>
+          nx: {utils.prettyUptime(val.nx)}
         </>
       )
     }
@@ -128,8 +104,8 @@ const columns = [
 
       return(
         <>
-          rpi: {bytesToSizeIEC(rpiTotal - rpiFree)} / {bytesToSizeIEC(rpiTotal)}<br/>
-          nx: {bytesToSizeIEC(nxTotal - nxFree)} / {bytesToSizeIEC(nxTotal)}<br/>
+          rpi: {utils.bytesToSizeIEC(rpiTotal - rpiFree)} / {utils.bytesToSizeIEC(rpiTotal)}<br/>
+          nx: {utils.bytesToSizeIEC(nxTotal - nxFree)} / {utils.bytesToSizeIEC(nxTotal)}<br/>
         </>
       )
     }

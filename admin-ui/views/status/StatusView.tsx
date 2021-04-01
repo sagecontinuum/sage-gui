@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
 import 'regenerator-runtime'
@@ -121,10 +121,10 @@ function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
     const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
 
     const suffix = host.split('.')[1]
-    byHost[suffix ? HOST_SUFFIX_MAPPING[suffix] : host] = elapsedTime
+    const key = suffix ? HOST_SUFFIX_MAPPING[suffix] : host
+    byHost[key] = elapsedTime
   })
 
-  console.log('timestamp',  byHost)
   return byHost
 }
 
@@ -140,16 +140,11 @@ function getMetric(
   const valueObj = {}
   Object.keys(metricObjs).forEach(host => {
     const m = metricObjs[host][metricName]
-
-    // get latest value
-    let val
-    if (latestOnly)
-      val = m[m.length - 1].value
-    else
-      val = m
+    const val = latestOnly ? m[m.length - 1].value : m
 
     const suffix = host.split('.')[1]
-    valueObj[suffix ? HOST_SUFFIX_MAPPING[suffix] : host] = val
+    const key = suffix ? HOST_SUFFIX_MAPPING[suffix] : host
+    valueObj[key] = val
   })
 
   return valueObj
@@ -162,7 +157,7 @@ const determineStatus = (elaspedTimes: {[host: string]: number}) =>
 
 
 // join some beehive and beekeeper data
-function joinData(data, metrics) {
+function joinData(data: BK.State[], metrics: BH.AggMetrics) {
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
     if (!(id in metrics)) return nodeObj
@@ -271,7 +266,7 @@ export default function StatusView() {
 
     let handle
     (async () => {
-      const data = await BK.fetchStatus()
+      const data = await BK.fetchState()
       setData(data)
 
       const metrics = await BH.getLatestMetrics()

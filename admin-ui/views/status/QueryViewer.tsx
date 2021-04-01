@@ -7,7 +7,7 @@ type Props = {
  filterState: {[filed: string]: string[]}
 }
 
-export default function (props: Props) {
+export default function QueryViewer(props: Props) {
   const {filterState} = props
 
   const fields =

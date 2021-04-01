@@ -32,14 +32,9 @@ export default function chartTooltip(tooltipModel) {
 
   // Set Text
   if (tooltipModel.body) {
-    let titleLines = tooltipModel.title || []
     let bodyLines = tooltipModel.body.map(getBody)
 
     let innerHtml = '<thead>'
-
-    // titleLines.forEach(function (title) {
-    //   innerHtml += '<tr><th>' + title + '</th></tr>'
-    // })
     innerHtml += '</thead><tbody>'
 
     bodyLines.forEach((body, i) => {

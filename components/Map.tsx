@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import token from '../mapbox-token'
-console.log('process', process.env.MAPBOX_TOKEN)
+
 
 const center = [-100, 50]
 const initialZoom = 1.5
