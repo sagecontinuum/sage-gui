@@ -1,14 +1,16 @@
 /* eslint-disable react/display-name */
 import React from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
 
 
-type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive'
+
+type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive' | 'loading'
 
 const getStateIcon = (status: NodeStatus) => {
   if (!status)
     return <Icon className="material-icons failed">error</Icon>
+  else if (status == 'loading')
+    return '…'
   else if (status == 'active')
     return <Icon className="material-icons success">check_circle</Icon>
   else if (status == 'warning')
@@ -26,8 +28,8 @@ const Icon = styled.span`
 
 const getUpdatedColor = (val) => {
   if (!val) return 'failed'
-  if (val > 11) return 'failed'
-  if (val >= 8) return 'warning'
+  else if (val > 90000) return 'failed'
+  else if (val > 63000) return 'warning'
   return 'success'
 }
 
@@ -36,6 +38,29 @@ const prettyUptime = (secs: number) => {
   return new Date(secs * 1000).toISOString().substr(11, 8)
 }
 
+
+function bytesToSizeIEC(bytes) {
+  const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB']
+  if (bytes == 0) return '0 Byte'
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  return (bytes / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i]
+}
+
+
+// https://stackoverflow.com/a/32180863
+function msToTime(ms) {
+  let secs = Number( (ms / 1000).toFixed(1))
+  let mins = Number( (ms / (1000 * 60)).toFixed(1) )
+  let hours = Number( (ms / (1000 * 60 * 60)).toFixed(1) )
+  let days = Number( (ms / (1000 * 60 * 60 * 24)).toFixed(1) )
+  if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
+  else if (mins < 60) return mins + ' min ago'
+  else if (hours < 24) return hours + ' hrs ago'
+  else return days + ' says ago'
+}
+
+
+// todo(nc): remove assumptions about hosts
 const columns = [
   {
     id: 'status',
@@ -43,16 +68,24 @@ const columns = [
     width: '25px',
     format: (val) => getStateIcon(val)
   }, {
+    id: 'elaspedTimes',
+    label: 'Last Updated',
+    format: (val) => {
+      if (!val) return
+      console.log('val', val)
+      const {rpi, nx} = val
+      return  (
+        <>
+          <b className={getUpdatedColor(rpi)}>{msToTime(rpi)}</b><br/>
+          <b className={getUpdatedColor(nx)}>{msToTime(nx)}</b>
+        </>
+      )
+    }
+  }, {
     id: 'id',
     label: 'Node ID',
     width: '200px'
-  },
-
-  /* {
-    id: 'name',
-    label: 'Name',
-    format: val => <Link to={`/node/${val}`}>{val}</Link>
-  }, */ {
+  }, {
     id: 'uptimes',
     label: 'Uptime',
     format: (val) => {
@@ -61,37 +94,43 @@ const columns = [
       else if (val.unknown)
         return prettyUptime(val.unknown)
 
-      return(
-        <div>
+      return (
+        <>
           rpi: {prettyUptime(val.rpi)}<br/>
           nx: {prettyUptime(val.nx)}
-        </div>
+        </>
       )
     }
   }, {
     id: 'cpu',
-    label: '% CPU',
+    label: 'CPU Secs',
     format: (val) => {
       if (!val) return '-'
 
-      return(
-        <div>
+      return (
+        <>
           rpi: {val.rpi.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
           nx: {val.nx.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
-        </div>
+        </>
       )
     }
   },
   {
     id: 'memTotal',
-    label: 'mem',
+    label: 'Mem',
     format: (val, obj) => {
       if (!val) return '-'
+
+      const rpiTotal = obj.memTotal.rpi[0].value,
+        rpiFree = obj.memFree.rpi[0].value,
+        nxTotal = obj.memTotal.nx[0].value,
+        nxFree = obj.memFree.nx[0].value
+
       return(
-        <div>
-          rpi: {obj.memFree.rpi[0].value} / {obj.memTotal.rpi[0].value}<br/>
-          nx: {obj.memFree.nx[0].value} / {obj.memTotal.nx[0].value}<br/>
-        </div>
+        <>
+          rpi: {bytesToSizeIEC(rpiTotal - rpiFree)} / {bytesToSizeIEC(rpiTotal)}<br/>
+          nx: {bytesToSizeIEC(nxTotal - nxFree)} / {bytesToSizeIEC(nxTotal)}<br/>
+        </>
       )
     }
   }, {
@@ -104,112 +143,17 @@ const columns = [
         return new Date(val.unknown * 1000).toISOString()
 
       return(
-        <div>
+        <>
           rpi: {new Date(val.rpi * 1000).toISOString()}<br/>
           nx: {new Date(val.nx * 1000).toISOString()}
-        </div>
+        </>
       )
     }
   },
   {
     id: 'registration_event',
     label: 'Registered'
-  },
-
-  /*{
-    id: 'lastUpdated',
-    label: 'Last Updated',
-    format: (val) =>
-      <b className={getUpdatedColor(val)}>
-        {val == 'N/A' ? val : `${val}s`}
-      </b>
-  }, {
-    id: 'cpu',
-    label: '% CPU',
-    format: (val) => <b>{val}</b>
-  }, {
-    id: 'mem',
-    label: 'Mem',
-    format: (val) => <b>{val}gb</b>
-  }, {
-    id: 'storage',
-    label: 'Storage',
-    format: (val) =>
-      <b>
-        {val == 'N/A' ? val : `${val}%`}
-      </b>
-  },
-  {id: 'rSSH'},
-  {id: 'iDRAC_IP', label: 'iDRAC IP'},
-  {id: 'iDRAC_Port', label: 'iDRAC Port'},
-  {id: 'eno1_address', label: 'eno1 address'},
-  {id: 'eno2_address', label: 'eno2 address', hide: true},
-  {id: 'provision_date', label: 'Provisioning Date'},
-  {id: 'os_version', label: 'OS Version', hide: true},
-  {id: 'service_tag', label: 'Service Tag'},
-  {id: 'special_devices', label: 'Special Devices'},
-  {id: 'VSN', hide: true},
-  {id: 'bios_version', label: 'BIOS Version', hide: true},
-  {id: 'lat', label: 'Lat', hide: true},
-  {id: 'lng', label: 'Lng', hide: true},
-  {id: 'location', label: 'Location', hide: true},
-  {id: 'contact', label: 'Contact', hide: true},
-  {id: 'notes', label: 'Notes', hide: true}
-  */
-]
-
-
-const oldColumns = [
-  {
-    id: 'status',
-    label: 'Status',
-    format: (val) => getStateIcon(val)
-  }, {
-    id: 'name',
-    label: 'Name',
-    format: val => <Link to={`/node/${val}`}>{val}</Link>
-  }, {
-    id: 'node_id',
-    label: 'Node ID'
-  }, {
-    id: 'lastUpdated',
-    label: 'Last Updated',
-    format: (val) =>
-      <b className={getUpdatedColor(val)}>
-        {val == 'N/A' ? val : `${val}s`}
-      </b>
-  }, {
-    id: 'cpu',
-    label: '% CPU',
-    format: (val) => <b>{val}</b>
-  }, {
-    id: 'mem',
-    label: 'Mem',
-    format: (val) => <b>{val}gb</b>
-  }, {
-    id: 'storage',
-    label: 'Storage',
-    format: (val) =>
-      <b>
-        {val == 'N/A' ? val : `${val}%`}
-      </b>
-  },
-  {id: 'rSSH'},
-  {id: 'iDRAC_IP', label: 'iDRAC IP'},
-  {id: 'iDRAC_Port', label: 'iDRAC Port'},
-  {id: 'eno1_address', label: 'eno1 address'},
-  {id: 'eno2_address', label: 'eno2 address', hide: true},
-  {id: 'provision_date', label: 'Provisioning Date'},
-  {id: 'os_version', label: 'OS Version', hide: true},
-  {id: 'service_tag', label: 'Service Tag'},
-  {id: 'special_devices', label: 'Special Devices'},
-  {id: 'VSN', hide: true},
-  {id: 'bios_version', label: 'BIOS Version', hide: true},
-  {id: 'lat', label: 'Lat', hide: true},
-  {id: 'lng', label: 'Lng', hide: true},
-  {id: 'location', label: 'Location', hide: true},
-  {id: 'contact', label: 'Contact', hide: true},
-  {id: 'notes', label: 'Notes', hide: true}
+  }
 ]
 
 export default columns

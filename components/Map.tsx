@@ -3,27 +3,27 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import token from '../mapbox-token'
-
+console.log('process', process.env.MAPBOX_TOKEN)
 
 const center = [-100, 50]
 const initialZoom = 1.5
 
 
 const loadMap = (domRef) => {
-	mapboxgl.accessToken = token
+  mapboxgl.accessToken = token
 
   const map = new mapboxgl.Map({
-      container: domRef.current,
-      style: 'mapbox://styles/mapbox/light-v10',
-      center,
-      zoom: initialZoom
+    container: domRef.current,
+    style: 'mapbox://styles/mapbox/light-v10',
+    center,
+    zoom: initialZoom
   })
 
   map.on('load', () => {
     map.resize()
   })
 
-  map.addControl(new mapboxgl.FullscreenControl({container: domRef.current}));
+  map.addControl(new mapboxgl.FullscreenControl({container: domRef.current}))
 
   return map
 }
@@ -105,7 +105,7 @@ const getGeoSpec = (data) => {
   const nodes = data
     .filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
     .map(obj => ({
-      type: "FeatureCollection",
+      type: 'FeatureCollection',
       status: obj.status,
       geometry: {
         type: 'Point',

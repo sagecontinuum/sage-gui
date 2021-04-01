@@ -10,7 +10,6 @@ type Params = {
   }
 }
 
-
 type Metric = {
   timestamp: string
   name: string
@@ -21,7 +20,7 @@ type Metric = {
   }
 }
 
-type AggMetrics = {
+export type AggMetrics = {
   [nodeID: string]: {
     [host: string]: {
       [metricName: string]: Metric[]
@@ -67,7 +66,7 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 
 
 export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
-  const metrics = await fetchStatus(params || {start: '-5m'})
+  const metrics = await fetchStatus(params || {start: '-5m', filter: {name: 'sys.*'}})
 
   const byNode = aggregateMetrics(metrics)
 

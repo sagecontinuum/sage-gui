@@ -7,5 +7,8 @@ export default  {
   ecr: 'http://localhost:5000',
   ui: {
     activityLength: 50 // number of data points to store for activity monitoring of each node
+  },
+  user: {
+    username: 'testuser'
   }
 }

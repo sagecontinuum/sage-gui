@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
 import 'regenerator-runtime'
@@ -25,10 +25,14 @@ import * as BH from '../../apis/beehive'
 
 const ENABLE_MAP = true
 const ELASPED_THRES = 90000
-const TIME_OUT = 2000
+const TIME_OUT = 5000
 const ACTIVITY_LENGTH = config.ui.activityLength
 const PRIMARY_KEY = 'id'
 
+const HOST_SUFFIX_MAPPING = {
+  'ws-nxcore': 'nx',
+  'ws-rpi': 'rpi'
+}
 
 
 function queryData(data: object[], query: string) {
@@ -84,9 +88,49 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
 }
 
 
+const initialNodeActivity = {
+  cpu: [],
+  mem: [],
+  storage: []
+}
+
+
+function getAppendedActivity(prev, rows) {
+  let id
+  let d
+  for (const row of rows) {
+    id = row.id
+    d = id in prev ? prev[id] : initialNodeActivity
+
+    prev[id] = {
+      cpu: [...d.cpu, row.cpu].slice(-ACTIVITY_LENGTH),
+      mem: [...d.mem, row.mem].slice(-ACTIVITY_LENGTH),
+      storage: [...d.storage, row.storage].slice(-ACTIVITY_LENGTH),
+    }
+  }
+
+  return prev
+}
+
+
+
+function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
+  const byHost = {}
+  Object.keys(metrics[nodeID]).forEach(host => {
+    const timestamp = metrics[nodeID][host]['sys.time'][0].timestamp
+    const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
+
+    const suffix = host.split('.')[1]
+    byHost[suffix ? HOST_SUFFIX_MAPPING[suffix] : host] = elapsedTime
+  })
+
+  console.log('timestamp',  byHost)
+  return byHost
+}
+
 
 function getMetric(
-  metrics: AggMetrics,
+  metrics: BH.AggMetrics,
   nodeID: string,
   metricName: string,
   latestOnly = true
@@ -102,18 +146,19 @@ function getMetric(
     if (latestOnly)
       val = m[m.length - 1].value
     else
-      val = m.map(o => o)
+      val = m
 
-    if (host.includes('ws-nxcore'))
-      valueObj['nx'] = val
-    else if (host.includes('ws-rpi'))
-      valueObj['rpi'] = val
-    else
-      valueObj['unknown'] = val
+    const suffix = host.split('.')[1]
+    valueObj[suffix ? HOST_SUFFIX_MAPPING[suffix] : host] = val
   })
 
   return valueObj
 }
+
+
+const determineStatus = (elaspedTimes: {[host: string]: number}) =>
+  Object.values(elaspedTimes).some(val => val > ELASPED_THRES) ? 'failed' : 'active'
+
 
 
 // join some beehive and beekeeper data
@@ -122,18 +167,20 @@ function joinData(data, metrics) {
     const id = nodeObj.id.toLowerCase()
     if (!(id in metrics)) return nodeObj
 
-    const memFree = getMetric(metrics, id, 'sys.mem.free', false)
-    const timestamp = memFree.rpi[memFree.rpi.length - 1].timestamp
-    const elaspedTime = (new Date().getTime() - new Date(timestamp).getTime())
+    const elaspedTimes = getElaspedTimes(metrics, id)
 
     return {
       ...nodeObj,
-      status: elaspedTime > ELASPED_THRES ? 'failed' : 'active',
+      status: determineStatus(elaspedTimes),
+      elaspedTimes,
       uptimes: getMetric(metrics, id, 'sys.uptime'),
       sysTimes: getMetric(metrics, id, 'sys.time'),
       cpu: getMetric(metrics, id, 'sys.cpu_seconds', false),
       memTotal: getMetric(metrics, id, 'sys.mem.total', false),
-      memFree: memFree
+      memFree: getMetric(metrics, id, 'sys.mem.free', false),
+      memAvail: getMetric(metrics, id, 'sys.mem.avail', false),
+      fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
+      fsSize: getMetric(metrics, id, 'sys.fs.size', false),
     }
   })
 
@@ -192,17 +239,37 @@ export default function StatusView() {
   const [selected, setSelected] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
 
-
   // keep a ticker of recent activity
   const [activity, setActivity] = useState({})
+
+  const [lastUpdate, setLastUpdate] = useState(null)
+  const [lastMetricTime, setLastMetricTime] = useState(null)
+
+  const dataRef = useRef(null)
+  dataRef.current = data
 
 
   /**
    * load data
    */
   useEffect(() => {
-    let handle
+    // get latest metrics
+    function ping(data) {
+      const handle = setTimeout(async () => {
+        const metrics = await BH.getLatestMetrics()
+        setData(joinData(dataRef.current, metrics))
 
+        setActivity(prev => getAppendedActivity(prev, dataRef.current))
+        setLastUpdate(new Date().toLocaleTimeString('en-US'))
+
+        // recursive
+        ping(data)
+      }, TIME_OUT)
+
+      return handle
+    }
+
+    let handle
     (async () => {
       const data = await BK.fetchStatus()
       setData(data)
@@ -211,6 +278,8 @@ export default function StatusView() {
       const allData = joinData(data, metrics)
       setData(allData)
 
+      setActivity(prev => getAppendedActivity(prev, allData))
+      setLastUpdate(new Date().toLocaleTimeString('en-US'))
       handle = ping(data)
     })()
 
@@ -238,24 +307,10 @@ export default function StatusView() {
   }, [data])
 
 
-  // latestMetrics
-  const ping = (data) => {
-    const handle = setTimeout(async () => {
-      const metrics = await BH.getLatestMetrics()
-      setData(joinData(data, metrics))
-
-      // recursive
-      ping(data)
-    }, TIME_OUT)
-
-    return handle
-  }
-
-
-  // filter data
-  const updateAll = (data) => {
+  // filter data (todo: this can probably be done more efficiently)
+  const updateAll = (d) => {
     const filterState = getFilterState(params)
-    let filteredData = queryData(data, query)
+    let filteredData = queryData(d, query)
     filteredData = filterData(filteredData, filterState)
 
     setFiltered(filteredData)
@@ -302,6 +357,7 @@ export default function StatusView() {
           data={filtered}
           selected={selected}
           activity={activity}
+          lastUpdate={lastUpdate}
         />
 
         {ENABLE_MAP && filtered &&
@@ -412,7 +468,7 @@ export default function StatusView() {
 }
 
 
-const VertDivider = (props) =>
+const VertDivider = () =>
   <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
 
 

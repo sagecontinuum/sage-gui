@@ -136,11 +136,17 @@ type Props = {
   data: any[]
   selected: any
   activity: any
+  lastUpdate: string
 }
 
 
 export default function Charts(props: Props) {
-  const {data, selected, activity} = props
+  const {
+    data,
+    selected,
+    activity,
+    lastUpdate
+  } = props
 
   const [selectedIDs, setSelectedIDs] = useState(
     selected ? selected.map(o => o.id) : null
@@ -203,7 +209,7 @@ export default function Charts(props: Props) {
 
       {!selected &&
         <MainTitle>
-          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''}
+          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
         </MainTitle>
       }
 
@@ -235,7 +241,10 @@ export default function Charts(props: Props) {
                   datalabels: {
                     anchor: 'end',
                     backgroundColor: function(context) {
-                      return context.dataset.backgroundColor;
+                      return context.dataset.backgroundColor
+                    },
+                    display: (context) => {
+                      return context.dataset.data[context.dataIndex] !== 0;
                     },
                     borderColor: 'white',
                     borderRadius: 25,
@@ -257,7 +266,7 @@ export default function Charts(props: Props) {
           <BottomCharts>
 
             <ChartTitle>
-              % cpu | {(100 * (selected ? selected.length : data.length)).toLocaleString()} total
+              % cpu {/*| {(100 * (selected ? selected.length : data.length)).toLocaleString()} total*/}
             </ChartTitle>
             <div className="chart">
               <Line
@@ -296,7 +305,7 @@ export default function Charts(props: Props) {
             </div>
 
             <ChartTitle>
-              mem | {(192 * (selected ? selected.length : data.length)).toLocaleString()} GB available
+              mem {/*| {(192 * (selected ? selected.length : data.length)).toLocaleString()} GB available */}
             </ChartTitle>
             <div className="chart">
               <Line
@@ -402,6 +411,7 @@ const TopCharts = styled.div`
 const BottomCharts = styled.div`
   display: flex;
   flex-direction: column;
+  margin-top: 10px;
 
   div.chart {
     width: 500px;

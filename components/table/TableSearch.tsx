@@ -35,7 +35,7 @@ export default function TableSearch(props: Props) {
         value={query}
         onChange={e => { setQuery(e.target.value) }}
         InputProps={{
-          style: { width: rest.width || '230px'},
+          style: { width: rest.width || '275px'},
           startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
         }}
         size="small"
