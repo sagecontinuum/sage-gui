@@ -71,7 +71,6 @@ export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
   const byNode = aggregateMetrics(metrics)
 
   let latestMetrics = {}
-
   for (const [node, host] of Object.entries(byNode)) {
     latestMetrics[node] = {}
     for (const [hostName, metricObj] of Object.entries(host)) {

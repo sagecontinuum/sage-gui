@@ -11,6 +11,14 @@ export function bytesToSizeIEC(bytes: number) {
 }
 
 
+export function bytesToSizeSI(bytes) {
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+  if (bytes == 0) return '0 Byte'
+  const i = Math.floor(Math.log(bytes) / Math.log(1000))
+  return (bytes / Math.pow(1000, i)).toFixed(2) + ' ' + sizes[i]
+}
+
+
 // https://stackoverflow.com/a/32180863
 export function msToTime(ms: number) {
   let secs = Number( (ms / 1000).toFixed(1))

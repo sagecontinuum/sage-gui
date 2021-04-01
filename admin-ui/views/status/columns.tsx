@@ -1,4 +1,5 @@
 /* eslint-disable react/display-name */
+import Divider from '@material-ui/core/Divider'
 import React from 'react'
 import styled from 'styled-components'
 
@@ -35,6 +36,28 @@ const getUpdatedColor = (val) => {
 }
 
 
+function fsAggregator(data) {
+  return data.reduce((acc, o) => {
+    const key = o.meta.fstype + ':' + o.meta.mountpoint
+    acc[key] = o.value
+    return acc
+  }, {})
+}
+
+
+function FSPercent({aggFSSize, aggFSAvail}) {
+  return (
+    <div>{
+      Object.keys(aggFSSize).map(key => {
+        const precent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100).toFixed(2)
+        return (
+          <div key={key}><small>{key.split(':')[0]}: {precent}%</small></div>
+        )
+      })
+    }
+    </div>
+  )
+}
 
 // todo(nc): remove assumptions about hosts
 const columns = [
@@ -52,8 +75,8 @@ const columns = [
       const {rpi, nx} = val
       return  (
         <>
-          <b className={getUpdatedColor(rpi)}>{utils.msToTime(rpi)}</b><br/>
-          <b className={getUpdatedColor(nx)}>{utils.msToTime(nx)}</b>
+          rpi: <b className={getUpdatedColor(rpi)}>{utils.msToTime(rpi)}</b><br/>
+          nx: <b className={getUpdatedColor(nx)}>{utils.msToTime(nx)}</b>
         </>
       )
     }
@@ -80,13 +103,13 @@ const columns = [
   }, {
     id: 'cpu',
     label: 'CPU Secs',
-    format: (val) => {
+    format: (val, obj) => {
       if (!val) return '-'
 
       return (
         <>
-          rpi: {val.rpi.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
-          nx: {val.nx.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
+          {val.rpi.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
+          {val.nx.reduce((acc, o) => acc + o.value, 0).toFixed(2)}<br/>
         </>
       )
     }
@@ -104,8 +127,28 @@ const columns = [
 
       return(
         <>
-          rpi: {utils.bytesToSizeIEC(rpiTotal - rpiFree)} / {utils.bytesToSizeIEC(rpiTotal)}<br/>
-          nx: {utils.bytesToSizeIEC(nxTotal - nxFree)} / {utils.bytesToSizeIEC(nxTotal)}<br/>
+          {utils.bytesToSizeIEC(rpiTotal - rpiFree)} / {utils.bytesToSizeIEC(rpiTotal)}<br/>
+          {utils.bytesToSizeIEC(nxTotal - nxFree)} / {utils.bytesToSizeIEC(nxTotal)}<br/>
+        </>
+      )
+    }
+  }, {
+    id: 'fsSize',
+    label: 'FS Utilization',
+    format: (val, obj) => {
+      if (!obj.fsSize) return '-'
+
+      const rpiAggFSSize = fsAggregator(obj.fsSize.rpi)
+      const rpiAggFSAvail = fsAggregator(obj.fsAvail.rpi)
+
+      const nxAggFSSize = fsAggregator(obj.fsSize.nx)
+      const nxAggFSAvail = fsAggregator(obj.fsAvail.nx)
+
+      return (
+        <>
+          <FSPercent aggFSSize={rpiAggFSSize} aggFSAvail={rpiAggFSAvail} />
+          <Divider/>
+          <FSPercent aggFSSize={nxAggFSSize} aggFSAvail={nxAggFSAvail} />
         </>
       )
     }
@@ -120,8 +163,8 @@ const columns = [
 
       return(
         <>
-          rpi: {new Date(val.rpi * 1000).toISOString()}<br/>
-          nx: {new Date(val.nx * 1000).toISOString()}
+          {new Date(val.rpi * 1000).toISOString()}<br/>
+          {new Date(val.nx * 1000).toISOString()}
         </>
       )
     }

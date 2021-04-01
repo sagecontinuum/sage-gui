@@ -1,11 +1,10 @@
 node_modules/
 test-data/
-
 *token*
 *Token*
-
 build/
 dist/
 .cache/
 .parcel-cache/
 coverage/
+*mock*
