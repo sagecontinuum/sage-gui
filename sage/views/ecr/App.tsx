@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import * as ECR from '../../api/ecr'
+import * as ECR from '../../apis/ecr'
 
 type Props = {
   app: string
