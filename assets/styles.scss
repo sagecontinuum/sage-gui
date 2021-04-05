@@ -36,6 +36,16 @@ table.key-value-table {
   }
 }
 
+a.nav-link {
+  color: #000;
+  opacity: 0.7;
+}
+
+a.nav-link:hover {
+  text-decoration: none;
+  opacity: 1.0;
+}
+
 
 /**
  *  helpers
@@ -51,6 +61,7 @@ table.key-value-table {
 .no-padding { padding: 0; }
 .text-color { color: $text-color; }
 .list-none { list-style-type: none; }
+
 
 .flex { display: flex; }
 .flex.column { flex-direction: column; }

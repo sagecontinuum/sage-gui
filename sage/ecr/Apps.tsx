@@ -1,30 +1,38 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useParams} from 'react-router-dom'
+import {
+  useParams,
+  useRouteMatch,
+  Switch,
+  Route
+} from 'react-router-dom'
 
 import Sidebar from './Sidebar'
 import AppList from './AppList'
 import App from './App'
 import CreateApp from './CreateApp'
 
+import PrivateRoute from '../auth/PrivateRoute'
+
 
 export default function Apps() {
+  let { path } = useRouteMatch()
   let { view } = useParams()
+
 
   return (
     <Root>
       <Sidebar />
 
       <Container>
-        {view == 'my-apps' &&
-          <AppList />
-        }
-        {view == 'create-app' &&
-          <CreateApp />
-        }
-        {view.split('/').length == 4 &&
-          <App app={view.split('/').slice(1).join('/')} />
-        }
+        <Switch>
+          <PrivateRoute path={`${path}/my-apps`} component={AppList} />
+          <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
+
+          {view && view.split('/').length == 4 &&
+            <App app={view.split('/').slice(1).join('/')} />
+          }
+        </Switch>
       </Container>
     </Root>
   )

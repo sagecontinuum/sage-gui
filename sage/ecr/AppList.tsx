@@ -16,12 +16,12 @@ import Tooltip from '@material-ui/core/Tooltip'
 import Alert from '@material-ui/lab/Alert'
 
 
-import Table from '../../../components/table/Table'
-import TableSearch from '../../../components/table/TableSearch'
+import Table from '../../components/table/Table'
+import TableSearch from '../../components/table/TableSearch'
 
 import FancyLayout from './FancyLayout'
 
-import * as ECR from '../../apis/ecr'
+import * as ECR from '../apis/ecr'
 
 
 type VerTooltipProps = {

@@ -1,13 +1,14 @@
 import React from 'react'
 import ReactDom from 'react-dom'
-import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom'
+import {BrowserRouter, Switch, Route, Redirect, Link} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
-import Apps from './views/ecr/Apps'
+import Apps from './ecr/Apps'
+import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '../components/404'
 
 import { SnackbarProvider } from 'notistack'
@@ -55,7 +56,13 @@ const theme = createMuiTheme({
 })
 
 
-const NavMenu = () => <div className="title">My Apps</div>
+const NavMenu = () =>
+  <div className="title">
+    <Link to="/apps/certified-apps" className="nav-link">
+      Edge Apps
+    </Link>
+  </div>
+
 
 
 export default function Sage() {
@@ -63,25 +70,31 @@ export default function Sage() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <NavBar Menu={NavMenu} />
 
-      <SnackbarProvider>
-        <Container>
-          <BrowserRouter basename="/">
+      <BrowserRouter basename="/">
+        <NavBar Menu={NavMenu} />
+
+        <SnackbarProvider>
+          <Container>
+
             <Switch>
               <Route exact path="/">
-                <Redirect to="/apps/my-apps" />
+                <Redirect to="/apps/certified-apps" />
               </Route>
-              <Route path="/apps/:view+">
+              <Route exact path="/login">
+                <TestSignIn />
+              </Route>
+
+              <Route path="/apps">
                 <Apps />
               </Route>
               <Route path="*">
                 <NotFound />
               </Route>
             </Switch>
-          </BrowserRouter>
-        </Container>
-      </SnackbarProvider>
+          </Container>
+        </SnackbarProvider>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }

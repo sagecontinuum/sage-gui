@@ -17,7 +17,7 @@ import ConfigForm from './ConfigForm'
 
 import { useSnackbar } from 'notistack'
 
-import * as ECR from '../../apis/ecr'
+import * as ECR from '../apis/ecr'
 
 
 const GITHUB_API = 'https://api.github.com'
