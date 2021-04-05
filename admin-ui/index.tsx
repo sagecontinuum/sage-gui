@@ -91,5 +91,13 @@ const Container = styled.div`
   width: 100%;
 `
 
-
-ReactDom.render(<App />, document.getElementById('app'))
+if (process.env.NODE_ENV === 'development') {
+  (async () => {
+    const { worker } = require('./mocks/browser')
+    console.log('starting mock service worker...')
+    await worker.start()
+    ReactDom.render(<App />, document.getElementById('app'))
+  })()
+} else {
+  ReactDom.render(<App />, document.getElementById('app'))
+}

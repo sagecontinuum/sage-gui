@@ -7,4 +7,3 @@ dist/
 .cache/
 .parcel-cache/
 coverage/
-*mock*
