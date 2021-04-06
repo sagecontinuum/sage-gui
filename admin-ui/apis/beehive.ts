@@ -68,15 +68,17 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
   const metrics = await fetchStatus(params || {start: '-5m', filter: {name: 'sys.*'}})
 
+  // first aggregate all the metrics
   const byNode = aggregateMetrics(metrics)
 
+  // now take the latest sets of (based on timestamps)
   let latestMetrics = {}
-  for (const [node, host] of Object.entries(byNode)) {
+  for (const [node, byHost] of Object.entries(byNode)) {
     latestMetrics[node] = {}
-    for (const [hostName, metricObj] of Object.entries(host)) {
-      latestMetrics[node][hostName] = {}
+    for (const [host, metricObj] of Object.entries(byHost)) {
+      latestMetrics[node][host] = {}
       for (const [mName, entries] of Object.entries(metricObj)) {
-        latestMetrics[node][hostName][mName] = getLatestEntries(entries)
+        latestMetrics[node][host][mName] = getLatestEntries(entries)
       }
     }
   }
@@ -144,3 +146,7 @@ function getLatestEntries(entries) {
   return latest
 }
 
+
+function getSysActivity() {
+  // implement
+}

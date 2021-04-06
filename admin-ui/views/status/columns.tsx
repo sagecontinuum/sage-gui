@@ -7,11 +7,6 @@ import * as utils from '../../../components/utils/units'
 
 import { NodeStatus } from '../../node.d'
 
-import config from '../../../config'
-const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
-const HOST_NAMES = Object.values(HOST_SUFFIX_MAPPING)
-
-
 
 
 const getStateIcon = (status: NodeStatus) => {
@@ -68,7 +63,7 @@ function FSPercent({aggFSSize, aggFSAvail}) {
 
 
 
-// todo(nc): remove assumptions about hosts
+// todo(nc): remove rest of assumptions about hosts
 const columns = [
   {
     id: 'status',
@@ -81,11 +76,12 @@ const columns = [
     format: (val) => {
       if (!val) return '-'
 
-      return HOST_NAMES.map(host =>
-        <div key={host}>
-          {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
-        </div>
-      )
+      return Object.keys(val)
+        .map(host =>
+          <div key={host}>
+            {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
+          </div>
+        )
     }
   }, {
     id: 'id',
@@ -97,8 +93,8 @@ const columns = [
     format: (val) => {
       if (!val) return '-'
 
-      return HOST_NAMES.map(host =>
-        <div key={host}>rpi: {utils.prettyUptime(val[host])}</div>
+      return Object.keys(val).map(host =>
+        <div key={host}>{host}: {utils.prettyUptime(val[host])}</div>
       )
     }
   }, {
@@ -107,7 +103,7 @@ const columns = [
     format: (val, obj) => {
       if (!val) return '-'
 
-      return HOST_NAMES.map(host =>
+      return Object.keys(val).map(host =>
         <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
       )
     }
@@ -118,7 +114,7 @@ const columns = [
     format: (val, obj) => {
       if (!val) return '-'
 
-      return HOST_NAMES.map(host => {
+      return Object.keys(val).map(host => {
         const total = (obj.memTotal[host] || [])[0]?.value
         const free = (obj.memFree[host] || [])[0]?.value
 
@@ -131,18 +127,20 @@ const columns = [
     format: (val, obj) => {
       if (!val) return '-'
 
-      const rpiAggFSSize = fsAggregator(obj.fsSize?.rpi)
-      const rpiAggFSAvail = fsAggregator(obj.fsAvail?.rpi)
-      const nxAggFSSize = fsAggregator(obj.fsSize?.nx)
-      const nxAggFSAvail = fsAggregator(obj.fsAvail?.nx)
+      const hosts = Object.keys(val)
 
-      return (
-        <>
-          <FSPercent aggFSSize={rpiAggFSSize} aggFSAvail={rpiAggFSAvail} />
-          <Divider/>
-          <FSPercent aggFSSize={nxAggFSSize} aggFSAvail={nxAggFSAvail} />
-        </>
-      )
+      return hosts
+        .map((host, i) => {
+          const aggFSSize = fsAggregator(obj.fsSize[host])
+          const aggFSAvail = fsAggregator(obj.fsAvail[host])
+
+          return (
+            <div key={host + i}>
+              <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
+              {i < hosts.length - 1 && <Divider style={{marginRight: 50}}/>}
+            </div>
+          )
+        })
     }
   }, {
     id: 'sysTimes',
@@ -150,7 +148,7 @@ const columns = [
     format: (val) => {
       if (!val) return '-'
 
-      return HOST_NAMES.map(host =>
+      return Object.keys(val).map(host =>
         <div key={host}>
           {val[host] && new Date(val[host] * 1000).toISOString()}
         </div>
