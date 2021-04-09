@@ -3,8 +3,10 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import token from '../mapbox-token'
+import config from '../config'
 
 
+const DISABLE_MAP = config.ui.disableMap
 const center = [-100, 50]
 const initialZoom = 1.5
 
@@ -143,6 +145,8 @@ function Map(props: Props) {
   const [lastID, setLastID] = useState(-1)
 
   useEffect(() => {
+    if (DISABLE_MAP) return
+
     const map = loadMap(ref)
     setMap(map)
   }, [])
@@ -211,6 +215,12 @@ const MapContainer = styled.div`
   border: 1px solid #ccc;
   width: 100%;
   height: 475px;
+`
+
+const MapPlaceholder = styled.div`
+  height: 450px;
+  width: 800px;
+  background: #ccc;
 `
 
 export default Map

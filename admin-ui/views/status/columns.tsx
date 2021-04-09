@@ -71,6 +71,11 @@ const columns = [
     width: '25px',
     format: (val) => getStateIcon(val)
   }, {
+    id: 'id',
+    label: 'Node ID',
+    width: '200px'
+
+  }, {
     id: 'elaspedTimes',
     label: 'Last Updated',
     format: (val) => {
@@ -84,23 +89,19 @@ const columns = [
         )
     }
   }, {
-    id: 'id',
-    label: 'Node ID',
-    width: '200px'
-  }, {
     id: 'uptimes',
     label: 'Uptime',
     format: (val) => {
       if (!val) return '-'
 
       return Object.keys(val).map(host =>
-        <div key={host}>{host}: {utils.prettyUptime(val[host])}</div>
+        <div key={host}>{utils.prettyUptime(val[host])}</div>
       )
     }
   }, {
     id: 'cpu',
     label: 'CPU Secs',
-    format: (val, obj) => {
+    format: (val) => {
       if (!val) return '-'
 
       return Object.keys(val).map(host =>
@@ -115,8 +116,8 @@ const columns = [
       if (!val) return '-'
 
       return Object.keys(val).map(host => {
-        const total = (obj.memTotal[host] || [])[0]?.value
-        const free = (obj.memFree[host] || [])[0]?.value
+        const total = obj.memTotal[host]
+        const free = obj.memFree[host]
 
         return <div key={host}>{utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}</div>
       })

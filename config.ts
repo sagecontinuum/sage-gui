@@ -15,7 +15,8 @@ export default  {
     hostSuffixMapping: {
       'ws-rpi': 'rpi',
       'ws-nxcore': 'nx'
-    }
+    },
+    disableMap: true
   },
 
   // temp/testing configuration

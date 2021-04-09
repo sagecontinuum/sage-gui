@@ -36,7 +36,7 @@ export default function App() {
             main: '#8166a0',
           },
           secondary: {
-            main: '#056600',
+            main: 'rgb(28, 140, 201)',
           }
         },
         props: {

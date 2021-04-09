@@ -5,6 +5,7 @@ import 'regenerator-runtime'
 
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
+import CircularProgress from '@material-ui/core/CircularProgress'
 import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
 import InfoIcon from '@material-ui/icons/InfoOutlined'
 import UndoIcon from '@material-ui/icons/UndoRounded'
@@ -25,10 +26,8 @@ import * as BH from '../../apis/beehive'
 
 
 
-const ENABLE_MAP = true
 const ELASPED_THRES = 90000
 const TIME_OUT = 5000
-const ACTIVITY_LENGTH = config.ui.activityLength
 const PRIMARY_KEY = 'id'
 
 const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
@@ -91,30 +90,6 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
 }
 
 
-const initialNodeActivity = {
-  cpu: [],
-  mem: [],
-  storage: []
-}
-
-
-function getAppendedActivity(prev, rows) {
-  let id
-  let d
-  for (const row of rows) {
-    id = row.id
-    d = id in prev ? prev[id] : initialNodeActivity
-
-    prev[id] = {
-      cpu: [...d.cpu, row.cpu].slice(-ACTIVITY_LENGTH),
-      mem: [...d.mem, row.mem].slice(-ACTIVITY_LENGTH),
-      storage: [...d.storage, row.storage].slice(-ACTIVITY_LENGTH),
-    }
-  }
-
-  return prev
-}
-
 
 
 function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
@@ -143,6 +118,8 @@ function getMetric(
   const valueObj = {}
   Object.keys(metricObjs).forEach(host => {
     const m = metricObjs[host][metricName]
+    if (!m) return
+
     const val = latestOnly ? m[m.length - 1].value : m
 
     const suffix = host.split('.')[1]
@@ -178,9 +155,9 @@ function joinData(data: BK.State[], metrics: BH.AggMetrics) {
       uptimes: getMetric(metrics, id, 'sys.uptime'),
       sysTimes: getMetric(metrics, id, 'sys.time'),
       cpu: getMetric(metrics, id, 'sys.cpu_seconds', false),
-      memTotal: getMetric(metrics, id, 'sys.mem.total', false),
-      memFree: getMetric(metrics, id, 'sys.mem.free', false),
-      memAvail: getMetric(metrics, id, 'sys.mem.avail', false),
+      memTotal: getMetric(metrics, id, 'sys.mem.total', true),
+      memFree: getMetric(metrics, id, 'sys.mem.free', true),
+      memAvail: getMetric(metrics, id, 'sys.mem.avail', true),
       fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
       fsSize: getMetric(metrics, id, 'sys.fs.size', false),
     }
@@ -242,11 +219,11 @@ export default function StatusView() {
   const [selected, setSelected] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
 
-  // keep a ticker of recent activity
-  const [activity, setActivity] = useState({})
+  // ticker of recent activity
+  const [loadingTicker, setLoadingTicker] = useState(false)
+  const [activity, setActivity] = useState(null)
 
   const [lastUpdate, setLastUpdate] = useState(null)
-  const [lastMetricTime, setLastMetricTime] = useState(null)
 
   const dataRef = useRef(null)
   dataRef.current = data
@@ -261,8 +238,6 @@ export default function StatusView() {
       const handle = setTimeout(async () => {
         const metrics = await BH.getLatestMetrics()
         setData(joinData(dataRef.current, metrics))
-
-        setActivity(prev => getAppendedActivity(prev, dataRef.current))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -279,8 +254,6 @@ export default function StatusView() {
 
         const allData = joinData(state, metrics)
         setData(allData)
-
-        setActivity(prev => getAppendedActivity(prev, allData))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         handle = ping()
       }).catch(err => setError(err))
@@ -292,7 +265,7 @@ export default function StatusView() {
 
 
 
-  // effect for updating on state changes
+  // updating on state changes
   useEffect(() => {
     if (!data) return
     updateAll(data)
@@ -302,11 +275,26 @@ export default function StatusView() {
   }, [query, status, project, region])
 
 
-  // effect for activity updates
+  // activity updates
   useEffect(() => {
     if (!data) return
     updateAll(data)
   }, [data])
+
+
+  // activity updates
+  useEffect(() => {
+    if (selected?.length !== 1) {
+      setActivity(null)
+      return
+    }
+
+    setLoadingTicker(true)
+    const id = selected[0].id
+    BH.getNodeActivity(id)
+      .then(activity => setActivity(activity))
+      .finally(() => setLoadingTicker(false))
+  }, [selected])
 
 
   // filter data (todo: this can probably be done more efficiently)
@@ -355,21 +343,39 @@ export default function StatusView() {
   return (
     <Root>
       <TopContainer>
-        <Charts
-          data={filtered}
-          selected={selected}
-          activity={activity}
-          lastUpdate={lastUpdate}
-        />
+        <div className="flex column">
+          {selected?.length == 1 &&
+            <h3>{selected[0].id}</h3>
+          }
 
-        {ENABLE_MAP && filtered &&
+          {selected?.length > 1 &&
+            <h3>{selected.map(o => o.id).join(', ')}</h3>
+          }
+
+          {data && !selected?.length &&
+            <ChartTitle>
+              {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
+            </ChartTitle>
+          }
+          <br/>
+          <br/>
+
+          {loadingTicker && <Progress color="secondary" />}
+          <Charts
+            data={filtered}
+            selected={selected}
+            activity={activity}
+            lastUpdate={lastUpdate}
+          />
+        </div>
+
+        {filtered &&
           <Map
             data={filtered}
             selected={selected}
             updateID={updateID}
           />
         }
-        {!ENABLE_MAP && <MapPlaceholder />}
       </TopContainer>
 
       <TableContainer>
@@ -474,6 +480,7 @@ export default function StatusView() {
 }
 
 
+
 const VertDivider = () =>
   <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
 
@@ -484,18 +491,19 @@ const Root = styled.div`
   }
 `
 
+const Progress = styled(CircularProgress)`
+`
+
 const TopContainer = styled.div`
   display: flex;
   padding: 5px 0 10px 0;
 `
 
+const ChartTitle = styled.h3`
+  margin: 0 0 0px 15px;
+`
+
 const TableContainer = styled.div`
-
 `
 
-const MapPlaceholder = styled.div`
-  height: 450px;
-  width: 800px;
-  background: #ccc;
-`
 

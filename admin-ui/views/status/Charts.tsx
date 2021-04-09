@@ -8,7 +8,19 @@ import chartTooltip from './chartTooltip'
 import config from '../../../config'
 
 const PIE_PADDING = 15
-const ACTIVITY_LENGTH = config.ui.activityLength
+
+
+const colors = [{
+  backgroundColor: 'rgb(32, 153, 209, .7)',
+  borderColor: 'rgba(0, 0, 0, 0.2)',
+}, {
+  backgroundColor: 'rgb(209, 32, 71, .7)',
+  borderColor: 'rgba(0, 0, 0, 0.2)',
+}, {
+  backgroundColor:'rgb(55, 55, 55, .7)',
+  borderColor: 'rgba(0, 0, 0, 0.2)'
+}
+]
 
 
 const defaultOptions = {
@@ -37,7 +49,8 @@ const defaultOptions = {
       anchor: 'center',
       align:  -120,
       display: (context) => {
-        return context.dataIndex == context.dataset.data.length - 1
+        return false
+        // return context.dataIndex == context.dataset.data.length - 1
       },
       formatter: value => {
         return value.toFixed(2)
@@ -72,71 +85,24 @@ const getStatuses = (data) => {
 }
 
 
-const aggregateOnField = (data, field) =>
-  data.reduce((acc, o) => acc + parseFloat(o[field]), 0).toFixed(2)
 
-
-const getAverage = (data, field) =>
-  (data.reduce((acc, o) => acc + parseFloat(o[field]), 0) / data.length).toFixed(2)
-
-
-const sumArrays = (arrs: number[], len: number) => {
-  const zeros = new Array(len).fill(0)
-  return arrs.reduce((acc, vals) =>
-    acc.map((val, i) => parseFloat(val) + parseFloat(vals[i]) )
-  , zeros)
+const getLabels = (byHost: object, key: string) => {
+  // todo(nc): take any host for length?
+  const labels = byHost[Object.keys(byHost)[0]][key].map((_, i) => i)
+  return labels
 }
 
 
-const avgArrays = (arrs: number[], len: number) => {
-  const zeros = new Array(len).fill(0)
-  const totals = arrs.reduce((acc, vals) =>
-    acc.map((val, i) => parseFloat(val) + parseFloat(vals[i]) )
-  , zeros)
-
-  return totals.map(val => val / arrs.length)
-}
-
-
-
-const aggregateOnData = (data, activity) => {
-  const ids = data.map(obj => obj.id)
-
-  const activities = ids.map(id => activity[id])
-  const cpuActivities = activities.map(obj => obj.cpu)
-  const memActivities = activities.map(obj => obj.mem)
-  const storageActivities = activities.map(obj => obj.storage)
-
-  return {
-    cpu: sumArrays(cpuActivities, cpuActivities[0]?.length),
-    mem: sumArrays(memActivities, memActivities[0]?.length),
-    storage: avgArrays(storageActivities, storageActivities[0]?.length)
-  }
-}
-
-
-// helper function to pad unused label space nulls
-const getLabels = (vals: number[]) => {
-  return [
-    ...new Array(ACTIVITY_LENGTH - vals.length).fill(null),
-    ...vals.map((_, i) => i)
-  ]
-}
-
-// helper function to pad data with null values
-const getData = (vals: number[]) => {
-  return [
-    ...new Array(ACTIVITY_LENGTH - vals.length).fill(null),
-    ...vals
-  ]
-}
 
 
 type Props = {
-  data: any[]
-  selected: any
-  activity: any
-  lastUpdate: string
+  data: {id: string}[]
+  selected: {id: string}[]
+  activity: {
+    [host: string]: {
+      [metric: string]: number | number[]
+    }
+  }
 }
 
 
@@ -144,22 +110,13 @@ export default function Charts(props: Props) {
   const {
     data,
     selected,
-    activity,
-    lastUpdate
+    activity
   } = props
 
-  const [selectedIDs, setSelectedIDs] = useState(
-    selected ? selected.map(o => o.id) : null
-  )
+  const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
+
 
   const [statuses, setStatuses] = useState([])
-
-  // currently unused
-  const [cpuState, setCpuState] = useState([])
-  const [memState, setMemState] = useState([])
-  const [storageState, setStorageState] = useState([])
-
-  const [aggActivity, setAggActivity] = useState(null)
 
 
   useEffect(() => {
@@ -172,41 +129,18 @@ export default function Charts(props: Props) {
 
     const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
     const statuses = getStatuses(d)
+
     setStatuses(statuses)
   }, [data, selectedIDs])
-
-
-  // aggregation of activity
-  useEffect(() => {
-    if (!data || !Object.keys(activity).length) return
-
-    const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
-    const allActivity = aggregateOnData(d, activity)
-    setAggActivity(allActivity)
-  }, [data, selectedIDs, activity])
 
 
   if (!data) return <></>
 
   return (
     <Root>
-      {selectedIDs?.length == 1 &&
-        <h3>{selectedIDs[0]}</h3>
-      }
-
-      {selectedIDs?.length > 1 &&
-        <h3>{selectedIDs.join(', ')}</h3>
-      }
-
-      {!selected &&
-        <MainTitle>
-          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
-        </MainTitle>
-      }
-
       <ChartsContainer>
-        <TopCharts>
-          {!selected &&
+        <StatusChart>
+          {!selected?.length &&
             <Doughnut
               data={{
                 labels: ['active', 'failed', 'inactive'],
@@ -235,7 +169,7 @@ export default function Charts(props: Props) {
                       return context.dataset.backgroundColor
                     },
                     display: (context) => {
-                      return context.dataset.data[context.dataIndex] !== 0;
+                      return context.dataset.data[context.dataIndex] !== 0
                     },
                     borderColor: 'white',
                     borderRadius: 25,
@@ -251,36 +185,35 @@ export default function Charts(props: Props) {
               }}
             />
           }
-        </TopCharts>
+        </StatusChart>
 
-        {aggActivity &&
-          <BottomCharts>
-
+        {activity && Object.keys(activity).length &&
+          <MetricCharts>
+            {/*
             <ChartTitle>
-              % cpu {/*| {(100 * (selected ? selected.length : data.length)).toLocaleString()} total*/}
+              cpu (secs)
             </ChartTitle>
             <div className="chart">
               <Line
                 data={{
-                  labels: getLabels(aggActivity.cpu),
-                  datasets: [
-                    {
-                      label: '% cpu',
-                      data: getData(aggActivity.cpu),
+                  labels: getLabels(activity, 'cpu'),
+                  datasets:
+                    Object.keys(activity).map((host, i) => ({
+                      label: 'cpu (secs)',
+                      data: activity[host].cpu,
                       fill: true,
-                      backgroundColor: 'rgb(32, 153, 209, .7)',
-                      borderColor: 'rgba(0, 0, 0, 0.2)',
+                      backgroundColor: colors[i].backgroundColor,
+                      borderColor: colors[i].borderColor,
                       pointStyle: null,
                       lineTension: 0
-                    }
-                  ]
+                    }))
                 }}
                 options={{
                   ...defaultOptions,
                   scales: {
                     yAxes: [{
                       ticks: {
-                        max: 100 * (selected ? selected.length : data.length),
+                        max: activity[Object.keys(activity)[0]].maxCpu,
                         min: 0,
                         display: false,
                         maxTicksLimit: 1
@@ -294,32 +227,32 @@ export default function Charts(props: Props) {
                 }}
               />
             </div>
+            */}
 
             <ChartTitle>
-              mem {/*| {(192 * (selected ? selected.length : data.length)).toLocaleString()} GB available */}
+              mem%
             </ChartTitle>
             <div className="chart">
               <Line
                 data={{
-                  labels: getLabels(aggActivity.mem),
-                  datasets: [
-                    {
-                      label: 'mem (gb)',
-                      data: getData(aggActivity.mem),
+                  labels: getLabels(activity, 'memPercent'),
+                  datasets:
+                    Object.keys(activity).map((host, i) => ({
+                      label: 'mem%',
+                      data: activity[host].memPercent,
                       fill: true,
-                      backgroundColor: 'rgb(209, 32, 71, .7)',
-                      borderColor: 'rgba(0, 0, 0, 0.2)',
+                      backgroundColor: colors[i].backgroundColor,
+                      borderColor: colors[i].borderColor,
                       pointStyle: null,
                       lineTension: 0
-                    }
-                  ]
+                    }))
                 }}
                 options={{
                   ...defaultOptions,
                   scales: {
                     yAxes: [{
                       ticks: {
-                        max: 192 * (selected ? selected.length : data.length),
+                        max: 100,
                         min: 0,
                         display: false,
                         maxTicksLimit: 1
@@ -335,10 +268,12 @@ export default function Charts(props: Props) {
               />
             </div>
 
+            {/*
             <ChartTitle>
               storage%
             </ChartTitle>
             <div className="chart">
+
               <Line
                 data={{
                   labels: getLabels(aggActivity.storage),
@@ -373,7 +308,8 @@ export default function Charts(props: Props) {
                 }}
               />
             </div>
-          </BottomCharts>
+            */}
+          </MetricCharts>
         }
       </ChartsContainer>
     </Root>
@@ -385,27 +321,22 @@ const Root = styled.div`
   height: 300px;
 `
 
-const MainTitle = styled.h3`
-  margin: 0 0 0px 15px;
-`
-
-
 const ChartsContainer = styled.div`
   display: flex;
   flex-direction: column;
 `
 
-const TopCharts = styled.div`
+const StatusChart = styled.div`
   width: 300px;
+  margin-right: 200px;
 `
 
-const BottomCharts = styled.div`
+const MetricCharts = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: 10px;
 
   div.chart {
-    width: 500px;
     height: 75px;
     margin-left: 14px;
     margin-right: 20px;
