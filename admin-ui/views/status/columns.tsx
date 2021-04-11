@@ -8,6 +8,21 @@ import * as utils from '../../../components/utils/units'
 import { NodeStatus } from '../../node.d'
 
 
+const dateOpts = {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric'
+}
+
+const sysTimeOtps = {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric'
+}
+
 
 const getStateIcon = (status: NodeStatus) => {
   if (!status)
@@ -95,7 +110,7 @@ const columns = [
       if (!val) return '-'
 
       return Object.keys(val).map(host =>
-        <div key={host}>{utils.prettyUptime(val[host])}</div>
+        <div key={host}>{utils.prettyTime(val[host])}</div>
       )
     }
   }, {
@@ -151,14 +166,15 @@ const columns = [
 
       return Object.keys(val).map(host =>
         <div key={host}>
-          {val[host] && new Date(val[host] * 1000).toISOString()}
+          {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOtps)}
         </div>
       )
     }
   },
   {
     id: 'registration_event',
-    label: 'Registered'
+    label: 'Registered',
+    format: (val) => new Date(val).toLocaleString('en-US', dateOpts)
   }
 ]
 

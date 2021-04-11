@@ -1,6 +1,7 @@
-export function prettyUptime(secs: number) {
+export function prettyTime(secs: number) {
   if (!secs && secs != 0) return
-  return new Date(secs * 1000).toISOString().substr(11, 8)
+  const parts = new Date(secs * 1000).toISOString().substr(11, 8).split(':')
+  return `${parts[0]}h ${parts[1]}m ${parts[2]}s`
 }
 
 
