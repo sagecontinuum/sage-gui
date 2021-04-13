@@ -15,7 +15,7 @@ import NotFound from '../components/404'
 import '../assets/styles.scss'
 
 
-const NavMenu = () => <div className="title">Admin UI</div>
+const NavMenu = () => <div className="title">Admin</div>
 
 
 export default function App() {

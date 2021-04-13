@@ -3,22 +3,28 @@ import styled from 'styled-components'
 
 import Drawer from '@material-ui/core/Drawer'
 import TextField from '@material-ui/core/TextField'
+import CircularProgress from '@material-ui/core/CircularProgress'
+
+import * as BK from '../../apis/beekeeper'
 
 type Props = {
-  selected: any[]
-  columns: any[]
+  node: string
+  columns: {id: string, label: string}[]
   onClose: () => void
 }
 
 export default function DetailsSidebar(props: Props) {
-  const {selected, columns, onClose} = props
+  const {node, columns, onClose} = props
 
-  const [item, setItem] = useState(selected ? selected[0] : null)
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState(null)
 
   useEffect(() => {
-    if (!selected) return
-    setItem(selected[0])
-  }, [selected])
+    setLoading(true)
+    BK.fetchNode(node)
+      .then((data) => setData(data))
+      .finally(() => setLoading(false))
+  }, [node])
 
 
   return (
@@ -29,49 +35,52 @@ export default function DetailsSidebar(props: Props) {
       BackdropProps={{ invisible: true }}
       className="ignore-click-outside"
     >
-      <Details>
-        <h3>{item.name}</h3>
+      {loading && <CircularProgress />}
+      {data &&
+        <Details>
+          <h3>{data.name}</h3>
 
-        <table className="key-value-table">
-          <tbody>
-            <tr>
-              <td>Status</td>
-              <td className={item.status == 'active' ? 'success' : ''}>
-                <b>{item.status}</b>
-              </td>
-            </tr>
+          <table className="key-value-table">
+            <tbody>
+              <tr>
+                <td>Status</td>
+                <td className={data.status == 'active' ? 'success' : ''}>
+                  <b>{data.status}</b>
+                </td>
+              </tr>
 
-            {columns
-              .filter(o => !['status', 'contact', 'notes'].includes(o.id))
-              .filter(o => typeof item[o.id] != 'object')
-              .map(o => {
-                return <tr key={o.id}><td>{o.label || o.id}</td><td>{item[o.id]}</td></tr>
-              })
-            }
+              {columns
+                .filter(o => !['status', 'contact', 'notes'].includes(o.id))
+                .filter(o => typeof data[o.id] != 'object')
+                .map(o => {
+                  return <tr key={o.id}><td>{o.label || o.id}</td><td>{data[o.id]}</td></tr>
+                })
+              }
 
-            {item.contact &&
-              <>
-                <tr><td colSpan={2}>Contact</td></tr>
-                <tr>
-                  <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{item.contact}</td>
-                </tr>
-              </>
-            }
-          </tbody>
-        </table>
+              {data.contact &&
+                <>
+                  <tr><td colSpan={2}>Contact</td></tr>
+                  <tr>
+                    <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
+                  </tr>
+                </>
+              }
+            </tbody>
+          </table>
 
-        <br/><br/>
+          <br/><br/>
 
-        <TextField
-          id={`sage-${item.name}-notes`}
-          label="Notes"
-          multiline
-          rows={4}
-          defaultValue={item.notes}
-          variant="outlined"
-          fullWidth
-        />
-      </Details>
+          <TextField
+            id={`sage-${data.name}-notes`}
+            label="Notes"
+            multiline
+            rows={4}
+            defaultValue={data.notes}
+            variant="outlined"
+            fullWidth
+          />
+        </Details>
+      }
     </Drawer>
   )
 }

@@ -60,3 +60,8 @@ export async function fetchState() : Promise<State[]> {
       status: 'loading'
     }))
 }
+
+export async function fetchNode(id: string) : Promise<State[]> {
+  const data = await get(`${url}/state/${id}`)
+  return data.data
+}

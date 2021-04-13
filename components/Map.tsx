@@ -6,7 +6,7 @@ import token from '../mapbox-token'
 import config from '../config'
 
 
-const DISABLE_MAP = config.ui.disableMap
+const DISABLE_MAP = config.ui['disableMap'] || false
 const center = [-100, 50]
 const initialZoom = 1.5
 
@@ -217,10 +217,5 @@ const MapContainer = styled.div`
   height: 475px;
 `
 
-const MapPlaceholder = styled.div`
-  height: 450px;
-  width: 800px;
-  background: #ccc;
-`
 
 export default Map

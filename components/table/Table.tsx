@@ -28,6 +28,7 @@ import TableSearch from './TableSearch'
 import selectedReducer, { SelectedState, initialSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
 
+export { SelectedState }
 
 /*
 const exampleColumns = [
@@ -447,22 +448,22 @@ export default function TableComponent(props: Props) {
     props.onPage(newPage)
   }
 
-  const handleSelect = (evt, rowID, obj) => {
+  const handleSelect = (event, rowID, obj) => {
     if (disableRowSelect && disableRowSelect(obj)) {
       return
     }
 
     let type
-    if (evt.metaKey) {
+    if (event.metaKey) {
       type = 'CTRL_SET'
-    } else if (evt.shiftKey) {
+    } else if (event.shiftKey) {
       type = 'SHIFT_SET'
     } else {
       type = 'SET'
       setAllSelected(false)
     }
 
-    dispatch({type, id: rowID, obj, rows})
+    dispatch({type, id: rowID, obj, rows, event})
 
     // enable text-selection again
     setUserSelect(true)
@@ -654,6 +655,15 @@ const Container = styled(TableContainer)`
 
   /* handled with stickyHeader */
   border-collapse: separate;
+
+  .on-row-hover {
+    visibility: hidden;
+  }
+
+  tr:hover .on-row-hover {
+    visibility: visible;
+  }
+
 
   td {
     /* if using ellipsis

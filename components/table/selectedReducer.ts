@@ -1,4 +1,4 @@
-
+import React from 'react'
 
 export type SelectedState = {
   lastSelected: number
@@ -9,6 +9,7 @@ export type SelectedState = {
 
 export type Action = {
   type: 'SELECT_ALL' | 'CLEAR' | 'SET' | 'SHIFT_SET' | 'CTRL_SET'
+  event?: React.MouseEvent
   id?: number
   rows?: any[]
   obj?: any
@@ -17,19 +18,21 @@ export type Action = {
 
 export const initialSelectedState = {
   lastSelected: null,
+  event: null,
   ids: [],
-  objs: []
+  objs: [],
 }
 
 
 // handles selection of rows
 export default function selectedReducer(state: SelectedState, action: Action) {
 
-  const {type} = action
+  const {type, event} = action
 
   if (type == 'SELECT_ALL') {
     return {
       ...state,
+      event,
       ids: action.rows.map(obj => obj.rowID),
       objs: action.rows
     }
@@ -40,6 +43,7 @@ export default function selectedReducer(state: SelectedState, action: Action) {
   } else if (type == 'SET' || state.lastSelected == null) {
     return {
       ...state,
+      event,
       lastSelected: action.id,
       ids: [action.id],
       objs: [action.obj]
@@ -56,6 +60,7 @@ export default function selectedReducer(state: SelectedState, action: Action) {
 
     return {
       ...state,
+      event,
       lastSelected: action.id,
       ids: newObjs.map(o => o.rowID),
       objs: newObjs
@@ -68,6 +73,7 @@ export default function selectedReducer(state: SelectedState, action: Action) {
 
     return {
       ...state,
+      event,
       lastSelected: action.id,
       ids: [...state.ids, action.id],
       objs: [...state.objs, action.obj]

@@ -1,12 +1,8 @@
 import React from 'react'
-import styled from 'styled-components'
 import {useParams} from 'react-router-dom'
 
-type Props = {
 
-}
-
-export default function (props: Props) {
+export default function NodeView() {
   const {node} = useParams()
 
   return (

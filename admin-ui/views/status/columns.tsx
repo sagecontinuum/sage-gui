@@ -1,7 +1,11 @@
 /* eslint-disable react/display-name */
-import Divider from '@material-ui/core/Divider'
 import React from 'react'
 import styled from 'styled-components'
+import {Link} from 'react-router-dom'
+
+import IconButton from '@material-ui/core/IconButton'
+import Divider from '@material-ui/core/Divider'
+import InfoOutlined from '@material-ui/icons/InfoOutlined'
 
 import * as utils from '../../../components/utils/units'
 
@@ -88,7 +92,21 @@ const columns = [
   }, {
     id: 'id',
     label: 'Node ID',
-    width: '200px'
+    width: '200px',
+    format: (val) =>
+      <div className="flex items-center">
+        {val}
+        <IconButton
+          size="small"
+          color="secondary"
+          component={Link}
+          to={`status?details=${val}`}
+          onClick={(evt) => evt.stopPropagation()}
+          replace
+        >
+          <InfoOutlined fontSize="small" />
+        </IconButton>
+      </div>
 
   }, {
     id: 'elaspedTimes',

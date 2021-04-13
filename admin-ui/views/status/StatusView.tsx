@@ -7,7 +7,6 @@ import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
-import InfoIcon from '@material-ui/icons/InfoOutlined'
 import UndoIcon from '@material-ui/icons/UndoRounded'
 
 import columns from './columns'
@@ -18,12 +17,11 @@ import Charts from './Charts'
 import QueryViewer from './QueryViewer'
 import Alert from '@material-ui/lab/Alert'
 
-import config from '../../../config'
 import DetailsSidebar from './DetailsSidebar'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
-
+import config from '../../../config'
 
 
 const ELASPED_THRES = 90000
@@ -177,7 +175,7 @@ const initialState = {
 function getFilterState(params) {
   let init = {...initialState}
   for (const [key, val] of params) {
-    if (key == 'query') continue
+    if (['query', 'details'].includes(key)) continue
     init[key] = val.split(',')
   }
 
@@ -199,6 +197,7 @@ export default function StatusView() {
   const status = params.get('status')
   const project = params.get('project')
   const region = params.get('region')
+  const details = params.get('details')
 
 
   // all data and current state of filtered data
@@ -217,7 +216,7 @@ export default function StatusView() {
 
   // selected
   const [selected, setSelected] = useState(null)
-  const [showDetails, setShowDetails] = useState(false)
+  // const [showDetails, setShowDetails] = useState(false)
 
   // ticker of recent activity
   const [loadingTicker, setLoadingTicker] = useState(false)
@@ -275,7 +274,7 @@ export default function StatusView() {
   }, [query, status, project, region])
 
 
-  // activity updates
+  // re-apply updates in case of sorting or such (remove?)
   useEffect(() => {
     if (!data) return
     updateAll(data)
@@ -330,6 +329,8 @@ export default function StatusView() {
 
 
   const handleRemoveFilters = () => {
+
+    params.delete('query')
     history.push({search: ''})
   }
 
@@ -337,6 +338,11 @@ export default function StatusView() {
   const handleSelect = (sel) => {
     setSelected(sel.objs.length ? sel.objs : null)
     setUpdateID(prev => prev + 1)
+  }
+
+  const hideDetails = () => {
+    params.delete(details)
+    history.replace()
   }
 
 
@@ -365,7 +371,6 @@ export default function StatusView() {
             data={filtered}
             selected={selected}
             activity={activity}
-            lastUpdate={lastUpdate}
           />
         </div>
 
@@ -428,7 +433,7 @@ export default function StatusView() {
                   />
                 */}
 
-                {selected &&
+                {/*selected &&
                   <>
                     <VertDivider />
                     <Button variant="contained"
@@ -440,7 +445,7 @@ export default function StatusView() {
                       Details
                     </Button>
                   </>
-                }
+                */}
 
                 {filtered.length != data.length &&
                   <>
@@ -468,11 +473,11 @@ export default function StatusView() {
         <Alert severity="error">{error.message}</Alert>
       }
 
-      {showDetails &&
+      {details &&
         <DetailsSidebar
           columns={columns}
-          selected={selected}
-          onClose={() => setShowDetails(false)}
+          node={details}
+          onClose={() => hideDetails()}
         />
       }
     </Root>

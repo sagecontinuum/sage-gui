@@ -16,7 +16,7 @@ export default  {
       'ws-rpi': 'rpi',
       'ws-nxcore': 'nx'
     },
-    disableMap: true
+    disableMap: false
   },
 
   // temp/testing configuration
