@@ -19,7 +19,9 @@ import Alert from '@material-ui/lab/Alert'
 import Table from '../../components/table/Table'
 import TableSearch from '../../components/table/TableSearch'
 
-import FancyLayout from './FancyLayout'
+import SpaciousLayout from './SpaciousLayout'
+
+import BeeIcon from 'url:../../assets/bee.svg'
 
 import * as ECR from '../apis/ecr'
 
@@ -110,7 +112,13 @@ type Row = {
 }
 
 
-export default function AppList() {
+type Props = {
+  view: 'public' | 'sharedWithMe' | 'certified'
+}
+
+export default function AppList(props: Props) {
+  const {view} = props
+
   const params = useParams()
   const history = useHistory()
 
@@ -120,22 +128,20 @@ export default function AppList() {
   const [rows, setRows] = useState<Row[]>()
   const [error, setError] = useState(null)
 
-  const [showLatestVers, setShowLatestVers] = useState(true)
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
 
 
   useEffect(() => {
+    if (view) {
+      // todo(nc): implement
+      setData([])
+      return
+    }
+
     ECR.listApps()
       .then(data => setData(data))
       .catch(error => setError(error.message))
-  }, [])
-
-
-  useEffect(() => {
-    if (!data) return
-
-    // implement show latest toggle
-  }, [data, showLatestVers])
+  }, [view])
 
 
   useEffect(() => {
@@ -157,7 +163,6 @@ export default function AppList() {
     <Root>
       <Controls>
         <TableSearch
-          value={query}
           onSearch={onSearch}
           width="300px"
         />
@@ -166,24 +171,10 @@ export default function AppList() {
           component={Link}
           to="/apps/create-app"
           variant="contained"
-          color="secondary"
+          color="primary"
         >
           <AddIcon/> New App
         </Button>
-
-        {/*
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={showLatestVers}
-              color="primary"
-              size="small"
-              inputProps={{ 'aria-label': 'show latest versions' }}
-            />
-          }
-          label="latest versions"
-        />
-        */}
 
         <div>
           <IconButton
@@ -214,7 +205,7 @@ export default function AppList() {
       }
 
       {rows && viewStyle == 'spacious' &&
-        <FancyLayout
+        <SpaciousLayout
           columns={columns}
           rows={rows}
         />
@@ -222,6 +213,13 @@ export default function AppList() {
 
       {error &&
         <Alert severity="error">{error}</Alert>
+      }
+
+      {view == 'sharedWithMe' && data?.length == 0 &&
+        <NoneFound className="flex column items-center justify-center muted">
+          <img src={BeeIcon} />
+          no apps are shared with you
+        </NoneFound>
       }
     </Root>
   )
@@ -242,6 +240,16 @@ const Controls = styled.div`
 
   & :last-child {
     margin-left: auto;
+  }
+`
+
+const NoneFound = styled.div`
+  font-size: 2.0em;
+  padding-top: 100px;
+
+  img {
+    width: 200px;
+    margin-right: 20px;
   }
 `
 

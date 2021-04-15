@@ -8,7 +8,7 @@ import InputAdornment from '@material-ui/core/InputAdornment'
 import useDebounce from '../hooks/useDebounce'
 
 type Props = {
-  value: string
+  value?: string
   placeholder?: string
   onSearch: ({query: string}) => void
   [rest: string]: any

@@ -1,10 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+
 import { VersionTooltip } from './AppList'
 
 
 
-// todo: optimize!
+// todo: optimize?
 const getFormatter = (id, spec) =>
   spec.filter(obj => obj.id == id)[0].format
 
@@ -15,7 +17,7 @@ function Row(props) {
   const {namespace, name, version, details} = data
 
   return (
-    <AppRow className="flex column">
+    <AppRow className="flex column" to={`app/${namespace}/${name}/${version}`}>
       <div>
         <h2 className="no-margin">
           {namespace} / {getFormatter('name', spec)(name, data)}{' '}
@@ -33,16 +35,27 @@ function Row(props) {
         }
       </div>
 
-      <p>
-        {details.description}
-      </p>
+      {details.description &&
+        <p>{details.description}</p>
+      }
     </AppRow>
   )
 }
 
-const AppRow = styled.div`
+const AppRow = styled(Link)`
   margin: 20px 0;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  box-shadow: 0px 0px 1px 1px #f8f8f8;
+  color: initial;
+  :hover {
+    text-decoration: none;
+  }
 
+  :hover {
+    box-shadow: 0px 0px 2px 2px rgb(28, 140, 201, 50%);
+  }
   svg {
     font-size: 1em;
   }
@@ -55,7 +68,7 @@ type Props = {
   rows: {[key: string]: any}
 }
 
-export default function FancyLayout(props: Props) {
+export default function SpaciousLayout(props: Props) {
   const {columns, rows} = props
 
   return (

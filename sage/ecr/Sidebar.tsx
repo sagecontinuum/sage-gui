@@ -12,8 +12,12 @@ import VerifiedIcon from '@material-ui/icons/VerifiedUserRounded'
 export default function Sidebar() {
   return (
     <Root>
-      <Item to="/apps/certified-apps"><VerifiedIcon /> Certified Apps</Item>
-      <Item to="/apps/public"><PublicIcon /> Public</Item>
+      <Item to="/apps/certified-apps">
+        <span className="material-icons">
+          verified
+        </span>&nbsp;Certified Apps
+      </Item>
+      <Item to="/apps/public"><PublicIcon /> Public Hub</Item>
       <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
       <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
     </Root>
@@ -27,7 +31,7 @@ const Root = styled.div`
 `
 
 const primaryColor = '#8166a0'
-const secondaryColor = '#87baa6'
+const secondaryColor = 'rgb(28, 140, 201)'
 
 const Item = styled(NavLink)`
   display: flex;

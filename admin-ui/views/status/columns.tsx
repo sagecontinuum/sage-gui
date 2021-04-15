@@ -70,9 +70,9 @@ function FSPercent({aggFSSize, aggFSAvail}) {
   return (
     <div>{
       Object.keys(aggFSSize).map(key => {
-        const precent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100).toFixed(2)
+        const percent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100)
         return (
-          <div key={key}><small>{key.split(':')[0]}: {precent}%</small></div>
+          <div key={key}><small>{key.split(':')[0]}: {percent.toFixed(2)}%</small></div>
         )
       })
     }
@@ -98,7 +98,7 @@ const columns = [
         {val}
         <IconButton
           size="small"
-          color="secondary"
+          color="primary"
           component={Link}
           to={`status?details=${val}`}
           onClick={(evt) => evt.stopPropagation()}
@@ -152,7 +152,11 @@ const columns = [
         const total = obj.memTotal[host]
         const free = obj.memFree[host]
 
-        return <div key={host}>{utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}</div>
+        return (
+          <div key={host}>
+            {utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}
+          </div>
+        )
       })
     }
   }, {
