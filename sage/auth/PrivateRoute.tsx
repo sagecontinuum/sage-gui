@@ -1,7 +1,13 @@
 import React from 'react'
-import { Route, Redirect } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 
 import * as Auth from './auth'
+
+
+function redirect(urlPath: string) {
+  // use .replace() to avoid duplicate history for globus auth
+  window.location.replace(urlPath)
+}
 
 
 export default function PrivateRoute({render: Render = null, component: Component = null, ...rest}) {
@@ -10,7 +16,8 @@ export default function PrivateRoute({render: Render = null, component: Componen
       {...rest}
       render={(props) => Auth.isSignedIn()
         ? (Render ? Render(props) : <Component {...props} />)
-        : <Redirect to={`/login?redirect=${rest.path}`} />}
+        : redirect(`/login/?redirect=${rest.path}`)
+      }
     />
   )
 }

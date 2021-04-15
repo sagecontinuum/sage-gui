@@ -3,7 +3,8 @@ import user from '../../testToken'
 
 
 export function signIn() {
-  document.cookie = `username=${user.name}; token=${user.token}`
+  document.cookie = `username=${user.name};path=/`
+  document.cookie = `token=${user.token};path=/`
   return true
 }
 
