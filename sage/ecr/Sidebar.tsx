@@ -5,7 +5,6 @@ import { NavLink} from 'react-router-dom'
 import UserIcon from '@material-ui/icons/AccountCircleRounded'
 import SharedIcon from '@material-ui/icons/SupervisedUserCircle'
 import PublicIcon from '@material-ui/icons/PublicRounded'
-import VerifiedIcon from '@material-ui/icons/VerifiedUserRounded'
 
 
 

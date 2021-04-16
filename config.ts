@@ -5,7 +5,7 @@ export default  {
   // api end points
   beehive: 'https://sdr.honeyhouse.one/api/v1',
   beekeeper: 'https://beekeeper.honeyhouse.one/api',
-  ecr: 'http://localhost:5000',
+  ecr: 'http://localhost:5000', // https://ecr.honeyhouse.one/api
 
   // ui configuration
   ui: {

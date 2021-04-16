@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 import {
-  useParams,
   useRouteMatch,
   Switch,
   Route
@@ -17,8 +16,6 @@ import PrivateRoute from '../auth/PrivateRoute'
 
 export default function Apps() {
   let { path } = useRouteMatch()
-  let { view } = useParams()
-
 
   return (
     <Root>
@@ -30,9 +27,7 @@ export default function Apps() {
           <PrivateRoute path={`${path}/shared-with-me`} render={() => <AppList view="sharedWithMe" />} />
           <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
 
-          {view && view.split('/').length == 4 &&
-            <App app={view.split('/').slice(1).join('/')} />
-          }
+          <Route path={`${path}/app/:path*`} component={App}/>
         </Switch>
       </Container>
     </Root>

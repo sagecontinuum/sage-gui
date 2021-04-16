@@ -85,12 +85,8 @@ export default function Sage() {
                 <TestSignIn />
               </Route>
 
-              <Route path="/apps">
-                <Apps />
-              </Route>
-              <Route path="*">
-                <NotFound />
-              </Route>
+              <Route path="/apps" component={Apps} />
+              <Route path="*" component={NotFound} />
             </Switch>
           </Container>
         </SnackbarProvider>

@@ -13,7 +13,7 @@ import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import SpaciousIcon from '@material-ui/icons/ViewStream'
 import GithubIcon from '@material-ui/icons/GitHub'
 import Tooltip from '@material-ui/core/Tooltip'
-import Alert from '@material-ui/lab/Alert'
+import ErrorMsg from '../ErrorMsg'
 
 
 import Table from '../../components/table/Table'
@@ -212,7 +212,7 @@ export default function AppList(props: Props) {
       }
 
       {error &&
-        <Alert severity="error">{error}</Alert>
+        <ErrorMsg>{error}</ErrorMsg>
       }
 
       {view == 'sharedWithMe' && data?.length == 0 &&
