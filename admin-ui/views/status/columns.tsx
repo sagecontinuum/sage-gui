@@ -6,10 +6,12 @@ import {Link} from 'react-router-dom'
 import IconButton from '@material-ui/core/IconButton'
 import Divider from '@material-ui/core/Divider'
 import InfoOutlined from '@material-ui/icons/InfoOutlined'
+import Tooltip from '@material-ui/core/Tooltip'
 
 import * as utils from '../../../components/utils/units'
 
 import { NodeStatus } from '../../node.d'
+
 
 
 const dateOpts = {
@@ -64,21 +66,48 @@ function fsAggregator(data) {
   }, {})
 }
 
+const shortMntName = name =>
+  name.replace('root-', '')
+    .replace('plugin-data', 'plugins')
+
 
 function FSPercent({aggFSSize, aggFSAvail}) {
   if (!aggFSSize || !aggFSAvail) return <></>
+
+  // avoid redundant mnts
+  const percents = []
+
   return (
-    <div>{
-      Object.keys(aggFSSize).map(key => {
+    <>{
+      Object.keys(aggFSSize).sort().map((key, i) => {
         const percent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100)
+
+        if (percents.includes(percent))
+          return <React.Fragment key={key}></React.Fragment>
+
+        percents.push(percent)
+        const mntParts = key.split('/')
+        const mntPath = mntParts[mntParts.length - 1]
+
         return (
-          <div key={key}><small>{key.split(':')[0]}: {percent.toFixed(2)}%</small></div>
+          <React.Fragment key={key}>
+            <Tooltip title={key} placement="top">
+              <FSItem><div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%</FSItem>
+            </Tooltip>
+          </React.Fragment>
         )
       })
     }
-    </div>
+    </>
   )
 }
+
+const FSItem = styled.div`
+  font-size: .9em;
+  div {
+    font-size: .9em;
+  }
+`
 
 
 
@@ -98,7 +127,6 @@ const columns = [
         {val}
         <IconButton
           size="small"
-          color="primary"
           component={Link}
           to={`status?details=${val}`}
           onClick={(evt) => evt.stopPropagation()}
@@ -173,9 +201,9 @@ const columns = [
           const aggFSAvail = fsAggregator(obj.fsAvail[host])
 
           return (
-            <div key={host + i}>
+            <div key={host + i} className="flex justify-between" style={{maxWidth: '200px'}}>
               <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
-              {i < hosts.length - 1 && <Divider style={{marginRight: 50}}/>}
+              {/*i < hosts.length - 1 && <Divider flexItem style={{marginRight: 50}}/>*/}
             </div>
           )
         })

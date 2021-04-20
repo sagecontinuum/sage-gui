@@ -114,8 +114,6 @@ export default function Charts(props: Props) {
   } = props
 
   const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
-
-
   const [statuses, setStatuses] = useState([])
 
 
@@ -187,7 +185,7 @@ export default function Charts(props: Props) {
           }
         </StatusChart>
 
-        {activity && Object.keys(activity).length &&
+        {selected?.length && activity && Object.keys(activity).length &&
           <MetricCharts>
             {/*
             <ChartTitle>

@@ -14,8 +14,13 @@ import NotFound from '../components/404'
 
 import '../assets/styles.scss'
 
+// import {version} from '../package.json'
 
-const NavMenu = () => <div className="title">Admin</div>
+
+const NavMenu = () =>
+  <div className="title">
+    Admin <small className="muted">{/*version placeholder*/}</small>
+  </div>
 
 
 export default function App() {

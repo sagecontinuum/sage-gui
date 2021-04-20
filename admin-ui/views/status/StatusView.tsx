@@ -351,7 +351,13 @@ export default function StatusView() {
       <TopContainer>
         <div className="flex column">
           {selected?.length == 1 &&
-            <h3>{selected[0].id}</h3>
+            <div className="flex items-center">
+              <h3>
+                {selected[0].id}
+              </h3>
+              &nbsp;
+              {loadingTicker && <Progress color="secondary" size={15}/>}
+            </div>
           }
 
           {selected?.length > 1 &&
@@ -363,10 +369,7 @@ export default function StatusView() {
               {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
             </ChartTitle>
           }
-          <br/>
-          <br/>
 
-          {loadingTicker && <Progress color="secondary" />}
           <Charts
             data={filtered}
             selected={selected}
