@@ -16,7 +16,7 @@ export default function PrivateRoute({render: Render = null, component: Componen
       {...rest}
       render={(props) => Auth.isSignedIn()
         ? (Render ? Render(props) : <Component {...props} />)
-        : redirect(`/login/?redirect=${rest.path}`)
+        : redirect(`/login?redirect=${rest.path}`)
       }
     />
   )

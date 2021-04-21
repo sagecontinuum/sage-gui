@@ -80,10 +80,11 @@ type Namespace = {
   type: string
 }
 
-
 export function listNamespaces() : Promise<Namespace[]>{
   return get(`${url}/apps`)
+    .then(data => data.data)
 }
+
 
 
 type App = {
@@ -102,22 +103,30 @@ type Repo = App & {
   }]
 }
 
-
 type ListAppsParams = {
   includeStatus?: boolean
 }
 
 export async function listApps(params: ListAppsParams = {})  {
+  return get(`${url}/apps`)
+    .then(data => data.data)
+}
+
+
+
+export async function listAppsDeprecated(params: ListAppsParams = {})  {
   const {
     includeStatus = true
   } = params
 
   // first get namespaces
   const nsObjs = await listNamespaces()
+
   const namespaces = nsObjs.map(o => o.id)
   const objs = await Promise.all(
     namespaces.map(namespace => get(`${url}/apps/${namespace}`))
   )
+
 
   // join all repos
   let repos: Repo[] = objs.reduce((acc, obj) => [...acc, ...obj.repositories], [])

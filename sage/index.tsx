@@ -29,10 +29,10 @@ const theme = createMuiTheme({
   palette: {
     type: 'light', // darkMode ? 'dark' : 'light',
     primary: {
-      main: '#8166a0',
+      main: 'rgb(28, 140, 201)'
     },
     secondary: {
-      main: 'rgb(28, 140, 201)',
+      main: '#8166a0'
     }
   },
   props: {

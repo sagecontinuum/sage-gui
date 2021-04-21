@@ -5,14 +5,12 @@ export default  {
   // api end points
   beehive: 'https://sdr.honeyhouse.one/api/v1',
   beekeeper: 'https://beekeeper.honeyhouse.one/api',
-  ecr: 'http://localhost:5000', // https://ecr.honeyhouse.one/api
+  ecr: 'https://ecr.honeyhouse.one/api',   // 'http://localhost:5000'
 
   // ui configuration
   ui: {
-    // number of data points for ticker
-    activityLength: 50,
-    // mapping for host suffix to short names (displayed in UI)
-    hostSuffixMapping: {
+    activityLength: 50,     // number of data points for ticker
+    hostSuffixMapping: {    // mapping for host suffix to short names (displayed in UI)
       'ws-rpi': 'rpi',
       'ws-nxcore': 'nx'
     },

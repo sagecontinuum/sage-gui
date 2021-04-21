@@ -26,18 +26,20 @@ function Row(props) {
       </div>
 
       <div className="flex row">
-        {getFormatter('repo', spec)(null, data)}
-        {data.versions.length != 0 &&
+        {/*getFormatter('repo', spec)(null, data)*/}
+        {/*data.versions.length != 0 &&
           <>&nbsp;|&nbsp; <VersionTooltip versions={data.versions}/></>
-        }
-        {data.permissions.length > 1 ?
+        */}
+
+        {/*data.permissions.length > 1 ?
           <>&nbsp;|&nbsp;{getFormatter('permissions', spec)(data.permissions)}</> : <></>
-        }
+        */}
       </div>
 
-      {details.description &&
+      description will go here
+      {/*details.description &&
         <p>{details.description}</p>
-      }
+      */}
     </AppRow>
   )
 }
@@ -54,7 +56,8 @@ const AppRow = styled(Link)`
   }
 
   :hover {
-    box-shadow: 0px 0px 2px 2px rgb(28, 140, 201, 50%);
+    border: 1px solid rgb(28, 140, 201);
+
   }
   svg {
     font-size: 1em;
@@ -78,7 +81,7 @@ export default function SpaciousLayout(props: Props) {
         {rows.map((row, i) => {
           return (
             <>
-              <Row key={row.details.id} spec={columns} data={row} />
+              <Row key={row.id} spec={columns} data={row} />
             </>
           )
         })}

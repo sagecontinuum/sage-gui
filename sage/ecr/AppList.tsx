@@ -50,29 +50,39 @@ export function VersionTooltip(props: VerTooltipProps) {
 
 
 const columns = [
-  {id: 'name', label: 'Name',
-    format: (name, o) => <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
-  },
-  {id: 'namespace', label: 'Namespace'},
-  {id: 'versions', label: 'Version',
+  {
+    id: 'name',
+    label: 'Name',
+    format: (name, o) =>
+      <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
+  }, {
+    id: 'namespace',
+    label: 'Namespace'
+  }, {
+    id: 'versions',
+    label: 'Version',
     format: (versions) => {
-      if (!versions.length) return '-'
+      if (!versions?.length) return '-'
 
       return (
         <>
-          {versions[versions.length - 1].version}{' '}
+          {versions[versions?.length - 1].version}{' '}
           (<VersionTooltip versions={versions}/>)
         </>
       )
     }
-  },
-  {id: 'owner_id', label: 'Owner'},
-  {id: 'permissions', label: 'Members',
+  }, {
+    id: 'owner_id',
+    label: 'Owner'
+  }, {/*
+    id: 'permissions',
+    label: 'Members',
     format: (perms) => {
       return perms.length == 1 ? `Only me` : `${perms.length} members`
     }
-  },
-  {id: 'repo', label: 'Repo',
+  */}, {/*
+    id: 'repo',
+    label: 'Repo',
     format: (_, {details: obj}) => {
       if (!obj.source) return <></>
 
@@ -84,13 +94,11 @@ const columns = [
         </a>
       )
     }
-  },
-  {id: 'details', label: 'Last Update',
-    format: (details) => {
-      return details.last_update_time
-    }
-  },
-  {id: 'id', label: 'Version', hide: true},
+  */}, {
+    id: 'time_created',
+    label: 'Last Update'
+  }
+//   {id: 'id', label: 'Version', hide: true},
 ]
 
 
@@ -113,7 +121,7 @@ type Row = {
 
 
 type Props = {
-  view: 'public' | 'sharedWithMe' | 'certified'
+  view: 'certified' | 'public' | 'sharedWithMe' | 'myApps'
 }
 
 export default function AppList(props: Props) {
@@ -124,6 +132,7 @@ export default function AppList(props: Props) {
 
   const query = params.get('query') || ''
 
+  const [loading, setLoading] = useState(false)
   const [data, setData] = useState<Row[]>()
   const [rows, setRows] = useState<Row[]>()
   const [error, setError] = useState(null)
@@ -132,15 +141,19 @@ export default function AppList(props: Props) {
 
 
   useEffect(() => {
-    if (view) {
+    setLoading(true)
+
+    if (view == 'sharedWithMe') {
       // todo(nc): implement
       setData([])
+      setLoading(false)
       return
     }
 
     ECR.listApps()
       .then(data => setData(data))
       .catch(error => setError(error.message))
+      .finally(() => setLoading(false))
   }, [view])
 
 
@@ -215,10 +228,18 @@ export default function AppList(props: Props) {
         <ErrorMsg>{error}</ErrorMsg>
       }
 
-      {view == 'sharedWithMe' && data?.length == 0 &&
+
+      {!loading && view == 'myApps' && data?.length == 0 &&
         <NoneFound className="flex column items-center justify-center muted">
           <img src={BeeIcon} />
-          no apps are shared with you
+          <p>You don&apos;t have any apps yet.  Try <Link to="/apps/create-app">creating one</Link>.</p>
+        </NoneFound>
+      }
+
+      {!loading && view == 'sharedWithMe' && data?.length == 0 &&
+        <NoneFound className="flex column items-center justify-center muted">
+          <img src={BeeIcon} />
+          <p>no apps are shared with you</p>
         </NoneFound>
       }
     </Root>
@@ -248,8 +269,9 @@ const NoneFound = styled.div`
   padding-top: 100px;
 
   img {
-    width: 200px;
+    width: 175px;
     margin-right: 20px;
+    filter: drop-shadow(0px 0px 0.3rem #ccc);
   }
 `
 

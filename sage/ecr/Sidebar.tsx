@@ -29,8 +29,8 @@ const Root = styled.div`
   border-right: 1px solid #ddd;
 `
 
-const primaryColor = '#8166a0'
-const secondaryColor = 'rgb(28, 140, 201)'
+const primaryColor = 'rgb(28, 140, 201)'
+const secondaryColor = '#8166a0'
 
 const Item = styled(NavLink)`
   display: flex;
