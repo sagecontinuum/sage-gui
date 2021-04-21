@@ -6,15 +6,12 @@ import styled from 'styled-components'
 
 // import FormControlLabel from '@material-ui/core/FormControlLabel'
 // import Checkbox from '@material-ui/core/Checkbox'
-import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
-import AddIcon from '@material-ui/icons/AddRounded'
 import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import SpaciousIcon from '@material-ui/icons/ViewStream'
-import GithubIcon from '@material-ui/icons/GitHub'
 import Tooltip from '@material-ui/core/Tooltip'
 import ErrorMsg from '../ErrorMsg'
-
+import { useSnackbar } from 'notistack'
 
 import Table from '../../components/table/Table'
 import TableSearch from '../../components/table/TableSearch'
@@ -129,6 +126,7 @@ export default function AppList(props: Props) {
 
   const params = useParams()
   const history = useHistory()
+  const { enqueueSnackbar } = useSnackbar()
 
   const query = params.get('query') || ''
 
@@ -150,10 +148,7 @@ export default function AppList(props: Props) {
       return
     }
 
-    ECR.listApps()
-      .then(data => setData(data))
-      .catch(error => setError(error.message))
-      .finally(() => setLoading(false))
+    listApps()
   }, [view])
 
 
@@ -164,12 +159,35 @@ export default function AppList(props: Props) {
   }, [query, data])
 
 
+  const listApps = () => {
+    return ECR.listApps()
+      .then(data => setData(data))
+      .catch(error => setError(error.message))
+      .finally(() => setLoading(false))
+  }
+
   // todo: refactor into useContext or table componnent
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
     history.push({search: params.toString()})
   }
+
+
+  const handleDelete = (evt, app) => {
+    evt.preventDefault()
+    ECR.deleteApp(app)
+      .then(res => {
+        enqueueSnackbar('Deleting app...')
+        return listApps()
+      }).catch(() => {
+        enqueueSnackbar('Failed to delete app', {variant: 'error'})
+      }).finally(() => {
+        enqueueSnackbar('App deleted!', {variant: 'success'})
+      })
+
+  }
+
 
 
   return (
@@ -180,26 +198,17 @@ export default function AppList(props: Props) {
           width="300px"
         />
 
-        <Button
-          component={Link}
-          to="/apps/create-app"
-          variant="contained"
-          color="primary"
-        >
-          <AddIcon/> New App
-        </Button>
-
         <div>
           <IconButton
             onClick={() => setViewStyle('compact')}
-            color={viewStyle == 'compact' ? 'primary' : 'default'}
+            style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
             size="small"
           >
             <ViewComfyIcom />
           </IconButton>
           <IconButton
             onClick={() => setViewStyle('spacious')}
-            color={viewStyle == 'spacious' ? 'primary' : 'default'}
+            style={{color: viewStyle == 'spacious' ? '#000' : '#ccc'}}
             size="small"
           >
             <SpaciousIcon />
@@ -221,6 +230,7 @@ export default function AppList(props: Props) {
         <SpaciousLayout
           columns={columns}
           rows={rows}
+          onDelete={handleDelete}
         />
       }
 

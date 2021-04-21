@@ -39,6 +39,9 @@ const theme = createMuiTheme({
     MuiButtonBase: {
       disableRipple: true,
     },
+    MuiIconButton: {
+      size: 'small',
+    },
     MuiTextField: {
       margin: 'dense',
       variant: 'outlined'
@@ -74,7 +77,7 @@ export default function Sage() {
       <BrowserRouter basename="/">
         <NavBar Menu={NavMenu} />
 
-        <SnackbarProvider>
+        <SnackbarProvider autoHideDuration={3000}>
           <Container>
 
             <Switch>

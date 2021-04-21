@@ -91,6 +91,9 @@ export default function CreateApp() {
 
   // repo config state
   const [repo, setRepo] = useState('')
+  const [namespace, setNamespace] = useState('')
+  const [name, setName] = useState('')
+  const [version, setVersion] = useState('')
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
@@ -140,9 +143,23 @@ export default function CreateApp() {
   }
 
 
+
+  const handleRegister = () => {
+    setIsSubmitting(true)
+    ECR.register({namespace, name, version}, config)
+      .then(() => {
+        setIsSubmitting(false)
+        enqueueSnackbar('App Registered')
+        history.push('/apps/my-apps')
+      }).catch(error => {
+        setIsSubmitting(false)
+        setError(error.message)
+      })
+  }
+
   const handleBuild = () => {
     setIsSubmitting(true)
-    ECR.registerAndBuild(config)
+    ECR.registerAndBuild({namespace, name, version}, config)
       .then(() => {
         setIsSubmitting(false)
         enqueueSnackbar('Build started')
@@ -151,7 +168,6 @@ export default function CreateApp() {
         setIsSubmitting(false)
         setError(error.message)
       })
-
   }
 
 
@@ -247,12 +263,21 @@ export default function CreateApp() {
 
         <div className="step">
           <Button
+            onClick={handleRegister}
+            variant="outlined"
+            color="primary"
+            disabled={!repo || !config || isSubmitting || error}
+          >
+            {isSubmitting ? 'Submitting...' : 'Register App'}
+          </Button>
+
+          <Button
             onClick={handleBuild}
             variant="contained"
             color="primary"
             disabled={!repo || !config || isSubmitting || error}
           >
-            {isSubmitting ? 'Submitting...' : 'Build App'}
+            {isSubmitting ? 'Submitting...' : 'Register & Build App'}
           </Button>
         </div>
       </Main>
@@ -288,6 +313,10 @@ const Main = styled.div`
 
   .step {
     margin: 0px 25px 40px 25px;
+
+    .MuiButton-root {
+      margin-right: 10px;
+    }
   }
 
   .step-1 {

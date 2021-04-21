@@ -30,35 +30,57 @@ function get(endpoint: string) {
 
 
 
-function post(endpoint: string, data = '') {
+function post(endpoint: string, data = {}) {
   return fetch(endpoint, {
     method: 'POST',
-    body: data,
+    body: JSON.stringify(data),
     ...options
   }).then(handleErrors)
     .then(res => res.json())
 }
 
 
+function deleteReq(endpoint: string) {
+  return fetch(endpoint, {
+    method: 'Delete',
+    ...options
+  }).then(handleErrors)
+    .then(res => res.json())
+}
 
-export function register(appConfig) {
+
+type AppDef = {
+  namespace: string
+  name: string
+  version: string
+}
+
+
+export function register(appConfig: object) {
   return post(`${url}/submit`, appConfig)
 }
 
 
 
-export function build(app) {
-  return post(`${url}/builds/${app}`)
+export function build(app: AppDef) {
+  const {namespace, name, version} = app
+  return post(`${url}/builds/${namespace}/${name}/${version}`)
 }
 
 
 
-export async function registerAndBuild(appConfig, version = '1.0') {
+export async function registerAndBuild(app: AppDef, appConfig) {
   await register(appConfig)
-  const res = await build(`sage/simple/${version}`)
+  const res = await build(app)
   return res
 }
 
+
+export async function deleteApp(app: AppDef) {
+  const {namespace, name, version} = app
+  const res = await deleteReq(`${url}/apps/${namespace}/${name}/${version}`)
+  return res
+}
 
 
 type Permission = {
