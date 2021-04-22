@@ -17,6 +17,7 @@ import ConfigForm from './ConfigForm'
 
 import { useSnackbar } from 'notistack'
 
+import * as Auth from '../../components/auth/auth'
 import * as ECR from '../apis/ecr'
 
 
@@ -91,8 +92,8 @@ export default function CreateApp() {
 
   // repo config state
   const [repo, setRepo] = useState('')
-  const [namespace, setNamespace] = useState('')
-  const [name, setName] = useState('')
+  const [namespace, setNamespace] = useState(Auth.user)
+  const [name, setName] = useState('simple')
   const [version, setVersion] = useState('')
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
@@ -146,7 +147,7 @@ export default function CreateApp() {
 
   const handleRegister = () => {
     setIsSubmitting(true)
-    ECR.register({namespace, name, version}, config)
+    ECR.register(config)
       .then(() => {
         setIsSubmitting(false)
         enqueueSnackbar('App Registered')

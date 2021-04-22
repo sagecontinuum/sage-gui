@@ -7,6 +7,7 @@ import UserIcon from '@material-ui/icons/AccountCircleRounded'
 import SharedIcon from '@material-ui/icons/SupervisedUserCircle'
 import PublicIcon from '@material-ui/icons/PublicRounded'
 import AddIcon from '@material-ui/icons/AddRounded'
+import Divider from '@material-ui/core/Divider'
 
 
 
@@ -24,9 +25,12 @@ export default function Sidebar() {
           disabled={location.pathname == '/apps/create-app'}
           fullWidth
         >
-          <AddIcon/> New App
+          <AddIcon/> Add App
         </Button>
       </NewApp>
+
+      <Divider style={{margin: '20px 10px'}}/>
+
 
       <Item to="/apps/certified-apps">
         <span className="material-icons">
@@ -41,13 +45,13 @@ export default function Sidebar() {
 }
 
 const Root = styled.div`
-  padding-top: 30px;
+  padding-top: 20px;
   min-width: 200px;
   border-right: 1px solid #ddd;
 `
 
 const NewApp = styled.div`
-  margin: 0 10px 30px 10px;
+  margin: 10px;
 `
 
 

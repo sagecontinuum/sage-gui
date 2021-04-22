@@ -7,12 +7,12 @@ const ProgressContext = React.createContext({})
 
 function ProgressProvider(props) {
 
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
 
   return (
-    <ProgressContext.Provider value={[isLoading, setIsLoading]}>
-      {isLoading &&
-        <LinearProgress style={{position: 'absolute', width: '100%'}} />
+    <ProgressContext.Provider value={{loading, setLoading}}>
+      {loading &&
+        <LinearProgress style={{position: 'absolute', width: '100%', height: '3px'}} />
       }
 
       {props.children}

@@ -1,11 +1,11 @@
 import config from '../../config'
 const url = config.ecr
 
-import user from '../../testToken'
+import * as Auth from '../../components/auth/auth'
 
 const options = {
   headers: {
-    Authorization: `sage ${user.token}`
+    Authorization: `sage ${Auth.token}`
   }
 }
 
@@ -30,10 +30,10 @@ function get(endpoint: string) {
 
 
 
-function post(endpoint: string, data = {}) {
+function post(endpoint: string, data = '') {
   return fetch(endpoint, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data,
     ...options
   }).then(handleErrors)
     .then(res => res.json())
@@ -56,7 +56,7 @@ type AppDef = {
 }
 
 
-export function register(appConfig: object) {
+export function register(appConfig) {
   return post(`${url}/submit`, appConfig)
 }
 

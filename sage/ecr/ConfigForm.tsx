@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField'
 import Select from '@material-ui/core/Select'
 
 
-import user from '../../testToken'
+import * as Auth from '../../components/auth/auth'
 import FormControl from '@material-ui/core/FormControl'
 
 
@@ -14,7 +14,7 @@ const initialState = {
   name: '',
   description: '',
   version: '',
-  namespace: user.name,
+  namespace: Auth.user,
   source: {
     architecture: ['']
   },

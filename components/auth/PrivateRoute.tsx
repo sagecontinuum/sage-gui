@@ -10,14 +10,18 @@ function redirect(urlPath: string) {
 }
 
 
-export default function PrivateRoute({render: Render = null, component: Component = null, ...rest}) {
+export default function PrivateRoute({
+  component: Component,
+  ...rest
+}) {
   return (
     <Route
       {...rest}
-      render={(props) => Auth.isSignedIn()
-        ? (Render ? Render(props) : <Component {...props} />)
-        : redirect(`/login?redirect=${rest.path}`)
-      }
+      render={props => (
+        Auth.isSignedIn() ?
+          Component ? <Component {...props} /> : rest.render(props)
+          : redirect(`/login?redirect=${rest.path}`)
+      )}
     />
   )
 }

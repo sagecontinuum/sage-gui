@@ -4,7 +4,7 @@ import { useLocation, useHistory } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
 
-import * as Auth from '../auth/auth'
+import * as Auth from '../../components/auth/auth'
 
 
 export default function TestSignIn() {

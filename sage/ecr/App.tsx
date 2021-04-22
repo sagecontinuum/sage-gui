@@ -3,21 +3,26 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import ErrorMsg from '../ErrorMsg'
 
+import {useProgress} from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
 
 
 export default function App() {
   const { path } = useParams()
 
+  const { setLoading } = useProgress()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const [namepsace, name, version] = path.split('/')
+
+    setLoading(true)
     ECR.getApp(namepsace, name, version)
       .then(data => setData(data))
       .catch(err => setError(err))
-  }, [path])
+      .finally(() => setLoading(false))
+  }, [path, setLoading])
 
   if (!data) return <></>
 

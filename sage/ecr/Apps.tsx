@@ -11,7 +11,8 @@ import AppList from './AppList'
 import App from './App'
 import CreateApp from './CreateApp'
 
-import PrivateRoute from '../auth/PrivateRoute'
+import PrivateRoute from '../../components/auth/PrivateRoute'
+import { ProgressProvider } from '../../components/progress/Progress'
 
 
 export default function Apps() {
@@ -19,17 +20,19 @@ export default function Apps() {
 
   return (
     <Root>
-      <Sidebar />
+      <ProgressProvider>
+        <Sidebar />
 
-      <Container>
-        <Switch>
-          <PrivateRoute path={`${path}/my-apps`} component={AppList} render={() => <AppList view="myApps" />} />
-          <PrivateRoute path={`${path}/shared-with-me`} render={() => <AppList view="sharedWithMe" />} />
-          <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
+        <Main>
+          <Switch>
+            <PrivateRoute path={`${path}/my-apps`} component={AppList} render={() => <AppList view="myApps" />} />
+            <PrivateRoute path={`${path}/shared-with-me`} render={() => <AppList view="sharedWithMe" />} />
+            <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
 
-          <Route path={`${path}/app/:path*`} component={App}/>
-        </Switch>
-      </Container>
+            <Route path={`${path}/app/:path*`} component={App}/>
+          </Switch>
+        </Main>
+      </ProgressProvider>
     </Root>
   )
 }
@@ -40,7 +43,7 @@ const Root = styled.div`
   height: 100%;
 `
 
-const Container = styled.div`
+const Main = styled.div`
   padding: 20px;
   flex-grow: 1;
   overflow-y: auto;

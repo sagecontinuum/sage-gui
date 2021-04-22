@@ -1,10 +1,13 @@
 
-import user from '../../testToken'
+import test from '../../testToken'
+
+export const user = test.name
+export const token = test.token
 
 
 export function signIn() {
-  document.cookie = `username=${user.name};path=/`
-  document.cookie = `token=${user.token};path=/`
+  document.cookie = `username=${user};path=/`
+  document.cookie = `token=${token};path=/`
   return true
 }
 

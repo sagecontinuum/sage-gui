@@ -20,6 +20,7 @@ import SpaciousLayout from './SpaciousLayout'
 
 import BeeIcon from 'url:../../assets/bee.svg'
 
+import { useProgress } from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
 
 
@@ -130,7 +131,8 @@ export default function AppList(props: Props) {
 
   const query = params.get('query') || ''
 
-  const [loading, setLoading] = useState(false)
+
+  const {loading, setLoading} = useProgress()
   const [data, setData] = useState<Row[]>()
   const [rows, setRows] = useState<Row[]>()
   const [error, setError] = useState(null)
