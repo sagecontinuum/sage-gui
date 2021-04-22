@@ -57,7 +57,8 @@ export async function fetchState() : Promise<State[]> {
   return data.data
     .map(obj => ({
       ...obj,
-      status: 'loading'
+      status: 'loading',
+      registration_event: new Date(obj.registration_event).getTime()
     }))
 }
 
