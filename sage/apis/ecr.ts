@@ -51,7 +51,7 @@ function deleteReq(endpoint: string) {
 
 type AppDef = {
   namespace: string
-  name: string
+  repo: string
   version: string
 }
 
@@ -63,8 +63,8 @@ export function register(appConfig) {
 
 
 export function build(app: AppDef) {
-  const {namespace, name, version} = app
-  return post(`${url}/builds/${namespace}/${name}/${version}`)
+  const {namespace, repo, version} = app
+  return post(`${url}/builds/${namespace}/${repo}/${version}`)
 }
 
 
@@ -77,8 +77,8 @@ export async function registerAndBuild(app: AppDef, appConfig) {
 
 
 export async function deleteApp(app: AppDef) {
-  const {namespace, name, version} = app
-  const res = await deleteReq(`${url}/apps/${namespace}/${name}/${version}`)
+  const {namespace, repo, version} = app
+  const res = await deleteReq(`${url}/apps/${namespace}/${repo}/${version}`)
   return res
 }
 

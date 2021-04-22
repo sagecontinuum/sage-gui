@@ -9,9 +9,11 @@ import Tabs from '@material-ui/core/Tabs'
 import Tab from '@material-ui/core/Tab'
 import Button from '@material-ui/core/Button'
 import Tooltip from '@material-ui/core/Tooltip'
-
+import FormHelperText from '@material-ui/core/FormHelperText'
 import CheckIcon from '@material-ui/icons/Check'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
+
+import Editor from '@monaco-editor/react'
 
 import ConfigForm from './ConfigForm'
 
@@ -19,6 +21,7 @@ import { useSnackbar } from 'notistack'
 
 import * as Auth from '../../components/auth/auth'
 import * as ECR from '../apis/ecr'
+
 
 
 const GITHUB_API = 'https://api.github.com'
@@ -91,16 +94,16 @@ export default function CreateApp() {
   const [tabIndex, setTabIndex] = useState(0)
 
   // repo config state
-  const [repo, setRepo] = useState('')
+  const [repoURL, setRepoURL] = useState('')
   const [namespace, setNamespace] = useState(Auth.user)
-  const [name, setName] = useState('simple')
+  const [repo, setRepo] = useState('simple')
   const [version, setVersion] = useState('')
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
   // app config state
-  const [configType, setConfigType] = useState<'yaml'|'json'|'none'>(null)
-  const [config, setConfig] = useState('')
+  const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
+  const [config, setConfig] = useState<string>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
@@ -108,34 +111,35 @@ export default function CreateApp() {
 
   // remove all verification/error state on changes
   useEffect(() => {
-    setIsValid(null)
     setError(null)
-  }, [repo, config])
+  }, [repoURL, config])
 
 
   const handleRepoVerify = (evt = null) => {
     if (evt) evt.preventDefault()
 
-    const path = repo.split('.com')[1]
+    const path = repoURL.split('.com')[1]
       .replace('.git', '').slice(1)
 
     // todo: add rate limit notice, add branch?
     setValidating(true)
     fetch(`${GITHUB_API}/repos/${path}`)
-      .then(res => res.ok ? setIsValid(true) : setIsValid(false))
+      .then(res => setIsValid(res.ok))
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
-      .then(async () => {
-        const res = await fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.json`)
-        setConfig(await res.text())
-        setConfigType('json')
-      })
-      .catch(async () => {
-        const res = await fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.yaml`)
-        setConfig(await res.text())
-        setConfigType('yaml')
-      })
-      .catch(() => setConfigType('none'))
+      .then(() => fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.json`))
+      .then(res => res.status == 404 ?
+        fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.yaml`) : res
+      ).then(res => {
+        // set config type
+        const type = res.status == 404 ?
+          'none' : res.url.slice(res.url.lastIndexOf('.') + 1)
+        setConfigType(type)
+
+        // set config text
+        res.text().then(text => setConfig(text))
+      }).catch(() => setConfigType('none'))
+
   }
 
 
@@ -160,7 +164,7 @@ export default function CreateApp() {
 
   const handleBuild = () => {
     setIsSubmitting(true)
-    ECR.registerAndBuild({namespace, name, version}, config)
+    ECR.registerAndBuild({namespace, repo, version}, config)
       .then(() => {
         setIsSubmitting(false)
         enqueueSnackbar('Build started')
@@ -174,13 +178,13 @@ export default function CreateApp() {
 
   const onExampleOne = () => {
     setConfig('')
-    setRepo(EXAMPLE_REPO_1)
+    setRepoURL(EXAMPLE_REPO_1)
   }
 
 
   // Todo: for demonstration, there's an error in example 1
   const onExampleTwo = async () => {
-    setRepo(EXAMPLE_REPO_2)
+    setRepoURL(EXAMPLE_REPO_2)
     setIsValid(true)
     const res = await fetch(`${GITHUB_STATIC_URL}/sagecontinuum/sage-ecr/master/example_app.yaml`)
     setConfig(await res.text())
@@ -188,8 +192,8 @@ export default function CreateApp() {
   }
 
   const onExampleThree = () => {
-    setConfig('')
-    setRepo(EXAMPLE_REPO_3)
+    setConfig(null)
+    setRepoURL(EXAMPLE_REPO_3)
   }
 
   return (
@@ -200,15 +204,14 @@ export default function CreateApp() {
         <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
             label="GitHub/GitLab repo URL"
-            value={repo}
+            value={repoURL}
             onChange={evt => setRepo(evt.target.value)}
             error={isValid == false}
-            helperText={isValid == false ? 'Sorry, we could not verify github repo' : ''}
+            helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
             style={{width: 500}}
           />
 
           {repo &&
-
             <Button
               onClick={handleRepoVerify}
               variant="contained"
@@ -224,43 +227,50 @@ export default function CreateApp() {
         </form>
 
 
+        {config &&
+          <>
+            <StepTitle icon="2" active={true} label="App Configuration" />
+            <div className="step">
+              {configType == 'none' &&
+                <p>
+                  No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
+                  <sup>
+                    <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.  (Click for help)">
+                      <HelpIcon fontSize="small" />
+                    </Tooltip>
+                  </sup>
+                </p>
+              }
 
-        <StepTitle icon="2" active={true} label="App Configuration" />
-        <div className="step">
-          {configType == 'none' &&
-            <p>
-              No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
-              <sup>
-                <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.  (Click for help)">
-                  <HelpIcon fontSize="small" />
-                </Tooltip>
-              </sup>
-            </p>
-          }
+              <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
+                <CustomTab label="Raw Config" {...a11yProps(0)} />
+                <CustomTab label="Form" {...a11yProps(1)} />
+                <CustomTab label="Preview" {...a11yProps(2)} />
+              </CustomTabs>
 
-          <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
-            <CustomTab label="Raw Config" {...a11yProps(0)} />
-            <CustomTab label="Form" {...a11yProps(1)} />
-            <CustomTab label="Preview" {...a11yProps(2)} />
-          </CustomTabs>
+              {tabIndex == 0 &&
+                <EditorContainer>
+                  <Editor
+                    height="500px"
+                    defaultLanguage={configType}
+                    value={config}
+                    onChange={val => setConfig(val)}
+                    theme="light"
+                  />
+                </EditorContainer>
+              }
 
-          {tabIndex == 0 &&
-            <TextField
-              id="config-input"
-              multiline
-              fullWidth
-              rows={20}
-              value={config}
-              onChange={evt => setConfig(evt.target.value)}
-              error={error}
-              helperText={error}
-            />
-          }
+              {tabIndex == 1 &&
+                <ConfigForm />
+              }
 
-          {tabIndex == 1 &&
-            <ConfigForm />
-          }
-        </div>
+              {error &&
+                <FormHelperText error>{error}</FormHelperText>
+              }
+            </div>
+          </>
+        }
+
 
         <div className="step">
           <Button
@@ -335,6 +345,10 @@ const Main = styled.div`
     padding: 1px 2px;
     color: #c52700;
   }
+`
+
+const EditorContainer = styled.div`
+  border: 1px solid #ccc;
 `
 
 const Help = styled.div`
