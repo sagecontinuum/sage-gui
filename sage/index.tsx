@@ -77,7 +77,7 @@ export default function Sage() {
       <BrowserRouter basename="/">
         <NavBar Menu={NavMenu} />
 
-        <SnackbarProvider autoHideDuration={3000}>
+        <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
           <Container>
 
             <Switch>

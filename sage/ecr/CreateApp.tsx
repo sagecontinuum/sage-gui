@@ -95,9 +95,9 @@ export default function CreateApp() {
 
   // repo config state
   const [repoURL, setRepoURL] = useState('')
-  const [namespace, setNamespace] = useState(Auth.user)
+  const [namespace, setNamespace] = useState(Auth.user.split('@')[0])
   const [repo, setRepo] = useState('simple')
-  const [version, setVersion] = useState('')
+  const [version, setVersion] = useState('1.20')
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
@@ -105,7 +105,8 @@ export default function CreateApp() {
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
   const [config, setConfig] = useState<string>(null)
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [isBuilding, setIsBuilding] = useState(false)
   const [error, setError] = useState(null)
 
 
@@ -131,6 +132,7 @@ export default function CreateApp() {
       .then(res => res.status == 404 ?
         fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.yaml`) : res
       ).then(res => {
+
         // set config type
         const type = res.status == 404 ?
           'none' : res.url.slice(res.url.lastIndexOf('.') + 1)
@@ -139,7 +141,6 @@ export default function CreateApp() {
         // set config text
         res.text().then(text => setConfig(text))
       }).catch(() => setConfigType('none'))
-
   }
 
 
@@ -148,31 +149,30 @@ export default function CreateApp() {
   }
 
 
-
   const handleRegister = () => {
-    setIsSubmitting(true)
+    setIsRegistering(true)
     ECR.register(config)
       .then(() => {
-        setIsSubmitting(false)
-        enqueueSnackbar('App Registered')
+        enqueueSnackbar('App registered', {variant: 'success'})
         history.push('/apps/my-apps')
       }).catch(error => {
-        setIsSubmitting(false)
+        if (error.message.includes('force=true')) {
+          // todo: implement overwrite
+        }
         setError(error.message)
-      })
+      }).finally(() => setIsRegistering(false))
   }
 
+
   const handleBuild = () => {
-    setIsSubmitting(true)
+    setIsBuilding(true)
     ECR.registerAndBuild({namespace, repo, version}, config)
       .then(() => {
-        setIsSubmitting(false)
         enqueueSnackbar('Build started')
         history.push('/apps/my-apps')
       }).catch(error => {
-        setIsSubmitting(false)
         setError(error.message)
-      })
+      }).finally(() => setIsBuilding(false))
   }
 
 
@@ -204,14 +204,16 @@ export default function CreateApp() {
         <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
             label="GitHub/GitLab repo URL"
+            placeholder="https://github.com/me/my-edge-app"
             value={repoURL}
-            onChange={evt => setRepo(evt.target.value)}
+            onChange={evt => setRepoURL(evt.target.value)}
             error={isValid == false}
             helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
             style={{width: 500}}
+            InputLabelProps={{ shrink: true }}
           />
 
-          {repo &&
+          {repoURL &&
             <Button
               onClick={handleRepoVerify}
               variant="contained"
@@ -277,18 +279,18 @@ export default function CreateApp() {
             onClick={handleRegister}
             variant="outlined"
             color="primary"
-            disabled={!repo || !config || isSubmitting || error}
+            disabled={!repo || !config || isRegistering || isBuilding || error}
           >
-            {isSubmitting ? 'Submitting...' : 'Register App'}
+            {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
 
           <Button
             onClick={handleBuild}
             variant="contained"
             color="primary"
-            disabled={!repo || !config || isSubmitting || error}
+            disabled={!repo || !config || isRegistering || isBuilding || error}
           >
-            {isSubmitting ? 'Submitting...' : 'Register & Build App'}
+            {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
         </div>
       </Main>

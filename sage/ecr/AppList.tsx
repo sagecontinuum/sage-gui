@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useLocation, useHistory } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -123,14 +123,13 @@ type Props = {
 }
 
 export default function AppList(props: Props) {
-  const {view} = props
-
   const params = useParams()
   const history = useHistory()
   const { enqueueSnackbar } = useSnackbar()
 
   const query = params.get('query') || ''
 
+  const [view, setView] = useState(props.view)
 
   const {loading, setLoading} = useProgress()
   const [data, setData] = useState<Row[]>()
@@ -138,6 +137,19 @@ export default function AppList(props: Props) {
   const [error, setError] = useState(null)
 
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
+
+  useEffect(() => {
+    setView(props.view)
+  }, [props.view])
+
+  const listApps = useCallback(() => {
+    return ECR.listApps()
+      .then(data => {
+        setData(data)
+      })
+      .catch(error => setError(error.message))
+      .finally(() => setLoading(false))
+  }, [setData, setError, setLoading])
 
 
   useEffect(() => {
@@ -151,7 +163,7 @@ export default function AppList(props: Props) {
     }
 
     listApps()
-  }, [view])
+  }, [view, listApps, setLoading])
 
 
   useEffect(() => {
@@ -161,14 +173,7 @@ export default function AppList(props: Props) {
   }, [query, data])
 
 
-  const listApps = () => {
-    return ECR.listApps()
-      .then(data => setData(data))
-      .catch(error => setError(error.message))
-      .finally(() => setLoading(false))
-  }
-
-  // todo: refactor into useContext or table componnent
+  // todo: refactor into useContext or table componnent?
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')

@@ -25,7 +25,7 @@ export default function Apps() {
 
         <Main>
           <Switch>
-            <PrivateRoute path={`${path}/my-apps`} component={AppList} render={() => <AppList view="myApps" />} />
+            <PrivateRoute path={`${path}/my-apps`} render={() => <AppList view="myApps" />} />
             <PrivateRoute path={`${path}/shared-with-me`} render={() => <AppList view="sharedWithMe" />} />
             <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
 
