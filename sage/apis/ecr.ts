@@ -152,7 +152,9 @@ export function listNamespaces() : Promise<Namespace[]>{
 
 export async function listApps()  {
   return get(`${url}/apps`)
-    .then(data => data.data)
+    .then(data =>
+      data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
+    )
 }
 
 

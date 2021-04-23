@@ -4,24 +4,23 @@ import { useLocation, useHistory } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-// import FormControlLabel from '@material-ui/core/FormControlLabel'
-// import Checkbox from '@material-ui/core/Checkbox'
 import IconButton from '@material-ui/core/IconButton'
 import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import SpaciousIcon from '@material-ui/icons/ViewStream'
+import GithubIcon from '@material-ui/icons/GitHub'
 import Tooltip from '@material-ui/core/Tooltip'
 import ErrorMsg from '../ErrorMsg'
 import { useSnackbar } from 'notistack'
 
-import Table from '../../components/table/Table'
-import TableSearch from '../../components/table/TableSearch'
-
-import SpaciousLayout from './SpaciousLayout'
-
 import BeeIcon from 'url:../../assets/bee.svg'
 
+import Table from '../../components/table/Table'
+import TableSearch from '../../components/table/TableSearch'
+import * as utils from '../../components/utils/units'
 import { useProgress } from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
+
+import SpaciousLayout from './SpaciousLayout'
 
 
 type VerTooltipProps = {
@@ -47,56 +46,70 @@ export function VersionTooltip(props: VerTooltipProps) {
 }
 
 
+export const formatters = {
+  name: (name, o) => {
+    return <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
+  },
+  versions: (versions) => {
+    if (!versions?.length) return '-'
+
+    return (
+      <>
+        {versions[versions?.length - 1].version}{' '}
+        (<VersionTooltip versions={versions}/>)
+      </>
+    )
+  },
+  repo: (_, {sources}) => {
+    const {url} = sources
+
+    if (!url) return <></>
+
+    return (
+      <a href={url} target="_blank" rel="noreferrer" className="flex items-center">
+        <GithubIcon fontSize="small" className="text-color" />&nbsp;
+        {url.slice(url.lastIndexOf('/') + 1).replace('.git', '')}
+      </a>
+    )
+  },
+  time: val => {
+    return utils.msToTime(Date.now() - new Date(val).getTime())
+  }
+}
+
+
 const columns = [
   {
     id: 'name',
     label: 'Name',
-    format: (name, o) =>
-      <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
+    format: formatters.name
   }, {
     id: 'namespace',
     label: 'Namespace'
   }, {
     id: 'versions',
     label: 'Version',
-    format: (versions) => {
-      if (!versions?.length) return '-'
-
-      return (
-        <>
-          {versions[versions?.length - 1].version}{' '}
-          (<VersionTooltip versions={versions}/>)
-        </>
-      )
-    }
+    format: formatters.versions
   }, {
     id: 'owner_id',
     label: 'Owner'
-  }, {/*
-    id: 'permissions',
-    label: 'Members',
-    format: (perms) => {
-      return perms.length == 1 ? `Only me` : `${perms.length} members`
-    }
-  */}, {/*
+  }, {
+    /*
+      id: 'permissions',
+      label: 'Members',
+      format: (perms) => {
+        return perms.length == 1 ? `Only me` : `${perms.length} members`
+      }
+    */
+   }, {
     id: 'repo',
     label: 'Repo',
-    format: (_, {details: obj}) => {
-      if (!obj.source) return <></>
-
-      const url = obj.source.url
-      return (
-        <a href={url} target="_blank" rel="noreferrer" className="flex items-center">
-          <GithubIcon fontSize="small" className="text-color" />&nbsp;
-          {url.slice(url.lastIndexOf('/') + 1).replace('.git', '')}
-        </a>
-      )
-    }
-  */}, {
-    id: 'time_created',
-    label: 'Last Update'
+    format: formatters.repo
+  }, {
+    id: 'time_last_updated',
+    label: 'Last Update',
+    format: formatters.time
   }
-//   {id: 'id', label: 'Version', hide: true},
 ]
 
 
@@ -251,7 +264,6 @@ export default function AppList(props: Props) {
 
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
-          columns={columns}
           rows={rows}
           onDelete={handleDelete}
           onMakePublic={handleMakePublic}

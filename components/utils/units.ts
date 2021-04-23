@@ -33,5 +33,5 @@ export function msToTime(ms: number) {
   if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
   else if (mins < 60) return mins + ' min ago'
   else if (hours < 24) return hours + ' hrs ago'
-  else return days + ' says ago'
+  else return days + ' days ago'
 }
