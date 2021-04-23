@@ -57,8 +57,13 @@ function deleteReq(endpoint: string) {
 }
 
 
-export type App = {
+export type Repo = {
   namespace: string
+  repo: string
+}
+
+export type App = {
+  namespace: string,
   repo: string
   version: string
 }
@@ -90,28 +95,44 @@ export async function deleteApp(app: App) {
   return res
 }
 
+type Operation = 'add' | 'delete'
+type GranteeType = 'USER' | 'GROUP'
+type Permission =  'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
+type PermissionObj = {
+  grantee: string
+  granteeType: GranteeType
+  permission: Permission
+  resourceName: string
+  resourceType: 'string'
+}
 
-export function makePublic(app: App) {
-  const {namespace, repo, version} = app
-  return put(`${url}/permissions/${namespace}/${repo}/${version}`, {
-    operation: 'add',
-    granteeType: 'USER',
-    grantee: 'OtherUser',
+export function makePublic(repoObj : Repo, operation = 'add') {
+  const {namespace, repo} = repoObj
+  return put(`${url}/permissions/${namespace}/${repo}`, {
+    operation,
+    granteeType: 'GROUP',
+    grantee: 'AllUsers',
     permission: 'READ'
   })
 }
 
 
-
-type Permission = {
-  grantee: string
-  granteeType: 'USER' | 'GROUP'
-  permission: 'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
-  resourceName: string
-  resourceType: 'string'
+export function share(
+  repoObj: Repo,
+  grantee: string,
+  permission: Permission,
+  operation: Operation = 'add'
+) {
+  const {namespace, repo} = repoObj
+  return put(`${url}/permissions/${namespace}/${repo}`, {
+    operation,
+    granteeType: 'USER',
+    grantee,
+    permission
+  })
 }
 
-export function listPermissions(app: string) : Promise<Permission[][]> {
+export function listPermissions(app: string) : Promise<PermissionObj[][]> {
   return get(`${url}/permissions/${app}`)
 }
 
@@ -157,6 +178,7 @@ export function getApp(namespace: string, repo: string, version?: string) : Prom
 /*************/
 
 // DEPRECATED: special, client-side version of a "repo"
+/*
 type Repo = AppDef & {
   versions?: [{
     id: string,
@@ -164,7 +186,7 @@ type Repo = AppDef & {
     namespace: string,
     version: string
   }]
-}
+}*/
 
 type ListAppsParams = {
   includeStatus?: boolean

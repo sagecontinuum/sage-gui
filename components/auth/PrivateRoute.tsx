@@ -11,7 +11,7 @@ function redirect(urlPath: string) {
 
 
 export default function PrivateRoute({
-  component: Component,
+  component: Component = null,
   ...rest
 }) {
   return (
