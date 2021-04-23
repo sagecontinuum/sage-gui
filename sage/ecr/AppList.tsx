@@ -179,15 +179,31 @@ export default function AppList(props: Props) {
   const handleDelete = (evt, app) => {
     evt.preventDefault()
     ECR.deleteApp(app)
-      .then(res => {
+      .then(() => {
         enqueueSnackbar('Deleting app...')
         return listApps()
+      }).then(() => {
+        enqueueSnackbar('App deleted!', {variant: 'success'})
       }).catch(() => {
         enqueueSnackbar('Failed to delete app', {variant: 'error'})
-      }).finally(() => {
-        enqueueSnackbar('App deleted!', {variant: 'success'})
       })
+  }
 
+  const handleMakePublic = (evt, app) => {
+    evt.preventDefault()
+    ECR.makePublic(app)
+      .then(() => {
+        enqueueSnackbar('Making app public...')
+        return listApps()
+      }).then(() => {
+        enqueueSnackbar('Your app is not viewable to everybody!', {variant: 'success'})
+      }).catch(() => {
+        enqueueSnackbar('Failed to make app public', {variant: 'error'})
+      })
+  }
+
+  const handleShare = (evt, app) => {
+    alert('sharing is not implemented yet')
   }
 
 
@@ -233,6 +249,8 @@ export default function AppList(props: Props) {
           columns={columns}
           rows={rows}
           onDelete={handleDelete}
+          onMakePublic={handleMakePublic}
+          onShare={handleShare}
         />
       }
 

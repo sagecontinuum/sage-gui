@@ -3,6 +3,8 @@ const url = config.ecr
 
 import * as Auth from '../../components/auth/auth'
 
+
+
 const options = {
   headers: {
     Authorization: `sage ${Auth.token}`
@@ -28,8 +30,6 @@ function get(endpoint: string) {
     .then(res => res.json())
 }
 
-
-
 function post(endpoint: string, data = '') {
   return fetch(endpoint, {
     method: 'POST',
@@ -39,17 +39,25 @@ function post(endpoint: string, data = '') {
     .then(res => res.json())
 }
 
+function put(endpoint: string, data = {}) {
+  return fetch(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+    ...options
+  }).then(handleErrors)
+    .then(res => res.json())
+}
 
 function deleteReq(endpoint: string) {
   return fetch(endpoint, {
-    method: 'Delete',
+    method: 'DELETE',
     ...options
   }).then(handleErrors)
     .then(res => res.json())
 }
 
 
-type AppDef = {
+export type App = {
   namespace: string
   repo: string
   version: string
@@ -62,25 +70,37 @@ export function register(appConfig) {
 
 
 
-export function build(app: AppDef) {
+export function build(app: App) {
   const {namespace, repo, version} = app
   return post(`${url}/builds/${namespace}/${repo}/${version}`)
 }
 
 
 
-export async function registerAndBuild(app: AppDef, appConfig) {
+export async function registerAndBuild(app: App, appConfig) {
   await register(appConfig)
   const res = await build(app)
   return res
 }
 
 
-export async function deleteApp(app: AppDef) {
+export async function deleteApp(app: App) {
   const {namespace, repo, version} = app
   const res = await deleteReq(`${url}/apps/${namespace}/${repo}/${version}`)
   return res
 }
+
+
+export function makePublic(app: App) {
+  const {namespace, repo, version} = app
+  return put(`${url}/permissions/${namespace}/${repo}/${version}`, {
+    operation: 'add',
+    granteeType: 'USER',
+    grantee: 'OtherUser',
+    permission: 'READ'
+  })
+}
+
 
 
 type Permission = {
@@ -96,6 +116,7 @@ export function listPermissions(app: string) : Promise<Permission[][]> {
 }
 
 
+
 type Namespace = {
   id: string
   owner_id: string
@@ -108,15 +129,35 @@ export function listNamespaces() : Promise<Namespace[]>{
 }
 
 
+export async function listApps()  {
+  return get(`${url}/apps`)
+    .then(data => data.data)
+}
 
-type App = {
+
+
+type AppDef = {
   name: string
   namespace: string
   owner_id: string
 }
 
-// special, client-side version of a "repo"
-type Repo = App & {
+export function getApp(namespace: string, repo: string, version?: string) : Promise<AppDef> {
+  if (version)
+    return get(`${url}/apps/${namespace}/${repo}/${version}`)
+  else
+    return get(`${url}/apps/${namespace}/${repo}`)
+}
+
+
+
+
+
+
+/*************/
+
+// DEPRECATED: special, client-side version of a "repo"
+type Repo = AppDef & {
   versions?: [{
     id: string,
     name: string,
@@ -128,13 +169,6 @@ type Repo = App & {
 type ListAppsParams = {
   includeStatus?: boolean
 }
-
-export async function listApps(params: ListAppsParams = {})  {
-  return get(`${url}/apps`)
-    .then(data => data.data)
-}
-
-
 
 export async function listAppsDeprecated(params: ListAppsParams = {})  {
   const {
@@ -192,12 +226,4 @@ export async function listAppsDeprecated(params: ListAppsParams = {})  {
   }
 
   return repos
-}
-
-
-export function getApp(namespace: string, name: string, version?: string) : Promise<App> {
-  if (version)
-    return get(`${url}/apps/${namespace}/${name}/${version}`)
-  else
-    return get(`${url}/apps/${namespace}/${name}`)
 }

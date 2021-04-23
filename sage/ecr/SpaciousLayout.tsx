@@ -2,10 +2,13 @@ import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { VersionTooltip } from './AppList'
 import IconButton from '@material-ui/core/IconButton'
 import DeleteIcon from '@material-ui/icons/DeleteOutline'
+import PublicIcon from '@material-ui/icons/PublicRounded'
+import ShareIcon from '@material-ui/icons/PersonAdd'
+import Divider from '@material-ui/core/Divider'
 
+import { App } from '../apis/ecr'
 
 
 // todo: optimize?
@@ -47,8 +50,21 @@ function Row(props) {
         <p>{details.description}</p>
       */}
 
-      <div className="controls">
-        <IconButton onClick={evt => props.onDelete(evt, {namespace, name, version})}>
+      <div className="controls flex">
+        <IconButton
+          onClick={evt => props.onShare(evt, {namespace, repo: name, version})}
+        >
+          <ShareIcon />
+        </IconButton>
+        <IconButton
+          onClick={evt => props.onMakePublic(evt, {namespace, repo: name, version})}
+        >
+          <PublicIcon />
+        </IconButton>
+        <IconButton
+          style={{color: '#912341'}}
+          onClick={evt => props.onDelete(evt, {namespace, repo: name, version})}
+        >
           <DeleteIcon />
         </IconButton>
       </div>
@@ -85,16 +101,20 @@ const AppRow = styled(Link)`
   }
 `
 
-type App = {
-  namespace: string,
-  name: string,
-  version: string
-}
+
 
 type Props = {
   columns: object[]  // todo: type
   rows: {[key: string]: any}
   onDelete: (
+    event: React.MouseEvent,
+    app: App
+  ) => void
+  onShare: (
+    event: React.MouseEvent,
+    app: App
+  ) => void
+  onMakePublic: (
     event: React.MouseEvent,
     app: App
   ) => void
@@ -105,7 +125,7 @@ export default function SpaciousLayout(props: Props) {
 
   return (
     <Root>
-      <Divider />
+      <HR />
       <Rows>
         {rows.map((row) =>
           <Row key={row.id} data={row} spec={columns} {...rest} />
@@ -119,7 +139,7 @@ const Root = styled.div`
   margin-top: 1em;
 `
 
-const Divider = styled.div`
+const HR = styled.div`
    border-top: 1px solid #ddd;
 `
 
