@@ -32,12 +32,13 @@ export default function Sidebar() {
       <Divider style={{margin: '20px 10px'}}/>
 
 
-      <Item to="/apps/certified-apps">
+      {/*<Item to="/apps/certified-apps">
         <span className="material-icons">
           verified
         </span>&nbsp;Certified Apps
-      </Item>
-      <Item to="/apps/public"><PublicIcon /> Public Hub</Item>
+      </Item>*/}
+
+      <Item to="/apps/explore"><PublicIcon /> Explore</Item>
       <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
       <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
     </Root>

@@ -61,7 +61,7 @@ const theme = createMuiTheme({
 
 const NavMenu = () =>
   <div className="title">
-    <Link to="/apps/certified-apps" className="nav-link">
+    <Link to="/apps/explore-apps" className="nav-link">
       Edge Apps
     </Link>
   </div>
@@ -82,7 +82,7 @@ export default function Sage() {
 
             <Switch>
               <Route exact path="/">
-                <Redirect to="/apps/certified-apps" />
+                <Redirect to="/apps/explore" />
               </Route>
               <Route exact path="/login">
                 <TestSignIn />

@@ -9,6 +9,25 @@ import ShareIcon from '@material-ui/icons/PersonAdd'
 
 import { App } from '../apis/ecr'
 import { formatters } from './AppList'
+import Tooltip from '@material-ui/core/Tooltip'
+
+
+type ActionBtnProps = {
+  title: string
+  onClick: (evt: React.MouseEvent) => void
+  icon: JSX.Element
+  style?: object
+}
+
+function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
+  return (
+    <Tooltip title={title}>
+      <IconButton onClick={onClick} style={style}>
+        {icon}
+      </IconButton>
+    </Tooltip>
+  )
+}
 
 
 function Row(props) {
@@ -48,22 +67,22 @@ function Row(props) {
         </div>
 
         <div className="controls">
-          <IconButton
+          <ActionBtn
+            title="Share app"
+            icon={<ShareIcon />}
             onClick={evt => props.onShare(evt, {namespace, repo: name, version})}
-          >
-            <ShareIcon />
-          </IconButton>
-          <IconButton
+          />
+          <ActionBtn
+            title="Make app public"
+            icon={<PublicIcon />}
             onClick={evt => props.onMakePublic(evt, {namespace, repo: name, version})}
-          >
-            <PublicIcon />
-          </IconButton>
-          <IconButton
-            style={{color: '#912341'}}
+          />
+          <ActionBtn
+            title="Delete app"
+            icon={<DeleteIcon />}
             onClick={evt => props.onDelete(evt, {namespace, repo: name, version})}
-          >
-            <DeleteIcon />
-          </IconButton>
+            style={{color: '#912341'}}
+          />
         </div>
       </div>
     </AppRow>

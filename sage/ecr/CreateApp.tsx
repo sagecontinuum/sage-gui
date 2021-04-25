@@ -14,6 +14,7 @@ import CheckIcon from '@material-ui/icons/Check'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
 import Editor from '@monaco-editor/react'
+import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
 
 import ConfigForm from './ConfigForm'
 
@@ -24,13 +25,15 @@ import * as ECR from '../apis/ecr'
 
 
 
+
+
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
 
 // Todo: need better examples
 const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
 const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
-const EXAMPLE_REPO_3 = 'https://github.com/nconrad/plugin-helloworld-ml'
+// const EXAMPLE_REPO_3 = 'https://github.com/nconrad/plugin-helloworld-ml'
 
 
 function StepTitle(props) {
@@ -95,9 +98,12 @@ export default function CreateApp() {
 
   // repo config state
   const [repoURL, setRepoURL] = useState('')
-  const [namespace, setNamespace] = useState(Auth.user.split('@')[0])
-  const [repo, setRepo] = useState('simple')
-  const [version, setVersion] = useState('1.20')
+
+  const [namespace, setNamespace] = useState(null)
+  const [repo, setRepo] = useState(null)
+  const [version, setVersion] = useState(null)
+
+  const [configObj, setConfigObj] = useState(null)
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
@@ -139,7 +145,11 @@ export default function CreateApp() {
         setConfigType(type)
 
         // set config text
-        res.text().then(text => setConfig(text))
+        res.text().then(text => {
+          setConfig(text)
+          const obj = jsyaml.load(text)
+          setConfigObj(obj)
+        })
       }).catch(() => setConfigType('none'))
   }
 
@@ -176,6 +186,16 @@ export default function CreateApp() {
   }
 
 
+  const handleConfigChange = (val) => {
+    const obj = jsyaml.load(val)
+    setConfigObj(obj)
+    setConfig(val)
+
+    setNamespace(obj.namespace)
+    setRepo(obj.name)
+    setVersion(obj.version)
+  }
+
   const onExampleOne = () => {
     setConfig('')
     setRepoURL(EXAMPLE_REPO_1)
@@ -184,17 +204,18 @@ export default function CreateApp() {
 
   // Todo: for demonstration, there's an error in example 1
   const onExampleTwo = async () => {
+    setConfig('')
     setRepoURL(EXAMPLE_REPO_2)
-    setIsValid(true)
-    const res = await fetch(`${GITHUB_STATIC_URL}/sagecontinuum/sage-ecr/master/example_app.yaml`)
-    setConfig(await res.text())
-    setConfigType('yaml')
   }
 
+  /*
   const onExampleThree = () => {
     setConfig(null)
     setRepoURL(EXAMPLE_REPO_3)
   }
+  */
+
+
 
   return (
     <Root>
@@ -229,49 +250,45 @@ export default function CreateApp() {
         </form>
 
 
-        {config &&
-          <>
-            <StepTitle icon="2" active={true} label="App Configuration" />
-            <div className="step">
-              {configType == 'none' &&
-                <p>
-                  No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
-                  <sup>
-                    <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.  (Click for help)">
-                      <HelpIcon fontSize="small" />
-                    </Tooltip>
-                  </sup>
-                </p>
-              }
+        <StepTitle icon="2" active={true} label="App Configuration" />
+        <div className="step">
+          {configType == 'none' &&
+            <p>
+              No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
+              <sup>
+                <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.  (Click for help)">
+                  <HelpIcon fontSize="small" />
+                </Tooltip>
+              </sup>
+            </p>
+          }
 
-              <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
-                <CustomTab label="Raw Config" {...a11yProps(0)} />
-                <CustomTab label="Form" {...a11yProps(1)} />
-                <CustomTab label="Preview" {...a11yProps(2)} />
-              </CustomTabs>
+          <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
+            <CustomTab label="Raw Config" {...a11yProps(0)} />
+            <CustomTab label="Form" {...a11yProps(1)} />
+            <CustomTab label="Preview" {...a11yProps(2)} />
+          </CustomTabs>
 
-              {tabIndex == 0 &&
-                <EditorContainer>
-                  <Editor
-                    height="500px"
-                    defaultLanguage={configType}
-                    value={config}
-                    onChange={val => setConfig(val)}
-                    theme="light"
-                  />
-                </EditorContainer>
-              }
+          {tabIndex == 0 &&
+            <EditorContainer>
+              <Editor
+                height="400px"
+                defaultLanguage="yaml"
+                value={config}
+                onChange={handleConfigChange}
+                theme="light"
+              />
+            </EditorContainer>
+          }
 
-              {tabIndex == 1 &&
-                <ConfigForm />
-              }
+          {tabIndex == 1 &&
+            <ConfigForm />
+          }
 
-              {error &&
-                <FormHelperText error>{error}</FormHelperText>
-              }
-            </div>
-          </>
-        }
+          {error &&
+            <FormHelperText error>{error}</FormHelperText>
+          }
+        </div>
 
 
         <div className="step">
@@ -279,7 +296,7 @@ export default function CreateApp() {
             onClick={handleRegister}
             variant="outlined"
             color="primary"
-            disabled={!repo || !config || isRegistering || isBuilding || error}
+            disabled={!configObj || isRegistering || isBuilding || error}
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
@@ -288,7 +305,7 @@ export default function CreateApp() {
             onClick={handleBuild}
             variant="contained"
             color="primary"
-            disabled={!repo || !config || isRegistering || isBuilding || error}
+            disabled={!configObj || isRegistering || isBuilding || error}
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
@@ -309,7 +326,7 @@ export default function CreateApp() {
         <ul className="no-padding list-none">
           <li><a onClick={onExampleOne}>Use Example One</a></li>
           <li><a onClick={onExampleTwo}>Use Example Two</a></li>
-          <li><a onClick={onExampleThree}>Use Example Three</a></li>
+          {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
         </ul>
       </Help>
     </Root>

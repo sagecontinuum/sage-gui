@@ -167,7 +167,6 @@ export default function AppList(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    console.log('view', view)
     if (['sharedWithMe', 'public'].includes(view)) {
       // todo(nc): implement
       setData([])
