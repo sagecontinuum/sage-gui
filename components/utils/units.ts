@@ -1,7 +1,8 @@
 export function prettyTime(secs: number) {
   if (!secs && secs != 0) return
+  const days = Math.floor(secs / (24*60*60))
   const parts = new Date(secs * 1000).toISOString().substr(11, 8).split(':')
-  return `${parts[0]}h ${parts[1]}m ${parts[2]}s`
+  return `${days > 0 ? days + 'd ' : ''}${parseInt(parts[0])}h ${parseInt(parts[1])}m ${parseInt(parts[2])}s`
 }
 
 
