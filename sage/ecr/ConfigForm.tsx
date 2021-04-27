@@ -1,90 +1,138 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
+import FormControl from '@material-ui/core/FormControl'
 import TextField from '@material-ui/core/TextField'
 import Select from '@material-ui/core/Select'
+import FormLabel from '@material-ui/core/FormLabel'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+import CheckBox from '@material-ui/core/CheckBox'
+import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank'
+import CheckBoxIcon from '@material-ui/icons/CheckBox'
 
 
-import * as Auth from '../../components/auth/auth'
-import FormControl from '@material-ui/core/FormControl'
 
-
-
-const initialState = {
-  name: '',
-  description: '',
-  version: '',
-  namespace: Auth.user,
+export type FormState = {
+  name: string
+  description: string
+  version: string
+  namespace: string
   source: {
-    architecture: ['']
-  },
-  url: '',
-  directory: '',
-  resources: [
-    {type: '', view: '', min_resolution: ''}
-  ],
-  inputs: [
-    {id: 'speed', type: 'int'}
-  ],
-  metadata: {}
+    architectures: string[]
+  }
+  url: string
+  directory: string
+  resources: {type: string, view: string, min_resolution: string}[]
+  inputs: {id: string, type: string}[]
+  metadata: {
+    [item: string]: any
+  }
 }
+
+
+const architectures = [
+  'linux/amd64',
+  'linux/arm/v7',
+  'linux/arm64'
+]
 
 
 type Props = {
-
+  form: FormState
+  onChange: (form: FormState) => void
 }
 
 export default function ConfigForm(props: Props) {
-  const [form, setForm] = useState(initialState)
+  const {onChange} = props
+
+  const [form, setForm] = useState(props.form)
+
+  useEffect(() => {
+    setForm(props.form)
+  }, [props.form])
+
+
+  const handleChange = (event, val?: string) => {
+    const {name, value} = event.target
+
+    let f
+    if (name == 'architectures') {
+      f = {...form}
+      const archList = f.source.architectures
+      f.source.architectures = event.target.checked ?
+        [...archList, val] : archList.filter(v => v != val)
+    } else {
+      f = {...form, [name]: value}
+    }
+
+    onChange(f)
+  }
+
 
   return (
     <Root className="flex column">
       <div className="flex row">
         <TextField
           label="Namespace"
+          name="namespace"
           value={form.namespace}
-          onChange={(evt, val) => setForm(prev => ({...prev, version: val}))}
-          InputLabelProps={{ shrink: true }}
+          onChange={handleChange}
+          InputLabelProps={{ shrink: true}}
+          size="small"
+          margin="dense"
         />
         <Slash>&nbsp;/&nbsp;</Slash>
         <TextField
           label="Name"
+          name="name"
           value={form.name}
-          onChange={(evt, val) => setForm(prev => ({...prev, name: val}))}
+          onChange={handleChange}
           InputLabelProps={{ shrink: true }}
+          placeholder="my-app"
+        />
+        <TextField
+          label="Version"
+          name="version"
+          value={form.version}
+          onChange={handleChange}
+          style={{width: 100, marginLeft: 10}}
+          InputLabelProps={{ shrink: true }}
+          placeholder="1.0"
         />
       </div>
 
-      <TextField
-        label="Version"
-        value={form.version}
-        onChange={(evt, val) => setForm(prev => ({...prev, version: val}))}
-        style={{width: 100}}
-        InputLabelProps={{ shrink: true }}
-        placeholder="1.0"
-      />
 
       <TextField
         label="Description"
+        name="description"
         value={form.description}
-        onChange={(evt, val) => setForm(prev => ({...prev, version: val}))}
-        style={{width: 500}}
+        onChange={handleChange}
+        fullWidth
         multiline
-        rows={2}
+        rows={3}
         InputLabelProps={{ shrink: true }}
         placeholder="My awesome app"
       />
 
-      <FormControl variant="outlined">
-        <Select
-          value={form.source.architecture}
-          onChange={(evt, val) => setForm(prev => ({...prev, architecture: val}))}
-          label="Architectures"
-          margin="dense"
-        >
-          <option value="linux/amd64" selected={true}>linux/amd64</option>
-          <option value="linux/arm/v7">linux/arm/v7</option>
-        </Select>
+      <FormControl>
+        <FormLabel component="legend">Architecture</FormLabel>
+        {architectures.map((arch) =>
+          <FormControlLabel
+            key={arch}
+            control={
+              <CheckBox
+                name="architectures"
+                checked={form.source.architectures.includes(arch)}
+                onChange={(evt) => handleChange(evt, arch)}
+                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                color="primary"
+                size="small"
+              />
+            }
+            label={arch}
+          />
+        )}
       </FormControl>
     </Root>
   )

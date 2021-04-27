@@ -36,3 +36,16 @@ export function msToTime(ms: number) {
   else if (hours < 24) return hours + ' hrs ago'
   else return days + ' days ago'
 }
+
+export function msToTimeApprox(ms: number) {
+  if (!ms && ms != 0) return
+  let secs = Math.floor( (ms / 1000))
+  let mins = Math.floor( (ms / (1000 * 60)))
+  let hours = Math.floor( (ms / (1000 * 60 * 60)))
+  let days = Math.floor( (ms / (1000 * 60 * 60 * 24)))
+  if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
+  else if (mins < 60) return mins + ' min ago'
+  else if (hours < 24) return hours + ' hrs ago'
+  else return days + ' days ago'
+}
+

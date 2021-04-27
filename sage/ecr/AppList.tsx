@@ -73,7 +73,7 @@ export const formatters = {
     )
   },
   time: val => {
-    return utils.msToTime(Date.now() - new Date(val).getTime())
+    return utils.msToTimeApprox(Date.now() - new Date(val).getTime())
   }
 }
 

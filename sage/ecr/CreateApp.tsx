@@ -16,15 +16,11 @@ import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 import Editor from '@monaco-editor/react'
 import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
 
-import ConfigForm from './ConfigForm'
+import ConfigForm, { FormState } from './ConfigForm'
 
 import { useSnackbar } from 'notistack'
 
-import * as Auth from '../../components/auth/auth'
 import * as ECR from '../apis/ecr'
-
-
-
 
 
 const GITHUB_API = 'https://api.github.com'
@@ -34,6 +30,7 @@ const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
 const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
 const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
 // const EXAMPLE_REPO_3 = 'https://github.com/nconrad/plugin-helloworld-ml'
+
 
 
 function StepTitle(props) {
@@ -89,6 +86,27 @@ function a11yProps(index) {
 }
 
 
+const initialState = {
+  name: '',
+  description: '',
+  version: '',
+  namespace: '',
+  source: {
+    architectures: []
+  },
+  url: '',
+  directory: '',
+  resources: [
+    {type: '', view: '', min_resolution: ''}
+  ],
+  inputs: [
+    {id: 'speed', type: 'int'}
+  ],
+  metadata: {}
+}
+
+
+
 
 export default function CreateApp() {
   let history = useHistory()
@@ -96,20 +114,14 @@ export default function CreateApp() {
 
   const [tabIndex, setTabIndex] = useState(0)
 
-  // repo config state
+  // app config state
   const [repoURL, setRepoURL] = useState('')
+  const [form, setForm] = useState<FormState>(initialState)
+  const [config, setConfig] = useState<string>(jsyaml.dump(initialState))
+  const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
 
-  const [namespace, setNamespace] = useState(null)
-  const [repo, setRepo] = useState(null)
-  const [version, setVersion] = useState(null)
-
-  const [configObj, setConfigObj] = useState(null)
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
-
-  // app config state
-  const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
-  const [config, setConfig] = useState<string>(null)
 
   const [isRegistering, setIsRegistering] = useState(false)
   const [isBuilding, setIsBuilding] = useState(false)
@@ -148,7 +160,8 @@ export default function CreateApp() {
         res.text().then(text => {
           setConfig(text)
           const obj = jsyaml.load(text)
-          setConfigObj(obj)
+
+          setForm(obj)
         })
       }).catch(() => setConfigType('none'))
   }
@@ -176,7 +189,9 @@ export default function CreateApp() {
 
   const handleBuild = () => {
     setIsBuilding(true)
-    ECR.registerAndBuild({namespace, repo, version}, config)
+
+    const {namespace, name, version} = form
+    ECR.registerAndBuild({namespace, repo: name, version}, config)
       .then(() => {
         enqueueSnackbar('Build started')
         history.push('/apps/my-apps')
@@ -188,12 +203,8 @@ export default function CreateApp() {
 
   const handleConfigChange = (val) => {
     const obj = jsyaml.load(val)
-    setConfigObj(obj)
+    setForm(obj)
     setConfig(val)
-
-    setNamespace(obj.namespace)
-    setRepo(obj.name)
-    setVersion(obj.version)
   }
 
   const onExampleOne = () => {
@@ -214,6 +225,11 @@ export default function CreateApp() {
     setRepoURL(EXAMPLE_REPO_3)
   }
   */
+
+  const handleFormChange = (state) => {
+    setForm(state)
+    setConfig(jsyaml.dump(state))
+  }
 
 
 
@@ -264,26 +280,28 @@ export default function CreateApp() {
           }
 
           <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
-            <CustomTab label="Raw Config" {...a11yProps(0)} />
-            <CustomTab label="Form" {...a11yProps(1)} />
-            <CustomTab label="Preview" {...a11yProps(2)} />
+            <CustomTab label="Form" {...a11yProps(0)} />
+            <CustomTab label="Raw Config" {...a11yProps(1)} />
+            {/*<CustomTab label="Preview" {...a11yProps(2)} />*/}
           </CustomTabs>
 
+
           {tabIndex == 0 &&
-            <EditorContainer>
-              <Editor
-                height="400px"
-                defaultLanguage="yaml"
-                value={config}
-                onChange={handleConfigChange}
-                theme="light"
-              />
-            </EditorContainer>
+            <ConfigForm form={form} onChange={handleFormChange} />
           }
 
-          {tabIndex == 1 &&
-            <ConfigForm />
-          }
+
+          {/* here we preload the editor */}
+          <EditorContainer style={{display: tabIndex == 1 ? 'block' : 'none'}}>
+            <Editor
+              height="400px"
+              defaultLanguage="yaml"
+              value={config}
+              onChange={handleConfigChange}
+              theme="light"
+            />
+          </EditorContainer>
+
 
           {error &&
             <FormHelperText error>{error}</FormHelperText>
@@ -296,7 +314,7 @@ export default function CreateApp() {
             onClick={handleRegister}
             variant="outlined"
             color="primary"
-            disabled={!configObj || isRegistering || isBuilding || error}
+            disabled={!isValid || !form || isRegistering || isBuilding || error}
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
@@ -305,7 +323,7 @@ export default function CreateApp() {
             onClick={handleBuild}
             variant="contained"
             color="primary"
-            disabled={!configObj || isRegistering || isBuilding || error}
+            disabled={!isValid || !form || isRegistering || isBuilding || error}
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>

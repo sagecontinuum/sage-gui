@@ -66,7 +66,7 @@ function Row(props) {
           {formatters.time(time_last_updated)}
         </div>
 
-        <div className="controls">
+        <div className="actions">
           <ActionBtn
             title="Share app"
             icon={<ShareIcon />}
@@ -103,11 +103,11 @@ const AppRow = styled(Link)`
     border: 1px solid rgb(28, 140, 201);
   }
 
-  .controls {
+  .actions {
     display: none;
   }
 
-  :hover .controls {
+  :hover .actions {
     display: block;
   }
 
