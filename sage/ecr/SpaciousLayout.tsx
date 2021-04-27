@@ -43,7 +43,6 @@ function Row(props) {
       <div className="flex column">
         <h2 className="no-margin">
           {namespace} / {formatters.name(name, data)}{' '}
-          <small className="muted">{version}</small>
         </h2>
 
         {formatters.repo(null, data)}
@@ -63,7 +62,10 @@ function Row(props) {
 
       <div className="flex column items-end">
         <div className="muted">
-          {formatters.time(time_last_updated)}
+          version: {version}
+        </div>
+        <div className="muted">
+          updated {formatters.time(time_last_updated)}<br/>
         </div>
 
         <div className="actions">

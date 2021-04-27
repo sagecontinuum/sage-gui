@@ -150,8 +150,8 @@ export function listNamespaces() : Promise<Namespace[]>{
 }
 
 
-export async function listApps()  {
-  return get(`${url}/apps`)
+export async function listApps(onlyPublic = false) {
+  return get(`${url}/apps${onlyPublic ? '?public=true' : ''}`)
     .then(data => {
       const allApps = data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
 
@@ -166,7 +166,6 @@ export async function listApps()  {
           return [...acc, app]
         }
       }, [])
-
       return apps
     })
 }

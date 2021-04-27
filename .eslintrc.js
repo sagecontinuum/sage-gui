@@ -43,5 +43,6 @@ module.exports = {
     'jest': true,
     'test': true,
     'describe': true,
+    'navigator': true
   }
 }

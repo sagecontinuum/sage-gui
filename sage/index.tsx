@@ -61,7 +61,7 @@ const theme = createMuiTheme({
 
 const NavMenu = () =>
   <div className="title">
-    <Link to="/apps/explore-apps" className="nav-link">
+    <Link to="/apps/explore" className="nav-link">
       Edge Apps
     </Link>
   </div>

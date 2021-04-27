@@ -3,8 +3,16 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import ErrorMsg from '../ErrorMsg'
 
+import Tooltip from '@material-ui/core/Tooltip'
+import IconButton from '@material-ui/core/IconButton'
+import MoreIcon from '@material-ui/icons/UnfoldMoreOutlined'
+import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
+import CopyIcon from '@material-ui/icons/FileCopyOutlined'
+import DoneIcon from '@material-ui/icons/DoneOutlined'
+
 import {useProgress} from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
+
 
 
 export default function App() {
@@ -14,6 +22,11 @@ export default function App() {
   const [config, setConfig] = useState<ECR.AppConfig>({})
   const [fullConfig, setFullConfig] = useState({})
   const [error, setError] = useState(null)
+
+  const [showFullConfig, setShowFullConfig] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+
+
 
   useEffect(() => {
     const [namepsace, name, version] = path.split('/')
@@ -30,6 +43,14 @@ export default function App() {
 
   }, [path, setLoading])
 
+
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(JSON.stringify(config, null, 4))
+    setIsCopied(true)
+  }
+
+
   if (loading) return <></>
 
   return (
@@ -39,9 +60,27 @@ export default function App() {
       </h2>
       <p>{config.description}</p>
 
-      <h4>App Config</h4>
+      <div className="flex items-center justify-between">
+        <b>App Config</b>
+
+        <div>
+          <Tooltip title={showFullConfig ? 'Show only app config' : 'Show all details'}>
+            <IconButton onClick={() => setShowFullConfig(!showFullConfig)} size="small">
+              {showFullConfig ? <LessIcon fontSize="small" /> : <MoreIcon fontSize="small" />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={isCopied ? 'Copied!' : 'Copy contents'}>
+            <IconButton onClick={handleCopy} size="small">
+              {isCopied ? <DoneIcon fontSize="small" />  : <CopyIcon fontSize="small"/>}
+            </IconButton>
+          </Tooltip>
+        </div>
+      </div>
+
       <pre className="code">
-        {JSON.stringify(config, null, 4)}
+        {showFullConfig ?
+          JSON.stringify(fullConfig, null, 4) : JSON.stringify(config, null, 4)
+        }
       </pre>
 
       {error &&

@@ -101,7 +101,7 @@ const columns = [
         return perms.length == 1 ? `Only me` : `${perms.length} members`
       }
     */
-   }, {
+  }, {
     id: 'repo',
     label: 'Repo',
     format: formatters.repo
@@ -132,7 +132,7 @@ type Row = {
 
 
 type Props = {
-  view: 'certified' | 'public' | 'sharedWithMe' | 'myApps'
+  view: 'explore' | 'sharedWithMe' | 'myApps'
 }
 
 export default function AppList(props: Props) {
@@ -155,26 +155,25 @@ export default function AppList(props: Props) {
     setView(props.view)
   }, [props.view])
 
-  const listApps = useCallback(() => {
-    return ECR.listApps()
-      .then(data => {
-        setData(data)
-      })
+  const listApps = useCallback((onlyPublic = false) => {
+    return ECR.listApps(onlyPublic)
+      .then(data => setData(data))
       .catch(error => setError(error.message))
       .finally(() => setLoading(false))
   }, [setData, setError, setLoading])
 
-
   useEffect(() => {
     setLoading(true)
-    if (['sharedWithMe', 'public'].includes(view)) {
+    if (['sharedWithMe'].includes(view)) {
       // todo(nc): implement
       setData([])
       setLoading(false)
       return
+    } else if (view == 'explore') {
+      listApps(true)
+    } else {
+      listApps()
     }
-
-    listApps()
   }, [view, listApps, setLoading])
 
 
