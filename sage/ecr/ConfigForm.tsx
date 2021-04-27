@@ -11,23 +11,7 @@ import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@material-ui/icons/CheckBox'
 
 
-
-export type FormState = {
-  name: string
-  description: string
-  version: string
-  namespace: string
-  source: {
-    architectures: string[]
-  }
-  url: string
-  directory: string
-  resources: {type: string, view: string, min_resolution: string}[]
-  inputs: {id: string, type: string}[]
-  metadata: {
-    [item: string]: any
-  }
-}
+import { AppConfig } from '../apis/ecr'
 
 
 const architectures = [
@@ -38,8 +22,8 @@ const architectures = [
 
 
 type Props = {
-  form: FormState
-  onChange: (form: FormState) => void
+  form: AppConfig
+  onChange: (form: AppConfig) => void
 }
 
 export default function ConfigForm(props: Props) {

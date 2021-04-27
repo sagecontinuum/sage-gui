@@ -16,21 +16,23 @@ export default function Sidebar() {
 
   return (
     <Root>
-      <NewApp>
-        <Button
-          component={Link}
-          to="/apps/create-app"
-          variant="contained"
-          color="primary"
-          disabled={location.pathname == '/apps/create-app'}
-          fullWidth
-        >
-          <AddIcon/> Add App
-        </Button>
-      </NewApp>
+      {location.pathname != '/apps/create-app' &&
+        <>
+          <NewApp>
+            <Button
+              component={Link}
+              to="/apps/create-app"
+              variant="contained"
+              color="primary"
+              fullWidth
+            >
+              <AddIcon/> Add App
+            </Button>
+          </NewApp>
 
-      <Divider style={{margin: '20px 10px'}}/>
-
+          <Divider style={{margin: '20px 10px'}}/>
+        </>
+      }
 
       {/*<Item to="/apps/certified-apps">
         <span className="material-icons">

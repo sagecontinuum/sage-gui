@@ -16,7 +16,7 @@ import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 import Editor from '@monaco-editor/react'
 import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
 
-import ConfigForm, { FormState } from './ConfigForm'
+import ConfigForm from './ConfigForm'
 
 import { useSnackbar } from 'notistack'
 
@@ -116,7 +116,7 @@ export default function CreateApp() {
 
   // app config state
   const [repoURL, setRepoURL] = useState('')
-  const [form, setForm] = useState<FormState>(initialState)
+  const [form, setForm] = useState<ECR.AppConfig>(initialState)
   const [config, setConfig] = useState<string>(jsyaml.dump(initialState))
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
 
@@ -373,14 +373,6 @@ const Main = styled.div`
     button, svg {
       margin-left: 10px;
     }
-  }
-
-  .code {
-    background: #ddd;
-    border-radius: 3px;
-    border: 1px solid #bbb;
-    padding: 1px 2px;
-    color: #c52700;
   }
 `
 

@@ -152,11 +152,43 @@ export function listNamespaces() : Promise<Namespace[]>{
 
 export async function listApps()  {
   return get(`${url}/apps`)
-    .then(data =>
-      data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
-    )
+    .then(data => {
+      const allApps = data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
+
+      // reduce to latest
+      const repos = []
+      const apps = allApps.reduce((acc, app) => {
+        const path = app.id.split(':')[0]
+        if (repos.includes(path)) {
+          return acc
+        } else {
+          repos.push(path)
+          return [...acc, app]
+        }
+      }, [])
+
+      return apps
+    })
 }
 
+
+
+export type AppConfig = {
+  name: string
+  description: string
+  version: string
+  namespace: string
+  source: {
+    architectures: string[]
+  }
+  url: string
+  directory: string
+  resources: {type: string, view: string, min_resolution: string}[]
+  inputs: {id: string, type: string}[]
+  metadata: {
+    [item: string]: any
+  }
+}
 
 
 type AppDef = {
@@ -165,11 +197,25 @@ type AppDef = {
   owner_id: string
 }
 
-export function getApp(namespace: string, repo: string, version?: string) : Promise<AppDef> {
+export function getApp(
+  namespace: string,
+  name: string,
+  version?: string
+) : Promise<AppConfig | AppDef> {
+
   if (version)
-    return get(`${url}/apps/${namespace}/${repo}/${version}`)
+    return get(`${url}/apps/${namespace}/${name}/${version}`)
   else
-    return get(`${url}/apps/${namespace}/${repo}`)
+    return get(`${url}/apps/${namespace}/${name}`)
+}
+
+
+export function getAppConfig(
+  namespace: string,
+  name: string,
+  version?: string) : Promise<AppConfig> {
+
+  return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)
 }
 
 

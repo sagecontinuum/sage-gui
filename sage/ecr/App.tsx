@@ -10,32 +10,38 @@ import * as ECR from '../apis/ecr'
 export default function App() {
   const { path } = useParams()
 
-  const { setLoading } = useProgress()
-  const [data, setData] = useState(null)
+  const { loading, setLoading } = useProgress()
+  const [config, setConfig] = useState<ECR.AppConfig>({})
+  const [fullConfig, setFullConfig] = useState({})
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const [namepsace, name, version] = path.split('/')
 
     setLoading(true)
-    ECR.getApp(namepsace, name, version)
-      .then(data => setData(data))
-      .catch(err => setError(err))
+    Promise.all([
+      ECR.getAppConfig(namepsace, name, version),
+      ECR.getApp(namepsace, name, version)
+    ]).then(([config, fullConfig]) => {
+      setConfig(config)
+      setFullConfig(fullConfig)
+    }).catch(err => setError(err))
       .finally(() => setLoading(false))
+
   }, [path, setLoading])
 
-  if (!data) return <></>
+  if (loading) return <></>
 
   return (
     <Root>
       <h2>
-        {data.namespace} / {data.name} <small className="muted">{data.version}</small>
+        {config.namespace} / {config.name} <small className="muted">{config.version}</small>
       </h2>
-      <p>{data.description}</p>
+      <p>{config.description}</p>
 
       <h4>App Config</h4>
-      <pre>
-        {JSON.stringify(data, null, 4)}
+      <pre className="code">
+        {JSON.stringify(config, null, 4)}
       </pre>
 
       {error &&

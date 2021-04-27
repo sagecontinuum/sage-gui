@@ -60,8 +60,8 @@ export const formatters = {
       </>
     )
   },
-  repo: (_, {sources}) => {
-    const {url} = sources
+  repo: (_, {source}) => {
+    const {url} = source
 
     if (!url) return <></>
 
