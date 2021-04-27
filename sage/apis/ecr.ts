@@ -106,7 +106,7 @@ type PermissionObj = {
   resourceType: 'string'
 }
 
-export function makePublic(repoObj : Repo, operation = 'add') {
+export function makePublic(repoObj: Repo, operation: Operation = 'add') {
   const {namespace, repo} = repoObj
   return put(`${url}/permissions/${namespace}/${repo}`, {
     operation,
@@ -155,17 +155,26 @@ export async function listApps(onlyPublic = false) {
     .then(data => {
       const allApps = data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
 
-      // reduce to latest
-      const repos = []
-      const apps = allApps.reduce((acc, app) => {
-        const path = app.id.split(':')[0]
-        if (repos.includes(path)) {
+      // reduce to latest (and get versions)
+      let versions = {}
+      let apps = allApps.reduce((acc, app) => {
+        const [repo, ver] = app.id.split(':')
+
+        if (repo in versions) {
+          versions[repo].push(ver)
           return acc
         } else {
-          repos.push(path)
+          versions[repo] = [ver]
           return [...acc, app]
         }
       }, [])
+
+      // merge in versions
+      apps = apps.map(app => ({
+        ...app,
+        versions: versions[app.id.split(':')[0]]
+      }))
+
       return apps
     })
 }

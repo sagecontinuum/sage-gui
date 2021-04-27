@@ -32,8 +32,9 @@ function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
 
 function Row(props) {
   const {data} = props
-  const {namespace, name, version, description, time_last_updated} = data
+  const {namespace, name, version, versions, description, time_last_updated} = data
 
+  const verCount = versions.length
 
   return (
     <AppRow
@@ -62,10 +63,11 @@ function Row(props) {
 
       <div className="flex column items-end">
         <div className="muted">
-          version: {version}
+          Updated {formatters.time(time_last_updated)}<br/>
         </div>
+
         <div className="muted">
-          updated {formatters.time(time_last_updated)}<br/>
+          {verCount > 1 ? `(${verCount} versions)` : ''}
         </div>
 
         <div className="actions">
