@@ -59,12 +59,12 @@ function deleteReq(endpoint: string) {
 
 export type Repo = {
   namespace: string
-  repo: string
+  name: string
 }
 
 export type App = {
   namespace: string,
-  repo: string
+  name: string
   version: string
 }
 
@@ -76,8 +76,8 @@ export function register(appConfig) {
 
 
 export function build(app: App) {
-  const {namespace, repo, version} = app
-  return post(`${url}/builds/${namespace}/${repo}/${version}`)
+  const {namespace, name, version} = app
+  return post(`${url}/builds/${namespace}/${name}/${version}`)
 }
 
 
@@ -90,8 +90,8 @@ export async function registerAndBuild(app: App, appConfig) {
 
 
 export async function deleteApp(app: App) {
-  const {namespace, repo, version} = app
-  const res = await deleteReq(`${url}/apps/${namespace}/${repo}/${version}`)
+  const {namespace, name, version} = app
+  const res = await deleteReq(`${url}/apps/${namespace}/${name}/${version}`)
   return res
 }
 
@@ -107,8 +107,8 @@ type PermissionObj = {
 }
 
 export function makePublic(repoObj: Repo, operation: Operation = 'add') {
-  const {namespace, repo} = repoObj
-  return put(`${url}/permissions/${namespace}/${repo}`, {
+  const {namespace, name} = repoObj
+  return put(`${url}/permissions/${namespace}/${name}`, {
     operation,
     granteeType: 'GROUP',
     grantee: 'AllUsers',
@@ -123,8 +123,8 @@ export function share(
   permission: Permission,
   operation: Operation = 'add'
 ) {
-  const {namespace, repo} = repoObj
-  return put(`${url}/permissions/${namespace}/${repo}`, {
+  const {namespace, name} = repoObj
+  return put(`${url}/permissions/${namespace}/${name}`, {
     operation,
     granteeType: 'USER',
     grantee,
@@ -226,82 +226,3 @@ export function getAppConfig(
   return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)
 }
 
-
-
-
-
-
-/*************/
-
-// DEPRECATED: special, client-side version of a "repo"
-/*
-type Repo = AppDef & {
-  versions?: [{
-    id: string,
-    name: string,
-    namespace: string,
-    version: string
-  }]
-}*/
-
-type ListAppsParams = {
-  includeStatus?: boolean
-}
-
-export async function listAppsDeprecated(params: ListAppsParams = {})  {
-  const {
-    includeStatus = true
-  } = params
-
-  // first get namespaces
-  const nsObjs = await listNamespaces()
-
-  const namespaces = nsObjs.map(o => o.id)
-  const objs = await Promise.all(
-    namespaces.map(namespace => get(`${url}/apps/${namespace}`))
-  )
-
-
-  // join all repos
-  let repos: Repo[] = objs.reduce((acc, obj) => [...acc, ...obj.repositories], [])
-
-  // include versions
-  repos = await Promise.all(
-    repos.map(o => getApp(o.namespace, o.name))
-  )
-
-  // sort versions
-  repos = repos.map(obj => ({
-    ...obj,
-    versions: obj.versions.sort((a, b) => b.version.localeCompare(a.version))
-  }))
-
-  // get permissions
-  const perms = await Promise.all(
-    repos.map(o => listPermissions(`${o.namespace}/${o.name}`))
-  )
-
-  // get app info
-  const details: any[] = await Promise.all(
-    repos.map(o => o.versions.length ?
-      getApp(o.namespace, o.name, o.versions[0].version) : {}
-    )
-  )
-
-  // merge in all the of the above
-  repos = repos.map((obj, i) => ({
-    ...obj,
-    permissions: perms[i],
-    details: details[i],
-    version: obj.versions.length ? obj.versions[0].version : null,
-    id: details[i].id || `id-${i}`
-  }))
-
-
-  // todo: add api method?
-  if (includeStatus) {
-    // implement
-  }
-
-  return repos
-}
