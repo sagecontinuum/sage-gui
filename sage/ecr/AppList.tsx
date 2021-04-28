@@ -10,7 +10,6 @@ import SpaciousIcon from '@material-ui/icons/ViewStream'
 import GithubIcon from '@material-ui/icons/GitHub'
 import Tooltip from '@material-ui/core/Tooltip'
 import ErrorMsg from '../ErrorMsg'
-import { useSnackbar } from 'notistack'
 
 import BeeIcon from 'url:../../assets/bee.svg'
 
@@ -36,7 +35,7 @@ export function VersionTooltip(props: VerTooltipProps) {
       title={
         <>
           <div>Versions:</div>
-          {versions.map(o => <div key={o.version}>{o.version}</div>)}
+          {versions.map(ver => <div key={ver}>{ver}</div>)}
         </>
       }
     >
@@ -56,7 +55,7 @@ export const formatters = {
     return (
       <>
         {versions[versions?.length - 1].version}{' '}
-        (<VersionTooltip versions={versions}/>)
+        <VersionTooltip versions={versions}/>
       </>
     )
   },
@@ -88,7 +87,7 @@ const columns = [
     label: 'Namespace'
   }, {
     id: 'versions',
-    label: 'Version',
+    label: 'Versions',
     format: formatters.versions
   }, {
     id: 'owner_id',
@@ -138,7 +137,6 @@ type Props = {
 export default function AppList(props: Props) {
   const params = useParams()
   const history = useHistory()
-  const { enqueueSnackbar } = useSnackbar()
 
   const query = params.get('query') || ''
 
@@ -191,37 +189,10 @@ export default function AppList(props: Props) {
     history.push({search: params.toString()})
   }
 
-
-  const handleDelete = (evt, app) => {
-    evt.preventDefault()
-    ECR.deleteApp(app)
-      .then(() => {
-        enqueueSnackbar('Deleting app...')
-        return listApps()
-      }).then(() => {
-        enqueueSnackbar('App deleted!', {variant: 'success'})
-      }).catch(() => {
-        enqueueSnackbar('Failed to delete app', {variant: 'error'})
-      })
+  const handleActionComplete = () => {
+    setLoading(true)
+    listApps()
   }
-
-  const handleMakePublic = (evt, app) => {
-    evt.preventDefault()
-    ECR.makePublic(app)
-      .then(() => {
-        enqueueSnackbar('Making app public...')
-        return listApps()
-      }).then(() => {
-        enqueueSnackbar('Your app is not viewable to everybody!', {variant: 'success'})
-      }).catch(() => {
-        enqueueSnackbar('Failed to make app public', {variant: 'error'})
-      })
-  }
-
-  const handleShare = (evt, app) => {
-    alert('sharing is not implemented yet')
-  }
-
 
 
   return (
@@ -263,9 +234,7 @@ export default function AppList(props: Props) {
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
           rows={rows}
-          onDelete={handleDelete}
-          onMakePublic={handleMakePublic}
-          onShare={handleShare}
+          onComplete={handleActionComplete}
         />
       }
 

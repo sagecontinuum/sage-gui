@@ -10,8 +10,11 @@ import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
 import CopyIcon from '@material-ui/icons/FileCopyOutlined'
 import DoneIcon from '@material-ui/icons/DoneOutlined'
 
+import AppActions from './AppActions'
+
 import {useProgress} from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
+
 
 
 
@@ -51,14 +54,31 @@ export default function App() {
   }
 
 
+  const handleActionComplete = () => {
+    // todo: implement
+  }
+
   if (loading) return <></>
 
   return (
     <Root>
-      <h2>
-        {config.namespace} / {config.name} <small className="muted">{config.version}</small>
+      <h2 className="flex justify-between">
+        {config.namespace} / {config.name}
+
+        <div className="actions">
+          <AppActions
+            namespace={config.namespace}
+            name={config.name}
+            version={config.version}
+            condensed={false}
+            onComplete={handleActionComplete}
+          />
+        </div>
       </h2>
+
       <p>{config.description}</p>
+
+      <b>Version:</b> {config.version}<br/>
 
       <div className="flex items-center justify-between">
         <b>App Config</b>
@@ -66,12 +86,12 @@ export default function App() {
         <div>
           <Tooltip title={showFullConfig ? 'Show only app config' : 'Show all details'}>
             <IconButton onClick={() => setShowFullConfig(!showFullConfig)} size="small">
-              {showFullConfig ? <LessIcon fontSize="small" /> : <MoreIcon fontSize="small" />}
+              {showFullConfig ? <LessIcon /> : <MoreIcon />}
             </IconButton>
           </Tooltip>
           <Tooltip title={isCopied ? 'Copied!' : 'Copy contents'}>
             <IconButton onClick={handleCopy} size="small">
-              {isCopied ? <DoneIcon fontSize="small" />  : <CopyIcon fontSize="small"/>}
+              {isCopied ? <DoneIcon  />  : <CopyIcon />}
             </IconButton>
           </Tooltip>
         </div>

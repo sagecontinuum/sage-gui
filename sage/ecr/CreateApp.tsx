@@ -191,7 +191,7 @@ export default function CreateApp() {
     setIsBuilding(true)
 
     const {namespace, name, version} = form
-    ECR.registerAndBuild({namespace, repo: name, version}, config)
+    ECR.registerAndBuild({namespace, name, version}, config)
       .then(() => {
         enqueueSnackbar('Build started')
         history.push('/apps/my-apps')

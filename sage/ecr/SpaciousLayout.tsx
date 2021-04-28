@@ -1,37 +1,16 @@
 import React from 'react'
 import styled from 'styled-components'
+
 import { Link } from 'react-router-dom'
 
-import IconButton from '@material-ui/core/IconButton'
-import DeleteIcon from '@material-ui/icons/DeleteOutline'
-import PublicIcon from '@material-ui/icons/PublicRounded'
-import ShareIcon from '@material-ui/icons/PersonAdd'
-
-import { App } from '../apis/ecr'
+import AppActions from './AppActions'
 import { formatters } from './AppList'
-import Tooltip from '@material-ui/core/Tooltip'
 
 
-type ActionBtnProps = {
-  title: string
-  onClick: (evt: React.MouseEvent) => void
-  icon: JSX.Element
-  style?: object
-}
-
-function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
-  return (
-    <Tooltip title={title}>
-      <IconButton onClick={onClick} style={style}>
-        {icon}
-      </IconButton>
-    </Tooltip>
-  )
-}
 
 
 function Row(props) {
-  const {data} = props
+  const {data, onComplete} = props
   const {namespace, name, version, versions, description, time_last_updated} = data
 
   const verCount = versions.length
@@ -46,7 +25,18 @@ function Row(props) {
           {namespace} / {formatters.name(name, data)}{' '}
         </h2>
 
-        {formatters.repo(null, data)}
+        <div className="flex">
+          {formatters.repo(null, data)}
+
+          {verCount > 1 &&
+            <>&nbsp;|&nbsp;
+              <span className="muted">
+                {verCount} versions
+              </span>
+            </>
+          }
+        </div>
+
         {/*
           data.versions.length != 0 &&
           <>&nbsp;|&nbsp; <VersionTooltip versions={data.versions}/></>
@@ -66,26 +56,12 @@ function Row(props) {
           Updated {formatters.time(time_last_updated)}<br/>
         </div>
 
-        <div className="muted">
-          {verCount > 1 ? `(${verCount} versions)` : ''}
-        </div>
-
         <div className="actions">
-          <ActionBtn
-            title="Share app"
-            icon={<ShareIcon />}
-            onClick={evt => props.onShare(evt, {namespace, repo: name, version})}
-          />
-          <ActionBtn
-            title="Make app public"
-            icon={<PublicIcon />}
-            onClick={evt => props.onMakePublic(evt, {namespace, repo: name, version})}
-          />
-          <ActionBtn
-            title="Delete app"
-            icon={<DeleteIcon />}
-            onClick={evt => props.onDelete(evt, {namespace, repo: name, version})}
-            style={{color: '#912341'}}
+          <AppActions
+            onComplete={onComplete}
+            namespace={namespace}
+            name={name}
+            version={version}
           />
         </div>
       </div>
@@ -124,18 +100,7 @@ const AppRow = styled(Link)`
 
 type Props = {
   rows: {[key: string]: any}
-  onDelete: (
-    event: React.MouseEvent,
-    app: App
-  ) => void
-  onShare: (
-    event: React.MouseEvent,
-    app: App
-  ) => void
-  onMakePublic: (
-    event: React.MouseEvent,
-    app: App
-  ) => void
+  onComplete: () => void
 }
 
 export default function SpaciousLayout(props: Props) {
