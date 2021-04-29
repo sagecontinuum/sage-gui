@@ -7,6 +7,7 @@ import ShareIcon from '@material-ui/icons/PersonAdd'
 import Tooltip from '@material-ui/core/Tooltip'
 import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
+import Divider from '@material-ui/core/Divider'
 import { useSnackbar } from 'notistack'
 
 import * as ECR from '../apis/ecr'
@@ -22,7 +23,7 @@ type ActionBtnProps = {
 function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
   return (
     <Tooltip title={title}>
-      <IconButton onClick={onClick} style={style}>
+      <IconButton onClick={onClick} size="small" style={style}>
         {icon}
       </IconButton>
     </Tooltip>
@@ -56,6 +57,7 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
 
 
 type Props = ECR.App & {
+  isPublic?: boolean
   condensed?: boolean
   onComplete?: () => void
 }
@@ -67,6 +69,7 @@ export default function AppActions(props: Props) {
     name,
     version,
     condensed = true,
+    isPublic,
     onComplete
   } = props
 
@@ -92,11 +95,14 @@ export default function AppActions(props: Props) {
     evt.preventDefault()
 
     const app = {namespace, name, version}
-    ECR.makePublic(app)
+    ECR.makePublic(app, isPublic ? 'delete' : 'add')
       .then(() =>
         enqueueSnackbar('Making app public...')
       ).then(() =>
-        enqueueSnackbar('Your app is not viewable to everybody!', {variant: 'success'})
+        enqueueSnackbar(
+          isPublic ? 'Your app is now private' : 'Your app is now public!',
+          {variant: 'success'}
+        )
       ).catch(() =>
         enqueueSnackbar('Failed to make app public', {variant: 'error'})
       ).finally(() =>
@@ -110,21 +116,21 @@ export default function AppActions(props: Props) {
 
 
   return (
-    <Root>
+    <Root className="flex">
       {condensed ?
         <>
           <ActionBtn
-            title="Share app"
+            title="Share repo"
             icon={<ShareIcon />}
             onClick={handleShare}
           />
           <ActionBtn
-            title="Make app public"
+            title={isPublic ? 'Turn public access off' : 'Make repo public'}
             icon={<PublicIcon />}
             onClick={handleMakePublic}
           />
           <ActionBtn
-            title="Delete app"
+            title="Delete repo"
             icon={<DeleteIcon />}
             onClick={handleDelete}
             style={{color: '#912341'}}

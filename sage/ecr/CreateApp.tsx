@@ -237,10 +237,10 @@ export default function CreateApp() {
     <Root>
       <Main>
 
-        <StepTitle icon="1" active={true} label="Add New App"/>
+        <StepTitle icon="1" active={true} label="Specify Repo URL"/>
         <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
-            label="GitHub/GitLab repo URL"
+            label="GitHub Repo URL"
             placeholder="https://github.com/me/my-edge-app"
             value={repoURL}
             onChange={evt => setRepoURL(evt.target.value)}
@@ -266,7 +266,7 @@ export default function CreateApp() {
         </form>
 
 
-        <StepTitle icon="2" active={true} label="App Configuration" />
+        <StepTitle icon="2" active={true} label="Configuration" />
         <div className="step">
           {configType == 'none' &&
             <p>

@@ -93,14 +93,6 @@ const columns = [
     id: 'owner_id',
     label: 'Owner'
   }, {
-    /*
-      id: 'permissions',
-      label: 'Members',
-      format: (perms) => {
-        return perms.length == 1 ? `Only me` : `${perms.length} members`
-      }
-    */
-  }, {
     id: 'repo',
     label: 'Repo',
     format: formatters.repo
@@ -110,7 +102,6 @@ const columns = [
     format: formatters.time
   }
 ]
-
 
 
 const queryData = (data: object[], query: string) => {

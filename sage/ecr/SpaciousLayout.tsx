@@ -1,6 +1,8 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import PublicIcon from '@material-ui/icons/PublicRounded'
+import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import { Link } from 'react-router-dom'
 
 import AppActions from './AppActions'
@@ -11,7 +13,16 @@ import { formatters } from './AppList'
 
 function Row(props) {
   const {data, onComplete} = props
-  const {namespace, name, version, versions, description, time_last_updated} = data
+  const {
+    namespace,
+    name,
+    version,
+    versions,
+    isPublic,
+    isShared,
+    description,
+    time_last_updated
+  } = data
 
   const verCount = versions.length
 
@@ -21,47 +32,42 @@ function Row(props) {
       to={`app/${namespace}/${name}/${version}`}
     >
       <div className="flex column">
-        <h2 className="no-margin">
-          {namespace} / {formatters.name(name, data)}{' '}
-        </h2>
+        <div className="flex items-center">
+          <h2 className="no-margin">
+            {namespace} / {formatters.name(name, data)}{' '}
+          </h2>
+          &nbsp;
+          {isShared && <SharedIcon />}
+        </div>
 
         <div className="flex">
           {formatters.repo(null, data)}
-
-          {verCount > 1 &&
-            <>&nbsp;|&nbsp;
-              <span className="muted">
-                {verCount} versions
-              </span>
-            </>
-          }
         </div>
-
-        {/*
-          data.versions.length != 0 &&
-          <>&nbsp;|&nbsp; <VersionTooltip versions={data.versions}/></>
-        */}
-
-        {/*
-          data.permissions.length > 1 ?
-          <>&nbsp;|&nbsp;{getFormatter('permissions', spec)(data.permissions)}</> : <></>
-        */}
 
         {description && <p>{description}</p>}
       </div>
 
 
       <div className="flex column items-end">
-        <div className="muted">
-          Updated {formatters.time(time_last_updated)}<br/>
+
+        <div className="flex muted items-center">
+          <div className="flex items-center">
+            {isPublic && <>&nbsp;<PublicIcon /> <span>public</span>&nbsp;|&nbsp;</>}
+            {verCount} tag{verCount > 1 ? 's' : ''}&nbsp;|&nbsp;
+          </div>
+
+          <div>
+            Updated {formatters.time(time_last_updated)}
+          </div>
         </div>
 
         <div className="actions">
           <AppActions
-            onComplete={onComplete}
             namespace={namespace}
             name={name}
             version={version}
+            isPublic={isPublic}
+            onComplete={onComplete}
           />
         </div>
       </div>
@@ -70,7 +76,6 @@ function Row(props) {
 }
 
 const AppRow = styled(Link)`
-  position: relative;
   margin: 20px 0;
   padding: 10px 15px;
   border: 1px solid #ddd;
@@ -89,10 +94,6 @@ const AppRow = styled(Link)`
 
   :hover .actions {
     display: block;
-  }
-
-  svg {
-    font-size: 1em;
   }
 `
 

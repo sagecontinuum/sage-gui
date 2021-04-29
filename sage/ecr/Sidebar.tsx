@@ -26,7 +26,7 @@ export default function Sidebar() {
               color="primary"
               fullWidth
             >
-              <AddIcon/> Add App
+              <AddIcon/> Create App
             </Button>
           </NewApp>
 

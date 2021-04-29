@@ -32,12 +32,12 @@ export default function App() {
 
 
   useEffect(() => {
-    const [namepsace, name, version] = path.split('/')
+    const [namespace, name, version] = path.split('/')
 
     setLoading(true)
     Promise.all([
-      ECR.getAppConfig(namepsace, name, version),
-      ECR.getApp(namepsace, name, version)
+      ECR.getAppConfig({namespace, name, version}),
+      ECR.getApp({namespace, name, version})
     ]).then(([config, fullConfig]) => {
       setConfig(config)
       setFullConfig(fullConfig)

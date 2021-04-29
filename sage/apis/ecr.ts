@@ -74,12 +74,10 @@ export function register(appConfig) {
 }
 
 
-
 export function build(app: App) {
   const {namespace, name, version} = app
   return post(`${url}/builds/${namespace}/${name}/${version}`)
 }
-
 
 
 export async function registerAndBuild(app: App, appConfig) {
@@ -95,6 +93,14 @@ export async function deleteApp(app: App) {
   return res
 }
 
+
+export async function deleteRepo(repo) {
+  const {namespace, name} = repo
+  const res = await deleteReq(`${url}/repositories/${namespace}/${name}`)
+  return res
+}
+
+
 type Operation = 'add' | 'delete'
 type GranteeType = 'USER' | 'GROUP'
 type Permission =  'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
@@ -106,8 +112,8 @@ type PermissionObj = {
   resourceType: 'string'
 }
 
-export function makePublic(repoObj: Repo, operation: Operation = 'add') {
-  const {namespace, name} = repoObj
+export function makePublic(repo: Repo, operation: Operation = 'add') {
+  const {namespace, name} = repo
   return put(`${url}/permissions/${namespace}/${name}`, {
     operation,
     granteeType: 'GROUP',
@@ -118,12 +124,12 @@ export function makePublic(repoObj: Repo, operation: Operation = 'add') {
 
 
 export function share(
-  repoObj: Repo,
+  repo: Repo,
   grantee: string,
   permission: Permission,
   operation: Operation = 'add'
 ) {
-  const {namespace, name} = repoObj
+  const {namespace, name} = repo
   return put(`${url}/permissions/${namespace}/${name}`, {
     operation,
     granteeType: 'USER',
@@ -135,7 +141,6 @@ export function share(
 export function listPermissions(app: string) : Promise<PermissionObj[][]> {
   return get(`${url}/permissions/${app}`)
 }
-
 
 
 type Namespace = {
@@ -150,12 +155,36 @@ export function listNamespaces() : Promise<Namespace[]>{
 }
 
 
-export async function listApps(onlyPublic = false) {
-  return get(`${url}/apps${onlyPublic ? '?public=true' : ''}`)
-    .then(data => {
-      const allApps = data.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
+export async function listApps(onlyPublic = true) {
 
-      // reduce to latest (and get versions)
+  const repoPerm = get(`${url}/repositories?view=permissions`)
+  const appProm = get(`${url}/apps${onlyPublic ? '?public=true' : ''}`)
+
+  return Promise.all([repoPerm, appProm])
+    .then(([repoRes, appRes]) => {
+
+      // API: remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
+      const myRepos = repoRes.data.filter(repo => {
+        if (!repo.permissions) return true
+        else if (repo.owner_id == Auth.owner_id) return true
+
+        const isPublic = repo.permissions.filter(p => p.grantee === 'AllUsers').length > 0
+        return !isPublic
+      })
+
+      // create lookup; todo?: could do merging on repos instead
+      const repoMap = myRepos.reduce((acc, r) =>
+        (`${r.namepsace}/${r.name}` in acc) ?
+          acc : {...acc, [`${r.namespace}/${r.name}`]: r}
+      , {})
+
+
+      // sort by last updated
+      const allApps =
+      appRes.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
+
+
+      // reduce to last updated (and get versions)
       let versions = {}
       let apps = allApps.reduce((acc, app) => {
         const [repo, ver] = app.id.split(':')
@@ -169,11 +198,25 @@ export async function listApps(onlyPublic = false) {
         }
       }, [])
 
-      // merge in versions
-      apps = apps.map(app => ({
-        ...app,
-        versions: versions[app.id.split(':')[0]]
-      }))
+
+      // ignore any apps not in repoMap, and merge in additional data
+      apps = apps
+        .filter(app => app.id.split(':')[0] in repoMap)
+        .map(app => {
+          const repo = app.id.split(':')[0]
+          const repoInfo = repoMap[repo]
+          const permissions = repoInfo.permissions || []
+          const isPublic = permissions.filter(p => p.grantee === 'AllUsers').length > 0
+          // const isShared = permissions.filter(p => p.grantee !== 'AllUsers').length > 0
+
+          return {
+            ...app,
+            versions: versions[repo],
+            permissions,
+            isPublic,
+            isShared: false
+          }
+        })
 
       return apps
     })
@@ -198,31 +241,37 @@ export type AppConfig = {
   }
 }
 
-
-type AppDef = {
-  name: string
-  namespace: string
-  owner_id: string
+type FullAppConfig = AppConfig & {
+  [key: string]: any
 }
 
-export function getApp(
-  namespace: string,
-  name: string,
-  version?: string
-) : Promise<AppConfig | AppDef> {
-
-  if (version)
-    return get(`${url}/apps/${namespace}/${name}/${version}`)
-  else
-    return get(`${url}/apps/${namespace}/${name}`)
-}
-
-
-export function getAppConfig(
-  namespace: string,
-  name: string,
-  version?: string) : Promise<AppConfig> {
-
+export function getAppConfig(app: App) : Promise<AppConfig> {
+  const {namespace, name, version} = app
   return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)
 }
+
+export function getApp(app: App) : Promise<FullAppConfig> {
+  const {namespace, name, version} = app
+  return get(`${url}/apps/${namespace}/${name}/${version}`)
+}
+
+
+
+
+
+/**
+ * the following functions are for testing only
+ */
+
+function __deleteEverything() {
+  const repoPerm = get(`${url}/repositories?view=permissions`)
+  repoPerm.then((res) =>
+    res.data.forEach(repo =>
+      deleteRepo(repo)
+    )
+  )
+}
+
+
+
 

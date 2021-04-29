@@ -39,9 +39,6 @@ const theme = createMuiTheme({
     MuiButtonBase: {
       disableRipple: true,
     },
-    MuiIconButton: {
-      size: 'small',
-    },
     MuiTextField: {
       margin: 'dense',
       variant: 'outlined'
