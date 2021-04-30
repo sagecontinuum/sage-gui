@@ -47,6 +47,7 @@ a.nav-link:hover {
 }
 
 
+
 /**
  *  helpers
  */
@@ -56,13 +57,13 @@ a.nav-link:hover {
 .inactive { color: #888; }
 .muted { color: #888; }
 
-
 .no-margin { margin: 0; }
 .no-padding { padding: 0; }
 .text-color { color: $text-color; }
 .list-none { list-style-type: none; }
+.hover:hover { opacity: .7; }
 
-
+// layout
 .flex { display: flex; }
 .flex.column { flex-direction: column; }
 .flex.row { flex-direction: row; }
@@ -97,4 +98,5 @@ pre.code {
   padding: 10px;
   color: #222;
 }
+
 

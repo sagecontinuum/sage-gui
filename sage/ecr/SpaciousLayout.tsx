@@ -1,14 +1,20 @@
 import React from 'react'
 import styled from 'styled-components'
 
+import Divider from '@material-ui/core/Divider'
+import Tooltip from '@material-ui/core/Tooltip'
+import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import PublicIcon from '@material-ui/icons/PublicRounded'
 import SharedIcon from '@material-ui/icons/PeopleAltRounded'
+import GithubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 
 import AppActions from './AppActions'
-import { formatters } from './AppList'
+import { formatters } from './formatters'
 
 
+const VertDivide = () =>
+  <Divider orientation="vertical" style={{margin: '8px' }} flexItem/>
 
 
 function Row(props) {
@@ -28,54 +34,71 @@ function Row(props) {
 
   return (
     <AppRow
-      className="flex justify-between"
+      className="flex column justify-between"
       to={`app/${namespace}/${name}/${version}`}
     >
-      <div className="flex column">
-        <div className="flex items-center">
-          <h2 className="no-margin">
-            {namespace} / {formatters.name(name, data)}{' '}
-          </h2>
-          &nbsp;
-          {isShared && <SharedIcon />}
-        </div>
+      <div className="flex items-center justify-between">
+        <Repo>
+          {namespace} / {formatters.name(name, data)}{' '}
+        </Repo>
+        &nbsp;
+        {isShared && <SharedIcon />}
 
-        <div className="flex">
-          {formatters.repo(null, data)}
-        </div>
-
-        {description && <p>{description}</p>}
-      </div>
-
-
-      <div className="flex column items-end">
-
-        <div className="flex muted items-center">
-          <div className="flex items-center">
-            {isPublic && <>&nbsp;<PublicIcon /> <span>public</span>&nbsp;|&nbsp;</>}
-            {verCount} tag{verCount > 1 ? 's' : ''}&nbsp;|&nbsp;
+        <div className="flex muted">
+          <div className="flex items-center details">
+            {isPublic &&
+              <>
+                <Info className="flex items-center">
+                  <PublicIcon />&nbsp;<span>public</span>
+                </Info>
+                <VertDivide />
+              </>
+            }
+            <Info>
+              {verCount} tag{verCount > 1 ? 's' : ''}
+            </Info>
+            <VertDivide />
+            <Info>
+              Updated {formatters.time(time_last_updated)}
+            </Info>
           </div>
 
-          <div>
-            Updated {formatters.time(time_last_updated)}
-          </div>
-        </div>
+          <VertDivide />
 
-        <div className="actions">
-          <AppActions
-            namespace={namespace}
-            name={name}
-            version={version}
-            isPublic={isPublic}
-            onComplete={onComplete}
-          />
+          <span className="external-link hover">
+            <Tooltip
+              title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+              placement="top"
+            >
+              <a href={data.source.url}
+                target="_blank"
+                rel="noreferrer"
+                onClick={e => e.stopPropagation()}
+              >
+                <GithubIcon className="text-color" />
+              </a>
+            </Tooltip>
+          </span>
         </div>
       </div>
+
+      <div className="actions">
+        <AppActions
+          namespace={namespace}
+          name={name}
+          version={version}
+          isPublic={isPublic}
+          onComplete={onComplete}
+        />
+      </div>
+
+      {description && <p>{description}</p>}
     </AppRow>
   )
 }
 
 const AppRow = styled(Link)`
+  position: relative;
   margin: 20px 0;
   padding: 10px 15px;
   border: 1px solid #ddd;
@@ -89,13 +112,25 @@ const AppRow = styled(Link)`
   }
 
   .actions {
+    position: absolute;
     display: none;
+    right: 50px;
   }
 
   :hover .actions {
     display: block;
   }
+
+  :hover .details {
+    display: none;
+  }
 `
+
+const Repo = styled.div`
+  font-size: 1.5em;
+  font-weight: 800;
+`
+
 
 
 

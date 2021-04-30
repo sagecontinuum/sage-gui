@@ -22,7 +22,7 @@ type ActionBtnProps = {
 
 function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
   return (
-    <Tooltip title={title}>
+    <Tooltip title={title} placement="top">
       <IconButton onClick={onClick} size="small" style={style}>
         {icon}
       </IconButton>
@@ -52,7 +52,6 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
     </Button>
   )
 }
-
 
 
 
@@ -126,7 +125,11 @@ export default function AppActions(props: Props) {
           />
           <ActionBtn
             title={isPublic ? 'Turn public access off' : 'Make repo public'}
-            icon={<PublicIcon />}
+            icon={
+              isPublic ?
+                <span className="material-icons">public_off</span> :
+                <PublicIcon />
+            }
             onClick={handleMakePublic}
           />
           <ActionBtn
@@ -144,7 +147,7 @@ export default function AppActions(props: Props) {
             onClick={handleShare}
           />
           <FullActionBtn
-            text="Make public"
+            text={isPublic ? 'Make private' : 'Make public'}
             icon={<PublicIcon />}
             onClick={handleMakePublic}
           />

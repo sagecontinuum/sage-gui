@@ -178,11 +178,9 @@ export async function listApps(onlyPublic = true) {
           acc : {...acc, [`${r.namespace}/${r.name}`]: r}
       , {})
 
-
       // sort by last updated
       const allApps =
-      appRes.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
-
+        appRes.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
 
       // reduce to last updated (and get versions)
       let versions = {}
@@ -197,7 +195,6 @@ export async function listApps(onlyPublic = true) {
           return [...acc, app]
         }
       }, [])
-
 
       // ignore any apps not in repoMap, and merge in additional data
       apps = apps
