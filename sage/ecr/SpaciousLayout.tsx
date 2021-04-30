@@ -48,19 +48,19 @@ function Row(props) {
           <div className="flex items-center details">
             {isPublic &&
               <>
-                <Info className="flex items-center">
+                <div className="flex items-center">
                   <PublicIcon />&nbsp;<span>public</span>
-                </Info>
+                </div>
                 <VertDivide />
               </>
             }
-            <Info>
+            <div>
               {verCount} tag{verCount > 1 ? 's' : ''}
-            </Info>
+            </div>
             <VertDivide />
-            <Info>
+            <div>
               Updated {formatters.time(time_last_updated)}
-            </Info>
+            </div>
           </div>
 
           <VertDivide />

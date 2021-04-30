@@ -155,6 +155,13 @@ export function listNamespaces() : Promise<Namespace[]>{
 }
 
 
+export function listVersions(repo: Repo) : Promise<Namespace[]> {
+  const {namespace, name} = repo
+  return get(`${url}/apps/${namespace}/${name}`)
+    .then(data => data.data)
+}
+
+
 export async function listApps(onlyPublic = true) {
 
   const repoPerm = get(`${url}/repositories?view=permissions`)
@@ -238,16 +245,21 @@ export type AppConfig = {
   }
 }
 
-type FullAppConfig = AppConfig & {
-  [key: string]: any
-}
+export type AppDetails =
+  AppConfig & {
+    id: string
+    owner: string
+    frozen: boolean
+    time_created: string
+    time_last_updated: string
+  }
 
 export function getAppConfig(app: App) : Promise<AppConfig> {
   const {namespace, name, version} = app
   return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)
 }
 
-export function getApp(app: App) : Promise<FullAppConfig> {
+export function getAppDetails(app: App) : Promise<AppDetails> {
   const {namespace, name, version} = app
   return get(`${url}/apps/${namespace}/${name}/${version}`)
 }
