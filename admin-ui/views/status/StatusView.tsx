@@ -97,7 +97,7 @@ function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
     const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
 
     const suffix = host.split('.')[1]
-    const key = suffix ? HOST_SUFFIX_MAPPING[suffix] : host
+    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
     byHost[key] = elapsedTime
   })
 
@@ -121,7 +121,7 @@ function getMetric(
     const val = latestOnly ? m[m.length - 1].value : m
 
     const suffix = host.split('.')[1]
-    const key = suffix ? HOST_SUFFIX_MAPPING[suffix] : host
+    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
     valueObj[key] = val
   })
 

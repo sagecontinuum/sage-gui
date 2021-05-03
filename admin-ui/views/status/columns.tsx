@@ -210,7 +210,7 @@ const columns = [
     }
   }, {
     id: 'sysTimes',
-    label: 'Sys Times',
+    label: 'Sys Time',
     format: (val) => {
       if (!val) return '-'
 
@@ -219,7 +219,8 @@ const columns = [
           {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOtps)}
         </div>
       )
-    }
+    },
+    hide: true
   },
   {
     id: 'registration_event',
