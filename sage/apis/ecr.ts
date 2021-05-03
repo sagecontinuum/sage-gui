@@ -138,8 +138,9 @@ export function share(
   })
 }
 
-export function listPermissions(app: string) : Promise<PermissionObj[][]> {
-  return get(`${url}/permissions/${app}`)
+export function listPermissions(repo: Repo) : Promise<PermissionObj[]> {
+  const {namespace, name} = repo
+  return get(`${url}/permissions/${namespace}/${name}`)
 }
 
 
@@ -162,26 +163,37 @@ export function listVersions(repo: Repo) : Promise<Namespace[]> {
     .then(d => d.sort(timeCompare))
 }
 
-
-export async function listApps(onlyPublic = true) {
+type FilterType = 'mine' | 'public'
+export async function listApps(filter: FilterType) {
 
   const repoPerm = get(`${url}/repositories?view=permissions`)
-  const appProm = get(`${url}/apps${onlyPublic ? '?public=true' : ''}`)
+  const appProm = get(`${url}/apps${filter == 'public' ? '?public=true' : ''}`)
 
   return Promise.all([repoPerm, appProm])
     .then(([repoRes, appRes]) => {
 
-      // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
-      const myRepos = repoRes.data.filter(repo => {
-        if (!repo.permissions) return true
-        else if (repo.owner_id == Auth.owner_id) return true
+      let repos = repoRes.data
 
-        const isPublic = repo.permissions.filter(p => p.grantee === 'AllUsers').length > 0
-        return !isPublic
-      })
+      if (filter == 'public') {
+        repos = repos.filter(repo => {
+          const _isPublic = isPublic(repo.permissions)
+          return _isPublic
+        })
+      } else if (filter == 'mine') {
+        // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
+        repos = repos.filter(repo => {
+          if (!repo.permissions) return true
+          else if (repo.owner_id == Auth.owner_id) return true
+
+          const _isPublic = isPublic(repo.permissions)
+          return !_isPublic
+        })
+      } else {
+        throw Error(`listApps: must specify filter: ('public' or 'mine')`)
+      }
 
       // create lookup; todo?: could do merging on repos instead
-      const repoMap = myRepos.reduce((acc, r) =>
+      const repoMap = repos.reduce((acc, r) =>
         (`${r.namepsace}/${r.name}` in acc) ?
           acc : {...acc, [`${r.namespace}/${r.name}`]: r}
       , {})
@@ -275,6 +287,12 @@ export function getAppDetails(app: App) : Promise<AppDetails> {
 /**
  * helpers
  */
+
+
+export function isPublic(permissions: PermissionObj[]) : boolean {
+  return (permissions || []).filter(p => p.grantee === 'AllUsers').length > 0
+}
+
 
 const timeCompare = (a, b) =>
   b.time_last_updated.localeCompare(a.time_last_updated)

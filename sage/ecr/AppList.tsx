@@ -90,12 +90,13 @@ export default function AppList(props: Props) {
     setView(props.view)
   }, [props.view])
 
-  const listApps = useCallback((onlyPublic = false) => {
-    return ECR.listApps(onlyPublic)
+  const listApps = useCallback(() => {
+    const opts = view == 'explore' ? 'public' : 'mine'
+    return ECR.listApps(opts)
       .then(data => setData(data))
       .catch(error => setError(error.message))
       .finally(() => setLoading(false))
-  }, [setData, setError, setLoading])
+  }, [setData, setError, setLoading, view])
 
   useEffect(() => {
     setLoading(true)
@@ -104,8 +105,6 @@ export default function AppList(props: Props) {
       setData([])
       setLoading(false)
       return
-    } else if (view == 'explore') {
-      listApps(true)
     } else {
       listApps()
     }
@@ -145,19 +144,23 @@ export default function AppList(props: Props) {
 
         <div className="flex">
           {view !== 'explore' &&
-            <Button
-              component={Link}
-              to="/apps/create-app"
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon/>}
-              size="small"
-              fullWidth
-            >
-              Create app
-            </Button>
+            <>
+              <Button
+                component={Link}
+                to="/apps/create-app"
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon/>}
+                size="small"
+                fullWidth
+              >
+                Create app
+              </Button>
+
+              <Divider orientation="vertical" style={{margin: '0 8px 0 5px'}} flexItem />
+            </>
           }
-          <Divider orientation="vertical" style={{margin: '0 8px 0 5px'}} flexItem />
+
           <IconButton
             onClick={() => setViewStyle('compact')}
             style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}

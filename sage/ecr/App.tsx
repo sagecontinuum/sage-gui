@@ -13,24 +13,6 @@ import * as ECR from '../apis/ecr'
 import Versions from './Versions'
 
 
-function TagsTable(props) {
-  const {versions} = props
-
-  return (
-    <table className="stiped">
-      <thead>
-        <tr><th>Tag</th></tr>
-      </thead>
-      <tbody>
-        {versions.map(obj => {
-          const {version} = obj
-          return <tr key={version}><td>{version}</td></tr>
-        })}
-      </tbody>
-    </table>
-  )
-}
-
 
 export default function App() {
   const { path } = useParams()
@@ -38,6 +20,7 @@ export default function App() {
   const { loading, setLoading } = useProgress()
   const [config, setConfig] = useState<ECR.AppConfig>(null)
   const [versions, setVersions] = useState(null)
+  const [isPublic, setIsPublic] = useState(null)
   const [error, setError] = useState(null)
 
 
@@ -48,10 +31,12 @@ export default function App() {
     setLoading(true)
     Promise.all([
       ECR.getAppConfig({namespace, name, version}),
-      ECR.listVersions({namespace, name})
-    ]).then(([config, versions]) => {
+      ECR.listVersions({namespace, name}),
+      ECR.listPermissions({namespace, name})
+    ]).then(([config, versions, perms]) => {
       setConfig(config)
       setVersions(versions)
+      setIsPublic(ECR.isPublic(perms))
     }).catch(err => setError(err))
       .finally(() => setLoading(false))
 
@@ -77,6 +62,8 @@ export default function App() {
             version={config.version}
             condensed={false}
             onComplete={handleActionComplete}
+            versionCount={versions.length}
+            isPublic={isPublic}
           />
         </div>
       </h2>

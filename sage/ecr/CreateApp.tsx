@@ -28,7 +28,7 @@ const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
 
 // Todo: need better examples
 const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
-const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
+// const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
 // const EXAMPLE_REPO_3 = 'https://github.com/nconrad/plugin-helloworld-ml'
 
 
@@ -342,8 +342,8 @@ export default function CreateApp() {
           </li>
         </ul>
         <ul className="no-padding list-none">
-          <li><a onClick={onExampleOne}>Use Example One</a></li>
-          <li><a onClick={onExampleTwo}>Use Example Two</a></li>
+          <li><a onClick={onExampleOne}>Use Helloworld ML</a></li>
+          {/*<li><a onClick={onExampleTwo}>Use Example Two</a></li>*/}
           {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
         </ul>
       </Help>

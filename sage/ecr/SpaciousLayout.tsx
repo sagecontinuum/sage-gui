@@ -38,11 +38,13 @@ function Row(props) {
       to={`app/${namespace}/${name}/${version}`}
     >
       <div className="flex items-center justify-between">
-        <Repo>
-          {namespace} / {formatters.name(name, data)}{' '}
-        </Repo>
-        &nbsp;
-        {isShared && <SharedIcon />}
+        <div className="flex items-center">
+          <Repo>
+            {namespace} / {formatters.name(name, data)}{' '}
+          </Repo>
+          &nbsp;
+          <div className="muted">{isShared && <SharedIcon />}</div>
+        </div>
 
         <div className="flex column items-end muted">
           <div className="flex items-center details">

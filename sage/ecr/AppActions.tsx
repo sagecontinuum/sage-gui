@@ -7,7 +7,6 @@ import ShareIcon from '@material-ui/icons/PersonAdd'
 import Tooltip from '@material-ui/core/Tooltip'
 import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
-import Divider from '@material-ui/core/Divider'
 
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
 import { useSnackbar } from 'notistack'
