@@ -44,7 +44,7 @@ function Row(props) {
         &nbsp;
         {isShared && <SharedIcon />}
 
-        <div className="flex muted">
+        <div className="flex column items-end muted">
           <div className="flex items-center details">
             {isPublic &&
               <>
@@ -61,35 +61,37 @@ function Row(props) {
             <div>
               Updated {formatters.time(time_last_updated)}
             </div>
+
+            <VertDivide />
+
+            <span className="external-link hover">
+              <Tooltip
+                title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+                placement="top"
+              >
+                <a href={data.source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <GithubIcon className="text-color" />
+                </a>
+              </Tooltip>
+            </span>
           </div>
 
-          <VertDivide />
-
-          <span className="external-link hover">
-            <Tooltip
-              title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}
-              placement="top"
-            >
-              <a href={data.source.url}
-                target="_blank"
-                rel="noreferrer"
-                onClick={e => e.stopPropagation()}
-              >
-                <GithubIcon className="text-color" />
-              </a>
-            </Tooltip>
-          </span>
+          <div className="actions">
+            <AppActions
+              namespace={namespace}
+              name={name}
+              version={version}
+              isPublic={isPublic}
+              onComplete={onComplete}
+              versionCount={versions.length}
+            />
+          </div>
         </div>
-      </div>
 
-      <div className="actions">
-        <AppActions
-          namespace={namespace}
-          name={name}
-          version={version}
-          isPublic={isPublic}
-          onComplete={onComplete}
-        />
       </div>
 
       {description && <p>{description}</p>}
@@ -114,7 +116,8 @@ const AppRow = styled(Link)`
   .actions {
     position: absolute;
     display: none;
-    right: 50px;
+    bottom: .5rem;
+    right: .6rem;
   }
 
   :hover .actions {
@@ -122,7 +125,7 @@ const AppRow = styled(Link)`
   }
 
   :hover .details {
-    display: none;
+    // display: none;
   }
 `
 

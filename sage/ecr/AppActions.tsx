@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import styled from 'styled-components'
 
 import DeleteIcon from '@material-ui/icons/DeleteOutline'
@@ -8,6 +8,8 @@ import Tooltip from '@material-ui/core/Tooltip'
 import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
+
+import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
 import { useSnackbar } from 'notistack'
 
 import * as ECR from '../apis/ecr'
@@ -58,6 +60,7 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
 type Props = ECR.App & {
   isPublic?: boolean
   condensed?: boolean
+  versionCount: number
   onComplete?: () => void
 }
 
@@ -72,11 +75,20 @@ export default function AppActions(props: Props) {
     onComplete
   } = props
 
-
+  const [confirm, setConfirm] = useState(false)
+  const [publish, setPublish] = useState(false)
 
   const handleDelete = (evt) => {
     evt.preventDefault()
+    setConfirm(true)
+  }
 
+  const handleMakePublic = (evt) => {
+    evt.preventDefault()
+    setPublish(true)
+  }
+
+  const onDelete = () => {
     const app = {namespace, name, version}
     ECR.deleteApp(app)
       .then(() =>
@@ -90,9 +102,7 @@ export default function AppActions(props: Props) {
       )
   }
 
-  const handleMakePublic = (evt) => {
-    evt.preventDefault()
-
+  const onMakePublic = () => {
     const app = {namespace, name, version}
     ECR.makePublic(app, isPublic ? 'delete' : 'add')
       .then(() =>
@@ -108,6 +118,7 @@ export default function AppActions(props: Props) {
         onComplete && onComplete()
       )
   }
+
 
   const handleShare = (evt) => {
     alert('sharing is not implemented yet')
@@ -158,6 +169,25 @@ export default function AppActions(props: Props) {
             style={{color: '#912341', border: '1px solid #912341'}}
           />
         </div>
+      }
+
+      {confirm &&
+        <ConfirmationDialog
+          title={<>Are you sure you want to delete <i>{namespace}/{name}</i>?</>}
+          content={`Note ${props.versionCount} tags will be deleted!`}
+          confirmBtnText="Delete"
+          confirmBtnStyle={{background: '#c70000'}}
+          onConfirm={onDelete}
+          onClose={() => setConfirm(false)} />
+      }
+
+      {publish &&
+        <ConfirmationDialog
+          title={<>Are you sure you want make <i>{namespace}/{name}</i> publicly readable?</>}
+          content={`Note: You repo, ${name}, will be viewable without a sage account. `}
+          confirmBtnText="Make public"
+          onConfirm={onMakePublic}
+          onClose={() => setPublish(false)} />
       }
     </Root>
   )
