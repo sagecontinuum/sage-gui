@@ -33,7 +33,7 @@ export default function CreateDialog(props: Props) {
 
   const [loading, setLoading] = useState(false)
 
-  const onSubmit = (evt) => {
+  const handleSubmit = (evt) => {
     evt.preventDefault()
     setLoading(true)
 
@@ -50,9 +50,14 @@ export default function CreateDialog(props: Props) {
     }
   }
 
+  const handleClose = (evt) => {
+    evt.preventDefault()
+    if (onClose) onClose()
+  }
+
   return (
-    <Dialog open onClose={onClose} aria-labelledby="form-dialog-title">
-      <form onSubmit={onSubmit}>
+    <Dialog open onClose={handleClose} aria-labelledby="form-dialog-title">
+      <form onSubmit={handleSubmit}>
         <DialogTitle id="form-dialog-title">{title}</DialogTitle>
         <DialogContent>
           {contentTitle &&
@@ -65,7 +70,7 @@ export default function CreateDialog(props: Props) {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose} color="primary">
+          <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
 
@@ -75,6 +80,7 @@ export default function CreateDialog(props: Props) {
             variant="contained"
             disabled={loading}
             style={confirmBtnStyle}
+            onClick={handleSubmit}
           >
             {(loading && loadingText) ? loadingText : confirmBtnText}
           </Button>

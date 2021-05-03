@@ -38,7 +38,7 @@ const Root = styled.div`
   top: 0;
   width: 100%;
   background: #fff;
-  z-index: 9999;
+  z-index: 1000;
   display: flex;
   align-items: center;
   padding: 0 20px;

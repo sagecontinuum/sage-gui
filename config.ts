@@ -12,7 +12,8 @@ export default  {
     activityLength: 50,     // number of data points for ticker
     hostSuffixMapping: {    // mapping for host suffix to short names (displayed in UI)
       'ws-rpi': 'rpi',
-      'ws-nxcore': 'nx'
+      'ws-nxcore': 'nx',
+      'ws-nxagent': 'nxagent'
     },
     disableMap: false
   },

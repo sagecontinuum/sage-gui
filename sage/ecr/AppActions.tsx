@@ -90,7 +90,7 @@ export default function AppActions(props: Props) {
 
   const onDelete = () => {
     const app = {namespace, name, version}
-    ECR.deleteApp(app)
+    return ECR.deleteApp(app)
       .then(() =>
         enqueueSnackbar('Deleting app...')
       ).then(() =>
@@ -104,7 +104,7 @@ export default function AppActions(props: Props) {
 
   const onMakePublic = () => {
     const app = {namespace, name, version}
-    ECR.makePublic(app, isPublic ? 'delete' : 'add')
+    return ECR.makePublic(app, isPublic ? 'delete' : 'add')
       .then(() =>
         enqueueSnackbar('Making app public...')
       ).then(() =>
@@ -173,7 +173,7 @@ export default function AppActions(props: Props) {
 
       {confirm &&
         <ConfirmationDialog
-          title={<>Are you sure you want to delete <i>{namespace}/{name}</i>?</>}
+          title={<>Are you sure you want to delete "<b>{namespace}/{name}</b>"?</>}
           content={`Note ${props.versionCount} tags will be deleted!`}
           confirmBtnText="Delete"
           confirmBtnStyle={{background: '#c70000'}}
@@ -183,9 +183,17 @@ export default function AppActions(props: Props) {
 
       {publish &&
         <ConfirmationDialog
-          title={<>Are you sure you want make <i>{namespace}/{name}</i> publicly readable?</>}
-          content={`Note: You repo, ${name}, will be viewable without a sage account. `}
-          confirmBtnText="Make public"
+          title={isPublic ?
+            <>Make "<b>{namespace}/{name}</b>" publicly readable...</> :
+            <>Make "<b>{namespace}/{name}</b>" private...</>
+          }
+          content={
+            isPublic ?
+              <>Your repo will no longer be publicly viewable.  Are you sure?</> :
+              <>Your repo, "<b>{name}</b>", will be viewable without signing in.  Are you sure?</>
+          }
+          confirmBtnText={isPublic ? 'Make it private' : 'Make it public'}
+          confirmBtnStyle={isPublic ? {background: '#c70000'} : {}}
           onConfirm={onMakePublic}
           onClose={() => setPublish(false)} />
       }

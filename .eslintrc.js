@@ -27,7 +27,13 @@ module.exports = {
     'semi': ['error', 'never'],
     'react/prop-types': 0,
     'no-unused-vars': 'off',
-    '@typescript-eslint/no-unused-vars': 'error'
+    '@typescript-eslint/no-unused-vars': 'error',
+    'react/no-unescaped-entities': [
+      'error',
+      {
+        forbid: ['>', '}'],
+      },
+    ],
   },
   'globals': {
     'document': true,
