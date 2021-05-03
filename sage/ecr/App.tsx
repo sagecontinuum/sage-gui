@@ -1,46 +1,57 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
+
+import LaunchIcon from '@material-ui/icons/LaunchRounded'
+
 import ErrorMsg from '../ErrorMsg'
-
-import Tooltip from '@material-ui/core/Tooltip'
-import IconButton from '@material-ui/core/IconButton'
-import MoreIcon from '@material-ui/icons/UnfoldMoreOutlined'
-import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
-import CopyIcon from '@material-ui/icons/FileCopyOutlined'
-import DoneIcon from '@material-ui/icons/DoneOutlined'
-
 import AppActions from './AppActions'
 
 import {useProgress} from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
 
+import Versions from './Versions'
 
+
+function TagsTable(props) {
+  const {versions} = props
+
+  return (
+    <table className="stiped">
+      <thead>
+        <tr><th>Tag</th></tr>
+      </thead>
+      <tbody>
+        {versions.map(obj => {
+          const {version} = obj
+          return <tr key={version}><td>{version}</td></tr>
+        })}
+      </tbody>
+    </table>
+  )
+}
 
 
 export default function App() {
   const { path } = useParams()
 
   const { loading, setLoading } = useProgress()
-  const [config, setConfig] = useState<ECR.AppConfig>({})
-  const [fullConfig, setFullConfig] = useState({})
+  const [config, setConfig] = useState<ECR.AppConfig>(null)
+  const [versions, setVersions] = useState(null)
   const [error, setError] = useState(null)
-
-  const [showFullConfig, setShowFullConfig] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
-
 
 
   useEffect(() => {
+
     const [namespace, name, version] = path.split('/')
 
     setLoading(true)
     Promise.all([
       ECR.getAppConfig({namespace, name, version}),
-      ECR.getApp({namespace, name, version})
-    ]).then(([config, fullConfig]) => {
+      ECR.listVersions({namespace, name})
+    ]).then(([config, versions]) => {
       setConfig(config)
-      setFullConfig(fullConfig)
+      setVersions(versions)
     }).catch(err => setError(err))
       .finally(() => setLoading(false))
 
@@ -48,17 +59,11 @@ export default function App() {
 
 
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JSON.stringify(config, null, 4))
-    setIsCopied(true)
-  }
-
-
   const handleActionComplete = () => {
     // todo: implement
   }
 
-  if (loading) return <></>
+  if (loading || !config) return <></>
 
   return (
     <Root>
@@ -78,34 +83,19 @@ export default function App() {
 
       <p>{config.description}</p>
 
-      <b>Version:</b> {config.version}<br/>
-
-      <div className="flex items-center justify-between">
-        <b>App Config</b>
-
-        <div>
-          <Tooltip title={showFullConfig ? 'Show only app config' : 'Show all details'}>
-            <IconButton onClick={() => setShowFullConfig(!showFullConfig)} size="small">
-              {showFullConfig ? <LessIcon /> : <MoreIcon />}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={isCopied ? 'Copied!' : 'Copy contents'}>
-            <IconButton onClick={handleCopy} size="small">
-              {isCopied ? <DoneIcon  />  : <CopyIcon />}
-            </IconButton>
-          </Tooltip>
-        </div>
-      </div>
-
-      <pre className="code">
-        {showFullConfig ?
-          JSON.stringify(fullConfig, null, 4) : JSON.stringify(config, null, 4)
-        }
-      </pre>
+      <b>Repo:</b> <a href={config.source.url} target="_blank" rel="noreferrer">
+        {config.source.url} <LaunchIcon className="external-icon"/>
+      </a>
 
       {error &&
         <ErrorMsg>{error}</ErrorMsg>
       }
+
+      {versions &&
+        <Versions
+          versions={versions} />
+      }
+
     </Root>
   )
 }

@@ -74,9 +74,9 @@ export function register(appConfig) {
 }
 
 
-export function build(app: App) {
+export function build(app: App, skipPush = true) {
   const {namespace, name, version} = app
-  return post(`${url}/builds/${namespace}/${name}/${version}`)
+  return post(`${url}/builds/${namespace}/${name}/${version}${skipPush && `?skip_image_push=true`}`)
 }
 
 
@@ -159,6 +159,7 @@ export function listVersions(repo: Repo) : Promise<Namespace[]> {
   const {namespace, name} = repo
   return get(`${url}/apps/${namespace}/${name}`)
     .then(data => data.data)
+    .then(d => d.sort(timeCompare))
 }
 
 
@@ -170,7 +171,7 @@ export async function listApps(onlyPublic = true) {
   return Promise.all([repoPerm, appProm])
     .then(([repoRes, appRes]) => {
 
-      // API: remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
+      // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
       const myRepos = repoRes.data.filter(repo => {
         if (!repo.permissions) return true
         else if (repo.owner_id == Auth.owner_id) return true
@@ -187,7 +188,7 @@ export async function listApps(onlyPublic = true) {
 
       // sort by last updated
       const allApps =
-        appRes.data.sort((a, b) => b.time_last_updated.localeCompare(a.time_last_updated))
+        appRes.data.sort(timeCompare)
 
       // reduce to last updated (and get versions)
       let versions = {}
@@ -235,6 +236,10 @@ export type AppConfig = {
   namespace: string
   source: {
     architectures: string[]
+    branch: string
+    directory: string
+    dockerfile: string
+    url: string
   }
   url: string
   directory: string
@@ -255,6 +260,7 @@ export type AppDetails =
   }
 
 export function getAppConfig(app: App) : Promise<AppConfig> {
+  // todo(wg): add `view=app` for repos(?)
   const {namespace, name, version} = app
   return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)
 }
@@ -264,6 +270,14 @@ export function getAppDetails(app: App) : Promise<AppDetails> {
   return get(`${url}/apps/${namespace}/${name}/${version}`)
 }
 
+
+
+/**
+ * helpers
+ */
+
+const timeCompare = (a, b) =>
+  b.time_last_updated.localeCompare(a.time_last_updated)
 
 
 

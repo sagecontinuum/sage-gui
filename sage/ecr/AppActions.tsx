@@ -43,7 +43,7 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
   return (
     <Button
       onClick={onClick}
-      style={{...style, marginLeft: 10}}
+      style={{...style}}
       variant="outlined"
       color="primary"
       size="small"
@@ -140,7 +140,7 @@ export default function AppActions(props: Props) {
           />
         </>
         :
-        <>
+        <div className="flex btn-gap">
           <FullActionBtn
             text="Share"
             icon={<ShareIcon />}
@@ -157,7 +157,7 @@ export default function AppActions(props: Props) {
             onClick={handleDelete}
             style={{color: '#912341', border: '1px solid #912341'}}
           />
-        </>
+        </div>
       }
     </Root>
   )

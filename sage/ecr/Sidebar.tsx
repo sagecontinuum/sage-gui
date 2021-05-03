@@ -16,30 +16,14 @@ export default function Sidebar() {
 
   return (
     <Root>
-      {location.pathname != '/apps/create-app' &&
-        <>
-          <NewApp>
-            <Button
-              component={Link}
-              to="/apps/create-app"
-              variant="contained"
-              color="primary"
-              fullWidth
-            >
-              <AddIcon/> Create App
-            </Button>
-          </NewApp>
-
-          <Divider style={{margin: '20px 10px'}}/>
-        </>
-      }
-
-      {/*<Item to="/apps/certified-apps">
+      {/*
+      <Item to="/apps/certified-apps">
         <span className="material-icons">
           verified
         </span>&nbsp;Certified Apps
-      </Item>*/}
-
+      </Item>
+      */
+      }
       <Item to="/apps/explore"><PublicIcon /> Explore</Item>
       <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
       <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
@@ -48,7 +32,7 @@ export default function Sidebar() {
 }
 
 const Root = styled.div`
-  padding-top: 20px;
+  padding-top: 30px;
   min-width: 200px;
   border-right: 1px solid #ddd;
 `
@@ -57,9 +41,9 @@ const NewApp = styled.div`
   margin: 10px;
 `
 
-
 const primaryColor = 'rgb(28, 140, 201)'
 const secondaryColor = '#8166a0'
+
 
 const Item = styled(NavLink)`
   display: flex;

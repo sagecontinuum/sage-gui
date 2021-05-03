@@ -7,6 +7,10 @@ import IconButton from '@material-ui/core/IconButton'
 import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import SpaciousIcon from '@material-ui/icons/ViewStream'
 
+import Button from '@material-ui/core/Button'
+import AddIcon from '@material-ui/icons/AddRounded'
+import Divider from '@material-ui/core/Divider'
+
 import ErrorMsg from '../ErrorMsg'
 
 import BeeIcon from 'url:../../assets/bee.svg'
@@ -130,13 +134,30 @@ export default function AppList(props: Props) {
 
   return (
     <Root>
-      <Controls>
-        <TableSearch
-          onSearch={onSearch}
-          width="300px"
-        />
-
+      <Controls className="flex items-center justify-between">
         <div>
+          <TableSearch
+            onSearch={onSearch}
+            width="300px"
+          />
+        </div>
+
+
+        <div className="flex">
+          {view !== 'explore' &&
+            <Button
+              component={Link}
+              to="/apps/create-app"
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon/>}
+              size="small"
+              fullWidth
+            >
+              Create app
+            </Button>
+          }
+          <Divider orientation="vertical" style={{margin: '0 8px 0 5px'}} flexItem />
           <IconButton
             onClick={() => setViewStyle('compact')}
             style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
@@ -198,17 +219,11 @@ const Root = styled.div`
 `
 
 const Controls = styled.div`
-  display: flex;
-  align-items: center;
-
   .MuiButton-root,
   .MuiFormControlLabel-root {
     margin: 0 10px;
   }
 
-  & :last-child {
-    margin-left: auto;
-  }
 `
 
 const NoneFound = styled.div`
@@ -221,4 +236,9 @@ const NoneFound = styled.div`
     filter: drop-shadow(0px 0px 0.3rem #ccc);
   }
 `
+
+const NewApp = styled.div`
+
+`
+
 

@@ -73,6 +73,9 @@ table.striped {
 .list-none { list-style-type: none; }
 .hover:hover { opacity: .7; }
 
+.gap { gap: 1rem; }
+.btn-gap { gap: .6rem; }
+
 // layout
 .flex { display: flex; }
 .flex.column { flex-direction: column; }
@@ -91,6 +94,14 @@ table.striped {
 .justify-around { justify-content: space-around; }
 .justify-evenly { justify-content: space-evenly; }
 
+.w-full	{width: 100%; }
+.w-screen	{width: 100vw; }
+.w-min { width: min-content; }
+.w-max { width: max-content; }
+
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+
 
 /**
  * global util classes
@@ -108,5 +119,18 @@ pre.code {
   padding: 10px;
   color: #222;
 }
+
+[target=_blank] .external-icon {
+  visibility: hidden;
+  font-size: 1rem;
+  position: absolute;
+}
+
+[target=_blank]:hover .external-icon {
+  visibility: visible;
+  color: #666;
+  margin-left: 5px;
+}
+
 
 
