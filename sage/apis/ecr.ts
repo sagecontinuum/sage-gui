@@ -57,6 +57,11 @@ function deleteReq(endpoint: string) {
 }
 
 
+
+/**
+ * actions
+ */
+
 export type Repo = {
   namespace: string
   name: string
@@ -123,6 +128,7 @@ export async function deleteApp(app: App) {
   return res
 }
 
+
 export async function deleteRepo(repo) {
   const {namespace, name} = repo
 
@@ -137,6 +143,10 @@ export async function deleteRepo(repo) {
   return res
 }
 
+
+/**
+ * permissions
+ */
 
 type Operation = 'add' | 'delete'
 type GranteeType = 'USER' | 'GROUP'
@@ -180,6 +190,11 @@ export function listPermissions(repo: Repo) : Promise<PermissionObj[]> {
   return get(`${url}/permissions/${namespace}/${name}`)
 }
 
+
+
+/**
+ * listings
+ */
 
 type Namespace = {
   id: string
@@ -275,6 +290,10 @@ export async function listApps(filter: FilterType) {
       return apps
     })
 }
+
+/**
+ * retrival
+ */
 
 
 export function getAppConfig(app: App) : Promise<AppConfig> {

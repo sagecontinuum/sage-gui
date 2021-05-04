@@ -9,7 +9,7 @@ import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import GithubIcon from '@material-ui/icons/GitHub'
 import { Link } from 'react-router-dom'
 
-import AppActions from './AppActions'
+import RepoActions from './RepoActions'
 import { formatters } from './formatters'
 
 
@@ -83,7 +83,7 @@ function Row(props) {
           </div>
 
           <div className="actions">
-            <AppActions
+            <RepoActions
               namespace={namespace}
               name={name}
               version={version}

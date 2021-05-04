@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 
 import ErrorMsg from '../ErrorMsg'
-import AppActions from './AppActions'
+import RepoActions from './RepoActions'
 
 import {useProgress} from '../../components/progress/Progress'
 import * as ECR from '../apis/ecr'
@@ -52,11 +52,11 @@ export default function App() {
 
   return (
     <Root>
-      <h2 className="flex justify-between">
+      <h1 className="flex justify-between">
         {config.namespace} / {config.name}
 
         <div className="actions">
-          <AppActions
+          <RepoActions
             namespace={config.namespace}
             name={config.name}
             version={config.version}
@@ -66,7 +66,7 @@ export default function App() {
             isPublic={isPublic}
           />
         </div>
-      </h2>
+      </h1>
 
       <p>{config.description}</p>
 

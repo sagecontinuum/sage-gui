@@ -1,29 +1,16 @@
 import React from 'react'
 import styled from 'styled-components'
-import { NavLink, Link, useLocation} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
-import Button from '@material-ui/core/Button'
 import UserIcon from '@material-ui/icons/AccountCircleRounded'
 import SharedIcon from '@material-ui/icons/SupervisedUserCircle'
 import PublicIcon from '@material-ui/icons/PublicRounded'
-import AddIcon from '@material-ui/icons/AddRounded'
-import Divider from '@material-ui/core/Divider'
 
 
 
 export default function Sidebar() {
-  let location = useLocation()
-
   return (
     <Root>
-      {/*
-      <Item to="/apps/certified-apps">
-        <span className="material-icons">
-          verified
-        </span>&nbsp;Certified Apps
-      </Item>
-      */
-      }
       <Item to="/apps/explore"><PublicIcon /> Explore</Item>
       <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
       <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
@@ -32,14 +19,12 @@ export default function Sidebar() {
 }
 
 const Root = styled.div`
-  padding-top: 30px;
+  padding-top: 35px;
   min-width: 200px;
   border-right: 1px solid #ddd;
+
 `
 
-const NewApp = styled.div`
-  margin: 10px;
-`
 
 const primaryColor = 'rgb(28, 140, 201)'
 const secondaryColor = '#8166a0'

@@ -107,7 +107,7 @@ export default function ConfigForm(props: Props) {
             control={
               <CheckBox
                 name="architectures"
-                checked={form.source.architectures.includes(arch)}
+                checked={form.source?.architectures?.includes(arch)}
                 onChange={(evt) => handleChange(evt, arch)}
                 icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                 checkedIcon={<CheckBoxIcon fontSize="small" />}

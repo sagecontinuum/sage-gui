@@ -110,7 +110,7 @@ export default function Versions(props: Props) {
 
   return (
     <Root>
-      <h4>Tags</h4>
+      <h2>Tags</h2>
       {versions.map((ver, i) => {
         const {
           version,
@@ -189,8 +189,8 @@ export default function Versions(props: Props) {
                         JSON.stringify(cfgMap[version], null, 4)
                       ) :
                       (format == 'yaml' ?
-                        jsyaml.dump(versions.filter(ver => ver.version == version)):
-                        JSON.stringify(versions.filter(ver => ver.version == version), null, 4)
+                        jsyaml.dump(versions.filter(ver => ver.version == version)[0]):
+                        JSON.stringify(versions.filter(ver => ver.version == version)[0], null, 4)
                       )
                     }
                   </pre>
