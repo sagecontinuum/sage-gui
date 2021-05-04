@@ -54,7 +54,7 @@ export default function ConfigForm(props: Props) {
 
 
   return (
-    <Root className="flex column">
+    <Form className="flex column" autoComplete="off">
       <div className="flex row">
         <TextField
           label="Namespace"
@@ -119,11 +119,11 @@ export default function ConfigForm(props: Props) {
           />
         )}
       </FormControl>
-    </Root>
+    </Form>
   )
 }
 
-const Root = styled.div`
+const Form = styled.form`
   margin-top: 15px;
 
   .MuiTextField-root, .MuiFormControl-root {
