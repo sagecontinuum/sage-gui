@@ -130,9 +130,7 @@ function getMetric(
 
 
 const determineStatus = (elaspedTimes: {[host: string]: number}) => {
-  if (Object.values(elaspedTimes).length !== HOST_COUNT)
-    return 'failed'
-  else if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
+  if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
     return 'failed'
   return 'active'
 }

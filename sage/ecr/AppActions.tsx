@@ -88,8 +88,8 @@ export default function AppActions(props: Props) {
   }
 
   const onDelete = () => {
-    const app = {namespace, name, version}
-    return ECR.deleteApp(app)
+    const repo = {namespace, name}
+    return ECR.deleteRepo(repo)
       .then(() =>
         enqueueSnackbar('Deleting app...')
       ).then(() =>
@@ -102,8 +102,8 @@ export default function AppActions(props: Props) {
   }
 
   const onMakePublic = () => {
-    const app = {namespace, name, version}
-    return ECR.makePublic(app, isPublic ? 'delete' : 'add')
+    const repo = {namespace, name}
+    return ECR.makePublic(repo, isPublic ? 'delete' : 'add')
       .then(() =>
         enqueueSnackbar('Making app public...')
       ).then(() =>
@@ -172,8 +172,8 @@ export default function AppActions(props: Props) {
 
       {confirm &&
         <ConfirmationDialog
-          title={<>Are you sure you want to delete "<b>{namespace}/{name}</b>"?</>}
-          content={`Note ${props.versionCount} tags will be deleted!`}
+          title={`Are you sure you want to delete this?`}
+          content={<><b>"{namespace}/{name}"</b> and {props.versionCount} associated tag{props.versionCount > 1 ? 's' : ''} will be deleted!</>}
           confirmBtnText="Delete"
           confirmBtnStyle={{background: '#c70000'}}
           onConfirm={onDelete}
@@ -183,13 +183,16 @@ export default function AppActions(props: Props) {
       {publish &&
         <ConfirmationDialog
           title={isPublic ?
-            <>Make "<b>{namespace}/{name}</b>" publicly readable...</> :
-            <>Make "<b>{namespace}/{name}</b>" private...</>
+            <>Make "<b>{namespace}/{name}</b>" private...</> :
+            <>Make "<b>{namespace}/{name}</b>" publicly readable...</>
           }
           content={
             isPublic ?
               <>Your repo will no longer be publicly viewable.  Are you sure?</> :
-              <>Your repo, "<b>{name}</b>", will be viewable without signing in.  Are you sure?</>
+              <>
+                Your repo, "<b>{name}</b>", will be viewable to everyone without sign-in.<br/>
+                Are you sure you want to do this?
+              </>
           }
           confirmBtnText={isPublic ? 'Make it private' : 'Make it public'}
           confirmBtnStyle={isPublic ? {background: '#c70000'} : {}}

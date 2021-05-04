@@ -5,6 +5,7 @@ const url = config.beehive
 type Params = {
   start: string
   end?: string
+  tail?: number
   filter?: {
     [tag: string]: string
   }
@@ -66,7 +67,7 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 
 
 export async function getLatestMetrics(
-  params: Params = {start: '-5m', filter: {name: 'sys.*'}},
+  params: Params = {start: '-4320h', filter: {name: 'sys.*'}, tail: 1},
   mostRecent = true
 ) : Promise<AggMetrics> {
 

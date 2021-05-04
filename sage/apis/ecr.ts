@@ -68,6 +68,36 @@ export type App = {
   version: string
 }
 
+export type AppConfig = {
+  name: string
+  description: string
+  version: string
+  namespace: string
+  source: {
+    architectures: string[]
+    branch: string
+    directory: string
+    dockerfile: string
+    url: string
+  }
+  url: string
+  directory: string
+  resources: {type: string, view: string, min_resolution: string}[]
+  inputs: {id: string, type: string}[]
+  metadata: {
+    [item: string]: any
+  }
+}
+
+export type AppDetails =
+  AppConfig & {
+    id: string
+    owner: string
+    frozen: boolean
+    time_created: string
+    time_last_updated: string
+  }
+
 
 export function register(appConfig) {
   return post(`${url}/submit`, appConfig)
@@ -93,10 +123,17 @@ export async function deleteApp(app: App) {
   return res
 }
 
-
 export async function deleteRepo(repo) {
   const {namespace, name} = repo
-  const res = await deleteReq(`${url}/repositories/${namespace}/${name}`)
+
+  // first, delete all versions
+  const versions = await listVersions(repo)
+  const proms = versions.map(({version}) => deleteApp({namespace, name, version}))
+
+  // delete repo
+  const res = Promise.all(proms)
+    .then(() => deleteReq(`${url}/repositories/${namespace}/${name}`))
+
   return res
 }
 
@@ -156,7 +193,7 @@ export function listNamespaces() : Promise<Namespace[]>{
 }
 
 
-export function listVersions(repo: Repo) : Promise<Namespace[]> {
+export function listVersions(repo: Repo) : Promise<AppDetails[]> {
   const {namespace, name} = repo
   return get(`${url}/apps/${namespace}/${name}`)
     .then(data => data.data)
@@ -239,37 +276,6 @@ export async function listApps(filter: FilterType) {
     })
 }
 
-
-
-export type AppConfig = {
-  name: string
-  description: string
-  version: string
-  namespace: string
-  source: {
-    architectures: string[]
-    branch: string
-    directory: string
-    dockerfile: string
-    url: string
-  }
-  url: string
-  directory: string
-  resources: {type: string, view: string, min_resolution: string}[]
-  inputs: {id: string, type: string}[]
-  metadata: {
-    [item: string]: any
-  }
-}
-
-export type AppDetails =
-  AppConfig & {
-    id: string
-    owner: string
-    frozen: boolean
-    time_created: string
-    time_last_updated: string
-  }
 
 export function getAppConfig(app: App) : Promise<AppConfig> {
   // todo(wg): add `view=app` for repos(?)
