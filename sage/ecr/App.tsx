@@ -71,7 +71,7 @@ export default function App() {
       <p>{config.description}</p>
 
       <b>Repo:</b> <a href={config.source.url} target="_blank" rel="noreferrer">
-        {config.source.url} <LaunchIcon className="external-icon"/>
+        {config.source.url} <LaunchIcon className="external-link"/>
       </a>
 
       {error &&

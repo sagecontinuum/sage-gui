@@ -27,8 +27,12 @@ function Row(props) {
     isPublic,
     isShared,
     description,
-    time_last_updated
+    time_last_updated,
+    isBuilding,
+    buildResult,
+    buildUrl
   } = data
+
 
   const verCount = versions.length
 
@@ -48,6 +52,24 @@ function Row(props) {
 
         <div className="flex column items-end muted">
           <div className="flex items-center details">
+
+            {buildUrl &&
+              <>
+                {isBuilding ?
+                  <b className="success">Building</b> :
+                  (buildResult == 'SUCCESS' ? <b className="success">Built</b> : <b className="failed">Failed</b>)
+                }
+                &nbsp;
+                (<Tooltip
+                  title={<>Jenkins <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+                  placement="top"
+                >
+                  <a href={buildUrl} onClick={evt => evt.stopPropagation()} target="_blank" rel="noreferrer">view</a>
+                </Tooltip>)
+                <VertDivide />
+              </>
+            }
+
             {isPublic &&
               <>
                 <div className="flex items-center">
@@ -56,13 +78,12 @@ function Row(props) {
                 <VertDivide />
               </>
             }
-            <div>
-              {verCount} tag{verCount > 1 ? 's' : ''}
-            </div>
+
+            <div>{verCount} tag{verCount > 1 ? 's' : ''}</div>
+
             <VertDivide />
-            <div>
-              Updated {formatters.time(time_last_updated)}
-            </div>
+
+            <div>Updated {formatters.time(time_last_updated)}</div>
 
             <VertDivide />
 
@@ -124,10 +145,6 @@ const AppRow = styled(Link)`
 
   :hover .actions {
     display: block;
-  }
-
-  :hover .details {
-    // display: none;
   }
 `
 

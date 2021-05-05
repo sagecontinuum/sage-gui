@@ -339,6 +339,7 @@ export default function CreateApp() {
           <li>
             <a href="https://github.com/waggle-sensor/plugin-helloworld-ml/blob/master/README.md" target="_blank" rel="noreferrer" >
               Getting Started
+              <LaunchIcon className="external-link"/>
             </a>
           </li>
         </ul>

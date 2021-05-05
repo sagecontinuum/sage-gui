@@ -24,7 +24,7 @@ type ActionBtnProps = {
 
 function ActionBtn({title, onClick, icon, className}: ActionBtnProps) {
   return (
-    <Tooltip title={title} placement="top">
+    <Tooltip title={title}>
       <IconButton onClick={onClick} size="small" className={className}>
         {icon}
       </IconButton>
@@ -80,6 +80,7 @@ export default function RepoActions(props: Props) {
 
   const handleDelete = (evt) => {
     evt.preventDefault()
+    evt.stopPropagation()
     setConfirm(true)
   }
 
@@ -92,8 +93,6 @@ export default function RepoActions(props: Props) {
     const repo = {namespace, name}
     return ECR.deleteRepo(repo)
       .then(() =>
-        enqueueSnackbar('Deleting app...')
-      ).then(() =>
         enqueueSnackbar('App deleted!', {variant: 'success'})
       ).catch(() =>
         enqueueSnackbar('Failed to delete app', {variant: 'error'})
@@ -106,8 +105,6 @@ export default function RepoActions(props: Props) {
     const repo = {namespace, name}
     return ECR.makePublic(repo, isPublic ? 'delete' : 'add')
       .then(() =>
-        enqueueSnackbar('Making app public...')
-      ).then(() =>
         enqueueSnackbar(
           isPublic ? 'Your app is now private' : 'Your app is now public!',
           {variant: 'success'}

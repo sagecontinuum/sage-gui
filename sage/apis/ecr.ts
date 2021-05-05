@@ -101,6 +101,11 @@ export type AppDetails =
     frozen: boolean
     time_created: string
     time_last_updated: string
+
+    // addition status info (requested seperate from app details)
+    isBuilding?: boolean
+    buildResult?: string
+    buildUrl?: string
   }
 
 
@@ -292,6 +297,21 @@ export async function listApps(filter: FilterType) {
 
       return apps
     })
+}
+
+
+export function listBuildStatus(app: App) {
+  const {namespace, name, version} = app
+  return get(`${url}/builds/${namespace}/${name}/${version}`)
+}
+
+
+export function listBuildStatusBulk(apps: App[]) {
+  const proms = apps.map(app => {
+    listBuildStatus(app)
+  })
+
+  return Promise.all(proms)
 }
 
 

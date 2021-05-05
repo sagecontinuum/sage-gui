@@ -4,17 +4,15 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import IconButton from '@material-ui/core/IconButton'
-import ViewComfyIcom from '@material-ui/icons/ViewComfy'
-import SpaciousIcon from '@material-ui/icons/ViewStream'
-
 import Button from '@material-ui/core/Button'
+import SpaciousIcon from '@material-ui/icons/ViewStream'
+import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import AddIcon from '@material-ui/icons/AddRounded'
 import Divider from '@material-ui/core/Divider'
 
-import ErrorMsg from '../ErrorMsg'
-
 import BeeIcon from 'url:../../assets/bee.svg'
 
+import ErrorMsg from '../ErrorMsg'
 import Table from '../../components/table/Table'
 import TableSearch from '../../components/table/TableSearch'
 import { useProgress } from '../../components/progress/Progress'
@@ -22,6 +20,8 @@ import * as ECR from '../apis/ecr'
 
 import SpaciousLayout from './SpaciousLayout'
 import { formatters } from './formatters'
+
+import config from '../../config'
 
 const columns = [
   {
@@ -50,7 +50,7 @@ const columns = [
 ]
 
 
-const queryData = (data: object[], query: string) => {
+const queryData = (data: any[], query: string) => {
   return data.filter(row =>
     Object.values(row)
       .join('').toLowerCase()
@@ -61,10 +61,6 @@ const queryData = (data: object[], query: string) => {
 const useParams = () =>
   new URLSearchParams(useLocation().search)
 
-
-type Row = {
-  [key: string]: any
-}
 
 
 type Props = {
@@ -80,26 +76,33 @@ export default function AppList(props: Props) {
   const [view, setView] = useState(props.view)
 
   const {loading, setLoading} = useProgress()
-  const [data, setData] = useState<Row[]>()
-  const [rows, setRows] = useState<Row[]>()
+  const [data, setData] = useState<ECR.AppDetails[]>()
+  const [rows, setRows] = useState<ECR.AppDetails[]>()
   const [error, setError] = useState(null)
 
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
+
+
 
   useEffect(() => {
     setView(props.view)
   }, [props.view])
 
+
   const listApps = useCallback(() => {
     const opts = view == 'explore' ? 'public' : 'mine'
     return ECR.listApps(opts)
-      .then(data => setData(data))
+      .then(data => {
+        setData(data)
+      })
       .catch(error => setError(error.message))
       .finally(() => setLoading(false))
   }, [setData, setError, setLoading, view])
 
+
   useEffect(() => {
     setLoading(true)
+
     if (['sharedWithMe'].includes(view)) {
       // todo(nc): implement
       setData([])
@@ -107,6 +110,10 @@ export default function AppList(props: Props) {
       return
     } else {
       listApps()
+    }
+
+    return () => {
+      setData([])
     }
   }, [view, listApps, setLoading])
 
@@ -116,6 +123,34 @@ export default function AppList(props: Props) {
 
     setRows(queryData(data, query))
   }, [query, data])
+
+
+  // effect for updating build status
+  useEffect(() => {
+    if (!data) return
+
+    for (const app of data) {
+      ECR.listBuildStatus(app)
+        .then(status => {
+          setRows(prev => {
+            if (!prev) return prev
+
+            // copy to change object ref
+            const newRows = [...prev]
+
+            const idx = newRows.findIndex(d => d.id == app.id)
+            newRows[idx] = {
+              ...newRows[idx],
+              isBuilding: status.building,
+              buildResult: status.result,
+              buildUrl: config.jenkins + status.url.split('/jenkins')[1] + 'console'
+            }
+
+            return newRows
+          })
+        })
+    }
+  }, [data])
 
 
   // todo: refactor into useContext or table componnent?

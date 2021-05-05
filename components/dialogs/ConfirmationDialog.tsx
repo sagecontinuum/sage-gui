@@ -52,11 +52,12 @@ export default function CreateDialog(props: Props) {
 
   const handleClose = (evt) => {
     evt.preventDefault()
+    evt.stopPropagation()
     if (onClose) onClose()
   }
 
   return (
-    <Dialog open onClose={handleClose} aria-labelledby="form-dialog-title">
+    <Dialog open={true} onClose={handleClose} aria-labelledby="form-dialog-title">
       <form onSubmit={handleSubmit}>
         <DialogTitle id="form-dialog-title">{title}</DialogTitle>
         <DialogContent>
@@ -79,7 +80,7 @@ export default function CreateDialog(props: Props) {
             color="primary"
             variant="contained"
             disabled={loading}
-            style={confirmBtnStyle}
+            style={!loading ? confirmBtnStyle : {}}
             onClick={handleSubmit}
           >
             {(loading && loadingText) ? loadingText : confirmBtnText}

@@ -136,7 +136,6 @@ export default function Versions(props: Props) {
               id={`${panel}-content`}
             >
               <div className="flex justify-between">
-
                 <div className="flex gap">
                   <b>{version}</b>
                   <span className={classes.secondaryHeading}>
