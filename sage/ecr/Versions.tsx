@@ -5,7 +5,7 @@ import { makeStyles, Theme, createStyles, withStyles } from '@material-ui/core/s
 import MuiAccordion from '@material-ui/core/Accordion'
 import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
-import Typography from '@material-ui/core/Typography'
+
 import Tooltip from '@material-ui/core/Tooltip'
 import IconButton from '@material-ui/core/IconButton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
@@ -13,8 +13,10 @@ import MoreIcon from '@material-ui/icons/UnfoldMoreOutlined'
 import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
 import CopyIcon from '@material-ui/icons/FileCopyOutlined'
 import DoneIcon from '@material-ui/icons/DoneOutlined'
+import DeleteIcon from '@material-ui/icons/DeleteRounded'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 import ToggleButton from '@material-ui/lab/ToggleButton'
+
 
 import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
 
@@ -133,11 +135,18 @@ export default function Versions(props: Props) {
               aria-controls={`${panel}-content`}
               id={`${panel}-content`}
             >
-              <div className="flex gap">
-                <b>{version}</b>
-                <span className={classes.secondaryHeading}>
-                  updated {formatters.time(time_last_updated)}
-                </span>
+              <div className="flex justify-between">
+
+                <div className="flex gap">
+                  <b>{version}</b>
+                  <span className={classes.secondaryHeading}>
+                    updated {formatters.time(time_last_updated)}
+                  </span>
+                </div>
+
+                <div className="tag-actions">
+                  <DeleteIcon />
+                </div>
               </div>
             </AccordionSummary>
 
@@ -225,5 +234,14 @@ const Accordion = styled(MuiAccordion) `
     .MuiIconButton-label {
       color: rgb(28, 140, 201);
     }
+  }
+
+
+  .tag-actions {
+    display: none;
+  }
+
+  :hover .tag-actions {
+    display: block;
   }
 `

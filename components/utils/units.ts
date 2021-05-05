@@ -44,8 +44,8 @@ export function msToTimeApprox(ms: number) {
   let hours = Math.floor( (ms / (1000 * 60 * 60)))
   let days = Math.floor( (ms / (1000 * 60 * 60 * 24)))
   if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
-  else if (mins < 60) return mins + ' min ago'
-  else if (hours < 24) return hours + ' hrs ago'
-  else return days + ' days ago'
+  else if (mins < 60) return `${mins} min${mins != 1 ? 's' : ''} ago`
+  else if (hours < 24) return `${hours} hr${hours != 1 ? 's' : ''} ago`
+  else return `${days} day${days != 1 ? 's' : ''} ago`
 }
 

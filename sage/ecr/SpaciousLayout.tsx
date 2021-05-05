@@ -51,7 +51,7 @@ function Row(props) {
             {isPublic &&
               <>
                 <div className="flex items-center">
-                  <PublicIcon />&nbsp;<span>public</span>
+                  <PublicIcon fontSize="small" />&nbsp;<span>public</span>
                 </div>
                 <VertDivide />
               </>

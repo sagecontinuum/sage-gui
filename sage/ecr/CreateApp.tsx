@@ -11,6 +11,7 @@ import Button from '@material-ui/core/Button'
 import Tooltip from '@material-ui/core/Tooltip'
 import FormHelperText from '@material-ui/core/FormHelperText'
 import CheckIcon from '@material-ui/icons/Check'
+import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
 import Editor from '@monaco-editor/react'
@@ -304,7 +305,7 @@ export default function CreateApp() {
 
 
           {error &&
-            <FormHelperText error>{error}</FormHelperText>
+            <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
           }
         </div>
 

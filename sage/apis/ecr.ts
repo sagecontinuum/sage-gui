@@ -148,16 +148,19 @@ export async function deleteRepo(repo) {
  * permissions
  */
 
-type Operation = 'add' | 'delete'
-type GranteeType = 'USER' | 'GROUP'
-type Permission =  'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
-type PermissionObj = {
+export type Permission =  'READ' | 'WRITE' | 'READ_ACP' | 'WRITE_ACP' | 'FULL_CONTROL'
+
+export type PermissionObj = {
   grantee: string
   granteeType: GranteeType
   permission: Permission
   resourceName: string
   resourceType: 'string'
 }
+
+type Operation = 'add' | 'delete'
+type GranteeType = 'USER' | 'GROUP'
+
 
 export function makePublic(repo: Repo, operation: Operation = 'add') {
   const {namespace, name} = repo
@@ -235,7 +238,7 @@ export async function listApps(filter: FilterType) {
         // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
         repos = repos.filter(repo => {
           if (!repo.permissions) return true
-          else if (repo.owner_id == Auth.owner_id) return true
+          else if (repo.owner_id == Auth.user_id) return true
 
           const _isPublic = isPublic(repo.permissions)
           return !_isPublic
@@ -291,10 +294,11 @@ export async function listApps(filter: FilterType) {
     })
 }
 
+
+
 /**
  * retrival
  */
-
 
 export function getAppConfig(app: App) : Promise<AppConfig> {
   // todo(wg): add `view=app` for repos(?)
@@ -312,7 +316,6 @@ export function getAppDetails(app: App) : Promise<AppDetails> {
 /**
  * helpers
  */
-
 
 export function isPublic(permissions: PermissionObj[]) : boolean {
   return (permissions || []).filter(p => p.grantee === 'AllUsers').length > 0

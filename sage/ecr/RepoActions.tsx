@@ -9,6 +9,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
 
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
+import ShareDialog from './dialogs/ShareRepo'
 import { useSnackbar } from 'notistack'
 
 import * as ECR from '../apis/ecr'
@@ -18,13 +19,13 @@ type ActionBtnProps = {
   title: string
   onClick: (evt: React.MouseEvent) => void
   icon: JSX.Element
-  style?: object
+  className?: string
 }
 
-function ActionBtn({title, onClick, icon, style}: ActionBtnProps) {
+function ActionBtn({title, onClick, icon, className}: ActionBtnProps) {
   return (
     <Tooltip title={title} placement="top">
-      <IconButton onClick={onClick} size="small" style={style}>
+      <IconButton onClick={onClick} size="small" className={className}>
         {icon}
       </IconButton>
     </Tooltip>
@@ -75,6 +76,7 @@ export default function RepoActions(props: Props) {
 
   const [confirm, setConfirm] = useState(false)
   const [publish, setPublish] = useState(false)
+  const [share, setShare] = useState(false)
 
   const handleDelete = (evt) => {
     evt.preventDefault()
@@ -119,7 +121,8 @@ export default function RepoActions(props: Props) {
 
 
   const handleShare = (evt) => {
-    alert('sharing is not implemented yet')
+    evt.preventDefault()
+    setShare(true)
   }
 
 
@@ -145,11 +148,11 @@ export default function RepoActions(props: Props) {
             title="Delete repo"
             icon={<DeleteIcon />}
             onClick={handleDelete}
-            style={{color: '#912341'}}
+            className="delete"
           />
         </>
         :
-        <div className="flex btn-gap">
+        <div className="flex form-gap">
           <FullActionBtn
             text="Share"
             icon={<ShareIcon />}
@@ -197,6 +200,12 @@ export default function RepoActions(props: Props) {
           confirmBtnStyle={isPublic ? {background: '#c70000'} : {}}
           onConfirm={onMakePublic}
           onClose={() => setPublish(false)} />
+      }
+
+      {share &&
+        <ShareDialog
+          repo={{namespace, name}}
+          onClose={() => setShare(false)} />
       }
     </Root>
   )

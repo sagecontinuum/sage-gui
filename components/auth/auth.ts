@@ -3,7 +3,7 @@ import test from '../../testToken'
 
 export const user = test.user
 export const token = test.token
-export const owner_id = test.owner_id
+export const user_id = test.user_id
 
 
 export function signIn() {
