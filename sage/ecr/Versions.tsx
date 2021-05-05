@@ -13,10 +13,14 @@ import MoreIcon from '@material-ui/icons/UnfoldMoreOutlined'
 import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
 import CopyIcon from '@material-ui/icons/FileCopyOutlined'
 import DoneIcon from '@material-ui/icons/DoneOutlined'
-import DeleteIcon from '@material-ui/icons/DeleteRounded'
+import DeleteIcon from '@material-ui/icons/DeleteOutlineRounded'
+import LaunchIcon from '@material-ui/icons/LaunchRounded'
+import GithubIcon from '@material-ui/icons/Github'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 import ToggleButton from '@material-ui/lab/ToggleButton'
 
+
+import { useSnackbar } from 'notistack'
 
 import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
 
@@ -24,6 +28,10 @@ import yamlIcon from 'url:../../assets/yaml-logo.svg'
 import { formatters } from './formatters'
 
 import * as ECR from '../apis/ecr'
+import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
+
+
+
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -67,6 +75,7 @@ type Props = {
 
 
 export default function Versions(props: Props) {
+  const { enqueueSnackbar } = useSnackbar()
   const {versions} = props
 
   const classes = useStyles()
@@ -78,7 +87,8 @@ export default function Versions(props: Props) {
 
   const [loadingConfigs, setLoadingConfigs] = useState(false)
 
-  const [expanded, setExpanded] = React.useState<string | false>('panel-0')
+  const [deleteTag, setDeleteTag] = useState<ECR.AppDetails>(null)
+  const [expanded, setExpanded] = useState<string | false>('panel-0')
 
   // fetch all submitted app configs
   useEffect(() => {
@@ -110,6 +120,21 @@ export default function Versions(props: Props) {
   }
 
 
+  const onClickDeleteTag = (evt, app) => {
+    evt.stopPropagation()
+    setDeleteTag(app)
+  }
+
+  const handleDelete = () => {
+    return ECR.deleteApp(deleteTag)
+      .then(() =>
+        enqueueSnackbar('Tag deleted!', {variant: 'success'})
+      ).catch(() =>
+        enqueueSnackbar('Failed to delete tag', {variant: 'error'})
+      )
+  }
+
+
   return (
     <Root>
       <h2>Tags</h2>
@@ -131,11 +156,11 @@ export default function Versions(props: Props) {
           >
 
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
+              expandIcon={<ExpandMoreIcon className="caret"/>}
               aria-controls={`${panel}-content`}
               id={`${panel}-content`}
             >
-              <div className="flex justify-between">
+              <div className="flex items-center justify-between">
                 <div className="flex gap">
                   <b>{version}</b>
                   <span className={classes.secondaryHeading}>
@@ -144,15 +169,30 @@ export default function Versions(props: Props) {
                 </div>
 
                 <div className="tag-actions">
-                  <DeleteIcon />
+                  <Tooltip title="Delete tag">
+                    <IconButton onClick={(evt) => onClickDeleteTag(evt, ver)} size="small" className="delete">
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip
+                    title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+                  >
+                    <IconButton href={ver.source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      size="small"
+                    >
+                      <GithubIcon fontSize="small"/>
+                    </IconButton>
+                  </Tooltip>
                 </div>
               </div>
             </AccordionSummary>
 
             <AccordionDetails className="flex column">
-              <p className="no-margin">{description}</p>
-
-              <h4>App Config</h4>
+              <p className="no-margin">{description}</p><br/>
 
               <div className="flex items-end justify-between">
                 <StyledToggleButtonGroup
@@ -204,14 +244,21 @@ export default function Versions(props: Props) {
                   </pre>
               }
 
-
             </AccordionDetails>
-
           </Accordion>
         )
       })
       }
 
+      {deleteTag &&
+        <ConfirmationDialog
+          title={<>Are you sure you want to delete tag <b>{deleteTag.version}</b>?</>}
+          content={<>This action cannot be undone!</>}
+          confirmBtnText="Delete"
+          confirmBtnStyle={{background: '#c70000'}}
+          onConfirm={handleDelete}
+          onClose={() => setDeleteTag(null)} />
+      }
     </Root>
   )
 }
@@ -230,17 +277,22 @@ const Accordion = styled(MuiAccordion) `
 
   :hover:not(.Mui-expanded) {
     border-left: 2px solid rgb(28, 140, 201);
-    .MuiIconButton-label {
+    .caret {
       color: rgb(28, 140, 201);
     }
   }
 
 
+  .MuiAccordionSummary-content {
+    display: block;
+    margin: 10px 0;
+  }
+
   .tag-actions {
-    display: none;
+    visibility: hidden;
   }
 
   :hover .tag-actions {
-    display: block;
+    visibility: visible;
   }
 `

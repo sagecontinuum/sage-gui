@@ -31,7 +31,7 @@ function VersionTooltip(props: VerTooltipProps) {
 
 export const formatters = {
   name: (name, o) => {
-    return <Link to={`app/${o.namespace}/${name}/${o.version}`}>{name}</Link>
+    return <Link to={`app/${o.namespace}/${name}`}>{name}</Link>
   },
   versions: (versions) => {
     if (!versions?.length) return '-'

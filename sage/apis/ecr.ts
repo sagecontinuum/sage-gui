@@ -320,6 +320,19 @@ export function listBuildStatusBulk(apps: App[]) {
  * retrival
  */
 
+
+export function getRepo(repo: Repo) : Promise<AppConfig> {
+  const {namespace, name} = repo
+  return get(`${url}/repositories/${namespace}/${name}`)
+    .then(data => {
+
+      return {
+        ...data,
+        versions: data.versions.sort(timeCompare)
+      }
+    })
+}
+
 export function getAppConfig(app: App) : Promise<AppConfig> {
   // todo(wg): add `view=app` for repos(?)
   const {namespace, name, version} = app

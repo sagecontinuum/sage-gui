@@ -18,7 +18,7 @@ export default function App() {
   const { path } = useParams()
 
   const { loading, setLoading } = useProgress()
-  const [config, setConfig] = useState<ECR.AppConfig>(null)
+  const [repo, setRepo] = useState<ECR.AppConfig>(null)
   const [versions, setVersions] = useState(null)
   const [isPublic, setIsPublic] = useState(null)
   const [error, setError] = useState(null)
@@ -26,16 +26,15 @@ export default function App() {
 
   useEffect(() => {
 
-    const [namespace, name, version] = path.split('/')
+    const [namespace, name ] = path.split('/')
 
     setLoading(true)
     Promise.all([
-      ECR.getAppConfig({namespace, name, version}),
-      ECR.listVersions({namespace, name}),
+      ECR.getRepo({namespace, name}),
       ECR.listPermissions({namespace, name})
-    ]).then(([config, versions, perms]) => {
-      setConfig(config)
-      setVersions(versions)
+    ]).then(([repo, perms]) => {
+      setRepo(repo)
+      setVersions(repo.versions)
       setIsPublic(ECR.isPublic(perms))
     }).catch(err => setError(err))
       .finally(() => setLoading(false))
@@ -48,18 +47,18 @@ export default function App() {
     // todo: implement
   }
 
-  if (loading || !config) return <></>
+  if (loading || !repo) return <></>
 
   return (
     <Root>
       <h1 className="flex justify-between">
-        {config.namespace} / {config.name}
+        {repo.namespace} / {repo.name}
 
         <div className="actions">
           <RepoActions
-            namespace={config.namespace}
-            name={config.name}
-            version={config.version}
+            namespace={repo.namespace}
+            name={repo.name}
+            version={repo.version}
             condensed={false}
             onComplete={handleActionComplete}
             versionCount={versions.length}
@@ -68,10 +67,10 @@ export default function App() {
         </div>
       </h1>
 
-      <p>{config.description}</p>
+      <p>{repo.versions[0]?.description}</p>
 
-      <b>Repo:</b> <a href={config.source.url} target="_blank" rel="noreferrer">
-        {config.source.url} <LaunchIcon className="external-link"/>
+      <b>Repo:</b> <a href={repo.versions[0]?.source.url} target="_blank" rel="noreferrer">
+        {repo.versions[0]?.source.url} <LaunchIcon className="external-link"/>
       </a>
 
       {error &&

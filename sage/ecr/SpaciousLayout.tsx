@@ -39,7 +39,7 @@ function Row(props) {
   return (
     <AppRow
       className="flex column justify-between"
-      to={`app/${namespace}/${name}/${version}`}
+      to={`app/${namespace}/${name}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
