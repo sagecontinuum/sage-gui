@@ -66,31 +66,15 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 
 
 
-export async function getLatestMetrics(
-  params: Params = {start: '-4320h', filter: {name: 'sys.*'}, tail: 1},
-  mostRecent = true
-) : Promise<AggMetrics> {
+export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
+  params = params || {start: '-4320h', filter: {name: 'sys.*'}, tail: 1}
 
   const allMetrics = await fetchStatus(params)
 
-  // first aggregate all the metrics
+  // aggregate all the metrics
   const byNode = aggregateMetrics(allMetrics)
 
-  let metrics = mostRecent ? {} : byNode
-  if (mostRecent) {
-    // take the latest sets of (based on timestamps)
-    for (const [node, byHost] of Object.entries(byNode)) {
-      metrics[node] = {}
-      for (const [host, metricObj] of Object.entries(byHost)) {
-        metrics[node][host] = {}
-        for (const [mName, entries] of Object.entries(metricObj)) {
-          metrics[node][host][mName] = getLatestEntries(entries)
-        }
-      }
-    }
-  }
-
-  return metrics
+  return byNode
 }
 
 
@@ -122,35 +106,7 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
       nodeData[name] = [record]
   })
 
-  // sort all entries
-  for (const host of Object.values(byNode)) {
-    for (const metricObj of Object.values(host)) {
-      for (const entries of Object.values(metricObj)) {
-        entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime() )
-      }
-    }
-  }
-
   return byNode
-}
-
-
-
-function getLatestEntries(metrics: Metric[]) : Metric[] {
-  const latest = []
-
-  const lastTimestamp = metrics[metrics.length - 1].timestamp
-
-  let i = metrics.length
-  while (i--) {
-    const entry = metrics[i]
-    if (entry.timestamp != lastTimestamp)
-      break
-
-    latest.push(entry)
-  }
-
-  return latest
 }
 
 
@@ -171,13 +127,13 @@ export async function getNodeActivity(
 
   // todo(ss): provide "OR" option!
   params.filter.name = 'sys.mem.*'
-  const memByNode = await getLatestMetrics(params, false)
+  const memByNode = await getLatestMetrics(params)
 
   params.filter.name = 'sys.cpu_seconds'
-  const cpuByNode = await getLatestMetrics(params, false)
+  const cpuByNode = await getLatestMetrics(params)
 
   params.filter.name = 'sys.fs.*'
-  const fsByNode = await getLatestMetrics(params, false)
+  const fsByNode = await getLatestMetrics(params)
 
 
   let byHost = {}
@@ -189,15 +145,15 @@ export async function getNodeActivity(
     // mem
     const memFrees = metricObj['sys.mem.free'].map(o => o.value)
     const memTotals = metricObj['sys.mem.total'].map(o => o.value)
-    const memUsed = memFrees.map((free, i) => memTotals[i] - free)
-    const memPercent = memUsed.map((used, i) => used / memTotals[i] * 100)
+    const memUsed = memFrees.map((free, i) => Number(memTotals[i]) - Number(free))
+    const memPercent = memUsed.map((used, i) => used / Number(memTotals[i]) * 100)
 
     // cpu
     metricObj = cpuByNode[node][host]
     let maxCpu = 0
     const cpu = metricObj['sys.cpu_seconds'].map(o => {
       if (o.value > maxCpu)
-        maxCpu = o.value
+        maxCpu = Number(o.value)
       return o.value
     })
 

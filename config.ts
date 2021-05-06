@@ -3,7 +3,7 @@
 
 export default  {
   // api end points
-  beehive: 'https://sdr.honeyhouse.one/api/v1',
+  beehive: 'https://sdr.sagecontinuum.org/api/v1',
   beekeeper: 'https://beekeeper.honeyhouse.one/api',
   ecr: 'https://ecr.sagecontinuum.org/api',   // 'http://localhost:5000'
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',

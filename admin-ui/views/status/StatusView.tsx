@@ -30,9 +30,6 @@ const PRIMARY_KEY = 'id'
 
 const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
 
-const HOST_NAMES = Object.values(HOST_SUFFIX_MAPPING)
-const HOST_COUNT = HOST_NAMES.length
-
 
 
 function queryData(data: object[], query: string) {
