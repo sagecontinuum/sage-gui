@@ -15,7 +15,7 @@ import BeeIcon from 'url:../../assets/bee.svg'
 import ErrorMsg from '../ErrorMsg'
 import Table from '../../components/table/Table'
 import TableSearch from '../../components/table/TableSearch'
-import { useProgress } from '../../components/progress/Progress'
+import { useProgress } from '../../components/progress/ProgressProvider'
 import * as ECR from '../apis/ecr'
 
 import SpaciousLayout from './SpaciousLayout'

@@ -12,7 +12,7 @@ import App from './App'
 import CreateApp from './CreateApp'
 
 import PrivateRoute from '../../components/auth/PrivateRoute'
-import { ProgressProvider } from '../../components/progress/Progress'
+import { ProgressProvider } from '../../components/progress/ProgressProvider'
 
 
 export default function Apps() {
