@@ -93,19 +93,18 @@ const initialState = {
   version: '',
   namespace: '',
   source: {
-    architectures: []
+    architectures: [],
+    branch: '',
+    directory: '',
+    dockerfile: '',
+    url: '',
   },
   url: '',
   directory: '',
-  resources: [
-    {type: '', view: '', min_resolution: ''}
-  ],
-  inputs: [
-    {id: 'speed', type: 'int'}
-  ],
+  resources: [],
+  inputs: [],
   metadata: {}
 }
-
 
 
 

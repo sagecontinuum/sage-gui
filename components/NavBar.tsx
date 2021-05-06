@@ -4,8 +4,10 @@ import sage from 'url:../assets/sage-drawing.png'
 import Divider from '@material-ui/core/Divider'
 import AccountIcon from '@material-ui/icons/AccountCircleRounded'
 
-import config from '../config'
-const {user} = config
+import {getUser} from '../components/auth/auth'
+
+const username = getUser()
+
 
 type Props = {
   Menu?: React.FC
@@ -26,7 +28,7 @@ export default function NavBar(props: Props) {
       </div>
 
       <div className="flex items-center">
-        <AccountIcon />&nbsp;{user.username}
+        <AccountIcon />&nbsp;{username}
       </div>
     </Root>
   )

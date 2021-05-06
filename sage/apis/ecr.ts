@@ -3,11 +3,12 @@ const url = config.ecr
 
 import * as Auth from '../../components/auth/auth'
 
-
+const __user_id = Auth.getUserId()
+const __token = Auth.getToken()
 
 const options = {
   headers: {
-    Authorization: `sage ${Auth.token}`
+    Authorization: `sage ${__token}`
   }
 }
 
@@ -243,7 +244,7 @@ export async function listApps(filter: FilterType) {
         // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
         repos = repos.filter(repo => {
           if (!repo.permissions) return true
-          else if (repo.owner_id == Auth.user_id) return true
+          else if (repo.owner_id == __user_id) return true
 
           const _isPublic = isPublic(repo.permissions)
           return !_isPublic

@@ -10,9 +10,10 @@ import CheckBox from '@material-ui/core/CheckBox'
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@material-ui/icons/CheckBox'
 
-import * as Auth from '../../components/auth/auth'
 import { AppConfig } from '../apis/ecr'
 
+import * as Auth from '../../components/auth/auth'
+const __username = Auth.getUser()
 
 const architectures = [
   'linux/amd64',
@@ -64,7 +65,7 @@ export default function ConfigForm(props: Props) {
           InputLabelProps={{ shrink: true}}
           size="small"
           margin="dense"
-          placeholder={Auth.user.split('@')[0]}
+          placeholder={__username.split('@')[0]}
         />
         <Slash>&nbsp;/&nbsp;</Slash>
         <TextField

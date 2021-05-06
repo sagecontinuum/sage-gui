@@ -8,6 +8,8 @@ export default  {
   ecr: 'https://ecr.sagecontinuum.org/api',   // 'http://localhost:5000'
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
 
+  auth: 'https://sage.nautilus.optiputer.net/',
+
   // ui configuration
   ui: {
     activityLength: 50,     // number of data points for ticker

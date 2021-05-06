@@ -18,7 +18,7 @@ import * as Auth from '../../../components/auth/auth'
 import * as ECR from '../../apis/ecr'
 
 
-
+const userId = Auth.getUserId()
 
 const permMap = {
   'FULL_CONTROL': 'owner',
@@ -26,7 +26,7 @@ const permMap = {
   'WRITE': 'can write'
 }
 
-const isMe = (grantee) => grantee == Auth.user_id
+const isMe = (grantee) => grantee == userId
 
 
 type PermTableProps = {
