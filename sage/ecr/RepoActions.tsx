@@ -182,14 +182,14 @@ export default function RepoActions(props: Props) {
       {publish &&
         <ConfirmationDialog
           title={isPublic ?
-            <>Make Repo Private</> :
-            <>Make Repo publicly readable</>
+            <>Make App Private</> :
+            <>Make App Publicly Readable</>
           }
           content={
             isPublic ?
-              <>Your repo <b>{namespace}/{name}</b> will no longer be publicly viewable.  Are you sure?</> :
+              <>Your app <b>{namespace}/{name}</b> will no longer be publicly viewable.  Are you sure?</> :
               <>
-                Your repo <b>{namespace}/{name}</b> will be viewable to everyone without sign-in.<br/>
+                Your app <b>{namespace}/{name}</b> will be viewable to everyone without sign-in.<br/>
                 Are you sure you want to do this?
               </>
           }
