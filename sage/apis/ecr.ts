@@ -103,7 +103,7 @@ export type AppDetails =
     time_created: string
     time_last_updated: string
 
-    // addition status info (requested seperate from app details)
+    // addition status info (requested separate from app details)
     isBuilding?: boolean
     buildResult?: string
     buildUrl?: string

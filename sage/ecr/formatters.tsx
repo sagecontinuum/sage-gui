@@ -7,7 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip'
 import * as utils from '../../components/utils/units'
 
 type VerTooltipProps = {
-  versions: {version: string}[]
+  versions: []
 }
 
 function VersionTooltip(props: VerTooltipProps) {
