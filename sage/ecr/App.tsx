@@ -10,7 +10,7 @@ import RepoActions from './RepoActions'
 import {useProgress} from '../../components/progress/ProgressProvider'
 import * as ECR from '../apis/ecr'
 
-import Versions from './Versions'
+import Versions from './TagList'
 
 
 

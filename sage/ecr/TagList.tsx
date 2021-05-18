@@ -22,7 +22,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton'
 
 import { useSnackbar } from 'notistack'
 
-import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
+import jsyaml from 'js-yaml/dist/js-yaml'
 
 import yamlIcon from 'url:../../assets/yaml-logo.svg'
 import { formatters } from './formatters'
@@ -74,7 +74,7 @@ type Props = {
 }
 
 
-export default function Versions(props: Props) {
+export default function TagList(props: Props) {
   const { enqueueSnackbar } = useSnackbar()
   const {versions} = props
 
@@ -88,7 +88,7 @@ export default function Versions(props: Props) {
   const [loadingConfigs, setLoadingConfigs] = useState(false)
 
   const [deleteTag, setDeleteTag] = useState<ECR.AppDetails>(null)
-  const [expanded, setExpanded] = useState<string | false>('panel-0')
+  const [expanded, setExpanded] = useState<string | false>(false)
 
   // fetch all submitted app configs
   useEffect(() => {
