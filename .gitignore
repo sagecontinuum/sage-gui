@@ -8,3 +8,5 @@ dist/
 .parcel-cache/
 coverage/
 *mock*
+
+components/dialogs/ConfirmProvider.tsx
