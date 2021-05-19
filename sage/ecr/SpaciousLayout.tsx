@@ -37,13 +37,20 @@ function Row(props) {
     buildUrl
   } = data
 
-
   const verCount = versions.length
+
+  const handleClick = (evt) => {
+    if (evt.target.closest('.MuiDialog-root')) {
+      // prevent navigation if using dialog
+      evt.preventDefault()
+    }
+  }
 
   return (
     <AppRow
       className="flex column justify-between"
       to={`app/${namespace}/${name}`}
+      onClick={handleClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
