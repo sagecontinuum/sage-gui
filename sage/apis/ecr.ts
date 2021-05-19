@@ -7,9 +7,9 @@ const __user_id = Auth.getUserId()
 const __token = Auth.getToken()
 
 const options = {
-  headers: {
+  headers: __token ? {
     Authorization: `sage ${__token}`
-  }
+  } : {}
 }
 
 
@@ -227,7 +227,7 @@ export function listVersions(repo: Repo) : Promise<AppDetails[]> {
 type FilterType = 'mine' | 'public'
 export async function listApps(filter: FilterType) {
 
-  const repoPerm = get(`${url}/repositories?view=permissions`)
+  const repoPerm = get(`${url}/repositories${__token ? `?view=permissions` : ''}`)
   const appProm = get(`${url}/apps${filter == 'public' ? '?public=true' : ''}`)
 
   return Promise.all([repoPerm, appProm])
@@ -235,11 +235,8 @@ export async function listApps(filter: FilterType) {
 
       let repos = repoRes.data
 
-      if (filter == 'public') {
-        repos = repos.filter(repo => {
-          const _isPublic = isPublic(repo.permissions)
-          return _isPublic
-        })
+      if (filter == 'public' && __token) {
+        repos = repos.filter(repo => isPublic(repo.permissions))
       } else if (filter == 'mine') {
         // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
         repos = repos.filter(repo => {
@@ -249,6 +246,8 @@ export async function listApps(filter: FilterType) {
           const _isPublic = isPublic(repo.permissions)
           return !_isPublic
         })
+      } else if (!__token) {
+        // pass
       } else {
         throw Error(`listApps: must specify filter: ('public' or 'mine')`)
       }

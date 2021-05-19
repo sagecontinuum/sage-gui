@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Divider from '@material-ui/core/Divider'
@@ -7,10 +8,13 @@ import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import PublicIcon from '@material-ui/icons/PublicRounded'
 import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import GithubIcon from '@material-ui/icons/GitHub'
-import { Link } from 'react-router-dom'
 
 import RepoActions from './RepoActions'
 import { formatters } from './formatters'
+
+import * as Auth from '../../components/auth/auth'
+
+const isSignedIn = Auth.isSignedIn()
 
 
 const VertDivide = () =>
@@ -103,16 +107,18 @@ function Row(props) {
             </span>
           </div>
 
-          <div className="actions">
-            <RepoActions
-              namespace={namespace}
-              name={name}
-              version={version}
-              isPublic={isPublic}
-              onComplete={onComplete}
-              versionCount={versions.length}
-            />
-          </div>
+          {isSignedIn &&
+            <div className="actions">
+              <RepoActions
+                namespace={namespace}
+                name={name}
+                version={version}
+                isPublic={isPublic}
+                onComplete={onComplete}
+                versionCount={versions.length}
+              />
+            </div>
+          }
         </div>
 
       </div>

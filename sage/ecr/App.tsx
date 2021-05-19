@@ -9,6 +9,7 @@ import RepoActions from './RepoActions'
 
 import {useProgress} from '../../components/progress/ProgressProvider'
 import * as ECR from '../apis/ecr'
+import * as Auth from '../../components/auth/auth'
 
 import Versions from './TagList'
 
@@ -31,11 +32,10 @@ export default function App() {
     setLoading(true)
     Promise.all([
       ECR.getRepo({namespace, name}),
-      ECR.listPermissions({namespace, name})
-    ]).then(([repo, perms]) => {
+      // may need other requests?
+    ]).then(([repo]) => {
       setRepo(repo)
       setVersions(repo.versions)
-      setIsPublic(ECR.isPublic(perms))
     }).catch(err => setError(err))
       .finally(() => setLoading(false))
 
@@ -54,17 +54,19 @@ export default function App() {
       <h1 className="flex justify-between">
         {repo.namespace} / {repo.name}
 
-        <div className="actions">
-          <RepoActions
-            namespace={repo.namespace}
-            name={repo.name}
-            version={repo.version}
-            condensed={false}
-            onComplete={handleActionComplete}
-            versionCount={versions.length}
-            isPublic={isPublic}
-          />
-        </div>
+        {Auth.isSignedIn() &&
+          <div className="actions">
+            <RepoActions
+              namespace={repo.namespace}
+              name={repo.name}
+              version={repo.version}
+              condensed={false}
+              onComplete={handleActionComplete}
+              versionCount={versions.length}
+              isPublic={isPublic}
+            />
+          </div>
+        }
       </h1>
 
       <p>{repo.versions[0]?.description}</p>

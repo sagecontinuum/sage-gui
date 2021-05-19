@@ -8,7 +8,7 @@ export default  {
   ecr: 'https://ecr.sagecontinuum.org/api',   // 'http://localhost:5000'
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
 
-  auth: 'https://sage.nautilus.optiputer.net/',
+  auth: 'https://auth.sagecontinuum.org',
 
   // ui configuration
   ui: {
@@ -23,6 +23,7 @@ export default  {
 
   // temp/testing configuration
   user: {
+
     username: 'testuser'
   }
 }
