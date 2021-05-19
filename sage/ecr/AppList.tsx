@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
+import { useLocation, useHistory, useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -63,18 +63,17 @@ const useParams = () =>
 
 
 
-type Props = {
-  view: 'explore' | 'sharedWithMe' | 'myApps'
-}
 
-export default function AppList(props: Props) {
+export default function AppList() {
   const params = useParams()
+  let { path } = useRouteMatch()
+  const view = path.split('/')[2]
+
   const history = useHistory()
 
   const query = params.get('query') || ''
 
-  const [view, setView] = useState(props.view)
-
+  const ref = useRef<boolean>()
   const {loading, setLoading} = useProgress()
   const [data, setData] = useState<ECR.AppDetails[]>()
   const [rows, setRows] = useState<ECR.AppDetails[]>()
@@ -83,46 +82,45 @@ export default function AppList(props: Props) {
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
 
 
-
-  useEffect(() => {
-    setView(props.view)
-  }, [props.view])
-
-
   const listApps = useCallback(() => {
     const opts = view == 'explore' ? 'public' : 'mine'
-    return ECR.listApps(opts)
+    ECR.listApps(opts)
       .then(data => {
+        if (!ref.current) return
         setData(data)
+      }).catch(error => setError(error.message))
+      .finally(() => {
+        if (!ref.current) return
+        setLoading(false)
       })
-      .catch(error => setError(error.message))
-      .finally(() => setLoading(false))
-  }, [setData, setError, setLoading, view])
+  }, [setLoading, view])
 
 
   useEffect(() => {
+    ref.current = true
     setLoading(true)
 
-    if (['sharedWithMe'].includes(view)) {
+    if (['shared-with-me'].includes(view)) {
       // todo(nc): implement
       setData([])
       setLoading(false)
       return
-    } else {
-      listApps()
     }
+
+    listApps()
 
     return () => {
-      setData([])
+      ref.current = false
     }
-  }, [view, listApps, setLoading])
+  }, [view, setLoading, listApps])
 
 
+  // effect for queries
   useEffect(() => {
     if (!data) return
 
     setRows(queryData(data, query))
-  }, [query, data])
+  }, [view, query, data])
 
 
   // effect for updating build status
@@ -132,6 +130,7 @@ export default function AppList(props: Props) {
     for (const app of data) {
       ECR.listBuildStatus(app)
         .then(status => {
+          if (!ref.current) return
           setRows(prev => {
             if (!prev) return prev
 
@@ -151,6 +150,7 @@ export default function AppList(props: Props) {
         })
     }
   }, [data])
+
 
 
   // todo: refactor into useContext or table componnent?
@@ -235,17 +235,18 @@ export default function AppList(props: Props) {
       }
 
 
-      {!loading && view == 'myApps' && data?.length == 0 &&
+      {!loading && view == 'my-apps' && data?.length == 0 &&
         <NoneFound className="flex column items-center justify-center muted">
           <img src={BeeIcon} />
           <p>You don&apos;t have any apps yet.  Try <Link to="/apps/create-app">creating one</Link>.</p>
         </NoneFound>
       }
 
-      {!loading && view == 'sharedWithMe' && data?.length == 0 &&
+      {!loading && view == 'shared-with-me' && data?.length == 0 &&
         <NoneFound className="flex column items-center justify-center muted">
           <img src={BeeIcon} />
-          <p>no apps are shared with you</p>
+          <span>No apps are shared with you</span>
+          <small>Note: sharing is not fully implemented</small>
         </NoneFound>
       }
     </Root>
