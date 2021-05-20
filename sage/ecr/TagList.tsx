@@ -21,8 +21,7 @@ import ToggleButton from '@material-ui/lab/ToggleButton'
 
 
 import { useSnackbar } from 'notistack'
-
-import jsyaml from 'js-yaml/dist/js-yaml'
+import { stringify } from 'yaml'
 
 import yamlIcon from 'url:../../assets/yaml-logo.svg'
 import { formatters } from './formatters'
@@ -114,7 +113,7 @@ export default function TagList(props: Props) {
   }
 
   const handleCopy = (ver: string) => {
-    navigator.clipboard.writeText(jsyaml.dump(cfgMap[ver]))
+    //navigator.clipboard.writeText(jsyaml.dump(cfgMap[ver]))
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
   }
@@ -233,11 +232,11 @@ export default function TagList(props: Props) {
                   <pre className="code text-xs">
                     {!showFullConfig ?
                       (format == 'yaml' ?
-                        jsyaml.dump(cfgMap[version]) :
+                        stringify(cfgMap[version]) :
                         JSON.stringify(cfgMap[version], null, 4)
                       ) :
                       (format == 'yaml' ?
-                        jsyaml.dump(versions.filter(ver => ver.version == version)[0]):
+                        stringify(versions.filter(ver => ver.version == version)[0]):
                         JSON.stringify(versions.filter(ver => ver.version == version)[0], null, 4)
                       )
                     }

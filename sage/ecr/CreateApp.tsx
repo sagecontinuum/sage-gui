@@ -15,7 +15,7 @@ import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
 import Editor from '@monaco-editor/react'
-import jsyaml from '../../node_modules/js-yaml/dist/js-yaml'
+import { parse, stringify } from 'yaml'
 
 import ConfigForm from './ConfigForm'
 
@@ -117,7 +117,7 @@ export default function CreateApp() {
   // app config state
   const [repoURL, setRepoURL] = useState('')
   const [form, setForm] = useState<ECR.AppConfig>(initialState)
-  const [config, setConfig] = useState<string>(jsyaml.dump(initialState))
+  const [config, setConfig] = useState<string>(stringify(initialState))
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
 
   const [validating, setValidating] = useState(false)
@@ -159,7 +159,7 @@ export default function CreateApp() {
         // set config text
         res.text().then(text => {
           setConfig(text)
-          const obj = jsyaml.load(text)
+          const obj = parse(text)
 
           setForm(obj)
         })
@@ -202,7 +202,7 @@ export default function CreateApp() {
 
 
   const handleConfigChange = (val) => {
-    const obj = jsyaml.load(val)
+    const obj = parse(val)
     setForm(obj)
     setConfig(val)
   }
@@ -228,7 +228,7 @@ export default function CreateApp() {
 
   const handleFormChange = (state) => {
     setForm(state)
-    setConfig(jsyaml.dump(state))
+    setConfig(stringify(state))
   }
 
 
