@@ -29,9 +29,9 @@ export function isSignedIn() {
 
 
 export function signOut() {
-  document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
-  document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
-  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'
+  document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
+  document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
+  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
 }
 
 

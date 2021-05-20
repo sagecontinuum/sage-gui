@@ -76,8 +76,8 @@ export default function Sage() {
     <ThemeProvider theme={theme}>
       <CssBaseline/>
 
-      <BrowserRouter basename="/">
-        <NavBar Menu={NavMenu} />
+      <BrowserRouter>
+        <NavBar Menu={NavMenu} hasSignIn />
 
         <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
           <Container>

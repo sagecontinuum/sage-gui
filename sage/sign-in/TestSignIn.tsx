@@ -26,8 +26,8 @@ export default function TestSignIn() {
     setTimeout(() => {
       setLoading(false)
       Auth.signIn(user, userId, token)
-      history.push(redirectPath || '/')
-    }, 1500)
+      window.location.href = redirectPath || '/'
+    }, 1000)
   }
 
 
@@ -37,8 +37,8 @@ export default function TestSignIn() {
     setTimeout(() => {
       setLoading(false)
       Auth.signOut()
-      history.push('/')
-    }, 1500)
+      window.location.href = '/'
+    }, 1000)
   }
 
   const isValid = () => user && userId && token
@@ -52,7 +52,7 @@ export default function TestSignIn() {
 
           {!Auth.isSignedIn() &&
             <>
-              Go <a href={config.auth} target="__target" rel="noreferrer">here</a> to get
+              Go <b><a href={config.auth} target="__target" rel="noreferrer">here</a></b> to get
               a token and paste it below.
             </>
           }
@@ -67,7 +67,7 @@ export default function TestSignIn() {
           {!Auth.isSignedIn() ? <>
 
             <TextField
-              label="Username (you plan on or are using)"
+              label="Username (your namespace)"
               onChange={evt => setUser(evt.target.value)}
             />
 
