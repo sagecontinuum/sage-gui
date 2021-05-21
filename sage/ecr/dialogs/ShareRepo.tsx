@@ -9,6 +9,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import TextField from '@material-ui/core/TextField'
 import Select from '@material-ui/core/Select'
 import MenuItem from '@material-ui/core/MenuItem'
+import Alert from '@material-ui/lab/Alert'
 
 import AddIcon from '@material-ui/icons/AddRounded'
 
@@ -140,6 +141,11 @@ export default function ShareDialog(props: Props) {
         <DialogTitle id="dialog-title">Edit Sharing</DialogTitle>
 
         <DialogContent>
+          <Alert severity="info">
+            Sharing at the user level has been temporarily disabled.
+          </Alert>
+
+          {/*
           {permissions &&
             <PermissionTable permissions={permissions} onDelete={handleDelete} />
           }
@@ -170,6 +176,7 @@ export default function ShareDialog(props: Props) {
               {loading ? 'loading...' : <><AddIcon/> Add</>}
             </Button>
           </div>
+          */}
         </DialogContent>
 
 
