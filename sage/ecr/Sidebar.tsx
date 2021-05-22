@@ -11,18 +11,27 @@ import PublicIcon from '@material-ui/icons/PublicRounded'
 export default function Sidebar() {
   return (
     <Root>
-      <Item to="/apps/explore"><PublicIcon /> Explore</Item>
-      <Item to="/apps/my-apps"><UserIcon/> My Apps</Item>
-      <Item to="/apps/shared-with-me"><SharedIcon /> Shared with Me</Item>
+      <Item to="/apps/explore">
+        <PublicIcon />
+        <div>Explore</div>
+      </Item>
+      <Item to="/apps/my-apps">
+        <UserIcon/>
+        <div>My Apps</div>
+      </Item>
+      <Item to="/apps/shared-with-me">
+        <SharedIcon />
+        <div>Shared with Me</div>
+      </Item>
     </Root>
   )
 }
 
 const Root = styled.div`
-  padding-top: 35px;
-  min-width: 200px;
+  padding-top: 18px;
   border-right: 1px solid #ddd;
-
+  background: #f5f5f5;
+  max-width: 75px;
 `
 
 
@@ -32,11 +41,17 @@ const secondaryColor = '#8166a0'
 
 const Item = styled(NavLink)`
   display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   padding: 10px;
   width: 100%;
   color: #444;
-  font-size: 1.1em;
+  font-size: .9em;
+
+  svg {
+    font-size: 2.5em;
+  }
 
   :hover{
     text-decoration: none;
@@ -46,13 +61,11 @@ const Item = styled(NavLink)`
     color: #000;
   }
 
-  .MuiSvgIcon-root {
-    margin-right: 5px;
-  }
-
   &.active {
     border-right: 3px solid ${primaryColor};
-    background: rgb(243, 243, 243);
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    background: rgb(255, 255, 255);
     font-weight: 800;
   }
 
