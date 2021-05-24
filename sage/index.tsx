@@ -8,6 +8,7 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
 import Apps from './ecr/Apps'
+import Docs from './docs/Page'
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '../components/404'
 
@@ -91,6 +92,7 @@ export default function Sage() {
               </Route>
 
               <Route path="/apps" component={Apps} />
+              <Route path="/docs/:page" component={Docs} />
               <Route path="*" component={NotFound} />
             </Switch>
           </Container>

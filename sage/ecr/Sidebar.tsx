@@ -48,6 +48,7 @@ const Item = styled(NavLink)`
   width: 100%;
   color: #444;
   font-size: .9em;
+  border-right: 3px solid #f5f5f5;
 
   svg {
     font-size: 2.5em;
@@ -65,6 +66,8 @@ const Item = styled(NavLink)`
     border-right: 3px solid ${primaryColor};
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
+    margin-top: -1px;
+    margin-bottom: -1px;
     background: rgb(255, 255, 255);
     font-weight: 800;
   }

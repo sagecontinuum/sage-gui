@@ -7,6 +7,7 @@ import Divider from '@material-ui/core/Divider'
 
 import AccountIcon from '@material-ui/icons/AccountCircleRounded'
 import ExitIcon from '@material-ui/icons/ExitToApp'
+import DocsIcon from '@material-ui/icons/MenuBookRounded'
 import MenuItem from '@material-ui/core/MenuItem'
 
 import DropdownMenu from '../components/Menu'
@@ -44,29 +45,39 @@ export default function NavBar(props: Props) {
         {Menu && <Menu />}
       </div>
 
-      {hasSignIn && username &&
+      <div className="flex gap">
         <DropdownMenu
-          label={
-            <div className="flex items-center">
-              <AccountIcon />&nbsp;{username.split('@')[0]}
-            </div>
-          }
-          caret={false}
-          style={{minWidth: 1, margin: 0}}
+          label="About"
           menu={
             <DropDown>
               <div>
-
-                <MenuItem onClick={handleSignOut} disableRipple>
-                  <ExitIcon/>&nbsp;Sign out
+                <MenuItem component={Link} to="/docs/Hello-World-Plugin" disableRipple>
+                  <DocsIcon/>&nbsp;Documentation
                 </MenuItem>
               </div>
             </DropDown>
           }
         />
-      }
 
-      {hasSignIn && !username && pathname != '/login' &&
+        {hasSignIn && username &&
+          <DropdownMenu
+            label={
+              <div className="flex items-center">
+                <AccountIcon />&nbsp;{username.split('@')[0]}
+              </div>
+            }
+            caret={false}
+            menu={
+              <DropDown>
+                <MenuItem onClick={handleSignOut} disableRipple>
+                  <ExitIcon/>&nbsp;Sign out
+                </MenuItem>
+              </DropDown>
+            }
+          />
+        }
+
+        {hasSignIn && !username && pathname != '/login' &&
           <Button
             component={Link}
             to="/login"
@@ -75,8 +86,8 @@ export default function NavBar(props: Props) {
           >
             Sign In
           </Button>
-
-      }
+        }
+      </div>
     </Root>
   )
 }

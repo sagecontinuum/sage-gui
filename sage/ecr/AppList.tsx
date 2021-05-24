@@ -246,7 +246,7 @@ export default function AppList() {
         <NoneFound className="flex column items-center justify-center muted">
           <img src={BeeIcon} />
           <span>No apps are shared with you</span>
-          <small>Note: sharing is not fully implemented</small>
+          <small>(sharing is not fully implemented)</small>
         </NoneFound>
       }
     </Root>
@@ -274,10 +274,6 @@ const NoneFound = styled.div`
     margin-right: 20px;
     filter: drop-shadow(0px 0px 0.3rem #ccc);
   }
-`
-
-const NewApp = styled.div`
-
 `
 
 

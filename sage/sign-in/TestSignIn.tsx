@@ -67,16 +67,19 @@ export default function TestSignIn() {
           {!Auth.isSignedIn() ? <>
 
             <TextField
+              id="sage-debug-username"
               label="Username (your namespace)"
               onChange={evt => setUser(evt.target.value)}
             />
 
             <TextField
+              id="sage-debug-uuid"
               label="User UUID"
               onChange={evt => setUserId(evt.target.value)}
             />
 
             <TextField
+              id="sage-debug-token"
               label="Sage Token"
               onChange={evt => setToken(evt.target.value)}
             />

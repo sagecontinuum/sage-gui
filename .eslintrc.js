@@ -1,7 +1,7 @@
 module.exports = {
   'env': {
     'node': true,
-    'es2020': true
+    'es2020': true,
   },
   'extends': [
     'eslint:recommended',
@@ -49,6 +49,10 @@ module.exports = {
     'jest': true,
     'test': true,
     'describe': true,
-    'navigator': true
+    'navigator': true,
+
+    // todo(nc): include all dom api types?
+    'Document': true,
+    'HTMLElement': true
   }
 }
