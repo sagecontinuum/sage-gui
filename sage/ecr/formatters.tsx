@@ -7,23 +7,27 @@ import Tooltip from '@material-ui/core/Tooltip'
 import * as utils from '../../components/utils/units'
 
 type VerTooltipProps = {
-  versions: []
+  row: object
 }
 
 function VersionTooltip(props: VerTooltipProps) {
-  const {versions} = props
+  const {row} = props
+
+  const versions = row.versions
 
   return (
     <Tooltip
       arrow
       title={
         <>
-          <div>Versions:</div>
+          <div>Tags:</div>
           {versions.map(ver => <div key={ver}>{ver}</div>)}
         </>
       }
     >
-      <a>{versions.length} version{versions.length > 1 ? 's' : ''}</a>
+      <Link to={`app/${row.namespace}/${row.name}`}>
+        {versions.length} tag{versions.length > 1 ? 's' : ''}
+      </Link>
     </Tooltip>
   )
 }
@@ -33,13 +37,13 @@ export const formatters = {
   name: (name, o) => {
     return <Link to={`app/${o.namespace}/${name}`}>{name}</Link>
   },
-  versions: (versions) => {
+  versions: (versions, row) => {
     if (!versions?.length) return '-'
 
     return (
       <>
         {versions[versions?.length - 1].version}{' '}
-        <VersionTooltip versions={versions}/>
+        <VersionTooltip row={row}/>
       </>
     )
   },

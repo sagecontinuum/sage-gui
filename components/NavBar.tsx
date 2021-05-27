@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation} from 'react-router-dom'
 import sage from 'url:../assets/sage-drawing.png'
@@ -9,12 +9,16 @@ import AccountIcon from '@material-ui/icons/AccountCircleRounded'
 import ExitIcon from '@material-ui/icons/ExitToApp'
 import DocsIcon from '@material-ui/icons/MenuBookRounded'
 import MenuItem from '@material-ui/core/MenuItem'
+import Progress from '@material-ui/core/CircularProgress'
 
 import DropdownMenu from '../components/Menu'
 
-import * as Auth from '../components/auth/auth'
 
-const username = Auth.getUser()
+import * as Auth from '../components/auth/auth'
+const userId = Auth.getUserId()
+const webOrigin = window.location.origin
+const signOutUrl = `${Auth.url}/portal-logout`
+
 
 
 type Props = {
@@ -26,10 +30,20 @@ export default function NavBar(props: Props) {
   const {pathname} = useLocation()
   const { Menu, hasSignIn} = props
 
-  const handleSignOut = () => {
+
+  const [signingOut, setSigningOut] = useState(false)
+
+
+  const handleSignOut = (evt) => {
+    evt.stopPropagation()
+
+    // display progress while signing out
+    setSigningOut(true)
     Auth.signOut()
-    window.location.href = '/'
+
+    window.location.href = `${signOutUrl}/?callback=${webOrigin}`
   }
+
 
   return (
     <Root className="flex items-center justify-between">
@@ -59,28 +73,30 @@ export default function NavBar(props: Props) {
           }
         />
 
-        {hasSignIn && username &&
+        {hasSignIn && userId &&
           <DropdownMenu
             label={
               <div className="flex items-center">
-                <AccountIcon />&nbsp;{username.split('@')[0]}
+                <AccountIcon />&nbsp;{userId.split('-')[0]}
               </div>
             }
             caret={false}
             menu={
               <DropDown>
                 <MenuItem onClick={handleSignOut} disableRipple>
-                  <ExitIcon/>&nbsp;Sign out
+                  {signingOut ?
+                    <><Progress size={20}/>&nbsp;Signing out...</> :
+                    <><ExitIcon/>&nbsp;Sign out</>
+                  }
                 </MenuItem>
               </DropDown>
             }
           />
         }
 
-        {hasSignIn && !username && pathname != '/login' &&
+        {hasSignIn && !userId && pathname != '/login' &&
           <Button
-            component={Link}
-            to="/login"
+            href={`${Auth.url}/?callback=${webOrigin}${pathname}`}
             variant="outlined"
             color="primary"
           >

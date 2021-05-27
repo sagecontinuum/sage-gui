@@ -1,16 +1,15 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useLocation, useHistory } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
 
 import * as Auth from '../../components/auth/auth'
-import config from '../../config'
+
 
 export default function TestSignIn() {
   const location = useLocation()
-  let history = useHistory()
   const params = new URLSearchParams(location.search)
 
   const [user, setUser] = React.useState('')
@@ -52,7 +51,7 @@ export default function TestSignIn() {
 
           {!Auth.isSignedIn() &&
             <>
-              Go <b><a href={config.auth} target="__target" rel="noreferrer">here</a></b> to get
+              Go <b><a href={Auth.url} target="__target" rel="noreferrer">here</a></b> to get
               a token and paste it below.
             </>
           }

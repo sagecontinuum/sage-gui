@@ -33,10 +33,10 @@ const columns = [
     label: 'Namespace'
   }, {
     id: 'versions',
-    label: 'Versions',
+    label: 'Tags',
     format: formatters.versions
   }, {
-    id: 'owner_id',
+    id: 'owner',
     label: 'Owner'
   }, {
     id: 'repo',

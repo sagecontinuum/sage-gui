@@ -2,6 +2,7 @@ import React from 'react'
 import { Route } from 'react-router-dom'
 
 import * as Auth from './auth'
+const _isSignedIn = Auth.isSignedIn()
 
 
 function redirect(urlPath: string) {
@@ -18,9 +19,9 @@ export default function PrivateRoute({
     <Route
       {...rest}
       render={props => (
-        Auth.isSignedIn() ?
+        _isSignedIn ?
           Component ? <Component {...props} /> : rest.render(props)
-          : redirect(`/login?redirect=${rest.path}`)
+          : redirect(`${Auth.url}/?callback=${window.location.origin}${rest.path}`)
       )}
     />
   )

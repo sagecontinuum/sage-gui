@@ -1,10 +1,11 @@
-
+import config from '../../config'
+export const url = config.auth
 
 
 export function signIn(user: string, user_id: string, token: string) {
   document.cookie = `username=${user};path=/`
-  document.cookie = `user_id=${user_id};path=/`
-  document.cookie = `token=${token};path=/`
+  document.cookie = `sage_uuid=${user_id};path=/`
+  document.cookie = `sage_token=${token};path=/`
 }
 
 
@@ -14,33 +15,36 @@ export function getUser() {
 
 
 export function getUserId() {
-  return _getCookieValue('user_id')
+  return _getCookieValue('sage_uuid')
 }
 
 
 export function getToken() {
-  return _getCookieValue('token')
+  return _getCookieValue('sage_token')
 }
 
 
 export function isSignedIn() {
-  return _getCookieValue('user_id')
+  return _getCookieValue('sage_token') !== undefined
 }
 
 
 export function signOut() {
-  document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
-  document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
-  document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'
+  const host = window.location.hostname
+  const domain = host.includes('.') ?  `${host.slice(host.indexOf('.'))}` : host
+  document.cookie = `username=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
+  document.cookie = `sage_uuid=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
+  document.cookie = `sage_token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
+  document.cookie = `sage_token_exp=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
 }
 
 
 function _getCookieValue(key) {
-  const match = document.cookie.split(';')
-    .filter(item => item.includes(key))
+  const match = document.cookie.split('; ')
+    .find(row => row.startsWith(`${key}=`))
 
-  if (!match.length)
-    return null
+  if (!match)
+    return undefined
 
-  return match[0].split('=')[1]
+  return match.split('=')[1].replace(/^"(.*)"$/, '$1')
 }
