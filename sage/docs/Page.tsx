@@ -121,8 +121,8 @@ const Root = styled.div`
 
   .github-link {
     position: absolute;
-    top: 3em;
-    right: 100px;
+    top: 1.5em;
+    right: 3.5em;
   }
 
   ul {

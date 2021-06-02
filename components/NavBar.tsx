@@ -15,7 +15,7 @@ import DropdownMenu from '../components/Menu'
 
 
 import * as Auth from '../components/auth/auth'
-const userId = Auth.getUserId()
+const username = Auth.getUser()
 const webOrigin = window.location.origin
 const signOutUrl = `${Auth.url}/portal-logout`
 
@@ -73,11 +73,11 @@ export default function NavBar(props: Props) {
           }
         />
 
-        {hasSignIn && userId &&
+        {hasSignIn && username &&
           <DropdownMenu
             label={
               <div className="flex items-center">
-                <AccountIcon />&nbsp;{userId.split('-')[0]}
+                <AccountIcon />&nbsp;{username.split('-')[0]}
               </div>
             }
             caret={false}
@@ -94,7 +94,7 @@ export default function NavBar(props: Props) {
           />
         }
 
-        {hasSignIn && !userId && pathname != '/login' &&
+        {hasSignIn && !username && pathname != '/login' &&
           <Button
             href={`${Auth.url}/?callback=${webOrigin}${pathname}`}
             variant="outlined"
