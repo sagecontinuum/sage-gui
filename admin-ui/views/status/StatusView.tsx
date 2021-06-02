@@ -15,6 +15,7 @@ import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
 import Charts from './Charts'
 import QueryViewer from './QueryViewer'
+import { useProgress } from '../../../components/progress/ProgressProvider'
 import Alert from '@material-ui/lab/Alert'
 
 import DetailsSidebar from './DetailsSidebar'
@@ -196,6 +197,7 @@ export default function StatusView() {
 
 
   // all data and current state of filtered data
+  const { setLoading } = useProgress()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
@@ -242,6 +244,7 @@ export default function StatusView() {
     }
 
     let handle
+    setLoading(true)
     Promise.all([BK.fetchState(), BH.getLatestMetrics()])
       .then(([state, metrics]) => {
         setData(state)
@@ -249,6 +252,7 @@ export default function StatusView() {
         const allData = joinData(state, metrics)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
+        setLoading(false)
         handle = ping()
       }).catch(err => setError(err))
 

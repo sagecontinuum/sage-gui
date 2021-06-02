@@ -11,10 +11,56 @@ import NavBar from '../components/NavBar'
 import StatusView from './views/status/StatusView'
 import NodeView from './views/node'
 import NotFound from '../components/404'
+import { ProgressProvider } from '../components/progress/ProgressProvider'
 
 import '../assets/styles.scss'
 
 // import {version} from '../package.json'
+
+
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: [
+      'Roboto'
+    ].join(','),
+    button: {
+      textTransform: 'none',
+      fontWeight: 800
+    }
+  },
+  palette: {
+    type: 'light', // darkMode ? 'dark' : 'light',
+    primary: {
+      main: 'rgb(28, 140, 201)'
+    },
+    secondary: {
+      main: '#8166a0'
+    }
+  },
+  props: {
+    MuiButtonBase: {
+      disableRipple: true,
+    },
+    MuiTextField: {
+      margin: 'dense',
+      variant: 'outlined'
+    }
+  },
+  transitions: {
+  },
+  overrides: {
+    MuiButton: {
+      text: {
+        textTransform: 'none',
+      },
+    },
+    MuiTooltip: {
+      tooltip: {
+        fontSize: '.8em'
+      }
+    }
+  },
+})
 
 
 const NavMenu = () =>
@@ -23,76 +69,40 @@ const NavMenu = () =>
   </div>
 
 
+
 export default function App() {
-  const darkMode = useMediaQuery('(prefers-color-scheme: dark)')
-
-  const theme = React.useMemo(
-    () =>
-      createMuiTheme({
-        typography: {
-          button: {
-            textTransform: 'none',
-            fontWeight: 800
-          }
-        },
-        palette: {
-          type: 'light', // darkMode ? 'dark' : 'light',
-          primary: {
-            main: '#8166a0',
-          },
-          secondary: {
-            main: 'rgb(28, 140, 201)',
-          }
-        },
-        props: {
-          MuiButtonBase: {
-            disableRipple: true,
-          }
-        },
-        transitions: {
-          create: () => 'none',
-        },
-        overrides: {
-          MuiButton: {
-            text: {
-              textTransform: 'none',
-            },
-          },
-        },
-      }),
-    [darkMode]
-  )
-
-
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline/>
-      <NavBar Menu={NavMenu} />
+      <BrowserRouter>
+        <CssBaseline/>
+        <NavBar Menu={NavMenu} />
 
-      <Container>
-        <BrowserRouter>
-          <Switch>
-            <Route exact path="/">
-              <Redirect to="/status" />
-            </Route>
-            <Route path="/status">
-              <StatusView />
-            </Route>
-            <Route path="/node/:node">
-              <NodeView />
-            </Route>
-            <Route path="*">
-              <NotFound />
-            </Route>
-          </Switch>
-        </BrowserRouter>
-      </Container>
+        <Container>
+          <ProgressProvider>
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/status" />
+              </Route>
+              <Route path="/status">
+                <StatusView />
+              </Route>
+              <Route path="/node/:node">
+                <NodeView />
+              </Route>
+              <Route path="*">
+                <NotFound />
+              </Route>
+            </Switch>
+          </ProgressProvider>
+        </Container>
+      </BrowserRouter>
     </ThemeProvider>
   )
 }
 
 const Container = styled.div`
-  margin: 70px 10px 10px 10px;
+  padding-top: 10px;
+  margin: 60px 10px 10px 10px;
   width: 100%;
 `
 

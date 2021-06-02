@@ -59,51 +59,53 @@ export default function NavBar(props: Props) {
         {Menu && <Menu />}
       </div>
 
-      <div className="flex gap">
-        <DropdownMenu
-          label="About"
-          menu={
-            <DropDown>
-              <div>
-                <MenuItem component={Link} to="/docs/Hello-World-Plugin" disableRipple>
-                  <DocsIcon/>&nbsp;Documentation
-                </MenuItem>
-              </div>
-            </DropDown>
-          }
-        />
-
-        {hasSignIn && username &&
+      {hasSignIn &&
+        <div className="flex gap">
           <DropdownMenu
-            label={
-              <div className="flex items-center">
-                <AccountIcon />&nbsp;{username.split('-')[0]}
-              </div>
-            }
-            caret={false}
+            label="About"
             menu={
               <DropDown>
-                <MenuItem onClick={handleSignOut} disableRipple>
-                  {signingOut ?
-                    <><Progress size={20}/>&nbsp;Signing out...</> :
-                    <><ExitIcon/>&nbsp;Sign out</>
-                  }
-                </MenuItem>
+                <div>
+                  <MenuItem component={Link} to="/docs/Hello-World-Plugin" disableRipple>
+                    <DocsIcon/>&nbsp;Documentation
+                  </MenuItem>
+                </div>
               </DropDown>
             }
           />
-        }
 
-        {hasSignIn && !username && pathname != '/login' &&
-          <Button
-            href={`${Auth.url}/?callback=${webOrigin}${pathname}`}
-            variant="outlined"
-            color="primary"
-          >
-            Sign In
-          </Button>
-        }
-      </div>
+          {username &&
+            <DropdownMenu
+              label={
+                <div className="flex items-center">
+                  <AccountIcon />&nbsp;{username}
+                </div>
+              }
+              caret={false}
+              menu={
+                <DropDown>
+                  <MenuItem onClick={handleSignOut} disableRipple>
+                    {signingOut ?
+                      <><Progress size={20}/>&nbsp;Signing out...</> :
+                      <><ExitIcon/>&nbsp;Sign out</>
+                    }
+                  </MenuItem>
+                </DropDown>
+              }
+            />
+          }
+
+          {!username && pathname != '/login' &&
+            <Button
+              href={`${Auth.url}/?callback=${webOrigin}${pathname}`}
+              variant="outlined"
+              color="primary"
+            >
+              Sign In
+            </Button>
+          }
+        </div>
+      }
     </Root>
   )
 }
