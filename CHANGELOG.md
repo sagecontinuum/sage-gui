@@ -3,6 +3,14 @@
 The following are some notable changes to the UI
 
 
+### [1.1.1](https://github.com/sagecontinuum/sage-gui/compare/v1.1.0...v1.1.1) (2021-06-04)
+
+
+### Bug Fixes
+
+* **ecr:** fix copy config button ([1f51bff](https://github.com/sagecontinuum/sage-gui/commit/1f51bfffc175cd60cb917bc6d7765b23e754708c))
+* **ecr:** set namespace to username as default ([61bcde4](https://github.com/sagecontinuum/sage-gui/commit/61bcde4a4e6ebe52941128aaf57d5a65f8a8082f))
+
 ## [1.1.0](https://github.com/sagecontinuum/sage-gui/compare/v1.0.0-alpha.0...v1.1.0) (2021-06-02)
 
 
