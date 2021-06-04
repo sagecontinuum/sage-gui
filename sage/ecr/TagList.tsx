@@ -115,7 +115,7 @@ export default function TagList(props: Props) {
   }
 
   const handleCopy = (ver: string) => {
-    //navigator.clipboard.writeText(jsyaml.dump(cfgMap[ver]))
+    navigator.clipboard.writeText(stringify(cfgMap[ver]))
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
   }
