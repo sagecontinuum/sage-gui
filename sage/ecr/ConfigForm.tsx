@@ -3,7 +3,9 @@ import styled from 'styled-components'
 
 import FormControl from '@material-ui/core/FormControl'
 import TextField from '@material-ui/core/TextField'
+import InputLabel from '@material-ui/core/InputLabel'
 import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
 import FormLabel from '@material-ui/core/FormLabel'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import CheckBox from '@material-ui/core/CheckBox'
@@ -17,8 +19,10 @@ const username = Auth.getUser()
 
 const architectures = [
   'linux/amd64',
+  'linux/arm64',
+  'linux/arm/v6',
   'linux/arm/v7',
-  'linux/arm64'
+  'linux/arm/v8'
 ]
 
 
@@ -57,16 +61,18 @@ export default function ConfigForm(props: Props) {
   return (
     <Form className="flex column" autoComplete="off">
       <div className="flex row">
-        <TextField
-          label="Namespace"
-          name="namespace"
-          value={form.namespace}
-          onChange={handleChange}
-          InputLabelProps={{ shrink: true}}
-          size="small"
-          margin="dense"
-          placeholder={username}
-        />
+        <FormControl variant="outlined" size="small">
+          <InputLabel id="namespace-label">Namespace</InputLabel>
+          <Select
+            labelId="namespace-label"
+            id="namepsace"
+            value={username}
+            onChange={evt => handleChange(evt)}
+            label="Namepsace"
+          >
+            <MenuItem value={username}>{username}</MenuItem>
+          </Select>
+        </FormControl>
         <Slash>&nbsp;/&nbsp;</Slash>
         <TextField
           label="Name"
@@ -87,7 +93,6 @@ export default function ConfigForm(props: Props) {
         />
       </div>
 
-
       <TextField
         label="Description"
         name="description"
@@ -97,10 +102,10 @@ export default function ConfigForm(props: Props) {
         multiline
         rows={3}
         InputLabelProps={{ shrink: true }}
-        placeholder="My awesome app"
+        placeholder="A description about my app"
       />
 
-      <FormControl>
+      <FormControl className="flex column">
         <FormLabel component="legend">Architecture</FormLabel>
         {architectures.map((arch) =>
           <FormControlLabel

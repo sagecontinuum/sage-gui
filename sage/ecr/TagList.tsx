@@ -26,8 +26,10 @@ import { stringify } from 'yaml'
 import yamlIcon from 'url:../../assets/yaml-logo.svg'
 import { formatters } from './formatters'
 
-import * as ECR from '../apis/ecr'
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
+import * as ECR from '../apis/ecr'
+import * as Auth from '../../components/auth/auth'
+const username = Auth.getUser()
 
 
 
@@ -141,7 +143,8 @@ export default function TagList(props: Props) {
         const {
           version,
           description,
-          time_last_updated
+          time_last_updated,
+          namespace
         } = ver
 
         const panel = `panel-${i}`
@@ -168,11 +171,14 @@ export default function TagList(props: Props) {
                 </div>
 
                 <div className="tag-actions">
-                  <Tooltip title="Delete tag">
-                    <IconButton onClick={(evt) => onClickDeleteTag(evt, ver)} size="small" className="delete">
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
+                  {/* todo(nc): allow actions on write or appropriate access */}
+                  {namespace == username &&
+                    <Tooltip title="Delete tag">
+                      <IconButton onClick={(evt) => onClickDeleteTag(evt, ver)} size="small" className="delete">
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
 
                   <Tooltip
                     title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}

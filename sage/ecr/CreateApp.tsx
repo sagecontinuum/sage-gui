@@ -22,16 +22,13 @@ import ConfigForm from './ConfigForm'
 import { useSnackbar } from 'notistack'
 
 import * as ECR from '../apis/ecr'
+import * as Auth from '../../components/auth/auth'
+const username = Auth.getUser()
 
 
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
-
-// Todo: need better examples
 const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
-// const EXAMPLE_REPO_2 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
-// const EXAMPLE_REPO_3 = 'https://github.com/nconrad/plugin-helloworld-ml'
-
 
 
 function StepTitle(props) {
@@ -91,7 +88,7 @@ const initialState = {
   name: '',
   description: '',
   version: '',
-  namespace: '',
+  namespace: username,
   source: {
     architectures: [],
     branch: '',
@@ -156,14 +153,18 @@ export default function CreateApp() {
           'none' : res.url.slice(res.url.lastIndexOf('.') + 1)
         setConfigType(type)
 
-        // set config text
+        // set form/config
         res.text().then(text => {
-          setConfig(text)
-          const obj = parse(text)
-
-          setForm(obj)
+          let obj = parse(text)
+          obj = sanitizeForm(obj)
+          setConfig(stringify(obj))
+          setForm(sanitizeForm(obj))
         })
       }).catch(() => setConfigType('none'))
+  }
+
+  const sanitizeForm = (obj) => {
+    return {...obj, namespace: username}
   }
 
 
@@ -201,11 +202,20 @@ export default function CreateApp() {
   }
 
 
-  const handleConfigChange = (val) => {
-    const obj = parse(val)
+
+  const handleFormChange = (obj: ECR.AppConfig) => {
+    obj = sanitizeForm(obj)
     setForm(obj)
-    setConfig(val)
+    setConfig(stringify(obj))
   }
+
+  const handleEditorChange = (text: string) => {
+    let obj = parse(text)
+    obj = sanitizeForm(obj)
+    setForm(obj)
+    setConfig(stringify(obj))
+  }
+
 
   const onExampleOne = () => {
     setConfig('')
@@ -213,30 +223,24 @@ export default function CreateApp() {
   }
 
 
-  // Todo: for demonstration, there's an error in example 1
+  /*
   const onExampleTwo = async () => {
     setConfig('')
     setRepoURL(EXAMPLE_REPO_2)
   }
 
-  /*
   const onExampleThree = () => {
     setConfig(null)
     setRepoURL(EXAMPLE_REPO_3)
   }
   */
 
-  const handleFormChange = (state) => {
-    setForm(state)
-    setConfig(stringify(state))
-  }
-
 
 
   return (
     <Root>
       <Main>
-
+        <h1>Create App</h1>
         <StepTitle icon="1" active={true} label="Specify Repo URL"/>
         <form className="step step-1" onSubmit={handleRepoVerify}>
           <TextField
@@ -297,7 +301,7 @@ export default function CreateApp() {
               height="400px"
               defaultLanguage="yaml"
               value={config}
-              onChange={handleConfigChange}
+              onChange={handleEditorChange}
               theme="light"
             />
           </EditorContainer>
@@ -354,7 +358,7 @@ export default function CreateApp() {
 
 const Root = styled.div`
   display: flex;
-  margin-top: 50px;
+  margin: 0 25px;
 `
 
 const Main = styled.div`
@@ -382,5 +386,6 @@ const EditorContainer = styled.div`
 `
 
 const Help = styled.div`
+  margin: 20px 0;
   flex-grow: 1;
 `
