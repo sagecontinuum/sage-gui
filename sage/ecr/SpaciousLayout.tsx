@@ -11,6 +11,7 @@ import GithubIcon from '@material-ui/icons/GitHub'
 
 import RepoActions from './RepoActions'
 import { formatters } from './formatters'
+import BuildIndicator from './common/BuildIndicator'
 
 import * as Auth from '../../components/auth/auth'
 
@@ -63,23 +64,8 @@ function Row(props) {
 
         <div className="flex column items-end muted">
           <div className="flex items-center details">
-
-            {buildUrl &&
-              <>
-                {isBuilding ?
-                  <b className="success">Building</b> :
-                  (buildResult == 'SUCCESS' ? <b className="success">Built</b> : <b className="failed">Failed</b>)
-                }
-                &nbsp;
-                (<Tooltip
-                  title={<>Jenkins <LaunchIcon style={{fontSize: '1.1em'}}/></>}
-                  placement="top"
-                >
-                  <a href={buildUrl} onClick={evt => evt.stopPropagation()} target="_blank" rel="noreferrer">view</a>
-                </Tooltip>)
-                <VertDivide />
-              </>
-            }
+            <BuildIndicator buildUrl={buildUrl} isBuilding={isBuilding} buildResult={buildResult} />
+            {buildUrl && <VertDivide />}
 
             {isPublic &&
               <>

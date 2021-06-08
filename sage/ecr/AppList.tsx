@@ -21,7 +21,7 @@ import * as ECR from '../apis/ecr'
 import SpaciousLayout from './SpaciousLayout'
 import { formatters } from './formatters'
 
-import config from '../../config'
+import useWithBuildStatus from './hooks/useWithBuildStatus'
 
 const columns = [
   {
@@ -75,7 +75,8 @@ export default function AppList() {
 
   const ref = useRef<boolean>()
   const {loading, setLoading} = useProgress()
-  const [data, setData] = useState<ECR.AppDetails[]>()
+
+  let [data, setData] = useWithBuildStatus<ECR.AppDetails[]>()
   const [rows, setRows] = useState<ECR.AppDetails[]>()
   const [error, setError] = useState(null)
 
@@ -121,35 +122,6 @@ export default function AppList() {
 
     setRows(queryData(data, query))
   }, [view, query, data])
-
-
-  // effect for updating build status
-  useEffect(() => {
-    if (!data) return
-
-    for (const app of data) {
-      ECR.listBuildStatus(app)
-        .then(status => {
-          if (!ref.current) return
-          setRows(prev => {
-            if (!prev) return prev
-
-            // copy to change object ref
-            const newRows = [...prev]
-
-            const idx = newRows.findIndex(d => d.id == app.id)
-            newRows[idx] = {
-              ...newRows[idx],
-              isBuilding: status.building,
-              buildResult: status.result,
-              buildUrl: config.jenkins + status.url.split('/jenkins')[1] + 'console'
-            }
-
-            return newRows
-          })
-        })
-    }
-  }, [data])
 
 
 
