@@ -125,6 +125,15 @@ export default function CreateApp() {
   const [error, setError] = useState(null)
 
 
+  useEffect(() => {
+    fetch(`${ECR.url}/permissions/`)
+      .then(res => {
+        return res.json()
+      }).then((data) => {
+        console.log(data)
+      })
+  }, [])
+
   // remove all verification/error state on changes
   useEffect(() => {
     setError(null)

@@ -7,6 +7,7 @@ import AccordionDetails from '@material-ui/core/AccordionDetails'
 import AccordionSummary from '@material-ui/core/AccordionSummary'
 
 import Tooltip from '@material-ui/core/Tooltip'
+import Button from '@material-ui/core/Button'
 import IconButton from '@material-ui/core/IconButton'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import MoreIcon from '@material-ui/icons/UnfoldMoreOutlined'
@@ -14,19 +15,22 @@ import LessIcon from '@material-ui/icons/UnfoldLessOutlined'
 import CopyIcon from '@material-ui/icons/FileCopyOutlined'
 import DoneIcon from '@material-ui/icons/DoneOutlined'
 import DeleteIcon from '@material-ui/icons/DeleteOutlineRounded'
+import BuildIcon from '@material-ui/icons/BuildRounded'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import GithubIcon from '@material-ui/icons/Github'
 import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 import ToggleButton from '@material-ui/lab/ToggleButton'
-
+import Divider from '@material-ui/core/Divider'
 
 import { useSnackbar } from 'notistack'
 import { stringify } from 'yaml'
-
 import yamlIcon from 'url:../../assets/yaml-logo.svg'
 import { formatters } from './formatters'
 
+import useWithBuildStatus from './hooks/useWithBuildStatus'
+import BuildIndicator from './common/BuildIndicator'
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
+
 import * as ECR from '../apis/ecr'
 import * as Auth from '../../components/auth/auth'
 const username = Auth.getUser()
@@ -77,9 +81,10 @@ type Props = {
 
 export default function TagList(props: Props) {
   const { enqueueSnackbar } = useSnackbar()
-  const {versions} = props
 
   const classes = useStyles()
+
+  const [versions, setVersions] = useWithBuildStatus()
 
   const [cfgMap, setCfgMap] = useState({})
   const [format, setFormat] = useState<'yaml' | 'json'>('yaml')
@@ -88,6 +93,7 @@ export default function TagList(props: Props) {
 
   const [loadingConfigs, setLoadingConfigs] = useState(false)
 
+  const [buildSubmitted, setBuildSubmitted] = useState(false)
   const [deleteTag, setDeleteTag] = useState<ECR.AppDetails>(null)
   const [expanded, setExpanded] = useState<string | false>(false)
 
@@ -95,7 +101,7 @@ export default function TagList(props: Props) {
   useEffect(() => {
     setLoadingConfigs(true)
 
-    const proms = versions.map(({namespace, name, version}) =>
+    const proms = props.versions.map(({namespace, name, version}) =>
       ECR.getAppConfig({namespace, name, version})
     )
 
@@ -107,7 +113,10 @@ export default function TagList(props: Props) {
         setCfgMap(cMap)
       })
       .finally(() => setLoadingConfigs(false))
-  }, [versions])
+
+    setVersions(props.versions)
+  }, [props.versions, setVersions])
+
 
 
   const handleChange = (panel: string) => (_, isExpanded: boolean) => {
@@ -126,6 +135,20 @@ export default function TagList(props: Props) {
     setDeleteTag(app)
   }
 
+  const onClickBuild = (evt, app) => {
+    evt.stopPropagation()
+    enqueueSnackbar('Build submitted')
+    setBuildSubmitted(true)
+    ECR.build(app)
+      .then(() => {
+        enqueueSnackbar('Build started')
+        setVersions(prev => prev)
+      }).catch(error => {
+        // todo(nc): implement submission (re)build error handling
+      }).finally(() => setBuildSubmitted(false))
+  }
+
+  // after confirmation handle
   const handleDelete = () => {
     return ECR.deleteApp(deleteTag)
       .then(() =>
@@ -139,12 +162,15 @@ export default function TagList(props: Props) {
   return (
     <Root>
       <h2>Tags</h2>
-      {versions.map((ver, i) => {
+      {versions && versions.map((ver, i) => {
         const {
+          namespace,
           version,
           description,
           time_last_updated,
-          namespace
+          buildUrl,
+          isBuilding,
+          buildResult
         } = ver
 
         const panel = `panel-${i}`
@@ -168,16 +194,38 @@ export default function TagList(props: Props) {
                   <span className={classes.secondaryHeading}>
                     updated {formatters.time(time_last_updated)}
                   </span>
+                  <BuildIndicator buildUrl={buildUrl} isBuilding={isBuilding} buildResult={buildResult} />
                 </div>
 
-                <div className="tag-actions">
+                <div className="tag-actions flex" >
                   {/* todo(nc): allow actions on write or appropriate access */}
                   {namespace == username &&
-                    <Tooltip title="Delete tag">
-                      <IconButton onClick={(evt) => onClickDeleteTag(evt, ver)} size="small" className="delete">
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
+                    <div className="flex gap">
+                      <Tooltip title="Build this tagged version">
+                        <Button
+                          onClick={(evt) => onClickBuild(evt, ver)}
+                          size="small" startIcon={<BuildIcon/>}
+                          variant="contained"
+                          color="primary"
+                          disabled={isBuilding || buildSubmitted}
+                        >
+                          {buildSubmitted ? 'Submitting...' : 'Build'}
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title="Delete tag">
+                        <Button
+                          onClick={(evt) => onClickDeleteTag(evt, ver)}
+                          size="small"
+                          className="delete"
+                          startIcon={<DeleteIcon />}
+                          variant="outlined"
+                          style={{color: 'rgb(145, 35, 65)', border: '1px solid rgb(145, 35, 65)'}}
+                        >
+                          Delete
+                        </Button>
+                      </Tooltip>
+                      <Divider orientation="vertical" style={{margin: '0 10px 0 0'}}/>
+                    </div>
                   }
 
                   <Tooltip

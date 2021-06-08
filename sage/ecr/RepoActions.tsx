@@ -49,8 +49,9 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
       variant="outlined"
       color="primary"
       size="small"
+      startIcon={icon}
     >
-      {icon} {text}
+      {text}
     </Button>
   )
 }
