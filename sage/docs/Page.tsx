@@ -9,12 +9,26 @@ const githubUrl = 'https://github.com'
 
 
 const index = [{
-  title: 'Hello World Plugin',
-  url: `${githubUrl}/waggle-sensor/plugin-helloworld-ml/blob/master/README.md`
-},
-{
-  title: 'Writing a Plugin',
-  url: `${githubUrl}/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md`,
+  title: 'About Sage',
+  docs: [{
+    title: 'Overview',
+    url: `${githubUrl}/sagecontinuum/sage/blob/master/README.md`,
+  }, {
+    title: 'Architecture Overview',
+    url: `${githubUrl}/sagecontinuum/sage/blob/master/architecture_overview.md`
+  }, {
+    title: 'User Interaction',
+    url: `${githubUrl}/sagecontinuum/sage/blob/master/user_interaction.md`
+  }],
+}, {
+  title: 'Developer Getting Started',
+  docs: [{
+    title: 'Hello World Plugin',
+    url: `${githubUrl}/waggle-sensor/plugin-helloworld-ml/blob/master/README.md`
+  }, {
+    title: 'Writing a Plugin',
+    url: `${githubUrl}/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md`,
+  }]
 }]
 
 
@@ -74,7 +88,10 @@ export default function Page() {
 
   useEffect(() => {
     const title = page.replace(/\-/g, ' ')
-    const editLink = index.filter(o => o.title == title)[0].url
+    const editLink = index
+      .reduce((acc, section) => [...acc, ...section.docs], [])
+      .filter(o => o.title == title)[0].url
+
     const srcUrl = getSrcUrl(editLink)
     setEditLink(editLink)
 
@@ -87,16 +104,23 @@ export default function Page() {
     <Root>
       <Sidebar>
         <h2 className="no-margin">
-          Developer Docs
-
+          Documentation
         </h2>
 
-        <h4>Getting Started</h4>
-        <ul>
-          {index.map(({title}) =>
+        {index.map(section => {
+          const {title, docs} = section
+
+          const entries = docs.map(({title}) =>
             <li key={title}><NavLink to={`/docs/${title.replace(/ /g, '-')}`}>{title}</NavLink></li>
-          )}
-        </ul>
+          )
+
+          return (
+            <div key={title}>
+              <h4>{title}</h4>
+              <ul>{entries}</ul>
+            </div>
+          )
+        })}
       </Sidebar>
 
       {data &&
@@ -132,6 +156,10 @@ const Root = styled.div`
 
   .active { font-weight: bold; }
   .active:hover { text-decoration: none; }
+
+  img {
+    width: 100%;
+  }
 `
 const Sidebar = styled.div`
   padding: 50px 20px;
