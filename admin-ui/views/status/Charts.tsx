@@ -185,48 +185,9 @@ export default function Charts(props: Props) {
           }
         </StatusChart>
 
-        {selected?.length && activity && Object.keys(activity).length &&
+        {/* disable metric history chart(s) for now
+        selected?.length && activity && Object.keys(activity).length &&
           <MetricCharts>
-            {/*
-            <ChartTitle>
-              cpu (secs)
-            </ChartTitle>
-            <div className="chart">
-              <Line
-                data={{
-                  labels: getLabels(activity, 'cpu'),
-                  datasets:
-                    Object.keys(activity).map((host, i) => ({
-                      label: 'cpu (secs)',
-                      data: activity[host].cpu,
-                      fill: true,
-                      backgroundColor: colors[i].backgroundColor,
-                      borderColor: colors[i].borderColor,
-                      pointStyle: null,
-                      lineTension: 0
-                    }))
-                }}
-                options={{
-                  ...defaultOptions,
-                  scales: {
-                    yAxes: [{
-                      ticks: {
-                        max: activity[Object.keys(activity)[0]].maxCpu,
-                        min: 0,
-                        display: false,
-                        maxTicksLimit: 1
-                      }
-                    }],
-                    xAxes: [{
-                      ticks: { display: false },
-                      gridLines: { lineWidth: 0 }
-                    }]
-                  },
-                }}
-              />
-            </div>
-            */}
-
             <ChartTitle>
               mem%
             </ChartTitle>
@@ -265,50 +226,8 @@ export default function Charts(props: Props) {
                 }}
               />
             </div>
-
-            {/*
-            <ChartTitle>
-              storage%
-            </ChartTitle>
-            <div className="chart">
-
-              <Line
-                data={{
-                  labels: getLabels(aggActivity.storage),
-                  datasets: [
-                    {
-                      label: 'storage%',
-                      data: getData(aggActivity.storage),
-                      fill: true,
-                      backgroundColor: 'rgb(55, 55, 55, .7)',
-                      borderColor: 'rgba(0, 0, 0, 0.2)',
-                      pointStyle: null,
-                      lineTension: 0
-                    }
-                  ]
-                }}
-                options={{
-                  ...defaultOptions,
-                  scales: {
-                    yAxes: [{
-                      ticks: {
-                        max: 100,
-                        min: 0,
-                        display: false,
-                        maxTicksLimit: 1
-                      },
-                    }],
-                    xAxes: [{
-                      ticks: { display: false },
-                      gridLines: { lineWidth: 0 }
-                    }]
-                  }
-                }}
-              />
-            </div>
-            */}
           </MetricCharts>
-        }
+        */}
       </ChartsContainer>
     </Root>
   )

@@ -18,8 +18,6 @@ import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 import Alert from '@material-ui/lab/Alert'
 
-import DetailsSidebar from './DetailsSidebar'
-
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
 import config from '../../../config'
@@ -193,8 +191,6 @@ export default function StatusView() {
   const status = params.get('status')
   const project = params.get('project')
   const region = params.get('region')
-  const details = params.get('details')
-
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
@@ -205,18 +201,17 @@ export default function StatusView() {
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
-  const [projects, setProjects] = useState<Option[]>()
-  const [regions, setRegions] = useState<Option[]>()
+  // const [projects, setProjects] = useState<Option[]>()
+  // const [regions, setRegions] = useState<Option[]>()
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
 
   // selected
   const [selected, setSelected] = useState(null)
-  // const [showDetails, setShowDetails] = useState(false)
 
   // ticker of recent activity
-  const [loadingTicker, setLoadingTicker] = useState(false)
+  // const [loadingTicker, setLoadingTicker] = useState(false)
   const [activity, setActivity] = useState(null)
 
   const [lastUpdate, setLastUpdate] = useState(null)
@@ -287,11 +282,13 @@ export default function StatusView() {
       return
     }
 
+    /* disabling node metric history for now
     setLoadingTicker(true)
     const id = selected[0].id
     BH.getNodeActivity(id)
       .then(activity => setActivity(activity))
       .finally(() => setLoadingTicker(false))
+    */
   }, [selected])
 
 
@@ -305,8 +302,8 @@ export default function StatusView() {
     setFilterState(filterState)
 
     setStatuses(getOptions(data, 'status'))
-    setProjects(getOptions(data, 'project'))
-    setRegions(getOptions(data, 'region'))
+    // setProjects(getOptions(data, 'project'))
+    // setRegions(getOptions(data, 'region'))
   }
 
 
@@ -328,7 +325,6 @@ export default function StatusView() {
 
 
   const handleRemoveFilters = () => {
-
     params.delete('query')
     history.push({search: ''})
   }
@@ -337,11 +333,6 @@ export default function StatusView() {
   const handleSelect = (sel) => {
     setSelected(sel.objs.length ? sel.objs : null)
     setUpdateID(prev => prev + 1)
-  }
-
-  const hideDetails = () => {
-    params.delete(details)
-    history.replace()
   }
 
 
@@ -355,7 +346,7 @@ export default function StatusView() {
                 {selected[0].id}
               </h3>
               &nbsp;
-              {loadingTicker && <Progress color="secondary" size={15}/>}
+              {loadingTicker && <Progress size={15}/>}
             </div>
           }
 
@@ -435,20 +426,6 @@ export default function StatusView() {
                   />
                 */}
 
-                {/*selected &&
-                  <>
-                    <VertDivider />
-                    <Button variant="contained"
-                      color="primary"
-                      onClick={() => setShowDetails(true)}
-                      startIcon={<InfoIcon />}
-                      size="small"
-                    >
-                      Details
-                    </Button>
-                  </>
-                */}
-
                 {filtered.length != data.length &&
                   <>
                     <VertDivider />
@@ -474,14 +451,6 @@ export default function StatusView() {
       {error &&
         <Alert severity="error">{error.message}</Alert>
       }
-
-      {details &&
-        <DetailsSidebar
-          columns={columns}
-          node={details}
-          onClose={() => hideDetails()}
-        />
-      }
     </Root>
   )
 }
@@ -493,9 +462,7 @@ const VertDivider = () =>
 
 
 const Root = styled.div`
-  && .MuiDrawer-paper {
-    margin-top: 60px;
-  }
+
 `
 
 const Progress = styled(CircularProgress)`

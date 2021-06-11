@@ -3,13 +3,12 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom'
 import styled from 'styled-components'
 
-import useMediaQuery from '@material-ui/core/useMediaQuery'
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar from '../components/NavBar'
 import StatusView from './views/status/StatusView'
-import NodeView from './views/node'
+import NodeView from './views/node/Node'
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 

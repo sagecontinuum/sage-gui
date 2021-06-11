@@ -34,7 +34,7 @@ const getStateIcon = (status: NodeStatus) => {
   if (!status)
     return <Icon className="material-icons failed">error</Icon>
   else if (status == 'loading')
-    return '…'
+    return <div className="text-center">-</div>
   else if (status == 'active')
     return <Icon className="material-icons success">check_circle</Icon>
   else if (status == 'warning')
@@ -122,20 +122,7 @@ const columns = [
     id: 'id',
     label: 'Node ID',
     width: '200px',
-    format: (val) =>
-      <div className="flex items-center">
-        {val}
-        <IconButton
-          size="small"
-          component={Link}
-          to={`status?details=${val}`}
-          onClick={(evt) => evt.stopPropagation()}
-          replace
-        >
-          <InfoOutlined fontSize="small" />
-        </IconButton>
-      </div>
-
+    format: (val) => <Link to={`node/${val}`}>{val}</Link>
   }, {
     id: 'elaspedTimes',
     label: 'Last Updated',
@@ -168,7 +155,8 @@ const columns = [
       return Object.keys(val).map(host =>
         <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
       )
-    }
+    },
+    hide: true
   },
   {
     id: 'memTotal',
@@ -225,7 +213,8 @@ const columns = [
   {
     id: 'registration_event',
     label: 'Registered',
-    format: (val) => new Date(val).toLocaleString('en-US', dateOpts)
+    format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
+    hide: true
   }
 ]
 
