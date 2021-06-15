@@ -3,6 +3,12 @@ import { NodeStatus } from '../node'
 
 const url = config.beekeeper
 
+const IGNORE_LIST = [
+  '0000000000000001', '000048B02D059C6A', '000048B02D07627C',
+  '000048B02D0766CD', '000048B02D0766D2', '000048B02D15BC65',
+  '000048B02D15C1AA', '000048B02D15D52F', 'SURYALAPTOP00000'
+]
+
 
 export type State = {
   address: string
@@ -21,7 +27,6 @@ export type State = {
   // additional status field.  may be replaced with 'mode' or such
   status: NodeStatus
 }
-
 
 
 function handleErrors(res) {
@@ -55,6 +60,7 @@ export async function fetchState() : Promise<State[]> {
   const data = await get(`${url}/state`)
 
   return data.data
+    .filter(obj => !IGNORE_LIST.includes(obj.id))
     .map(obj => ({
       ...obj,
       status: 'loading',
