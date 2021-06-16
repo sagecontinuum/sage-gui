@@ -3,9 +3,16 @@ import React from 'react'
 import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
+
+import ErrorIcon from '@material-ui/icons/ErrorRounded'
+import WarningIcon from '@material-ui/icons/WarningRounded'
+import InactiveIcon from '@material-ui/icons/RemoveCircleOutlineRounded'
+import CheckIcon from '@material-ui/icons/CheckCircleRounded'
+import Dot from '@material-ui/icons/FiberManualRecord'
+
+
 import IconButton from '@material-ui/core/IconButton'
 import Divider from '@material-ui/core/Divider'
-import InfoOutlined from '@material-ui/icons/InfoOutlined'
 import Tooltip from '@material-ui/core/Tooltip'
 
 import * as utils from '../../../components/utils/units'
@@ -30,7 +37,7 @@ const sysTimeOtps = {
 }
 
 
-const getStateIcon = (status: NodeStatus) => {
+const getStatusIcon = (status: NodeStatus) => {
   if (!status)
     return <Icon className="material-icons failed">error</Icon>
   else if (status == 'loading')
@@ -43,6 +50,55 @@ const getStateIcon = (status: NodeStatus) => {
     return <Icon className="material-icons failed">error</Icon>
   else
     return <Icon className="material-icons inactive">remove_circle_outline</Icon>
+}
+
+
+const getSanityIcon = (sanity: NodeStatus) => {
+  if (!sanity) return '-'
+
+  const {warnings, failed} = sanity.nx
+
+  // build list of issues for tooltip
+  const tt = []
+  Object.keys(sanity.nx).forEach(key => {
+    if (!key.includes('sys.sanity_status'))
+      return
+
+    const name = key.split('sys.sanity_status.')[1]
+
+    const {value, meta} = sanity.nx[key][0]
+    const hasIssue = value > 0
+    const severity = meta.severity
+    if (hasIssue)
+      tt.push(
+        <div className="flex items-center" key={name}>
+          <Dot className={severity} fontSize="small" />{name}
+        </div>
+      )
+  })
+
+  if (failed) {
+    const issues = failed + warnings
+    return (
+      <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
+        <ErrorIcon className="failed" />
+      </Tooltip>
+    )
+  } else if (!failed) {
+    return (
+      <Tooltip title={`All tests passed`}>
+        <CheckIcon className="success" />
+      </Tooltip>
+    )
+  } else if (warnings) {
+    return (
+      <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
+        <WarningIcon className="warning" />
+      </Tooltip>
+    )
+  } else {
+    return <InactiveIcon className="inactive" />
+  }
 }
 
 const Icon = styled.span`
@@ -117,7 +173,12 @@ const columns = [
     id: 'status',
     label: 'Status',
     width: '25px',
-    format: (val) => getStateIcon(val)
+    format: (val) => getStatusIcon(val)
+  }, {
+    id: 'sanity',
+    label: 'Sanity',
+    width: '25px',
+    format: (val) => getSanityIcon(val)
   }, {
     id: 'id',
     label: 'Node ID',

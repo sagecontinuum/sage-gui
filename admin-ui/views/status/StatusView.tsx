@@ -8,6 +8,7 @@ import Divider from '@material-ui/core/Divider'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
 import UndoIcon from '@material-ui/icons/UndoRounded'
+import Alert from '@material-ui/lab/Alert'
 
 import columns from './columns'
 import Table from '../../../components/table/Table'
@@ -16,7 +17,7 @@ import Map from '../../../components/Map'
 import Charts from './Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
-import Alert from '@material-ui/lab/Alert'
+
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
@@ -124,6 +125,49 @@ function getMetric(
   return valueObj
 }
 
+function getSanity(
+  metrics: BH.AggMetrics,
+  nodeID: string
+) {
+  const metricObjs = metrics[nodeID]
+
+  const valueObj = {}
+  Object.keys(metricObjs).forEach(host => {
+    if (!host.includes('ws-nxcore'))
+      return
+
+    const metric = metricObjs[host]
+    if (!metric) return
+
+
+    let passed = 0
+    let warnings = 0
+    let failed = 0
+
+    // determine pass ratio
+    Object.keys(metric).forEach(key => {
+      if (!key.includes('sys.sanity_status'))
+        return
+
+      const {value, meta} = metric[key][0]
+      const severity = meta.severity
+
+      passed = value == 0 ? passed + 1 : passed
+      warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
+      failed = value > 0 && severity == 'fatal' ? failed + 1 : failed
+    })
+
+    const suffix = host.split('.')[1]
+    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
+    valueObj[key] = metric
+    valueObj[key].passed = passed
+    valueObj[key].warnings = warnings
+    valueObj[key].failed = failed
+  })
+
+  return valueObj
+}
+
 
 const determineStatus = (elaspedTimes: {[host: string]: number}) => {
   if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
@@ -152,6 +196,7 @@ function joinData(data: BK.State[], metrics: BH.AggMetrics) {
       memAvail: getMetric(metrics, id, 'sys.mem.avail', true),
       fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
       fsSize: getMetric(metrics, id, 'sys.fs.size', false),
+      sanity: getSanity(metrics, id)
     }
   })
 
@@ -257,7 +302,6 @@ export default function StatusView() {
   }, [])
 
 
-
   // updating on state changes
   useEffect(() => {
     if (!data) return
@@ -338,7 +382,7 @@ export default function StatusView() {
 
   return (
     <Root>
-      <TopContainer>
+      <Overview className="flex">
         <div className="flex column">
           {selected?.length == 1 &&
             <div className="flex items-center">
@@ -346,7 +390,7 @@ export default function StatusView() {
                 {selected[0].id}
               </h3>
               &nbsp;
-              {loadingTicker && <Progress size={15}/>}
+              {/*loadingTicker && <Progress size={15}/>*/}
             </div>
           }
 
@@ -374,7 +418,7 @@ export default function StatusView() {
             updateID={updateID}
           />
         }
-      </TopContainer>
+      </Overview>
 
       <TableContainer>
         {filtered &&
@@ -462,15 +506,13 @@ const VertDivider = () =>
 
 
 const Root = styled.div`
-
 `
 
 const Progress = styled(CircularProgress)`
 `
 
-const TopContainer = styled.div`
-  display: flex;
-  padding: 5px 0 10px 0;
+const Overview = styled.div`
+  padding: 20px 0 10px 0;
 `
 
 const ChartTitle = styled.h3`

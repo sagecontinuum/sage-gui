@@ -67,8 +67,7 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 
 
 export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
-  params = params || {start: '-4320h', filter: {name: 'sys.*'}, tail: 1}
-
+  params = params || {start: '-7d', filter: {name: 'sys.*'}, tail: 1}
   const allMetrics = await fetchStatus(params)
 
   // aggregate all the metrics
@@ -110,66 +109,61 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
 }
 
 
+type AggSanityMetrics = {
+  items: {date: Date, value: number }[]
+  nodes: string[]
+}
+
+function aggSanityMetrics(data: Metric[]) : AggSanityMetrics {
+  const nodes = []
+
+  // first aggregate by day
+  let aggData = {}
+  data.forEach(obj => {
+    const {timestamp, name, value, meta} = obj
+    const {node} = meta
+
+    if (!nodes.includes(node))
+      nodes.push(node)
+
+    const day = new Date(timestamp.split('T')[0]).toDateString()
+    if (day in aggData)
+      aggData[day].data.push(obj)
+    else
+      aggData[day] = {data: [obj], passed: 0, failed: 0, value: 0}
 
 
-
-export async function getNodeActivity(
-  node: string,
-  start = '-24h'
-) : Promise<AggMetrics> {
-
-  node = node.toLowerCase()
-
-  let params = {
-    start,
-    filter: { name: null, node }
-  }
-
-  // todo(ss): provide "OR" option!
-  params.filter.name = 'sys.mem.*'
-  const memByNode = await getLatestMetrics(params)
-
-  params.filter.name = 'sys.cpu_seconds'
-  const cpuByNode = await getLatestMetrics(params)
-
-  params.filter.name = 'sys.fs.*'
-  const fsByNode = await getLatestMetrics(params)
-
-
-  let byHost = {}
-
-  const hosts = Object.keys(memByNode[node])
-  hosts.forEach(host => {
-    let metricObj = memByNode[node][host]
-
-    // mem
-    const memFrees = metricObj['sys.mem.free'].map(o => o.value)
-    const memTotals = metricObj['sys.mem.total'].map(o => o.value)
-    const memUsed = memFrees.map((free, i) => Number(memTotals[i]) - Number(free))
-    const memPercent = memUsed.map((used, i) => used / Number(memTotals[i]) * 100)
-
-    // cpu
-    metricObj = cpuByNode[node][host]
-    let maxCpu = 0
-    const cpu = metricObj['sys.cpu_seconds'].map(o => {
-      if (o.value > maxCpu)
-        maxCpu = Number(o.value)
-      return o.value
-    })
-
-
-    byHost[host] = {
-      memUsed,
-      memPercent,
-      memTotal: memTotals[0], // todo: close enough
-      cpu,
-      maxCpu,
-      // fsUsed,
-      // fsTotal: fsSizes[0]
-    }
+    aggData[day].passed = value == 0  ? aggData[day].passed + 1 : aggData[day].passed
+    aggData[day].failed = value > 0 ? aggData[day].failed + 1 : aggData[day].failed
+    aggData[day].value = aggData[day].failed
   })
 
-  return byHost
+
+  const items = Object.keys(aggData)
+    .map((k) => ({date: new Date(k), ...aggData[k]}))
+
+  return {items, nodes}
+}
+
+
+
+export async function getSanityTests(node?: string) {
+  const params = {
+    start: '-1d',
+    filter: {
+      name: 'sys.sanity_status.*',
+    }
+  }
+
+  if (node)  {
+    params.filter['node'] = node
+  }
+
+  const sanityTests = await fetchStatus(params)
+
+  const byDayData = aggSanityMetrics(sanityTests)
+
+  return byDayData
 }
 
 
