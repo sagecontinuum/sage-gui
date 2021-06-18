@@ -36,7 +36,7 @@ const sysTimeOtps = {
   second: 'numeric'
 }
 
-
+/*
 const getStatusIcon = (status: NodeStatus) => {
   if (!status)
     return <Icon className="material-icons failed">error</Icon>
@@ -51,6 +51,7 @@ const getStatusIcon = (status: NodeStatus) => {
   else
     return <Icon className="material-icons inactive">remove_circle_outline</Icon>
 }
+*/
 
 
 const getSanityIcon = (sanity: NodeStatus) => {
@@ -80,24 +81,34 @@ const getSanityIcon = (sanity: NodeStatus) => {
   if (failed) {
     const issues = failed + warnings
     return (
-      <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-        <ErrorIcon className="failed" />
-      </Tooltip>
+      <div className="text-center">
+        <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
+          <ErrorIcon className="failed" />
+        </Tooltip>
+      </div>
     )
   } else if (!failed) {
     return (
-      <Tooltip title={`All tests passed`}>
-        <CheckIcon className="success" />
-      </Tooltip>
+      <div className="text-center">
+        <Tooltip title={`All tests passed`}>
+          <CheckIcon className="success" />
+        </Tooltip>
+      </div>
     )
   } else if (warnings) {
     return (
-      <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-        <WarningIcon className="warning" />
-      </Tooltip>
+      <div className="text-center">
+        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
+          <WarningIcon className="warning flex self-center" />
+        </Tooltip>
+      </div>
     )
   } else {
-    return <InactiveIcon className="inactive" />
+    return (
+      <div className="text-center">
+        <InactiveIcon className="inactive self-center" />
+      </div>
+    )
   }
 }
 
@@ -168,115 +179,106 @@ const FSItem = styled.div`
 
 
 // todo(nc): remove rest of assumptions about hosts
-const columns = [
-  {
-    id: 'status',
-    label: 'Status',
-    width: '25px',
-    format: (val) => getStatusIcon(val)
-  }, {
-    id: 'sanity',
-    label: 'Sanity',
-    width: '25px',
-    format: (val) => getSanityIcon(val)
-  }, {
-    id: 'id',
-    label: 'Node ID',
-    width: '200px',
-    format: (val) => <Link to={`node/${val}`}>{val}</Link>
-  }, {
-    id: 'elaspedTimes',
-    label: 'Last Updated',
-    format: (val) => {
-      if (!val) return '-'
+const columns = [{
+  id: 'sanity',
+  label: 'Status',
+  width: '25px',
+  format: (val) => getSanityIcon(val)
+}, {
+  id: 'id',
+  label: 'Node ID',
+  width: '200px',
+  format: (val) => <Link to={`node/${val}`}>{val}</Link>
+}, {
+  id: 'elaspedTimes',
+  label: 'Last Updated',
+  format: (val) => {
+    if (!val) return '-'
 
-      return Object.keys(val)
-        .map(host =>
-          <div key={host}>
-            {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
-          </div>
-        )
-    }
-  }, {
-    id: 'uptimes',
-    label: 'Uptime',
-    format: (val) => {
-      if (!val) return '-'
-
-      return Object.keys(val).map(host =>
-        <div key={host}>{utils.prettyTime(val[host])}</div>
+    return Object.keys(val)
+      .map(host =>
+        <div key={host}>
+          {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
+        </div>
       )
-    }
-  }, {
-    id: 'cpu',
-    label: 'CPU Secs',
-    format: (val) => {
-      if (!val) return '-'
+  }
+}, {
+  id: 'uptimes',
+  label: 'Uptime',
+  format: (val) => {
+    if (!val) return '-'
 
-      return Object.keys(val).map(host =>
-        <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
-      )
-    },
-    hide: true
+    return Object.keys(val).map(host =>
+      <div key={host}>{utils.prettyTime(val[host])}</div>
+    )
+  }
+}, {
+  id: 'cpu',
+  label: 'CPU Secs',
+  format: (val) => {
+    if (!val) return '-'
+
+    return Object.keys(val).map(host =>
+      <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
+    )
   },
-  {
-    id: 'memTotal',
-    label: 'Mem',
-    format: (val, obj) => {
-      if (!val) return '-'
+  hide: true
+}, {
+  id: 'memTotal',
+  label: 'Mem',
+  format: (val, obj) => {
+    if (!val) return '-'
 
-      return Object.keys(val).map(host => {
-        const total = obj.memTotal[host]
-        const free = obj.memFree[host]
+    return Object.keys(val).map(host => {
+      const total = obj.memTotal[host]
+      const free = obj.memFree[host]
+
+      return (
+        <div key={host}>
+          {utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}
+        </div>
+      )
+    })
+  }
+}, {
+  id: 'fsSize',
+  label: 'FS Utilization',
+  format: (val, obj) => {
+    if (!val) return '-'
+
+    const hosts = Object.keys(val)
+
+    return hosts
+      .map((host, i) => {
+        const aggFSSize = fsAggregator(obj.fsSize[host])
+        const aggFSAvail = fsAggregator(obj.fsAvail[host])
 
         return (
-          <div key={host}>
-            {utils.bytesToSizeIEC(total - free)} / {utils.bytesToSizeIEC(total)}
+          <div key={host + i} className="flex justify-between" style={{maxWidth: '200px'}}>
+            <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
+            {/*i < hosts.length - 1 && <Divider flexItem style={{marginRight: 50}}/>*/}
           </div>
         )
       })
-    }
-  }, {
-    id: 'fsSize',
-    label: 'FS Utilization',
-    format: (val, obj) => {
-      if (!val) return '-'
-
-      const hosts = Object.keys(val)
-
-      return hosts
-        .map((host, i) => {
-          const aggFSSize = fsAggregator(obj.fsSize[host])
-          const aggFSAvail = fsAggregator(obj.fsAvail[host])
-
-          return (
-            <div key={host + i} className="flex justify-between" style={{maxWidth: '200px'}}>
-              <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
-              {/*i < hosts.length - 1 && <Divider flexItem style={{marginRight: 50}}/>*/}
-            </div>
-          )
-        })
-    }
-  }, {
-    id: 'sysTimes',
-    label: 'Sys Time',
-    format: (val) => {
-      if (!val) return '-'
-
-      return Object.keys(val).map(host =>
-        <div key={host}>
-          {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOtps)}
-        </div>
-      )
-    },
-    hide: true
-  },
-  {
-    id: 'registration_event',
-    label: 'Registered',
-    format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
-    hide: true
   }
-]
+}, {
+  id: 'sysTimes',
+  label: 'Sys Time',
+  format: (val) => {
+    if (!val) return '-'
+
+    return Object.keys(val).map(host =>
+      <div key={host}>
+        {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOtps)}
+      </div>
+    )
+  },
+  hide: true
+}, {
+  id: 'registration_event',
+  label: 'Registered',
+  format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
+  hide: true
+}]
 
 export default columns
