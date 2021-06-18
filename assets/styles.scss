@@ -33,9 +33,21 @@ a.no-style:hover {
   text-decoration: none;
 }
 
+
+
+/**
+ * navbar
+ */
+.nav-bar {
+  height: 100%;
+}
+
 a.nav-link {
   color: #000;
   opacity: 0.7;
+  margin-left: 40px;
+  font-weight: bold;
+  height: 100%;
 }
 
 a.nav-link:hover {
@@ -112,7 +124,7 @@ table.striped tbody tr:nth-of-type(odd) {
  */
 .success { color: #3ac37e }
 .warning { color: hsl(41, 83%, 35%); }
-.failed { color: hsl(0, 83%, 35%); }
+.failed, .fatal { color: hsl(0, 83%, 35%); }
 .inactive { color: #888; }
 .muted { color: #888; }
 
@@ -137,6 +149,12 @@ button.delete {color: #912341; }
 .items-center { align-items: center; }
 .items-baseline { align-items: baseline; }
 .items-stretch { align-items: stretch; }
+
+.self-auto { align-self: auto; }
+.self-start {align-self: flex-start; }
+.self-end { align-self: flex-end; }
+.self-center { align-self: center; }
+.self-stretch { align-self: stretch; }
 
 .justify-start { justify-content: flex-start; }
 .justify-end { justify-content: flex-end; }

@@ -11,7 +11,7 @@ type Params = {
   }
 }
 
-type Metric = {
+export type Metric = {
   timestamp: string
   name: string
   value: string | number
@@ -109,50 +109,13 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
 }
 
 
-type AggSanityMetrics = {
-  items: {date: Date, value: number }[]
-  nodes: string[]
-}
-
-function aggSanityMetrics(data: Metric[]) : AggSanityMetrics {
-  const nodes = []
-
-  // first aggregate by day
-  let aggData = {}
-  data.forEach(obj => {
-    const {timestamp, name, value, meta} = obj
-    const {node} = meta
-
-    if (!nodes.includes(node))
-      nodes.push(node)
-
-    const day = new Date(timestamp.split('T')[0]).toDateString()
-    if (day in aggData)
-      aggData[day].data.push(obj)
-    else
-      aggData[day] = {data: [obj], passed: 0, failed: 0, value: 0}
-
-
-    aggData[day].passed = value == 0  ? aggData[day].passed + 1 : aggData[day].passed
-    aggData[day].failed = value > 0 ? aggData[day].failed + 1 : aggData[day].failed
-    aggData[day].value = aggData[day].failed
-  })
-
-
-  const items = Object.keys(aggData)
-    .map((k) => ({date: new Date(k), ...aggData[k]}))
-
-  return {items, nodes}
-}
-
-
-
-export async function getSanityTests(node?: string) {
+export async function getSanityChart(node?: string) {
   const params = {
-    start: '-1d',
+    start: '-2d',
     filter: {
       name: 'sys.sanity_status.*',
-    }
+    },
+    tail: 48
   }
 
   if (node)  {
@@ -161,9 +124,9 @@ export async function getSanityTests(node?: string) {
 
   const sanityTests = await fetchStatus(params)
 
-  const byDayData = aggSanityMetrics(sanityTests)
+  const byNode = aggregateMetrics(sanityTests)
 
-  return byDayData
+  return byNode
 }
 
 
