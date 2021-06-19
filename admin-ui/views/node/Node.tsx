@@ -10,7 +10,12 @@ import * as BK from '../../apis/beekeeper'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
 
-import SanityChart, {computeBins, colorMap} from '../../SanityChart'
+import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
+
+
+type MetricsObj = {
+  [metric: string]: BH.Metric[]
+}
 
 
 export default function NodeView() {
@@ -18,10 +23,9 @@ export default function NodeView() {
 
   const { setLoading } = useProgress()
   const [data, setData] = useState(null)
-  const [chartData, setChartData] = useState<BH.AggMetrics>(null)
-  const [bins, setBins] = useState<BH.AggMetrics>(null)
+  const [chartData, setChartData] = useState<MetricsObj>(null)
+  const [bins, setBins] = useState<string[]>(null)
   const [error, setError] = useState(null)
-
 
   useEffect(() => {
     BK.fetchNode(node)
@@ -32,7 +36,7 @@ export default function NodeView() {
     BH.getSanityChart(node.toLowerCase())
       .then((data) => {
         const d = data[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
-        const bins = computeBins(d)
+        const bins = getMetricBins(Object.values(d))
         setBins(bins)
         setChartData(d)
       }).finally(() => setLoading(false))

@@ -321,14 +321,14 @@ const Root = styled.div`
 `
 
 
+type BinningData = { timestamp: string }[][]
 
-export function computeBins(data: BH.AggMetrics) {
-  const items = Object.values(data)
-
-  const startValues = items.map(a => new Date(a[0].timestamp).getTime() )
-  const endValues = items.map(a => new Date(a[a.length - 1].timestamp).getTime() )
+export function getMetricBins(data: BinningData, toNow = true) {
+  // note we assume the data is sorted already
+  const startValues = data.map(a => new Date(a[0].timestamp).getTime() )
+  const endValues = data.map(a => new Date(a[a.length - 1].timestamp).getTime() )
   const start = Math.min(...startValues)
-  const end = Math.max(...endValues)
+  const end = toNow ? new Date().getTime() : Math.max(...endValues)
 
   const bins = getHours(new Date(start), new Date(end))
 
