@@ -3,16 +3,12 @@ import React from 'react'
 import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
-
 import ErrorIcon from '@material-ui/icons/ErrorRounded'
-import WarningIcon from '@material-ui/icons/WarningRounded'
 import InactiveIcon from '@material-ui/icons/RemoveCircleOutlineRounded'
 import CheckIcon from '@material-ui/icons/CheckCircleRounded'
 import Dot from '@material-ui/icons/FiberManualRecord'
+import Badge from '@material-ui/core/Badge'
 
-
-import IconButton from '@material-ui/core/IconButton'
-import Divider from '@material-ui/core/Divider'
 import Tooltip from '@material-ui/core/Tooltip'
 
 import * as utils from '../../../components/utils/units'
@@ -35,23 +31,6 @@ const sysTimeOtps = {
   minute: 'numeric',
   second: 'numeric'
 }
-
-/*
-const getStatusIcon = (status: NodeStatus) => {
-  if (!status)
-    return <Icon className="material-icons failed">error</Icon>
-  else if (status == 'loading')
-    return <div className="text-center">-</div>
-  else if (status == 'active')
-    return <Icon className="material-icons success">check_circle</Icon>
-  else if (status == 'warning')
-    return <Icon className="material-icons warning">warning_amber</Icon>
-  else if (status == 'failed')
-    return <Icon className="material-icons failed">error</Icon>
-  else
-    return <Icon className="material-icons inactive">remove_circle_outline</Icon>
-}
-*/
 
 
 const getSanityIcon = (sanity: NodeStatus) => {
@@ -87,33 +66,38 @@ const getSanityIcon = (sanity: NodeStatus) => {
         </Tooltip>
       </div>
     )
-  } else if (!failed) {
-    return (
-      <div className="text-center">
-        <Tooltip title={`All tests passed`}>
-          <CheckIcon className="success" />
-        </Tooltip>
-      </div>
-    )
   } else if (warnings) {
     return (
       <div className="text-center">
-        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-          <WarningIcon className="warning flex self-center" />
+        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
+          <WarningDot variant="dot" overlap="circle">
+            <CheckIcon className="success flex" />
+          </WarningDot>
+        </Tooltip>
+      </div>
+    )
+  } else if (!failed) {
+    return (
+      <div className="text-center">
+
+        <Tooltip title={`All tests passed`}>
+          <CheckIcon className="success" />
         </Tooltip>
       </div>
     )
   } else {
     return (
       <div className="text-center">
-        <InactiveIcon className="inactive self-center" />
+        <InactiveIcon className="inactive" />
       </div>
     )
   }
 }
 
-const Icon = styled.span`
-  margin-left: 10px;
+const WarningDot = styled(Badge)`
+  .MuiBadge-badge {
+    background-color: #ffbd06;
+  }
 `
 
 
@@ -256,7 +240,6 @@ const columns = [{
         return (
           <div key={host + i} className="flex justify-between" style={{maxWidth: '200px'}}>
             <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
-            {/*i < hosts.length - 1 && <Divider flexItem style={{marginRight: 50}}/>*/}
           </div>
         )
       })
