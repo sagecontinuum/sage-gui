@@ -1,20 +1,20 @@
 import React from 'react'
 import ReactDom from 'react-dom'
-import {BrowserRouter, Switch, Route, Redirect} from 'react-router-dom'
+import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
-import NavBar from '../components/NavBar'
+import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/StatusView'
+import TestView from './views/tests/TestView'
 import NodeView from './views/node/Node'
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 
 import '../assets/styles.scss'
 
-// import {version} from '../package.json'
 
 
 const theme = createMuiTheme({
@@ -63,9 +63,15 @@ const theme = createMuiTheme({
 
 
 const NavMenu = () =>
-  <div className="title">
-    Admin <small className="muted">{/*version placeholder*/}</small>
-  </div>
+  <NavItems>
+    <li>
+      <NavLink to="/status">Status</NavLink>
+    </li>
+
+    <li>
+      <NavLink to="/tests">Tests</NavLink>
+    </li>
+  </NavItems>
 
 
 
@@ -85,6 +91,9 @@ export default function App() {
               <Route path="/status">
                 <StatusView />
               </Route>
+              <Route path="/tests">
+                <TestView />
+              </Route>
               <Route path="/node/:node">
                 <NodeView />
               </Route>
@@ -100,7 +109,6 @@ export default function App() {
 }
 
 const Container = styled.div`
-  padding-top: 10px;
   margin: 60px 10px 10px 10px;
   width: 100%;
 `
