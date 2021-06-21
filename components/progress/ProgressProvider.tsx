@@ -12,7 +12,7 @@ function ProgressProvider(props) {
   return (
     <ProgressContext.Provider value={{loading, setLoading}}>
       {loading &&
-        <LinearProgress style={{position: 'absolute', width: '100%', height: '3px', left: 0, top: 60}} />
+        <LinearProgress style={{position: 'absolute', width: '100%', height: '2px', left: 0, top: 0, zIndex: 9999}} />
       }
 
       {props.children}

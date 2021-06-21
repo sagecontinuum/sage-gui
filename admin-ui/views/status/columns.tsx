@@ -165,7 +165,7 @@ const FSItem = styled.div`
 // todo(nc): remove rest of assumptions about hosts
 const columns = [{
   id: 'sanity',
-  label: 'Status',
+  label: 'Tests',
   width: '25px',
   format: (val) => getSanityIcon(val)
 }, {

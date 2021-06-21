@@ -90,7 +90,7 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
 function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
   const byHost = {}
   Object.keys(metrics[nodeID]).forEach(host => {
-    const timestamp = metrics[nodeID][host]['sys.time'][0].timestamp
+    const timestamp = metrics[nodeID][host]['sys.uptime'][0].timestamp
     const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
 
     const suffix = host.split('.')[1]
@@ -125,6 +125,8 @@ function getMetric(
   return valueObj
 }
 
+
+
 function getSanity(
   metrics: BH.AggMetrics,
   nodeID: string
@@ -139,7 +141,6 @@ function getSanity(
     const metric = metricObjs[host]
     if (!metric) return
 
-
     let passed = 0
     let warnings = 0
     let failed = 0
@@ -150,7 +151,7 @@ function getSanity(
         return
 
       const {value, meta} = metric[key][0]
-      const severity = meta.severity
+      const severity = meta['severity']
 
       passed = value == 0 ? passed + 1 : passed
       warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
@@ -295,6 +296,7 @@ export default function StatusView() {
         setLoading(false)
         handle = ping()
       }).catch(err => setError(err))
+      .finally(() => setLoading(false))
 
     return () => {
       clearTimeout(handle)

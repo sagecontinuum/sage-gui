@@ -21,13 +21,23 @@ export type Metric = {
   }
 }
 
+
+export type SanityMetric = Metric & {
+  meta: {
+    severity: 'fatal' | 'warning'
+  }
+}
+
+
 export type AggMetrics = {
   [nodeID: string]: {
     [host: string]: {
-      [metricName: string]: Metric[]
+      [metricName: string]: Metric[] | SanityMetric[]
     }
   }
 }
+
+
 
 
 function handleErrors(res) {
@@ -109,7 +119,7 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
 }
 
 
-export async function getSanityChart(node?: string) {
+export async function getSanityChart(node?: string) : Promise<AggMetrics> {
   const params = {
     start: '-2d',
     filter: {
@@ -123,7 +133,6 @@ export async function getSanityChart(node?: string) {
   }
 
   const sanityTests = await fetchStatus(params)
-
   const byNode = aggregateMetrics(sanityTests)
 
   return byNode
