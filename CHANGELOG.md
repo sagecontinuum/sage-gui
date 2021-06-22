@@ -3,6 +3,25 @@
 The following are some notable changes to the UI
 
 
+## [1.2.0](https://github.com/sagecontinuum/sage-gui/compare/v1.1.0...v1.2.0) (2021-06-22)
+
+
+### Features
+
+* **admin:** add node details view (placeholder) ([1a5c606](https://github.com/sagecontinuum/sage-gui/commit/1a5c6069e533c98d8054de607cb88c95dc63b027))
+* **admin:** add node sanity test overview chart ([2e9be5b](https://github.com/sagecontinuum/sage-gui/commit/2e9be5b5c5d6e5d171892a4f1b21d475fbeabc3f))
+* **admin:** add recent sanity metric events ([2ff95ad](https://github.com/sagecontinuum/sage-gui/commit/2ff95ad797867670cb6da5fc97b06e08ef41eb3b))
+* **admin:** add test heatmap ([cf59003](https://github.com/sagecontinuum/sage-gui/commit/cf59003201ee592de73b26c988748fbf78b15fb1))
+* **admin:** add/fix status warning dot/tooltip ([255b116](https://github.com/sagecontinuum/sage-gui/commit/255b11605aa75ecf34898dc74e18fe28e5ddd0b6))
+* add app tag build button and indicator to tag list; some restyling ([dbf5069](https://github.com/sagecontinuum/sage-gui/commit/dbf5069ca6e3e4182799e8ef037e344ea286f589))
+
+
+### Bug Fixes
+
+* **admin:** improve new status display ([a5c3ef3](https://github.com/sagecontinuum/sage-gui/commit/a5c3ef3ab80b6f35d4325b8ed6b95877d0edc5c3))
+* **ecr:** fix copy config button ([1f51bff](https://github.com/sagecontinuum/sage-gui/commit/1f51bfffc175cd60cb917bc6d7765b23e754708c))
+* **ecr:** set namespace to username as default ([61bcde4](https://github.com/sagecontinuum/sage-gui/commit/61bcde4a4e6ebe52941128aaf57d5a65f8a8082f))
+
 ### [1.1.1](https://github.com/sagecontinuum/sage-gui/compare/v1.1.0...v1.1.1) (2021-06-04)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "sage-gui",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "",
   "scripts": {
     "start": "./node_modules/parcel/lib/bin.js serve ./sage/index.html --dist-dir build/",
@@ -31,6 +31,7 @@
     "chart.js": "^2.9.4",
     "chartjs-plugin-datalabels": "^0.7.0",
     "mapbox-gl": "^2.1.1",
+    "marked": "^2.0.4",
     "material-design-icons": "^3.0.1",
     "monaco-editor": "^0.24.0",
     "notistack": "^1.0.5",
@@ -40,8 +41,7 @@
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "styled-components": "^5.2.1",
-    "yaml": "^1.10.2",
-    "marked": "^2.0.4"
+    "yaml": "^1.10.2"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",
