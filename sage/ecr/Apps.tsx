@@ -12,7 +12,6 @@ import App from './App'
 import CreateApp from './CreateApp'
 
 import PrivateRoute from '../../components/auth/PrivateRoute'
-import { ProgressProvider } from '../../components/progress/ProgressProvider'
 
 
 export default function Apps() {
@@ -20,22 +19,20 @@ export default function Apps() {
 
   return (
     <Root>
-      <ProgressProvider>
-        <Sidebar />
+      <Sidebar />
 
-        <Main>
-          <Switch>
-            <Route path={`${path}/explore`} component={AppList} />
-            <Route path={`${path}/app/:path*`} component={App}/>
+      <Main>
+        <Switch>
+          <Route path={`${path}/explore`} component={AppList} />
+          <Route path={`${path}/app/:path*`} component={App}/>
 
-            <PrivateRoute path={`${path}/my-apps`} component={AppList} />
-            <PrivateRoute path={`${path}/shared-with-me`} component={AppList} />
-            <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
+          <PrivateRoute path={`${path}/my-apps`} component={AppList} />
+          <PrivateRoute path={`${path}/shared-with-me`} component={AppList} />
+          <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
 
-            <Route path={`${path}/app/:path*`} component={App}/>
-          </Switch>
-        </Main>
-      </ProgressProvider>
+          <Route path={`${path}/app/:path*`} component={App}/>
+        </Switch>
+      </Main>
     </Root>
   )
 }

@@ -7,7 +7,7 @@ const ProgressContext = React.createContext(null)
 
 function ProgressProvider(props) {
 
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(true)
 
   return (
     <ProgressContext.Provider value={{loading, setLoading}}>
