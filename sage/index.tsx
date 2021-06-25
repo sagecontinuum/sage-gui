@@ -1,20 +1,23 @@
 import React from 'react'
 import ReactDom from 'react-dom'
-import {BrowserRouter, Switch, Route, Redirect, Link} from 'react-router-dom'
+import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
-import NavBar from '../components/NavBar'
+import NavBar, {NavItems} from '../components/NavBar'
+import DataSearch from './data/Search'
 import Apps from './ecr/Apps'
 import Docs from './docs/Page'
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '../components/404'
 
+import { ProgressProvider } from '../components/progress/ProgressProvider'
 import { SnackbarProvider } from 'notistack'
 
 import '../assets/styles.scss'
+// import Alert from '@material-ui/lab/Alert'
 
 
 const theme = createMuiTheme({
@@ -63,11 +66,10 @@ const theme = createMuiTheme({
 
 
 const NavMenu = () =>
-  <div className="title">
-    <Link to="/apps/explore" className="nav-link">
-      Edge Apps
-    </Link>
-  </div>
+  <NavItems>
+    <li><NavLink to="/apps/explore">Edge Apps</NavLink></li>
+    <li><NavLink to="/data">Data</NavLink></li>
+  </NavItems>
 
 
 
@@ -82,19 +84,26 @@ export default function Sage() {
 
         <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
           <Container>
+            <ProgressProvider>
+              {/*
+              <Alert severity="warning" style={{borderBottom: '1px solid #ddd' }}>
+                Our team is currently doing maintenance on this application.
+              </Alert>
+              */}
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/apps/explore" />
+                </Route>
+                <Route exact path="/login">
+                  <TestSignIn />
+                </Route>
 
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/apps/explore" />
-              </Route>
-              <Route exact path="/login">
-                <TestSignIn />
-              </Route>
-
-              <Route path="/apps" component={Apps} />
-              <Route path="/docs/:page" component={Docs} />
-              <Route path="*" component={NotFound} />
-            </Switch>
+                <Route path="/apps" component={Apps} />
+                <Route path="/data/" component={DataSearch} />
+                <Route path="/docs/:page" component={Docs} />
+                <Route path="*" component={NotFound} />
+              </Switch>
+            </ProgressProvider>
           </Container>
         </SnackbarProvider>
       </BrowserRouter>
