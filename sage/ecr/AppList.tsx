@@ -3,10 +3,7 @@ import { useLocation, useHistory, useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
-import SpaciousIcon from '@material-ui/icons/ViewStream'
-import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import AddIcon from '@material-ui/icons/AddRounded'
 import Divider from '@material-ui/core/Divider'
 
@@ -20,6 +17,7 @@ import * as ECR from '../apis/ecr'
 
 import SpaciousLayout from './SpaciousLayout'
 import { formatters } from './formatters'
+import LayoutToggle from '../common/LayoutToggle'
 
 import useWithBuildStatus from './hooks/useWithBuildStatus'
 
@@ -168,20 +166,10 @@ export default function AppList() {
             </>
           }
 
-          <IconButton
-            onClick={() => setViewStyle('compact')}
-            style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
-            size="small"
-          >
-            <ViewComfyIcom />
-          </IconButton>
-          <IconButton
-            onClick={() => setViewStyle('spacious')}
-            style={{color: viewStyle == 'spacious' ? '#000' : '#ccc'}}
-            size="small"
-          >
-            <SpaciousIcon />
-          </IconButton>
+          <LayoutToggle
+            layout={viewStyle}
+            onClick={view => setViewStyle(view)}
+          />
         </div>
       </Controls>
 

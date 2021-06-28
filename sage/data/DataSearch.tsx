@@ -3,10 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import IconButton from '@material-ui/core/IconButton'
-import SpaciousIcon from '@material-ui/icons/ViewStream'
-import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import Badge from '@material-ui/core/Badge'
+import Alert from '@material-ui/lab/Alert'
 // import Chip from '@material-ui/core/Chip'
 
 import ErrorMsg from '../ErrorMsg'
@@ -16,9 +14,9 @@ import { useProgress } from '../../components/progress/ProgressProvider'
 
 import Breadcrumbs from './BreadCrumbs'
 import Filter from './Filter'
+import LayoutToggle from '../common/LayoutToggle'
 
 import config from '../../config'
-import Alert from '@material-ui/lab/Alert'
 const url = config.sageCommons
 
 
@@ -162,29 +160,15 @@ export default function Search() {
           <Breadcrumbs path="/data/" />
 
           <Controls className="flex items-center justify-between">
-            <div>
-              <TableSearch
-                onSearch={onSearch}
-                width="300px"
-              />
-            </div>
+            <TableSearch
+              onSearch={onSearch}
+              width="300px"
+            />
 
-            <div className="flex">
-              <IconButton
-                onClick={() => setViewStyle('compact')}
-                style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
-                size="small"
-              >
-                <ViewComfyIcom />
-              </IconButton>
-              <IconButton
-                onClick={() => setViewStyle('spacious')}
-                style={{color: viewStyle == 'spacious' ? '#000' : '#ccc'}}
-                size="small"
-              >
-                <SpaciousIcon />
-              </IconButton>
-            </div>
+            <LayoutToggle
+              layout={viewStyle}
+              onClick={view => setViewStyle(view)}
+            />
           </Controls>
 
 
