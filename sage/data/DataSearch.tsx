@@ -16,8 +16,7 @@ import Breadcrumbs from './BreadCrumbs'
 import Filter from './Filter'
 import LayoutToggle from '../common/LayoutToggle'
 
-import config from '../../config'
-const url = config.sageCommons
+import * as Data from '../apis/data'
 
 
 const columns = [
@@ -51,32 +50,17 @@ const columns = [
 ]
 
 
-type FacetState = {
-  [name: string]: []
-}
 
-const initFacets = {
+
+const initFilterState = {
   'organization': [],
   'tags': [],
   'format': [],
   'resources': []
 }
 
-const facetList = Object.keys(initFacets)
-const facetStr = JSON.stringify(facetList)
+const facetList = Object.keys(initFilterState)
 
-
-// builds filter query in form:
-//    name:("filter one" AND "filter two")
-function fqBuilder(facets: FacetState) {
-  const parts = Object.entries(facets)
-    .filter(([_, vals]) => vals.length )
-    .map(([name, vals]) =>
-      `${name}:(${vals.map(v => `"${v}"`).join(' AND ')})`
-    )
-
-  return parts.length ? `&fq=${parts.join(' AND ')}` : ``
-}
 
 
 const useQueryParams = () =>
@@ -89,22 +73,19 @@ export default function Search() {
   const history = useHistory()
 
   const {setLoading} = useProgress()
-  const [rows, setRows] = useState()
+  const [rows, setRows] = useState<Data.Result[]>()
   const [facets, setFacets] = useState(null)
   const [error, setError] = useState(null)
 
 
-  const [filterState, setFilterState] = useState<FacetState>(initFacets)
+  const [filterState, setFilterState] = useState<Data.FilterState>(initFilterState)
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('compact')
 
 
   useEffect(() => {
     setLoading(true)
 
-    const req = `${url}/action/package_search?facet.field=${facetStr}${fqBuilder(filterState)}`
-    // console.log('req', req)
-    fetch(req)
-      .then(res => res.json())
+    Data.search({facets: facetList, filters: filterState})
       .then(data => {
         const {results, search_facets} = data.result
         setRows(results)

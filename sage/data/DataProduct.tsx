@@ -3,25 +3,23 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Chip from '@material-ui/core/Chip'
+import Alert from '@material-ui/lab/Alert'
 
 import { useProgress } from '../../components/progress/ProgressProvider'
 import ErrorMsg from '../ErrorMsg'
 
 import Breadcrumbs from './BreadCrumbs'
 
-import config from '../../config'
-import Alert from '@material-ui/lab/Alert'
-const url = config.sageCommons
+import * as Data from '../apis/data'
 
-function formatNotes(text: string) {
+
+
+function formatNotes(text: string) : string {
   return text.replace(/\n/g, '<br>').replace(/\*/g, '•')
 }
 
-type Props = {
 
-}
-
-export default function Product(props: Props) {
+export default function Product() {
   const {name} = useParams()
 
   const {setLoading} = useProgress()
@@ -31,9 +29,7 @@ export default function Product(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    const req = `${url}/action/package_show?id=${name}`
-    fetch(req)
-      .then(res => res.json())
+    Data.getPackage(name)
       .then(data => setData(data.result))
       .catch(error => setError(error))
       .finally(() => setLoading(false))
