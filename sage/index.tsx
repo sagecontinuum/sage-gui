@@ -7,7 +7,8 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
-import DataSearch from './data/Search'
+import DataSearch from './data/DataSearch'
+import DataProduct from './data/DataProduct'
 import Apps from './ecr/Apps'
 import Docs from './docs/Page'
 import TestSignIn from './sign-in/TestSignIn'
@@ -67,7 +68,7 @@ const theme = createMuiTheme({
 
 const NavMenu = () =>
   <NavItems>
-    <li><NavLink to="/apps/explore">Edge Apps</NavLink></li>
+    <li><NavLink to="/apps">Edge Apps</NavLink></li>
     <li><NavLink to="/data">Data</NavLink></li>
   </NavItems>
 
@@ -94,12 +95,16 @@ export default function Sage() {
                 <Route exact path="/">
                   <Redirect to="/apps/explore" />
                 </Route>
+                <Route exact path="/apps">
+                  <Redirect to="/apps/explore" />
+                </Route>
                 <Route exact path="/login">
                   <TestSignIn />
                 </Route>
 
                 <Route path="/apps" component={Apps} />
-                <Route path="/data/" component={DataSearch} />
+                <Route exact path="/data" component={DataSearch} />
+                <Route path="/data/product/:name" component={DataProduct} />
                 <Route path="/docs/:page" component={Docs} />
                 <Route path="*" component={NotFound} />
               </Switch>

@@ -2,11 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { withStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import StepIcon from '@material-ui/core/StepIcon'
-import Tabs from '@material-ui/core/Tabs'
-import Tab from '@material-ui/core/Tab'
 import Button from '@material-ui/core/Button'
 import Tooltip from '@material-ui/core/Tooltip'
 import FormHelperText from '@material-ui/core/FormHelperText'
@@ -16,13 +13,13 @@ import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 
 import Editor from '@monaco-editor/react'
 import { parse, stringify } from 'yaml'
+import { useSnackbar } from 'notistack'
 
 import ConfigForm from './ConfigForm'
 
-import { useSnackbar } from 'notistack'
-
-import * as ECR from '../apis/ecr'
+import {Tabs, Tab} from '../../components/tabs/Tabs'
 import * as Auth from '../../components/auth/auth'
+import * as ECR from '../apis/ecr'
 const username = Auth.getUser()
 
 
@@ -48,40 +45,6 @@ const StepRoot = styled.div`
     margin-right: 5px;
   }
 `
-
-
-const CustomTabs = withStyles((theme) => ({
-  root: {
-    borderBottom: '1px solid #e8e8e8',
-  },
-  indicator: {
-    backgroundColor: theme.palette.primary.main
-  },
-}))(Tabs)
-
-
-const CustomTab = withStyles((theme) => ({
-  root: {
-    textTransform: 'none',
-    minWidth: 72,
-    fontWeight: theme.typography.fontWeightRegular,
-    marginRight: theme.spacing(4),
-    '&:hover': {
-      color: '#222',
-      opacity: 1,
-    },
-  },
-  selected: {},
-}))((props) => <Tab disableRipple {...props} />)
-
-
-
-function a11yProps(index) {
-  return {
-    id: `tab-${index}`,
-    'aria-controls': `tabpanel-${index}`,
-  }
-}
 
 
 const initialState = {
@@ -175,12 +138,6 @@ export default function CreateApp() {
   const sanitizeForm = (obj) => {
     return {...obj, namespace: username}
   }
-
-
-  const handleTabChange = (evt, val) => {
-    setTabIndex(val)
-  }
-
 
   const handleRegister = () => {
     setIsRegistering(true)
@@ -292,17 +249,14 @@ export default function CreateApp() {
             </p>
           }
 
-          <CustomTabs value={tabIndex} onChange={handleTabChange} aria-label="App Configuration Tabs">
-            <CustomTab label="Form" {...a11yProps(0)} />
-            <CustomTab label="Raw Config" {...a11yProps(1)} />
-            {/*<CustomTab label="Preview" {...a11yProps(2)} />*/}
-          </CustomTabs>
-
+          <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)} aria-label="App Configuration Tabs">
+            <Tab label="Form" idx={0} />
+            <Tab label="Raw Config" idx={1} />
+          </Tabs>
 
           {tabIndex == 0 &&
             <ConfigForm form={form} onChange={handleFormChange} />
           }
-
 
           {/* here we preload the editor */}
           <EditorContainer style={{display: tabIndex == 1 ? 'block' : 'none'}}>

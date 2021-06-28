@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import { Link, useLocation, useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
 import IconButton from '@material-ui/core/IconButton'
@@ -9,16 +9,16 @@ import ViewComfyIcom from '@material-ui/icons/ViewComfy'
 import Badge from '@material-ui/core/Badge'
 // import Chip from '@material-ui/core/Chip'
 
-
 import ErrorMsg from '../ErrorMsg'
 import Table from '../../components/table/Table'
 import TableSearch from '../../components/table/TableSearch'
 import { useProgress } from '../../components/progress/ProgressProvider'
 
+import Breadcrumbs from './BreadCrumbs'
 import Filter from './Filter'
 
 import config from '../../config'
-
+import Alert from '@material-ui/lab/Alert'
 const url = config.sageCommons
 
 
@@ -26,7 +26,8 @@ const columns = [
   {
     id: 'title',
     label: 'Title',
-    format: (val, obj) => val.replace(`: ${obj.name}`, '')
+    format: (val, obj) =>
+      <Link to={`/data/product/${obj.name}`}>{val.replace(`: ${obj.name}`, '')}</Link>
   }, {
     id: 'name',
     label: 'Name',
@@ -101,9 +102,10 @@ export default function Search() {
 
   useEffect(() => {
     setLoading(true)
-    const q = `${url}/action/package_search?facet.field=${facetStr}${fqBuilder(filterState)}`
-    console.log('q', q)
-    fetch(q)
+
+    const req = `${url}/action/package_search?facet.field=${facetStr}${fqBuilder(filterState)}`
+    // console.log('req', req)
+    fetch(req)
       .then(res => res.json())
       .then(data => {
         const {results, search_facets} = data.result
@@ -113,7 +115,7 @@ export default function Search() {
       .catch(error => setError(error))
       .finally(() => setLoading(false))
 
-  }, [setLoading, filterState])
+  }, [setLoading, query, filterState])
 
 
   // todo: refactor into useContext or table componnent?
@@ -137,10 +139,14 @@ export default function Search() {
 
   return (
     <Root>
-      {facets &&
-        <Filters>
+      <Alert severity="info" style={{borderBottom: '1px solid #f2f2f2' }}>
+        The data explorer is currently under development and available here for <b>early preview</b>.
+        Pease check back later when more data is available.
+      </Alert>
+      <Content>
+        <Sidebar>
           <FiltersTitle>Filters</FiltersTitle>
-          {facetList.map(facet =>
+          {facets && facetList.map(facet =>
             <Filter
               key={facet}
               title={facet}
@@ -150,50 +156,53 @@ export default function Search() {
               data={facets[facet].items}
             />
           )}
-        </Filters>
-      }
+        </Sidebar>
 
-      <Main>
-        <Controls className="flex items-center justify-between">
-          <div>
-            <TableSearch
-              onSearch={onSearch}
-              width="300px"
-            />
-          </div>
+        <Main>
+          <Breadcrumbs path="/data/" />
 
-          <div className="flex">
-            <IconButton
-              onClick={() => setViewStyle('compact')}
-              style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
-              size="small"
-            >
-              <ViewComfyIcom />
-            </IconButton>
-            <IconButton
-              onClick={() => setViewStyle('spacious')}
-              style={{color: viewStyle == 'spacious' ? '#000' : '#ccc'}}
-              size="small"
-            >
-              <SpaciousIcon />
-            </IconButton>
-          </div>
-        </Controls>
+          <Controls className="flex items-center justify-between">
+            <div>
+              <TableSearch
+                onSearch={onSearch}
+                width="300px"
+              />
+            </div>
+
+            <div className="flex">
+              <IconButton
+                onClick={() => setViewStyle('compact')}
+                style={{color: viewStyle == 'compact' ? '#000' : '#ccc'}}
+                size="small"
+              >
+                <ViewComfyIcom />
+              </IconButton>
+              <IconButton
+                onClick={() => setViewStyle('spacious')}
+                style={{color: viewStyle == 'spacious' ? '#000' : '#ccc'}}
+                size="small"
+              >
+                <SpaciousIcon />
+              </IconButton>
+            </div>
+          </Controls>
 
 
-        {rows && viewStyle == 'compact' &&
-        <Table
-          primaryKey="id"
-          enableSorting
-          columns={columns}
-          rows={rows}
-        />
-        }
+          {rows && viewStyle == 'compact' &&
+          <Table
+            primaryKey="id"
+            enableSorting
+            columns={columns}
+            rows={rows}
+          />
+          }
 
-        {error &&
-          <ErrorMsg>{error}</ErrorMsg>
-        }
-      </Main>
+          {error &&
+            <ErrorMsg>{error}</ErrorMsg>
+          }
+        </Main>
+
+      </Content>
 
     </Root>
   )
@@ -201,6 +210,25 @@ export default function Search() {
 
 const Root = styled.div`
   display: flex;
+  flex-direction: column;
+`
+
+const Content = styled.div`
+  display: flex;
+`
+
+const Main = styled.div`
+  height: 100%;
+  padding: 20px;
+  width: 100%;
+`
+
+const Sidebar = styled.div`
+  height: calc(100vh - 60px);
+  padding-top: 10px;
+  width: 250px;
+  min-width: 250px;
+  border-right: 1px solid #f5f5f5;
 `
 
 const FiltersTitle = styled.h2`
@@ -208,19 +236,6 @@ const FiltersTitle = styled.h2`
 
 `
 
-const Filters = styled.div`
-  height: calc(100vh - 60px);
-  padding-top: 10px;
-  min-width: 250px;
-  border-right: 1px solid #f5f5f5;
-`
-
-
-const Main = styled.div`
-  height: 100%;
-  padding: 20px;
-  width: 100%;
-`
 
 const Controls = styled.div`
   .MuiButton-root,

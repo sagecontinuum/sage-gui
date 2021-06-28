@@ -126,7 +126,7 @@ const AppRow = styled(Link)`
   margin: 20px 0;
   padding: 10px 15px;
   border: 1px solid #ddd;
-  border-radius: 2px;
+  border-radius: 5px;
   box-shadow: 0px 0px 1px 1px #f8f8f8;
   color: initial;
 

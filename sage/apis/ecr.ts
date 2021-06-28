@@ -1,5 +1,5 @@
 import config from '../../config'
-const url = config.ecr
+export const url = config.ecr
 
 import * as Auth from '../../components/auth/auth'
 

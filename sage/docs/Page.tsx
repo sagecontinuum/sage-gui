@@ -103,9 +103,7 @@ export default function Page() {
   return (
     <Root>
       <Sidebar>
-        <h2 className="no-margin">
-          Documentation
-        </h2>
+        <h2>Documentation</h2>
 
         {index.map(section => {
           const {title, docs} = section

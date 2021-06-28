@@ -58,14 +58,14 @@ const queryData = (data: any[], query: string) => {
   )
 }
 
-const useParams = () =>
+const useQueryParams = () =>
   new URLSearchParams(useLocation().search)
 
 
 
 
 export default function AppList() {
-  const params = useParams()
+  const params = useQueryParams()
   let { path } = useRouteMatch()
   const view = path.split('/')[2]
 
@@ -234,7 +234,6 @@ const Controls = styled.div`
   .MuiFormControlLabel-root {
     margin: 0 10px;
   }
-
 `
 
 const NoneFound = styled.div`
