@@ -15,7 +15,7 @@ import TableSearch from '../../components/table/TableSearch'
 import { useProgress } from '../../components/progress/ProgressProvider'
 import * as ECR from '../apis/ecr'
 
-import SpaciousLayout from './SpaciousLayout'
+import SpaciousLayout from './SpaciousAppList'
 import { formatters } from './formatters'
 import LayoutToggle from '../common/LayoutToggle'
 

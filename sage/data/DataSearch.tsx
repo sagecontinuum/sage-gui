@@ -3,9 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Badge from '@material-ui/core/Badge'
 import Alert from '@material-ui/lab/Alert'
-// import Chip from '@material-ui/core/Chip'
+import Chip from '@material-ui/core/Chip'
 
 import ErrorMsg from '../ErrorMsg'
 import Table from '../../components/table/Table'
@@ -15,16 +14,49 @@ import { useProgress } from '../../components/progress/ProgressProvider'
 import Breadcrumbs from './BreadCrumbs'
 import Filter from './Filter'
 import LayoutToggle from '../common/LayoutToggle'
+import DataProductList from './SpaciousDataList'
 
 import * as Data from '../apis/data'
+
+
+const typeColorMap = {
+  default: 'rgb(28,140,201)',
+  JSON: '#efdb50',
+  PDF: '#ac3535',
+  TAR: '#4e4e4e',
+}
+
+export const formatter = {
+  title: (val, obj) => {
+    return <Link to={`/data/product/${obj.name}`}>{val.replace(`: ${obj.name}`, '')}</Link>
+  },
+  resources: (arr) => (
+    arr.filter(o => o.format)
+      .map(o =>
+        <div key={o.format} className="flex items-center">
+          <Dot style={{backgroundColor: o.format in typeColorMap ? typeColorMap[o.format] : typeColorMap.default}} />
+          <div className="muted">{o.format.toLowerCase()}</div>
+        </div>
+      )
+  ),
+  tags: (obj) =>
+    obj.map(tag => <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>)
+}
+
+const Dot = styled.div`
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  margin-right: 3px;
+`
 
 
 const columns = [
   {
     id: 'title',
     label: 'Title',
-    format: (val, obj) =>
-      <Link to={`/data/product/${obj.name}`}>{val.replace(`: ${obj.name}`, '')}</Link>
+    format: formatter.title
   }, {
     id: 'name',
     label: 'Name',
@@ -36,16 +68,12 @@ const columns = [
   }, {
     id: 'resources',
     label: 'Type',
-    format: (arr) => {
-      return arr.filter(o => o.format)
-        .map(o => <Badge key={o.format}badgeContent={o.format} color="primary" />)
-    }
+    format: formatter.resources
   },
   /*{
     id: 'tags',
     label: 'Tags',
-    format: (obj) =>
-      obj.map(tag => <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>)
+    format: formatter.tags
   }*/
 ]
 
@@ -79,7 +107,7 @@ export default function Search() {
 
 
   const [filterState, setFilterState] = useState<Data.FilterState>(initFilterState)
-  const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('compact')
+  const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
 
 
   useEffect(() => {
@@ -154,12 +182,18 @@ export default function Search() {
 
 
           {rows && viewStyle == 'compact' &&
-          <Table
-            primaryKey="id"
-            enableSorting
-            columns={columns}
-            rows={rows}
-          />
+            <Table
+              primaryKey="id"
+              enableSorting
+              columns={columns}
+              rows={rows}
+            />
+          }
+
+          {rows && viewStyle == 'spacious' &&
+            <DataProductList
+              rows={rows}
+            />
           }
 
           {error &&
