@@ -38,21 +38,24 @@ type Facet = {
   name: string
 }
 
-export type Results = {
+export type Result = {
   [key: string]: any
 }
 
-type SearchRes = {
+type Response = {
   help: string
+  success: boolean
+}
+
+type SearchRes = Response & {
   result: {
     count: number
-    results: Results
+    results: Result[]
     search_facets: {
       [facet: string] : { title: string, items: Facet[]}
     }
     sort: string  // ex: "score desc, metadata_modified desc"
-  },
-  success: boolean
+  }
 }
 
 export function search(args: SearchArgs) : Promise<SearchRes> {
@@ -67,6 +70,18 @@ export function search(args: SearchArgs) : Promise<SearchRes> {
 
 
 
+
+type PackageRes = Response & {
+  result: Result
+}
+
+export function getPackage(name: string) : Promise<PackageRes> {
+  const req = `${url}/action/package_show?id=${name}`
+  return get(req)
+}
+
+
+
 /**
  * Return filter query in form:
  *    &fq=name:("filter one" AND "filter two") AND ...
@@ -74,7 +89,7 @@ export function search(args: SearchArgs) : Promise<SearchRes> {
  * @param facets
  * @returns url param string fq portion of solr request
  */
-function fqBuilder(facets: FilterState) : string{
+function fqBuilder(facets: FilterState) : string {
   const parts = Object.entries(facets)
     .filter(([_, vals]) => vals.length )
     .map(([name, vals]) =>
@@ -83,3 +98,5 @@ function fqBuilder(facets: FilterState) : string{
 
   return parts.length ? `&fq=${parts.join(' AND ')}` : ``
 }
+
+

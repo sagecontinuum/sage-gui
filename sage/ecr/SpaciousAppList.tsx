@@ -1,5 +1,4 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Divider from '@material-ui/core/Divider'
@@ -9,6 +8,7 @@ import PublicIcon from '@material-ui/icons/PublicRounded'
 import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import GithubIcon from '@material-ui/icons/GitHub'
 
+import { Item, Title } from '../common/SpaciousList'
 import RepoActions from './RepoActions'
 import { formatters } from './formatters'
 import BuildIndicator from './common/BuildIndicator'
@@ -16,6 +16,41 @@ import BuildIndicator from './common/BuildIndicator'
 import * as Auth from '../../components/auth/auth'
 
 const isSignedIn = Auth.isSignedIn()
+
+
+type Props = {
+  rows: {[key: string]: any}
+  onComplete: () => void
+}
+
+export default function SpaciousLayout(props: Props) {
+  const {rows, ...rest} = props
+
+  return (
+    <Root>
+      <HR />
+      <Rows>
+        {rows.map((row) =>
+          <Row key={row.id} data={row} {...rest} />
+        )}
+      </Rows>
+    </Root>
+  )
+}
+
+const Root = styled.div`
+  margin-top: 1em;
+`
+
+const HR = styled.div`
+  border-top: 1px solid #ddd;
+`
+
+const Rows = styled.div`
+  margin-top: 1em;
+`
+
+
 
 
 const VertDivide = () =>
@@ -48,16 +83,16 @@ function Row(props) {
   }
 
   return (
-    <AppRow
+    <Item
       className="flex column justify-between"
       to={`app/${namespace}/${name}`}
       onClick={handleClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          <Repo>
+          <Title>
             {namespace} / {formatters.name(name, data)}{' '}
-          </Repo>
+          </Title>
           &nbsp;
           <div className="muted">{isShared && <SharedIcon />}</div>
         </div>
@@ -117,72 +152,6 @@ function Row(props) {
       </div>
 
       {description && <p>{description}</p>}
-    </AppRow>
+    </Item>
   )
 }
-
-const AppRow = styled(Link)`
-  position: relative;
-  margin: 20px 0;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0px 0px 1px 1px #f8f8f8;
-  color: initial;
-
-  :hover {
-    text-decoration: none;
-    border: 1px solid rgb(28, 140, 201);
-  }
-
-  .actions {
-    position: absolute;
-    display: none;
-    bottom: .5rem;
-    right: .6rem;
-  }
-
-  :hover .actions {
-    display: block;
-  }
-`
-
-const Repo = styled.div`
-  font-size: 1.5em;
-  font-weight: 800;
-`
-
-
-
-
-type Props = {
-  rows: {[key: string]: any}
-  onComplete: () => void
-}
-
-export default function SpaciousLayout(props: Props) {
-  const {rows, ...rest} = props
-
-  return (
-    <Root>
-      <HR />
-      <Rows>
-        {rows.map((row) =>
-          <Row key={row.id} data={row} {...rest} />
-        )}
-      </Rows>
-    </Root>
-  )
-}
-
-const Root = styled.div`
-  margin-top: 1em;
-`
-
-const HR = styled.div`
-   border-top: 1px solid #ddd;
-`
-
-const Rows = styled.div`
-  margin-top: 1em;
-`
