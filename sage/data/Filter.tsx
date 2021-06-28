@@ -2,14 +2,13 @@ import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 
 import IconButton from '@material-ui/core/IconButton'
-import Button from '@material-ui/core/Button'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import TextField from '@material-ui/core/TextField'
 
 import SearchIcon from '@material-ui/icons/SearchOutlined'
 
 import highlightText from './text'
-import Checkbox from '@material-ui/core/Checkbox'
+import Checkbox from '../../components/input/Checkbox'
 
 
 // number of rows shown by default for each facet
@@ -116,8 +115,6 @@ export default function Filter(props: Props) {
             <Checkbox
               checked={selectAll}
               onChange={handleSelectAll}
-              size="small"
-              color="primary"
               indeterminate={showUndo && !selectAll}
             />
           }
@@ -193,8 +190,6 @@ export default function Filter(props: Props) {
               <CBContainer
                 control={
                   <Checkbox
-                    color="primary"
-                    size="small"
                     checked={checked.includes(name)}
                     onChange={() => handleCheck(name)}
                   />
@@ -237,11 +232,6 @@ const FilterRoot = styled.div`
   flex-direction: column;
   margin-bottom: 15px;
   padding: 0 5px;
-
-
-  .MuiCheckbox-root {
-    padding: 2px 5px;
-  }
 `
 
 const Header = styled.div`
