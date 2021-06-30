@@ -119,11 +119,16 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
 }
 
 
-export async function getSanityChart(node?: string) : Promise<AggMetrics> {
+
+
+export async function getSanityChart(
+  {node, metricId} : {node?: string, metricId?: string})
+: Promise<AggMetrics> {
+
   const params = {
     start: '-2d',
     filter: {
-      name: 'sys.sanity_status.*',
+      name: metricId || `sys.sanity_status.*`
     },
     tail: 48
   }

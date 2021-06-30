@@ -103,7 +103,9 @@ type Option = {
 
 type Props = {
   options: Option[]
-  value: Option[]
+  value: Option[] | Option
+  multiple: boolean
+  disableCloseOnSelect: boolean
   ButtonComponent?: JSX.Element
   headerText?: string
   noOptionsText?: string
@@ -114,6 +116,7 @@ export default function ColumnMenu(props: Props) {
   const {
     options,
     onChange,
+    multiple,
     ButtonComponent,
     headerText,
     noOptionsText,
@@ -128,6 +131,8 @@ export default function ColumnMenu(props: Props) {
   useEffect(() => {
     setValue(props.value)
   }, [props.value])
+
+
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
@@ -168,7 +173,7 @@ export default function ColumnMenu(props: Props) {
         <Autocomplete
           open
           onClose={handleClose}
-          multiple
+          multiple={multiple}
           classes={{
             paper: classes.paper,
             option: classes.option,
@@ -182,26 +187,36 @@ export default function ColumnMenu(props: Props) {
           disablePortal
           renderTags={() => null}
           noOptionsText={noOptionsText || 'No items found'}
-          renderOption={(option: Option) => (
-            <>
-              <DoneIcon
-                className={classes.iconSelected}
-                style={{ visibility: value.includes(option.id) ? 'visible' : 'hidden' }}
-              />
-              <div className={classes.text}>
-                {option.label || option.id}
-              </div>
-            </>
-          )}
-          options={[...options].sort((a, b) => {
-            // Display the selected labels first.
-            let ai = value.indexOf(a.id)
-            ai = ai === -1 ? value.length + options.indexOf(a) : ai
-            let bi = value.indexOf(b.id)
-            bi = bi === -1 ? value.length + options.indexOf(b) : bi
-            return ai - bi
-          })}
-          getOptionLabel={(option) => option.label || option.id}
+          renderOption={(option: Option) => {
+            return (
+              <>
+                <DoneIcon
+                  className={classes.iconSelected}
+                  style={{
+                    visibility: (multiple ?
+                      value.includes(option.id) : value.id == option.id) ?
+                      'visible' : 'hidden'
+                  }} />
+                <div className={classes.text}>
+                  {option.label || option.id}
+                </div>
+              </>
+            )
+          }
+          }
+          options={multiple ?
+            [...options].sort((a, b) => {
+              // Display the selected labels first.
+              let ai = value.indexOf(a.id)
+              ai = ai === -1 ? value.length + options.indexOf(a) : ai
+              let bi = value.indexOf(b.id)
+              bi = bi === -1 ? value.length + options.indexOf(b) : bi
+              return ai - bi
+            })
+            :
+            [...options.filter(o => o.id == value.id), ...options.filter(o => o.id != value.id)]
+          }
+          getOptionLabel={(option) => option.label || option.id }
           renderInput={(params) => (
             <InputBase
               ref={params.InputProps.ref}

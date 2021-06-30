@@ -239,7 +239,7 @@ const Chart = React.memo((props) => {
       {cells}
     </>
   )
-}, (prev, next) =>  true)
+}, (prev, next) =>  prev.id == next.id)
 
 Chart.displayName = 'SanityChart > Chart'
 
