@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 export const Item = styled(Link)`
   position: relative;
-  margin: 20px 0;
+  margin: 20px 1px; // 1px left/right for sticky header
   padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -32,3 +32,23 @@ export const Title = styled.div`
   font-weight: 800;
 `
 
+export const Top = styled.div`
+  position: sticky;
+  top: 60px;
+  z-index: 100;
+`
+
+
+const Shadow = styled.div`
+  position: sticky;
+  width: 100%;
+  box-shadow: -2px 1px 5px 2px rgb(175 175 175 / 75%);
+  z-index: 0;
+`
+
+const ShadowCover = styled.div`
+  position: absolute;
+  background: #fff;
+  width: 100%;
+  height: 10px;
+`

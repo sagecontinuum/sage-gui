@@ -1,5 +1,6 @@
 import config from '../../config'
 export const url = config.sageCommons
+export const downloadUrl = config.dataDownload
 
 
 
@@ -29,7 +30,8 @@ export type FilterState = {
 
 type SearchArgs = {
   facets: string[]
-  filters: FilterState
+  filters?: FilterState
+  query?: string
 }
 
 type Facet = {
@@ -59,15 +61,15 @@ type SearchRes = Response & {
 }
 
 export function search(args: SearchArgs) : Promise<SearchRes> {
-  const {facets, filters} = args
+  const {facets, filters, query} = args
 
   const req = `${url}/action/package_search`
     + `?facet.field=${JSON.stringify(facets)}`
+    + (query ? `&q=${query}` : '')
     + `${fqBuilder(filters)}`
 
   return get(req)
 }
-
 
 
 

@@ -53,6 +53,7 @@ module.exports = {
 
     // todo(nc): include all dom api types?
     'Document': true,
-    'HTMLElement': true
+    'HTMLElement': true,
+    'HTMLInputElement': true
   }
 }

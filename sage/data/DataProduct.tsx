@@ -4,14 +4,22 @@ import styled from 'styled-components'
 
 import Chip from '@material-ui/core/Chip'
 import Alert from '@material-ui/lab/Alert'
+import Button from '@material-ui/core/Button'
+import DownloadIcon from '@material-ui/icons/CloudDownloadOutlined'
 
 import { useProgress } from '../../components/progress/ProgressProvider'
 import ErrorMsg from '../ErrorMsg'
 
 import Breadcrumbs from './BreadCrumbs'
+import { formatter } from './DataSearch'
+import {Top} from '../common/Layout'
 
 import * as Data from '../apis/data'
 
+
+function getDownloadURL(id) {
+  return `${Data.downloadUrl}/${id}?bom=True`
+}
 
 
 function formatNotes(text: string) : string {
@@ -30,10 +38,13 @@ export default function Product() {
     setLoading(true)
 
     Data.getPackage(name)
-      .then(data => setData(data.result))
+      .then(data => {
+        setData(data.result)
+      })
       .catch(error => setError(error))
       .finally(() => setLoading(false))
   }, [name, setLoading])
+
 
   return (
     <Root>
@@ -42,7 +53,7 @@ export default function Product() {
         Pease check back later when more data is available.
       </Alert>
       <Main>
-        <Aside>
+        <Sidebar>
           <h2>About</h2>
 
           <h4>Organization</h4>
@@ -54,20 +65,48 @@ export default function Product() {
               <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>
             )}
           </Keywords>
-        </Aside>
+
+          <h4>Last Updated</h4>
+          <div>Updated {data && formatter.time(data.metadata_modified+'Z')}</div>
+
+          <h4>Created</h4>
+          <div>{data?.metadata_modified+'Z'}</div>
+
+          <h4>Resource Type</h4>
+          <div>{data && formatter.resources(data.resources)}</div>
+
+          <h4>License</h4>
+          <div>{data?.license_title || 'N/A'}</div>
+        </Sidebar>
 
         <Details>
-          <Breadcrumbs path={`/data/${name}`} />
+          <Top>
+            <Breadcrumbs path={`/data/${name}`} />
+          </Top>
 
-          <h1>{name}</h1>
+          <div className="flex items-center justify-between">
+            <h1>{name}</h1>
+
+            {data &&
+              <Button
+                href={getDownloadURL(data.resources[0].id)}
+                startIcon={<DownloadIcon/>}
+                variant="contained"
+                color="primary"
+              >
+                Download
+              </Button>
+            }
+          </div>
+
           {data &&
             <span dangerouslySetInnerHTML={{__html: formatNotes(data.notes)}}></span>
           }
-        </Details>
 
-        {error &&
-          <ErrorMsg>{error}</ErrorMsg>
-        }
+          {error &&
+            <ErrorMsg>{error}</ErrorMsg>
+          }
+        </Details>
       </Main>
     </Root>
   )
@@ -78,10 +117,12 @@ const Root = styled.div`
   flex-direction: column;
 `
 
-const Aside = styled.aside`
+const Sidebar = styled.div`
+  position: sticky;
+  top: 0;
   height: calc(100vh - 60px);
-
   width: 300px;
+  padding: 0 10px;
 `
 
 const Main = styled.div`

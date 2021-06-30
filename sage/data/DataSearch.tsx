@@ -14,10 +14,11 @@ import { useProgress } from '../../components/progress/ProgressProvider'
 import Breadcrumbs from './BreadCrumbs'
 import Filter from './Filter'
 import LayoutToggle from '../common/LayoutToggle'
+import {Top} from '../common/Layout'
 import DataProductList from './SpaciousDataList'
 
 import * as Data from '../apis/data'
-
+import * as utils from '../../components/utils/units'
 
 const typeColorMap = {
   default: 'rgb(28,140,201)',
@@ -41,6 +42,10 @@ export const formatter = {
   ),
   tags: (obj) =>
     obj.map(tag => <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>)
+  ,
+  time: val => {
+    return utils.msToTimeApprox(Date.now() - new Date(val).getTime())
+  }
 }
 
 const Dot = styled.div`
@@ -83,8 +88,7 @@ const columns = [
 const initFilterState = {
   'organization': [],
   'tags': [],
-  'format': [],
-  'resources': []
+  'res_format': []
 }
 
 const facetList = Object.keys(initFilterState)
@@ -113,7 +117,7 @@ export default function Search() {
   useEffect(() => {
     setLoading(true)
 
-    Data.search({facets: facetList, filters: filterState})
+    Data.search({facets: facetList, filters: filterState, query})
       .then(data => {
         const {results, search_facets} = data.result
         setRows(results)
@@ -150,35 +154,41 @@ export default function Search() {
         The data explorer is currently under development and available here for <b>early preview</b>.
         Pease check back later when more data is available.
       </Alert>
-      <Content>
+
+      <div className="flex">
         <Sidebar>
           <FiltersTitle>Filters</FiltersTitle>
-          {facets && facetList.map(facet =>
-            <Filter
-              key={facet}
-              title={facet}
-              checked={filterState[facet]}
-              onCheck={(val) => handleFilter(facet, val)}
-              type="text"
-              data={facets[facet].items}
-            />
-          )}
+          {facets && facetList.map(facet => {
+            const {title, items} = facets[facet]
+            return (
+              <Filter
+                key={title}
+                title={title.replace('res_', '').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}
+                checked={filterState[facet]}
+                onCheck={(val) => handleFilter(facet, val)}
+                type="text"
+                data={items}
+              />
+            )
+          })}
         </Sidebar>
 
         <Main>
-          <Breadcrumbs path="/data/" />
+          <Top>
+            <Breadcrumbs path="/data/" />
 
-          <Controls className="flex items-center justify-between">
-            <TableSearch
-              onSearch={onSearch}
-              width="300px"
-            />
+            <Controls className="flex items-center justify-between">
+              <TableSearch
+                onSearch={onSearch}
+                width="300px"
+              />
 
-            <LayoutToggle
-              layout={viewStyle}
-              onClick={view => setViewStyle(view)}
-            />
-          </Controls>
+              <LayoutToggle
+                layout={viewStyle}
+                onClick={view => setViewStyle(view)}
+              />
+            </Controls>
+          </Top>
 
 
           {rows && viewStyle == 'compact' &&
@@ -201,7 +211,7 @@ export default function Search() {
           }
         </Main>
 
-      </Content>
+      </div>
 
     </Root>
   )
@@ -212,17 +222,9 @@ const Root = styled.div`
   flex-direction: column;
 `
 
-const Content = styled.div`
-  display: flex;
-`
-
-const Main = styled.div`
-  height: 100%;
-  padding: 20px;
-  width: 100%;
-`
-
 const Sidebar = styled.div`
+  position: sticky;
+  top: 0;
   height: calc(100vh - 60px);
   padding-top: 10px;
   width: 250px;
@@ -232,13 +234,17 @@ const Sidebar = styled.div`
 
 const FiltersTitle = styled.h2`
   margin-left: 10px;
-
 `
 
+const Main = styled.div`
+  position: relative;
+  height: 100%;
+  padding: 0 20px;
+  width: 100%;
+`
 
 const Controls = styled.div`
-  .MuiButton-root,
-  .MuiFormControlLabel-root {
-    margin: 0 10px;
-  }
+  background-color: #fff;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
 `

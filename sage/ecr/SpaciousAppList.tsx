@@ -8,7 +8,7 @@ import PublicIcon from '@material-ui/icons/PublicRounded'
 import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import GithubIcon from '@material-ui/icons/GitHub'
 
-import { Item, Title } from '../common/SpaciousList'
+import { Item, Title } from '../common/Layout'
 import RepoActions from './RepoActions'
 import { formatters } from './formatters'
 import BuildIndicator from './common/BuildIndicator'

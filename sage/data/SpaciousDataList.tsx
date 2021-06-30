@@ -1,7 +1,9 @@
 import React from 'react'
 import styled from 'styled-components'
 import { formatter } from './DataSearch'
-import { Item, Title } from '../common/SpaciousList'
+import { Item, Title } from '../common/Layout'
+import Divider from '@material-ui/core/Divider'
+import { Link } from 'react-router-dom'
 
 
 
@@ -14,7 +16,6 @@ export default function SpaciousLayout(props: Props) {
 
   return (
     <Root>
-      <HR />
       <Rows>
         {rows.map((row) =>
           <Row key={row.id} data={row} {...rest} />
@@ -25,16 +26,14 @@ export default function SpaciousLayout(props: Props) {
 }
 
 const Root = styled.div`
-  margin-top: 1em;
+  margin-top: 5px;
 `
 
-const HR = styled.div`
-  border-top: 1px solid #ddd;
-`
 
 const Rows = styled.div`
   margin-top: 1em;
 `
+
 
 
 function Row(props) {
@@ -43,33 +42,50 @@ function Row(props) {
     title,
     name,
     notes,
-    resources
+    tags,
+    metadata_modified,
+    resources,
+    license_title
   } = data
+
 
   return (
     <Item className="flex column" to={`data/product/${name}`}>
-      <div className="flex items-center justify-between">
-        <Title>{formatter.title(title, data)}</Title>
-        <Type>{formatter.resources(resources)}</Type>
+      <Title>{formatter.title(title, data)}</Title>
+
+      {notes &&
+        <Notes>
+          {notes.slice(0, 250)}
+          {notes.length > 250 ? <>... <Link to={`data/product/${name}`}>read more</Link></> : ''}
+        </Notes>
+      }
+
+      <div className="flex items-center">
+        {notes &&
+          <Keywords>{formatter.tags(tags)}</Keywords>
+        }
       </div>
 
-      {notes &&
-        <p>{notes.slice(0, 250)}</p>
-      }
-
-      {notes &&
-        <Keywords>{formatter.tags(data.tags)}</Keywords>
-      }
+      <div className="flex items-center gap muted">
+        <Type>{formatter.resources(resources)}</Type>
+        <div>Updated {formatter.time(metadata_modified+'Z')}</div>
+        <div>{license_title}</div>
+      </div>
     </Item>
   )
 }
 
 
+const Notes = styled.p`
+  margin-bottom: 0px;
+`
+
 const Keywords = styled.p`
   div {
-    margin: 2px;
+    margin: 2px 2px 2px 0;
   }
 `
+
 const Type = styled.div`
-  margin-right: 15px;
+
 `

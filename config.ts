@@ -8,7 +8,8 @@ export default  {
   ecr: 'https://ecr.sagecontinuum.org/api',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   auth: 'https://auth.sagecontinuum.org',
-  sageCommons: 'http://hotshot.sdsc.edu:5000/api',
+  sageCommons: 'https://sage-commons.sdsc.edu/api',
+  dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
 
   // ui configuration (for admin ui)
   ui: {

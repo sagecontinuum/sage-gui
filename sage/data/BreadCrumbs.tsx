@@ -59,7 +59,8 @@ export default function Breadcrumbs(props: BreadcrumbProps) {
 
 
 const Root = styled.div`
-  padding: 0px 0 15px 0;
+  background-color: #fff;
+  padding: 15px 0;
   border-bottom: 1px solid #f2f2f2;
   font-size: 1.1em;
 `
