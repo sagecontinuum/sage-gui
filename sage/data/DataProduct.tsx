@@ -15,7 +15,9 @@ import { formatter } from './DataSearch'
 import {Top} from '../common/Layout'
 
 import * as Data from '../apis/data'
+import * as BH from '../../admin-ui/apis/beehive'
 
+import Table from '../../components/table/Table'
 
 function getDownloadURL(id) {
   return `${Data.downloadUrl}/${id}?bom=True`
@@ -27,6 +29,29 @@ function formatNotes(text: string) : string {
 }
 
 
+
+const columns = [
+  {
+    id: 'timestamp',
+    label: 'Time',
+  },   {
+    id: 'name',
+    label: 'Name',
+  }, {
+    id: 'value',
+    label: 'Value',
+  }, {
+    id: 'meta',
+    label: 'Meta',
+    format: (o) =>
+      Object.keys(o).map(k => {
+        return <div key={k}><b>{k}</b>: {o[k]}</div>
+      })
+  },
+]
+
+
+
 export default function Product() {
   const {name} = useParams()
 
@@ -34,16 +59,36 @@ export default function Product() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
 
+  const [isPlugin, setIsPlugin] = useState(false)
+  const [pluginData, setPluginData] = useState(null)
+
   useEffect(() => {
     setLoading(true)
 
     Data.getPackage(name)
       .then(data => {
-        setData(data.result)
+
+        const {result} = data
+        setData(result)
+
+        const isPlugin = result.extras.filter(o => o.key == 'ecr_plugin_url').length > 0
+
+        setIsPlugin(isPlugin)
       })
       .catch(error => setError(error))
       .finally(() => setLoading(false))
   }, [name, setLoading])
+
+  useEffect(() => {
+    BH.getData({
+      start: '-1d',
+      filter: {
+        name: 'iio.*',
+      },
+      tail: 1
+    }).then((data) => setPluginData(data))
+      .catch(error => setError(error))
+  }, [isPlugin])
 
 
   return (
@@ -53,7 +98,10 @@ export default function Product() {
         Pease check back later when more data is available.
       </Alert>
       <Main>
+
         <Sidebar>
+          <a type="submit" href="https://web.lcrc.anl.gov/public/waggle/sagedata/measurements/sys.boot_time/2021-04-21.csv.gz">Download!</a>
+
           <h2>About</h2>
 
           <h4>Organization</h4>
@@ -106,6 +154,18 @@ export default function Product() {
           {error &&
             <ErrorMsg>{error}</ErrorMsg>
           }
+
+          <PreviewTable>
+            <h3>Preview of Most Recent Data</h3>
+            {isPlugin && pluginData &&
+              <Table
+                primaryKey="id"
+                enableSorting
+                columns={columns}
+                rows={pluginData}
+              />
+            }
+          </PreviewTable>
         </Details>
       </Main>
     </Root>
@@ -139,4 +199,8 @@ const Keywords = styled.div`
 
 const Details = styled.div`
   width: 100%;
+`
+
+const PreviewTable = styled.div`
+  margin-top: 5em;
 `
