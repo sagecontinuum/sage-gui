@@ -16,9 +16,15 @@ import Filter from './Filter'
 import LayoutToggle from '../common/LayoutToggle'
 import {Top} from '../common/Layout'
 import DataProductList from './SpaciousDataList'
+import QueryViewer from '../../components/QueryViewer'
+import BeeIcon from 'url:../../assets/bee.svg'
 
 import * as Data from '../apis/data'
 import * as utils from '../../components/utils/units'
+import Select from '@material-ui/core/Select'
+import MenuItem from '@material-ui/core/MenuItem'
+import FormControl from '@material-ui/core/FormControl'
+import InputLabel from '@material-ui/core/InputLabel'
 
 const typeColorMap = {
   default: 'rgb(28,140,201)',
@@ -105,10 +111,11 @@ export default function Search() {
   const history = useHistory()
 
   const {setLoading} = useProgress()
-  const [rows, setRows] = useState<Data.Result[]>()
+  const [rows, setRows] = useState<Data.Result[]>(null)
   const [facets, setFacets] = useState(null)
   const [error, setError] = useState(null)
 
+  const [sort, setSort] = useState('most_relevant')
 
   const [filterState, setFilterState] = useState<Data.FilterState>(initFilterState)
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
@@ -175,13 +182,37 @@ export default function Search() {
 
         <Main>
           <Top>
-            <Breadcrumbs path="/data/" />
+            <div className="flex items-center gap" style={{backgroundColor: '#fff'}}>
+              <Breadcrumbs path="/data/"/>
+
+              <QueryViewer filterState={filterState} />
+            </div>
+
 
             <Controls className="flex items-center justify-between">
-              <TableSearch
-                onSearch={onSearch}
-                width="300px"
-              />
+              <div className="flex items-ceter gap">
+                <TableSearch
+                  onSearch={onSearch}
+                  width="300px"
+                />
+                <FormControl variant="outlined" className="flex self-center">
+                  <Select
+                    labelId="namespace-label"
+                    id="namepsace"
+                    value={sort}
+                    onChange={evt => alert('Sorting is not implemented yet.  Check back later.') /*setSort(evt.target.value)*/}
+                    variant="outlined"
+                    margin="dense"
+                    style={{marginTop: '1px'}}
+                  >
+                    <MenuItem value={'most_relevant'}>most relevant</MenuItem>
+                    <MenuItem value={'name_accending'}>name ascending</MenuItem>
+                    <MenuItem value={'name_decending'}>name decending</MenuItem>
+                    <MenuItem value={'last_mod'}>last modified</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+
 
               <LayoutToggle
                 layout={viewStyle}
@@ -203,7 +234,16 @@ export default function Search() {
           {rows && viewStyle == 'spacious' &&
             <DataProductList
               rows={rows}
+              query={query}
             />
+          }
+
+          {/* todo: refactor */}
+          {rows && !rows.length &&
+            <NoneFound className="flex column items-center justify-center muted">
+              <img src={BeeIcon} />
+              <span>No data was found</span>
+            </NoneFound>
           }
 
           {error &&
@@ -248,3 +288,17 @@ const Controls = styled.div`
   padding: 5px 0;
   border-bottom: 1px solid #ddd;
 `
+
+
+const NoneFound = styled.div`
+  font-size: 2.0em;
+  padding-top: 100px;
+
+  img {
+    width: 175px;
+    margin-right: 20px;
+    filter: drop-shadow(0px 0px 0.3rem #ccc);
+  }
+`
+
+

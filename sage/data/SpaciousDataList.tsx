@@ -4,7 +4,7 @@ import { formatter } from './DataSearch'
 import { Item, Title } from '../common/Layout'
 import Divider from '@material-ui/core/Divider'
 import { Link } from 'react-router-dom'
-
+import highlightText from './text'
 
 
 type Props = {
@@ -37,7 +37,7 @@ const Rows = styled.div`
 
 
 function Row(props) {
-  const {data} = props
+  const {data, query} = props
   const {
     title,
     name,
@@ -48,14 +48,14 @@ function Row(props) {
     license_title
   } = data
 
-
+1
   return (
     <Item className="flex column" to={`data/product/${name}`}>
       <Title>{formatter.title(title, data)}</Title>
 
       {notes &&
         <Notes>
-          {notes.slice(0, 250)}
+          {highlightText(notes.slice(0, 250), query ? query : '')}
           {notes.length > 250 ? <>... <Link to={`data/product/${name}`}>read more</Link></> : ''}
         </Notes>
       }
@@ -82,7 +82,7 @@ const Notes = styled.p`
 
 const Keywords = styled.p`
   div {
-    margin: 2px 2px 2px 0;
+    margin: 2px 3px 2px 0;
   }
 `
 

@@ -50,46 +50,97 @@ const columns = [
   },
 ]
 
+function checkIfPlugin(data) {
+  return data.extras.filter(o => o.key == 'ecr_plugin_url').length > 0
+}
+
+// todo: refactor into resource fetching
+function handleErrors(res) {
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(errorObj => {
+    throw Error(errorObj)
+  })
+}
 
 
 export default function Product() {
   const {name} = useParams()
 
   const {setLoading} = useProgress()
+
+  const [cols, setCols] = useState(columns)
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
 
-  const [isPlugin, setIsPlugin] = useState(false)
+  // const [resources, setResources] = useState(null)
+  const [objData, setObjData] = useState(null)
   const [pluginData, setPluginData] = useState(null)
+
 
   useEffect(() => {
     setLoading(true)
 
     Data.getPackage(name)
       .then(data => {
-
         const {result} = data
         setData(result)
-
-        const isPlugin = result.extras.filter(o => o.key == 'ecr_plugin_url').length > 0
-
-        setIsPlugin(isPlugin)
       })
       .catch(error => setError(error))
       .finally(() => setLoading(false))
   }, [name, setLoading])
 
-  useEffect(() => {
-    BH.getData({
-      start: '-1d',
-      filter: {
-        name: 'iio.*',
-      },
-      tail: 1
-    }).then((data) => setPluginData(data))
-      .catch(error => setError(error))
-  }, [isPlugin])
 
+
+  useEffect(() => {
+    if (!data) return
+
+    const isPlugin = checkIfPlugin(data)
+    if (!isPlugin) return
+
+    const sources = data.resources.filter(o => o.url)
+    const {query} = sources[0]
+
+    // todo: sage commons should provide valid json
+    let q = JSON.parse(query.replace(/u'/g, '\'').replace(/'/g, '"'))
+
+    // todo: need link between plugin and plugin data
+    setLoading(true)
+    BH.getData(q)
+      .then((data) => setPluginData(data))
+      .catch(error => setError(error))
+      .finally(() => setLoading(false))
+  }, [data, setLoading])
+
+
+  useEffect(() => {
+    if (!data) return
+
+    const isPlugin = checkIfPlugin(data)
+    if (isPlugin) return
+
+    const {resources} = data
+    const sources = resources.filter(o => o.url)
+    const {url} = sources[0]
+
+    // todo: need link between plugin and plugin data
+    setLoading(true)
+    fetch(url)
+      .then(handleErrors)
+      .then(res => res.json())
+      .then((data) => {
+        const cols = Object.keys(data[0]).map((k) => ({id: k, label: k}))
+        setCols(cols)
+        setObjData(data)
+      })
+      .catch(error => {
+        // setError(error) // ignore error now
+      })
+      .finally(() => setLoading(false))
+
+  }, [data, setLoading])
 
   return (
     <Root>
@@ -100,7 +151,7 @@ export default function Product() {
       <Main>
 
         <Sidebar>
-          <a type="submit" href="https://web.lcrc.anl.gov/public/waggle/sagedata/measurements/sys.boot_time/2021-04-21.csv.gz">Download!</a>
+          {/*<a type="submit" href="https://web.lcrc.anl.gov/public/waggle/sagedata/measurements/sys.boot_time/2021-04-21.csv.gz">Download!</a>*/}
 
           <h2>About</h2>
 
@@ -152,18 +203,32 @@ export default function Product() {
           }
 
           {error &&
-            <ErrorMsg>{error}</ErrorMsg>
+            <ErrorMsg>{error.message}</ErrorMsg>
           }
 
           <PreviewTable>
-            <h3>Preview of Most Recent Data</h3>
-            {isPlugin && pluginData &&
-              <Table
-                primaryKey="id"
-                enableSorting
-                columns={columns}
-                rows={pluginData}
-              />
+            {pluginData &&
+              <>
+                <h3>Preview of Most Recent Data</h3>
+                <Table
+                  primaryKey="id"
+                  enableSorting
+                  columns={cols}
+                  rows={pluginData}
+                />
+              </>
+            }
+
+            {objData &&
+              <>
+                <h3>Data</h3>
+                <Table
+                  primaryKey="id"
+                  enableSorting
+                  columns={cols}
+                  rows={pluginData}
+                />
+              </>
             }
           </PreviewTable>
         </Details>
