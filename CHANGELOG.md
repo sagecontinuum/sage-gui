@@ -3,6 +3,17 @@
 The following are some notable changes to the UI
 
 
+## [1.3.0](https://github.com/sagecontinuum/sage-gui/compare/v1.2.0...v1.3.0) (2021-07-06)
+
+
+### Features
+
+* **data:** add basic data product page ([4c79ace](https://github.com/sagecontinuum/sage-gui/commit/4c79ace4321ec28e4139e37a99e5adb9a9121b77))
+* **data:** add format filter; simple download btn; simple query; some styling ([d3505fe](https://github.com/sagecontinuum/sage-gui/commit/d3505fed7ac69f355e643420e4a7340bb9308862))
+* **data:** add initial data prototype ([1b5a236](https://github.com/sagecontinuum/sage-gui/commit/1b5a2362e1ad4415b2fd6764130b9b87f2d41f20))
+* **data:** add simple beehive data preview ([f615fd9](https://github.com/sagecontinuum/sage-gui/commit/f615fd9a3e4c3b6650f2bca7af0848d56e696267))
+* **data:** add spacious list ([7d818c6](https://github.com/sagecontinuum/sage-gui/commit/7d818c60e779a7a7c385de39d33ae186169132e9))
+
 ## [1.2.0](https://github.com/sagecontinuum/sage-gui/compare/v1.1.0...v1.2.0) (2021-06-22)
 
 
