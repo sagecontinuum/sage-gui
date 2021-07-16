@@ -47,7 +47,7 @@ npm run build-admin
 To create an Sage UI build in `dist/`:
 
 ```
-npm run build-admin
+npm run build
 ```
 
 
