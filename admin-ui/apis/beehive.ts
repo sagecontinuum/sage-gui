@@ -60,7 +60,7 @@ function post(endpoint: string, data = {}) {
 
 
 
-async function fetchStatus(params: Params) : Promise<Metric[]> {
+async function getData(params: Params) : Promise<Metric[]> {
   const res = await post(`${url}/query`, params)
   const text = await res.text()
 
@@ -78,7 +78,7 @@ async function fetchStatus(params: Params) : Promise<Metric[]> {
 
 export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
   params = params || {start: '-7d', filter: {name: 'sys.*'}, tail: 1}
-  const allMetrics = await fetchStatus(params)
+  const allMetrics = await getData(params)
 
   // aggregate all the metrics
   const byNode = aggregateMetrics(allMetrics)
@@ -132,7 +132,7 @@ export async function getSanityChart(node?: string) : Promise<AggMetrics> {
     params.filter['node'] = node
   }
 
-  const sanityTests = await fetchStatus(params)
+  const sanityTests = await getData(params)
   const byNode = aggregateMetrics(sanityTests)
 
   return byNode
