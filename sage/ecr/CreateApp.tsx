@@ -22,6 +22,16 @@ import * as Auth from '../../components/auth/auth'
 import * as ECR from '../apis/ecr'
 const username = Auth.getUser()
 
+const devList = [
+  'nconrad',
+  'wgerlach',
+  'gemblerz',
+  'seanshahkarami',
+  'jswantek'
+]
+
+const isDevUser = devList.includes(username)
+
 
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
@@ -275,6 +285,10 @@ export default function CreateApp() {
           }
         </div>
 
+        {/* when in debug mode*/}
+        {devMode &&
+          <Debug form={form} />
+        }
 
         <div className="step">
           <Button
@@ -314,6 +328,29 @@ export default function CreateApp() {
           {/*<li><a onClick={onExampleTwo}>Use Example Two</a></li>*/}
           {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
         </ul>
+
+        {isDevUser &&
+          <DebugOptions>
+            <h3 className="no-margin">
+              Debugging
+              <sup>
+                <Tooltip title={`These special debug mode options are only available to: ${devList.join(', ')}`} placement="top">
+                  <HelpIcon fontSize="small" />
+                </Tooltip>
+              </sup>
+            </h3>
+            <hr/>
+            <FormControlLabel
+              control={
+                <CheckBox
+                  checked={devMode}
+                  onChange={evt => setDevMode(evt.target.checked)}
+                />
+              }
+              label={<>Show form state</>}
+            />
+          </DebugOptions>
+        }
       </Help>
     </Root>
   )
@@ -352,3 +389,24 @@ const Help = styled.div`
   margin: 20px 0;
   flex-grow: 1;
 `
+
+
+const DebugOptions = styled.div`
+  margin-top: 75px;
+`
+
+
+function Debug(props) {
+  const {form} = props
+
+  return (
+    <>
+      <h4>Form State (Debug Mode)</h4>
+      <pre
+        style={{fontSize: '.8em'}}
+        className="code"
+        dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 4).replace(/\\n/g, '<br/>')}}
+      />
+    </>
+  )
+}
