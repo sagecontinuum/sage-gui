@@ -24,7 +24,6 @@ function handleErrors(res) {
 }
 
 
-
 function get(endpoint: string) {
   return fetch(endpoint, options)
     .then(handleErrors)
@@ -59,9 +58,7 @@ function deleteReq(endpoint: string) {
 
 
 
-/**
- * actions
- */
+
 
 export type Repo = {
   namespace: string
@@ -74,22 +71,38 @@ export type App = {
   version: string
 }
 
+type Arch =
+  'linux/amd64' |
+  'linux/arm64' |
+  'linux/arm/v6' |
+  'linux/arm/v7' |
+  'linux/arm/v8'
+
+
 export type AppConfig = {
   name: string
   description: string
   version: string
   namespace: string
   source: {
-    architectures: string[]
-    branch: string
-    directory: string
-    dockerfile: string
+    architectures: Arch[]
     url: string
+    branch: string
+    directory?: string
+    dockerfile?: string
+    build_args?: {
+      [variable: string]: string
+    }
   }
-  url: string
-  directory: string
-  resources: {type: string, view: string, min_resolution: string}[]
-  inputs: {id: string, type: string}[]
+  resources: {
+    type: string,
+    view: string,
+    min_resolution: string
+  }[]
+  inputs: {
+    id: string,
+    type: 'boolean' | 'int' | 'long' | 'float' | 'double' | 'string' | 'File'
+  }[]
   metadata: {
     [item: string]: any
   }
@@ -319,7 +332,6 @@ export function listBuildStatusBulk(apps: App[]) {
 /**
  * retrival
  */
-
 
 export function getRepo(repo: Repo) : Promise<AppConfig> {
   const {namespace, name} = repo
