@@ -8,7 +8,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete'
 import InputBase from '@material-ui/core/InputBase'
 
 
-
 /* example options
 const options = [
   { id: 'foo', label: 'Foo' },
@@ -93,17 +92,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-// todo(nc): figure out what is happening with typing here.
-type Option = {
-  id: string
-  label?: string
-  hide?: boolean
-  type?: string
-}
+
+type Option =
+  {
+    id: string
+    label?: string
+    hide?: boolean
+    type?: string
+  }
 
 type Props = {
   options: Option[]
-  value: Option[]
+  value: Option | Option[]
+  multiple?: boolean    // default: true
   ButtonComponent?: JSX.Element
   headerText?: string
   noOptionsText?: string
@@ -113,6 +114,7 @@ type Props = {
 export default function ColumnMenu(props: Props) {
   const {
     options,
+    multiple = true,
     onChange,
     ButtonComponent,
     headerText,
@@ -168,7 +170,7 @@ export default function ColumnMenu(props: Props) {
         <Autocomplete
           open
           onClose={handleClose}
-          multiple
+          multiple={multiple}
           classes={{
             paper: classes.paper,
             option: classes.option,
@@ -182,25 +184,40 @@ export default function ColumnMenu(props: Props) {
           disablePortal
           renderTags={() => null}
           noOptionsText={noOptionsText || 'No items found'}
-          renderOption={(option: Option) => (
-            <>
-              <DoneIcon
-                className={classes.iconSelected}
-                style={{ visibility: value.includes(option.id) ? 'visible' : 'hidden' }}
-              />
-              <div className={classes.text}>
-                {option.label || option.id}
-              </div>
-            </>
-          )}
-          options={[...options].sort((a, b) => {
-            // Display the selected labels first.
-            let ai = value.indexOf(a.id)
-            ai = ai === -1 ? value.length + options.indexOf(a) : ai
-            let bi = value.indexOf(b.id)
-            bi = bi === -1 ? value.length + options.indexOf(b) : bi
-            return ai - bi
-          })}
+          renderOption={(option: Option) =>
+            multiple ?
+              (<>
+                <DoneIcon
+                  className={classes.iconSelected}
+                  style={{ visibility: value.includes(option.id) ? 'visible' : 'hidden' }}
+                />
+                <div className={classes.text}>
+                  {option.label || option.id}
+                </div>
+              </>) :
+              (<>
+                <DoneIcon
+                  className={classes.iconSelected}
+                  style={{ visibility: value?.id == option.id ? 'visible' : 'hidden' }}
+                />
+                <div className={classes.text}>
+                  {option.label || option.id}
+                </div>
+              </>)
+          }
+          options={
+            multiple ?
+              [...options].sort((a, b) => {
+                // Display the selected labels first.
+                let ai = value.indexOf(a.id)
+                ai = ai === -1 ? value.length + options.indexOf(a) : ai
+                let bi = value.indexOf(b.id)
+                bi = bi === -1 ? value.length + options.indexOf(b) : bi
+                return ai - bi
+              })
+              :
+              [...options.filter(o => o.id == value?.id), ...options.filter(o => o.id != value?.id)]
+          }
           getOptionLabel={(option) => option.label || option.id}
           renderInput={(params) => (
             <InputBase
