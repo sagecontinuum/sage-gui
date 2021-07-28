@@ -257,9 +257,6 @@ export default function SanityChart(props) {
   const [hoverInfo, setHoverInfo] = useState({})
   const items = Object.values(data)
 
-  console.log('items', items)
-
-  const canvasWidth = Math.max.apply(Math, items.map(a => a.length)) * (w + cellPad) + xStart + cellPad + 100
   const canvasHeight = items.length * (h + cellPad) + yStart + cellPad
 
   const onMouseOver = (obj) => {

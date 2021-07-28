@@ -60,7 +60,7 @@ function post(endpoint: string, data = {}) {
 
 
 
-async function getData(params: Params) : Promise<Metric[]> {
+export async function getData(params: Params) : Promise<Metric[]> {
   const res = await post(`${url}/query`, params)
   const text = await res.text()
 

@@ -95,7 +95,7 @@ export default function TagList(props: Props) {
 
   const [buildSubmitted, setBuildSubmitted] = useState(false)
   const [deleteTag, setDeleteTag] = useState<ECR.AppDetails>(null)
-  const [expanded, setExpanded] = useState<string | false>(false)
+  const [expanded, setExpanded] = useState<string | false>('panel-0')
 
   // fetch all submitted app configs
   useEffect(() => {

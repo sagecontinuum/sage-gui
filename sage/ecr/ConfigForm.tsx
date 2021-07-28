@@ -28,34 +28,11 @@ const architectures = [
 
 type Props = {
   form: AppConfig
-  onChange: (form: AppConfig) => void
+  onChange: (evt: React.ChangeEvent, val?: string) => void
 }
 
 export default function ConfigForm(props: Props) {
-  const {onChange} = props
-
-  const [form, setForm] = useState(props.form)
-
-  useEffect(() => {
-    setForm(props.form)
-  }, [props.form])
-
-
-  const handleChange = (event, val?: string) => {
-    const {name, value} = event.target
-
-    let f
-    if (name == 'architectures') {
-      f = {...form}
-      const archList = f.source.architectures
-      f.source.architectures = event.target.checked ?
-        [...archList, val] : archList.filter(v => v != val)
-    } else {
-      f = {...form, [name]: value}
-    }
-
-    onChange(f)
-  }
+  const {form, onChange} = props
 
 
   return (
@@ -65,10 +42,10 @@ export default function ConfigForm(props: Props) {
           <InputLabel id="namespace-label">Namespace</InputLabel>
           <Select
             labelId="namespace-label"
-            id="namepsace"
+            id="namespace"
             value={username}
-            onChange={evt => handleChange(evt)}
-            label="Namepsace"
+            onChange={evt => onChange(evt)}
+            label="Namespace"
           >
             <MenuItem value={username}>{username}</MenuItem>
           </Select>
@@ -78,7 +55,7 @@ export default function ConfigForm(props: Props) {
           label="Name"
           name="name"
           value={form.name}
-          onChange={handleChange}
+          onChange={onChange}
           InputLabelProps={{ shrink: true }}
           placeholder="my-app"
         />
@@ -86,7 +63,7 @@ export default function ConfigForm(props: Props) {
           label="Version"
           name="version"
           value={form.version}
-          onChange={handleChange}
+          onChange={onChange}
           style={{width: 100, marginLeft: 10}}
           InputLabelProps={{ shrink: true }}
           placeholder="1.0"
@@ -97,7 +74,7 @@ export default function ConfigForm(props: Props) {
         label="Description"
         name="description"
         value={form.description}
-        onChange={handleChange}
+        onChange={onChange}
         fullWidth
         multiline
         rows={3}
@@ -114,7 +91,7 @@ export default function ConfigForm(props: Props) {
               <CheckBox
                 name="architectures"
                 checked={form.source?.architectures?.includes(arch)}
-                onChange={(evt) => handleChange(evt, arch)}
+                onChange={(evt) => onChange(evt, arch)}
                 icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                 checkedIcon={<CheckBoxIcon fontSize="small" />}
                 color="primary"

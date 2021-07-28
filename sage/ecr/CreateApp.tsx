@@ -10,16 +10,22 @@ import FormHelperText from '@material-ui/core/FormHelperText'
 import CheckIcon from '@material-ui/icons/Check'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
+import TagIcon from '@material-ui/icons/LocalOfferOutlined'
 
-import Editor from '@monaco-editor/react'
-import { parse, stringify } from 'yaml'
+import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
+
+import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
 
 import ConfigForm from './ConfigForm'
+import FilterMenu from '../../components/FilterMenu'
+import CheckBox from '../../components/input/Checkbox'
 
 import {Tabs, Tab} from '../../components/tabs/Tabs'
 import * as Auth from '../../components/auth/auth'
 import * as ECR from '../apis/ecr'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
+
 const username = Auth.getUser()
 
 const devList = [
@@ -84,10 +90,14 @@ export default function CreateApp() {
 
   const [tabIndex, setTabIndex] = useState(0)
 
-  // app config state
+  // app repo
   const [repoURL, setRepoURL] = useState('')
+  const [tag, setTag] = useState({id: 'main', label: 'main'})
+  const [tagList, setTagList] = useState([])
+
+  // app config state
   const [form, setForm] = useState<ECR.AppConfig>(initialState)
-  const [config, setConfig] = useState<string>(stringify(initialState))
+  const [config, setConfig] = useState<string>(YAML.stringify(initialState))
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
 
   const [validating, setValidating] = useState(false)
@@ -98,14 +108,9 @@ export default function CreateApp() {
   const [error, setError] = useState(null)
 
 
-  useEffect(() => {
-    fetch(`${ECR.url}/permissions/`)
-      .then(res => {
-        return res.json()
-      }).then((data) => {
-        console.log(data)
-      })
-  }, [])
+  // debug settings
+  const [devMode, setDevMode] = useState(false)
+
 
   // remove all verification/error state on changes
   useEffect(() => {
@@ -113,7 +118,14 @@ export default function CreateApp() {
   }, [repoURL, config])
 
 
-  const handleRepoVerify = (evt = null) => {
+  // if repo url changes, force user to reverify
+  useEffect(() => {
+    setIsValid(null)
+  }, [repoURL])
+
+
+
+  const onRepoVerify = (evt = null) => {
     if (evt) evt.preventDefault()
 
     const path = repoURL.split('.com')[1]
@@ -122,7 +134,22 @@ export default function CreateApp() {
     // todo: add rate limit notice, add branch?
     setValidating(true)
     fetch(`${GITHUB_API}/repos/${path}`)
-      .then(res => setIsValid(res.ok))
+      .then(res => {
+        setIsValid(res.ok)
+        return res.json()
+      }).then(data => {
+        // set branch dropdown to github default branch
+        const t = data.default_branch
+        setTag({id: t, label: t})
+
+        // fetch branches for dropdown (this will be tags in future?)
+        fetch(data.branches_url.replace('{/branch}', ''))
+          .then(res => res.json())
+          .then(branches => {
+            const opts = branches.map(b => b.name).map(name => ({id: name, label: name}))
+            setTagList(opts)
+          })
+      })
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
       .then(() => fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.json`))
@@ -137,19 +164,42 @@ export default function CreateApp() {
 
         // set form/config
         res.text().then(text => {
-          let obj = parse(text)
+          let obj = YAML.parse(text)
           obj = sanitizeForm(obj)
-          setConfig(stringify(obj))
-          setForm(sanitizeForm(obj))
+
+          // update config with repo url and tag (just branch for now)
+          obj.source.url = repoURL
+          obj.source.branch = tag.id
+
+          setForm(obj)
+          setConfig(YAML.stringify(obj))
         })
       }).catch(() => setConfigType('none'))
   }
+
+
+  const onRepoTagChange = (tagObj) => {
+    if (!tagObj) {
+      setIsValid(false)
+      return
+    }
+
+    setTag(tagObj)
+    setIsValid(true)
+
+    const f = {...form}
+    f.source.branch = tagObj.id
+    setForm(f)
+    setConfig(YAML.stringify(f))
+  }
+
 
   const sanitizeForm = (obj) => {
     return {...obj, namespace: username}
   }
 
-  const handleRegister = () => {
+
+  const onRegister = () => {
     setIsRegistering(true)
     ECR.register(config)
       .then(() => {
@@ -164,7 +214,7 @@ export default function CreateApp() {
   }
 
 
-  const handleBuild = () => {
+  const onBuild = () => {
     setIsBuilding(true)
 
     const {namespace, name, version} = form
@@ -178,38 +228,38 @@ export default function CreateApp() {
   }
 
 
-
-  const handleFormChange = (obj: ECR.AppConfig) => {
-    obj = sanitizeForm(obj)
-    setForm(obj)
-    setConfig(stringify(obj))
-  }
-
-  const handleEditorChange = (text: string) => {
-    let obj = parse(text)
-    obj = sanitizeForm(obj)
-    setForm(obj)
-    setConfig(stringify(obj))
-  }
-
-
   const onExampleOne = () => {
     setConfig('')
     setRepoURL(EXAMPLE_REPO_1)
   }
 
 
-  /*
-  const onExampleTwo = async () => {
-    setConfig('')
-    setRepoURL(EXAMPLE_REPO_2)
+  const onUpdateForm = (event, val?: string) => {
+    const {name, value} = event.target
+
+    let f
+    if (name == 'architectures') {
+      f = {...form}
+      const archList = f.source.architectures
+      f.source.architectures = event.target.checked ?
+        [...archList, val] : archList.filter(v => v != val)
+    } else {
+      f = {...form, [name]: value}
+    }
+
+    setForm(f)
+    setConfig(YAML.stringify(f))
   }
 
-  const onExampleThree = () => {
-    setConfig(null)
-    setRepoURL(EXAMPLE_REPO_3)
+
+  const onEditorChange = (evt) => {
+    const text = evt.target.value
+    setConfig(text)
+
+    let obj = YAML.parse(text)
+    obj = sanitizeForm(obj)
+    setForm(obj)
   }
-  */
 
 
 
@@ -217,8 +267,10 @@ export default function CreateApp() {
     <Root>
       <Main>
         <h1>Create App</h1>
+
         <StepTitle icon="1" active={true} label="Specify Repo URL"/>
-        <form className="step step-1" onSubmit={handleRepoVerify}>
+
+        <form className="step step-1 gap" onSubmit={onRepoVerify}>
           <TextField
             label="GitHub Repo URL"
             placeholder="https://github.com/me/my-edge-app"
@@ -230,9 +282,25 @@ export default function CreateApp() {
             InputLabelProps={{ shrink: true }}
           />
 
-          {repoURL &&
+          {isValid &&
+            <FilterMenu
+              options={tagList}
+              multiple={false}
+              onChange={onRepoTagChange}
+              value={tag}
+              headerText="Select a different branch"
+              ButtonComponent={
+                <Button style={{marginLeft: 10}} startIcon={<TagIcon/>}>
+                  {tag?.id}
+                  <CaretIcon />
+                </Button>
+              }
+            />
+          }
+
+          {repoURL && !isValid &&
             <Button
-              onClick={handleRepoVerify}
+              onClick={onRepoVerify}
               variant="contained"
               color="primary"
             >
@@ -246,7 +314,8 @@ export default function CreateApp() {
         </form>
 
 
-        <StepTitle icon="2" active={true} label="Configuration" />
+        <StepTitle icon="2" active={true} label="Set App Configuration" />
+
         <div className="step">
           {configType == 'none' &&
             <p>
@@ -259,40 +328,40 @@ export default function CreateApp() {
             </p>
           }
 
-          <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)} aria-label="App Configuration Tabs">
+          <Tabs
+            value={tabIndex}
+            onChange={(_, idx) => setTabIndex(idx)}
+            aria-label="App Configuration Tabs"
+          >
             <Tab label="Form" idx={0} />
             <Tab label="Raw Config" idx={1} />
           </Tabs>
 
           {tabIndex == 0 &&
-            <ConfigForm form={form} onChange={handleFormChange} />
+            <ConfigForm
+              form={form}
+              onChange={onUpdateForm}
+            />
           }
 
-          {/* here we preload the editor */}
-          <EditorContainer style={{display: tabIndex == 1 ? 'block' : 'none'}}>
-            <Editor
-              height="400px"
-              defaultLanguage="yaml"
-              value={config}
-              onChange={handleEditorChange}
-              theme="light"
-            />
-          </EditorContainer>
-
+          {tabIndex == 1 &&
+            <EditorContainer>
+              <Editor
+                value={config}
+                onChange={onEditorChange}
+              />
+            </EditorContainer>
+          }
 
           {error &&
             <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
           }
         </div>
 
-        {/* when in debug mode*/}
-        {devMode &&
-          <Debug form={form} />
-        }
 
         <div className="step">
           <Button
-            onClick={handleRegister}
+            onClick={onRegister}
             variant="outlined"
             color="primary"
             disabled={!isValid || !form || isRegistering || isBuilding || error}
@@ -301,7 +370,7 @@ export default function CreateApp() {
           </Button>
 
           <Button
-            onClick={handleBuild}
+            onClick={onBuild}
             variant="contained"
             color="primary"
             disabled={!isValid || !form || isRegistering || isBuilding || error}
@@ -351,6 +420,11 @@ export default function CreateApp() {
             />
           </DebugOptions>
         }
+
+        {/* when in debug mode*/}
+        {devMode &&
+          <Debug form={form} />
+        }
       </Help>
     </Root>
   )
@@ -382,12 +456,20 @@ const Main = styled.div`
 `
 
 const EditorContainer = styled.div`
+  margin-top: 10px;
+`
+
+const Editor = styled.textarea`
+  height: 400px;
+  width: 100%;
   border: 1px solid #ccc;
+  padding: 5px 10px;
 `
 
 const Help = styled.div`
   margin: 20px 0;
   flex-grow: 1;
+  max-width: 300px;
 `
 
 
@@ -400,13 +482,20 @@ function Debug(props) {
   const {form} = props
 
   return (
-    <>
+    <DebugRoot>
       <h4>Form State (Debug Mode)</h4>
       <pre
-        style={{fontSize: '.8em'}}
         className="code"
         dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 4).replace(/\\n/g, '<br/>')}}
       />
-    </>
+    </DebugRoot>
   )
 }
+
+
+const DebugRoot = styled.div`
+  pre {
+    overflow: scroll;
+    font-size: .7em;
+  }
+`
