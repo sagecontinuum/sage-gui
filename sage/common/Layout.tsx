@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-export const Item = styled(Link)`
+export const Item = styled.div`
   position: relative;
   margin: 20px 1px; // 1px left/right for sticky header
   padding: 10px 15px;
@@ -18,6 +18,7 @@ export const Item = styled(Link)`
   .actions {
     position: absolute;
     display: none;
+    background: #fff; // overlay on text if needed
     bottom: .5rem;
     right: .6rem;
   }
@@ -32,9 +33,9 @@ export const Title = styled.div`
   font-weight: 800;
 `
 
-export const Top = styled.div`
+export const Top = styled.div<{top: string}>`
   position: sticky;
-  top: 60px;
+  top: ${props => props.top || '60px'};
   z-index: 100;
 `
 

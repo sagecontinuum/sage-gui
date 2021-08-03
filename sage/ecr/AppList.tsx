@@ -15,6 +15,7 @@ import TableSearch from '../../components/table/TableSearch'
 import { useProgress } from '../../components/progress/ProgressProvider'
 import * as ECR from '../apis/ecr'
 
+import {Top} from '../common/Layout'
 import SpaciousLayout from './SpaciousAppList'
 import { formatters } from './formatters'
 import LayoutToggle from '../common/LayoutToggle'
@@ -130,7 +131,7 @@ export default function AppList() {
     history.push({search: params.toString()})
   }
 
-  const handleActionComplete = () => {
+  const onActionComplete = () => {
     setLoading(true)
     listApps()
   }
@@ -143,40 +144,39 @@ export default function AppList() {
 
   return (
     <Root>
-      <Controls className="flex items-center justify-between">
-        <div>
+      <Top top="0">
+        <Controls className="flex items-center justify-between">
           <TableSearch
             onSearch={onSearch}
             width="300px"
           />
-        </div>
 
+          <div className="flex">
+            {view !== 'explore' &&
+              <>
+                <Button
+                  component={Link}
+                  to="/apps/create-app"
+                  variant="contained"
+                  color="primary"
+                  startIcon={<AddIcon/>}
+                  size="small"
+                  fullWidth
+                >
+                  Create app
+                </Button>
 
-        <div className="flex">
-          {view !== 'explore' &&
-            <>
-              <Button
-                component={Link}
-                to="/apps/create-app"
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon/>}
-                size="small"
-                fullWidth
-              >
-                Create app
-              </Button>
+                <Divider orientation="vertical" style={{margin: '0 8px 0 5px'}} flexItem />
+              </>
+            }
 
-              <Divider orientation="vertical" style={{margin: '0 8px 0 5px'}} flexItem />
-            </>
-          }
-
-          <LayoutToggle
-            layout={viewStyle}
-            onClick={view => setViewStyle(view)}
-          />
-        </div>
-      </Controls>
+            <LayoutToggle
+              layout={viewStyle}
+              onClick={view => setViewStyle(view)}
+            />
+          </div>
+        </Controls>
+      </Top>
 
 
       {rows && viewStyle == 'compact' &&
@@ -220,11 +220,17 @@ export default function AppList() {
   )
 }
 
-const Root = styled.div`
 
+const Root = styled.div`
+  position: relative;
 `
 
 const Controls = styled.div`
+  background-color: #fff;
+
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+
   .MuiButton-root,
   .MuiFormControlLabel-root {
     margin: 0 10px;
@@ -241,5 +247,4 @@ const NoneFound = styled.div`
     filter: drop-shadow(0px 0px 0.3rem #ccc);
   }
 `
-
 
