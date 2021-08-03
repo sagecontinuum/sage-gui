@@ -10,7 +10,7 @@ import PublicIcon from '@material-ui/icons/PublicRounded'
 
 export default function Sidebar() {
   return (
-    <Root>
+    <Root className="flex-nowrap">
       <Item to="/apps/explore">
         <PublicIcon />
         <div>Explore</div>

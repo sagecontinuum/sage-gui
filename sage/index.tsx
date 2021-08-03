@@ -69,7 +69,7 @@ const theme = createMuiTheme({
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps">Edge Apps</NavLink></li>
-    <li><NavLink to="/data">Data</NavLink></li>
+    {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
 
 

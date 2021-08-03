@@ -486,7 +486,7 @@ function Debug(props) {
       <h4>Form State (Debug Mode)</h4>
       <pre
         className="code"
-        dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 4).replace(/\\n/g, '<br/>')}}
+        dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 2).replace(/\\n/g, '<br/>')}}
       />
     </DebugRoot>
   )

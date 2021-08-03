@@ -19,7 +19,7 @@ const isSignedIn = Auth.isSignedIn()
 
 
 
-const getThumbnailSrc = (url: string, branch: string) => {
+export const getThumbnailSrc = (url: string, branch: string) => {
 
   const src = url.replace(/github\.com/g, 'raw.githubusercontent.com')
     .replace(/\.git$/g, '')
@@ -159,7 +159,7 @@ function Row(props) {
 }
 
 
-const Thumb = styled.img`
+export const Thumb = styled.img`
   width: 125px;
   height: 125px;
   border: 1px solid #ccc;

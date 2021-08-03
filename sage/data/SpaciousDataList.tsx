@@ -4,7 +4,7 @@ import { formatter } from './DataSearch'
 import { Item, Title } from '../common/Layout'
 import Divider from '@material-ui/core/Divider'
 import { Link } from 'react-router-dom'
-import highlightText from './text'
+import highlightText from '../../components/utils/text'
 
 
 type Props = {

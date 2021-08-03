@@ -26,7 +26,6 @@ export default function BuildIndicator(props: Props) {
           &nbsp;
           (<Tooltip
             title={<>Jenkins <LaunchIcon style={{fontSize: '1.1em'}}/></>}
-            placement="top"
           >
             <a href={buildUrl} onClick={evt => evt.stopPropagation()} target="_blank" rel="noreferrer">view</a>
           </Tooltip>)

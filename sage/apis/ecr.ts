@@ -248,6 +248,8 @@ export async function listApps(filter: FilterType) {
 
       let repos = repoRes.data
 
+      console.log('repos', repos)
+
       if (filter == 'public' && __token) {
         repos = repos.filter(repo => isPublic(repo.permissions))
       } else if (filter == 'mine') {
@@ -294,8 +296,7 @@ export async function listApps(filter: FilterType) {
         .filter(app => app.id.split(':')[0] in repoMap)
         .map(app => {
           const repo = app.id.split(':')[0]
-          const repoInfo = repoMap[repo]
-          const permissions = repoInfo.permissions || []
+          const {permissions = [], imgs} = repoMap[repo]
           const isPublic = permissions.filter(p => p.grantee === 'AllUsers').length > 0
           // const isShared = permissions.filter(p => p.grantee !== 'AllUsers').length > 0
 
@@ -304,7 +305,8 @@ export async function listApps(filter: FilterType) {
             versions: versions[repo],
             permissions,
             isPublic,
-            isShared: false
+            isShared: false,
+            imgs
           }
         })
 

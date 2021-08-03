@@ -76,8 +76,8 @@ export async function getData(params: Params) : Promise<Metric[]> {
 
 
 
-export async function getLatestMetrics(params?: Params) : Promise<AggMetrics> {
-  params = params || {start: '-7d', filter: {name: 'sys.*'}, tail: 1}
+export async function getLatestMetrics() : Promise<AggMetrics> {
+  params = {start: '-7d', filter: {name: 'sys.*'}, tail: 1}
   const allMetrics = await getData(params)
 
   // aggregate all the metrics

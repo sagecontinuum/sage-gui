@@ -7,7 +7,7 @@ import TextField from '@material-ui/core/TextField'
 
 import SearchIcon from '@material-ui/icons/SearchOutlined'
 
-import highlightText from './text'
+import highlightText from '../../components/utils/text'
 import Checkbox from '../../components/input/Checkbox'
 
 

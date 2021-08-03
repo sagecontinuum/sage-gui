@@ -44,7 +44,7 @@ const Root = styled.div`
 `
 
 const Main = styled.div`
-  padding: 20px;
+  padding: 0 20px;
   flex-grow: 1;
   overflow-y: auto;
 `

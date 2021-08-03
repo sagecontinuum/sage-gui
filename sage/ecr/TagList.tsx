@@ -161,7 +161,6 @@ export default function TagList(props: Props) {
 
   return (
     <Root>
-      <h2>Tags</h2>
       {versions && versions.map((ver, i) => {
         const {
           namespace,
