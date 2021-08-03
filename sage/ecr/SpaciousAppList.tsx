@@ -58,7 +58,8 @@ const VertDivide = () =>
 
 
 function Row(props) {
-  const {data, onComplete} = props
+  const {data, view, onComplete, onNavigate} = props
+
   const {
     namespace,
     name,
@@ -81,6 +82,10 @@ function Row(props) {
       evt.preventDefault()
     }
   }
+
+    if (!evt.target.hasAttribute('href')) {
+      onNavigate(`/apps/app/${namespace}/${name}`)
+    }
 
   return (
     <Item

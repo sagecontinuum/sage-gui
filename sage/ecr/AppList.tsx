@@ -136,6 +136,11 @@ export default function AppList() {
   }
 
 
+  const onNavigate = (path: string) => {
+    history.push(path)
+  }
+
+
   return (
     <Root>
       <Controls className="flex items-center justify-between">
@@ -186,7 +191,9 @@ export default function AppList() {
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
           rows={rows}
-          onComplete={handleActionComplete}
+          view={view}
+          onComplete={onActionComplete}
+          onNavigate={onNavigate}
         />
       }
 
