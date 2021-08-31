@@ -55,9 +55,11 @@ function Row(props) {
     if (evt.target.closest('.MuiDialog-root')) {
       // prevent navigation if using dialog
       evt.preventDefault()
+      return
     }
 
-    if (!evt.target.hasAttribute('href')) {
+    // if not link or button, allow navigation
+    if (!evt.target.hasAttribute('href') && !evt.target.closest('.MuiButtonBase-root')) {
       onNavigate(`/apps/app/${namespace}/${name}`)
     }
   }
