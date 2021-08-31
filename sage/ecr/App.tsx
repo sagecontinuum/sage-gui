@@ -54,10 +54,9 @@ export default function App() {
     ]).then(([repo]) => {
       setRepo(repo)
       setVersions(repo.versions)
-      console.log('repo ', repo)
 
-      if (repo.science_description) {
-        fetch(`${ECR.url}/${repo.science_description}`)
+      if (repo.versions[0].science_description) {
+        fetch(`${ECR.url}/meta-files/${repo.versions[0].science_description}`)
           .then(res => res.text())
           .then(text => {
             setMarkDownText(text)
@@ -82,16 +81,10 @@ export default function App() {
     <Root>
       <div className="flex justify-between">
         <div className="flex">
-          {/* eventually, we'll pull the thumbnail from the database
-            repo && repo.images?.length > 0 ?
-            <Thumb src={`${ECR.url}${repo.images[0]}`} /> :
-            <></>
-          */}
-          {repo &&
-            <Thumb
-              src={getThumbnailSrc(repo.versions[0].source.url, repo.versions[0].source.branch)}
-              onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
-            />
+          {
+            repo && repo.versions[0].thumbnail ?
+              <Thumb src={`${ECR.url}/meta-files/${repo.versions[0].thumbnail}`} /> :
+              <></>
           }
 
           <div className="flex column">
@@ -136,23 +129,28 @@ export default function App() {
           onChange={(_, idx) => setTabIndex(idx)}
           aria-label="App details tabs"
         >
-          {/*repo.science_description && <Tab label="Science Overview" idx={0} />*/}
-          <Tab label="Tagged Versions" idx={0} />
+          {repo.versions[0].science_description && <Tab label="Science Overview" idx={0} />}
+          <Tab label="Tagged Versions" idx={1} />
         </Tabs>
         <br/>
 
 
-        {tabIndex == 1 &&
+        {tabIndex == 0 &&
           <Content>
+            {repo && repo.images?.length > 0 ?
+              <Thumb src={`${ECR.url}/meta-files/${repo.images[0]}`} /> :
+              <></>
+            }
+
             {!editSci &&
               <ScienceDescript dangerouslySetInnerHTML={{__html: sciHtml}} />
             }
 
-            {!editSci &&
+            {/*!editSci &&
               <EditBtn onClick={() => setEditSci(true)} className="flex items-center">
                 <EditIcon fontSize="small"/> Edit
               </EditBtn>
-            }
+            */}
 
             {editSci &&
               <SaveContainer className="flex gap">
@@ -189,7 +187,7 @@ export default function App() {
           </Content>
         }
 
-        {tabIndex == 0 &&
+        {tabIndex == 1 &&
           <>
             {versions &&
               <Versions
