@@ -14,6 +14,7 @@ import { formatters } from './formatters'
 import BeeIcon from 'url:../../assets/bee.svg'
 
 import * as Auth from '../../components/auth/auth'
+import config from '../../config'
 
 const isSignedIn = Auth.isSignedIn()
 
@@ -45,7 +46,7 @@ function Row(props) {
     isBuilding,
     buildResult,
     buildUrl,
-    imgs
+    thumbnail
   } = data
 
 
@@ -66,21 +67,23 @@ function Row(props) {
 
   return (
     <Item
-      className="flex justify-between"
+      className="flex justify-between large-click-target"
       onClick={handleClick}
     >
       <div className="flex">
         <div>
-          {/* eventually, we'll want to pull from the database
-            imgs?.length > 0 ?
-              <Thumb src={`${config.ecr}${imgs[0]}`} /> :
+          {
+            thumbnail?.length ?
+              <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
               <Thumb className="placeholder" src={BeeIcon} />
-          */}
+          }
 
-          <Thumb
-            src={getThumbnailSrc(data.source.url, data.source.branch)}
-            onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
-          />
+          {/*
+            <Thumb
+              src={getThumbnailSrc(data.source.url, data.source.branch)}
+              onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
+            />
+          */}
         </div>
 
         <div className="flex column justify-around">
@@ -144,7 +147,7 @@ function Row(props) {
 
       </div>
 
-      {isSignedIn &&
+      {view != 'explore' && isSignedIn &&
         <div className="actions">
           <RepoActions
             namespace={namespace}
@@ -164,6 +167,7 @@ function Row(props) {
 export const Thumb = styled.img`
   width: 125px;
   height: 125px;
+  object-fit: contain;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 1em;
