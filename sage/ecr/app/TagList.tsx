@@ -24,15 +24,15 @@ import Divider from '@material-ui/core/Divider'
 
 import { useSnackbar } from 'notistack'
 import { stringify } from 'yaml'
-import yamlIcon from 'url:../../assets/yaml-logo.svg'
-import { formatters } from './formatters'
+import yamlIcon from 'url:../../../assets/yaml-logo.svg'
+import { formatters } from '../formatters'
 
-import useWithBuildStatus from './hooks/useWithBuildStatus'
-import BuildIndicator from './common/BuildIndicator'
-import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
+import useWithBuildStatus from '../hooks/useWithBuildStatus'
+import BuildIndicator from '../BuildIndicator'
+import ConfirmationDialog from '../../../components/dialogs/ConfirmationDialog'
 
-import * as ECR from '../apis/ecr'
-import * as Auth from '../../components/auth/auth'
+import * as ECR from '../../apis/ecr'
+import * as Auth from '../../../components/auth/auth'
 const username = Auth.getUser()
 
 
