@@ -7,20 +7,20 @@ import Button from '@material-ui/core/Button'
 import AddIcon from '@material-ui/icons/AddRounded'
 import Divider from '@material-ui/core/Divider'
 
-import BeeIcon from 'url:../../assets/bee.svg'
+import BeeIcon from 'url:../../../assets/bee.svg'
 
-import ErrorMsg from '../ErrorMsg'
-import Table from '../../components/table/Table'
-import TableSearch from '../../components/table/TableSearch'
-import { useProgress } from '../../components/progress/ProgressProvider'
-import * as ECR from '../apis/ecr'
+import ErrorMsg from '../../ErrorMsg'
+import Table from '../../../components/table/Table'
+import TableSearch from '../../../components/table/TableSearch'
+import { useProgress } from '../../../components/progress/ProgressProvider'
+import * as ECR from '../../apis/ecr'
 
-import {Top} from '../common/Layout'
+import {Top} from '../../common/Layout'
 import SpaciousLayout from './SpaciousAppList'
-import { formatters } from './formatters'
-import LayoutToggle from '../common/LayoutToggle'
+import { formatters } from '../formatters'
+import LayoutToggle from '../../common/LayoutToggle'
 
-import useWithBuildStatus from './hooks/useWithBuildStatus'
+import useWithBuildStatus from '../hooks/useWithBuildStatus'
 
 const columns = [
   {

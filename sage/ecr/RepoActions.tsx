@@ -58,7 +58,9 @@ function FullActionBtn({text, onClick, icon, style}: FullActionBtnProps) {
 
 
 
-type Props = ECR.App & {
+type Props = {
+  namespace: string
+  name: string
   isPublic?: boolean
   condensed?: boolean
   versionCount: number

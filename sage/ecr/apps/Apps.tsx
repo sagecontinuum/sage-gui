@@ -6,12 +6,12 @@ import {
   Route
 } from 'react-router-dom'
 
-import Sidebar from './Sidebar'
+import Sidebar from '../Sidebar'
 import AppList from './AppList'
-import App from './App'
-import CreateApp from './CreateApp'
+import App from '../app/App'
+import CreateApp from '../create-app/CreateApp'
 
-import PrivateRoute from '../../components/auth/PrivateRoute'
+import PrivateRoute from '../../../components/auth/PrivateRoute'
 
 
 export default function Apps() {

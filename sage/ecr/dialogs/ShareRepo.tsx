@@ -77,7 +77,7 @@ function PermissionTable(props: PermTableProps) {
 
 
 type Props = {
-  repo: ECR.Repo
+  repo: {namespace: string, name: string}
   onClose: () => void
 }
 

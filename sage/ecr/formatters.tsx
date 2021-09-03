@@ -1,5 +1,6 @@
 /* eslint-disable react/display-name */
 import React from 'react'
+import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import GithubIcon from '@material-ui/icons/GitHub'
 import Tooltip from '@material-ui/core/Tooltip'
@@ -64,3 +65,16 @@ export const formatters = {
   }
 }
 
+export const Thumb = styled.img`
+  width: 125px;
+  height: 125px;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 1em;
+
+  &.placeholder {
+    padding: 1em;
+    filter: drop-shadow(0px 0px 0.3rem #ccc);
+  }
+`

@@ -7,14 +7,14 @@ import PublicIcon from '@material-ui/icons/PublicRounded'
 import SharedIcon from '@material-ui/icons/PeopleAltRounded'
 import GithubIcon from '@material-ui/icons/GitHub'
 
-import { Item, Title } from '../common/Layout'
-import BuildIndicator from './common/BuildIndicator'
-import RepoActions from './RepoActions'
-import { formatters } from './formatters'
-import BeeIcon from 'url:../../assets/bee.svg'
+import { Item, Title } from '../../common/Layout'
+import BuildIndicator from '../BuildIndicator'
+import RepoActions from '../RepoActions'
+import { Thumb, formatters } from '../formatters'
+import BeeIcon from 'url:../../../assets/bee.svg'
 
-import * as Auth from '../../components/auth/auth'
-import config from '../../config'
+import * as Auth from '../../../components/auth/auth'
+import config from '../../../config'
 
 const isSignedIn = Auth.isSignedIn()
 
@@ -77,13 +77,6 @@ function Row(props) {
               <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
               <Thumb className="placeholder" src={BeeIcon} />
           }
-
-          {/*
-            <Thumb
-              src={getThumbnailSrc(data.source.url, data.source.branch)}
-              onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
-            />
-          */}
         </div>
 
         <div className="flex column justify-around">
@@ -164,19 +157,6 @@ function Row(props) {
 }
 
 
-export const Thumb = styled.img`
-  width: 125px;
-  height: 125px;
-  object-fit: contain;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 1em;
-
-  &.placeholder {
-    padding: 1em;
-    filter: drop-shadow(0px 0px 0.3rem #ccc);
-  }
-`
 
 
 const Dot = styled.div`
