@@ -6,7 +6,6 @@ import TextField from '@material-ui/core/TextField'
 import StepIcon from '@material-ui/core/StepIcon'
 import Button from '@material-ui/core/Button'
 import Tooltip from '@material-ui/core/Tooltip'
-import FormHelperText from '@material-ui/core/FormHelperText'
 import CheckIcon from '@material-ui/icons/Check'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
@@ -18,12 +17,11 @@ import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
 
 import ConfigForm from './ConfigForm'
-import FilterMenu from '../../components/FilterMenu'
-import CheckBox from '../../components/input/Checkbox'
+import FilterMenu from '../../../components/FilterMenu'
+import CheckBox from '../../../components/input/Checkbox'
 
-import {Tabs, Tab} from '../../components/tabs/Tabs'
-import * as Auth from '../../components/auth/auth'
-import * as ECR from '../apis/ecr'
+import * as Auth from '../../../components/auth/auth'
+import * as ECR from '../../apis/ecr'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 const username = Auth.getUser()
@@ -64,10 +62,10 @@ const StepRoot = styled.div`
 
 
 const initialState = {
-  name: '',
+  // namespace: username, // only if supplied?
+  // name: '',
+  // version: '',
   description: '',
-  version: '',
-  namespace: username,
   source: {
     architectures: [],
     branch: '',
@@ -87,8 +85,6 @@ const initialState = {
 export default function CreateApp() {
   let history = useHistory()
   const { enqueueSnackbar } = useSnackbar()
-
-  const [tabIndex, setTabIndex] = useState(0)
 
   // app repo
   const [repoURL, setRepoURL] = useState('')
@@ -137,7 +133,8 @@ export default function CreateApp() {
       .then(res => {
         setIsValid(res.ok)
         return res.json()
-      }).then(data => {
+      })
+      .then(data => {
         // set branch dropdown to github default branch
         const t = data.default_branch
         setTag({id: t, label: t})
@@ -201,7 +198,9 @@ export default function CreateApp() {
 
   const onRegister = () => {
     setIsRegistering(true)
-    ECR.register(config)
+
+    const {namespace, name, version} = form
+    ECR.register({namespace, name, version}, config)
       .then(() => {
         enqueueSnackbar('App registered', {variant: 'success'})
         history.push('/apps/my-apps')
@@ -234,31 +233,13 @@ export default function CreateApp() {
   }
 
 
-  const onUpdateForm = (event, val?: string) => {
+  const onUpdateForm = (event) => {
     const {name, value} = event.target
 
-    let f
-    if (name == 'architectures') {
-      f = {...form}
-      const archList = f.source.architectures
-      f.source.architectures = event.target.checked ?
-        [...archList, val] : archList.filter(v => v != val)
-    } else {
-      f = {...form, [name]: value}
-    }
+    let f = {...form, [name]: value}
 
     setForm(f)
     setConfig(YAML.stringify(f))
-  }
-
-
-  const onEditorChange = (evt) => {
-    const text = evt.target.value
-    setConfig(text)
-
-    let obj = YAML.parse(text)
-    obj = sanitizeForm(obj)
-    setForm(obj)
   }
 
 
@@ -268,7 +249,7 @@ export default function CreateApp() {
       <Main>
         <h1>Create App</h1>
 
-        <StepTitle icon="1" active={true} label="Specify Repo URL"/>
+        <StepTitle icon="1" active={true} label="Repo URL"/>
 
         <form className="step step-1 gap" onSubmit={onRepoVerify}>
           <TextField
@@ -314,50 +295,33 @@ export default function CreateApp() {
         </form>
 
 
-        <StepTitle icon="2" active={true} label="Set App Configuration" />
+        <StepTitle icon="2" active={true} label="App Name and Version" />
 
         <div className="step">
           {configType == 'none' &&
             <p>
               No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
               <sup>
-                <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.  (Click for help)">
+                <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.">
                   <HelpIcon fontSize="small" />
                 </Tooltip>
               </sup>
             </p>
           }
 
-          <Tabs
-            value={tabIndex}
-            onChange={(_, idx) => setTabIndex(idx)}
-            aria-label="App Configuration Tabs"
-          >
-            <Tab label="Form" idx={0} />
-            <Tab label="Raw Config" idx={1} />
-          </Tabs>
 
-          {tabIndex == 0 &&
-            <ConfigForm
-              form={form}
-              onChange={onUpdateForm}
-            />
-          }
-
-          {tabIndex == 1 &&
-            <EditorContainer>
-              <Editor
-                value={config}
-                onChange={onEditorChange}
-              />
-            </EditorContainer>
-          }
-
-          {error &&
-            <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
-          }
+          <ConfigForm
+            form={form}
+            onChange={onUpdateForm}
+          />
         </div>
 
+        {isValid &&
+          <div className="step">
+            <h4>App Config</h4>
+            <pre className="code">{config}</pre>
+          </div>
+        }
 
         <div className="step">
           <Button
@@ -455,16 +419,6 @@ const Main = styled.div`
   }
 `
 
-const EditorContainer = styled.div`
-  margin-top: 10px;
-`
-
-const Editor = styled.textarea`
-  height: 400px;
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 5px 10px;
-`
 
 const Help = styled.div`
   margin: 20px 0;
