@@ -58,13 +58,6 @@ function deleteReq(endpoint: string) {
 
 
 
-
-
-export type Repo = {
-  namespace: string
-  name: string
-}
-
 export type App = {
   namespace: string,
   name: string
@@ -80,10 +73,19 @@ type Arch =
 
 
 export type AppConfig = {
-  name: string
-  description: string
-  version: string
-  namespace: string
+  namespace?: string
+  name?: string
+  version?: string
+  description?: string
+  authors?: string // todo(nc) allow list too?
+  keywords?: string
+  homepage?: string
+  license?: string
+  funding?: string
+  collaborators?: string // todo(nc): allow list too?
+  thumbnail?: string[] // todo(nc): make single string
+  images: string[]
+  science_description: string[]
   source: {
     architectures: Arch[]
     url: string
@@ -94,16 +96,15 @@ export type AppConfig = {
       [variable: string]: string
     }
   }
-  resources: {
+  resources?: {
     type: string,
-    view: string,
-    min_resolution: string
+    view: string
   }[]
-  inputs: {
+  inputs?: {
     id: string,
     type: 'boolean' | 'int' | 'long' | 'float' | 'double' | 'string' | 'File'
   }[]
-  metadata: {
+  metadata?: {
     [item: string]: any
   }
 }
@@ -123,8 +124,17 @@ export type AppDetails =
   }
 
 
-export function register(appConfig) {
-  return post(`${url}/submit`, appConfig)
+export type Repo = {
+  namespace: string
+  name: string
+  owener_id: string
+  versions: AppDetails[]
+}
+
+
+export function register(app: App, appConfig) {
+  const {namespace, name, version} = app
+  return post(`${url}/apps/${namespace}/${name}/${version}`, appConfig)
 }
 
 
@@ -135,7 +145,7 @@ export function build(app: App, skipPush = true) {
 
 
 export async function registerAndBuild(app: App, appConfig) {
-  await register(appConfig)
+  await register(app, appConfig)
   const res = await build(app)
   return res
 }
@@ -332,8 +342,9 @@ export function listBuildStatusBulk(apps: App[]) {
  * retrival
  */
 
-export function getRepo(repo: Repo) : Promise<AppConfig> {
-  const {namespace, name} = repo
+
+export function getRepo(repo) : Promise<Repo> {
+  const {namespace, name} : {namespace: string, name: string} = repo
   return get(`${url}/repositories/${namespace}/${name}`)
     .then(data => {
 
