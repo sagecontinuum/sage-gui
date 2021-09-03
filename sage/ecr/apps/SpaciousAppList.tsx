@@ -77,6 +77,13 @@ function Row(props) {
               <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
               <Thumb className="placeholder" src={BeeIcon} />
           }
+
+          {/*
+            <Thumb
+              src={getThumbnailSrc(data.source.url, data.source.branch)}
+              onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
+            />
+          */}
         </div>
 
         <div className="flex column justify-around">
