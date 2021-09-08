@@ -2,8 +2,8 @@
 // no trailing slashes in endpoints, please
 
 export default  {
-  // api end points
-  beehive: 'https://sdr.sagecontinuum.org/api/v1',
+  // api endpoints
+  beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org/api',
   ecr: 'https://ecr.sagecontinuum.org/api',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',

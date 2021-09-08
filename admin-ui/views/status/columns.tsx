@@ -34,7 +34,7 @@ const sysTimeOtps = {
 
 
 const getSanityIcon = (sanity: NodeStatus) => {
-  if (!sanity) return '-'
+  if (!sanity || !sanity.nx) return '-'
 
   const {warnings, failed} = sanity.nx
 
