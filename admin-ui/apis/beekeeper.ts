@@ -1,5 +1,7 @@
 import config from '../../config'
 import { NodeStatus } from '../node'
+import nodeMeta from '../data/node-meta.json'
+import { node } from 'prop-types'
 
 const url = config.beekeeper
 
@@ -18,14 +20,17 @@ export type State = {
   internet_connection: string
   mode: string
   name: string
-  position: string // will be point()?
+  position: string    // will be point()?
   project_id: null
   registration_event: string // todo: fix format
   server_node: string
-  timestamp: string // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
+  timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
 
-  // additional status field.  may be replaced with 'mode' or such
-  status: NodeStatus
+  /* new, proposed fields. */
+  status: NodeStatus  // may be replaced with 'mode' or such?
+  vsn: string
+  project: string
+  location: string    // currently part of "project" in mock data
 }
 
 
@@ -61,11 +66,23 @@ export async function fetchState() : Promise<State[]> {
 
   return data.data
     .filter(obj => !IGNORE_LIST.includes(obj.id))
-    .map(obj => ({
-      ...obj,
-      status: 'loading',
-      registration_event: new Date(obj.registration_event).getTime()
-    }))
+    .map(obj => {
+      const meta = nodeMeta[obj.id],
+        vsn = meta?.VSN || '-',
+        proj = meta?.Project || '-'
+
+      const parts = (proj || '').split(',').map(p => p.trim())
+      const [project, location] = parts
+
+      return {
+        ...obj,
+        vsn,
+        project,
+        location,
+        status: 'loading',
+        registration_event: new Date(obj.registration_event).getTime()
+      }
+    })
 }
 
 export async function fetchNode(id: string) : Promise<State[]> {

@@ -7,7 +7,9 @@ import ErrorIcon from '@material-ui/icons/ErrorRounded'
 import InactiveIcon from '@material-ui/icons/RemoveCircleOutlineRounded'
 import CheckIcon from '@material-ui/icons/CheckCircleRounded'
 import Dot from '@material-ui/icons/FiberManualRecord'
+import ChartsIcon from '@material-ui/icons/AssessmentOutlined'
 import Badge from '@material-ui/core/Badge'
+import IconButton from '@material-ui/core/IconButton'
 
 import Tooltip from '@material-ui/core/Tooltip'
 
@@ -15,7 +17,8 @@ import * as utils from '../../../components/utils/units'
 
 import { NodeStatus } from '../../node.d'
 
-
+const INFLUX_URL = `https://influxdb.sagecontinuum.org/orgs/141ded5fedaf67c3/dashboards/07b179572e436000`
+  + `?lower=now%28%29%20-%2024h`
 
 const dateOpts = {
   month: 'long',
@@ -169,10 +172,31 @@ const columns = [{
   width: '25px',
   format: (val) => getSanityIcon(val)
 }, {
+  id: 'vsn',
+  label: 'Node',
+  width: '100px',
+  format: (val, obj) =>
+    <NodeCell className="flex items-center justify-between">
+      <IconButton
+        size="small"
+        href={`${INFLUX_URL}&vars%5BnodeID%5D=${obj.id}`} target="_blank" rel="noreferrer"
+      >
+        <ChartsIcon />
+      </IconButton>
+      <Link to={`node/${obj.id}`}>
+        {val == '-' ? `...${obj.id.slice(12)}` : val}
+      </Link>
+    </NodeCell>
+}, {
   id: 'id',
-  label: 'Node ID',
+  label: 'ID',
   width: '200px',
-  format: (val) => <Link to={`node/${val}`}>{val}</Link>
+  format: (val) => <Link to={`node/${val}`}>{val}</Link>,
+  hide: true
+}, {
+  id: 'project',
+  label: 'Project',
+  width: '140px'
 }, {
   id: 'elaspedTimes',
   label: 'Last Updated',
@@ -263,5 +287,12 @@ const columns = [{
   format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
   hide: true
 }]
+
+const NodeCell = styled.div`
+  margin-right: .2em;
+  .MuiButtonBase-root {
+    margin-bottom: 2px;
+  }
+`
 
 export default columns

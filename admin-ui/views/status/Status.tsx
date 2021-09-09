@@ -177,8 +177,8 @@ const determineStatus = (elaspedTimes: {[host: string]: number}) => {
 }
 
 
-// join some beehive and beekeeper data
-function joinData(data: BK.State[], metrics: BH.AggMetrics) {
+// join beehive and beekeeper data, basically
+function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics) {
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
     if (!(id in metrics)) return nodeObj
@@ -247,7 +247,7 @@ export default function StatusView() {
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
-  // const [projects, setProjects] = useState<Option[]>()
+  const [projects, setProjects] = useState<Option[]>()
   // const [regions, setRegions] = useState<Option[]>()
 
   // filter state
@@ -274,7 +274,7 @@ export default function StatusView() {
     function ping() {
       const handle = setTimeout(async () => {
         const metrics = await BH.getLatestMetrics()
-        setData(joinData(dataRef.current, metrics))
+        setData(mergeMetrics(dataRef.current, metrics))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -290,7 +290,7 @@ export default function StatusView() {
       .then(([state, metrics]) => {
         setData(state)
 
-        const allData = joinData(state, metrics)
+        const allData = mergeMetrics(state, metrics)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
@@ -348,7 +348,7 @@ export default function StatusView() {
     setFilterState(filterState)
 
     setStatuses(getOptions(data, 'status'))
-    // setProjects(getOptions(data, 'project'))
+    setProjects(getOptions(data, 'project'))
     // setRegions(getOptions(data, 'region'))
   }
 
@@ -445,7 +445,7 @@ export default function StatusView() {
                     }
                   /> : <></>
                 }
-                {/*projects &&
+                {projects &&
                   <FilterMenu
                     options={projects}
                     value={filterState.project}
@@ -457,7 +457,7 @@ export default function StatusView() {
                     }
                   />
                 }
-                {regions &&
+                {/*regions &&
                   <FilterMenu
                     options={regions}
                     value={filterState.region}
@@ -506,9 +506,6 @@ const VertDivider = () =>
 
 
 const Root = styled.div`
-`
-
-const Progress = styled(CircularProgress)`
 `
 
 const Overview = styled.div`
