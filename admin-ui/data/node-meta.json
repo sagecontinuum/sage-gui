@@ -1,0 +1,122 @@
+{
+  "000048B02D15BC77": {
+    "VSN": "W021",
+    "Project": "SAGE-ARM-OK, OK"
+  },
+  "000048B02D15BDC7": {
+    "VSN": "W020",
+    "Project": "CRADA (Add modem), 4302"
+  },
+  "000048B02D15BDA5": {
+    "VSN": "W022",
+    "Project": "DAWN-ANL, Apiary"
+  },
+  "000048B02D15C31A": {
+    "VSN": "W01A",
+    "Project": "DAWN-LBNL, LBNL"
+  },
+  "000048B02D15C31F": {
+    "VSN": "W01C",
+    "Project": "DAWN-ANL, Apiary"
+  },
+  "000048B02D15BC6D": {
+    "VSN": "W01B",
+    "Project": "DAWN-LBNL, LBNL"
+  },
+  "000048B02D15BC42": {
+    "VSN": "W01D",
+    "Project": "SAGE-NEON, FedEx"
+  },
+  "000048B02D15C328": {
+    "VSN": "W016",
+    "Project": "ARM, EVH"
+  },
+  "000048B02D15BC72": {
+    "VSN": "W018",
+    "Project": "ARM, EVH"
+  },
+  "000048B02D15BC4C": {
+    "VSN": "W017",
+    "Project": "ARM, EVH"
+  },
+  "000048B02D15BC64": {
+    "VSN": "W01F",
+    "Project": "SAGE-NEON, FedEx"
+  },
+  "000048B02D15BC3D": {
+    "VSN": "W01E",
+    "Project": "VTO, Apiary"
+  },
+  "000048B02D15C332": {
+    "VSN": "W038",
+    "Project": "SAGE-NEON, FedEx"
+  },
+  "000048B02D05A0A4": {
+    "VSN": "W02E",
+    "Project": "VTO, Apiary"
+  },
+  "000048B02D15BDD2": {
+    "VSN": "W02D",
+    "Project": "VTO, Apiary"
+  },
+  "000048B02D15BDC2": {
+    "VSN": "W02F",
+    "Project": "VTO, Apiary"
+  },
+  "000048B02D15BC68": {
+    "VSN": "W030",
+    "Project": "Breadboard-Pirate, Joe"
+  },
+  "000048B02D15BDAA": {
+    "VSN": "W02B",
+    "Project": "SAGE-TTU, FedEx"
+  },
+  "000048B02D15BDCD": {
+    "VSN": "W029",
+    "Project": "Sage, FedEX"
+  },
+  "000048B02D15BD2F": {
+    "VSN": "W02A",
+    "Project": "SAGE-AoT, 4302"
+  },
+  "000048B02D15BC87": {
+    "VSN": "W019",
+    "Project": "SAGE-UOregon, FedEx"
+  },
+  "000048B02D15BC8C": {
+    "VSN": "W039",
+    "Project": "CRADA (ANL), 4302"
+  },
+  "000048B02D15BC7D": {
+    "VSN": "W028",
+    "Project": "SAGE-NIU, NIU"
+  },
+  "000048B02D15C319": {
+    "VSN": "W015",
+    "Project": "SAGE-AoT, Apiary"
+  },
+  "000048B02D05A1C2": {
+    "VSN": "W02C",
+    "Project": "SAGE-AoT, Apiary"
+  },
+  "000048B02D15BC7C": {
+    "VSN": "W023",
+    "Project": "SAGE-MainGate, North Gate"
+  },
+  "000048B02D0766D2": {
+    "VSN": "W014",
+    "Project": "SAGE-BadRiver, 4302"
+  },
+  "000048B02D15BC73": {
+    "VSN": "W024",
+    "Project": "SAGE-AoT, Apiary"
+  },
+  "000048B02D05A1C7": {
+    "VSN": "W026",
+    "Project": "SAGE-AoT, 4302"
+  },
+  "000048B02D05A1C6": {
+    "VSN": "W027",
+    "Project": "SAGE-AoT, 4302"
+  }
+}

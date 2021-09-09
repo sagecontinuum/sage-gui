@@ -391,8 +391,6 @@ export default function StatusView() {
               <h3>
                 {selected[0].id}
               </h3>
-              &nbsp;
-              {/*loadingTicker && <Progress size={15}/>*/}
             </div>
           }
 

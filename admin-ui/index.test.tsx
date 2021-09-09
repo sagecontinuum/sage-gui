@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import SatusPage from './views/status/StatusView'
+import SatusPage from './views/status/Status'
 
 
 jest.mock('mapbox-gl/dist/mapbox-gl', () => ({
