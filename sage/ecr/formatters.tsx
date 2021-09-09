@@ -65,6 +65,7 @@ export const formatters = {
   }
 }
 
+
 export const Thumb = styled.img`
   width: 125px;
   height: 125px;
@@ -76,5 +77,13 @@ export const Thumb = styled.img`
   &.placeholder {
     padding: 1em;
     filter: drop-shadow(0px 0px 0.3rem #ccc);
+  }
+`
+
+
+export const Dot = styled.div`
+  margin: 0 10px;
+  :before {
+    content: "·";
   }
 `

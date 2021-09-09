@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import LaunchIcon from '@material-ui/icons/LaunchRounded'
+import ScienceIcon from '@material-ui/icons/BarChartRounded'
+import TagIcon from '@material-ui/icons/LocalOfferOutlined'
 import Chip from '@material-ui/core/Chip'
 
 import ErrorMsg from '../../ErrorMsg'
@@ -12,6 +13,8 @@ import {Tabs, Tab} from '../../../components/tabs/Tabs'
 import {useProgress} from '../../../components/progress/ProgressProvider'
 import Versions from './TagList'
 import BeeIcon from 'url:../../../assets/bee.svg'
+import GitIcon from 'url:../../../assets/git.svg'
+import LinkIcon from 'url:../../../assets/link.svg'
 import { Thumb } from '../formatters'
 
 import * as ECR from '../../apis/ecr'
@@ -46,14 +49,12 @@ export default function App() {
       .then((repo) => {
         setRepo(repo)
 
-        console.log('data', repo)
         const latestTag = repo.versions[0]
         setLatestTag(latestTag)
 
         const hasSciMarkDown = !!latestTag?.science_description
         const mdPath = hasSciMarkDown ?
-          latestTag?.science_description[0] : null
-        console.log('mdPath', mdPath)
+          latestTag?.science_description : null
 
         if (mdPath) {
           fetch(`${ECR.url}/meta-files/${mdPath}`)
@@ -81,10 +82,9 @@ export default function App() {
     <Root>
       <div className="flex justify-between">
         <div className="flex">
-          {
-            repo && latestTag.thumbnail ?
-              <Thumb src={`${ECR.url}/meta-files/${latestTag.thumbnail[0]}`} /> :
-              <Thumb className="placeholder" src={BeeIcon} />
+          {repo && latestTag.thumbnail ?
+            <Thumb src={`${ECR.url}/meta-files/${latestTag.thumbnail}`} /> :
+            <Thumb className="placeholder" src={BeeIcon} />
           }
 
           <div className="flex column">
@@ -124,22 +124,21 @@ export default function App() {
             onChange={(_, idx) => setTabIndex(idx)}
             aria-label="App details tabs"
           >
-            <Tab label="Science Overview" idx={0} />
-            <Tab label="Tagged Versions" idx={1}/>
+            <Tab label={<div className="flex items-center"><ScienceIcon /> Science Overview</div>} idx={0} />
+            <Tab label={<div className="flex items-center"><TagIcon fontSize="small"/> Tagged Versions ({repo.versions.length})</div>} idx={1}/>
           </Tabs>
           <br/>
 
 
           {tabIndex == 0 &&
             <Science>
-              {/*<img src={`${ECR.url}/meta-files/${latestTag.images[0]}`} width="500"/>*/}
               <div dangerouslySetInnerHTML={{__html: sciHtml}} />
             </Science>
           }
 
           {tabIndex == 0 && !sciHtml &&
             <div className="muted">
-              There is no science description for this app yet.
+              No science description available for this app.
             </div>
           }
 
@@ -149,26 +148,38 @@ export default function App() {
         </Main>
 
         <MetaSidebar>
+          {latestTag.images && <SciImage src={`${ECR.url}/meta-files/${latestTag.images[0]}`} />}
+
+          <h4>Repository</h4>
+          <p>
+            <a href={latestTag?.source.url} target="_blank" rel="noreferrer" className="flex">
+              <img src={GitIcon} className="icon"/> {' '}
+              {urlShortner(latestTag?.source.url.slice(0, 40))}
+            </a>
+          </p>
+
           {latestTag?.homepage &&
             <>
               <h4>Homepage</h4>
               <p>
-                <a href={latestTag?.homepage} target="_blank" rel="noreferrer">
-                  {urlShortner(latestTag?.homepage)} <LaunchIcon className="external-link"/>
+                <a href={latestTag?.homepage} className="flex">
+                  <img src={LinkIcon} width="15" className="icon" /> {' '}
+                  {urlShortner(latestTag?.homepage)}
                 </a>
               </p>
             </>
           }
 
-
-          <h4>Repo</h4>
-          <p>
-            <a href={latestTag?.source.url} target="_blank" rel="noreferrer">
-              {urlShortner(latestTag?.source.url.slice(0, 40))} <LaunchIcon className="external-link"/>
-            </a>
-          </p>
-
-          {metaItem(latestTag, 'Authors')}
+          {latestTag?.authors &&
+            <>
+              <h4>Authors</h4>
+              <p>
+                {latestTag?.authors.split(',').map(auth =>
+                  <span key={auth}>{auth.split('<')[0]}</span>
+                )}
+              </p>
+            </>
+          }
 
           {latestTag?.keywords &&
             <>
@@ -181,7 +192,9 @@ export default function App() {
             </>
           }
 
-          {metaItem(latestTag, 'License')}
+          <h4>License</h4>
+          {getLicense(latestTag.license)}
+
           {metaItem(latestTag, 'Funding')}
           {metaItem(latestTag, 'Collaborators')}
         </MetaSidebar>
@@ -205,10 +218,39 @@ const metaItem = (data, label) => {
         <h4>{label}</h4>
         <p>{data[key]}</p>
       </div> :
-      <></>
+      <div>
+        <h4>{label}</h4>
+        <p className="muted not-found">None submitted</p>
+      </div>
   )
 }
 
+
+const getLicense = license => {
+  if (!license)
+    return <p className="muted not-found">None submitted</p>
+
+  const text = license.toLowerCase()
+  let img, a
+  if (text.includes('mit'))
+    [img, a] = [`License-MIT-yellow.svg`, 'licenses/MIT']
+  else if (text.includes('bsd') && text.icludes('3'))
+    [img, a] = [`License-BSD%203--Clause-blue.svg`, 'licenses/BSD-3-Clause']
+  else if (text.includes('apache') && text.icludes('3'))
+    [img, a] = [`License-Apache%202.0-yellowgreen.svg`, 'licenses/Apache-2.0']
+
+  if (a) {
+    return (
+      <p>
+        <a href={`https://opensource.org/${a}`}>
+          <img src={`https://img.shields.io/badge/${img}`} alt={license}/>
+        </a>
+      </p>
+    )
+  }
+
+  return <p>{license}</p>
+}
 
 
 const Root = styled.div`
@@ -225,14 +267,31 @@ const Details = styled.div`
 const MetaSidebar = styled.div`
   margin: 0 0 0 4em;
   min-width: 300px;
+  max-width: 300px;
 
   h4 {
     opacity: 0.6;
     margin-bottom: 0.5em;
   }
 
-  p { font-weight: 600; }
+  p {
+    margin: .5em 2px 1.5em 4px;
+    font-weight: 600;
+    .icon {
+      margin-right: .3em;
+    }
+  }
+
+  .not-found {
+    font-weight: 400;
+  }
+
   .MuiChip-root { font-weight: 500; }
+`
+
+const SciImage = styled.img`
+  margin-top: 1em;
+  width: 100%;
 `
 
 const Main = styled.div`

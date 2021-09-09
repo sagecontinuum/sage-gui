@@ -10,7 +10,7 @@ import GithubIcon from '@material-ui/icons/GitHub'
 import { Item, Title } from '../../common/Layout'
 import BuildIndicator from '../BuildIndicator'
 import RepoActions from '../RepoActions'
-import { Thumb, formatters } from '../formatters'
+import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:../../../assets/bee.svg'
 
 import * as Auth from '../../../components/auth/auth'
@@ -18,16 +18,6 @@ import config from '../../../config'
 
 const isSignedIn = Auth.isSignedIn()
 
-
-
-export const getThumbnailSrc = (url: string, branch: string) => {
-
-  const src = url.replace(/github\.com/g, 'raw.githubusercontent.com')
-    .replace(/\.git$/g, '')
-    + `/${branch || 'main'}/ecr-meta/ecr-icon.jpg`
-
-  return src
-}
 
 
 
@@ -72,18 +62,10 @@ function Row(props) {
     >
       <div className="flex">
         <div>
-          {
-            thumbnail?.length ?
-              <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
-              <Thumb className="placeholder" src={BeeIcon} />
+          {thumbnail?.length ?
+            <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
+            <Thumb className="placeholder" src={BeeIcon} />
           }
-
-          {/*
-            <Thumb
-              src={getThumbnailSrc(data.source.url, data.source.branch)}
-              onError={function (e) {e.target.onerror = null; e.target.classList.add('placeholder'); e.target.src = BeeIcon}}
-            />
-          */}
         </div>
 
         <div className="flex column justify-around">
@@ -164,14 +146,6 @@ function Row(props) {
 }
 
 
-
-
-const Dot = styled.div`
-  margin: 0 10px;
-  :before {
-    content: "·";
-  }
-`
 
 
 

@@ -25,7 +25,7 @@ import Divider from '@material-ui/core/Divider'
 import { useSnackbar } from 'notistack'
 import { stringify } from 'yaml'
 import yamlIcon from 'url:../../../assets/yaml-logo.svg'
-import { formatters } from '../formatters'
+import { formatters, Dot } from '../formatters'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 import BuildIndicator from '../BuildIndicator'
