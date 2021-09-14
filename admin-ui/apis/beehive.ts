@@ -97,6 +97,11 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
     const {timestamp, name, value, meta} = obj
     const {node, host} = meta
 
+    // if no node or host, don't include in aggregation
+    if (!node || !host) {
+      return
+    }
+
     // add entry for node
     if (!(node in byNode))
       byNode[node] = {}
