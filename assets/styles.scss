@@ -102,7 +102,7 @@ table.striped tbody tr:nth-of-type(odd) {
  */
 .success { color: #3ac37e }
 .warning { color: hsl(41, 83%, 35%); }
-.failed, .fatal { color: hsl(0, 83%, 35%); }
+.failed, .fatal, .severe { color: hsl(0, 83%, 35%); }
 .inactive { color: #888; }
 .muted { color: #888; }
 
@@ -167,6 +167,13 @@ button.delete {color: #912341; }
 .flex-nowrap {
   flex-shrink: 0;
 }
+
+
+.font-normal {font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
 
 /**
  * global util classes

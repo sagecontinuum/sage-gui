@@ -1,15 +1,14 @@
 import config from '../../config'
 import { NodeStatus } from '../node'
+
+// currently static data
 import nodeMeta from '../data/node-meta.json'
-import { node } from 'prop-types'
+import geo from '../data/geo.json'
+
 
 const url = config.beekeeper
 
-const IGNORE_LIST = [
-  '0000000000000001', '000048B02D059C6A', '000048B02D07627C',
-  '000048B02D0766CD', '000048B02D0766D2', '000048B02D15BC65',
-  '000048B02D15C1AA', '000048B02D15D52F', 'SURYALAPTOP00000'
-]
+const IGNORE_LIST = config.admin.ignoreList
 
 
 export type State = {
@@ -28,7 +27,6 @@ export type State = {
 
   /* new, proposed fields. */
   status: NodeStatus  // may be replaced with 'mode' or such?
-  vsn: string
   project: string
   location: string    // currently part of "project" in mock data
 }
@@ -68,18 +66,21 @@ export async function fetchState() : Promise<State[]> {
     .filter(obj => !IGNORE_LIST.includes(obj.id))
     .map(obj => {
       const meta = nodeMeta[obj.id],
-        vsn = meta?.VSN || '-',
         proj = meta?.Project || '-'
 
       const parts = (proj || '').split(',').map(p => p.trim())
       const [project, location] = parts
 
+      const position = geo[obj.id]
+
       return {
         ...obj,
-        vsn,
         project,
         location,
         status: 'loading',
+        // position: geo[obj.id],
+        lat: position ? position[0] : null,
+        lng: position ? position[1] : null,
         registration_event: new Date(obj.registration_event).getTime()
       }
     })

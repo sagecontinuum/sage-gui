@@ -22,6 +22,7 @@ export default function NodeView() {
   const {node} = useParams()
 
   const { setLoading } = useProgress()
+  const [vsn, setVsn] = useState(null)
   const [data, setData] = useState(null)
   const [chartData, setChartData] = useState<MetricsObj>(null)
   const [bins, setBins] = useState<string[]>(null)
@@ -30,6 +31,11 @@ export default function NodeView() {
   useEffect(() => {
     BK.fetchNode(node)
       .then(data => setData(data))
+      .catch(error => setError(error))
+
+    // todo(nc): to be replaced by entry in beekeeper?
+    BH.getVSN(node.toLowerCase())
+      .then(vsn => setVsn(vsn))
       .catch(error => setError(error))
 
     setLoading(true)
@@ -48,7 +54,9 @@ export default function NodeView() {
 
   return (
     <Root>
-      <h1>{node}</h1>
+      <h1>
+        Node {vsn} | <small className="muted">{node}</small>
+      </h1>
 
       <h2 className="no-margin">Tests</h2>
       {chartData &&

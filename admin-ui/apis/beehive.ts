@@ -18,6 +18,7 @@ export type Metric = {
   meta: {
     node: string
     host: string
+    vsn?: string
   }
 }
 
@@ -74,10 +75,15 @@ export async function getData(params: Params) : Promise<Metric[]> {
   return metrics
 }
 
+export async function getVSN(node: string) : Promise<string> {
+  const metrics = await getData({start: '-7d', filter: {name: 'sys.uptime', node}, tail: 1})
+  return metrics[metrics.length - 1].meta.vsn
+}
+
 
 
 export async function getLatestMetrics() : Promise<AggMetrics> {
-  params = {start: '-7d', filter: {name: 'sys.*'}, tail: 1}
+  const params = {start: '-7d', filter: {name: 'sys.*',  vsn: '.*'}, tail: 1}
   const allMetrics = await getData(params)
 
   // aggregate all the metrics
@@ -114,6 +120,7 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
 
     // append data
     const record = {timestamp, value, meta}
+
     if (name in nodeData)
       nodeData[name].push(record)
     else

@@ -5,7 +5,6 @@ import 'regenerator-runtime'
 
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'
-import CircularProgress from '@material-ui/core/CircularProgress'
 import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
 import UndoIcon from '@material-ui/icons/UndoRounded'
 import Alert from '@material-ui/lab/Alert'
@@ -28,7 +27,7 @@ const ELASPED_THRES = 90000
 const TIME_OUT = 5000
 const PRIMARY_KEY = 'id'
 
-const HOST_SUFFIX_MAPPING = config.ui.hostSuffixMapping
+const HOST_SUFFIX_MAPPING = config.admin.hostSuffixMapping
 
 
 
@@ -89,8 +88,11 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
 
 function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
   const byHost = {}
+
   Object.keys(metrics[nodeID]).forEach(host => {
+
     const timestamp = metrics[nodeID][host]['sys.uptime'][0].timestamp
+
     const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
 
     const suffix = host.split('.')[1]
@@ -103,12 +105,12 @@ function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
 
 
 function getMetric(
-  metrics: BH.AggMetrics,
+  aggMetrics: BH.AggMetrics,
   nodeID: string,
   metricName: string,
   latestOnly = true
 ) {
-  const metricObjs = metrics[nodeID]
+  const metricObjs = aggMetrics[nodeID]
 
   const valueObj = {}
   Object.keys(metricObjs).forEach(host => {
@@ -185,8 +187,13 @@ function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics) {
 
     const elaspedTimes = getElaspedTimes(metrics, id)
 
+    // get vsn from arbitrary host
+    const someHost = Object.keys(metrics[id])[0]
+    const vsn = metrics[id][someHost]['sys.uptime'][0].meta.vsn
+
     return {
       ...nodeObj,
+      vsn,
       status: determineStatus(elaspedTimes),
       elaspedTimes,
       uptimes: getMetric(metrics, id, 'sys.uptime'),

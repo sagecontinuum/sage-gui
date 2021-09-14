@@ -6,7 +6,7 @@ import token from '../mapbox-token'
 import config from '../config'
 
 
-const DISABLE_MAP = config.ui['disableMap'] || false
+const DISABLE_MAP = config.admin['disableMap'] || false
 const center = [-100, 50]
 const initialZoom = 1.5
 
