@@ -104,11 +104,17 @@ const WarningDot = styled(Badge)`
 `
 
 
-const getUpdatedColor = (val) => {
-  if (!val) return 'failed'
-  else if (val > 90000) return 'failed'
+const getUpdatedClass = (val) => {
+  if (!val || val > 90000) return 'failed'
   else if (val > 63000) return 'warning'
   return 'success'
+}
+
+
+const getFSClass = (val) => {
+  if (!val || val > 90.0) return 'severe font-bold'
+  else if (val > 80.0) return 'warning font-bold'
+  return ''
 }
 
 
@@ -146,7 +152,7 @@ function FSPercent({aggFSSize, aggFSAvail}) {
         return (
           <React.Fragment key={key}>
             <Tooltip title={key} placement="top">
-              <FSItem><div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%</FSItem>
+              <FSItem className={getFSClass(percent)}><div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%</FSItem>
             </Tooltip>
           </React.Fragment>
         )
@@ -157,6 +163,7 @@ function FSPercent({aggFSSize, aggFSAvail}) {
 }
 
 const FSItem = styled.div`
+  margin-right: 1em;
   font-size: .9em;
   div {
     font-size: .9em;
@@ -174,17 +181,11 @@ const columns = [{
 }, {
   id: 'vsn',
   label: 'Node',
-  width: '100px',
+  width: '50px',
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
-      <IconButton
-        size="small"
-        href={`${INFLUX_URL}&vars%5BnodeID%5D=${obj.id}`} target="_blank" rel="noreferrer"
-      >
-        <ChartsIcon />
-      </IconButton>
       <Link to={`node/${obj.id}`}>
-        {val == '-' ? `...${obj.id.slice(12)}` : val}
+        {val ? val : `...${obj.id.slice(12)}`}
       </Link>
     </NodeCell>
 }, {
@@ -198,6 +199,19 @@ const columns = [{
   label: 'Project',
   width: '140px'
 }, {
+  id: 'location',
+  label: 'Location'
+}, {
+  id: 'data',
+  label: 'Data',
+  format: (val, obj) =>
+    <IconButton
+      size="small"
+      href={`${INFLUX_URL}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`} target="_blank" rel="noreferrer"
+    >
+      <ChartsIcon />
+    </IconButton>
+}, {
   id: 'elaspedTimes',
   label: 'Last Updated',
   format: (val) => {
@@ -206,7 +220,7 @@ const columns = [{
     return Object.keys(val)
       .map(host =>
         <div key={host}>
-          {host}: <b className={getUpdatedColor(val[host])}>{utils.msToTime(val[host])}</b>
+          {host}: <b className={getUpdatedClass(val[host])}>{utils.msToTime(val[host])}</b>
         </div>
       )
   }
