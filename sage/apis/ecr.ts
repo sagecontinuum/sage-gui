@@ -138,9 +138,9 @@ export function register(app: App, appConfig) {
 }
 
 
-export function build(app: App, skipPush = true) {
+export function build(app: App, skipPush = false) {
   const {namespace, name, version} = app
-  return post(`${url}/builds/${namespace}/${name}/${version}${skipPush && `?skip_image_push=true`}`)
+  return post(`${url}/builds/${namespace}/${name}/${version}${skipPush ? `?skip_image_push=true` : ''}`)
 }
 
 

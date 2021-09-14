@@ -166,7 +166,7 @@ export default function CreateApp() {
 
           // update config with repo url and tag (just branch for now)
           obj.source.url = repoURL
-          obj.source.branch = tag.id
+          obj.source.branch = obj.source.branch || tag.id
 
           setForm(obj)
           setConfig(YAML.stringify(obj))
