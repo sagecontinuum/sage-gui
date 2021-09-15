@@ -3,6 +3,30 @@
 The following are some notable changes to the UI
 
 
+## [1.5.0](https://github.com/sagecontinuum/sage-gui/compare/v1.3.0...v1.5.0) (2021-09-15)
+
+
+### Features
+
+* **admin:** add sensor chart links, VSNs, and projects with filtering (mock) ([7e04a00](https://github.com/sagecontinuum/sage-gui/commit/7e04a00a22e4676f2a256e00eb14af9b4085a4f3))
+* **admin:** highlight fs sizes at some thresholds ([f80fc09](https://github.com/sagecontinuum/sage-gui/commit/f80fc091c97dbeb84a9655bab51ce8cddbbc402e))
+* **admin:** use VSNs from beehive; some configuration changes ([0eb0683](https://github.com/sagecontinuum/sage-gui/commit/0eb0683c2ab0fc550e5f8d37607204f79b86afb3))
+* **ecr:** add branch selection (and fix text inputs) ([0d91e8a](https://github.com/sagecontinuum/sage-gui/commit/0d91e8a7f3105ea06ed0f99077309f63482c2bd0))
+* **ecr:** add form "debug" option ([a85bb01](https://github.com/sagecontinuum/sage-gui/commit/a85bb01e1cf0709a958bf1828bc6c576878eee5f))
+* **ecr:** make table search sticky ([2efca45](https://github.com/sagecontinuum/sage-gui/commit/2efca45cfe18034d0f19de3f287158933d3631f5))
+* **ecr:** revise app listing and add thumbnail placeholders ([b70da67](https://github.com/sagecontinuum/sage-gui/commit/b70da67d1c56611a69ba0b67c7f51d3d2176c8ef))
+* **ecr:** revised app layout (for meta); ([f5e9b74](https://github.com/sagecontinuum/sage-gui/commit/f5e9b74a453f45b80f1bf24bd8a7fc114f03752b))
+
+
+### Bug Fixes
+
+* **admin:** handle no nx sanity metrics; update data endpoint ([f1efd2b](https://github.com/sagecontinuum/sage-gui/commit/f1efd2b7e69cc7723d639705d040b2096aa5a988))
+* **admin:** ignore records that don't have a node id or host ([6be4b36](https://github.com/sagecontinuum/sage-gui/commit/6be4b361d57cb0d1f8fd806ec691fa0415f4d45c))
+* revised app submission ([dfbcd1d](https://github.com/sagecontinuum/sage-gui/commit/dfbcd1d544bd007c0947058a935702ff8caa5b47))
+* **admin:** fix/add sanity chart height; rename api function ([198f678](https://github.com/sagecontinuum/sage-gui/commit/198f678dd815e6397bddf143c73d30da0e33ca22))
+* **ecr:** allow click on action shortcuts in "my apps" ([328728d](https://github.com/sagecontinuum/sage-gui/commit/328728d5ec8e2ced93fa6c665c7066c5278c5773))
+* **ecr:** don't use nested links (and fix text selection in app listing) ([01baa53](https://github.com/sagecontinuum/sage-gui/commit/01baa53007da9c67ce7d78d858e31bd440b70998))
+
 ## [1.3.0](https://github.com/sagecontinuum/sage-gui/compare/v1.2.0...v1.3.0) (2021-07-06)
 
 
