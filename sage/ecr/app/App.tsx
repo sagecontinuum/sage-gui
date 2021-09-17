@@ -175,7 +175,7 @@ export default function App() {
               <h4>Authors</h4>
               <p>
                 {latestTag?.authors.split(',').map(auth =>
-                  <span key={auth}>{auth.split('<')[0]}</span>
+                  <div key={auth}>{auth.split('<')[0]}</div>
                 )}
               </p>
             </>
@@ -226,6 +226,7 @@ const metaItem = (data, label) => {
 }
 
 
+// todo(nc): support more badges
 const getLicense = license => {
   if (!license)
     return <p className="muted not-found">None submitted</p>
@@ -234,10 +235,12 @@ const getLicense = license => {
   let img, a
   if (text.includes('mit'))
     [img, a] = [`License-MIT-yellow.svg`, 'licenses/MIT']
-  else if (text.includes('bsd') && text.icludes('3'))
+  else if (text.includes('bsd') && text.includes('3'))
     [img, a] = [`License-BSD%203--Clause-blue.svg`, 'licenses/BSD-3-Clause']
-  else if (text.includes('apache') && text.icludes('3'))
+  else if (text.includes('apache') && text.includes('2'))
     [img, a] = [`License-Apache%202.0-yellowgreen.svg`, 'licenses/Apache-2.0']
+  else if (text.includes('gnu') && text.includes('3'))
+    [img, a] = [`License-GPLv3-blue.svg`, 'licenses/gpl-3.0']
 
   if (a) {
     return (
