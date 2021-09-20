@@ -3,9 +3,10 @@ import styled from 'styled-components'
 
 import 'chartjs-plugin-datalabels'
 import { Doughnut, Line} from 'react-chartjs-2'
-import chartTooltip from './chartTooltip'
+import chartTooltip from '../chartTooltip'
 
-import config from '../../../config'
+import * as BK from '../../../apis/beekeeper'
+
 
 const PIE_PADDING = 15
 
@@ -72,12 +73,13 @@ const defaultOptions = {
 }
 
 
-const getStatuses = (data) => {
+
+
+function getStatusArray(data: BK.State[]) : number[] {
   const statuses = data.reduce((acc, o) =>[
     acc[0] + (o.status == 'active' ? 1 : 0),
     acc[1] + (o.status == 'failed' ? 1 : 0),
-    acc[2] + (o.status == 'inactive' ? 1 : 0),
-    acc[3] + (o.status == 'testing' ? 1 : 0)
+    acc[2] + (o.status == 'inactive' ? 1 : 0)
   ]
   , [0, 0 ,0 ,0])
 
@@ -86,12 +88,11 @@ const getStatuses = (data) => {
 
 
 
-const getLabels = (byHost: object, key: string) => {
+function getLabels(byHost: object, key: string) : string[]  {
   // todo(nc): take any host for length?
   const labels = byHost[Object.keys(byHost)[0]][key].map((_, i) => i)
   return labels
 }
-
 
 
 
@@ -102,7 +103,8 @@ type Props = {
     [host: string]: {
       [metric: string]: number | number[]
     }
-  }
+  },
+  lastUpdate: string
 }
 
 
@@ -110,11 +112,18 @@ export default function Charts(props: Props) {
   const {
     data,
     selected,
-    activity
+    activity,
+    lastUpdate
   } = props
 
   const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
   const [statuses, setStatuses] = useState([])
+
+  // highlevel stats
+  const [issues, setIssues] = useState<Issues>({
+    tests: -1,
+    responses: -1
+  })
 
 
   useEffect(() => {
@@ -126,9 +135,9 @@ export default function Charts(props: Props) {
     if (!data && !selectedIDs) return
 
     const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
-    const statuses = getStatuses(d)
-
+    const statuses = getStatusArray(d)
     setStatuses(statuses)
+
   }, [data, selectedIDs])
 
 
@@ -136,7 +145,21 @@ export default function Charts(props: Props) {
 
   return (
     <Root>
+
+      {selected?.length > 1 &&
+        <h2>{selected.map(o => o.id).join(', ')}</h2>
+      }
+
+
+      {!selected?.length &&
+        <h2>
+          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
+        </h2>
+      }
+
       <ChartsContainer>
+
+
         <StatusChart>
           {!selected?.length &&
             <Doughnut
@@ -235,7 +258,6 @@ export default function Charts(props: Props) {
 
 const Root = styled.div`
   flex-grow: 1;
-  height: 300px;
 `
 
 const ChartsContainer = styled.div`
@@ -266,6 +288,4 @@ const ChartTitle = styled.div`
   color: #666;
   margin-left: 15px;
 `
-
-
 
