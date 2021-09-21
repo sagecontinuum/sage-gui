@@ -264,14 +264,14 @@ const clientSideSort = (data, id, direction) => {
   } else if (isNumeric) {
     data.sort((a, b) =>
       direction == 'asc' ?
-        a[id].toString().localeCompare(b[id].toString(), undefined, {numeric: true}) :
-        b[id].toString().localeCompare(a[id].toString(), undefined, {numeric: true})
+        (a[id] || -Infinity).toString().localeCompare((b[id] || -Infinity).toString(), undefined, {numeric: true}) :
+        (b[id] || -Infinity).toString().localeCompare((a[id] || -Infinity).toString(), undefined, {numeric: true})
     )
   } else {
     data.sort((a, b) =>
       direction == 'asc' ?
-        a[id].localeCompare(b[id])
-        : b[id].localeCompare(a[id])
+        (a[id] || '').localeCompare((b[id] || '')) :
+        (b[id] || '').localeCompare((a[id] || ''))
     )
   }
 
