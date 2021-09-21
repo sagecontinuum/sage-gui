@@ -152,6 +152,9 @@ button.delete {color: #912341; }
 .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 
+.flex-grow-0 { flex-grow: 0; }
+.flex-grow { flex-grow: 1; }
+
 // text
 .text-left { text-align: left; }
 .text-center {text-align: center; }

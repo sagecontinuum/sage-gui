@@ -76,15 +76,15 @@ export async function getData(params: Params) : Promise<Metric[]> {
 }
 
 export async function getVSN(node: string) : Promise<string> {
-  const metrics = await getData({start: '-7d', filter: {name: 'sys.uptime', node}, tail: 1})
+  const metrics = await getData({start: '-2d', filter: {name: 'sys.uptime', node}, tail: 1})
   return metrics[metrics.length - 1].meta.vsn
 }
 
 
 
 export async function getLatestMetrics() : Promise<AggMetrics> {
-  const params = {start: '-7d', filter: {name: 'sys.*',  vsn: '.*'}, tail: 1}
-  const allMetrics = await getData(params)
+  let params = {start: '-4d', filter: {name: 'sys.*'}, tail: 1}
+  let allMetrics = await getData(params)
 
   // aggregate all the metrics
   const byNode = aggregateMetrics(allMetrics)
@@ -92,6 +92,13 @@ export async function getLatestMetrics() : Promise<AggMetrics> {
   return byNode
 }
 
+export async function getLatestTemp() {
+  let params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
+  const allMetrics = await getData(params)
+  const byNode = aggregatePerNode(allMetrics)
+
+  return byNode
+}
 
 
 function aggregateMetrics(data: Metric[]) : AggMetrics {
@@ -130,6 +137,37 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
   return byNode
 }
 
+function aggregatePerNode(data: Metric[]) : AggMetrics {
+  if (!data)
+    return {}
+
+  let byNode = {}
+  data.forEach(obj => {
+    const {timestamp, name, value, meta} = obj
+    const {node, host} = meta
+
+    // if no node or host, don't include in aggregation
+    if (!node) {
+      return
+    }
+
+    // add entry for node
+    if (!(node in byNode))
+      byNode[node] = {}
+
+    let nodeData = byNode[node]
+
+    // append data
+    const record = {timestamp, value, meta}
+
+    if (name in nodeData)
+      nodeData[name].push(record)
+    else
+      nodeData[name] = [record]
+  })
+
+  return byNode
+}
 
 export async function getSanityChart(node?: string) : Promise<AggMetrics> {
   const params = {

@@ -77,7 +77,7 @@ export async function fetchState() : Promise<State[]> {
         ...obj,
         project,
         location,
-        status: 'loading',
+        status: 'inactive',
         // position: geo[obj.id],
         lat: position ? position[0] : null,
         lng: position ? position[1] : null,

@@ -1,4 +1,5 @@
 import React from 'react'
+import styled from 'styled-components'
 import LinearProgress from '@material-ui/core/LinearProgress'
 
 
@@ -11,14 +12,21 @@ function ProgressProvider(props) {
 
   return (
     <ProgressContext.Provider value={{loading, setLoading}}>
-      {loading &&
-        <LinearProgress style={{position: 'absolute', width: '100%', height: '2px', left: 0, top: 0, zIndex: 9999}} />
-      }
+      {loading && <Progress />}
 
       {props.children}
     </ProgressContext.Provider>
   )
 }
+
+const Progress = styled(LinearProgress)`
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+`
 
 
 function useProgress() {

@@ -10,6 +10,9 @@ const DISABLE_MAP = config.admin['disableMap'] || false
 const center = [-100, 50]
 const initialZoom = 1.5
 
+const minHeight = '225px'
+const maxHeight = '350px'
+
 
 const loadMap = (domRef) => {
   mapboxgl.accessToken = process.env.MAPBOX_TOKEN || token
@@ -144,14 +147,32 @@ function Map(props: Props) {
   // keep track of primary keys
   const [lastID, setLastID] = useState(-1)
 
+
+
   useEffect(() => {
     if (DISABLE_MAP) return
 
     const map = loadMap(ref)
     setMap(map)
+
+    window.onscroll = () => {
+      if (document.documentElement.scrollTop > 0) {
+        document.getElementById('map').style.height = minHeight
+      } else {
+        document.getElementById('map').style.height = maxHeight
+      }
+
+      setTimeout(() => {
+        map.resize()
+      }, 300)
+    }
   }, [])
 
   useEffect(() => {
+    updateMap()
+  }, [map, data, selected, updateID])
+
+  const updateMap = () => {
     if (!data || !map)
       return
 
@@ -195,8 +216,7 @@ function Map(props: Props) {
     setInit(true)
     setTotal(data.length)
     setLastID(updateID)
-  }, [map, data, selected, updateID])
-
+  }
 
   return (
     <Root>
@@ -214,7 +234,8 @@ const Root = styled.div`
 const MapContainer = styled.div`
   border: 1px solid #ccc;
   width: 100%;
-  height: 400px;
+  height: ${maxHeight};
+  transition: height 100ms;
 `
 
 
