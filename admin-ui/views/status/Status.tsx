@@ -16,6 +16,8 @@ import Map from '../../../components/Map'
 import Charts from './charts/Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
+import ToggleButton from '@material-ui/lab/ToggleButton'
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 
 
 import * as BK from '../../apis/beekeeper'
@@ -71,7 +73,7 @@ const useParams = () =>
   new URLSearchParams(useLocation().search)
 
 
-function mergeParams(params: URLSearchParams, field: string, val: string) : string  {
+function mergeParams(params: URLSearchParams, field: string, val: string, replace = false) : string  {
   const str = params.get(field)
   const existing = str?.length ? str.split(',') : []
 
@@ -80,9 +82,8 @@ function mergeParams(params: URLSearchParams, field: string, val: string) : stri
     return existing.join(',')
   }
 
-  return [...existing, val].join(',')
+  return replace ? [val].join(',') : [...existing, val].join(',')
 }
-
 
 
 
@@ -270,6 +271,7 @@ export default function StatusView() {
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
+  const [nodeType, setNodeType] = useState<'all' | 'wild sage' | 'dellblade'>('all')
 
   // selected
   const [selected, setSelected] = useState(null)
@@ -330,7 +332,7 @@ export default function StatusView() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, region])
+  }, [query, status, project, region, nodeType])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -379,7 +381,18 @@ export default function StatusView() {
   }
 
 
-  const handleFilterChange = (field, vals) => {
+  const handleFilterChange = (field: string, vals: {id: string, label: string}[]) => {
+    if (field == 'nodeType') {
+      const val = vals[vals.length - 1].id
+      const newStr = mergeParams(params, field, val, true)
+
+      if (!newStr.length) params.delete(field)
+      else params.set(field, newStr)
+      history.push({search: params.toString()})
+
+      return
+    }
+
     const val = vals[vals.length - 1].id
     const newStr = mergeParams(params, field, val)
 
@@ -390,6 +403,7 @@ export default function StatusView() {
 
 
   const handleRemoveFilters = () => {
+    setNodeType('all')
     params.delete('query')
     history.push({search: ''})
   }
@@ -404,7 +418,7 @@ export default function StatusView() {
   return (
     <Root>
       <Overview className="flex">
-        <div className="flex column">
+        <ChartsContainer className="flex column" >
           {selected?.length == 1 &&
             <div className="flex items-center">
               <h3>
@@ -413,22 +427,13 @@ export default function StatusView() {
             </div>
           }
 
-          {selected?.length > 1 &&
-            <h3>{selected.map(o => o.id).join(', ')}</h3>
-          }
-
-          {data && !selected?.length &&
-            <ChartTitle>
-              {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | {lastUpdate}
-            </ChartTitle>
-          }
-
           <Charts
             data={filtered}
             selected={selected}
             activity={activity}
+            lastUpdate={lastUpdate}
           />
-        </div>
+        </ChartsContainer>
 
         {filtered &&
           <Map
@@ -450,7 +455,29 @@ export default function StatusView() {
             onColumnMenuChange={() => {}}
             onSelect={handleSelect}
             middleComponent={
-              <>
+              <FilterControls className="flex items-center">
+                <ToggleButtonGroup
+                  value={nodeType}
+                  exclusive
+                  onChange={(evt, newType) => {
+                    console.log('newType', newType)
+                    setNodeType(newType == null ? 'all' : newType)
+                    handleFilterChange('nodeType', newType == 'all' || newType == null ? [] :  [{id: newType, label: newType}])
+                  }}
+                  aria-label="filter by node type"
+                  size="small"
+                >
+                  <ToggleButton value="all" aria-label="all nodes">
+                    All
+                  </ToggleButton>
+                  <ToggleButton value="wild sage" aria-label="wild sage nodes">
+                    Wild Sage
+                  </ToggleButton>
+                  <ToggleButton value="dellblade" aria-label="blades">
+                    Blades
+                  </ToggleButton>
+                </ToggleButtonGroup>
+
                 {statuses ?
                   <FilterMenu
                     options={statuses}
@@ -505,7 +532,7 @@ export default function StatusView() {
                 }
 
                 <QueryViewer filterState={filterState} />
-              </>
+              </FilterControls>
             }
           />
         }
@@ -528,14 +555,27 @@ const Root = styled.div`
 `
 
 const Overview = styled.div`
+  position: sticky;
+  top: 0;
+  z-index: 100;
   padding: 20px 0 10px 0;
+  background: #fff;
+  border-bottom: 1px solid #f2f2f2;
 `
 
-const ChartTitle = styled.h3`
-  margin: 0 0 0px 15px;
+const ChartsContainer = styled.div`
+  margin: 0px 20px;
 `
+
 
 const TableContainer = styled.div`
 `
+
+const FilterControls = styled.div`
+  margin-Left: 1em;
+  margin-top: 3px;
+
+`
+
 
 

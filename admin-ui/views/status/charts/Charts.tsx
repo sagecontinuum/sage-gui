@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import 'chartjs-plugin-datalabels'
-import chartTooltip from '../chartTooltip'
 
 import SummaryBar from './SummaryBar'
 import SummaryBox from './SummaryBox'
@@ -151,6 +150,6 @@ const ChartsContainer = styled.div`
 `
 
 const StatusChart = styled.div`
-  width: 300px;
-  margin-right: 200px;
+  width: 400px;
+
 `

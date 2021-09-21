@@ -8,6 +8,7 @@ import InactiveIcon from '@material-ui/icons/RemoveCircleOutlineRounded'
 import CheckIcon from '@material-ui/icons/CheckCircleRounded'
 import Dot from '@material-ui/icons/FiberManualRecord'
 import ChartsIcon from '@material-ui/icons/AssessmentOutlined'
+import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import Badge from '@material-ui/core/Badge'
 import IconButton from '@material-ui/core/IconButton'
 
@@ -15,7 +16,7 @@ import Tooltip from '@material-ui/core/Tooltip'
 
 import * as utils from '../../../components/utils/units'
 
-import { NodeStatus } from '../../node.d'
+import * as BH from '../../apis/beehive'
 
 const INFLUX_URL = `https://influxdb.sagecontinuum.org/orgs/141ded5fedaf67c3/dashboards/07b179572e436000`
   + `?lower=now%28%29%20-%2024h`
@@ -36,8 +37,14 @@ const sysTimeOtps = {
 }
 
 
-const getSanityIcon = (sanity: NodeStatus) => {
-  if (!sanity || !sanity.nx) return '-'
+type MetricsByHost = {
+  [host: string]: {
+    [metricName: string]: BH.SanityMetric[] | number
+  }
+}
+
+const getSanityIcon = (sanity: MetricsByHost) => {
+  if (!sanity || !sanity.nx) return <div className="text-center">-</div>
 
   const {warnings, failed} = sanity.nx
 
@@ -129,6 +136,7 @@ function fsAggregator(data) {
 const shortMntName = name =>
   name.replace('root-', '')
     .replace('plugin-data', 'plugins')
+    .replace('core_sdcard_test', 'sdcard')
 
 
 function FSPercent({aggFSSize, aggFSAvail}) {
@@ -139,7 +147,7 @@ function FSPercent({aggFSSize, aggFSAvail}) {
 
   return (
     <>{
-      Object.keys(aggFSSize).sort().map((key, i) => {
+      Object.keys(aggFSSize).sort().map((key) => {
         const percent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100)
 
         if (percents.includes(percent))
@@ -152,7 +160,9 @@ function FSPercent({aggFSSize, aggFSAvail}) {
         return (
           <React.Fragment key={key}>
             <Tooltip title={key} placement="top">
-              <FSItem className={getFSClass(percent)}><div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%</FSItem>
+              <FSItem className={getFSClass(percent)}>
+                <div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%
+              </FSItem>
             </Tooltip>
           </React.Fragment>
         )
@@ -178,6 +188,10 @@ const columns = [{
   label: 'Tests',
   width: '25px',
   format: (val) => getSanityIcon(val)
+}, {
+  id: 'nodeType',
+  label: 'Type',
+  hide: true
 }, {
   id: 'vsn',
   label: 'Node',
