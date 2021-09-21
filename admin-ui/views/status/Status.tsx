@@ -13,7 +13,7 @@ import columns from './columns'
 import Table from '../../../components/table/Table'
 import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
-import Charts from './Charts'
+import Charts from './charts/Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
@@ -180,7 +180,7 @@ const determineStatus = (elaspedTimes: {[host: string]: number}) => {
 
 
 // join beehive and beekeeper data, basically
-function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics) {
+function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics, temps) {
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
     if (!(id in metrics)) return nodeObj
@@ -191,9 +191,20 @@ function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics) {
     const someHost = Object.keys(metrics[id])[0]
     const vsn = metrics[id][someHost]['sys.uptime'][0].meta.vsn
 
+
+    const nodeTemps = (temps[id] && 'iio.in_temp_input' in temps[id]) ?
+      temps[id]['iio.in_temp_input'] : null
+
+    const temp = nodeTemps ? nodeTemps[nodeTemps.length-1].value / 1000 : -999
+
+    // todo(nc): move to data source
+    const isDellBlade = Object.keys(metrics[id]).filter(s => s.includes('dellblade')).length > 0
+
     return {
       ...nodeObj,
       vsn,
+      temp,
+      nodeType: isDellBlade ? 'dellblade' : 'wild sage',
       status: determineStatus(elaspedTimes),
       elaspedTimes,
       uptimes: getMetric(metrics, id, 'sys.uptime'),
@@ -281,7 +292,8 @@ export default function StatusView() {
     function ping() {
       const handle = setTimeout(async () => {
         const metrics = await BH.getLatestMetrics()
-        setData(mergeMetrics(dataRef.current, metrics))
+        const temps = await BH.getLatestTemp()
+        setData(mergeMetrics(dataRef.current, metrics, temps))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -293,11 +305,11 @@ export default function StatusView() {
 
     let handle
     setLoading(true)
-    Promise.all([BK.fetchState(), BH.getLatestMetrics()])
-      .then(([state, metrics]) => {
+    Promise.all([BK.fetchState(), BH.getLatestMetrics(), BH.getLatestTemp()])
+      .then(([state, metrics, temps]) => {
         setData(state)
 
-        const allData = mergeMetrics(state, metrics)
+        const allData = mergeMetrics(state, metrics, temps)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)

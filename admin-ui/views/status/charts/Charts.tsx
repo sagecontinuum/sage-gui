@@ -130,6 +130,7 @@ export default function Charts(props: Props) {
       }
 
       <ChartsContainer>
+        <StatusChart></StatusChart>
       </ChartsContainer>
     </Root>
   )

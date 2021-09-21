@@ -200,17 +200,31 @@ const columns = [{
   width: '140px'
 }, {
   id: 'location',
-  label: 'Location'
+  label: 'Location',
+  hide: true
 }, {
   id: 'data',
   label: 'Data',
   format: (val, obj) =>
-    <IconButton
-      size="small"
-      href={`${INFLUX_URL}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`} target="_blank" rel="noreferrer"
+    <Tooltip
+      title={<>View in InfluxDB <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+      placement="top"
     >
-      <ChartsIcon />
-    </IconButton>
+      <IconButton
+        size="small"
+        href={`${INFLUX_URL}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`} target="_blank" rel="noreferrer"
+      >
+        <ChartsIcon />
+      </IconButton>
+    </Tooltip>
+}, {
+  id: 'temp',
+  label: 'Temp',
+  format: (val) => {
+    if (!val || val == -999) return '-'
+
+    return <>{val.toFixed(1)} <small className="muted">({(val * 1.8 + 32).toFixed(1)} °F)</small></>
+  }
 }, {
   id: 'elaspedTimes',
   label: 'Last Updated',

@@ -69,7 +69,7 @@ export async function fetchState() : Promise<State[]> {
         proj = meta?.Project || '-'
 
       const parts = (proj || '').split(',').map(p => p.trim())
-      const [project, location] = parts
+      const [project, location = '-'] = parts
 
       const position = geo[obj.id]
 
