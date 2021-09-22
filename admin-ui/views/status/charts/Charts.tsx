@@ -9,10 +9,10 @@ import SummaryBox from './SummaryBox'
 import * as BK from '../../../apis/beekeeper'
 
 const barColors = {
-  'active': '#3ac37e',
+  'reporting': '#3ac37e',
   'failed': '#a30f0f',
-  'not updating': '#a30f0f',
-  'inactive': '#aaa'
+  'not reporting': '#a30f0f',
+  'offline': '#aaa'
 }
 
 
@@ -31,18 +31,18 @@ function getIssues(data) : Issues {
 
 
 type Status = {
-  active: number,
+  reporting: number,
   failed: number,
-  inactive: number
-  'not updating'?: number
+  'not reporting'?: number
+  offline: number
 }
 
 
 function getStatus(data: BK.State[]) : Status {
   const statuses = data.reduce((acc, o) => {
-    acc.active += o.status == 'active' ? 1 : 0,
-    acc.failed += o.status == 'failed' ? 1 : 0,
-    acc.inactive += o.status == 'inactive' ? 1 : 0
+    acc.active += o.status == 'reporting' ? 1 : 0,
+    acc.failed += o.status == 'not reporting' ? 1 : 0,
+    acc.inactive += o.status == 'offline' ? 1 : 0
     return acc
   }, {active: 0, failed: 0, inactive: 0})
 
@@ -89,7 +89,11 @@ export default function Charts(props: Props) {
 
     const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
     const {active, failed, inactive} = getStatus(d)
-    setStatuses({active, 'not updating': failed, inactive })
+    setStatuses({
+      'reporting': active,
+      'not reporting': failed,
+      'offline': inactive
+    })
 
     const issues = getIssues(d)
     setIssues(issues)

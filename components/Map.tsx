@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
-import token from '../mapbox-token'
+import tokens from '../tokens'
 import config from '../config'
 
 
@@ -15,7 +15,7 @@ const maxHeight = '350px'
 
 
 const loadMap = (domRef) => {
-  mapboxgl.accessToken = process.env.MAPBOX_TOKEN || token
+  mapboxgl.accessToken = process.env.MAPBOX_TOKEN || tokens.mapbox
 
   const map = new mapboxgl.Map({
     container: domRef.current,
@@ -36,11 +36,11 @@ const loadMap = (domRef) => {
 
 
 const getMarkerColor = (status) => {
-  if (status == 'active')
+  if (status == 'reporting')
     return '#3ac37e'
   else if (status == 'degraded')
     return 'hsl(41, 83%, 35%)'
-  else if (status == 'failed')
+  else if (status == 'not reporting')
     return '#d72020'
   else
     return '#aaa'

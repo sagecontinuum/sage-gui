@@ -1,1 +1,0 @@
-export default 'you_may_put_a_mapbox_key_here'

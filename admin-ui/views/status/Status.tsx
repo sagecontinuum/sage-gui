@@ -175,8 +175,8 @@ function getSanity(
 
 const determineStatus = (elaspedTimes: {[host: string]: number}) => {
   if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
-    return 'failed'
-  return 'active'
+    return 'not reporting'
+  return 'reporting'
 }
 
 
@@ -460,7 +460,6 @@ export default function StatusView() {
                   value={nodeType}
                   exclusive
                   onChange={(evt, newType) => {
-                    console.log('newType', newType)
                     setNodeType(newType == null ? 'all' : newType)
                     handleFilterChange('nodeType', newType == 'all' || newType == null ? [] :  [{id: newType, label: newType}])
                   }}

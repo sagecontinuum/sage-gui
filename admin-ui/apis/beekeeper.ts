@@ -5,10 +5,10 @@ import { NodeStatus } from '../node'
 import nodeMeta from '../data/node-meta.json'
 import geo from '../data/geo.json'
 
+import tokens from '../../tokens'
 
 const url = config.beekeeper
 
-const IGNORE_LIST = config.admin.ignoreList
 
 
 export type State = {
@@ -25,10 +25,11 @@ export type State = {
   server_node: string
   timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
 
-  /* new, proposed fields. */
+  /* new, proposed fields? */
   status: NodeStatus  // may be replaced with 'mode' or such?
   project: string
   location: string    // currently part of "project" in mock data
+  isOnline: boolean
 }
 
 
@@ -59,26 +60,40 @@ function post(endpoint: string, body = '') {
 }
 
 
+async function fetchMonitorData() {
+  const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+  return data.values.reduce((acc, [id, mode]) => ({...acc, [id]: {mode}}), {})
+}
+
+
 export async function fetchState() : Promise<State[]> {
+  let monitorData, includeList
+  try {
+    monitorData = await fetchMonitorData()
+    includeList = Object.keys(monitorData)
+  } catch(e) {
+    // todo(nc): maybe add a warning?
+  }
+
   const data = await get(`${url}/state`)
 
   return data.data
-    .filter(obj => !IGNORE_LIST.includes(obj.id))
+    .filter(obj => monitorData ? includeList.includes(obj.id) : true)
     .map(obj => {
-      const meta = nodeMeta[obj.id],
+      const id = obj.id,
+        meta = nodeMeta[id],
         proj = meta?.Project || '-'
 
       const parts = (proj || '').split(',').map(p => p.trim())
       const [project, location = '-'] = parts
 
-      const position = geo[obj.id]
+      const position = geo[id]
 
       return {
         ...obj,
         project,
         location,
-        status: 'inactive',
-        // position: geo[obj.id],
+        status: monitorData ? monitorData[id].mode : null,
         lat: position ? position[0] : null,
         lng: position ? position[1] : null,
         registration_event: new Date(obj.registration_event).getTime()

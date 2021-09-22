@@ -83,7 +83,7 @@ export async function getVSN(node: string) : Promise<string> {
 
 
 export async function getLatestMetrics() : Promise<AggMetrics> {
-  let params = {start: '-4d', filter: {name: 'sys.*'}, tail: 1}
+  let params = {start: '-4d', filter: {name: 'sys.*', vsn: '.*'}, tail: 1}
   let allMetrics = await getData(params)
 
   // aggregate all the metrics
@@ -144,7 +144,7 @@ function aggregatePerNode(data: Metric[]) : AggMetrics {
   let byNode = {}
   data.forEach(obj => {
     const {timestamp, name, value, meta} = obj
-    const {node, host} = meta
+    const {node} = meta
 
     // if no node or host, don't include in aggregation
     if (!node) {

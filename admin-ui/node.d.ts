@@ -1,3 +1,3 @@
 
 
-export type NodeStatus = 'active' | 'warning' | 'failed' | 'inactive' | 'loading'
+export type NodeStatus = 'reporting' | 'not reporting' | 'offline'

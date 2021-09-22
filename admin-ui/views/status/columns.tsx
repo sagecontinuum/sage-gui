@@ -193,21 +193,20 @@ const columns = [{
   label: 'Type',
   hide: true
 }, {
+  id: 'id',
+  label: 'ID',
+  width: '100px',
+  format: (val) => <Link to={`node/${val}`}>{val}</Link>
+}, {
   id: 'vsn',
-  label: 'Node',
+  label: 'VSN',
   width: '50px',
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
       <Link to={`node/${obj.id}`}>
-        {val ? val : `...${obj.id.slice(12)}`}
+        {val ? val : `-`} {/* or maybe this?: val ? val : `...${obj.id.slice(12)}` */}
       </Link>
     </NodeCell>
-}, {
-  id: 'id',
-  label: 'ID',
-  width: '200px',
-  format: (val) => <Link to={`node/${val}`}>{val}</Link>,
-  hide: true
 }, {
   id: 'project',
   label: 'Project',
