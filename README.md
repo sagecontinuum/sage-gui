@@ -1,9 +1,9 @@
 # sage-gui
 
-React.js components for the Sage Admin UI and more.
+React.js components for the Sage.
 
 
-## Installation 
+## Installation
 
 Requires [node.js](https://nodejs.org) v14+
 
@@ -13,14 +13,16 @@ Clone this repo, `cd` to that directory, and run:
 npm install
 ```
 
+
 ## Development
 
-### Admin UI 
+### Admin UI
 
 To start the Admin UI dev server:
 ```
 npm run start-admin
 ```
+
 
 ### Sage UI
 
@@ -32,9 +34,9 @@ npm run start
 
 ## Builds
 
-### Admin UI
-
 Builds are done using [parcel](https://parceljs.org/) v2.
+
+### Admin UI
 
 To create an Admin UI build in `dist/`:
 
@@ -51,12 +53,11 @@ npm run build
 ```
 
 
-
 #### Notes
 
 If you want to use mapbox, you can use a local env variable `MAPBOX_TOKEN`.
 
-Example: 
+Example:
 
 ```
 export MAPBOX_TOKEN=<token_string>
