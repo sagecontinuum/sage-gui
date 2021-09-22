@@ -67,44 +67,50 @@ async function fetchMonitorData() {
 
 async function fetchProjectMeta() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
-  return data.values.reduce((acc, [row, id, vsn, project]) => ({...acc, [id]: {project}}), {})
+  return data.values.reduce((acc, [, id, , project, location]) =>
+    ({...acc, [id]: {project, location}})
+  , {})
 }
 
 
 export async function fetchState() : Promise<State[]> {
-  let monitorData, includeList
+  let monitorMeta, includeList
   try {
-    monitorData = await fetchMonitorData()
-    includeList = Object.keys(monitorData)
+    monitorMeta = await fetchMonitorData()
+    includeList = Object.keys(monitorMeta)
   } catch(e) {
-    // todo(nc): maybe add a warning?
+    // todo(nc): maybe give a warning to user?
+    // unreachable case is handled below
   }
 
-  let nodeMeta
+  let meta
   try {
-    nodeMeta = await fetchProjectMeta()
+    meta = await fetchProjectMeta()
   } catch(e) {
-    // todo(nc): maybe add a warning?
+    // todo(nc): maybe give a warning to user?
+    // unreachable case is handled below
   }
 
   const data = await get(`${url}/state`)
 
   return data.data
-    .filter(obj => monitorData ? includeList.includes(obj.id) : true)
+    .filter(obj => monitorMeta ? includeList.includes(obj.id) : true)
     .map(obj => {
-      const id = obj.id,
-        proj = nodeMeta[id].project || '-'
-
-      const parts = (proj || '').split(',').map(p => p.trim())
-      const [project, location = '-'] = parts
+      const {id} = obj
 
       const position = geo[id]
+
+      const metaIsAvail = meta && id in meta
+      const monIsAvail = monitorMeta && id in monitorMeta
+
+      const { project = null, location = null } = metaIsAvail ? meta[id] : {}
+      const { mode = null } = monIsAvail ? monitorMeta[id] : {}
 
       return {
         ...obj,
         project,
         location,
-        status: monitorData ? monitorData[id].mode : null,
+        status: mode,
         lat: position ? position[0] : null,
         lng: position ? position[1] : null,
         registration_event: new Date(obj.registration_event).getTime()
