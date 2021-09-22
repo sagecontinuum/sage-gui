@@ -2,7 +2,6 @@ import config from '../../config'
 import { NodeStatus } from '../node'
 
 // currently static data
-import nodeMeta from '../data/node-meta.json'
 import geo from '../data/geo.json'
 
 import tokens from '../../tokens'
@@ -66,11 +65,24 @@ async function fetchMonitorData() {
 }
 
 
+async function fetchProjectMeta() {
+  const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+  return data.values.reduce((acc, [row, id, vsn, project]) => ({...acc, [id]: {project}}), {})
+}
+
+
 export async function fetchState() : Promise<State[]> {
   let monitorData, includeList
   try {
     monitorData = await fetchMonitorData()
     includeList = Object.keys(monitorData)
+  } catch(e) {
+    // todo(nc): maybe add a warning?
+  }
+
+  let nodeMeta
+  try {
+    nodeMeta = await fetchProjectMeta()
   } catch(e) {
     // todo(nc): maybe add a warning?
   }
@@ -81,8 +93,7 @@ export async function fetchState() : Promise<State[]> {
     .filter(obj => monitorData ? includeList.includes(obj.id) : true)
     .map(obj => {
       const id = obj.id,
-        meta = nodeMeta[id],
-        proj = meta?.Project || '-'
+        proj = nodeMeta[id].project || '-'
 
       const parts = (proj || '').split(',').map(p => p.trim())
       const [project, location = '-'] = parts
