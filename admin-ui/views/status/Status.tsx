@@ -16,8 +16,6 @@ import Map from '../../../components/Map'
 import Charts from './charts/Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
-import ToggleButton from '@material-ui/lab/ToggleButton'
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 
 
 import * as BK from '../../apis/beekeeper'
@@ -223,7 +221,7 @@ function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics, temps) {
 const initialState = {
   status: [],
   project: [],
-  region: []
+  location: []
 }
 
 
@@ -251,7 +249,7 @@ export default function StatusView() {
   const query = params.get('query') || ''
   const status = params.get('status')
   const project = params.get('project')
-  const region = params.get('region')
+  const location = params.get('location')
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
@@ -263,7 +261,7 @@ export default function StatusView() {
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
   const [projects, setProjects] = useState<Option[]>()
-  // const [regions, setRegions] = useState<Option[]>()
+  const [locations, setLocations] = useState<Option[]>()
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
@@ -328,7 +326,7 @@ export default function StatusView() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, region, nodeType])
+  }, [query, status, project, location, nodeType])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -366,7 +364,7 @@ export default function StatusView() {
 
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
-    // setRegions(getOptions(data, 'region'))
+    setLocations(getOptions(data, 'location'))
   }
 
 
@@ -502,18 +500,18 @@ export default function StatusView() {
                     }
                   />
                 }
-                {/*regions &&
+                {locations &&
                   <FilterMenu
-                    options={regions}
-                    value={filterState.region}
-                    onChange={vals => handleFilterChange('region', vals)}
+                    options={locations}
+                    value={filterState.location}
+                    onChange={vals => handleFilterChange('location', vals)}
                     ButtonComponent={
                       <Button>
-                        Region <CaretIcon />
+                        Location <CaretIcon />
                       </Button>
                     }
                   />
-                */}
+                }
 
                 {filtered.length != data.length &&
                   <>
