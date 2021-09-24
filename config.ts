@@ -7,6 +7,7 @@ export default  {
   beekeeper: 'https://api.sagecontinuum.org/api',
   ecr: 'https://ecr.sagecontinuum.org/api',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
+  ses: 'https://portal.sagecontinuum.org/ses-plugin-data',
   auth: 'https://auth.sagecontinuum.org',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',

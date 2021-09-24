@@ -4,9 +4,11 @@ import { useParams } from 'react-router-dom'
 
 import TextField from '@material-ui/core/TextField'
 import Alert from '@material-ui/lab/Alert'
+import CircularProgress from '@material-ui/core/CircularProgress'
 
 import * as BH from '../../apis/beehive'
 import * as BK from '../../apis/beekeeper'
+import * as SES from '../../apis/ses'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
 
@@ -22,10 +24,17 @@ export default function NodeView() {
   const {node} = useParams()
 
   const { setLoading } = useProgress()
+
+  const [loadingTests, setLoadingTests] = useState(true)
+
   const [vsn, setVsn] = useState(null)
   const [data, setData] = useState(null)
   const [chartData, setChartData] = useState<MetricsObj>(null)
   const [bins, setBins] = useState<string[]>(null)
+
+  const [pluginData, setPluginData] = useState(null)
+  const [pluginBins, setPluginBins] = useState<string[]>(null)
+
   const [error, setError] = useState(null)
 
   useEffect(() => {
@@ -39,12 +48,21 @@ export default function NodeView() {
       .catch(error => setError(error))
 
     setLoading(true)
+
+    setLoadingTests(true)
     BH.getSanityChart(node.toLowerCase())
       .then((data) => {
         const d = data[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
         const bins = getMetricBins(Object.values(d))
         setBins(bins)
         setChartData(d)
+      }).finally(() => setLoadingTests(false))
+
+    SES.getGroupByPlugin(node)
+      .then((data) => {
+        const pluginBins = getMetricBins(Object.values(data))
+        setPluginBins(pluginBins)
+        setPluginData(data)
       }).finally(() => setLoading(false))
   }, [node, setLoading])
 
@@ -58,7 +76,28 @@ export default function NodeView() {
         Node {vsn} | <small className="muted">{node}</small>
       </h1>
 
-      <h2 className="no-margin">Tests</h2>
+      <h2 className="no-margin">Plugins</h2>
+      {pluginData &&
+        <SanityChart
+          data={pluginData}
+          bins={pluginBins}
+          colorForValue={(val, obj) => {
+            if (val == null)
+              return colorMap.noValue
+
+            if (val <= 0)
+              return colorMap.green3
+            else if (obj.meta.severity == 'warning')
+              return colorMap.orange1
+            else
+              return colorMap.red4
+          }}
+        />
+      }
+      <br/>
+
+      <h2 className="no-margin">Sanity Tests</h2>
+      {loadingTests && <CircularProgress/>}
       {chartData &&
         <SanityChart
           data={chartData}

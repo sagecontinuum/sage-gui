@@ -91,9 +91,9 @@ export default function App() {
               <Route path="/tests">
                 <TestView />
               </Route>
-              <Route path="/plugins">
+              {/*<Route path="/plugins">
                 <PluginsView />
-              </Route>
+              </Route>*/}
               <Route path="/node/:node">
                 <NodeView />
               </Route>

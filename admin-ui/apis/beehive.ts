@@ -76,8 +76,8 @@ export async function getData(params: Params) : Promise<Metric[]> {
 }
 
 export async function getVSN(node: string) : Promise<string> {
-  const metrics = await getData({start: '-2d', filter: {name: 'sys.uptime', node}, tail: 1})
-  return metrics[metrics.length - 1].meta.vsn
+  const metrics = await getData({start: '-1h', filter: {name: 'sys.uptime', node}, tail: 1})
+  return metrics.pop().meta.vsn
 }
 
 
