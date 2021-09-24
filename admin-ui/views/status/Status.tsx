@@ -198,14 +198,10 @@ function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics, temps) {
 
     const temp = nodeTemps ? nodeTemps[nodeTemps.length-1].value / 1000 : -999
 
-    // todo(nc): move to data source
-    const isDellBlade = Object.keys(metrics[id]).filter(s => s.includes('dellblade')).length > 0
-
     return {
       ...nodeObj,
       vsn,
       temp,
-      nodeType: isDellBlade ? 'dellblade' : 'wild sage',
       status: determineStatus(elaspedTimes),
       elaspedTimes,
       uptimes: getMetric(metrics, id, 'sys.uptime'),
@@ -271,7 +267,7 @@ export default function StatusView() {
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
-  const [nodeType, setNodeType] = useState<'all' | 'wild sage' | 'dellblade'>('all')
+  const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Dell'>('all')
 
   // selected
   const [selected, setSelected] = useState(null)
@@ -456,6 +452,7 @@ export default function StatusView() {
             onSelect={handleSelect}
             middleComponent={
               <FilterControls className="flex items-center">
+                {/* hide this toggle (for now)
                 <ToggleButtonGroup
                   value={nodeType}
                   exclusive
@@ -476,12 +473,14 @@ export default function StatusView() {
                     Blades
                   </ToggleButton>
                 </ToggleButtonGroup>
+                */}
 
                 {statuses ?
                   <FilterMenu
                     options={statuses}
                     value={filterState.status}
                     onChange={vals => handleFilterChange('status', vals)}
+                    noSelectedSort
                     ButtonComponent={
                       <Button style={{marginLeft: 10}}>
                         Status
@@ -495,6 +494,7 @@ export default function StatusView() {
                     options={projects}
                     value={filterState.project}
                     onChange={vals => handleFilterChange('project', vals)}
+                    noSelectedSort
                     ButtonComponent={
                       <Button>
                         Project <CaretIcon />

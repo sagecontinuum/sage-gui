@@ -204,14 +204,7 @@ export default function ColumnMenu(props: Props) {
               </div>
             </>
           )}
-          options={[...options].sort((a, b) => {
-            // Display the selected labels first.
-            let ai = value.indexOf(a)
-            ai = ai === -1 ? value.length + options.indexOf(a) : ai
-            let bi = value.indexOf(b)
-            bi = bi === -1 ? value.length + options.indexOf(b) : bi
-            return ai - bi
-          })}
+          options={options}
           getOptionLabel={(option) => option.label || option.id}
           renderInput={(params) => (
             <InputBase

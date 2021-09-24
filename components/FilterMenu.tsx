@@ -108,6 +108,7 @@ type Props = {
   ButtonComponent?: JSX.Element
   headerText?: string
   noOptionsText?: string
+  noSelectedSort?: boolean
   onChange: (opt: (string | Option)[]) => void
 }
 
@@ -119,6 +120,7 @@ export default function ColumnMenu(props: Props) {
     ButtonComponent,
     headerText,
     noOptionsText,
+    noSelectedSort = false,
     ...rest
   } = props
 
@@ -206,7 +208,7 @@ export default function ColumnMenu(props: Props) {
               </>)
           }
           options={
-            multiple ?
+            multiple && noSelectedSort == false ?
               [...options].sort((a, b) => {
                 // Display the selected labels first.
                 let ai = value.indexOf(a.id)
