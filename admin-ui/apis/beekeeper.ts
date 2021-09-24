@@ -61,14 +61,14 @@ function post(endpoint: string, body = '') {
 
 async function fetchMonitorData() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
-  return data.values.reduce((acc, [id, mode]) => ({...acc, [id]: {mode}}), {})
+  return data.values.reduce((acc, [id, expectedState]) => ({...acc, [id]: {expectedState}}), {})
 }
 
 
 async function fetchProjectMeta() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
-  return data.values.reduce((acc, [, id, , project, location]) =>
-    ({...acc, [id]: {project, location}})
+  return data.values.reduce((acc, [kind, id, , project, location]) =>
+    ({...acc, [id]: {kind, project, location}})
   , {})
 }
 
@@ -103,14 +103,15 @@ export async function fetchState() : Promise<State[]> {
       const metaIsAvail = meta && id in meta
       const monIsAvail = monitorMeta && id in monitorMeta
 
-      const { project = null, location = null } = metaIsAvail ? meta[id] : {}
-      const { mode = null } = monIsAvail ? monitorMeta[id] : {}
+      const { kind = null, project = null, location = null } = metaIsAvail ? meta[id] : {}
+      const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
 
       return {
         ...obj,
+        kind,
         project,
         location,
-        status: mode,
+        status: expectedState,
         lat: position ? position[0] : null,
         lng: position ? position[1] : null,
         registration_event: new Date(obj.registration_event).getTime()

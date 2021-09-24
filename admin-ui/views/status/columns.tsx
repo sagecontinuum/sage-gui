@@ -189,9 +189,9 @@ const columns = [{
   width: '25px',
   format: (val) => getSanityIcon(val)
 }, {
-  id: 'nodeType',
+  id: 'kind',
   label: 'Type',
-  hide: true
+  hide: false
 }, {
   id: 'id',
   label: 'ID',
