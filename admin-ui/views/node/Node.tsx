@@ -60,7 +60,19 @@ export default function NodeView() {
 
     SES.getGroupByPlugin(node)
       .then((data) => {
+        var d = new Date()
+        d.setDate(d.getDate() - 2)
+
+        // sort  all the lists by time and limit
+        Object.keys(data)
+          .map(key => {
+            data[key] = data[key].sort((a, b) =>
+              +new Date(a.timestamp) - +new Date(b.timestamp)
+            ).filter(obj => new Date(obj.timestamp) > d)
+          })
+
         const pluginBins = getMetricBins(Object.values(data))
+
         setPluginBins(pluginBins)
         setPluginData(data)
       }).finally(() => setLoading(false))
@@ -92,6 +104,12 @@ export default function NodeView() {
             else
               return colorMap.red4
           }}
+          tooltip={(item) =>
+            <div>
+              {new Date(item.timestamp).toLocaleTimeString()}<br/>
+              {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+            </div>
+          }
         />
       }
       <br/>
@@ -113,6 +131,12 @@ export default function NodeView() {
             else
               return colorMap.red4
           }}
+          tooltip={(item) =>
+            <div>
+              {new Date(item.timestamp).toLocaleTimeString()}<br/>
+              {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+            </div>
+          }
         />
       }
 

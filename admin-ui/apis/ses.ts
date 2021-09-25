@@ -20,11 +20,21 @@ function get(endpoint: string) {
 }
 
 
-export async function getGroupByPlugin(nodeId: string) {
+export function getGroupByPlugin(nodeId: string) {
   return get(`${url}/${nodeId}/by_plugin.json`)
 }
 
 
-export async function getLatestStatus(nodeId: string) {
+export function getLatestStatus(nodeId: string) {
   return get(`${url}/${nodeId}/latest.json`)
+}
+
+
+export function getAllLatestStatus(nodeIds) {
+  const proms = nodeIds.map(id => get(`${url}/${id}/latest.json`))
+
+  return Promise.all(proms)
+    .then(data => {
+      console.log('data', data)
+    })
 }

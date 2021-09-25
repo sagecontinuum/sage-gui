@@ -77,7 +77,7 @@ export async function getData(params: Params) : Promise<Metric[]> {
 
 export async function getVSN(node: string) : Promise<string> {
   const metrics = await getData({start: '-1h', filter: {name: 'sys.uptime', node}, tail: 1})
-  return metrics.pop().meta.vsn
+  return metrics?.pop().meta.vsn
 }
 
 
@@ -174,8 +174,7 @@ export async function getSanityChart(node?: string) : Promise<AggMetrics> {
     start: '-2d',
     filter: {
       name: 'sys.sanity_status.*',
-    },
-    tail: 48
+    }
   }
 
   if (node)  {

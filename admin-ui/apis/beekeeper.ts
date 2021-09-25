@@ -1,12 +1,11 @@
 import config from '../../config'
-import { NodeStatus } from '../node'
+const url = config.beekeeper
 
-// currently static data
-import geo from '../data/geo.json'
+import { NodeStatus } from '../node'
+import geo from '../data/geo.json' // todo(nc): currently static, remove
 
 import tokens from '../../tokens'
 
-const url = config.beekeeper
 
 
 
@@ -25,10 +24,10 @@ export type State = {
   timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
 
   /* new, proposed fields? */
-  status: NodeStatus  // may be replaced with 'mode' or such?
-  project: string
-  location: string    // currently part of "project" in mock data
-  isOnline: boolean
+  kind?: string
+  project?: string
+  location?: string    // currently part of "project" in mock data
+  status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 
 
@@ -37,7 +36,6 @@ function handleErrors(res) {
     return res
   }
 
-  // todo(nc): verify
   return res.json().then(errorObj => {
     throw Error(errorObj.error)
   })
@@ -51,22 +49,18 @@ function get(endpoint: string) {
 }
 
 
-function post(endpoint: string, body = '') {
-  return fetch(endpoint, {
-    method: 'POST',
-    body
-  }).then(handleErrors)
-}
-
-
 async function fetchMonitorData() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
-  return data.values.reduce((acc, [id, expectedState]) => ({...acc, [id]: {expectedState}}), {})
+
+  return data.values.reduce((acc, [id, expectedState]) =>
+    ({...acc, [id]: {expectedState}})
+  , {})
 }
 
 
 async function fetchProjectMeta() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+
   return data.values.reduce((acc, [kind, id, , project, location]) =>
     ({...acc, [id]: {kind, project, location}})
   , {})
@@ -91,7 +85,7 @@ export async function fetchState() : Promise<State[]> {
     // unreachable case is handled below
   }
 
-  const data = await get(`${url}/state`)
+  const [data] = await Promise.all([get(`${url}/state`)])
 
   return data.data
     .filter(obj => monitorMeta ? includeList.includes(obj.id) : true)

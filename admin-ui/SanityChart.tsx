@@ -16,13 +16,6 @@ export const colorMap = {
 }
 
 
-const tooltip = (item) =>
-  <div>
-    {new Date(item.timestamp).toLocaleTimeString()}<br/>
-    {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-  </div>
-
-
 function DefaultTooltip(props) {
   const {date, value} = props
 
@@ -34,6 +27,8 @@ function DefaultTooltip(props) {
   )
 }
 
+
+// Tooltip component
 function Tooltip(props) {
   const {show, offset, tooltip} = props
   let {x = 0, y = 0, date, name, value, item} = props.data
@@ -244,17 +239,26 @@ const Chart = React.memo((props) => {
 Chart.displayName = 'SanityChart > Chart'
 
 
+type Props = {
+  data: {
+    [key: string]: {}[]
+  }
+  onCellClick?: (evt: React.MouseEvent) => void
+  onRowClick?: (evt: React.MouseEvent) => void
+  tooltip?: React.FC
+}
 
-export default function SanityChart(props) {
+
+export default function SanityChart(props: Props) {
   const {
     data,
-    height = 650,
     onCellClick = () => {},
     onRowClick = () => {},
+    tooltip
   } = props
 
   const [hover, setHover] = useState(false)
-  const [hoverInfo, setHoverInfo] = useState({})
+  const [hoverInfo, setHoverInfo] = useState({x: null, y: null})
   const items = Object.values(data)
 
   const canvasHeight = items.length * (h + cellPad) + yStart + cellPad
