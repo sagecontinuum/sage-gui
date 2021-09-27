@@ -63,13 +63,16 @@ export default function NodeView() {
         var d = new Date()
         d.setDate(d.getDate() - 2)
 
-        // sort  all the lists by time and limit
-        Object.keys(data)
-          .map(key => {
-            data[key] = data[key].sort((a, b) =>
-              +new Date(a.timestamp) - +new Date(b.timestamp)
-            ).filter(obj => new Date(obj.timestamp) > d)
-          })
+        for (const key of Object.keys(data)) {
+          // sort all the lists by time and limit by last 2 days
+          data[key] = data[key].sort((a, b) =>
+            +new Date(a.timestamp) - +new Date(b.timestamp)
+          ).filter(obj => new Date(obj.timestamp) > d)
+
+          // exclude empty lists (for now)
+          if (data[key].length == 0)
+            delete data[key]
+        }
 
         const pluginBins = getMetricBins(Object.values(data))
 
