@@ -243,10 +243,11 @@ const columns = [{
         <IconButton
           size="small"
           href={`${TEMP_DASH}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`}
+          className="no-style"
           target="_blank"
           rel="noreferrer"
         >
-          <ChartsIcon />
+          <span className="material-icons">thermostat</span>
         </IconButton>
       </Tooltip>
     </>
