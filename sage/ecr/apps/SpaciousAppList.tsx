@@ -18,6 +18,41 @@ import config from '../../../config'
 
 const isSignedIn = Auth.isSignedIn()
 
+import {featuredApps} from './featuredApps'
+
+
+
+type Props = {
+  rows: {[key: string]: any}
+  onComplete: () => void
+  view: 'explore' | 'public' | 'mine'
+  onNavigate: (path: string) => void
+}
+
+
+export default function SpaciousLayout(props: Props) {
+  let {rows, ...rest} = props
+
+  rows = rows.filter(row => !featuredApps.includes(`${row.namespace}/${row.name}`))
+
+  return (
+    <Root>
+      <Rows>
+        {rows.map((row) =>
+          <Row key={row.id} data={row} {...rest} />
+        )}
+      </Rows>
+    </Root>
+  )
+}
+
+const Root = styled.div`
+  margin-top: 1em;
+`
+
+const Rows = styled.div`
+  margin-top: 1em;
+`
 
 
 
@@ -144,40 +179,5 @@ function Row(props) {
     </Item>
   )
 }
-
-
-
-
-
-type Props = {
-  rows: {[key: string]: any}
-  onComplete: () => void
-  view: 'explore' | 'public' | 'mine'
-  onNavigate: (path: string) => void
-}
-
-
-
-export default function SpaciousLayout(props: Props) {
-  const {rows, ...rest} = props
-
-  return (
-    <Root>
-      <Rows>
-        {rows.map((row) =>
-          <Row key={row.id} data={row} {...rest} />
-        )}
-      </Rows>
-    </Root>
-  )
-}
-
-const Root = styled.div`
-  margin-top: 1em;
-`
-
-const Rows = styled.div`
-  margin-top: 1em;
-`
 
 

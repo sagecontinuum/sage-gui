@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Button from '@material-ui/core/Button'
-import AddIcon from '@material-ui/icons/AddRounded'
 import Divider from '@material-ui/core/Divider'
+import AddIcon from '@material-ui/icons/AddRounded'
+import FeaturedIcon from '@material-ui/icons/StarsRounded'
+import PublicIcon from '@material-ui/icons/PublicRounded'
+
 
 import BeeIcon from 'url:../../../assets/bee.svg'
 
@@ -17,6 +20,7 @@ import * as ECR from '../../apis/ecr'
 
 import {Top} from '../../common/Layout'
 import SpaciousLayout from './SpaciousAppList'
+import FeaturedApps from './FeaturedApps'
 import { formatters } from '../formatters'
 import LayoutToggle from '../../common/LayoutToggle'
 
@@ -141,6 +145,8 @@ export default function AppList() {
     history.push(path)
   }
 
+  if (!data) return <></>
+
 
   return (
     <Root>
@@ -188,6 +194,24 @@ export default function AppList() {
         />
       }
 
+      {rows && view == 'explore' &&
+        <>
+          <h2 className="flex items-center">
+            <FeaturedIcon/>&nbsp;Featured Apps
+          </h2>
+          <FeaturedApps
+            rows={rows}
+            view={view}
+            onComplete={onActionComplete}
+            onNavigate={onNavigate}
+          />
+        </>
+      }
+
+
+      <h2 className="flex items-center">
+        <PublicIcon/>&nbsp;Other Plubic Apps
+      </h2>
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
           rows={rows}
@@ -200,7 +224,6 @@ export default function AppList() {
       {error &&
         <ErrorMsg>{error}</ErrorMsg>
       }
-
 
       {!loading && view == 'my-apps' && data?.length == 0 &&
         <NoneFound className="flex column items-center justify-center muted">
