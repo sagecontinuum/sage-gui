@@ -47,19 +47,19 @@ type MetricsByHost = {
 }
 
 const getSanityIcon = (sanity: MetricsByHost) => {
-  if (!sanity || !sanity.nx) return <div className="text-center">-</div>
+  if (!sanity) return <div className="text-center">-</div>
 
-  const {warnings, failed} = sanity.nx
+  const {warnings, failed} = sanity
 
   // build list of issues for tooltip
   const tt = []
-  Object.keys(sanity.nx).forEach(key => {
+  Object.keys(sanity).forEach(key => {
     if (!key.includes('sys.sanity_status'))
       return
 
     const name = key.split('sys.sanity_status.')[1]
 
-    const {value, meta} = sanity.nx[key][0]
+    const {value, meta} = sanity[key][0]
     const hasIssue = value > 0
     const severity = meta.severity
     if (hasIssue)
@@ -71,11 +71,11 @@ const getSanityIcon = (sanity: MetricsByHost) => {
   })
 
   if (failed) {
-    const issues = failed + warnings
+    const issues = failed + (warnings || 0)
     return (
       <div className="text-center">
         <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-          <ErrorIcon className="failed" />
+          <FailedBadge badgeContent={issues} />
         </Tooltip>
       </div>
     )
@@ -107,11 +107,77 @@ const getSanityIcon = (sanity: MetricsByHost) => {
   }
 }
 
+const FailedBadge = styled(Badge)`
+  color: #fff;
+  .MuiBadge-badge {
+    background-color: hsl(0, 83%, 35%);
+  }
+`
+
 const WarningDot = styled(Badge)`
   .MuiBadge-badge {
     background-color: #ffbd06;
   }
 `
+
+
+const getPluginStatusIcon = (data) => {
+  if (!data || !data.details) return <div className="text-center">-</div>
+
+  const {warnings, failed} = data
+
+  // build list of issues for tooltip
+  const tt = []
+  data.details.forEach(obj => {
+    const {value, meta} = obj
+    const hasIssue = value > 0
+    const severity = meta.severity
+    const status = meta.status
+
+    if (hasIssue)
+      tt.push(
+        <div className="flex items-center" key={status}>
+          <Dot className={severity} fontSize="small" /> {obj.meta.deployment} ({status})
+        </div>
+      )
+  })
+
+  if (failed) {
+    const issues = failed + (warnings || 0)
+    return (
+      <div className="text-center">
+        <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
+          <FailedBadge badgeContent={issues} />
+        </Tooltip>
+      </div>
+    )
+  } else if (warnings) {
+    return (
+      <div className="text-center">
+        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
+          <WarningDot variant="dot" overlap="circle">
+            <CheckIcon className="success flex" />
+          </WarningDot>
+        </Tooltip>
+      </div>
+    )
+  } else if (!failed) {
+    return (
+      <div className="text-center">
+
+        <Tooltip title={`All tests passed`}>
+          <CheckIcon className="success" />
+        </Tooltip>
+      </div>
+    )
+  } else {
+    return (
+      <div className="text-center">
+        <InactiveIcon className="inactive" />
+      </div>
+    )
+  }
+}
 
 
 const getUpdatedClass = (val) => {
@@ -191,6 +257,11 @@ const columns = [{
   label: 'Tests',
   width: '25px',
   format: (val) => getSanityIcon(val)
+}, {
+  id: 'pluginStatus',
+  label: 'Plugins',
+  width: '25px',
+  format: (val) => getPluginStatusIcon(val)
 }, {
   id: 'kind',
   label: 'Type',

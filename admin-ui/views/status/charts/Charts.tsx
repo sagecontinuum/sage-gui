@@ -18,15 +18,31 @@ const barColors = {
 
 type Issues = {
   tests: number
+  plugins: number
+  temps: number
+  fsUtil: number
 }
 
 function getIssues(data) : Issues {
   const tests = data.reduce((acc, obj) => {
-    const newTotal = acc + (obj?.sanity?.nx?.failed || 0)
-    return newTotal
+    const total = acc + (obj?.sanity?.failed || 0)
+    return total
   }, 0)
 
-  return {tests}
+  const plugins = data.reduce((acc, obj) =>
+    acc + (obj?.pluginStatus?.failed || 0)
+  , 0)
+
+
+  const temps = data.reduce((acc, obj) =>
+    acc + (obj?.temp >= 70 ? 1 : 0)
+  , 0)
+
+  const fsUtil = data.reduce((acc, obj) => {
+    return acc + (obj?.temp >= 70 ? 1 : 0)
+  }, 0)
+
+  return {tests, plugins, temps, fsUtil}
 }
 
 
@@ -127,8 +143,9 @@ export default function Charts(props: Props) {
       {!selected?.length &&
         <div className="flex gap flex-grow">
           <SummaryBox label="Tests" value={issues.tests}/>
+          <SummaryBox label="Plugins" value={issues.plugins}/>
           <SummaryBox label="Temps" value={issues.temps}/>
-          <SummaryBox label="FS Util" value={issues.fsUtil}/>
+          <SummaryBox label="FS Util" value={'n/a'}/>
         </div>
       }
 

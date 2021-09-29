@@ -20,21 +20,25 @@ function get(endpoint: string) {
 }
 
 
-export function getGroupByPlugin(nodeId: string) {
+
+type State = {
+  value: number
+  timestamp: string
+  meta: {
+    severity: string
+  }
+}
+
+export type LatestState = {
+  [nodeId: string]: State[]
+}
+
+
+export function getGroupByPlugin(nodeId: string) : Promise<State[]> {
   return get(`${url}/${nodeId}/by_plugin.json`)
 }
 
 
-export function getLatestStatus(nodeId: string) {
-  return get(`${url}/${nodeId}/latest.json`)
-}
-
-
-export function getAllLatestStatus(nodeIds) {
-  const proms = nodeIds.map(id => get(`${url}/${id}/latest.json`))
-
-  return Promise.all(proms)
-    .then(data => {
-      console.log('data', data)
-    })
+export function getLatestStatus() : Promise<LatestState>{
+  return get(`${url}/latest-status.json`)
 }

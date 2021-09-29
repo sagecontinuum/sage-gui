@@ -20,6 +20,7 @@ import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
+import * as SES from '../../apis/ses'
 import config from '../../../config'
 
 
@@ -134,8 +135,13 @@ function getSanity(
 ) {
   const metricObjs = metrics[nodeID]
 
-  const valueObj = {}
+  // todo(nc): assume data is only attached to nx?
+  // update when dealing with blades?
+  // todo(nc): really should organize this better.
+  // i.e., {warnings, failed, details: [...]}
+  let valueObj
   Object.keys(metricObjs).forEach(host => {
+
     if (!host.includes('ws-nxcore'))
       return
 
@@ -159,15 +165,36 @@ function getSanity(
       failed = value > 0 && severity == 'fatal' ? failed + 1 : failed
     })
 
-    const suffix = host.split('.')[1]
-    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-    valueObj[key] = metric
-    valueObj[key].passed = passed
-    valueObj[key].warnings = warnings
-    valueObj[key].failed = failed
+    valueObj = metric
+    valueObj.passed = passed
+    valueObj.warnings = warnings
+    valueObj.failed = failed
   })
 
   return valueObj
+}
+
+
+
+function getPluginStatus(data) {
+  if (!data) return {}
+
+  let entry = {
+    details: data,
+    passed: 0,
+    failed: 0
+  }
+
+  data.forEach(obj => {
+    const {value} = obj
+
+    entry.passed = value == 0 ? entry.passed + 1 : entry.passed
+    // currently not flagging warnings
+    // valueObj.warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
+    entry.failed = value > 0 ? entry.failed + 1 : entry.failed
+  })
+
+  return entry
 }
 
 
@@ -179,7 +206,10 @@ const determineStatus = (elaspedTimes: {[host: string]: number}) => {
 
 
 // join beehive and beekeeper data, basically
-function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics, temps) {
+function mergeMetrics(
+  data: BK.State[], metrics: BH.AggMetrics, temps, plugins: SES.LatestState
+) {
+
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
     if (!(id in metrics)) return nodeObj
@@ -210,7 +240,8 @@ function mergeMetrics(data: BK.State[], metrics: BH.AggMetrics, temps) {
       memAvail: getMetric(metrics, id, 'sys.mem.avail', true),
       fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
       fsSize: getMetric(metrics, id, 'sys.fs.size', false),
-      sanity: getSanity(metrics, id)
+      sanity: getSanity(metrics, id),
+      pluginStatus: getPluginStatus(plugins[id.toUpperCase()])
     }
   })
 
@@ -287,9 +318,13 @@ export default function StatusView() {
     // get latest metrics
     function ping() {
       const handle = setTimeout(async () => {
-        const metrics = await BH.getLatestMetrics()
-        const temps = await BH.getLatestTemp()
-        setData(mergeMetrics(dataRef.current, metrics, temps))
+        const [metrics, temps, plugins] = await Promise.all([
+          BH.getLatestMetrics(),
+          BH.getLatestTemp(),
+          SES.getLatestStatus()
+        ])
+
+        setData(mergeMetrics(dataRef.current, metrics, temps, plugins))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -301,11 +336,17 @@ export default function StatusView() {
 
     let handle
     setLoading(true)
-    Promise.all([BK.fetchState(), BH.getLatestMetrics(), BH.getLatestTemp()])
-      .then(([state, metrics, temps]) => {
+    const proms = [
+      BK.fetchState(),
+      BH.getLatestMetrics(),
+      BH.getLatestTemp(),
+      SES.getLatestStatus()
+    ]
+    Promise.all(proms)
+      .then(([state, metrics, temps, plugins]) => {
         setData(state)
 
-        const allData = mergeMetrics(state, metrics, temps)
+        const allData = mergeMetrics(state, metrics, temps, plugins)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)

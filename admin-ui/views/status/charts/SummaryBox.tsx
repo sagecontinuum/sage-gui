@@ -6,7 +6,7 @@ import Check from '@material-ui/icons/CheckCircleRounded'
 
 type StatusProps = {
   label: string
-  value: number
+  value: number | string
 }
 
 export default function SummaryBox(props: StatusProps) {
@@ -19,7 +19,7 @@ export default function SummaryBox(props: StatusProps) {
       <div className="status-value">
         {value ?
           <div className="flex items-center">
-            <span>{value}</span>&nbsp;<span className="status-text">issue{value > 1 ? 's' : ''}</span>
+            <span>{value}</span>&nbsp;{value != 'n/a' && <span className="status-text">issue{value > 1 ? 's' : ''}</span>}
           </div> :
           <div className="flex items-center"><Check/>&nbsp;ok</div>
         }
