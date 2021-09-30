@@ -3,6 +3,23 @@
 The following are some notable changes to the UI
 
 
+## [1.5.0](https://github.com/sagecontinuum/sage-gui/compare/v1.4.0...v1.5.0) (2021-09-30)
+
+
+### Features
+
+* **admin:** add basic plugin status chart ([a2fcc40](https://github.com/sagecontinuum/sage-gui/commit/a2fcc40178484bf7c6bd8773f476b7425b6d76de))
+* **admin:** support non-sorting menus ([25030c7](https://github.com/sagecontinuum/sage-gui/commit/25030c7ff7b907c34979c01b949ea2ae9dc9cd37))
+* **ecr:** crude version of "featured apps" ([b13f59a](https://github.com/sagecontinuum/sage-gui/commit/b13f59a4c98b93778778a5b71688507d9b84f658))
+
+
+### Bug Fixes
+
+* **admin:** add location column (and allow missing meta) ([411b2d2](https://github.com/sagecontinuum/sage-gui/commit/411b2d20cb827a3330c3802eb621c6789bd308fb))
+* **admin:** exclude empty lists in plugin chart (for now) ([1202890](https://github.com/sagecontinuum/sage-gui/commit/1202890cb0330e5e8a3a22f9caedd79a5cde33c2))
+* **admin:** fix sorting for undefined vals ([a1d215e](https://github.com/sagecontinuum/sage-gui/commit/a1d215e2c3700f18717846af72b115c74d1bf828))
+* **admin:** replace thermal link icon (WIP) ([cd59578](https://github.com/sagecontinuum/sage-gui/commit/cd5957810b00e97bf974c9e103685855fbf75028))
+
 ## [1.4.0](https://github.com/sagecontinuum/sage-gui/compare/v1.3.0...v1.4.0) (2021-09-15)
 
 
