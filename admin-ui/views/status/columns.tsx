@@ -20,8 +20,8 @@ import * as BH from '../../apis/beehive'
 
 import config from '../../../config'
 
-const SENSOR_DASH = `${config.influxDashboard}/082da52c87209000?lower=now%28%29%20-%2024h`
-const TEMP_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
+const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
+const TEMP_DASH = `${config.influxDashboard}/082da52c87209000?lower=now%28%29%20-%2024h`
 
 
 const dateOpts = {
