@@ -179,6 +179,11 @@ const getPluginStatusIcon = (data) => {
   }
 }
 
+const getTempClass = (val) => {
+  if (!val || val > 70) return 'severe font-bold'
+  else if (val > 69) return 'warning font-bold'
+  return ''
+}
 
 const getUpdatedClass = (val) => {
   if (!val || val > 90000) return 'failed'
@@ -186,12 +191,12 @@ const getUpdatedClass = (val) => {
   return 'success'
 }
 
-
 const getFSClass = (val) => {
   if (!val || val > 90.0) return 'severe font-bold'
   else if (val > 80.0) return 'warning font-bold'
   return ''
 }
+
 
 
 function fsAggregator(data) {
@@ -255,12 +260,12 @@ const FSItem = styled.div`
 const columns = [{
   id: 'sanity',
   label: 'Tests',
-  width: '25px',
+  width: '5px',
   format: (val) => getSanityIcon(val)
 }, {
   id: 'pluginStatus',
   label: 'Plugins',
-  width: '25px',
+  width: '5px',
   format: (val) => getPluginStatusIcon(val)
 }, {
   id: 'kind',
@@ -328,7 +333,9 @@ const columns = [{
   format: (val) => {
     if (!val || val == -999) return '-'
 
-    return <>{val.toFixed(1)} <small className="muted">({(val * 1.8 + 32).toFixed(1)} °F)</small></>
+    return <>
+      <span className={getTempClass(val)}>{val.toFixed(1)}</span> <small className="muted">({(val * 1.8 + 32).toFixed(1)} °F)</small>
+    </>
   }
 }, {
   id: 'elaspedTimes',
