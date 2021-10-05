@@ -83,7 +83,7 @@ const getSanityIcon = (sanity: MetricsByHost) => {
     return (
       <div className="text-center">
         <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
-          <WarningDot variant="dot" overlap="circle">
+          <WarningDot variant="dot" overlap="circular">
             <CheckIcon className="success flex" />
           </WarningDot>
         </Tooltip>
@@ -155,7 +155,7 @@ const getPluginStatusIcon = (data) => {
     return (
       <div className="text-center">
         <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
-          <WarningDot variant="dot" overlap="circle">
+          <WarningDot variant="dot" overlap="circular">
             <CheckIcon className="success flex" />
           </WarningDot>
         </Tooltip>

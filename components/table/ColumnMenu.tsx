@@ -1,9 +1,8 @@
 
-import React, { useEffect, useState } from 'react'
-import { fade, makeStyles } from '@material-ui/core/styles'
+import React, { useState } from 'react'
+import { alpha, makeStyles } from '@material-ui/core/styles'
 import Popper from '@material-ui/core/Popper'
 import SettingsIcon from '@material-ui/icons/SettingsOutlined'
-import CloseIcon from '@material-ui/icons/Close'
 import DoneIcon from '@material-ui/icons/Done'
 
 import Autocomplete from '@material-ui/lab/Autocomplete'
@@ -47,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
       border: '1px solid #ced4da',
       fontSize: 14,
       '&:focus': {
-        boxShadow: `${fade(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
+        boxShadow: `${alpha(theme.palette.primary.main, 0.25)} 0 0 0 0.2rem`,
         borderColor: theme.palette.primary.main,
       },
     },

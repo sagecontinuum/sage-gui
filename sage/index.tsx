@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
@@ -21,7 +21,7 @@ import '../assets/styles.scss'
 // import Alert from '@material-ui/lab/Alert'
 
 
-const theme = createMuiTheme({
+const theme = createTheme({
   typography: {
     fontFamily: [
       'Roboto'
@@ -69,7 +69,7 @@ const theme = createMuiTheme({
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps">App Catalog</NavLink></li>
-    <li><NavLink to="/job-status">Job Status</NavLink></li>
+    {/*<li><NavLink to="/job-status">Job Status</NavLink></li>*/}
     {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
 
