@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 
-import TextField from '@material-ui/core/TextField'
 import Alert from '@material-ui/lab/Alert'
 import CircularProgress from '@material-ui/core/CircularProgress'
 
@@ -11,8 +10,9 @@ import * as BK from '../../apis/beekeeper'
 import * as SES from '../../apis/ses'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
-
 import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
+
+import LatestData from './LatestData'
 
 
 type MetricsObj = {
@@ -32,7 +32,7 @@ export default function NodeView() {
   const [chartData, setChartData] = useState<MetricsObj>(null)
   const [bins, setBins] = useState<string[]>(null)
 
-  const [pluginData, setPluginData] = useState(null)
+  const [pluginData, setPluginData] = useState()
   const [pluginBins, setPluginBins] = useState<string[]>(null)
 
   const [error, setError] = useState(null)
@@ -78,7 +78,12 @@ export default function NodeView() {
 
         setPluginBins(pluginBins)
         setPluginData(data)
-      }).finally(() => setLoading(false))
+      }).catch(() => {
+        setLoading(false)
+        setPluginData(null)
+      }).finally(() => {
+        setLoading(false)
+      })
   }, [node, setLoading])
 
 
@@ -91,102 +96,106 @@ export default function NodeView() {
         Node {vsn} | <small className="muted">{node}</small>
       </h1>
 
-      <h2 className="no-margin">Plugins</h2>
-      {pluginData &&
-        <SanityChart
-          data={pluginData}
-          bins={pluginBins}
-          colorForValue={(val, obj) => {
-            if (val == null)
-              return colorMap.noValue
+      <div className="flex">
+        <Charts className="flex column">
 
-            if (val <= 0)
-              return colorMap.green3
-            else if (obj.meta.severity == 'warning')
-              return colorMap.orange1
-            else
-              return colorMap.red4
-          }}
-          tooltip={(item) =>
-            <div>
-              {new Date(item.timestamp).toLocaleTimeString()}<br/>
-              {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
-            </div>
+          <h2>Plugins</h2>
+          {pluginData &&
+          <SanityChart
+            data={pluginData}
+            bins={pluginBins}
+            colorForValue={(val, obj) => {
+              if (val == null)
+                return colorMap.noValue
+
+              if (val <= 0)
+                return colorMap.green3
+              else if (obj.meta.severity == 'warning')
+                return colorMap.orange1
+              else
+                return colorMap.red4
+            }}
+            tooltip={(item) =>
+              <div>
+                {new Date(item.timestamp).toLocaleTimeString()}<br/>
+                {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+              </div>
+            }
+          />
           }
-        />
-      }
-      <br/>
-
-      <h2 className="no-margin">Sanity Tests</h2>
-      {loadingTests && <CircularProgress/>}
-      {chartData &&
-        <SanityChart
-          data={chartData}
-          bins={bins}
-          colorForValue={(val, obj) => {
-            if (val == null)
-              return colorMap.noValue
-
-            if (val <= 0)
-              return colorMap.green3
-            else if (obj.meta.severity == 'warning')
-              return colorMap.orange1
-            else
-              return colorMap.red4
-          }}
-          tooltip={(item) =>
-            <div>
-              {new Date(item.timestamp).toLocaleTimeString()}<br/>
-              {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-            </div>
-          }
-        />
-      }
-
-      <h2>Node Details</h2>
-      <table className="key-value-table">
-        <tbody>
-          <tr>
-            <td>Status</td>
-            <td className={data.status == 'active' ? 'success' : ''}>
-              <b>{data.status}</b>
-            </td>
-          </tr>
-
-          {Object.entries(data)
-            .map(([key, val]) => {
-              const label = key.replace(/_/g, ' ')
-                .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-              return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
-            })
+          {pluginData == null &&
+            <span className="muted">No plugin data available</span>
           }
 
-          {data.contact &&
+          <br/>
+
+          <h2 className="no-margin">Sanity Tests</h2>
+          {loadingTests && <CircularProgress/>}
+          {chartData &&
+          <SanityChart
+            data={chartData}
+            bins={bins}
+            colorForValue={(val, obj) => {
+              if (val == null)
+                return colorMap.noValue
+
+              if (val <= 0)
+                return colorMap.green3
+              else if (obj.meta.severity == 'warning')
+                return colorMap.orange1
+              else
+                return colorMap.red4
+            }}
+            tooltip={(item) =>
+              <div>
+                {new Date(item.timestamp).toLocaleTimeString()}<br/>
+                {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+              </div>
+            }
+          />
+          }
+
+          <h2>Node Details</h2>
+          <table className="key-value-table">
+            <tbody>
+              <tr>
+                <td>Status</td>
+                <td className={data.status == 'active' ? 'success' : ''}>
+                  <b>{data.status}</b>
+                </td>
+              </tr>
+
+              {Object.entries(data)
+                .map(([key, val]) => {
+                  const label = key.replace(/_/g, ' ')
+                    .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                  return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
+                })
+              }
+
+              {data.contact &&
             <>
               <tr><td colSpan={2}>Contact</td></tr>
               <tr>
                 <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
               </tr>
             </>
+              }
+            </tbody>
+          </table>
+
+          {error &&
+          <Alert severity="error">{error.message}</Alert>
           }
-        </tbody>
-      </table>
 
-      <br/><br/>
+        </Charts>
 
-      <TextField
-        id={`sage-${data.name}-notes`}
-        label="Notes"
-        multiline
-        rows={4}
-        defaultValue={data.notes}
-        variant="outlined"
-        style={{width: '50%'}}
-      />
 
-      {error &&
-        <Alert severity="error">{error.message}</Alert>
-      }
+        <Data>
+          <LatestData node={node} />
+        </Data>
+
+      </div>
     </Root>
   )
 }
@@ -195,4 +204,19 @@ export default function NodeView() {
 
 const Root = styled.div`
   margin: 20px;
+
+  table {
+    max-width: 400px;
+  }
+`
+
+const Charts = styled.div`
+  max-width: 925px;
+  margin-bottom: 50px;
+`
+
+const Data = styled.div`
+  flex-grow: 1;
+  margin-left: 2em;
+
 `

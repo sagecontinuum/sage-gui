@@ -278,7 +278,7 @@ export default function SanityChart(props: Props) {
 
   return (
     <Root>
-      <svg width={1000} height={canvasHeight}>
+      <svg width={900} height={canvasHeight}>
         <Chart
           {...props}
           onMouseOver={onMouseOver}

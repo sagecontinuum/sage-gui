@@ -26,6 +26,7 @@
     "@material-ui/lab": "^4.0.0-alpha.57",
     "chart.js": "^2.9.4",
     "chartjs-plugin-datalabels": "^0.7.0",
+    "colormap": "^2.3.2",
     "mapbox-gl": "^2.1.1",
     "marked": "^2.0.4",
     "material-design-icons": "^3.0.1",
@@ -36,6 +37,7 @@
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
     "styled-components": "^5.2.1",
+    "wavesurfer.js": "^5.2.0",
     "yaml": "^1.10.2"
   },
   "devDependencies": {

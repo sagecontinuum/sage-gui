@@ -2,6 +2,15 @@ import config from '../../config'
 const url = config.beehive
 
 
+export const cameraOrientations = [
+  'top',
+  'left',
+  'right',
+  'bottom'
+]
+
+
+
 type Params = {
   start: string
   end?: string
@@ -40,7 +49,6 @@ export type AggMetrics = {
 
 
 
-
 function handleErrors(res) {
   if (res.ok) {
     return res
@@ -50,7 +58,6 @@ function handleErrors(res) {
     throw Error(errorObj.error)
   })
 }
-
 
 function post(endpoint: string, data = {}) {
   return fetch(endpoint, {
@@ -192,6 +199,91 @@ export async function getSanityChart(node?: string) : Promise<AggMetrics> {
   const byNode = aggregateMetrics(sanityTests)
 
   return byNode
+}
+
+
+
+type StorageRecord = Record & {
+  size: number
+}
+
+
+async function _findLatestAvail(data: Record[]) : Promise<StorageRecord> {
+  if (!data)
+    return null
+
+  // we'll start with newest
+  data.sort((a, b) =>
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  )
+
+  // sequentially attempt to fetch data until we get a 200 response (and include size)
+  let latest
+  for (const obj of data) {
+    latest = await fetch(obj.value.toString())
+      .then(res => {
+        const size = parseInt(res.headers.get('content-length'))
+        return res.ok ? {...obj, size} : null
+      })
+
+    if (latest) break
+  }
+
+  return latest
+}
+
+
+
+export async function getLatestImages(node: string) {
+  // requests for each orientation
+  const reqs = cameraOrientations.map(pos => {
+    const params = {
+      start: '-1d',
+      filter: {
+        name: 'upload',
+        node,
+        task: `imagesampler-${pos}`
+      }
+    }
+
+    return getData(params)
+  })
+
+
+  // find latest in storage for each position
+  const mapping = Promise.all(reqs)
+    .then(async (data) => {
+      const proms = data.map(d => _findLatestAvail(d))
+      const dataList = await Promise.all(proms)
+
+      // reduce into mapping: {top: [...], left, [...], ... ,}
+      const dataByPos = cameraOrientations.reduce((acc, pos, i) => ({
+        ...acc,
+        [pos]: dataList[i]
+      }), {})
+
+      return dataByPos
+    })
+
+  return mapping
+}
+
+
+
+export async function getLatestAudio(node: string) {
+
+  const data = await getData({
+    start: '-1d',
+    filter: {
+      name: 'upload',
+      node,
+      plugin: 'plugin-audio-sampler:0.*'
+    }
+  })
+
+  const latestAvail = await _findLatestAvail(data)
+
+  return latestAvail
 }
 
 
