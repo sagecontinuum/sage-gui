@@ -208,10 +208,11 @@ export default function AppList() {
         </>
       }
 
-
-      <h2 className="flex items-center">
-        <PublicIcon/>&nbsp;Other Plubic Apps
-      </h2>
+      {rows && view == 'explore' &&
+        <h2 className="flex items-center">
+          <PublicIcon/>&nbsp;Other Public Apps
+        </h2>
+      }
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
           rows={rows}

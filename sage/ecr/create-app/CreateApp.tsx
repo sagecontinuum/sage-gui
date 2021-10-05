@@ -10,6 +10,7 @@ import CheckIcon from '@material-ui/icons/Check'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
 import TagIcon from '@material-ui/icons/LocalOfferOutlined'
+import FormHelperText from '@material-ui/core/FormHelperText'
 
 import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
 
@@ -321,6 +322,10 @@ export default function CreateApp() {
             <h4>App Config</h4>
             <pre className="code">{config}</pre>
           </div>
+        }
+
+        {error &&
+          <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
         }
 
         <div className="step">
