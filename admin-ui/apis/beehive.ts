@@ -11,19 +11,19 @@ type Params = {
   }
 }
 
-export type Metric = {
+export type Record = {
   timestamp: string
   name: string
   value: string | number
   meta: {
     node: string
-    host: string
+    host?: string
     vsn?: string
   }
 }
 
 
-export type SanityMetric = Metric & {
+export type SanityMetric = Record & {
   meta: {
     severity: 'fatal' | 'warning'
   }
@@ -33,7 +33,7 @@ export type SanityMetric = Metric & {
 export type AggMetrics = {
   [nodeID: string]: {
     [host: string]: {
-      [metricName: string]: Metric[] | SanityMetric[]
+      [metricName: string]: Record[] | SanityMetric[]
     }
   }
 }
@@ -61,7 +61,7 @@ function post(endpoint: string, data = {}) {
 
 
 
-export async function getData(params: Params) : Promise<Metric[]> {
+export async function getData(params: Params) : Promise<Record[]> {
   const res = await post(`${url}/query`, params)
   const text = await res.text()
 
@@ -74,6 +74,8 @@ export async function getData(params: Params) : Promise<Metric[]> {
 
   return metrics
 }
+
+
 
 export async function getVSN(node: string) : Promise<string> {
   const metrics = await getData({start: '-1h', filter: {name: 'sys.uptime', node}, tail: 1})
@@ -101,7 +103,8 @@ export async function getLatestTemp() {
 }
 
 
-function aggregateMetrics(data: Metric[]) : AggMetrics {
+
+function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data)
     return {}
 
@@ -137,7 +140,9 @@ function aggregateMetrics(data: Metric[]) : AggMetrics {
   return byNode
 }
 
-function aggregatePerNode(data: Metric[]) : AggMetrics {
+
+
+function aggregatePerNode(data: Record[]) : AggMetrics {
   if (!data)
     return {}
 
@@ -168,6 +173,8 @@ function aggregatePerNode(data: Metric[]) : AggMetrics {
 
   return byNode
 }
+
+
 
 export async function getSanityChart(node?: string) : Promise<AggMetrics> {
   const params = {

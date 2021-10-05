@@ -16,7 +16,7 @@ import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
 
 
 type MetricsObj = {
-  [metric: string]: BH.Metric[]
+  [metric: string]: BH.Record[]
 }
 
 
