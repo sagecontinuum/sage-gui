@@ -174,18 +174,18 @@ export default function NodeView() {
               }
 
               {data.contact &&
-            <>
-              <tr><td colSpan={2}>Contact</td></tr>
-              <tr>
-                <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
-              </tr>
-            </>
+                <>
+                  <tr><td colSpan={2}>Contact</td></tr>
+                  <tr>
+                    <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
+                  </tr>
+                </>
               }
             </tbody>
           </table>
 
           {error &&
-          <Alert severity="error">{error.message}</Alert>
+            <Alert severity="error">{error.message}</Alert>
           }
 
         </Charts>

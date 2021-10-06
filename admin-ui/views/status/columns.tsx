@@ -3,7 +3,7 @@ import React from 'react'
 import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
-import ErrorIcon from '@material-ui/icons/ErrorRounded'
+// import ErrorIcon from '@material-ui/icons/ErrorRounded'
 import InactiveIcon from '@material-ui/icons/RemoveCircleOutlineRounded'
 import CheckIcon from '@material-ui/icons/CheckCircleRounded'
 import Dot from '@material-ui/icons/FiberManualRecord'
@@ -11,6 +11,7 @@ import ChartsIcon from '@material-ui/icons/AssessmentOutlined'
 import LaunchIcon from '@material-ui/icons/LaunchRounded'
 import Badge from '@material-ui/core/Badge'
 import IconButton from '@material-ui/core/IconButton'
+import MapIcon from '@material-ui/icons/RoomOutlined'
 
 import Tooltip from '@material-ui/core/Tooltip'
 
@@ -283,8 +284,11 @@ const columns = [{
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
       <Link to={`node/${obj.id}`}>
-        {val ? val : `-`} {/* or maybe this?: val ? val : `...${obj.id.slice(12)}` */}
+        {val ? val : `-`}
       </Link>
+      {obj.lat && obj.lng
+        && <MapIcon fontSize="small"/>
+      }
     </NodeCell>
 }, {
   id: 'project',
@@ -293,6 +297,14 @@ const columns = [{
 }, {
   id: 'location',
   label: 'Location',
+  hide: true
+}, {
+  id: 'gps',
+  label: 'GPS',
+  format: (val, obj) => {
+    if (!obj || !obj.lat || !obj.lng) return '-'
+    return `${obj.lat}, ${obj.lng}, ${obj.alt}`
+  },
   hide: true
 }, {
   id: 'data',
@@ -334,7 +346,12 @@ const columns = [{
     if (!val || val == -999) return '-'
 
     return <>
-      <span className={getTempClass(val)}>{val.toFixed(1)}</span> <small className="muted">({(val * 1.8 + 32).toFixed(1)} °F)</small>
+      <span className={getTempClass(val)}>
+        {val.toFixed(1)}
+      </span>&nbsp;
+      <small className="muted">
+        ({(val * 1.8 + 32).toFixed(1)} °F)
+      </small>
     </>
   }
 }, {

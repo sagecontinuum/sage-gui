@@ -232,6 +232,9 @@ function mergeMetrics(
       temp,
       status: determineStatus(elaspedTimes),
       elaspedTimes,
+      lat: getMetric(metrics, id, 'sys.gps.lat', true).nx,
+      lng: getMetric(metrics, id, 'sys.gps.lon', true).nx,
+      alt: getMetric(metrics, id, 'sys.gps.alt', true).nx,
       uptimes: getMetric(metrics, id, 'sys.uptime'),
       sysTimes: getMetric(metrics, id, 'sys.time'),
       cpu: getMetric(metrics, id, 'sys.cpu_seconds', false),
@@ -594,7 +597,7 @@ const Root = styled.div`
 
 const Overview = styled.div`
   position: sticky;
-  top: 0;
+  top: 60px;
   z-index: 100;
   padding: 20px 0 10px 0;
   background: #fff;

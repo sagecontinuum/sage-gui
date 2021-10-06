@@ -195,12 +195,12 @@ function Map(props: Props) {
     if (init && data != total) {
       const coords = getValidCoords(filteredData)
 
-      if (!coords.length) {
-        return
+      if (coords.length) {
+        const bbox = getBBox(coords)
+        fitBounds(map, bbox)
+      } else {
+        recenter(map)
       }
-
-      const bbox = getBBox(coords)
-      fitBounds(map, bbox)
     } else {
       recenter(map)
     }

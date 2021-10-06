@@ -48,7 +48,6 @@ export default function LatestData(props: Props) {
 
     BH.getLatestImages(node.toLowerCase())
       .then(images => {
-        console.log('most recent images:', images)
         const hasData = !!Object.keys(images).filter(k => images[k]).length
 
         setImages(hasData ? images : null)
@@ -58,8 +57,6 @@ export default function LatestData(props: Props) {
 
     BH.getLatestAudio(node.toLowerCase())
       .then(data => {
-        console.log('most recent audio:', data)
-
         setAudio(data)
 
         if (!data) return

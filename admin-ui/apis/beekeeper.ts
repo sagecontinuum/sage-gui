@@ -2,8 +2,6 @@ import config from '../../config'
 const url = config.beekeeper
 
 import { NodeStatus } from '../node'
-import geo from '../data/geo.json' // todo(nc): currently static, remove
-
 import tokens from '../../tokens'
 
 
@@ -92,8 +90,6 @@ export async function fetchState() : Promise<State[]> {
     .map(obj => {
       const {id} = obj
 
-      const position = geo[id]
-
       const metaIsAvail = meta && id in meta
       const monIsAvail = monitorMeta && id in monitorMeta
 
@@ -106,8 +102,6 @@ export async function fetchState() : Promise<State[]> {
         project,
         location,
         status: expectedState,
-        lat: position ? position[0] : null,
-        lng: position ? position[1] : null,
         registration_event: new Date(obj.registration_event).getTime()
       }
     })
