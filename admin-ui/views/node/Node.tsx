@@ -27,19 +27,20 @@ export default function NodeView() {
 
   const [loadingTests, setLoadingTests] = useState(true)
 
-  const [vsn, setVsn] = useState(null)
-  const [data, setData] = useState(null)
   const [chartData, setChartData] = useState<MetricsObj>(null)
-  const [bins, setBins] = useState<string[]>(null)
+  const [bins, setBins] = useState<Date[]>(null)
 
-  const [pluginData, setPluginData] = useState()
-  const [pluginBins, setPluginBins] = useState<string[]>(null)
+  const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
+  const [pluginBins, setPluginBins] = useState<Date[]>(null)
+
+  const [vsn, setVsn] = useState(null)
+  const [meta, setMeta] = useState(null)
 
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    BK.fetchNode(node)
-      .then(data => setData(data))
+    BK.getNode(node)
+      .then(data => setMeta(data))
       .catch(error => setError(error))
 
     // todo(nc): to be replaced by entry in beekeeper?
@@ -58,7 +59,7 @@ export default function NodeView() {
         setChartData(d)
       }).finally(() => setLoadingTests(false))
 
-    SES.getGroupByPlugin(node)
+    SES.getGroupedByPlugin(node)
       .then((data) => {
         var d = new Date()
         d.setDate(d.getDate() - 2)
@@ -75,7 +76,6 @@ export default function NodeView() {
         }
 
         const pluginBins = getMetricBins(Object.values(data))
-
         setPluginBins(pluginBins)
         setPluginData(data)
       }).catch(() => {
@@ -85,9 +85,6 @@ export default function NodeView() {
         setLoading(false)
       })
   }, [node, setLoading])
-
-
-  if (!data && !error) return <></>
 
 
   return (
@@ -156,33 +153,35 @@ export default function NodeView() {
           }
 
           <h2>Node Details</h2>
-          <table className="key-value-table">
-            <tbody>
-              <tr>
-                <td>Status</td>
-                <td className={data.status == 'active' ? 'success' : ''}>
-                  <b>{data.status}</b>
-                </td>
-              </tr>
+          {meta &&
+            <table className="key-value-table">
+              <tbody>
+                <tr>
+                  <td>Status</td>
+                  <td className={meta.status == 'active' ? 'success' : ''}>
+                    <b>{meta.status}</b>
+                  </td>
+                </tr>
 
-              {Object.entries(data)
-                .map(([key, val]) => {
-                  const label = key.replace(/_/g, ' ')
-                    .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-                  return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
-                })
-              }
+                {Object.entries(meta)
+                  .map(([key, val]) => {
+                    const label = key.replace(/_/g, ' ')
+                      .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                    return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
+                  })
+                }
 
-              {data.contact &&
+                {meta.contact &&
                 <>
                   <tr><td colSpan={2}>Contact</td></tr>
                   <tr>
                     <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
                   </tr>
                 </>
-              }
-            </tbody>
-          </table>
+                }
+              </tbody>
+            </table>
+          }
 
           {error &&
             <Alert severity="error">{error.message}</Alert>

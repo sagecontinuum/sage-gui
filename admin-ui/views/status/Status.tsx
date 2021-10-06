@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
-import 'regenerator-runtime'
 
 import Button from '@material-ui/core/Button'
 import Divider from '@material-ui/core/Divider'

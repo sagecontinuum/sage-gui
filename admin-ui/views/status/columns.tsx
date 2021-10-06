@@ -180,24 +180,13 @@ const getPluginStatusIcon = (data) => {
   }
 }
 
-const getTempClass = (val) => {
-  if (!val || val > 70) return 'severe font-bold'
-  else if (val > 69) return 'warning font-bold'
+
+function getColorClass(val, severe: number, warning: number, defaultClass) {
+  if (!val || val >= severe) return 'severe font-bold'
+  else if (val > warning) return 'warning font-bold'
+  else if (defaultClass) return defaultClass
   return ''
 }
-
-const getUpdatedClass = (val) => {
-  if (!val || val > 90000) return 'failed'
-  else if (val > 63000) return 'warning'
-  return 'success'
-}
-
-const getFSClass = (val) => {
-  if (!val || val > 90.0) return 'severe font-bold'
-  else if (val > 80.0) return 'warning font-bold'
-  return ''
-}
-
 
 
 function fsAggregator(data) {
@@ -235,7 +224,7 @@ function FSPercent({aggFSSize, aggFSAvail}) {
         return (
           <React.Fragment key={key}>
             <Tooltip title={key} placement="top">
-              <FSItem className={getFSClass(percent)}>
+              <FSItem className={getColorClass(percent, 90, 80)}>
                 <div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%
               </FSItem>
             </Tooltip>
@@ -346,7 +335,7 @@ const columns = [{
     if (!val || val == -999) return '-'
 
     return <>
-      <span className={getTempClass(val)}>
+      <span className={getColorClass(val, 70, 65)}>
         {val.toFixed(1)}
       </span>&nbsp;
       <small className="muted">
@@ -363,7 +352,9 @@ const columns = [{
     return Object.keys(val)
       .map(host =>
         <div key={host}>
-          {host}: <b className={getUpdatedClass(val[host])}>{utils.msToTime(val[host])}</b>
+          {host}: <b className={getColorClass(val[host], 90000, 63000, 'success font-bold')}>
+            {utils.msToTime(val[host])}
+          </b>
         </div>
       )
   }

@@ -29,14 +29,21 @@ type State = {
   }
 }
 
+
+export type GroupedByPlugin = {
+  [pluginName: string]: State[]
+}
+
 export type LatestState = {
   [nodeId: string]: State[]
 }
 
 
-export function getGroupByPlugin(nodeId: string) : Promise<State[]> {
+
+export function getGroupedByPlugin(nodeId: string) : Promise<GroupedByPlugin> {
   return get(`${url}/${nodeId}/by_plugin.json`)
 }
+
 
 
 export function getLatestStatus() : Promise<LatestState>{

@@ -47,6 +47,7 @@ function get(endpoint: string) {
 }
 
 
+
 async function fetchMonitorData() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
@@ -56,6 +57,7 @@ async function fetchMonitorData() {
 }
 
 
+
 async function fetchProjectMeta() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
@@ -63,6 +65,7 @@ async function fetchProjectMeta() {
     ({...acc, [id]: {kind, project, location}})
   , {})
 }
+
 
 
 export async function fetchState() : Promise<State[]> {
@@ -108,7 +111,9 @@ export async function fetchState() : Promise<State[]> {
 }
 
 
-export async function fetchNode(id: string) : Promise<State[]> {
+
+export async function getNode(id: string) : Promise<State[]> {
   const data = await get(`${url}/state/${id}`)
   return data.data
 }
+
