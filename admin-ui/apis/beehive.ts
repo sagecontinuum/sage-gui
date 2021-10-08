@@ -277,7 +277,7 @@ export async function getLatestAudio(node: string) {
     filter: {
       name: 'upload',
       node,
-      plugin: 'plugin-audio-sampler:0.*'
+      filename: '*.flac',
     }
   })
 

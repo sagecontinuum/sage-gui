@@ -75,6 +75,7 @@ type Props = {
     }
   },
   lastUpdate: string
+
 }
 
 
@@ -171,6 +172,6 @@ const ChartsContainer = styled.div`
 `
 
 const StatusChart = styled.div`
-  width: 400px;
+
 
 `

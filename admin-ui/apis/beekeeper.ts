@@ -58,12 +58,16 @@ async function fetchMonitorData() {
 
 
 
-async function fetchProjectMeta() {
+export async function fetchProjectMeta() {
   const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
-  return data.values.reduce((acc, [kind, id, , project, location]) =>
-    ({...acc, [id]: {kind, project, location}})
-  , {})
+  return data.values
+    .reduce((acc, [kind, id, , project, location]) => {
+      // ignore non-id rows in excell sheet
+      if (id?.length !== 16) return acc
+
+      return ({...acc, [id]: {kind, project, location}})
+    }, {})
 }
 
 
