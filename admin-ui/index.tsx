@@ -12,6 +12,8 @@ import TestView from './views/tests/Tests'
 import NodeView from './views/node/Node'
 //import SuryaView from './views/surya/Surya'
 import AudioView from './views/audio/LatestAudio'
+import StressView from './views/stress/Stress'
+
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 
@@ -98,6 +100,9 @@ export default function App() {
               </Route>*/}
               <Route path="/audio">
                 <AudioView />
+              </Route>
+              <Route path="/stress">
+                <StressView />
               </Route>
               <Route path="/node/:node">
                 <NodeView />

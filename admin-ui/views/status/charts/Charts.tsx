@@ -47,20 +47,19 @@ function getIssues(data) : Issues {
 
 
 type Status = {
-  reporting: number,
-  failed: number,
-  'not reporting'?: number
-  offline: number
+  'reporting': number,
+  'not reporting': number
+  'offline': number
 }
 
 
 function getStatus(data: BK.State[]) : Status {
   const statuses = data.reduce((acc, o) => {
-    acc.active += o.status == 'reporting' ? 1 : 0,
-    acc.failed += o.status == 'not reporting' ? 1 : 0,
-    acc.inactive += o.status == 'offline' ? 1 : 0
+    acc['reporting'] += o.status == 'reporting' ? 1 : 0,
+    acc['not reporting'] += o.status == 'not reporting' ? 1 : 0,
+    acc['offline'] += o.status == 'offline' ? 1 : 0
     return acc
-  }, {active: 0, failed: 0, inactive: 0})
+  }, {'reporting': 0, 'not reporting': 0, 'offline': 0})
 
   return statuses
 }
@@ -69,13 +68,7 @@ function getStatus(data: BK.State[]) : Status {
 type Props = {
   data: {id: string}[]
   selected: {id: string}[]
-  activity: {
-    [host: string]: {
-      [metric: string]: number | number[]
-    }
-  },
   lastUpdate: string
-
 }
 
 
@@ -83,7 +76,6 @@ export default function Charts(props: Props) {
   const {
     data,
     selected,
-    activity,
     lastUpdate
   } = props
 
@@ -92,7 +84,10 @@ export default function Charts(props: Props) {
 
   // highlevel stats
   const [issues, setIssues] = useState<Issues>({
-    tests: -1
+    tests: null,
+    plugins: null,
+    temps: null,
+    fsUtil: null
   })
 
 
@@ -105,11 +100,11 @@ export default function Charts(props: Props) {
     if (!data && !selectedIDs) return
 
     const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
-    const {active, failed, inactive} = getStatus(d)
+    const status = getStatus(d)
     setStatuses({
-      'reporting': active,
-      'not reporting': failed,
-      'offline': inactive
+      'reporting': status['reporting'],
+      'not reporting': status['not reporting'],
+      'offline': status['offline']
     })
 
     const issues = getIssues(d)

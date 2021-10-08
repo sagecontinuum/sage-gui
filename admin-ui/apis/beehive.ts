@@ -287,3 +287,19 @@ export async function getLatestAudio(node: string) {
 }
 
 
+export async function stressTest(node: string) {
+  const query = {
+    start: '-1d',
+    filter: {
+      name: 'upload',
+      node,
+      filename: '*.flac',
+    }
+  }
+
+  const data = await getData(query)
+
+  return [data, query]
+}
+
+

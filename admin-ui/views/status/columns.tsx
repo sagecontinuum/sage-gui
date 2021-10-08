@@ -181,7 +181,7 @@ const getPluginStatusIcon = (data) => {
 }
 
 
-export function getColorClass(val, severe: number, warning: number, defaultClass) {
+export function getColorClass(val, severe: number, warning: number, defaultClass?: string) {
   if (!val || val >= severe) return 'severe font-bold'
   else if (val > warning) return 'warning font-bold'
   else if (defaultClass) return defaultClass

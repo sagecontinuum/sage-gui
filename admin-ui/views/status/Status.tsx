@@ -205,7 +205,7 @@ const determineStatus = (elaspedTimes: {[host: string]: number}) => {
 
 
 // join beehive and beekeeper data, basically
-function mergeMetrics(
+export function mergeMetrics(
   data: BK.State[], metrics: BH.AggMetrics, temps, plugins: SES.LatestState
 ) {
 
@@ -605,6 +605,7 @@ const Overview = styled.div`
 
 const ChartsContainer = styled.div`
   margin: 0px 20px;
+  min-width: 400px;
 `
 
 
