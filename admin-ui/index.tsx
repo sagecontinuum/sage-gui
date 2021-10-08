@@ -9,8 +9,9 @@ import CssBaseline from '@material-ui/core/CssBaseline'
 import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
-// import PluginsView from './views/plugins/Plugins'
 import NodeView from './views/node/Node'
+//import SuryaView from './views/surya/Surya'
+import AudioView from './views/audio/LatestAudio'
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 
@@ -67,6 +68,7 @@ const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/status">Status</NavLink></li>
     <li><NavLink to="/tests">Tests</NavLink></li>
+    {/*<li><NavLink to="/surya">Surya</NavLink></li>*/}
     {/*<li><NavLink to="/plugins">Plugins</NavLink></li>*/}
   </NavItems>
 
@@ -91,9 +93,12 @@ export default function App() {
               <Route path="/tests">
                 <TestView />
               </Route>
-              {/*<Route path="/plugins">
-                <PluginsView />
+              {/*<Route path="/surya">
+                <SuryaView />
               </Route>*/}
+              <Route path="/audio">
+                <AudioView />
+              </Route>
               <Route path="/node/:node">
                 <NodeView />
               </Route>
