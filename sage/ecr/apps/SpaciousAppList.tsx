@@ -1,11 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Tooltip from '@material-ui/core/Tooltip'
-import LaunchIcon from '@material-ui/icons/LaunchRounded'
-import PublicIcon from '@material-ui/icons/PublicRounded'
-import SharedIcon from '@material-ui/icons/PeopleAltRounded'
-import GithubIcon from '@material-ui/icons/GitHub'
+import Tooltip from '@mui/material/Tooltip'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import PublicIcon from '@mui/icons-material/PublicRounded'
+import SharedIcon from '@mui/icons-material/PeopleAltRounded'
+import GithubIcon from '@mui/icons-material/GitHub'
 
 import { Item, Title } from '../../common/Layout'
 import BuildIndicator from '../BuildIndicator'

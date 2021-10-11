@@ -2,13 +2,13 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import TextField from '@material-ui/core/TextField'
-import FormControl from '@material-ui/core/FormControl'
-import FormLabel from '@material-ui/core/FormLabel'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import CheckBox from '@material-ui/core/CheckBox'
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank'
-import CheckBoxIcon from '@material-ui/icons/CheckBox'
+import TextField from '@mui/material/TextField'
+import FormControl from '@mui/material/FormControl'
+import FormLabel from '@mui/material/FormLabel'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import CheckBox from '@mui/material/CheckBox'
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
 
 import { AppConfig } from '../../../apis/ecr'
 

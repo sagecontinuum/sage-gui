@@ -21,9 +21,8 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "@material-ui/core": "^4.12.3",
-    "@material-ui/icons": "^4.11.2",
-    "@material-ui/lab": "^4.0.0-alpha.57",
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
     "@mui/icons-material": "^5.0.3",
     "@mui/lab": "^5.0.0-alpha.50",
     "@mui/material": "^5.0.3",

@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
-import SearchIcon from '@material-ui/icons/SearchOutlined'
-import TextField from '@material-ui/core/TextField'
-import InputAdornment from '@material-ui/core/InputAdornment'
+import SearchIcon from '@mui/icons-material/SearchOutlined'
+import TextField from '@mui/material/TextField'
+import InputAdornment from '@mui/material/InputAdornment'
 
 import useDebounce from '../hooks/useDebounce'
 

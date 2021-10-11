@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import ScienceIcon from '@material-ui/icons/BarChartRounded'
-import TagIcon from '@material-ui/icons/LocalOfferOutlined'
-import Chip from '@material-ui/core/Chip'
+import ScienceIcon from '@mui/icons-material/BarChartRounded'
+import TagIcon from '@mui/icons-material/LocalOfferOutlined'
+import Chip from '@mui/material/Chip'
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
@@ -22,7 +22,7 @@ import * as Auth from '../../../components/auth/auth'
 
 
 import marked from 'marked/lib/marked'
-import { Divider } from '@material-ui/core'
+import Divider from '@mui/material/Divider'
 
 
 

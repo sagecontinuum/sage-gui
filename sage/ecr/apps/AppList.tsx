@@ -3,11 +3,11 @@ import { useLocation, useHistory, useRouteMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Button from '@material-ui/core/Button'
-import Divider from '@material-ui/core/Divider'
-import AddIcon from '@material-ui/icons/AddRounded'
-import FeaturedIcon from '@material-ui/icons/StarsRounded'
-import PublicIcon from '@material-ui/icons/PublicRounded'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import AddIcon from '@mui/icons-material/AddRounded'
+import FeaturedIcon from '@mui/icons-material/StarsRounded'
+import PublicIcon from '@mui/icons-material/PublicRounded'
 
 
 import BeeIcon from 'url:../../../assets/bee.svg'

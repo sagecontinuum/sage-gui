@@ -1,7 +1,7 @@
 import React from 'react'
-import IconButton from '@material-ui/core/IconButton'
-import SpaciousIcon from '@material-ui/icons/ViewStream'
-import ViewComfyIcom from '@material-ui/icons/ViewComfy'
+import IconButton from '@mui/material/IconButton'
+import SpaciousIcon from '@mui/icons-material/ViewStream'
+import ViewComfyIcom from '@mui/icons-material/ViewComfy'
 
 
 

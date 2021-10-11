@@ -1,7 +1,7 @@
 import React from 'react'
-import { withStyles } from '@material-ui/core/styles'
-import MuiTabs from '@material-ui/core/Tabs'
-import MuiTab from '@material-ui/core/Tab'
+import withStyles from '@mui/styles/withStyles'
+import MuiTabs from '@mui/material/Tabs'
+import MuiTab from '@mui/material/Tab'
 
 
 function a11yProps(index) {

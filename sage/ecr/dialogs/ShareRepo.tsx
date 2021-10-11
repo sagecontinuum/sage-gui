@@ -1,19 +1,19 @@
 import React, {useEffect, useState} from 'react'
 
-import IconButton from '@material-ui/core/IconButton'
-import Button from '@material-ui/core/Button'
-import Dialog from '@material-ui/core/Dialog'
-import DialogActions from '@material-ui/core/DialogActions'
-import DialogContent from '@material-ui/core/DialogContent'
-import DialogTitle from '@material-ui/core/DialogTitle'
-import TextField from '@material-ui/core/TextField'
-import Select from '@material-ui/core/Select'
-import MenuItem from '@material-ui/core/MenuItem'
-import Alert from '@material-ui/lab/Alert'
+import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import Alert from '@mui/material/Alert'
 
-import AddIcon from '@material-ui/icons/AddRounded'
+import AddIcon from '@mui/icons-material/AddRounded'
 
-import DeleteIcon from '@material-ui/icons/DeleteOutlineRounded'
+import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded'
 
 import * as Auth from '../../../components/auth/auth'
 import * as ECR from '../../apis/ecr'
@@ -63,16 +63,16 @@ function PermissionTable(props: PermTableProps) {
               <td>{grantee.slice(grantee.lastIndexOf('-') + 1)} {isMe(grantee) ? '(me)' : ''}</td>
               <td>{permMap[permission]}</td>
               <td>
-                <IconButton onClick={(evt) => onDelete(evt, perm) }>
+                <IconButton onClick={(evt) => onDelete(evt, perm) } size="large">
                   <DeleteIcon className="delete"/>
                 </IconButton>
               </td>
             </tr>
-          )
+          );
         })}
       </tbody>
     </table>
-  )
+  );
 }
 
 

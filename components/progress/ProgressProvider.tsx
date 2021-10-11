@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import LinearProgress from '@material-ui/core/LinearProgress'
+import LinearProgress from '@mui/material/LinearProgress'
 
 
 const ProgressContext = React.createContext(null)

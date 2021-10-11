@@ -3,8 +3,8 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
-import { createTheme, ThemeProvider } from '@material-ui/core/styles'
-import CssBaseline from '@material-ui/core/CssBaseline'
+import { createTheme, ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/Status'
@@ -21,7 +21,13 @@ import '../assets/styles.scss'
 
 
 
-const theme = createTheme({
+declare module '@mui/styles/defaultTheme' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface DefaultTheme extends Theme {}
+}
+
+
+const theme = createTheme(adaptV4Theme({
   typography: {
     fontFamily: [
       'Roboto'
@@ -32,7 +38,7 @@ const theme = createTheme({
     }
   },
   palette: {
-    type: 'light', // darkMode ? 'dark' : 'light',
+    mode: 'light',
     primary: {
       main: 'rgb(28, 140, 201)'
     },
@@ -63,7 +69,7 @@ const theme = createTheme({
       }
     }
   },
-})
+}))
 
 
 const NavMenu = () =>
@@ -78,43 +84,45 @@ const NavMenu = () =>
 
 export default function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <CssBaseline/>
-        <NavBar Menu={NavMenu} />
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <CssBaseline/>
+          <NavBar Menu={NavMenu} />
 
-        <Container>
-          <ProgressProvider>
-            <Switch>
-              <Route exact path="/">
-                <Redirect to="/status" />
-              </Route>
-              <Route path="/status">
-                <StatusView />
-              </Route>
-              <Route path="/tests">
-                <TestView />
-              </Route>
-              {/*<Route path="/surya">
-                <SuryaView />
-              </Route>*/}
-              <Route path="/audio">
-                <AudioView />
-              </Route>
-              <Route path="/stress">
-                <StressView />
-              </Route>
-              <Route path="/node/:node">
-                <NodeView />
-              </Route>
-              <Route path="*">
-                <NotFound />
-              </Route>
-            </Switch>
-          </ProgressProvider>
-        </Container>
-      </BrowserRouter>
-    </ThemeProvider>
+          <Container>
+            <ProgressProvider>
+              <Switch>
+                <Route exact path="/">
+                  <Redirect to="/status" />
+                </Route>
+                <Route path="/status">
+                  <StatusView />
+                </Route>
+                <Route path="/tests">
+                  <TestView />
+                </Route>
+                {/*<Route path="/surya">
+                  <SuryaView />
+                </Route>*/}
+                <Route path="/audio">
+                  <AudioView />
+                </Route>
+                <Route path="/stress">
+                  <StressView />
+                </Route>
+                <Route path="/node/:node">
+                  <NodeView />
+                </Route>
+                <Route path="*">
+                  <NotFound />
+                </Route>
+              </Switch>
+            </ProgressProvider>
+          </Container>
+        </BrowserRouter>
+      </ThemeProvider>
+    </StyledEngineProvider>
   )
 }
 

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Chip from '@material-ui/core/Chip'
-import Alert from '@material-ui/lab/Alert'
-import Button from '@material-ui/core/Button'
-import DownloadIcon from '@material-ui/icons/CloudDownloadOutlined'
+import Chip from '@mui/material/Chip'
+import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 
 import { useProgress } from '../../components/progress/ProgressProvider'
 import ErrorMsg from '../ErrorMsg'
@@ -25,7 +25,7 @@ function getDownloadURL(id) {
 
 
 function formatNotes(text: string) : string {
-  return text.replace(/\n/g, '<br>').replace(/\*/g, '•')
+  return text.replace(/\n/g, '<br>').replace(/\*/g, '•');
 }
 
 

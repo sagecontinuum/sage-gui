@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react'
 import { Link, useLocation, useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Alert from '@material-ui/lab/Alert'
-import Chip from '@material-ui/core/Chip'
+import Alert from '@mui/material/Alert'
+import Chip from '@mui/material/Chip'
 
 import ErrorMsg from '../ErrorMsg'
 import Table from '../../components/table/Table'
@@ -21,10 +21,10 @@ import BeeIcon from 'url:../../assets/bee.svg'
 
 import * as Data from '../apis/data'
 import * as utils from '../../components/utils/units'
-import Select from '@material-ui/core/Select'
-import MenuItem from '@material-ui/core/MenuItem'
-import FormControl from '@material-ui/core/FormControl'
-import InputLabel from '@material-ui/core/InputLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
 
 const typeColorMap = {
   default: 'rgb(28,140,201)',
@@ -176,7 +176,7 @@ export default function Search() {
                 type="text"
                 data={items}
               />
-            )
+            );
           })}
         </Sidebar>
 
@@ -254,7 +254,7 @@ export default function Search() {
       </div>
 
     </Root>
-  )
+  );
 }
 
 const Root = styled.div`

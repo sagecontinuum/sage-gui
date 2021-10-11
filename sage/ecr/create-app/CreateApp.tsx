@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import TextField from '@material-ui/core/TextField'
-import StepIcon from '@material-ui/core/StepIcon'
-import Button from '@material-ui/core/Button'
-import Tooltip from '@material-ui/core/Tooltip'
-import CheckIcon from '@material-ui/icons/Check'
-import LaunchIcon from '@material-ui/icons/LaunchRounded'
-import HelpIcon from '@material-ui/icons/HelpOutlineRounded'
-import TagIcon from '@material-ui/icons/LocalOfferOutlined'
-import FormHelperText from '@material-ui/core/FormHelperText'
+import TextField from '@mui/material/TextField'
+import StepIcon from '@mui/material/StepIcon'
+import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
+import CheckIcon from '@mui/icons-material/Check'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
+import TagIcon from '@mui/icons-material/LocalOfferOutlined'
+import FormHelperText from '@mui/material/FormHelperText'
 
-import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
+import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 
 import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
@@ -23,7 +23,7 @@ import CheckBox from '../../../components/input/Checkbox'
 
 import * as Auth from '../../../components/auth/auth'
 import * as ECR from '../../apis/ecr'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 const username = Auth.getUser()
 
@@ -448,7 +448,7 @@ function Debug(props) {
         dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 2).replace(/\\n/g, '<br/>')}}
       />
     </DebugRoot>
-  )
+  );
 }
 
 

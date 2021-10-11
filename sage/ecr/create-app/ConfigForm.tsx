@@ -1,11 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import FormControl from '@material-ui/core/FormControl'
-import TextField from '@material-ui/core/TextField'
-import InputLabel from '@material-ui/core/InputLabel'
-import Select from '@material-ui/core/Select'
-import MenuItem from '@material-ui/core/MenuItem'
+import FormControl from '@mui/material/FormControl'
+import TextField from '@mui/material/TextField'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 
 import { AppConfig } from '../../apis/ecr'
 

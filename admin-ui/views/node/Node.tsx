@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 
-import Alert from '@material-ui/lab/Alert'
-import CircularProgress from '@material-ui/core/CircularProgress'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 
 import * as BH from '../../apis/beehive'
 import * as BK from '../../apis/beekeeper'

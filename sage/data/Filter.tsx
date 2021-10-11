@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import styled from 'styled-components'
 
-import IconButton from '@material-ui/core/IconButton'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import TextField from '@material-ui/core/TextField'
+import IconButton from '@mui/material/IconButton'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import TextField from '@mui/material/TextField'
 
-import SearchIcon from '@material-ui/icons/SearchOutlined'
+import SearchIcon from '@mui/icons-material/SearchOutlined'
 
 import highlightText from '../../components/utils/text'
 import Checkbox from '../../components/input/Checkbox'

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {NavLink, useParams} from 'react-router-dom'
 import styled from 'styled-components'
-import EditIcon from '@material-ui/icons/Edit'
+import EditIcon from '@mui/icons-material/Edit'
 
 import marked from 'marked/lib/marked'
 
@@ -133,7 +133,7 @@ export default function Page() {
         </a>
       }
     </Root>
-  )
+  );
 }
 
 

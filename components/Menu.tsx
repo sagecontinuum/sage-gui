@@ -1,8 +1,8 @@
 import React from 'react'
-import { withStyles } from '@material-ui/core/styles'
-import Button from '@material-ui/core/Button'
-import Menu from '@material-ui/core/Menu'
-import CaretIcon from '@material-ui/icons/ArrowDropDownRounded'
+import withStyles from '@mui/styles/withStyles'
+import Button from '@mui/material/Button'
+import Menu from '@mui/material/Menu'
+import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 
 const StyledMenu = withStyles({
   paper: {

@@ -2,7 +2,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import Check from '@material-ui/icons/CheckCircleRounded'
+import Check from '@mui/icons-material/CheckCircleRounded'
 
 type StatusProps = {
   label: string

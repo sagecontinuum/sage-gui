@@ -2,8 +2,8 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import GithubIcon from '@material-ui/icons/GitHub'
-import Tooltip from '@material-ui/core/Tooltip'
+import GithubIcon from '@mui/icons-material/GitHub'
+import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '../../components/utils/units'
 

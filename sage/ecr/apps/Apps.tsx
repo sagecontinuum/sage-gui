@@ -25,12 +25,9 @@ export default function Apps() {
         <Switch>
           <Route path={`${path}/explore`} component={AppList} />
           <Route path={`${path}/app/:path*`} component={App}/>
-
           <PrivateRoute path={`${path}/my-apps`} component={AppList} />
           <PrivateRoute path={`${path}/shared-with-me`} component={AppList} />
           <PrivateRoute path={`${path}/create-app`} component={CreateApp} />
-
-          <Route path={`${path}/app/:path*`} component={App}/>
         </Switch>
       </Main>
     </Root>

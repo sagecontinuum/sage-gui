@@ -1,14 +1,17 @@
 
 import React, { useState } from 'react'
-import { alpha, makeStyles } from '@material-ui/core/styles'
-import Popper from '@material-ui/core/Popper'
-import SettingsIcon from '@material-ui/icons/SettingsOutlined'
-import DoneIcon from '@material-ui/icons/Done'
+import { useTheme, alpha } from '@mui/material/styles'
+import makeStyles from '@mui/styles/makeStyles'
+import Popper from '@mui/material/Popper'
+import SettingsIcon from '@mui/icons-material/SettingsOutlined'
+import DoneIcon from '@mui/icons-material/Done'
 
-import Autocomplete from '@material-ui/lab/Autocomplete'
-import IconButton from '@material-ui/core/IconButton'
-import InputBase from '@material-ui/core/InputBase'
-import Tooltip from '@material-ui/core/Tooltip'
+import Autocomplete from '@mui/material/Autocomplete'
+import IconButton from '@mui/material/IconButton'
+import InputBase from '@mui/material/InputBase'
+import Tooltip from '@mui/material/Tooltip'
+
+import Box from '@mui/material/Box'
 
 
 /* example options
@@ -124,6 +127,7 @@ export default function ColumnMenu(props: Props) {
 
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState(null)
+  const theme = useTheme()
 
   const [value, setValue] = useState(options.filter(obj => !obj.hide))
 
@@ -192,17 +196,30 @@ export default function ColumnMenu(props: Props) {
           disablePortal
           renderTags={() => null}
           noOptionsText="No labels"
-          renderOption={(option, { selected }) => (
-            <>
-              <DoneIcon
-                className={classes.iconSelected}
-                style={{ visibility: selected ? 'visible' : 'hidden' }}
-              />
-              <div className={classes.text}>
-                {option.label || option.id}
-              </div>
-            </>
-          )}
+          renderOption={(props, option, { selected }) => {
+            return (
+              <li {...props}>
+                <Box
+                  component={DoneIcon}
+                  sx={{ width: 17, height: 17, mr: '5px', ml: '-2px' }}
+                  style={{
+                    visibility: selected ? 'visible' : 'hidden',
+                  }}
+                />
+
+                <Box
+                  sx={{
+                    flexGrow: 1,
+                    '& span': {
+                      color:
+                      theme.palette.mode === 'light' ? '#586069' : '#8b949e',
+                    },
+                  }}
+                >
+                  {option.label || option.id}
+                </Box>
+              </li>
+            )}}
           options={options}
           getOptionLabel={(option) => option.label || option.id}
           renderInput={(params) => (

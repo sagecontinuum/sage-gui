@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { formatter } from './DataSearch'
 import { Item, Title } from '../common/Layout'
-import Divider from '@material-ui/core/Divider'
+import Divider from '@mui/material/Divider'
 import { Link } from 'react-router-dom'
 import highlightText from '../../components/utils/text'
 

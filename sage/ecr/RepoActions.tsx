@@ -1,12 +1,12 @@
 import React, {useState} from 'react'
 import styled from 'styled-components'
 
-import DeleteIcon from '@material-ui/icons/DeleteOutline'
-import PublicIcon from '@material-ui/icons/PublicRounded'
-import ShareIcon from '@material-ui/icons/PersonAdd'
-import Tooltip from '@material-ui/core/Tooltip'
-import IconButton from '@material-ui/core/IconButton'
-import Button from '@material-ui/core/Button'
+import DeleteIcon from '@mui/icons-material/DeleteOutline'
+import PublicIcon from '@mui/icons-material/PublicRounded'
+import ShareIcon from '@mui/icons-material/PersonAdd'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
 
 import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
 import ShareDialog from './dialogs/ShareRepo'

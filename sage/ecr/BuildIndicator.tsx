@@ -1,6 +1,6 @@
 import React from 'react'
-import Tooltip from '@material-ui/core/Tooltip'
-import LaunchIcon from '@material-ui/icons/LaunchRounded'
+import Tooltip from '@mui/material/Tooltip'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 type Props = {
   isBuilding: boolean

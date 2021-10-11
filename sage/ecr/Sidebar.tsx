@@ -2,9 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 
-import UserIcon from '@material-ui/icons/AccountCircleRounded'
-import SharedIcon from '@material-ui/icons/SupervisedUserCircle'
-import PublicIcon from '@material-ui/icons/PublicRounded'
+import UserIcon from '@mui/icons-material/AccountCircleRounded'
+import SharedIcon from '@mui/icons-material/SupervisedUserCircle'
+import PublicIcon from '@mui/icons-material/PublicRounded'
 
 
 

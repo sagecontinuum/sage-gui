@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
 
-import Button from '@material-ui/core/Button'
-import Divider from '@material-ui/core/Divider'
-import CaretIcon from '@material-ui/icons/ExpandMoreRounded'
-import UndoIcon from '@material-ui/icons/UndoRounded'
-import Alert from '@material-ui/lab/Alert'
+import Button from '@mui/material/Button'
+import Divider from '@mui/material/Divider'
+import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
+import UndoIcon from '@mui/icons-material/UndoRounded'
+import Alert from '@mui/material/Alert'
 
 import columns from './columns'
 import Table from '../../../components/table/Table'
@@ -71,7 +71,7 @@ const useParams = () =>
   new URLSearchParams(useLocation().search)
 
 
-function mergeParams(params: URLSearchParams, field: string, val: string, replace = false) : string  {
+function mergeParams(params: URLSearchParams, field: string, val: string) : string  {
   const str = params.get(field)
   const existing = str?.length ? str.split(',') : []
 
@@ -80,7 +80,8 @@ function mergeParams(params: URLSearchParams, field: string, val: string, replac
     return existing.join(',')
   }
 
-  return replace ? [val].join(',') : [...existing, val].join(',')
+
+  return val ? [...existing, val].join(',') : existing.join(',')
 }
 
 
@@ -418,23 +419,16 @@ export default function StatusView() {
   }
 
 
-  const handleFilterChange = (field: string, vals: {id: string, label: string}[]) => {
-    if (field == 'nodeType') {
-      const val = vals[vals.length - 1].id
-      const newStr = mergeParams(params, field, val, true)
+  const handleFilterChange = (field: string, vals: ({id: string, label: string} | string)[]) => {
+    // MUI seems to result in vals may be string or option; todo(nc): address this?
+    const newStr = vals.map(item =>
+      typeof item == 'string' ? item : item.id
+    ).join(',')
 
-      if (!newStr.length) params.delete(field)
-      else params.set(field, newStr)
-      history.push({search: params.toString()})
-
-      return
-    }
-
-    const val = vals[vals.length - 1].id
-    const newStr = mergeParams(params, field, val)
 
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
+
     history.push({search: params.toString()})
   }
 

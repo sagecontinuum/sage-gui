@@ -5,8 +5,8 @@
 
 import React, {memo, ChangeEvent} from 'react'
 import clsx from 'clsx'
-import { makeStyles } from '@material-ui/core/styles'
-import Checkbox from '@material-ui/core/Checkbox'
+import makeStyles from '@mui/styles/makeStyles'
+import Checkbox from '@mui/material/Checkbox'
 
 
 const useStyles = makeStyles({
@@ -70,7 +70,6 @@ const StyledCheckbox = memo(function StyledCheckbox(props: Props) {
     <Checkbox
       className={classes.root}
       disableRipple
-      color="default"
       checkedIcon={<span className={clsx(classes.icon, classes.checkedIcon)} />}
       icon={<span className={classes.icon} />}
       inputProps={{ 'aria-label': 'checkbox' }}

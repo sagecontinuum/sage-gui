@@ -1,16 +1,16 @@
 
 import React, { useEffect, useState, useRef } from 'react'
 import styled from 'styled-components'
-import Alert from '@material-ui/lab/Alert'
+import Alert from '@mui/material/Alert'
 
 import WaveSurfer from 'wavesurfer.js'
 import SpectrogramPlugin from 'wavesurfer.js/src/plugin/spectrogram'
 import colormap from 'colormap'
 
-import Button from '@material-ui/core/Button'
-import PlayIcon from '@material-ui/icons/PlayArrowRounded'
-import PauseIcon from '@material-ui/icons/PauseCircleFilledRounded'
-import DownloadIcon from '@material-ui/icons/CloudDownloadOutlined'
+import Button from '@mui/material/Button'
+import PlayIcon from '@mui/icons-material/PlayArrowRounded'
+import PauseIcon from '@mui/icons-material/PauseCircleFilledRounded'
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 
 import {bytesToSizeSI} from '../../../components/utils/units'
 import { useProgress } from '../../../components/progress/ProgressProvider'

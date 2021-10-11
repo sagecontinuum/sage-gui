@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import Alert from '@material-ui/lab/Alert'
-import Button from '@material-ui/core/Button'
-import DownloadIcon from '@material-ui/icons/CloudDownloadOutlined'
+import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 
 import Audio from '../audio/Audio'
 import * as BH from '../../apis/beehive'

@@ -2,8 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import { useLocation } from 'react-router-dom'
 
-import TextField from '@material-ui/core/TextField'
-import Button from '@material-ui/core/Button'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
 
 import * as Auth from '../../components/auth/auth'
 
