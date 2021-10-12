@@ -13,7 +13,6 @@ export default function TestSignIn() {
   const params = new URLSearchParams(location.search)
 
   const [user, setUser] = React.useState('')
-  const [userId, setUserId] = React.useState('')
   const [token, setToken] = React.useState('')
   const [loading, setLoading] = React.useState(false)
 
@@ -24,7 +23,7 @@ export default function TestSignIn() {
 
     setTimeout(() => {
       setLoading(false)
-      Auth.signIn(user, userId, token)
+      Auth.signIn(user, token)
       window.location.href = redirectPath || '/'
     }, 1000)
   }
@@ -40,7 +39,7 @@ export default function TestSignIn() {
     }, 1000)
   }
 
-  const isValid = () => user && userId && token
+  const isValid = () => user && token
 
 
   return (
@@ -63,34 +62,26 @@ export default function TestSignIn() {
 
 
         <div className="flex column">
-          {!Auth.isSignedIn() ? <>
-
-            <TextField
-              id="sage-debug-username"
-              label="Username (your namespace)"
-              onChange={evt => setUser(evt.target.value)}
-            />
-
-            <TextField
-              id="sage-debug-uuid"
-              label="User UUID"
-              onChange={evt => setUserId(evt.target.value)}
-            />
-
-            <TextField
-              id="sage-debug-token"
-              label="Sage Token"
-              onChange={evt => setToken(evt.target.value)}
-            />
-
-            <br/>
-
-            <Button variant="contained" color="primary" onClick={handleSignIn} disabled={loading || !isValid()}>
-              {loading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </>
+          {!Auth.isSignedIn() ?
+            <>
+              <TextField
+                id="sage-debug-username"
+                label="Username"
+                onChange={evt => setUser(evt.target.value)}
+              />
+              <br/>
+              <TextField
+                id="sage-debug-token"
+                label="Sage Token"
+                onChange={evt => setToken(evt.target.value)}
+              />
+              <br/>
+              <Button variant="contained" color="primary" onClick={handleSignIn} disabled={loading || !isValid()} type="submit">
+                {loading ? 'Signing in...' : 'Sign In'}
+              </Button>
+            </>
             :
-            <Button variant="contained" color="primary" onClick={handleSignOut} disabled={loading}>
+            <Button variant="contained" color="primary" onClick={handleSignOut} disabled={loading} type="submit">
               {loading ? 'Signing out...' : 'Sign Out'}
             </Button>
           }
@@ -100,7 +91,7 @@ export default function TestSignIn() {
   )
 }
 
-const Root = styled.div`
+const Root = styled.form`
   margin-top: 100px;
   > div {
     max-width: 325px;

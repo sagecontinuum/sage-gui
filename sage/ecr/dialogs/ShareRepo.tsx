@@ -19,7 +19,7 @@ import * as Auth from '../../../components/auth/auth'
 import * as ECR from '../../apis/ecr'
 
 
-const userId = Auth.getUserId()
+const userId = Auth.getUser()
 
 const permMap = {
   'FULL_CONTROL': 'owner',
