@@ -48,7 +48,7 @@ function Row(props) {
     license_title
   } = data
 
-1
+
   return (
     <Item className="flex column" to={`data/product/${name}`}>
       <Title>{formatter.title(title, data)}</Title>

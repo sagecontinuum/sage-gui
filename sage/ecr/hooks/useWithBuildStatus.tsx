@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
+import { useRouteMatch } from 'react-router-dom'
 import config from '../../../config'
 import * as ECR from '../../apis/ecr'
 
 
 
 export default function useWithBuildStatus<T>() {
+  let { path } = useRouteMatch()
+  const view = path.split('/')[2]
+
   const [isDone, setIsDone] = useState(false)
   const [data, setData] = useState<T>()
 
-
   // effect for updating build status
   useEffect(() => {
-    if (!data || isDone) return
+    if (!data || isDone || view =='explore') return
 
     for (const app of data) {
       ECR.listBuildStatus(app)
@@ -38,7 +41,7 @@ export default function useWithBuildStatus<T>() {
     }
 
     setIsDone(true)
-  }, [isDone, data])
+  }, [isDone, data, view])
 
   return [data, setData]
 }

@@ -194,7 +194,7 @@ export default function AppList() {
         />
       }
 
-      {rows && view == 'explore' &&
+      {rows && view == 'explore' && viewStyle == 'spacious' &&
         <>
           <h2 className="flex items-center">
             <FeaturedIcon/>&nbsp;Featured Apps
@@ -208,11 +208,12 @@ export default function AppList() {
         </>
       }
 
-      {rows && view == 'explore' &&
+      {rows && view == 'explore' && viewStyle == 'spacious' &&
         <h2 className="flex items-center">
           <PublicIcon/>&nbsp;Other Public Apps
         </h2>
       }
+
       {rows && viewStyle == 'spacious' &&
         <SpaciousLayout
           rows={rows}
@@ -252,7 +253,7 @@ const Root = styled.div`
 const Controls = styled.div`
   background-color: #fff;
 
-  padding: 10px 0;
+  padding: 20px 0 15px 0;
   border-bottom: 1px solid #ddd;
 
   .MuiButton-root,

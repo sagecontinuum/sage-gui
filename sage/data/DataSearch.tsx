@@ -24,7 +24,7 @@ import * as utils from '../../components/utils/units'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
+
 
 const typeColorMap = {
   default: 'rgb(28,140,201)',
