@@ -152,8 +152,8 @@ export default function App() {
 
           <h4>Repository</h4>
           <p>
-            <a href={latestTag?.source.url} target="_blank" rel="noreferrer" className="flex">
-              <img src={GitIcon} className="icon"/> {' '}
+            <a href={latestTag?.source.url} target="_blank" rel="noreferrer" className="flex items-center">
+              <img src={GitIcon} className="icon" /> {' '}
               {urlShortner(latestTag?.source.url.slice(0, 40))}
             </a>
           </p>
@@ -162,7 +162,7 @@ export default function App() {
             <>
               <h4>Homepage</h4>
               <p>
-                <a href={latestTag?.homepage} className="flex">
+                <a href={latestTag?.homepage} className="flex items-center">
                   <img src={LinkIcon} width="15" className="icon" /> {' '}
                   {urlShortner(latestTag?.homepage)}
                 </a>

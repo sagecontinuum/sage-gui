@@ -321,11 +321,11 @@ export default function CreateApp() {
           <div className="step">
             <h4>App Config</h4>
             <pre className="code">{config}</pre>
-          </div>
-        }
 
-        {error &&
-          <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
+            {error &&
+              <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
+            }
+          </div>
         }
 
         <div className="step">

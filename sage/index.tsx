@@ -114,15 +114,12 @@ export default function Sage() {
                     <TestSignIn />
                   </Route>
 
-
                   <Route path="/apps" component={Apps} />
-
-
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
+
                   <Route path="/docs/:page" component={Docs} />
                   <Route path="*" component={NotFound} />
-
                 </Switch>
               </ProgressProvider>
             </Container>

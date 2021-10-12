@@ -204,7 +204,7 @@ export default function TagList(props: Props) {
                   {/* todo(nc): allow actions on write or appropriate access */}
                   {namespace == username &&
                     <div className="flex gap">
-                      <Tooltip title="Build this tagged version">
+                      <Tooltip title="Rebuild this tagged version">
                         <Button
                           onClick={(evt) => onClickBuild(evt, ver)}
                           size="small" startIcon={<BuildIcon/>}
@@ -212,7 +212,7 @@ export default function TagList(props: Props) {
                           color="primary"
                           disabled={isBuilding || buildSubmitted}
                         >
-                          {buildSubmitted ? 'Submitting...' : 'Build'}
+                          {buildSubmitted ? 'Submitting...' : 'Rebuild'}
                         </Button>
                       </Tooltip>
                       <Tooltip title="Delete tag">

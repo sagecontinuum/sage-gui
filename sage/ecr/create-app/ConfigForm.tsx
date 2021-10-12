@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 
 import FormControl from '@mui/material/FormControl'
@@ -21,6 +21,14 @@ type Props = {
 export default function ConfigForm(props: Props) {
   const {form, onChange} = props
 
+  const [isValid, setIsValid] = useState<boolean>(true)
+
+  const handleNameChange = (evt) => {
+    const name = evt.target.value
+    const isValid = /^[a-z0-9_-]*$/.test(name)
+    setIsValid(isValid)
+    onChange(evt)
+  }
 
   return (
     <Form className="flex column" autoComplete="off">
@@ -42,9 +50,11 @@ export default function ConfigForm(props: Props) {
           label="Name"
           name="name"
           value={form.name}
-          onChange={onChange}
+          onChange={handleNameChange}
           InputLabelProps={{ shrink: true }}
           placeholder="my-app"
+          error={!isValid}
+          helperText={!isValid && 'Only lowercase letters, numbers, "-", or "_" allowed'}
         />
         <TextField
           label="Version"
