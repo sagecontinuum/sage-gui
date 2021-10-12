@@ -13,6 +13,8 @@ export default  {
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
 
+  docs: 'https://docs.sagecontinuum.org/docs',
+
   // ui configuration (for admin ui)
   admin: {
     activityLength: 50,     // number of data points for ticker

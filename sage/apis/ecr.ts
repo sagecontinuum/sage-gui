@@ -1,5 +1,6 @@
 import config from '../../config'
 export const url = config.ecr
+export const docs = config.docs
 
 import * as Auth from '../../components/auth/auth'
 

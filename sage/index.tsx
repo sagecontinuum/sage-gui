@@ -54,7 +54,7 @@ const theme = createTheme(adaptV4Theme({
       disableRipple: true,
     },
     MuiTextField: {
-      margin: 'dense',
+      size: 'small',
       variant: 'outlined'
     }
   },

@@ -252,7 +252,7 @@ export default function CreateApp() {
 
         <StepTitle icon="1" active={true} label="Repo URL"/>
 
-        <form className="step step-1 gap" onSubmit={onRepoVerify}>
+        <form className="step step-1 flex items-center gap" onSubmit={onRepoVerify}>
           <TextField
             label="GitHub Repo URL"
             placeholder="https://github.com/me/my-edge-app"
@@ -355,16 +355,11 @@ export default function CreateApp() {
         <hr/>
         <ul className="no-padding list-none">
           <li>
-            <a href="/docs/Hello-World-Plugin" target="_blank" rel="noreferrer" >
-              Getting Started
+            <a href={`${ECR.docs}/tutorials/compute-at-edge`} target="_blank" rel="noreferrer" >
+              Computing at the Edge
               <LaunchIcon className="external-link"/>
             </a>
           </li>
-        </ul>
-        <ul className="no-padding list-none">
-          <li><a onClick={onExampleOne}>Use Helloworld ML</a></li>
-          {/*<li><a onClick={onExampleTwo}>Use Example Two</a></li>*/}
-          {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
         </ul>
 
         {isDevUser &&
@@ -378,6 +373,7 @@ export default function CreateApp() {
               </sup>
             </h3>
             <hr/>
+
             <FormControlLabel
               control={
                 <CheckBox
@@ -387,6 +383,12 @@ export default function CreateApp() {
               }
               label={<>Show form state</>}
             />
+
+            <ul className="no-padding list-none">
+              <li><a onClick={onExampleOne}>Use Helloworld ML</a></li>
+              {/*<li><a onClick={onExampleTwo}>Use Example Two</a></li>*/}
+              {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
+            </ul>
           </DebugOptions>
         }
 
@@ -416,8 +418,7 @@ const Main = styled.div`
   }
 
   .step-1 {
-    display: flex;
-    align-items: center;
+    margin-top: 2em;
     button, svg {
       margin-left: 10px;
     }
@@ -448,7 +449,7 @@ function Debug(props) {
         dangerouslySetInnerHTML={{__html: JSON.stringify(form, null, 2).replace(/\\n/g, '<br/>')}}
       />
     </DebugRoot>
-  );
+  )
 }
 
 

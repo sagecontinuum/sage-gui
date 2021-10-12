@@ -1,14 +1,13 @@
 import React, { useState } from 'react'
 import styled from 'styled-components'
-import { Link, useLocation} from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import sage from 'url:../assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
-import InfoIcon from '@mui/icons-material/InfoOutlined'
-import DocsIcon from '@mui/icons-material/MenuBookRounded'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
 
@@ -20,6 +19,7 @@ const username = Auth.getUser()
 const webOrigin = window.location.origin
 const signOutUrl = `${Auth.url}/portal-logout`
 
+import config from '../config'
 
 
 type Props = {
@@ -64,22 +64,19 @@ export default function NavBar(props: Props) {
       <Spacer/>
 
       {hasSignIn &&
-        <div className="flex gap">
-          <DropdownMenu
-            label="About"
-            menu={
-              <DropDown>
-                <div>
-                  <MenuItem component={Link} to="/docs/Overview" disableRipple>
-                    <InfoIcon/>&nbsp;About
-                  </MenuItem>
-                  <MenuItem component={Link} to="/docs/Hello-World-Plugin" disableRipple>
-                    <DocsIcon/>&nbsp;Documentation
-                  </MenuItem>
-                </div>
-              </DropDown>
-            }
-          />
+        <div className="flex items-center gap">
+          <NavItems>
+            <li>
+              <a
+                href={`${config.docs}/about/overview`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Docs
+                <LaunchIcon className="external-link" sx={{marginTop: '3px'}}/>
+              </a>
+            </li>
+          </NavItems>
 
           {username &&
             <DropdownMenu
