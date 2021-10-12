@@ -32,7 +32,6 @@
     "colormap": "^2.3.2",
     "mapbox-gl": "^2.1.1",
     "marked": "^2.0.4",
-    "material-design-icons": "^3.0.1",
     "notistack": "^1.0.5",
     "parcel": "^2.0.0-rc.0",
     "react": "^17.0.1",

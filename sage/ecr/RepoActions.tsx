@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import DeleteIcon from '@mui/icons-material/DeleteOutline'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 import ShareIcon from '@mui/icons-material/PersonAdd'
+import PublicOffIcon from '@mui/icons-material/PublicOffRounded'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
@@ -139,7 +140,7 @@ export default function RepoActions(props: Props) {
             title={isPublic ? 'Turn public access off' : 'Make repo public'}
             icon={
               isPublic ?
-                <span className="material-icons">public_off</span> :
+                <PublicOffIcon /> :
                 <PublicIcon />
             }
             onClick={handleMakePublic}

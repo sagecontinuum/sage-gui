@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import React from 'react'
-import styled from 'styled-components'
+import styled, { ThemeConsumer } from 'styled-components'
 import {Link} from 'react-router-dom'
 
 // import ErrorIcon from '@mui/icons-material/ErrorRounded'
@@ -12,6 +12,7 @@ import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import MapIcon from '@mui/icons-material/RoomOutlined'
+import ThermoIcon from '@mui/icons-material/ThermostatRounded'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -324,7 +325,7 @@ const columns = [{
           target="_blank"
           rel="noreferrer"
         >
-          <span className="material-icons">thermostat</span>
+          <ThermoIcon />
         </IconButton>
       </Tooltip>
     </>
@@ -416,6 +417,15 @@ const columns = [{
         )
       })
   }
+}, {
+  id: 'rxBytes',
+  label: 'Sent Bytes',
+  format: (val, obj) => {
+    if (!val) return '-'
+
+    return <div>todo</div>
+  },
+  hide: true
 }, {
   id: 'sysTimes',
   label: 'Sys Time',

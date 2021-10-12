@@ -243,6 +243,10 @@ export function mergeMetrics(
       memAvail: getMetric(metrics, id, 'sys.mem.avail', true),
       fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
       fsSize: getMetric(metrics, id, 'sys.fs.size', false),
+      txBytes: getMetric(metrics, id, 'sys.net.tx_bytes', false),
+      txPackets: getMetric(metrics, id, 'sys.net.tx_packets', false),
+      rxBytes: getMetric(metrics, id, 'sys.net.rx_bytes', false),
+      rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
       sanity: getSanity(metrics, id),
       pluginStatus: getPluginStatus(plugins[id.toUpperCase()])
     }
