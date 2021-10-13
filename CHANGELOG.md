@@ -3,6 +3,32 @@
 The following are some notable changes to the UI
 
 
+## [1.6.0](https://github.com/sagecontinuum/sage-gui/compare/v1.4.0...v1.6.0) (2021-10-13)
+
+
+### Features
+
+* **admin:** add "Latest Available Audio" page ([2f3a974](https://github.com/sagecontinuum/sage-gui/commit/2f3a974fb9934dd3a8d72d0526b34af7174550e6))
+* **admin:** add basic plugin status chart ([a2fcc40](https://github.com/sagecontinuum/sage-gui/commit/a2fcc40178484bf7c6bd8773f476b7425b6d76de))
+* **admin:** add latest image/audio to node view ([a2bf299](https://github.com/sagecontinuum/sage-gui/commit/a2bf299dfa22fc35ce8eb0e389e9b82057661753))
+* **admin:** support live geo data ([686d812](https://github.com/sagecontinuum/sage-gui/commit/686d81215bc32e49c55764ad4d7ce58f4f1d378e))
+* **admin:** support non-sorting menus ([25030c7](https://github.com/sagecontinuum/sage-gui/commit/25030c7ff7b907c34979c01b949ea2ae9dc9cd37))
+* **ecr:** crude version of "featured apps" ([b13f59a](https://github.com/sagecontinuum/sage-gui/commit/b13f59a4c98b93778778a5b71688507d9b84f658))
+
+
+### Bug Fixes
+
+* **admin:** add location column (and allow missing meta) ([411b2d2](https://github.com/sagecontinuum/sage-gui/commit/411b2d20cb827a3330c3802eb621c6789bd308fb))
+* **admin:** exclude empty lists in plugin chart (for now) ([1202890](https://github.com/sagecontinuum/sage-gui/commit/1202890cb0330e5e8a3a22f9caedd79a5cde33c2))
+* **admin:** fix sorting for undefined vals ([a1d215e](https://github.com/sagecontinuum/sage-gui/commit/a1d215e2c3700f18717846af72b115c74d1bf828))
+* **admin:** fix/swap influx dash links ([c1f154c](https://github.com/sagecontinuum/sage-gui/commit/c1f154cb9b3c9060daa24f85250afead6a5b9cb2))
+* **admin:** replace thermal link icon (WIP) ([cd59578](https://github.com/sagecontinuum/sage-gui/commit/cd5957810b00e97bf974c9e103685855fbf75028))
+* **admin:** update docs links; minor style fixes ([64a8c0d](https://github.com/sagecontinuum/sage-gui/commit/64a8c0de91f1d1c8162ae881ffbb29db4cdce14a))
+* **ecr:** improve validation ([967388c](https://github.com/sagecontinuum/sage-gui/commit/967388cbe4ad0690221cb42edc826ca21d77b557))
+* **ecr:** minor display fixes ([eaa12b6](https://github.com/sagecontinuum/sage-gui/commit/eaa12b61dad74f89b76f379452bbbcc0fd3db3ea))
+* **ecr:** remove build status from "explore" ([4ed3556](https://github.com/sagecontinuum/sage-gui/commit/4ed35564d888b3ec30cb60a90457b5a31fb68bcf))
+* **ecr:** remove uuid references ([f42b247](https://github.com/sagecontinuum/sage-gui/commit/f42b2479454f1f7ad90884c9f25de79a6d605a4b))
+
 ## [1.5.0](https://github.com/sagecontinuum/sage-gui/compare/v1.4.0...v1.5.0) (2021-09-30)
 
 
