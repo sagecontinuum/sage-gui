@@ -10,7 +10,7 @@ import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
 import NodeView from './views/node/Node'
-//import SuryaView from './views/surya/Surya'
+import SuryaView from './views/surya/Surya'
 import AudioView from './views/audio/LatestAudio'
 import StressView from './views/stress/Stress'
 
