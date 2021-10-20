@@ -102,7 +102,7 @@ export default function TestView() {
     setLoading(true)
     BH.getSanityChart()
       .then((data) => {
-        const {bins, chartData } = getChartData(data)
+        const { bins, chartData } = getChartData(data)
         setBins(bins)
         setChartData(chartData)
       }).finally(() => setLoading(false))

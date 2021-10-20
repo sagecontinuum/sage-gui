@@ -1,11 +1,11 @@
 /* eslint-disable react/display-name */
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components'
 import {useLocation } from 'react-router-dom'
 
-import Divider from '@material-ui/core/Divider'
-import Alert from '@material-ui/lab/Alert'
+import Alert from '@mui/material/Alert'
 
+import {Tabs, Tab} from '../../../components/tabs/Tabs'
 import Table from '../../../components/table/Table'
 import Charts from '../status/charts/Charts'
 import { useProgress } from '../../../components/progress/ProgressProvider'
@@ -18,77 +18,50 @@ import * as SES from '../../apis/ses'
 import * as utils from '../../../components/utils/units'
 import columns, { getColorClass } from '../status/columns'
 
-import { mergeMetrics } from '../status/Status'
-
+import {queryData, filterData, mergeMetrics} from '../status/statusDataUtils'
 
 const TIME_OUT = 5000
-const PRIMARY_KEY = 'id'
 
-
-
-
-// simplify dashboard by including a subset of column
+// ignore some columns to simplify table
 const ignoreColumns = [
-  'kind', 'project', 'location', 'data', 'uptimes', 'memTotal', 'fsSize'
+  'kind', 'project', 'elaspedTimes',  'location', 'data',
+  'uptimes', 'memTotal', 'fsSize', 'temp'
 ]
-let cols = columns.filter(col => !ignoreColumns.includes(col.id))
+const cols = columns.filter(col => !ignoreColumns.includes(col.id))
 
-// replace last updated
-cols = cols.filter(col => col.id != 'elaspedTimes')
-cols.push({
-  id: 'rpi',
-  label: 'RPi last updated',
-  format: (_, obj) => {
-    if (!obj || !obj.elaspedTimes) return '-'
+const simpleColumns = [
+  ...cols,
+  {
+    id: 'rpi',
+    label: 'RPi last updated',
+    format: (_, obj) => {
+      if (!obj || !obj.elaspedTimes) return '-'
 
-    const val = obj.elaspedTimes['rpi']
-    return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
-      {utils.msToTime(val)}
-    </b>
-  }
-}, {
-  id: 'nx',
-  label: 'NX last updated',
-  format: (_, obj) => {
-    if (!obj || !obj.elaspedTimes) return '-'
-
-    const val = obj.elaspedTimes['nx']
-    return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
-      {utils.msToTime(val)}
-    </b>
-  }
-})
-
-
-
-
-function queryData(data: object[], query: string) {
-  return data.filter(row =>
-    Object.values(row)
-      .join('').toLowerCase()
-      .includes(query.toLowerCase())
-  )
-}
-
-
-function filterData(data: object[], state: object) {
-  const filteredRows = data.filter(row => {
-
-    let keep = true
-    for (const [field, filters] of Object.entries(state)) {
-      if (!filters.length) continue
-
-      if (!filters.includes(row[field])) {
-        keep = false
-        break
-      }
+      const val = obj.elaspedTimes['rpi']
+      return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
+        {utils.msToTime(val)}
+      </b>
     }
+  }, {
+    id: 'nx',
+    label: 'NX last updated',
+    format: (_, obj) => {
+      if (!obj || !obj.elaspedTimes) return '-'
 
-    return keep
-  })
-
-  return filteredRows
-}
+      const val = obj.elaspedTimes['nx']
+      return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
+        {utils.msToTime(val)}
+      </b>
+    }
+  }, {
+    id: 'ip',
+    label: 'IP',
+    hide: true,
+    format: (val) => {
+      return val && Object.keys(val).length ? val : '-'
+    }
+  }
+]
 
 
 
@@ -105,7 +78,7 @@ const initialState = {
 function getFilterState(params) {
   let init = {...initialState}
   for (const [key, val] of params) {
-    if (['query', 'details'].includes(key)) continue
+    if (['query'].includes(key)) continue
     init[key] = val.split(',')
   }
 
@@ -116,10 +89,8 @@ function getFilterState(params) {
 export default function StatusView() {
   const params = useParams()
 
+  const view = Number((params.get('view') || '1').slice(-1)) - 1  // covert to tab index
   const query = params.get('query') || ''
-  const status = params.get('status')
-  const project = params.get('project')
-  const location = params.get('location')
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
@@ -127,14 +98,9 @@ export default function StatusView() {
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
 
-  // selected
-  const [selected, setSelected] = useState(null)
-
-  // ticker of recent activity
-  // const [loadingTicker, setLoadingTicker] = useState(false)
-  const [activity, setActivity] = useState(null)
-
   const [lastUpdate, setLastUpdate] = useState(null)
+
+  const [tabIdx, setTabIdx] = useState(view || 0)
 
   const dataRef = useRef(null)
   dataRef.current = data
@@ -186,81 +152,60 @@ export default function StatusView() {
     return () => {
       clearTimeout(handle)
     }
-  }, [])
+  }, [setLoading])
+
+
+  const updateAll = useCallback(() => {
+    const filterState = getFilterState(params)
+    let filteredData = queryData(data, query)
+    filteredData = filterData(filteredData, filterState)
+
+    if (tabIdx == 0) {
+      filteredData = data.filter(o => o.ip?.split('.')[2] == '11')
+    } else if (tabIdx == 1) {
+      filteredData = data.filter(o => o.ip?.split('.')[2] == '12')
+    } else if (tabIdx == 2) {
+      filteredData = data.filter(o => o.ip?.split('.')[2] == '13')
+    }
+
+    setFiltered(filteredData)
+  }, [data, tabIdx, query])
 
 
   // updating on state changes
   useEffect(() => {
     if (!data) return
-    updateAll(data)
-
-    // force mapbox rerender and avoid unnecessary rerenders
-    setUpdateID(prev => prev + 1)
-  }, [query, status, project, location])
+    updateAll()
+  }, [data, tabIdx, updateAll])
 
 
-  // re-apply updates in case of sorting or such (remove?)
-  useEffect(() => {
-    if (!data) return
-    updateAll(data)
-  }, [data])
-
-
-  // activity updates
-  useEffect(() => {
-    if (selected?.length !== 1) {
-      setActivity(null)
-      return
-    }
-  }, [selected])
-
-
-  // filter data (todo: this can probably be done more efficiently)
-  const updateAll = (d) => {
-    const filterState = getFilterState(params)
-    let filteredData = queryData(d, query)
-    filteredData = filterData(filteredData, filterState)
-
-    setFiltered(filteredData)
-  }
-
-
-  const handleSelect = (sel) => {
-    setSelected(sel.objs.length ? sel.objs : null)
-  }
 
 
   return (
     <Root>
-      <Overview className="flex">
-        <ChartsContainer className="flex" >
-          {selected?.length == 1 &&
-            <div className="flex items-center">
-              <h3>
-                {selected[0].id}
-              </h3>
-            </div>
-          }
+      <br/>
+      <Tabs
+        value={tabIdx}
+        onChange={(_, idx) => setTabIdx(idx)}
+        aria-label="Build phase tabs"
+      >
+        <Tab label="Phase 1" idx={0} />
+        <Tab label="Phase 2" idx={1} />
+        <Tab label="Phase 3" idx={2} />
+      </Tabs>
 
-          <Charts
-            data={filtered}
-            selected={selected}
-            activity={activity}
-            lastUpdate={lastUpdate}
-          />
-        </ChartsContainer>
+      <Overview>
+        <Charts data={filtered} />
       </Overview>
+
 
       <TableContainer>
         {filtered &&
           <Table
-            primaryKey={PRIMARY_KEY}
+            primaryKey="id"
             rows={filtered}
-            columns={cols}
+            columns={simpleColumns}
             enableSorting
-            // onSearch={handleQuery}
-            // onColumnMenuChange={() => {}}
-            onSelect={handleSelect}
           />
         }
       </TableContainer>
@@ -273,21 +218,17 @@ export default function StatusView() {
 }
 
 const Root = styled.div`
+
 `
 
 const Overview = styled.div`
+  margin: 30px 10px;
 
-  top: 60px;
-  z-index: 100;
-  padding: 20px 0 10px 0;
-  background: #fff;
-  border-bottom: 1px solid #f2f2f2;
+  .summary-bar {
+    margin: 0 20px 0 0;
+    align-self: center;
+  }
 `
-
-const ChartsContainer = styled.div`
-  margin: 0px 20px;
-`
-
 
 const TableContainer = styled.div`
 `
