@@ -96,27 +96,14 @@ export default function App() {
                 <Route exact path="/">
                   <Redirect to="/status" />
                 </Route>
-                <Route path="/status">
-                  <StatusView />
-                </Route>
-                <Route path="/tests">
-                  <TestView />
-                </Route>
-                {/*<Route path="/surya">
-                  <SuryaView />
-                </Route>*/}
-                <Route path="/audio">
-                  <AudioView />
-                </Route>
-                <Route path="/stress">
-                  <StressView />
-                </Route>
-                <Route path="/node/:node">
-                  <NodeView />
-                </Route>
-                <Route path="*">
-                  <NotFound />
-                </Route>
+
+                <Route path="/status" component={StatusView} />
+                <Route path="/tests" component={TestView} />
+                <Route path="/audio" component={AudioView} />
+                <Route path="/stress" component={StressView} />
+                <Route path="/node/:node" component={NodeView} />
+                <Route path="/surya" component={SuryaView } />
+                <Route path="*" component={NotFound} />
               </Switch>
             </ProgressProvider>
           </Container>

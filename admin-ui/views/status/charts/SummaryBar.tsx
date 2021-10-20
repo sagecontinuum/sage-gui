@@ -46,7 +46,7 @@ export default function SummaryBox(props: StatusProps) {
 
 
 const Root = styled.div`
-  margin-bottom: 30px;
+
 `
 
 const Bar = styled.div`

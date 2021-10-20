@@ -16,49 +16,14 @@ import Charts from './charts/Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
+import {queryData, filterData, mergeMetrics} from './statusDataUtils'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
 import * as SES from '../../apis/ses'
-import config from '../../../config'
 
 
-const ELASPED_THRES = 90000
 const TIME_OUT = 5000
-const PRIMARY_KEY = 'id'
-
-const HOST_SUFFIX_MAPPING = config.admin.hostSuffixMapping
-
-
-
-function queryData(data: object[], query: string) {
-  return data.filter(row =>
-    Object.values(row)
-      .join('').toLowerCase()
-      .includes(query.toLowerCase())
-  )
-}
-
-
-function filterData(data: object[], state: object) {
-  const filteredRows = data.filter(row => {
-
-    let keep = true
-    for (const [field, filters] of Object.entries(state)) {
-      if (!filters.length) continue
-
-      if (!filters.includes(row[field])) {
-        keep = false
-        break
-      }
-    }
-
-    return keep
-  })
-
-  return filteredRows
-}
-
 
 
 const getOptions = (data: object[], field: string) : Option[] =>
@@ -70,190 +35,6 @@ const getOptions = (data: object[], field: string) : Option[] =>
 const useParams = () =>
   new URLSearchParams(useLocation().search)
 
-
-function mergeParams(params: URLSearchParams, field: string, val: string) : string  {
-  const str = params.get(field)
-  const existing = str?.length ? str.split(',') : []
-
-  if (existing.includes(val)) {
-    existing.splice(existing.indexOf(val), 1)
-    return existing.join(',')
-  }
-
-
-  return val ? [...existing, val].join(',') : existing.join(',')
-}
-
-
-
-function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
-  const byHost = {}
-
-  Object.keys(metrics[nodeID]).forEach(host => {
-
-    const timestamp = metrics[nodeID][host]['sys.uptime'][0].timestamp
-
-    const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
-
-    const suffix = host.split('.')[1]
-    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-    byHost[key] = elapsedTime
-  })
-
-  return byHost
-}
-
-
-function getMetric(
-  aggMetrics: BH.AggMetrics,
-  nodeID: string,
-  metricName: string,
-  latestOnly = true
-) {
-  const metricObjs = aggMetrics[nodeID]
-
-  const valueObj = {}
-  Object.keys(metricObjs).forEach(host => {
-    const m = metricObjs[host][metricName]
-    if (!m) return
-
-    const val = latestOnly ? m[m.length - 1].value : m
-
-    const suffix = host.split('.')[1]
-    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-    valueObj[key] = val
-  })
-
-  return valueObj
-}
-
-
-
-function getSanity(
-  metrics: BH.AggMetrics,
-  nodeID: string
-) {
-  const metricObjs = metrics[nodeID]
-
-  // todo(nc): assume data is only attached to nx?
-  // update when dealing with blades?
-  // todo(nc): really should organize this better.
-  // i.e., {warnings, failed, details: [...]}
-  let valueObj
-  Object.keys(metricObjs).forEach(host => {
-
-    if (!host.includes('ws-nxcore'))
-      return
-
-    const metric = metricObjs[host]
-    if (!metric) return
-
-    let passed = 0
-    let warnings = 0
-    let failed = 0
-
-    // determine pass ratio
-    Object.keys(metric).forEach(key => {
-      if (!key.includes('sys.sanity_status'))
-        return
-
-      const {value, meta} = metric[key][0]
-      const severity = meta['severity']
-
-      passed = value == 0 ? passed + 1 : passed
-      warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
-      failed = value > 0 && severity == 'fatal' ? failed + 1 : failed
-    })
-
-    valueObj = metric
-    valueObj.passed = passed
-    valueObj.warnings = warnings
-    valueObj.failed = failed
-  })
-
-  return valueObj
-}
-
-
-
-function getPluginStatus(data) {
-  if (!data) return {}
-
-  let entry = {
-    details: data,
-    passed: 0,
-    failed: 0
-  }
-
-  data.forEach(obj => {
-    const {value} = obj
-
-    entry.passed = value == 0 ? entry.passed + 1 : entry.passed
-    // currently not flagging warnings
-    // valueObj.warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
-    entry.failed = value > 0 ? entry.failed + 1 : entry.failed
-  })
-
-  return entry
-}
-
-
-const determineStatus = (elaspedTimes: {[host: string]: number}) => {
-  if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
-    return 'not reporting'
-  return 'reporting'
-}
-
-
-// join beehive and beekeeper data, basically
-export function mergeMetrics(
-  data: BK.State[], metrics: BH.AggMetrics, temps, plugins: SES.LatestState
-) {
-
-  const joinedData = data.map(nodeObj => {
-    const id = nodeObj.id.toLowerCase()
-    if (!(id in metrics)) return nodeObj
-
-    const elaspedTimes = getElaspedTimes(metrics, id)
-
-    // get vsn from arbitrary host
-    const someHost = Object.keys(metrics[id])[0]
-    const vsn = metrics[id][someHost]['sys.uptime'][0].meta.vsn
-
-
-    const nodeTemps = (temps[id] && 'iio.in_temp_input' in temps[id]) ?
-      temps[id]['iio.in_temp_input'] : null
-
-    const temp = nodeTemps ? nodeTemps[nodeTemps.length-1].value / 1000 : -999
-
-    return {
-      ...nodeObj,
-      vsn,
-      temp,
-      status: determineStatus(elaspedTimes),
-      elaspedTimes,
-      lat: getMetric(metrics, id, 'sys.gps.lat', true).nx,
-      lng: getMetric(metrics, id, 'sys.gps.lon', true).nx,
-      alt: getMetric(metrics, id, 'sys.gps.alt', true).nx,
-      uptimes: getMetric(metrics, id, 'sys.uptime'),
-      sysTimes: getMetric(metrics, id, 'sys.time'),
-      cpu: getMetric(metrics, id, 'sys.cpu_seconds', false),
-      memTotal: getMetric(metrics, id, 'sys.mem.total', true),
-      memFree: getMetric(metrics, id, 'sys.mem.free', true),
-      memAvail: getMetric(metrics, id, 'sys.mem.avail', true),
-      fsAvail: getMetric(metrics, id, 'sys.fs.avail', false),
-      fsSize: getMetric(metrics, id, 'sys.fs.size', false),
-      txBytes: getMetric(metrics, id, 'sys.net.tx_bytes', false),
-      txPackets: getMetric(metrics, id, 'sys.net.tx_packets', false),
-      rxBytes: getMetric(metrics, id, 'sys.net.rx_bytes', false),
-      rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
-      sanity: getSanity(metrics, id),
-      pluginStatus: getPluginStatus(plugins[id.toUpperCase()])
-    }
-  })
-
-  return joinedData
-}
 
 
 const initialState = {
@@ -305,13 +86,7 @@ export default function StatusView() {
   const [updateID, setUpdateID] = useState(0)
   const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Dell'>('all')
 
-  // selected
   const [selected, setSelected] = useState(null)
-
-  // ticker of recent activity
-  // const [loadingTicker, setLoadingTicker] = useState(false)
-  const [activity, setActivity] = useState(null)
-
   const [lastUpdate, setLastUpdate] = useState(null)
 
   const dataRef = useRef(null)
@@ -384,23 +159,6 @@ export default function StatusView() {
   }, [data])
 
 
-  // activity updates
-  useEffect(() => {
-    if (selected?.length !== 1) {
-      setActivity(null)
-      return
-    }
-
-    /* disabling node metric history for now
-    setLoadingTicker(true)
-    const id = selected[0].id
-    BH.getNodeActivity(id)
-      .then(activity => setActivity(activity))
-      .finally(() => setLoadingTicker(false))
-    */
-  }, [selected])
-
-
   // filter data (todo: this can probably be done more efficiently)
   const updateAll = (d) => {
     const filterState = getFilterState(params)
@@ -454,6 +212,12 @@ export default function StatusView() {
     <Root>
       <Overview className="flex">
         <ChartsContainer className="flex column" >
+          {filtered && !selected?.length &&
+            <ChartsTitle>
+              {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
+            </ChartsTitle>
+          }
+
           {selected?.length == 1 &&
             <div className="flex items-center">
               <h3>
@@ -462,12 +226,18 @@ export default function StatusView() {
             </div>
           }
 
-          <Charts
-            data={filtered}
-            selected={selected}
-            activity={activity}
-            lastUpdate={lastUpdate}
-          />
+          {selected?.length > 1 &&
+            <h2>{selected.map(o => o.id).join(', ')}</h2>
+          }
+
+          {!selected?.length &&
+            <Charts
+              data={filtered}
+              selected={selected}
+              column
+              //lastUpdate={lastUpdate}
+            />
+          }
         </ChartsContainer>
 
         {filtered &&
@@ -482,7 +252,7 @@ export default function StatusView() {
       <TableContainer>
         {filtered &&
           <Table
-            primaryKey={PRIMARY_KEY}
+            primaryKey="id"
             rows={filtered}
             columns={columns}
             enableSorting
@@ -604,6 +374,11 @@ const Overview = styled.div`
 const ChartsContainer = styled.div`
   margin: 0px 20px;
   min-width: 400px;
+`
+
+const ChartsTitle = styled.h2`
+  margin-top: 0;
+  margin-bottom: 36px;
 `
 
 

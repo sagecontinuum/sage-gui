@@ -67,8 +67,9 @@ function getStatus(data: BK.State[]) : Status {
 
 type Props = {
   data: {id: string}[]
-  selected: {id: string}[]
-  lastUpdate: string
+  selected?: {id: string}[]
+  column?: boolean
+  // lastUpdate: string
 }
 
 
@@ -76,7 +77,8 @@ export default function Charts(props: Props) {
   const {
     data,
     selected,
-    lastUpdate
+    column
+    // lastUpdate
   } = props
 
   const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
@@ -115,58 +117,33 @@ export default function Charts(props: Props) {
   if (!data) return <></>
 
   return (
-    <Root>
-      {selected?.length > 1 &&
-        <h2>{selected.map(o => o.id).join(', ')}</h2>
-      }
+    <Root className={`${column ? 'flex column' : 'flex flex-grow'} space-between`}>
+      <div className="summary-bar">
+        <SummaryBar
+          values={statuses}
+          color={barColors}
+        />
+      </div>
 
-      {!selected?.length &&
-        <Title>
-          {data.length == 34 && 'All '}{data.length} Node{data.length > 1 ? 's' : ''} | <small>{lastUpdate}</small>
-        </Title>
-      }
-
-      {!selected?.length &&
-        <div>
-          <SummaryBar
-            values={statuses}
-            color={barColors}
-          />
-        </div>
-
-      }
-
-      {!selected?.length &&
-        <div className="flex gap flex-grow">
-          <SummaryBox label="Tests" value={issues.tests}/>
-          <SummaryBox label="Plugins" value={issues.plugins}/>
-          <SummaryBox label="Temps" value={issues.temps}/>
-          <SummaryBox label="FS Util" value={'n/a'}/>
-        </div>
-      }
-
-      <ChartsContainer>
-        <StatusChart></StatusChart>
-      </ChartsContainer>
+      <div className="flex gap summary-boxes">
+        <SummaryBox label="Tests" value={issues.tests}/>
+        <SummaryBox label="Plugins" value={issues.plugins}/>
+        <SummaryBox label="Temps" value={issues.temps}/>
+        <SummaryBox label="FS Util" value={'n/a'}/>
+      </div>
     </Root>
   )
 }
 
 const Root = styled.div`
-  flex-grow: 1;
+
+  .summary-bar {
+    flex-grow: 1;
+    margin-bottom: 30px;
+  }
+
+  .summary-boxes {
+    flex-grow: 1;
+  }
 `
 
-const Title = styled.h2`
-  margin-top: 0;
-  margin-bottom: 36px;
-`
-
-const ChartsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const StatusChart = styled.div`
-
-
-`

@@ -1,9 +1,8 @@
 /* eslint-disable react/display-name */
 import React from 'react'
-import styled, { ThemeConsumer } from 'styled-components'
+import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
-// import ErrorIcon from '@mui/icons-material/ErrorRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import Dot from '@mui/icons-material/FiberManualRecord'
@@ -17,7 +16,6 @@ import ThermoIcon from '@mui/icons-material/ThermostatRounded'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '../../../components/utils/units'
-
 import * as BH from '../../apis/beehive'
 
 import config from '../../../config'
@@ -247,7 +245,6 @@ const FSItem = styled.div`
 
 
 
-// todo(nc): remove rest of assumptions about hosts
 const columns = [{
   id: 'sanity',
   label: 'Tests',
@@ -337,11 +334,12 @@ const columns = [{
 
     return <>
       <span className={getColorClass(val, 70, 65)}>
-        {val.toFixed(1)}
-      </span>&nbsp;
+        {val.toFixed(1)}°C
+      </span>
+      {/* for °F
       <small className="muted">
         ({(val * 1.8 + 32).toFixed(1)} °F)
-      </small>
+      </small>*/}
     </>
   }
 }, {
@@ -376,7 +374,9 @@ const columns = [{
     if (!val) return '-'
 
     return Object.keys(val).map(host =>
-      <div key={host}>{val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}</div>
+      <div key={host}>
+        {val[host]?.reduce((acc, o) => acc + o.value, 0).toFixed(2)}
+      </div>
     )
   },
   hide: true
@@ -420,7 +420,7 @@ const columns = [{
 }, {
   id: 'rxBytes',
   label: 'Sent Bytes',
-  format: (val, obj) => {
+  format: (val) => {
     if (!val) return '-'
 
     return <div>todo</div>
