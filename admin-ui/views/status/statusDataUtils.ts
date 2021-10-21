@@ -215,3 +215,23 @@ export function mergeMetrics(
 
   return joinedData
 }
+
+
+
+const initialState = {
+  status: [],
+  project: [],
+  location: []
+}
+
+
+export function getFilterState(params) {
+  let init = {...initialState}
+  for (const [key, val] of params) {
+    if (['query'].includes(key)) continue
+    init[key] = val.split(',')
+  }
+
+  return init
+}
+

@@ -91,7 +91,7 @@ export default function Audio(props: Props) {
   }, [node, setLoading])
 
   return (
-    <Root>
+    <Root className="flex column">
       {audio &&
         <div>
           <div  className="flex justify-between">
@@ -122,9 +122,7 @@ export default function Audio(props: Props) {
       }
 
       {audio === null &&
-        <div>
-          <span className="muted">No audio available</span>
-        </div>
+        <p className="muted">No audio available</p>
       }
 
       {error &&
@@ -137,11 +135,4 @@ export default function Audio(props: Props) {
 }
 
 const Root = styled.div`
-  display: flex;
-  flex-direction: column;
-  img {
-
-    max-width: 100%;
-    margin: 1px;
-  }
 `

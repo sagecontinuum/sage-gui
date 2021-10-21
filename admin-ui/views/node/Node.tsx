@@ -36,28 +36,16 @@ export default function NodeView() {
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
 
-  const [error, setError] = useState(null)
+  const [error1, setError1] = useState(null)
+  const [error2, setError2] = useState(null)
+  const [error3, setError3] = useState(null)
 
   useEffect(() => {
-    BK.getNode(node)
-      .then(data => setMeta(data))
-      .catch(error => setError(error))
-
-    // todo(nc): to be replaced by entry in beekeeper?
     BH.getVSN(node.toLowerCase())
       .then(vsn => setVsn(vsn))
-      .catch(error => setError(error))
 
     setLoading(true)
-
     setLoadingTests(true)
-    BH.getSanityChart(node.toLowerCase())
-      .then((data) => {
-        const d = data[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
-        const bins = getMetricBins(Object.values(d))
-        setBins(bins)
-        setChartData(d)
-      }).finally(() => setLoadingTests(false))
 
     SES.getGroupedByPlugin(node)
       .then((data) => {
@@ -78,12 +66,24 @@ export default function NodeView() {
         const pluginBins = getMetricBins(Object.values(data))
         setPluginBins(pluginBins)
         setPluginData(data)
-      }).catch(() => {
-        setLoading(false)
-        setPluginData(null)
-      }).finally(() => {
-        setLoading(false)
-      })
+      }).catch((err) => setError1(err))
+      .finally(() => setLoading(false))
+
+    BH.getSanityChart(node.toLowerCase())
+      .then((data) => {
+        const d = data[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
+        const bins = getMetricBins(Object.values(d))
+        setBins(bins)
+        setChartData(d)
+      }).catch((err) => setError2(err))
+      .finally(() => setLoadingTests(false))
+
+
+    BK.getNode(node)
+      .then(data => setMeta(data))
+      .catch(err => setError3(err))
+
+
   }, [node, setLoading])
 
 
@@ -120,11 +120,9 @@ export default function NodeView() {
             }
           />
           }
-          {pluginData == null &&
-            <span className="muted">No plugin data available</span>
+          {(pluginData == null || error1) &&
+            <p className="muted">No plugin data available</p>
           }
-
-          <br/>
 
           <h2 className="no-margin">Sanity Tests</h2>
           {loadingTests && <CircularProgress/>}
@@ -150,6 +148,10 @@ export default function NodeView() {
               </div>
             }
           />
+          }
+
+          {error2 &&
+            <Alert severity="error">{error2.message}</Alert>
           }
 
           <h2>Node Details</h2>
@@ -183,8 +185,8 @@ export default function NodeView() {
             </table>
           }
 
-          {error &&
-            <Alert severity="error">{error.message}</Alert>
+          {error3 &&
+            <Alert severity="error">{error3.message}</Alert>
           }
 
         </Charts>
@@ -206,6 +208,10 @@ const Root = styled.div`
 
   table {
     max-width: 400px;
+  }
+
+  p {
+    margin-bottom: 30px;
   }
 `
 

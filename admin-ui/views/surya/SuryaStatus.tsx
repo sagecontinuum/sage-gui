@@ -18,7 +18,8 @@ import * as SES from '../../apis/ses'
 import * as utils from '../../../components/utils/units'
 import columns, { getColorClass } from '../status/columns'
 
-import {queryData, filterData, mergeMetrics} from '../status/statusDataUtils'
+import {queryData, filterData, mergeMetrics, getFilterState} from '../status/statusDataUtils'
+
 
 const TIME_OUT = 5000
 
@@ -56,10 +57,8 @@ const simpleColumns = [
   }, {
     id: 'ip',
     label: 'IP',
-    hide: true,
-    format: (val) => {
-      return val && Object.keys(val).length ? val : '-'
-    }
+    hide: false,
+    format: val => val ||  '-'
   }
 ]
 
@@ -68,22 +67,6 @@ const simpleColumns = [
 const useParams = () =>
   new URLSearchParams(useLocation().search)
 
-
-const initialState = {
-  status: [],
-  project: [],
-  location: []
-}
-
-function getFilterState(params) {
-  let init = {...initialState}
-  for (const [key, val] of params) {
-    if (['query'].includes(key)) continue
-    init[key] = val.split(',')
-  }
-
-  return init
-}
 
 
 export default function StatusView() {

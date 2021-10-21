@@ -16,7 +16,7 @@ import Charts from './charts/Charts'
 import QueryViewer from './QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
-import {queryData, filterData, mergeMetrics} from './statusDataUtils'
+import {queryData, filterData, mergeMetrics, getFilterState} from './statusDataUtils'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
@@ -35,24 +35,6 @@ const getOptions = (data: object[], field: string) : Option[] =>
 const useParams = () =>
   new URLSearchParams(useLocation().search)
 
-
-
-const initialState = {
-  status: [],
-  project: [],
-  location: []
-}
-
-
-function getFilterState(params) {
-  let init = {...initialState}
-  for (const [key, val] of params) {
-    if (['query', 'details'].includes(key)) continue
-    init[key] = val.split(',')
-  }
-
-  return init
-}
 
 
 type Option = {

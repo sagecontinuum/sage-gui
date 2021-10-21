@@ -33,7 +33,7 @@ export default function LatestData(props: Props) {
   }, [node])
 
   return (
-    <Root>
+    <Root className="flex column">
       <h2>Latest Images</h2>
       {images &&
         BH.cameraOrientations.map(pos => {
@@ -57,10 +57,8 @@ export default function LatestData(props: Props) {
       }
 
       {images === null &&
-        <span className="muted">No recent images available</span>
+        <p className="muted">No recent images available</p>
       }
-
-      <br/>
 
       <h2>Audio</h2>
       <Audio node={node} />
@@ -75,10 +73,7 @@ export default function LatestData(props: Props) {
 }
 
 const Root = styled.div`
-  display: flex;
-  flex-direction: column;
   img {
-
     max-width: 100%;
     margin: 1px;
   }
