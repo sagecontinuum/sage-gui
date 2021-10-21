@@ -145,7 +145,7 @@ export default function AppList() {
     history.push(path)
   }
 
-  if (!data) return <></>
+  if (!data && !error) return <></>
 
 
   return (
