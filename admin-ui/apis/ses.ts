@@ -7,9 +7,7 @@ function handleErrors(res) {
     return res
   }
 
-  return res.json().then(errorObj => {
-    throw Error(errorObj.error)
-  })
+  throw Error(res.status + (res.statusText ? ` - ${res.statusText}` : ''))
 }
 
 
@@ -41,7 +39,7 @@ export type LatestState = {
 
 
 export function getGroupedByPlugin(nodeId: string) : Promise<GroupedByPlugin> {
-  return get(`${url}/${nodeId}/by_plugin.json`)
+  return get(`${url}/${nodeId.toUpperCase()}/by_plugin.json`)
 }
 
 
