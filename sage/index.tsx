@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
-import { createTheme, ThemeProvider, Theme, StyledEngineProvider, adaptV4Theme } from '@mui/material/styles';
+import { createTheme, ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
@@ -30,7 +30,7 @@ declare module '@mui/styles/defaultTheme' {
 }
 
 
-const theme = createTheme(adaptV4Theme({
+const theme = createTheme({
   typography: {
     fontFamily: [
       'Roboto'
@@ -49,30 +49,25 @@ const theme = createTheme(adaptV4Theme({
       main: '#8166a0'
     }
   },
-  props: {
+  components: {
     MuiButtonBase: {
-      disableRipple: true,
+      defaultProps: {
+        disableRipple: true
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'none'
+        }
+      }
     },
     MuiTextField: {
-      size: 'small',
-      variant: 'outlined'
-    }
-  },
-  transitions: {
-  },
-  overrides: {
-    MuiButton: {
-      text: {
-        textTransform: 'none',
-      },
-    },
-    MuiTooltip: {
-      tooltip: {
-        fontSize: '.8em'
+      defaultProps: {
+        size: 'small',
+        variant: 'outlined'
       }
     }
-  },
-}))
+  }
+})
 
 
 const NavMenu = () =>
