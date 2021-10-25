@@ -263,7 +263,7 @@ const columns = [{
   id: 'id',
   label: 'ID',
   width: '100px',
-  format: (val) => <Link to={`node/${val}`}>{val}</Link>
+  format: (val) => <Link to={`/node/${val}`}>{val}</Link>
 }, {
   id: 'vsn',
   label: 'VSN',

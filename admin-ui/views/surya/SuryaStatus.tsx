@@ -25,8 +25,6 @@ const TIME_OUT = 5000
 
 const getColumn = (name) => columns.filter(c => c.id == name)[0]
 
-// ignore most columns to simplify table
-
 const simpleColumns = [
   getColumn('sanity'),
   getColumn('pluginStatus'),
@@ -34,7 +32,7 @@ const simpleColumns = [
     id: 'id',
     label: 'ID',
     width: '100px',
-    format: (val) => <Link to={`node/${val}?hours=12`}>{val}</Link>
+    format: (val) => <Link to={`/node/${val}?hours=12`}>{val}</Link>
   },
   {
     id: 'vsn',
@@ -69,8 +67,6 @@ const simpleColumns = [
   },
   getColumn('temp')
 ]
-
-
 
 
 
@@ -172,9 +168,9 @@ export default function StatusView() {
   }, [data, updateAll])
 
 
-  const getCountIndicator = (phase: string) => {
-    return byPhase[phase] ? `(${byPhase[phase].length})` : ''
-  }
+  const getCountIndicator = (phase: string) =>
+    byPhase[phase] ? `(${byPhase[phase].length})` : ''
+
 
 
   return (
@@ -191,7 +187,7 @@ export default function StatusView() {
       </Tabs>
 
       <Overview>
-        <Charts data={filtered} charts={null}/>
+        <Charts data={filtered} charts={null} />
       </Overview>
 
       <TableContainer>
