@@ -69,7 +69,7 @@ type Props = {
   data: {id: string}[]
   selected?: {id: string}[]
   column?: boolean
-  // lastUpdate: string
+  charts?: ('tests' | 'plugins' | 'temps' | 'fsutil')[]
 }
 
 
@@ -77,8 +77,8 @@ export default function Charts(props: Props) {
   const {
     data,
     selected,
-    column
-    // lastUpdate
+    column,
+    charts
   } = props
 
   const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
@@ -114,6 +114,8 @@ export default function Charts(props: Props) {
   }, [data, selectedIDs])
 
 
+  const showChart = (name) => charts != null && !charts || charts?.includes(name)
+
   if (!data) return <></>
 
   return (
@@ -126,10 +128,10 @@ export default function Charts(props: Props) {
       </div>
 
       <div className="flex gap summary-boxes">
-        <SummaryBox label="Tests" value={issues.tests}/>
-        <SummaryBox label="Plugins" value={issues.plugins}/>
-        <SummaryBox label="Temps" value={issues.temps}/>
-        <SummaryBox label="FS Util" value={'n/a'}/>
+        {showChart('tests') && <SummaryBox label="Tests" value={issues.tests}/>}
+        {showChart('plugins') && <SummaryBox label="Plugins" value={issues.plugins}/>}
+        {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
+        {showChart('fsutil') && <SummaryBox label="FS Util" value={'n/a'}/>}
       </div>
     </Root>
   )

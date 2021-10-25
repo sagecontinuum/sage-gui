@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components'
-import {useLocation } from 'react-router-dom'
+import { useParams, Link} from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
 
@@ -18,21 +18,28 @@ import * as SES from '../../apis/ses'
 import * as utils from '../../../components/utils/units'
 import columns, { getColorClass } from '../status/columns'
 
-import {queryData, filterData, mergeMetrics, getFilterState} from '../status/statusDataUtils'
+import { mergeMetrics } from '../status/statusDataUtils'
 
 
 const TIME_OUT = 5000
 
-// ignore some columns to simplify table
-const ignoreColumns = [
-  'kind', 'project', 'elaspedTimes',  'location', 'data',
-  'uptimes', 'memTotal', 'fsSize', 'temp'
-]
-const cols = columns.filter(col => !ignoreColumns.includes(col.id))
+const getColumn = (name) => columns.filter(c => c.id == name)[0]
+
+// ignore most columns to simplify table
 
 const simpleColumns = [
-  ...cols,
+  getColumn('sanity'),
+  getColumn('pluginStatus'),
   {
+    id: 'id',
+    label: 'ID',
+    width: '100px',
+    format: (val) => <Link to={`node/${val}?hours=12`}>{val}</Link>
+  },
+  {
+    id: 'vsn',
+    label: 'Label'
+  }, {
     id: 'rpi',
     label: 'RPi last updated',
     format: (_, obj) => {
@@ -57,29 +64,29 @@ const simpleColumns = [
   }, {
     id: 'ip',
     label: 'IP',
-    hide: false,
+    hide: true,
     format: val => val ||  '-'
-  }
+  },
+  getColumn('temp')
 ]
 
 
 
-const useParams = () =>
-  new URLSearchParams(useLocation().search)
 
 
 
 export default function StatusView() {
-  const params = useParams()
+  const {phase} = useParams()
 
-  const view = Number((params.get('view') || '1').slice(-1)) - 1  // covert to tab index
-  const query = params.get('query') || ''
+  const view = Number((phase || '1').slice(-1)) - 1  // covert to tab index
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
+
+  const [byPhase, setByPhase] = useState({phase1: null, phase2: null, phase3: null})
 
   const [lastUpdate, setLastUpdate] = useState(null)
 
@@ -139,29 +146,35 @@ export default function StatusView() {
 
 
   const updateAll = useCallback(() => {
-    const filterState = getFilterState(params)
-    let filteredData = queryData(data, query)
-    filteredData = filterData(filteredData, filterState)
+    let filteredData = data
+
+    const phase1 = data.filter(o => o.ip?.split('.')[2] == '11')
+    const phase2 = data.filter(o => o.ip?.split('.')[2] == '12')
+    const phase3 = data.filter(o => o.ip?.split('.')[2] == '13')
 
     if (tabIdx == 0) {
-      filteredData = data.filter(o => o.ip?.split('.')[2] == '11')
+      filteredData = phase1
     } else if (tabIdx == 1) {
-      filteredData = data.filter(o => o.ip?.split('.')[2] == '12')
+      filteredData = phase2
     } else if (tabIdx == 2) {
-      filteredData = data.filter(o => o.ip?.split('.')[2] == '13')
+      filteredData = phase3
     }
 
+    setByPhase({phase1, phase2, phase3})
     setFiltered(filteredData)
-  }, [data, tabIdx, query])
+  }, [data, tabIdx])
 
 
   // updating on state changes
   useEffect(() => {
     if (!data) return
     updateAll()
-  }, [data, tabIdx, updateAll])
+  }, [data, updateAll])
 
 
+  const getCountIndicator = (phase: string) => {
+    return byPhase[phase] ? `(${byPhase[phase].length})` : ''
+  }
 
 
   return (
@@ -172,15 +185,14 @@ export default function StatusView() {
         onChange={(_, idx) => setTabIdx(idx)}
         aria-label="Build phase tabs"
       >
-        <Tab label="Phase 1" idx={0} />
-        <Tab label="Phase 2" idx={1} />
-        <Tab label="Phase 3" idx={2} />
+        <Tab label={`NX flash ${getCountIndicator('phase1')}`} idx={0} component={Link} to="/surya/phase1" />
+        <Tab label={`Open build ${getCountIndicator('phase2')}`} idx={1} component={Link} to="/surya/phase2" />
+        <Tab label={`Long soak ${getCountIndicator('phase3')}`} idx={2} component={Link} to="/surya/phase3" />
       </Tabs>
 
       <Overview>
-        <Charts data={filtered} />
+        <Charts data={filtered} charts={null}/>
       </Overview>
-
 
       <TableContainer>
         {filtered &&
@@ -201,7 +213,6 @@ export default function StatusView() {
 }
 
 const Root = styled.div`
-
 `
 
 const Overview = styled.div`

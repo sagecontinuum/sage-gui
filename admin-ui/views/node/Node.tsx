@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -15,6 +15,24 @@ import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
 import LatestData from './LatestData'
 
 
+
+function getDate(hours, days) {
+  let d
+  if (hours) {
+    d = new Date()
+    d.setHours(d.getHours() - hours)
+  } else if (days) {
+    d = new Date()
+    d.setDate(d.getDate() - days)
+  } else {
+    d = new Date()
+    d.setDate(d.getDate() - 2)
+  }
+
+  return d
+}
+
+
 type MetricsObj = {
   [metric: string]: BH.Record[]
 }
@@ -22,6 +40,9 @@ type MetricsObj = {
 
 export default function NodeView() {
   const {node} = useParams()
+  const params = new URLSearchParams(useLocation().search)
+  const hours = params.get('hours')
+  const days = params.get('days')
 
   const { setLoading } = useProgress()
 
@@ -49,8 +70,7 @@ export default function NodeView() {
 
     SES.getGroupedByPlugin(node)
       .then((data) => {
-        var d = new Date()
-        d.setDate(d.getDate() - 2)
+        const d = getDate(hours, days)
 
         for (const key of Object.keys(data)) {
           // sort all the lists by time and limit by last 2 days
@@ -70,11 +90,19 @@ export default function NodeView() {
       .finally(() => setLoading(false))
 
     BH.getSanityChart(node.toLowerCase())
-      .then((data) => {
-        const d = data[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
-        const bins = getMetricBins(Object.values(d))
+      .then((sanity) => {
+        const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
+
+        const d = getDate(hours, days)
+
+        for (const key of Object.keys(data)) {
+          // sort all the lists by time and limit by last 2 days
+          data[key] = data[key].filter(obj => new Date(obj.timestamp) > d)
+        }
+
+        const bins = getMetricBins(Object.values(data))
         setBins(bins)
-        setChartData(d)
+        setChartData(data)
       }).catch((err) => setError2(err))
       .finally(() => setLoadingTests(false))
 
@@ -82,9 +110,7 @@ export default function NodeView() {
     BK.getNode(node)
       .then(data => setMeta(data))
       .catch(err => setError3(err))
-
-
-  }, [node, setLoading])
+  }, [node, setLoading, days, hours])
 
 
   return (
@@ -154,35 +180,39 @@ export default function NodeView() {
             <Alert severity="error">{error2.message}</Alert>
           }
 
-          <h2>Node Details</h2>
-          {meta &&
-            <table className="key-value-table">
-              <tbody>
-                <tr>
-                  <td>Status</td>
-                  <td className={meta.status == 'active' ? 'success' : ''}>
-                    <b>{meta.status}</b>
-                  </td>
-                </tr>
+          {!hours && !days &&
+            <>
+              <h2>Node Details</h2>
+              {meta &&
+                <table className="key-value-table">
+                  <tbody>
+                    <tr>
+                      <td>Status</td>
+                      <td className={meta.status == 'active' ? 'success' : ''}>
+                        <b>{meta.status}</b>
+                      </td>
+                    </tr>
 
-                {Object.entries(meta)
-                  .map(([key, val]) => {
-                    const label = key.replace(/_/g, ' ')
-                      .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-                    return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
-                  })
-                }
+                    {Object.entries(meta)
+                      .map(([key, val]) => {
+                        const label = key.replace(/_/g, ' ')
+                          .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                        return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
+                      })
+                    }
 
-                {meta.contact &&
-                <>
-                  <tr><td colSpan={2}>Contact</td></tr>
-                  <tr>
-                    <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
-                  </tr>
-                </>
-                }
-              </tbody>
-            </table>
+                    {meta.contact &&
+                    <>
+                      <tr><td colSpan={2}>Contact</td></tr>
+                      <tr>
+                        <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
+                      </tr>
+                    </>
+                    }
+                  </tbody>
+                </table>
+              }
+            </>
           }
 
           {error3 &&

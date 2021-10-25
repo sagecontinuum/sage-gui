@@ -96,7 +96,7 @@ export default function App() {
                 <Route path="/audio" component={AudioView} />
                 <Route path="/stress" component={StressView} />
                 <Route path="/node/:node" component={NodeView} />
-                <Route path="/surya" component={SuryaView } />
+                <Route path="/surya/:phase" component={SuryaView } />
                 <Route path="*" component={NotFound} />
               </Switch>
             </ProgressProvider>
