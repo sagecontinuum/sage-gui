@@ -16,25 +16,43 @@ type Props = {
   node: string
 }
 
-export default function LatestData(props: Props) {
+export default function RecentData(props: Props) {
   const {node} = props
 
   const [images, setImages] = useState<{[pos: string]: BH.Record}>()
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState()
 
+  const [total, setTotal] = useState<{[pos: string]: number}>()
+  const [progress, setProgress] = useState<{[pos: string]: number}>()
+
   useEffect(() => {
-    BH.getLatestImages(node.toLowerCase())
+    setLoading(true)
+    BH.getRecentImages(node.toLowerCase(), onStart, onProgress)
       .then(images => {
+        console.log('images', images)
+
         const hasData = !!Object.keys(images).filter(k => images[k]).length
         setImages(hasData ? images : null)
+        setLoading(false)
       }).catch((err) => {
         setError(err)
-      })
+      }).finally(() => setLoading(false))
   }, [node])
+
+
+  const onStart = (position, total) => {
+    setTotal(prev => ({...prev, [position]: total}))
+  }
+
+  const onProgress = (position, count) => {
+    console.log('progress', position, count)
+    setProgress(prev => ({...prev, [position]: count}))
+  }
 
   return (
     <Root className="flex column">
-      <h2>Latest Images</h2>
+      <h2>Recent Images</h2>
       {images &&
         BH.cameraOrientations.map(pos => {
           if (!images[pos])
@@ -56,7 +74,14 @@ export default function LatestData(props: Props) {
         })
       }
 
-      {images === null &&
+      {loading && total && progress &&
+        BH.cameraOrientations.map(pos => {
+          return total[pos] && total[pos] != progress[pos] &&
+            <span key={pos}><b>{pos}</b>: Searching {progress[pos]} of {total[pos]}</span>
+        })
+      }
+
+      {!loading && !images &&
         <p className="muted">No recent images available</p>
       }
 

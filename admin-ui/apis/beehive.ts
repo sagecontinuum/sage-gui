@@ -208,7 +208,11 @@ type StorageRecord = Record & {
 }
 
 
-async function _findLatestAvail(data: Record[]) : Promise<StorageRecord> {
+async function _findLatestAvail(
+  data: Record[],
+  position?: string,
+  onProgress?: (position: string, remaining: number) => void
+) : Promise<StorageRecord> {
   if (!data)
     return null
 
@@ -218,13 +222,19 @@ async function _findLatestAvail(data: Record[]) : Promise<StorageRecord> {
   )
 
   // sequentially attempt to fetch data until we get a 200 response (and include size)
-  let latest
+  let latest, i = 1
   for (const obj of data) {
     latest = await fetch(obj.value.toString())
       .then(res => {
+        if (onProgress) {
+          onProgress(position, i)
+        }
+
         const size = parseInt(res.headers.get('content-length'))
         return res.ok ? {...obj, size} : null
       })
+
+    i++
 
     if (latest) break
   }
@@ -234,7 +244,11 @@ async function _findLatestAvail(data: Record[]) : Promise<StorageRecord> {
 
 
 
-export async function getLatestImages(node: string) {
+export async function getRecentImages(
+  node: string,
+  onStart?: (position: string, total: number) => void,
+  onProgress?: (position: string, num: number) => void
+) {
   // requests for each orientation
   const reqs = cameraOrientations.map(pos => {
     const params = {
@@ -253,10 +267,19 @@ export async function getLatestImages(node: string) {
   // find latest in storage for each position
   const mapping = Promise.all(reqs)
     .then(async (data) => {
-      const proms = data.map(d => _findLatestAvail(d))
+      if (onStart) {
+        cameraOrientations.forEach((pos, i) => {
+          onStart(pos, data[i]?.length)
+        })
+      }
+
+      const proms = data.map((d, i) => {
+        const position = cameraOrientations[i]
+        return _findLatestAvail(d, position, onProgress)
+      })
       const dataList = await Promise.all(proms)
 
-      // reduce into mapping: {top: [...], left, [...], ... ,}
+      // reduce into mapping: {top: {...}, left, {...}, ... ,}
       const dataByPos = cameraOrientations.reduce((acc, pos, i) => ({
         ...acc,
         [pos]: dataList[i]
