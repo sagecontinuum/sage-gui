@@ -12,7 +12,9 @@ import TestView from './views/tests/Tests'
 import NodeView from './views/node/Node'
 import SuryaView from './views/surya/Surya'
 import AudioView from './views/audio/LatestAudio'
-import StressView from './views/stress/Stress'
+
+import Stress from './fiddle/Stress'
+import Timeline from './fiddle/Timeline'
 
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
@@ -87,16 +89,14 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Switch>
-                <Route exact path="/">
-                  <Redirect to="/status" />
-                </Route>
-
+                <Redirect exact from="/" to="status" />
                 <Route path="/status" component={StatusView} />
                 <Route path="/tests" component={TestView} />
                 <Route path="/audio" component={AudioView} />
-                <Route path="/stress" component={StressView} />
                 <Route path="/node/:node" component={NodeView} />
                 <Route path="/surya/:phase" component={SuryaView } />
+                <Route path="/fiddle/stress" component={Stress} />
+                <Route path="/fiddle/timeline" component={Timeline} />
                 <Route path="*" component={NotFound} />
               </Switch>
             </ProgressProvider>

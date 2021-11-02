@@ -114,7 +114,8 @@ export default function Charts(props: Props) {
   }, [data, selectedIDs])
 
 
-  const showChart = (name) => charts != null && !charts || charts?.includes(name)
+  const showChart = (name) =>
+    typeof charts == 'undefined' ? true : charts?.includes(name)
 
   if (!data) return <></>
 

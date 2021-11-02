@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import {fetchProjectMeta} from '../../apis/beekeeper'
+import {fetchProjectMeta} from '../apis/beekeeper'
 
-import * as BH from '../../apis/beehive'
+import * as BH from '../apis/beehive'
 
 
-export default function LatestAudio() {
+export default function Stress() {
 
   const [query, setQuery] = useState<object>()
   const [nodeIds, setNodeIds] = useState([])

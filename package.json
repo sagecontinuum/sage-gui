@@ -30,6 +30,7 @@
     "chart.js": "^2.9.4",
     "chartjs-plugin-datalabels": "^0.7.0",
     "colormap": "^2.3.2",
+    "d3": "^7.1.1",
     "mapbox-gl": "^2.1.1",
     "marked": "^2.0.4",
     "notistack": "^1.0.5",
