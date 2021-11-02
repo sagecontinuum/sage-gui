@@ -48,6 +48,18 @@ export type AggMetrics = {
 }
 
 
+// type for things like aggregation of sanity metrics
+export type MetricsObj = {
+  [metric: string]: Record[]
+}
+
+// (client side) record type for things stored in OSN
+export type StorageRecord = Record & {
+  size: number
+}
+
+
+
 
 function handleErrors(res) {
   if (res.ok) {
@@ -113,7 +125,8 @@ export async function getLatestTemp() {
 
 function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data)
-    return {}
+    return null
+
 
   let byNode = {}
   data.forEach(obj => {
@@ -183,7 +196,7 @@ function aggregatePerNode(data: Record[]) : AggMetrics {
 
 
 
-export async function getSanityChart(node?: string) : Promise<AggMetrics> {
+export async function getSanityChart(node?: string) : Promise<MetricsObj> {
   const params = {
     start: '-2d',
     filter: {
@@ -202,10 +215,6 @@ export async function getSanityChart(node?: string) : Promise<AggMetrics> {
 }
 
 
-
-type StorageRecord = Record & {
-  size: number
-}
 
 
 async function _findLatestAvail(
@@ -248,7 +257,7 @@ export async function getRecentImages(
   node: string,
   onStart?: (position: string, total: number) => void,
   onProgress?: (position: string, num: number) => void
-) {
+) : Promise<{[position: string]: StorageRecord}> {
   // requests for each orientation
   const reqs = cameraOrientations.map(pos => {
     const params = {

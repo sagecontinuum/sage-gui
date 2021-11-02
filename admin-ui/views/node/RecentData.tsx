@@ -19,7 +19,7 @@ type Props = {
 export default function RecentData(props: Props) {
   const {node} = props
 
-  const [images, setImages] = useState<{[pos: string]: BH.Record}>()
+  const [images, setImages] = useState<{[pos: string]: BH.StorageRecord}>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState()
 
@@ -30,8 +30,6 @@ export default function RecentData(props: Props) {
     setLoading(true)
     BH.getRecentImages(node.toLowerCase(), onStart, onProgress)
       .then(images => {
-        console.log('images', images)
-
         const hasData = !!Object.keys(images).filter(k => images[k]).length
         setImages(hasData ? images : null)
         setLoading(false)
@@ -46,7 +44,6 @@ export default function RecentData(props: Props) {
   }
 
   const onProgress = (position, count) => {
-    console.log('progress', position, count)
     setProgress(prev => ({...prev, [position]: count}))
   }
 

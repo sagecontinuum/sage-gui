@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { useParams, useLocation } from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
-import CircularProgress from '@mui/material/CircularProgress'
 
 import * as BH from '../../apis/beehive'
 import * as BK from '../../apis/beekeeper'
@@ -12,7 +11,7 @@ import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
 
-import LatestData from './LatestData'
+import RecentData from './RecentData'
 
 
 
@@ -33,10 +32,6 @@ function getDate(hours, days) {
 }
 
 
-type MetricsObj = {
-  [metric: string]: BH.Record[]
-}
-
 
 export default function NodeView() {
   const {node} = useParams()
@@ -46,9 +41,7 @@ export default function NodeView() {
 
   const { setLoading } = useProgress()
 
-  const [loadingTests, setLoadingTests] = useState(true)
-
-  const [chartData, setChartData] = useState<MetricsObj>(null)
+  const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
   const [bins, setBins] = useState<Date[]>(null)
 
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
@@ -57,18 +50,22 @@ export default function NodeView() {
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
 
+  const [loading1, setLoading1] = useState(null)
+  const [loading2, setLoading2] = useState(null)
+  const [loading3, setLoading3] = useState(null)
+
   const [error1, setError1] = useState(null)
   const [error2, setError2] = useState(null)
   const [error3, setError3] = useState(null)
 
   useEffect(() => {
+    setLoading(true)
+
     BH.getVSN(node.toLowerCase())
       .then(vsn => setVsn(vsn))
 
-    setLoading(true)
-    setLoadingTests(true)
-
-    SES.getGroupedByPlugin(node)
+    setLoading1(true)
+    const p1 = SES.getGroupedByPlugin(node)
       .then((data) => {
         const d = getDate(hours, days)
 
@@ -83,14 +80,25 @@ export default function NodeView() {
             delete data[key]
         }
 
+        if (!Object.keys(data).length) {
+          setPluginData(null)
+          return
+        }
+
         const pluginBins = getMetricBins(Object.values(data))
         setPluginBins(pluginBins)
         setPluginData(data)
       }).catch((err) => setError1(err))
-      .finally(() => setLoading(false))
+      .finally(() => setLoading1(false))
 
-    BH.getSanityChart(node.toLowerCase())
+    setLoading2(true)
+    const p2 = BH.getSanityChart(node.toLowerCase())
       .then((sanity) => {
+        if (!sanity) {
+          setSanityData(sanity)
+          return
+        }
+
         const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
 
         const d = getDate(hours, days)
@@ -102,14 +110,19 @@ export default function NodeView() {
 
         const bins = getMetricBins(Object.values(data))
         setBins(bins)
-        setChartData(data)
+        setSanityData(data)
       }).catch((err) => setError2(err))
-      .finally(() => setLoadingTests(false))
+      .finally(() => setLoading2(false))
 
-
-    BK.getNode(node)
+    setLoading3(true)
+    const p3 = BK.getNode(node)
       .then(data => setMeta(data))
       .catch(err => setError3(err))
+      .finally(() => setLoading3(false))
+
+    Promise.all([p1, p2, p3])
+      .then(() => setLoading(false))
+
   }, [node, setLoading, days, hours])
 
 
@@ -124,56 +137,64 @@ export default function NodeView() {
 
           <h2>Plugins</h2>
           {pluginData &&
-          <SanityChart
-            data={pluginData}
-            bins={pluginBins}
-            colorForValue={(val, obj) => {
-              if (val == null)
-                return colorMap.noValue
+            <SanityChart
+              data={pluginData}
+              bins={pluginBins}
+              colorForValue={(val, obj) => {
+                if (val == null)
+                  return colorMap.noValue
 
-              if (val <= 0)
-                return colorMap.green3
-              else if (obj.meta.severity == 'warning')
-                return colorMap.orange1
-              else
-                return colorMap.red4
-            }}
-            tooltip={(item) =>
-              <div>
-                {new Date(item.timestamp).toLocaleTimeString()}<br/>
-                {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
-              </div>
-            }
-          />
-          }
-          {(pluginData == null || error1) &&
-            <p className="muted">No plugin data available</p>
+                if (val <= 0)
+                  return colorMap.green3
+                else if (obj.meta.severity == 'warning')
+                  return colorMap.orange1
+                else
+                  return colorMap.red4
+              }}
+              tooltip={(item) =>
+                <div>
+                  {new Date(item.timestamp).toLocaleTimeString()}<br/>
+                  {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+                </div>
+              }
+            />
           }
 
-          <h2 className="no-margin">Sanity Tests</h2>
-          {loadingTests && <CircularProgress/>}
-          {chartData &&
-          <SanityChart
-            data={chartData}
-            bins={bins}
-            colorForValue={(val, obj) => {
-              if (val == null)
-                return colorMap.noValue
+          {!loading1 && !pluginData &&
+            <p className="muted">No (recent) plugin data available</p>
+          }
 
-              if (val <= 0)
-                return colorMap.green3
-              else if (obj.meta.severity == 'warning')
-                return colorMap.orange1
-              else
-                return colorMap.red4
-            }}
-            tooltip={(item) =>
-              <div>
-                {new Date(item.timestamp).toLocaleTimeString()}<br/>
-                {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-              </div>
-            }
-          />
+          {error1 &&
+            <Alert severity="error">{error1.message}</Alert>
+          }
+
+          <h2>Sanity Tests</h2>
+          {sanityData &&
+            <SanityChart
+              data={sanityData}
+              bins={bins}
+              colorForValue={(val, obj) => {
+                if (val == null)
+                  return colorMap.noValue
+
+                if (val <= 0)
+                  return colorMap.green3
+                else if (obj.meta.severity == 'warning')
+                  return colorMap.orange1
+                else
+                  return colorMap.red4
+              }}
+              tooltip={(item) =>
+                <div>
+                  {new Date(item.timestamp).toLocaleTimeString()}<br/>
+                  {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+                </div>
+              }
+            />
+          }
+
+          {!loading2 && !sanityData &&
+            <p className="muted">No sanity data available</p>
           }
 
           {error2 &&
@@ -215,15 +236,14 @@ export default function NodeView() {
             </>
           }
 
-          {error3 &&
+          {!loading3 && error3 &&
             <Alert severity="error">{error3.message}</Alert>
           }
 
         </Charts>
 
-
         <Data>
-          <LatestData node={node} />
+          <RecentData node={node} />
         </Data>
 
       </div>
@@ -246,6 +266,7 @@ const Root = styled.div`
 `
 
 const Charts = styled.div`
+  min-width: 925px;
   max-width: 925px;
   margin-bottom: 50px;
 `

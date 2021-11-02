@@ -122,7 +122,7 @@ export default function Audio(props: Props) {
       }
 
       {audio === null &&
-        <p className="muted">No audio available</p>
+        <p className="muted">No recent audio available</p>
       }
 
       {error &&

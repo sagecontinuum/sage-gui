@@ -8,29 +8,6 @@ import { useProgress } from '../../../components/progress/ProgressProvider'
 import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
 
 
-const CalTooltip = (date, data, dataKey) =>
-  <div>
-    <TTitle>{date.toDateString()}</TTitle>
-    {data &&
-        <>
-          <Count>{data[dataKey]} failed tests</Count>
-        </>
-    }
-  </div>
-
-
-
-const TTitle = styled.div`
-  font-size: 1.2em;
-  border-bottom: 1px solid #fff;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
-`
-
-const Count = styled.div`
-  font-size: 1.2em;
-`
-
 
 function getChartData(data) {
   const d = {}
@@ -142,6 +119,12 @@ export default function TestView() {
           }}
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
+          tooltip={(item) =>
+            <div>
+              {new Date(item.timestamp).toLocaleTimeString()} - {new Date(new Date(item.timestamp).getTime() + 60*60*1000).toLocaleTimeString()}<br/>
+              {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}<br/>
+            </div>
+          }
         />
       }
     </Root>
