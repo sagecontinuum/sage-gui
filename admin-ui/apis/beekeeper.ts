@@ -115,6 +115,42 @@ export async function fetchState() : Promise<State[]> {
 }
 
 
+// note: this code is duplicated until all requirments are settled
+export async function fetchSuryaState() : Promise<State[]> {
+  let monitorMeta, meta
+  try {
+    monitorMeta = await fetchMonitorData()
+    meta = await fetchProjectMeta()
+  } catch(e) {
+    // todo(nc): maybe give a warning to user?
+    // unreachable case is handled below
+  }
+
+  const [data] = await Promise.all([get(`${url}/state`)])
+
+  return data.data
+    //.filter(obj => monitorMeta ? includeList.includes(obj.id) : true)
+    .map(obj => {
+      const {id} = obj
+
+      const metaIsAvail = meta && id in meta
+      const monIsAvail = monitorMeta && id in monitorMeta
+
+      const { kind = null, project = null, location = null } = metaIsAvail ? meta[id] : {}
+      const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
+
+      return {
+        ...obj,
+        kind,
+        project,
+        location,
+        status: expectedState,
+        registration_event: new Date(obj.registration_event).getTime()
+      }
+    })
+}
+
+
 
 export async function getNode(id: string) : Promise<State[]> {
   const data = await get(`${url}/state/${id}`)

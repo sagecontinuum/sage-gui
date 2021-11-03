@@ -1,4 +1,4 @@
-import React, {  DOMElement, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import d3 from './d3'

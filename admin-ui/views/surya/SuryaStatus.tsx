@@ -36,7 +36,7 @@ const simpleColumns = [
   },
   {
     id: 'vsn',
-    label: 'Label'
+    label: 'VSN'
   }, {
     id: 'rpi',
     label: 'RPi last updated',
@@ -118,7 +118,7 @@ export default function StatusView() {
     let handle
     setLoading(true)
     const proms = [
-      BK.fetchState(),
+      BK.fetchSuryaState(),
       BH.getLatestMetrics(),
       BH.getLatestTemp(),
       SES.getLatestStatus()
@@ -175,7 +175,7 @@ export default function StatusView() {
 
   return (
     <Root>
-      <br/>
+      {lastUpdate && <h2>Lasted updated: {lastUpdate}</h2>}
       <Tabs
         value={tabIdx}
         onChange={(_, idx) => setTabIdx(idx)}
@@ -186,9 +186,11 @@ export default function StatusView() {
         <Tab label={`Long soak ${getCountIndicator('phase3')}`} idx={2} component={Link} to="/surya/phase3" />
       </Tabs>
 
-      <Overview>
-        <Charts data={filtered} charts={null} />
-      </Overview>
+      {['phase2', 'phase3'].includes(phase) && byPhase[phase]?.length > 0 &&
+        <Overview>
+          <Charts data={filtered} charts={null} />
+        </Overview>
+      }
 
       <TableContainer>
         {filtered &&
@@ -197,6 +199,7 @@ export default function StatusView() {
             rows={filtered}
             columns={simpleColumns}
             enableSorting
+            emptyNotice={`No nodes found in phase ${tabIdx+1}`}
           />
         }
       </TableContainer>
@@ -209,6 +212,11 @@ export default function StatusView() {
 }
 
 const Root = styled.div`
+
+  .MuiTabs-indicator {
+    transition: none;
+  }
+
 `
 
 const Overview = styled.div`
