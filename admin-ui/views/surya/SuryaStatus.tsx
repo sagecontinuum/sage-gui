@@ -99,11 +99,13 @@ export default function StatusView() {
     // get latest metrics
     function ping() {
       const handle = setTimeout(async () => {
-        const [metrics, temps, plugins] = await Promise.all([
+        const results = await Promise.allSettled([
           BH.getLatestMetrics(),
           BH.getLatestTemp(),
           SES.getLatestStatus()
         ])
+
+        const [metrics, temps, plugins] = results.map(r => r.value)
 
         setData(mergeMetrics(dataRef.current, metrics, temps, plugins))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
@@ -123,8 +125,9 @@ export default function StatusView() {
       BH.getLatestTemp(),
       SES.getLatestStatus()
     ]
-    Promise.all(proms)
-      .then(([state, metrics, temps, plugins]) => {
+    Promise.allSettled(proms)
+      .then((results) => {
+        const [state, metrics, temps, plugins] = results.map(r => r.value)
         setData(state)
 
         const allData = mergeMetrics(state, metrics, temps, plugins)

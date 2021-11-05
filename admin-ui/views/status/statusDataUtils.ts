@@ -209,7 +209,7 @@ export function mergeMetrics(
       rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
       ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value,
       sanity: getSanity(metrics, id),
-      pluginStatus: getPluginStatus(plugins[id.toUpperCase()])
+      pluginStatus: plugins ? getPluginStatus(plugins[id.toUpperCase()]) : {}
     }
   })
 
