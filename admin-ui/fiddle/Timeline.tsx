@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link} from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '../apis/beehive'
 
-import TimelineChart, {getMetricBins} from '../TimelineChart'
+import TimelineChart from '../TimelineChart'
 
 
 const node = '000048B02D05A0A4'
@@ -37,32 +37,50 @@ export default function Timeline(props: Props) {
   const hours = params.get('hours')
   const days = params.get('days')
 
-  const [data, setData] = useState<MetricsObj>(null)
+  const [data1, setData1] = useState<MetricsObj>(null)
+  const [data2, setData2] = useState<MetricsObj>(null)
 
-  const [error, setError] = useState(null)
+  const [error1, setError1] = useState(null)
+  const [error2, setError2] = useState(null)
 
 
   useEffect(() => {
-    BH.getSanityChart(node.toLowerCase())
+
+    // test one: influx aggregated data
+    BH.getDailyChart(node.toLowerCase())
+      .then((data) => {
+        console.log('data', data)
+        setData1(data)
+      }).catch((err) => setError2(err))
+
+
+    // test two: node sanity data
+    BH.getSanityChart(node.toLowerCase(), '-7d')
       .then((sanity) => {
         const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
+        setData2(data)
+      }).catch((err) => setError1(err))
 
-        const d = getDate(hours, days)
-
-        for (const key of Object.keys(data)) {
-        // sort all the lists by time and limit by last 2 days
-          data[key] = data[key].filter(obj => new Date(obj.timestamp) > d)
-        }
-
-        setData(data)
-      }).catch((err) => setError(err))
 
   }, [days, hours])
 
   return (
     <Root>
-      {data &&
-        <TimelineChart data={data} />
+      <h2>Nodes</h2>
+      {data1 &&
+        <TimelineChart
+          data={data1}
+          days={30}
+        />
+      }
+
+      {data2 && <h2>Node <Link to={`/node/${node}`}>{node}</Link></h2>}
+      {data2 &&
+        <TimelineChart
+          data={data2}
+          yFormat={l => l.split('.').pop()}
+          days={2}
+        />
       }
 
     </Root>

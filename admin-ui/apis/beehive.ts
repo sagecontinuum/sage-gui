@@ -196,9 +196,9 @@ function aggregatePerNode(data: Record[]) : AggMetrics {
 
 
 
-export async function getSanityChart(node?: string) : Promise<MetricsObj> {
+export async function getSanityChart(node?: string, start?: string) : Promise<MetricsObj> {
   const params = {
-    start: '-2d',
+    start: start || '-2d',
     filter: {
       name: 'sys.sanity_status.*',
     }
@@ -213,6 +213,29 @@ export async function getSanityChart(node?: string) : Promise<MetricsObj> {
 
   return byNode
 }
+
+
+export async function getDailyChart() : Promise<Record[]> {
+  const name = 'sanity_failure_total'
+
+  const params = {
+    bucket: 'downsampled',
+    start: '-30d',
+    filter: {
+      name
+    }
+
+  }
+
+  const failCounts = await getData(params)
+  let byNode = aggregatePerNode(failCounts)
+  Object.keys(byNode).forEach((id) => {
+    byNode[id] = byNode[id][name]
+  })
+
+  return byNode
+}
+
 
 
 
