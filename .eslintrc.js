@@ -50,8 +50,8 @@ module.exports = {
     'test': true,
     'describe': true,
     'navigator': true,
+    'ResizeObserver': true,
 
-    // todo(nc): include all dom api types?
     'Document': true,
     'HTMLElement': true,
     'HTMLInputElement': true

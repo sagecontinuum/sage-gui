@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import d3 from './d3'
 
 const margin = { top: 50, left: 150, right: 40, bottom: 50 }
-const width = 800
+const defaultWidth = 800
 const hour = 60 * 60 * 1000
 
 const cellHeight = 15
@@ -93,14 +93,16 @@ function showGuide(ref, svg, y) {
 
 
 
-function initChart(
+function drawChart(
   domEle: HTMLElement,
   params: {
+    width: number,
     yLabels: string[],
   } & TimelineProps
 ) {
 
   const {
+    width = defaultWidth,
     yLabels,
     data,
     yFormat,
@@ -172,8 +174,6 @@ function initChart(
     .on('mouseenter', function(evt, data) {
       // showGuide(this, svg, y)
       d3.select(this).attr('opacity', 0.85)
-        .attr('stroke-width', 3)
-
       showTooltip(evt, data)
     })
     .on('mouseleave', function() {
@@ -235,7 +235,7 @@ function initChart(
   }
 
   /**
-   *  panning/zooming
+   * panning/zooming
    **/
   svg.call(zoom)
 
@@ -279,6 +279,7 @@ function Chart(props: TimelineProps) {
   const ref = useRef(null)
 
   useLayoutEffect(() => {
+    let node = ref.current
 
     let yLabels, chartData
     if (typeof data == 'object') {
@@ -288,12 +289,27 @@ function Chart(props: TimelineProps) {
       throw `data format should be an object in form { [key: string]: {}[] }, was: ${data}`
     }
 
-    initChart(ref.current, {
-      data: chartData,
-      yLabels,
-      ...rest
+    const ro = new ResizeObserver(entries => {
+      const entry = entries[0]
+      const cr = entry.contentRect
+      const width = cr.width - margin.left - margin.right
+
+      const svg = ref.current.querySelector('svg')
+      if (svg) {
+        svg.remove()
+      }
+
+      drawChart(node, {
+        data: chartData,
+        width,
+        yLabels,
+        ...rest
+      })
     })
-  }, [data])
+
+    ro.observe(node)
+
+  }, [data, rest])
 
   return (
     <div ref={ref}></div>
