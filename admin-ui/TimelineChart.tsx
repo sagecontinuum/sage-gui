@@ -4,11 +4,11 @@ import styled from 'styled-components'
 import d3 from './d3'
 
 const margin = { top: 50, left: 150, right: 40, bottom: 50 }
-// const height = 700
 const width = 800
 const hour = 60 * 60 * 1000
 
 const cellHeight = 15
+const cellPad = 2
 const guideStroke = 3
 
 
@@ -129,13 +129,12 @@ function initChart(
   const colorScale = getColorScale(data)
 
   // create axises
-  const timeAxis = d3.axisTop(x)
-  const labelAxis = d3.axisLeft(y)
-
+  const xAxis = d3.axisTop(x)
+  const yAxis = d3.axisLeft(y)
 
   // format y axis labels if needed
   if (yFormat) {
-    labelAxis.tickFormat(yFormat)
+    yAxis.tickFormat(yFormat)
   }
 
   const svg = d3.select(domEle).append('svg')
@@ -144,7 +143,7 @@ function initChart(
 
   const gX = svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(timeAxis)
+    .call(xAxis)
 
 
   // add cells
@@ -158,8 +157,8 @@ function initChart(
     .append('rect')
     .attr('class', 'cell')
     .attr('x', (d) => x(new Date(d.timestamp)) )
-    .attr('y', (d) => y(d.row) + 1)
-    .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - 1)
+    .attr('y', (d) => y(d.row) + cellPad)
+    .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - cellPad)
     .attr('height', y.bandwidth() - 2 )
     .attr('rx', 3)
     .attr('fill', (d) => {
@@ -170,7 +169,6 @@ function initChart(
       else
         return d.value == 0 ? colors.green : colorScale(d.value)
     })
-    .attr('z-index', 1)
     .on('mouseenter', function(evt, data) {
       // showGuide(this, svg, y)
       d3.select(this).attr('opacity', 0.85)
@@ -182,6 +180,10 @@ function initChart(
       d3.select('.guide').remove()
       d3.select(this).attr('opacity', 1.0)
       tt.style('display', 'none')
+    })
+    .on('click', (evt, data) => {
+      if (!onCellClick) return
+      onCellClick(data)
     })
 
 
@@ -197,8 +199,14 @@ function initChart(
 
   svg.append('g')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(labelAxis)
+    .call(yAxis)
+    .on('click', (evt) => {
+      if (!onRowClick) return
 
+      const label = d3.select(evt.target).data()[0]
+      const row = data.filter(o => o.row == label)
+      onRowClick(label, row)
+    })
 
   /**
    * tooltip
@@ -236,11 +244,10 @@ function initChart(
 
     cells.selectAll('.cell')
       .attr('x', (d) => newScale(new Date(d.timestamp)))
-      .attr('width', (d) => newScale(new Date(d.timestamp).getTime() + hour) - newScale(new Date(d.timestamp)) - 1)
+      .attr('width', (d) => newScale(new Date(d.timestamp).getTime() + hour) - newScale(new Date(d.timestamp)) - cellPad)
 
-    gX.call(timeAxis.scale(newScale))
+    gX.call(xAxis.scale(newScale))
   }
-
 }
 
 
@@ -253,14 +260,13 @@ type Record = {
 }
 
 type TimelineProps = {
-  data: Record[] | { [key: string]: {}[] }
+  data: { [key: string]: Record[] }
   yFormat?: (label) => string
   tooltip?: (item: Record) => string  // update to use React.FC?
   colorCell?: (val: number, item: Record) => string
-  onCellClick?: (evt: React.MouseEvent) => void
-  onRowClick?: (evt: React.MouseEvent) => void
+  onRowClick?: (label: string, items: Record[]) => void
+  onCellClick?: (label: string) => void
 }
-
 
 
 function Chart(props: TimelineProps) {
@@ -270,16 +276,16 @@ function Chart(props: TimelineProps) {
   } = props
 
 
-  const ref = useRef()
+  const ref = useRef(null)
 
   useLayoutEffect(() => {
+
     let yLabels, chartData
-    if (Array.isArray(data)) {
-      yLabels = data.map(o => o.meta.node)
-      chartData = parseData(data)
-    } else if (typeof data == 'object') {
+    if (typeof data == 'object') {
       yLabels = Object.keys(data)
       chartData = parseData(data)
+    } else {
+      throw `data format should be an object in form { [key: string]: {}[] }, was: ${data}`
     }
 
     initChart(ref.current, {

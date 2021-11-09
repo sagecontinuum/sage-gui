@@ -54,6 +54,8 @@ export default function Timeline() {
             ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
             value: ${item.value}`
           }
+          onRowClick={(val, data) => console.log('row click', val, data)}
+          onCellClick={(data) => console.log('cell click', data)}
         />
       }
       {error1 &&
@@ -82,6 +84,8 @@ export default function Timeline() {
             ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
             `
           }
+          onRowClick={(val, data) => console.log('row click', val, data)}
+          onCellClick={(data) => console.log('cell click', data)}
         />
       }
       {error2 &&
