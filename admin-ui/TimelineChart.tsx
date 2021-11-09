@@ -1,19 +1,31 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import d3 from './d3'
-
-
 
 const margin = { top: 50, left: 150, right: 40, bottom: 50 }
 // const height = 700
 const width = 800
 const hour = 60 * 60 * 1000
-const day = 24 * hour
 
 const cellHeight = 15
 const guideStroke = 3
 
+
+
+
+const redShades = [
+  '#d34848',
+  '#520000'
+]
+
+export const colors = {
+  noValue: '#efefef',
+  green: '#06af00',
+  orange: '#d49318',
+  red1: redShades[0],
+  red2: redShades[1]
+}
 
 
 function parseData(data) {
@@ -39,25 +51,29 @@ function getDomain(data) {
   return [start, end]
 }
 
+
 function getMinMax(data) {
   const sorted = [...data].sort((a, b) => a.value - b.value)
   return [sorted[0].value, sorted.pop().value]
 }
 
+
 function getWidthHeight(data, cellHeight) {
   const rowCount = new Set(data.map(o => o.row)).size
 
   return [NaN, rowCount * cellHeight]
-
 }
 
 
-const green = '#06af00'
-const orange1 = '#d49318'
-const redShades = [
-  '#d34848',
-  '#520000'
-]
+export function getColorScale(data) {
+  const [min, max] = getMinMax(data)
+
+  const colorScale = d3.scaleLinear()
+    .domain([min, max])
+    .range(redShades)
+
+  return colorScale
+}
 
 
 function showGuide(ref, svg, y) {
@@ -87,11 +103,14 @@ function initChart(
   const {
     yLabels,
     data,
-    yFormat
+    yFormat,
+    tooltip,
+    colorCell,
+    onCellClick,
+    onRowClick
   } = params
 
   const [start, end] = getDomain(data)
-  const [min, max] = getMinMax(data)
   const [_, height] = getWidthHeight(data, cellHeight)
 
   const zoom = d3.zoom()
@@ -107,10 +126,7 @@ function initChart(
     .domain(yLabels)
     .range([0, height])
 
-  const colorScale = d3.scaleLinear()
-    .domain([min, max])
-    .range(redShades)
-
+  const colorScale = getColorScale(data)
 
   // create axises
   const timeAxis = d3.axisTop(x)
@@ -146,10 +162,14 @@ function initChart(
     .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - 1)
     .attr('height', y.bandwidth() - 2 )
     .attr('rx', 3)
-    .attr('fill', (d) => (d.value > 0 && d.meta.severity == 'warning') ?
-      orange1 :
-      (d.value == 0 ? green : colorScale(d.value))
-    )
+    .attr('fill', (d) => {
+      if (colorCell)
+        return colorCell(d.value, d)
+      else if (d.value > 0 && d.meta.severity == 'warning')
+        return colors.orange
+      else
+        return d.value == 0 ? colors.green : colorScale(d.value)
+    })
     .attr('z-index', 1)
     .on('mouseenter', function(evt, data) {
       // showGuide(this, svg, y)
@@ -161,7 +181,7 @@ function initChart(
     .on('mouseleave', function() {
       d3.select('.guide').remove()
       d3.select(this).attr('opacity', 1.0)
-      tooltip.style('display', 'none')
+      tt.style('display', 'none')
     })
 
 
@@ -183,7 +203,7 @@ function initChart(
   /**
    * tooltip
    */
-  const tooltip = d3.select(domEle)
+  const tt = d3.select(domEle)
     .selectAll('#tooltip')
     .data([null])
     .join('div')
@@ -195,16 +215,15 @@ function initChart(
     .style('padding', '1em')
 
   const showTooltip = (evt, data) => {
-    tooltip
-      .html(
-        `${new Date(data.timestamp).toDateString()} ${new Date(data.timestamp).toLocaleTimeString()}<br>
-        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
-        value: ${data.value}`
-      )
+    tt.html(tooltip ? tooltip(data) :
+      `${new Date(data.timestamp).toDateString()} ${new Date(data.timestamp).toLocaleTimeString()}<br>
+       ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
+       value: ${data.value}`
+    )
       .style('top', `${evt.pageY}px`)
       .style('left', `${evt.pageX + 10}px`)
 
-    tooltip.style('display', null)
+    tt.style('display', null)
   }
 
   /**
@@ -230,12 +249,16 @@ function initChart(
 type Record = {
   timestamp: string
   value: number
+  meta?: object
 }
 
 type TimelineProps = {
   data: Record[] | { [key: string]: {}[] }
   yFormat?: (label) => string
-  days?: number
+  tooltip?: (item: Record) => string  // update to use React.FC?
+  colorCell?: (val: number, item: Record) => string
+  onCellClick?: (evt: React.MouseEvent) => void
+  onRowClick?: (evt: React.MouseEvent) => void
 }
 
 
@@ -243,14 +266,13 @@ type TimelineProps = {
 function Chart(props: TimelineProps) {
   const {
     data,
-    yFormat,
-    days
+    ...rest
   } = props
 
 
   const ref = useRef()
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let yLabels, chartData
     if (Array.isArray(data)) {
       yLabels = data.map(o => o.meta.node)
@@ -260,20 +282,12 @@ function Chart(props: TimelineProps) {
       chartData = parseData(data)
     }
 
-    console.log('things',    {
-      data,
-      yLabels,
-      yFormat,
-      days
-    })
-
     initChart(ref.current, {
       data: chartData,
       yLabels,
-      yFormat,
-      days
+      ...rest
     })
-  }, [data, yFormat, days])
+  }, [data])
 
   return (
     <div ref={ref}></div>

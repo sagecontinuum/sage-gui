@@ -1,38 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link} from 'react-router-dom'
 import styled from 'styled-components'
+import Alert from '@mui/material/Alert'
 
 import * as BH from '../apis/beehive'
 
-import TimelineChart from '../TimelineChart'
+import TimelineChart, {colors} from '../TimelineChart'
 
 
 const node = '000048B02D05A0A4'
 
 
-
-function getDate(hours, days) {
-  let d
-  if (hours) {
-    d = new Date()
-    d.setHours(d.getHours() - hours)
-  } else if (days) {
-    d = new Date()
-    d.setDate(d.getDate() - days)
-  } else {
-    d = new Date()
-    d.setDate(d.getDate() - 2)
-  }
-
-  return d
-}
-
-
-type Props = {
-
-}
-
-export default function Timeline(props: Props) {
+export default function Timeline() {
   const params = new URLSearchParams(useLocation().search)
   const hours = params.get('hours')
   const days = params.get('days')
@@ -47,7 +26,7 @@ export default function Timeline(props: Props) {
   useEffect(() => {
 
     // test one: influx aggregated data
-    BH.getDailyChart(node.toLowerCase())
+    BH.getDailyChart()
       .then((data) => {
         console.log('data', data)
         setData1(data)
@@ -70,17 +49,43 @@ export default function Timeline(props: Props) {
       {data1 &&
         <TimelineChart
           data={data1}
-          days={30}
+          tooltip={(item) =>
+            `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
+            value: ${item.value}`
+          }
         />
       }
+      {error1 &&
+        <Alert severity="error">{error2.message}</Alert>
+      }
+
 
       {data2 && <h2>Node <Link to={`/node/${node}`}>{node}</Link></h2>}
       {data2 &&
         <TimelineChart
           data={data2}
           yFormat={l => l.split('.').pop()}
-          days={2}
+          colorCell={(val, obj) => {
+            if (val == null)
+              return colorMap.noValue
+
+            if (val <= 0)
+              return colors.green
+            else if (obj.meta.severity == 'warning')
+              return colors.orange
+            else
+              return colors.red2
+          }}
+          tooltip={(item) =>
+            `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+            `
+          }
         />
+      }
+      {error2 &&
+        <Alert severity="error">{error2.message}</Alert>
       }
 
     </Root>

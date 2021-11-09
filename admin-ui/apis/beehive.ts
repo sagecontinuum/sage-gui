@@ -219,7 +219,7 @@ export async function getDailyChart() : Promise<Record[]> {
   const name = 'sanity_failure_total'
 
   const params = {
-    bucket: 'downsampled',
+    bucket: 'downsampled-test',
     start: '-30d',
     filter: {
       name
