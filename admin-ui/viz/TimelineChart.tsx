@@ -302,7 +302,7 @@ function Chart(props: TimelineProps) {
       throw `data format should be an object in form { [key: string]: {}[] }, was: ${data}`
     }
 
-    const ro = new ResizeObserver(entries => {
+    const ro = new ResizeObserver(_debounce(100, entries => {
       const entry = entries[0]
       const cr = entry.contentRect
       const width = cr.width - margin.left - margin.right
@@ -318,15 +318,30 @@ function Chart(props: TimelineProps) {
         yLabels,
         ...rest
       })
-    })
+    }))
 
     ro.observe(node)
 
-  }, [data, rest])
+    return () => {
+      ro.unobserve(node)
+    }
+  }, [data, rest, margin])
 
   return (
     <div ref={ref}></div>
   )
+}
+
+
+// see https://jsfiddle.net/rudiedirkx/p0ckdcnv/
+const _debounce = function(ms, fn) {
+  var timer
+  return function() {
+    clearTimeout(timer)
+    var args = Array.prototype.slice.call(arguments)
+    args.unshift(this)
+    timer = setTimeout(fn.bind.apply(fn, args), ms)
+  }
 }
 
 
