@@ -16,16 +16,16 @@ import * as BH from '../../apis/beehive'
 import * as SES from '../../apis/ses'
 
 import * as utils from '../../../components/utils/units'
-import columns, { getColorClass } from '../status/columns'
+import cols, { getColorClass } from '../status/columns'
 
 import { mergeMetrics } from '../status/statusDataUtils'
 
 
 const TIME_OUT = 5000
 
-const getColumn = (name) => columns.filter(c => c.id == name)[0]
+const getColumn = (name) => cols.filter(c => c.id == name)[0]
 
-const simpleColumns = [
+const columns = [
   getColumn('sanity'),
   getColumn('pluginStatus'),
   {
@@ -83,6 +83,7 @@ export default function StatusView() {
   const [filtered, setFiltered] = useState(null)
 
   const [byPhase, setByPhase] = useState({phase1: null, phase2: null, phase3: null})
+  const [cols, setCols] = useState(columns)
 
   const [lastUpdate, setLastUpdate] = useState(null)
 
@@ -153,10 +154,15 @@ export default function StatusView() {
 
     if (tabIdx == 0) {
       filteredData = phase1
+      setCols(columns.filter(o =>
+        ['id', 'vsn', 'rpi', 'nx'].includes(o.id))
+      )
     } else if (tabIdx == 1) {
       filteredData = phase2
+      setCols(columns)
     } else if (tabIdx == 2) {
       filteredData = phase3
+      setCols(columns)
     }
 
     setByPhase({phase1, phase2, phase3})
@@ -200,7 +206,7 @@ export default function StatusView() {
           <Table
             primaryKey="id"
             rows={filtered}
-            columns={simpleColumns}
+            columns={cols}
             enableSorting
             emptyNotice={`No nodes found in phase ${tabIdx+1}`}
           />
