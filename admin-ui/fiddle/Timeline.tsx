@@ -16,8 +16,8 @@ export default function Timeline() {
   const hours = params.get('hours')
   const days = params.get('days')
 
-  const [data1, setData1] = useState<MetricsObj>(null)
-  const [data2, setData2] = useState<MetricsObj>(null)
+  const [data1, setData1] = useState<BH.MetricsObj>(null)
+  const [data2, setData2] = useState<BH.MetricsObj>(null)
 
   const [error1, setError1] = useState(null)
   const [error2, setError2] = useState(null)
@@ -70,14 +70,14 @@ export default function Timeline() {
           yFormat={l => l.split('.').pop()}
           colorCell={(val, obj) => {
             if (val == null)
-              return colorMap.noValue
+              return colors.noValue
 
             if (val <= 0)
               return colors.green
             else if (obj.meta.severity == 'warning')
               return colors.orange
             else
-              return colors.red2
+              return colors.red4
           }}
           tooltip={(item) =>
             `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>

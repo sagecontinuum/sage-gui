@@ -14,7 +14,7 @@ const guideStroke = 3
 
 
 
-const redShades = [
+const redSpectrum = [
   '#d34848',
   '#520000'
 ]
@@ -22,9 +22,15 @@ const redShades = [
 export const colors = {
   noValue: '#efefef',
   green: '#06af00',
+  green1: '#b2dfb0',
+  green2: '#8ed88b',
+  green3: '#4cc948',
+  green4: '#06af00',
+  red1: '#ffc5c5',
+  red2: '#ff8686',
+  red3: '#d34848',
+  red4: '#890000',
   orange: '#d49318',
-  red1: redShades[0],
-  red2: redShades[1]
 }
 
 
@@ -58,10 +64,9 @@ function getMinMax(data) {
 }
 
 
-function getWidthHeight(data, cellHeight) {
+function computeCanvasHeight(data, cellHeight) {
   const rowCount = new Set(data.map(o => o.row)).size
-
-  return [NaN, rowCount * cellHeight]
+  return rowCount * cellHeight
 }
 
 
@@ -70,7 +75,7 @@ export function getColorScale(data) {
 
   const colorScale = d3.scaleLinear()
     .domain([min, max])
-    .range(redShades)
+    .range(redSpectrum)
 
   return colorScale
 }
@@ -113,9 +118,10 @@ function drawChart(
   } = params
 
   const [start, end] = getDomain(data)
-  const [_, height] = getWidthHeight(data, cellHeight)
+  const height = computeCanvasHeight(data, cellHeight)
 
   const zoom = d3.zoom()
+    .filter((evt) => evt.type === 'wheel' ? evt.ctrlKey : true)
     .scaleExtent([.2, 8])
     .on('zoom', zoomed)
 
@@ -144,6 +150,7 @@ function drawChart(
     .attr('height',  height + margin.top + margin.bottom)
 
   const gX = svg.append('g')
+    .attr('cursor', 'grab')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
     .call(xAxis)
 
@@ -151,6 +158,7 @@ function drawChart(
   // add cells
   const cells = svg.append('g')
     .attr('width', width)
+    .style('cursor', onCellClick ? 'pointer' : 'auto')
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
   cells.selectAll()
@@ -163,6 +171,7 @@ function drawChart(
     .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - cellPad)
     .attr('height', y.bandwidth() - 2 )
     .attr('rx', 3)
+    .attr('stroke-width', 2)
     .attr('fill', (d) => {
       if (colorCell)
         return colorCell(d.value, d)
@@ -173,12 +182,17 @@ function drawChart(
     })
     .on('mouseenter', function(evt, data) {
       // showGuide(this, svg, y)
-      d3.select(this).attr('opacity', 0.85)
+      d3.select(this)
+        .attr('opacity', 0.85)
+        .attr('stroke-width', 2)
+        .attr('stroke', '#444')
       showTooltip(evt, data)
     })
     .on('mouseleave', function() {
       d3.select('.guide').remove()
-      d3.select(this).attr('opacity', 1.0)
+      d3.select(this)
+        .attr('opacity', 1.0)
+        .attr('stroke', null)
       tt.style('display', 'none')
     })
     .on('click', (evt, data) => {
@@ -190,7 +204,6 @@ function drawChart(
   // add y axis (with overlay)
   svg.append('g')
     .append('rect')
-    //.attr('transform', `translate(${margin.left}, ${margin.top})`)
     .attr('fill', '#fff')
     .attr('x', 0)
     .attr('y', margin.top)
