@@ -133,7 +133,6 @@ export default function NodeView() {
           {pluginData &&
             <TimelineChart
               data={pluginData}
-              //bins={pluginBins}
               colorCell={(val, obj) => {
                 if (val == null)
                   return colors.noValue
@@ -150,6 +149,7 @@ export default function NodeView() {
                  ${item.value == 0 ? 'running' : `not running (${item.meta.status})`}
                 `
               }
+              margin={{right: 20}}
             />
           }
 
@@ -182,6 +182,7 @@ export default function NodeView() {
                 ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
                 `
               }
+              margin={{right: 20}}
             />
           }
 

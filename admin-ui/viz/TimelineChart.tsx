@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import d3 from '../d3'
 
-const margin = { top: 20, left: 150, right: 40, bottom: 50 }
+const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
 const defaultWidth = 800
 const hour = 60 * 60 * 1000
 
@@ -57,16 +57,22 @@ function getDomain(data) {
   return [start, end]
 }
 
-
 function getMinMax(data) {
   const sorted = [...data].sort((a, b) => a.value - b.value)
   return [sorted[0].value, sorted.pop().value]
 }
 
-
-function computeCanvasHeight(data, cellHeight) {
+function computeCanvasHeight(data, cellHeight: number) : number {
   const rowCount = new Set(data.map(o => o.row)).size
   return rowCount * cellHeight
+}
+
+function computeSize(data: Data) : {m: number, n: number} {
+  const lengths = Object.values(data).map(arr => arr.length)
+  return {
+    m: Object.keys(data).length,
+    n: Math.max(...lengths)
+  }
 }
 
 
@@ -103,12 +109,16 @@ function drawChart(
   params: {
     width: number,
     yLabels: string[],
+    size: {m: number, n: number},
+    margin
   } & TimelineProps
 ) {
 
   const {
     width = defaultWidth,
     yLabels,
+    size,
+    margin,
     data,
     yFormat,
     tooltip,
@@ -272,32 +282,39 @@ type Record = {
   meta?: object
 }
 
+type Data = { [key: string]: Record[] }
+
 type TimelineProps = {
-  data: { [key: string]: Record[] }
+  data: Data
   yFormat?: (label) => string
   tooltip?: (item: Record) => string  // update to use React.FC?
   colorCell?: (val: number, item: Record) => string
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (label: string) => void
+  margin?: {top?: number, right?: number, bottom?: number, left?: number}
 }
 
 
 function Chart(props: TimelineProps) {
-  const {
+  let {
     data,
+    margin,
     ...rest
   } = props
 
+  // merge margins together
+  margin = {...defaultMargin, ...props.margin}
 
   const ref = useRef(null)
 
   useLayoutEffect(() => {
     let node = ref.current
 
-    let yLabels, chartData
+    let yLabels, chartData, size
     if (typeof data == 'object') {
       yLabels = Object.keys(data)
       chartData = parseData(data)
+      size = computeSize(data)
     } else {
       throw `data format should be an object in form { [key: string]: {}[] }, was: ${data}`
     }
@@ -316,6 +333,8 @@ function Chart(props: TimelineProps) {
         data: chartData,
         width,
         yLabels,
+        size,
+        margin,
         ...rest
       })
     }))

@@ -120,7 +120,7 @@ export default function TestView() {
 }
 
 const Root = styled.div`
-  margin: 0 20px;
+
 `
 
 

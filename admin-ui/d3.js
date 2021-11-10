@@ -11,6 +11,7 @@ import {
 
 import { zoom } from 'd3-zoom'
 import { range } from 'd3-array'
+import { timeHour } from 'd3-time'
 
 export default {
   select,
@@ -26,5 +27,6 @@ export default {
   scaleBand,
 
   zoom,
-  range
+  range,
+  timeHour
 }
