@@ -8,15 +8,18 @@ import SpectrogramPlugin from 'wavesurfer.js/src/plugin/spectrogram'
 import colormap from 'colormap'
 
 import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
 import PlayIcon from '@mui/icons-material/PlayArrowRounded'
 import PauseIcon from '@mui/icons-material/PauseCircleFilledRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import WarningIcon from '@mui/icons-material/WarningRounded'
 
-import {bytesToSizeSI} from '../../../components/utils/units'
+import {bytesToSizeSI, msToTime} from '../../../components/utils/units'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import * as BH from '../../apis/beehive'
 
+import { isOldData } from '../node/RecentData'
 
 const colors = colormap({
   colormap: 'hot',
@@ -81,7 +84,6 @@ export default function Audio(props: Props) {
         })
 
         wavesurfer.load(data.value)
-
         setLoading(false)
       }).catch((err) => {
         setError(err)
@@ -93,18 +95,18 @@ export default function Audio(props: Props) {
   return (
     <Root className="flex column">
       {audio &&
-        <div>
+        <div style={isOldData(audio.timestamp) ? {border: '10px solid red'} : {}}>
           <div  className="flex justify-between">
             <div></div>
             {waveSurf &&
               <div className="flex items-center justify-end gap">
                 {!isPlaying &&
-                <Button startIcon={<PlayIcon />} onClick={() => {waveSurf.play(); }} variant="outlined" size="small">
+                <Button startIcon={<PlayIcon />} onClick={() => {waveSurf.play() }} variant="outlined" size="small">
                   play
                 </Button>
                 }
                 {isPlaying &&
-                <Button startIcon={<PauseIcon />} onClick={() => {waveSurf.pause(); }} variant="outlined" size="small">
+                <Button startIcon={<PauseIcon />} onClick={() => {waveSurf.pause() }} variant="outlined" size="small">
                   pause
                 </Button>
                 }
@@ -114,8 +116,21 @@ export default function Audio(props: Props) {
 
           <div ref={ref}></div>
           <div ref={ref2}></div>
-          <div className="flex items-center justify-between">
-            <b className="muted">{new Date(audio.timestamp).toLocaleString()}</b>
+          <div
+            className="flex items-center justify-between"
+          >
+            <div className="flex items-center">
+              <div>
+                {isOldData(audio.timestamp) && <WarningIcon className="failed"/>}
+              </div>
+
+              <Tooltip title={new Date(audio.timestamp).toLocaleString()} placement="top">
+                <b className={isOldData(audio.timestamp) ? 'failed' : 'muted'}>
+                  ~{msToTime(new Date().getTime() - new Date(audio.timestamp).getTime())}
+                </b>
+              </Tooltip>
+            </div>
+
             <Button startIcon={<DownloadIcon />} size="small" href={audio.value}>{bytesToSizeSI(audio.size)}</Button>
           </div>
         </div>

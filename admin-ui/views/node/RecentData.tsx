@@ -4,12 +4,30 @@ import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
+import Tooltip from '@material-ui/core/Tooltip'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import WarningIcon from '@mui/icons-material/WarningRounded'
 
 import Audio from '../audio/Audio'
 import * as BH from '../../apis/beehive'
 
-import {bytesToSizeSI} from '../../../components/utils/units'
+import {bytesToSizeSI, msToTime} from '../../../components/utils/units'
+
+
+export function isOldData(timestamp, grain = 'hours', amount = 2) {
+  let date = new Date(timestamp)
+
+  let d
+  if (grain == 'hours') {
+    d = new Date()
+    d.setHours(d.getHours() - amount)
+  } else if (grain == 'minutes') {
+    d = new Date()
+    d.setMinutes(d.getMinutes() - amount)
+  }
+
+  return date < d
+}
 
 
 type Props = {
@@ -61,10 +79,25 @@ export default function RecentData(props: Props) {
           return (
             <div key={pos}>
               <h3>{title}</h3>
-              <img src={value} />
+              <img
+                src={value}
+                style={isOldData(timestamp) ? {border: '10px solid red'} : {}}
+              />
               <div className="flex items-center justify-between">
-                <b className="muted">{new Date(timestamp).toLocaleString()}</b>
-                <Button startIcon={<DownloadIcon />} size="small" href={value}>{bytesToSizeSI(size)}</Button>
+                <div className="flex items-center">
+                  <div>
+                    {isOldData(timestamp) && <WarningIcon className="failed"/>}
+                  </div>
+
+                  <Tooltip title={new Date(timestamp).toLocaleString()} placement="top">
+                    <b className={isOldData(timestamp) ? 'failed' : 'muted'}>
+                      ~{msToTime(new Date().getTime() - new Date(timestamp).getTime())}
+                    </b>
+                  </Tooltip>
+                </div>
+                <Button startIcon={<DownloadIcon />} size="small" href={value}>
+                  {bytesToSizeSI(size)}
+                </Button>
               </div>
             </div>
           )

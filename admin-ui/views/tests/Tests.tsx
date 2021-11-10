@@ -110,8 +110,9 @@ export default function TestView() {
           tooltip={(item) =>
             `${new Date(item.timestamp).toDateString()}<br>
             ${new Date(item.timestamp).toLocaleTimeString()} - ${new Date(new Date(item.timestamp).getTime() + 60*60*1000).toLocaleTimeString()}<br>
-            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-            (${item.value} issue${item.value == 1 ? '' : 's'})`
+            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}<br><br>
+            <small>(click for details)</small>`
+            // (${item.value} issue${item.value == 1 ? '' : 's'})`
           }
         />
       }
