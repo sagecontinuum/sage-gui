@@ -89,11 +89,11 @@ export async function fetchState() : Promise<State[]> {
     // todo(nc): maybe give a warning to user?
     // unreachable case is handled below
   }
+  const shouldFilter = monitorMeta && config.admin.filterNodes
 
   const [data] = await Promise.all([get(`${url}/state`)])
-
   return data.data
-    .filter(obj => monitorMeta ? includeList.includes(obj.id) : true)
+    .filter(obj => shouldFilter ? includeList.includes(obj.id) : true)
     .map(obj => {
       const {id} = obj
 
