@@ -5,7 +5,9 @@ import styled from 'styled-components'
 import * as BH from '../../apis/beehive'
 
 import { useProgress } from '../../../components/progress/ProgressProvider'
-import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
+
+import {getMetricBins } from '../../viz/dataUtils'
+import TimelineChart from '../../viz/TimelineChart'
 
 
 
@@ -72,27 +74,26 @@ export default function TestView() {
 
   const { setLoading } = useProgress()
   const [chartData, setChartData] = useState(null)
-  const [bins, setBins] = useState(null)
+  // const [bins, setBins] = useState(null)
 
 
   useEffect(() => {
     setLoading(true)
     BH.getSanityChart()
       .then((data) => {
-        const { bins, chartData } = getChartData(data)
-        setBins(bins)
+        const { chartData } = getChartData(data)
         setChartData(chartData)
       }).finally(() => setLoading(false))
 
   }, [setLoading])
 
 
-  const handleCellClick = (obj) => {
-    history.push(`/node/${obj.item.meta.node}`)
+  const handleCellClick = (item) => {
+    history.push(`/node/${item.meta.node}`)
   }
 
-  const handleLabelClick = (obj) => {
-    history.push(`/node/${obj.label.toUpperCase()}`)
+  const handleLabelClick = (label) => {
+    history.push(`/node/${label.toUpperCase()}`)
   }
 
 
@@ -102,28 +103,15 @@ export default function TestView() {
 
       <h2 className="no-margin">Test Overview</h2>
       {chartData &&
-        <SanityChart
+        <TimelineChart
           data={chartData}
-          height={1000}
-          bins={bins}
-          colorForValue={(val, obj) => {
-            if (val == null)
-              return colorMap.noValue
-
-            if (val <= 0)
-              return colorMap.green3
-            else if (obj.meta.severity == 'warning')
-              return colorMap.orange1
-            else
-              return colorMap.red4
-          }}
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
           tooltip={(item) =>
-            <div>
-              {new Date(item.timestamp).toLocaleTimeString()} - {new Date(new Date(item.timestamp).getTime() + 60*60*1000).toLocaleTimeString()}<br/>
-              {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}<br/>
-            </div>
+            `${new Date(item.timestamp).toDateString()}<br>
+            ${new Date(item.timestamp).toLocaleTimeString()} - ${new Date(new Date(item.timestamp).getTime() + 60*60*1000).toLocaleTimeString()}<br>
+            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+            (${item.value} issue${item.value == 1 ? '' : 's'})`
           }
         />
       }

@@ -9,7 +9,7 @@ import * as BK from '../../apis/beekeeper'
 import * as SES from '../../apis/ses'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
-import SanityChart, {getMetricBins, colorMap} from '../../SanityChart'
+import TimelineChart, {colors} from '../../viz/TimelineChart'
 
 import RecentData from './RecentData'
 
@@ -42,10 +42,8 @@ export default function NodeView() {
   const { setLoading } = useProgress()
 
   const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
-  const [bins, setBins] = useState<Date[]>(null)
 
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
-  const [pluginBins, setPluginBins] = useState<Date[]>(null)
 
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
@@ -70,7 +68,6 @@ export default function NodeView() {
         const d = getDate(hours, days)
 
         for (const key of Object.keys(data)) {
-          // sort all the lists by time and limit by last 2 days
           data[key] = data[key].sort((a, b) =>
             +new Date(a.timestamp) - +new Date(b.timestamp)
           ).filter(obj => new Date(obj.timestamp) > d)
@@ -85,8 +82,6 @@ export default function NodeView() {
           return
         }
 
-        const pluginBins = getMetricBins(Object.values(data))
-        setPluginBins(pluginBins)
         setPluginData(data)
       }).catch((err) => setError1(err))
       .finally(() => setLoading1(false))
@@ -101,15 +96,14 @@ export default function NodeView() {
 
         const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
 
-        const d = getDate(hours, days)
+        if (hours || days) {
+          const d = getDate(hours, days)
 
-        for (const key of Object.keys(data)) {
-          // sort all the lists by time and limit by last 2 days
-          data[key] = data[key].filter(obj => new Date(obj.timestamp) > d)
+          for (const key of Object.keys(data)) {
+            data[key] = data[key].filter(obj => new Date(obj.timestamp) > d)
+          }
         }
 
-        const bins = getMetricBins(Object.values(data))
-        setBins(bins)
         setSanityData(data)
       }).catch((err) => setError2(err))
       .finally(() => setLoading2(false))
@@ -137,25 +131,24 @@ export default function NodeView() {
 
           <h2>Plugins</h2>
           {pluginData &&
-            <SanityChart
+            <TimelineChart
               data={pluginData}
-              bins={pluginBins}
-              colorForValue={(val, obj) => {
+              //bins={pluginBins}
+              colorCell={(val, obj) => {
                 if (val == null)
-                  return colorMap.noValue
+                  return colors.noValue
 
                 if (val <= 0)
-                  return colorMap.green3
+                  return colors.green
                 else if (obj.meta.severity == 'warning')
-                  return colorMap.orange1
+                  return colors.orange
                 else
-                  return colorMap.red4
+                  return colors.red4
               }}
               tooltip={(item) =>
-                <div>
-                  {new Date(item.timestamp).toLocaleTimeString()}<br/>
-                  {item.value == 0 ? 'running' : `not running (${item.meta.status})`}
-                </div>
+                `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+                 ${item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+                `
               }
             />
           }
@@ -170,25 +163,24 @@ export default function NodeView() {
 
           <h2>Sanity Tests</h2>
           {sanityData &&
-            <SanityChart
+            <TimelineChart
               data={sanityData}
-              bins={bins}
-              colorForValue={(val, obj) => {
+              yFormat={l => l.split('.').pop()}
+              colorCell={(val, obj) => {
                 if (val == null)
-                  return colorMap.noValue
+                  return colors.noValue
 
                 if (val <= 0)
-                  return colorMap.green3
+                  return colors.green
                 else if (obj.meta.severity == 'warning')
-                  return colorMap.orange1
+                  return colors.orange
                 else
-                  return colorMap.red4
+                  return colors.red4
               }}
               tooltip={(item) =>
-                <div>
-                  {new Date(item.timestamp).toLocaleTimeString()}<br/>
-                  {item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-                </div>
+                `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+                ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+                `
               }
             />
           }
@@ -266,13 +258,12 @@ const Root = styled.div`
 `
 
 const Charts = styled.div`
-  min-width: 925px;
-  max-width: 925px;
+  flex-grow: 1;
   margin-bottom: 50px;
 `
 
 const Data = styled.div`
-  flex-grow: 1;
+  min-width: 400px;
+  max-width: 400px;
   margin-left: 2em;
-
 `

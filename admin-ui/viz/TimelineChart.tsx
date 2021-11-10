@@ -1,9 +1,9 @@
 import React, { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
-import d3 from './d3'
+import d3 from '../d3'
 
-const margin = { top: 50, left: 150, right: 40, bottom: 50 }
+const margin = { top: 20, left: 150, right: 40, bottom: 50 }
 const defaultWidth = 800
 const hour = 60 * 60 * 1000
 
@@ -21,7 +21,7 @@ const redSpectrum = [
 
 export const colors = {
   noValue: '#efefef',
-  green: '#06af00',
+  green: '#4cc948',
   green1: '#b2dfb0',
   green2: '#8ed88b',
   green3: '#4cc948',
@@ -307,7 +307,7 @@ function Chart(props: TimelineProps) {
       const cr = entry.contentRect
       const width = cr.width - margin.left - margin.right
 
-      const svg = ref.current.querySelector('svg')
+      const svg = node.querySelector('svg')
       if (svg) {
         svg.remove()
       }
@@ -340,6 +340,6 @@ export default function TimelineContainer(props: TimelineProps) {
 }
 
 const Root = styled.div`
-  margin-top: 50px;
+
 `
 
