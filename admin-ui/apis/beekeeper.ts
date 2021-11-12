@@ -5,6 +5,9 @@ import { NodeStatus } from '../node'
 import tokens from '../../tokens'
 
 
+const SHEETS_URL = `https://sheets.googleapis.com/v4/spreadsheets`
+const API_URL = `${url}/api`
+const NODE_MANIFEST = `${url}/production`
 
 
 export type State = {
@@ -49,7 +52,7 @@ function get(endpoint: string) {
 
 
 async function fetchMonitorData() {
-  const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+  const data = await get(`${SHEETS_URL}/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
   return data.values.reduce((acc, [id, expectedState]) =>
     ({...acc, [id]: {expectedState}})
@@ -59,7 +62,7 @@ async function fetchMonitorData() {
 
 
 export async function fetchProjectMeta() {
-  const data = await get(`https://sheets.googleapis.com/v4/spreadsheets/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+  const data = await get(`${SHEETS_URL}/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
   return data.values
     .reduce((acc, [kind, id, , project, location]) => {
@@ -68,6 +71,19 @@ export async function fetchProjectMeta() {
 
       return ({...acc, [id]: {kind, project, location}})
     }, {})
+}
+
+
+export async function fetchNodeManifest(node?: string) {
+  const data = await get(NODE_MANIFEST)
+
+  if (!node) {
+    return data
+  } else if (node.length == 4) {
+    return data.filter(o => o.vsn == node)[0]
+  } else {
+    throw 'fetchNodeManifest: (currently) only node vsn filtering is supported!'
+  }
 }
 
 
@@ -91,7 +107,7 @@ export async function fetchState() : Promise<State[]> {
   }
   const shouldFilter = monitorMeta && config.admin.filterNodes
 
-  const [data] = await Promise.all([get(`${url}/state`)])
+  const [data] = await Promise.all([get(`${API_URL}/state`)])
   return data.data
     .filter(obj => shouldFilter ? includeList.includes(obj.id) : true)
     .map(obj => {
@@ -126,10 +142,8 @@ export async function fetchSuryaState() : Promise<State[]> {
     // unreachable case is handled below
   }
 
-  const [data] = await Promise.all([get(`${url}/state`)])
-
+  const [data] = await Promise.all([get(`${API_URL}/state`)])
   return data.data
-    //.filter(obj => monitorMeta ? includeList.includes(obj.id) : true)
     .map(obj => {
       const {id} = obj
 
@@ -153,7 +167,7 @@ export async function fetchSuryaState() : Promise<State[]> {
 
 
 export async function getNode(id: string) : Promise<State[]> {
-  const data = await get(`${url}/state/${id}`)
+  const data = await get(`${API_URL}/state/${id}`)
   return data.data
 }
 

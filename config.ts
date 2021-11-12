@@ -4,7 +4,7 @@
 export default  {
   // api endpoints
   beehive: 'https://data.sagecontinuum.org/api/v1',
-  beekeeper: 'https://api.sagecontinuum.org/api',
+  beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   ses: 'https://portal.sagecontinuum.org/ses-plugin-data',
