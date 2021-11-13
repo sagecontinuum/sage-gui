@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import {fetchProjectMeta} from '../apis/beekeeper'
+import {getManifest} from '../apis/beekeeper'
 
 import * as BH from '../apis/beehive'
 
@@ -13,7 +13,7 @@ export default function Stress() {
 
   useEffect(() => {
     // get node list
-    fetchProjectMeta()
+    getManifest()
       .then(async meta => {
         const nodeIds = Object.keys(meta)
         setNodeIds(nodeIds)

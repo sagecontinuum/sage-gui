@@ -43,15 +43,15 @@ function handleErrors(res) {
 }
 
 
-function get(endpoint: string) {
-  return fetch(endpoint)
+function get(endpoint: string, opts={}) {
+  return fetch(endpoint, opts)
     .then(handleErrors)
     .then(res => res.json())
 }
 
 
 
-async function fetchMonitorData() {
+async function getMonitorData() {
   const data = await get(`${SHEETS_URL}/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
 
   return data.values.reduce((acc, [id, expectedState]) =>
@@ -61,110 +61,69 @@ async function fetchMonitorData() {
 
 
 
-export async function fetchProjectMeta() {
-  const data = await get(`${SHEETS_URL}/1S9v6RD0laPeTvC8wKO-NaLmKXbBoc8vdxFihBf8Ao50/values/overall!A2:H1000?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+export async function getManifest(node?: string) {
+  const data = await get(NODE_MANIFEST, {cache: 'reload'})
 
-  return data.values
-    .reduce((acc, [kind, id, , project, location]) => {
-      // ignore non-id rows in excell sheet
-      if (id?.length !== 16) return acc
-
-      return ({...acc, [id]: {kind, project, location}})
-    }, {})
-}
-
-
-export async function fetchNodeManifest(node?: string) {
-  const data = await get(NODE_MANIFEST)
+  const mapping = data
+    .filter(obj => 'node id' in obj )
+    .reduce((acc, node) => ({...acc, [node['node id']]: node}), {})
 
   if (!node) {
-    return data
+    return mapping
   } else if (node.length == 4) {
-    return data.filter(o => o.vsn == node)[0]
+    return mapping[node]
   } else {
-    throw 'fetchNodeManifest: (currently) only node vsn filtering is supported!'
+    throw 'getManifest: (currently) only node vsn filtering is supported!'
   }
 }
 
+
+function _joinNodeData(nodes, nodeMetas, monitorMeta) {
+  return nodes.map(obj => {
+    const {id} = obj
+
+    const meta = nodeMetas[id]
+    const monIsAvail = monitorMeta && id in monitorMeta
+
+    const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
+
+    return {
+      ...obj,
+      kind: meta['Node Type'],
+      project: meta.Project,
+      location: meta.Location,
+      status: expectedState,
+      registration_event: new Date(obj.registration_event).getTime()
+    }
+  })
+}
 
 
 export async function fetchState() : Promise<State[]> {
-  let monitorMeta, includeList
-  try {
-    monitorMeta = await fetchMonitorData()
-    includeList = Object.keys(monitorMeta)
-  } catch(e) {
-    // todo(nc): maybe give a warning to user?
-    // unreachable case is handled below
-  }
+  const proms = [getNodes(), getManifest(), getMonitorData()]
+  let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
-  let meta
-  try {
-    meta = await fetchProjectMeta()
-  } catch(e) {
-    // todo(nc): maybe give a warning to user?
-    // unreachable case is handled below
-  }
   const shouldFilter = monitorMeta && config.admin.filterNodes
+  const includeList = Object.keys(monitorMeta)
+  nodes = nodes.filter(obj => shouldFilter ? includeList.includes(obj.id) : true)
 
-  const [data] = await Promise.all([get(`${API_URL}/state`)])
-  return data.data
-    .filter(obj => shouldFilter ? includeList.includes(obj.id) : true)
-    .map(obj => {
-      const {id} = obj
-
-      const metaIsAvail = meta && id in meta
-      const monIsAvail = monitorMeta && id in monitorMeta
-
-      const { kind = null, project = null, location = null } = metaIsAvail ? meta[id] : {}
-      const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
-
-      return {
-        ...obj,
-        kind,
-        project,
-        location,
-        status: expectedState,
-        registration_event: new Date(obj.registration_event).getTime()
-      }
-    })
+  return _joinNodeData(nodes, meta, monitorMeta)
 }
 
 
-// note: this code is duplicated until all requirments are settled
+
 export async function fetchSuryaState() : Promise<State[]> {
-  let monitorMeta, meta
-  try {
-    monitorMeta = await fetchMonitorData()
-    meta = await fetchProjectMeta()
-  } catch(e) {
-    // todo(nc): maybe give a warning to user?
-    // unreachable case is handled below
-  }
+  const proms = [getNodes(), getManifest(), getMonitorData()]
+  let [nodes, meta, monitorMeta] = await Promise.all(proms)
+  return _joinNodeData(nodes, meta, monitorMeta)
 
-  const [data] = await Promise.all([get(`${API_URL}/state`)])
-  return data.data
-    .map(obj => {
-      const {id} = obj
-
-      const metaIsAvail = meta && id in meta
-      const monIsAvail = monitorMeta && id in monitorMeta
-
-      const { kind = null, project = null, location = null } = metaIsAvail ? meta[id] : {}
-      const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
-
-      return {
-        ...obj,
-        kind,
-        project,
-        location,
-        status: expectedState,
-        registration_event: new Date(obj.registration_event).getTime()
-      }
-    })
 }
 
 
+export async function getNodes() {
+  const data = await get(`${API_URL}/state`)
+  return data.data
+}
 
 export async function getNode(id: string) : Promise<State[]> {
   const data = await get(`${API_URL}/state/${id}`)

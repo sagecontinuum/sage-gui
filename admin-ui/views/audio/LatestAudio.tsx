@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 
 import Audio from './Audio'
 
-import {fetchProjectMeta} from '../../apis/beekeeper'
+import {getManifest} from '../../apis/beekeeper'
 
 
 function AllAudios() {
@@ -35,7 +35,7 @@ function AllAudios() {
       }, 0)
     }
 
-    fetchProjectMeta()
+    getManifest()
       .then(meta => {
         const nodeList = Object.keys(meta)
         addChart(nodeList)
