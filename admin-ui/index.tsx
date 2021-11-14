@@ -9,6 +9,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
+import DeprecatedTestsView from './views/tests/DeprecatedTestsView'
 import NodeView from './views/node/Node'
 import SuryaView from './views/surya/Surya'
 import AudioView from './views/audio/LatestAudio'
@@ -91,6 +92,7 @@ export default function App() {
               <Switch>
                 <Redirect exact from="/" to="status" />
                 <Route path="/status" component={StatusView} />
+                <Route path="/tests/old" component={DeprecatedTestsView} />
                 <Route path="/tests" component={TestView} />
                 <Route path="/audio" component={AudioView} />
                 <Route path="/node/:node" component={NodeView} />
