@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import d3 from '../d3'
+import Legend from './d3-color-legend'
 
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
 const defaultWidth = 800
@@ -9,6 +10,7 @@ const hour = 60 * 60 * 1000
 
 const cellHeight = 15
 const cellPad = 2
+const borderRadius = 0
 const guideStroke = 3
 
 
@@ -16,6 +18,7 @@ const guideStroke = 3
 
 const redSpectrum = [
   '#d34848',
+  '#890000',
   '#520000'
 ]
 
@@ -80,7 +83,7 @@ export function getColorScale(data) {
   const [min, max] = getMinMax(data)
 
   const colorScale = d3.scaleLinear()
-    .domain([min, max])
+    .domain([min, 10, max])
     .range(redSpectrum)
 
   return colorScale
@@ -180,8 +183,9 @@ function drawChart(
     .attr('y', (d) => y(d.row) + cellPad)
     .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - cellPad)
     .attr('height', y.bandwidth() - 2 )
-    .attr('rx', 3)
+    .attr('rx', borderRadius)
     .attr('stroke-width', 2)
+    // .attr('opacity', .5)
     .attr('fill', (d) => {
       if (colorCell)
         return colorCell(d.value, d)
@@ -275,6 +279,21 @@ function drawChart(
 
 
 
+function appendLegend(ele, chartData) {
+  const [_, max] = getMinMax(chartData) //todo(nc): optimze; only needs to be computed once
+
+  const legend = Legend(
+    d3.scaleOrdinal(
+      ['pass', '1 issue', '≥10 issues', `${max} issues`], [colors.green, ...redSpectrum]
+    ), {
+      title: 'Legend',
+      tickSize: 0
+    })
+
+  d3.select(ele).node().append(legend)
+}
+
+
 
 type Record = {
   timestamp: string
@@ -292,6 +311,7 @@ type TimelineProps = {
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (label: string) => void
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
+  showLegend?: boolean
 }
 
 
@@ -306,6 +326,7 @@ function Chart(props: TimelineProps) {
   margin = {...defaultMargin, ...props.margin}
 
   const ref = useRef(null)
+  const legendRef = useRef(null)
 
   useLayoutEffect(() => {
     let node = ref.current
@@ -341,13 +362,25 @@ function Chart(props: TimelineProps) {
 
     ro.observe(node)
 
+    const legendNode = legendRef.current
+    const legendSvg = legendNode.querySelector('svg')
+    if (!legendSvg) {
+      appendLegend(legendNode, chartData)
+    }
+
+
     return () => {
       ro.unobserve(node)
     }
   }, [data, rest, margin])
 
   return (
-    <div ref={ref}></div>
+    <div>
+      {props.showLegend &&
+        <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
+      }
+      <div ref={ref}></div>
+    </div>
   )
 }
 

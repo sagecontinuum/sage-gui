@@ -6,18 +6,15 @@ import {
   scaleLinear,
   scaleTime,
   scaleOrdinal,
-  scaleBand
+  scaleBand,
 } from 'd3-scale'
+
 
 import { zoom } from 'd3-zoom'
 import { range } from 'd3-array'
-import { timeHour } from 'd3-time'
 
 export default {
-  select,
-  selectAll,
-  pointer,
-  create,
+  select, selectAll, pointer, create,
 
   scaleLinear,
   scaleTime,
@@ -28,5 +25,4 @@ export default {
 
   zoom,
   range,
-  timeHour
 }
