@@ -31,6 +31,7 @@
     "chartjs-plugin-datalabels": "^0.7.0",
     "colormap": "^2.3.2",
     "d3": "^7.1.1",
+    "lodash": "^4.17.21",
     "mapbox-gl": "^2.1.1",
     "marked": "^2.0.4",
     "notistack": "^1.0.5",

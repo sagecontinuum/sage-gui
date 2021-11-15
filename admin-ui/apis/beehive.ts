@@ -1,6 +1,8 @@
 import config from '../../config'
 const url = config.beehive
 
+import {groupBy, mapValues} from 'lodash'
+
 
 export const cameraOrientations = [
   'top',
@@ -59,8 +61,6 @@ export type StorageRecord = Record & {
 }
 
 
-
-
 function handleErrors(res) {
   if (res.ok) {
     return res
@@ -115,8 +115,9 @@ export async function getLatestMetrics() : Promise<AggMetrics> {
 
 export async function getLatestTemp() {
   let params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
-  const allMetrics = await getData(params)
-  const byNode = aggregatePerNode(allMetrics)
+  const data = await getData(params)
+  const byNode = groupBy(data, 'meta.node')
+  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
 
   return byNode
 }
@@ -126,7 +127,6 @@ export async function getLatestTemp() {
 function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data)
     return null
-
 
   let byNode = {}
   data.forEach(obj => {
@@ -162,50 +162,13 @@ function aggregateMetrics(data: Record[]) : AggMetrics {
 
 
 
-function aggregatePerNode(data: Record[]) : AggMetrics {
-  if (!data)
-    return {}
-
-  let byNode = {}
-  data.forEach(obj => {
-    const {timestamp, name, value, meta} = obj
-    const {node} = meta
-
-    // if no node or host, don't include in aggregation
-    if (!node) {
-      return
-    }
-
-    // add entry for node
-    if (!(node in byNode))
-      byNode[node] = {}
-
-    let nodeData = byNode[node]
-
-    // append data
-    const record = {timestamp, value, meta}
-
-    if (name in nodeData)
-      nodeData[name].push(record)
-    else
-      nodeData[name] = [record]
-  })
-
-  return byNode
-}
-
-
-
 export async function getSanityChart(node?: string, start?: string) : Promise<MetricsObj> {
   const params = {
     start: start || '-2d',
     filter: {
       name: 'sys.sanity_status.*',
+      ...(node && {node})
     }
-  }
-
-  if (node)  {
-    params.filter['node'] = node
   }
 
   const sanityTests = await getData(params)
@@ -215,28 +178,57 @@ export async function getSanityChart(node?: string, start?: string) : Promise<Me
 }
 
 
-export async function getDailyChart() : Promise<Record[]> {
-  const name = 'sanity_failure_total'
 
+export async function getDailyChart(start?: string) : Promise<Record[]> {
   const params = {
     bucket: 'downsampled-test',
-    start: '-30d',
+    start: start ?? '-7d',
     filter: {
-      name
+      name: 'sanity_test_.*'
     }
-
   }
 
-  const failCounts = await getData(params)
-  let byNode = aggregatePerNode(failCounts)
-  Object.keys(byNode).forEach((id) => {
-    byNode[id] = byNode[id][name]
+  const data = await getData(params)
+  let byNode = groupBy(data, 'meta.node')
+  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
+
+  Object.entries(byNode).forEach(([id, obj]) => {
+    const failObjs = obj['sanity_test_fail_total']
+    const totalObjs = obj['sanity_test_total']
+
+    if (failObjs.length !== totalObjs.length) {
+      throw 'something has gone terribly wrong with the influxdb aggregator!'
+    }
+
+    const mergedObjs = failObjs.map((o, i) => ({
+      ...o,
+      totalCount: totalObjs[i].value
+    })).filter(o => o.totalCount !== 0)
+
+    byNode[id] = mergedObjs
   })
 
   return byNode
 }
 
 
+
+export async function getNodeHealth(node?: string, start?: string) : Promise<MetricsObj> {
+  const params = {
+    start: start || '-2d',
+    bucket: 'testing',
+    filter: {
+      name: 'node_health_check_summary',
+      ...(node && {node})
+    }
+  }
+
+  const data = await getData(params)
+  const byNode = groupBy(data, 'meta.node')
+  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.component'))
+
+  return byNode
+}
 
 
 
@@ -326,7 +318,6 @@ export async function getRecentImages(
 
 
 export async function getLatestAudio(node: string) {
-
   const data = await getData({
     start: '-1d',
     filter: {
@@ -340,6 +331,7 @@ export async function getLatestAudio(node: string) {
 
   return latestAvail
 }
+
 
 
 export async function stressTest(node: string) {
