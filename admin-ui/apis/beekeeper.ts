@@ -61,19 +61,24 @@ async function getMonitorData() {
 
 
 
-export async function getManifest(node?: string) {
+export async function getManifest(node?: string, by: 'vsn' | 'id' = 'id' ) {
   const data = await get(NODE_MANIFEST, {cache: 'reload'})
 
-  const mapping = data
-    .filter(obj => 'node id' in obj )
-    .reduce((acc, node) => ({...acc, [node['node id']]: node}), {})
+  let mapping
+
+  let d = data.filter(obj => 'node id' in obj)
+  if (by == 'id') {
+    mapping = d.reduce((acc, node) => ({...acc, [node['node id']]: node}), {})
+  } else if (by == 'vsn') {
+    mapping = d.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+  }
 
   if (!node) {
     return mapping
-  } else if (node.length == 4) {
+  } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
     return mapping[node]
   } else {
-    throw 'getManifest: (currently) only node vsn filtering is supported!'
+    throw 'getManifest: must provide `by=vsn` option if filtering to a node by VSN'
   }
 }
 

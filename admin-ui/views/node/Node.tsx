@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, Link} from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
 
@@ -13,6 +13,31 @@ import TimelineChart, {colors} from '../../viz/TimelineChart'
 
 import RecentData from './RecentData'
 
+
+const cols = [
+  'Node Type',
+  // 'vsn',
+  // 'node id',
+  'Project',
+  'Location',
+  'top camera',
+  'bottom camera',
+  'left camera',
+  'right camera',
+  'shield',
+  'modem',
+  'modem sim',
+  '2nd NX',
+  'Build Date',
+]
+
+function format(label: string, val: string) {
+  if (label == 'Project')
+    return <Link to={`/status?project=${val}`}>{val}</Link>
+  else if (label == 'Location')
+    return <Link to={`/status?location=${val}`}>{val}</Link>
+  return val == 'none' ? '-' :val
+}
 
 
 function getDate(hours, days) {
@@ -41,12 +66,11 @@ export default function NodeView() {
 
   const { setLoading } = useProgress()
 
-  const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
-
-  const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
-
+  const [manifest, setManifest] = useState(null)
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
+  const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
+  const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
 
   const [loading1, setLoading1] = useState(null)
   const [loading2, setLoading2] = useState(null)
@@ -59,8 +83,11 @@ export default function NodeView() {
   useEffect(() => {
     setLoading(true)
 
-    BH.getVSN(node.toLowerCase())
-      .then(vsn => setVsn(vsn))
+    BK.getManifest(node)
+      .then(data => {
+        setManifest(data)
+        setVsn(data.vsn)
+      })
 
     setLoading1(true)
     const p1 = SES.getGroupedByPlugin(node)
@@ -126,9 +153,38 @@ export default function NodeView() {
         Node {vsn} | <small className="muted">{node}</small>
       </h1>
 
+      {manifest &&
+        <table className="hor-key-value manifest">
+          <tr className="cat-header">
+            {cols.map(name => name == 'top camera' ?
+              <th key={name} colSpan="4">Cameras</th> :
+              <th key={name}></th>
+            ).slice(0, -3)
+            }
+            <th></th>
+          </tr>
+
+          <tr>
+            {cols.map(name => {
+              const label = name.replace(/_/g, ' ').replace('camera', '')
+                .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+              return <th key={label}>{label}</th>
+            })}
+            <th>Registration</th>
+          </tr>
+
+          <tr>
+            {cols.map(name => {
+              const val = manifest[name]
+              return <td key={name}>{format(name, val)}</td>
+            })}
+            <td>{new Date(meta?.registration_event).toLocaleString()}</td>
+          </tr>
+        </table>
+      }
+
       <div className="flex">
         <Charts className="flex column">
-
           <h2>Plugins</h2>
           {pluginData &&
             <TimelineChart
@@ -194,41 +250,6 @@ export default function NodeView() {
             <Alert severity="error">{error2.message}</Alert>
           }
 
-          {!hours && !days &&
-            <>
-              <h2>Node Details</h2>
-              {meta &&
-                <table className="key-value-table">
-                  <tbody>
-                    <tr>
-                      <td>Status</td>
-                      <td className={meta.status == 'active' ? 'success' : ''}>
-                        <b>{meta.status}</b>
-                      </td>
-                    </tr>
-
-                    {Object.entries(meta)
-                      .map(([key, val]) => {
-                        const label = key.replace(/_/g, ' ')
-                          .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-                        return <tr key={key}><td>{label}</td><td>{val || '-'}</td></tr>
-                      })
-                    }
-
-                    {meta.contact &&
-                    <>
-                      <tr><td colSpan={2}>Contact</td></tr>
-                      <tr>
-                        <td colSpan={2} style={{fontWeight: 400, paddingLeft: '30px'}}>{data.contact}</td>
-                      </tr>
-                    </>
-                    }
-                  </tbody>
-                </table>
-              }
-            </>
-          }
-
           {!loading3 && error3 &&
             <Alert severity="error">{error3.message}</Alert>
           }
@@ -245,12 +266,12 @@ export default function NodeView() {
 }
 
 
-
 const Root = styled.div`
   margin: 20px;
 
-  table {
-    max-width: 400px;
+  table.manifest {
+    width: 100%;
+    margin-bottom: 1em;
   }
 
   p {
