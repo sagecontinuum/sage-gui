@@ -15,28 +15,28 @@ import RecentData from './RecentData'
 
 
 const cols = [
-  'Node Type',
+  'node_type',
   // 'vsn',
-  // 'node id',
-  'Project',
-  'Location',
-  'top camera',
-  'bottom camera',
-  'left camera',
-  'right camera',
+  // 'node_id',
+  'project',
+  'location',
+  'top_camera',
+  'bottom_camera',
+  'left_camera',
+  'right_camera',
   'shield',
   'modem',
-  'modem sim',
-  '2nd NX',
-  'Build Date',
+  'modem_sim',
+  'nx_agent',
+  'build_date',
 ]
 
 function format(label: string, val: string) {
-  if (label == 'Project')
+  if (label == 'project')
     return <Link to={`/status?project=${val}`}>{val}</Link>
-  else if (label == 'Location')
+  else if (label == 'location')
     return <Link to={`/status?location=${val}`}>{val}</Link>
-  return val == 'none' ? '-' :val
+  return (!val || val == 'none') ? '-' : val
 }
 
 

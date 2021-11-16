@@ -25,7 +25,7 @@ export type State = {
   timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
 
   /* new, proposed fields? */
-  kind?: string
+  node_type?: string
   project?: string
   location?: string    // currently part of "project" in mock data
   status?: NodeStatus  // may be replaced with 'mode' or such?
@@ -66,9 +66,9 @@ export async function getManifest(node?: string, by: 'vsn' | 'id' = 'id' ) {
 
   let mapping
 
-  let d = data.filter(obj => 'node id' in obj)
+  let d = data.filter(obj => 'node_id' in obj)
   if (by == 'id') {
-    mapping = d.reduce((acc, node) => ({...acc, [node['node id']]: node}), {})
+    mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
   } else if (by == 'vsn') {
     mapping = d.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
   }
@@ -94,9 +94,7 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
 
     return {
       ...obj,
-      kind: meta['Node Type'],
-      project: meta.Project,
-      location: meta.Location,
+      ...meta,
       status: expectedState,
       registration_event: new Date(obj.registration_event).getTime()
     }
