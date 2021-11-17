@@ -36,7 +36,8 @@ function format(label: string, val: string) {
     return <Link to={`/status?project=${val}`}>{val}</Link>
   else if (label == 'location')
     return <Link to={`/status?location=${val}`}>{val}</Link>
-  return (!val || val == 'none') ? '-' : val
+
+  return typeof val == 'boolean' ? String(val) : ((!val || val == 'none') ? '-' : val)
 }
 
 
@@ -156,7 +157,7 @@ export default function NodeView() {
       {manifest &&
         <table className="hor-key-value manifest">
           <tr className="cat-header">
-            {cols.map(name => name == 'top camera' ?
+            {cols.map(name => name == 'top_camera' ?
               <th key={name} colSpan="4">Cameras</th> :
               <th key={name}></th>
             ).slice(0, -3)

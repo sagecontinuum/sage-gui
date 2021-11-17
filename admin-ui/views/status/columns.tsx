@@ -256,7 +256,7 @@ const columns = [{
   width: '5px',
   format: (val) => getPluginStatusIcon(val)
 }, {
-  id: 'kind',
+  id: 'node_type',
   label: 'Type',
   hide: false
 }, {
