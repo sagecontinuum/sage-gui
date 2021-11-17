@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
-import d3 from '../d3'
+import d3 from './d3'
 import Legend from './d3-color-legend'
 
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
@@ -364,10 +364,9 @@ function Chart(props: TimelineProps) {
 
     const legendNode = legendRef.current
     const legendSvg = legendNode.querySelector('svg')
-    if (!legendSvg) {
+    if (props.showLegend && !legendSvg) {
       appendLegend(legendNode, chartData)
     }
-
 
     return () => {
       ro.unobserve(node)
@@ -376,9 +375,7 @@ function Chart(props: TimelineProps) {
 
   return (
     <div>
-      {props.showLegend &&
-        <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
-      }
+      <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
       <div ref={ref}></div>
     </div>
   )

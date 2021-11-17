@@ -3,11 +3,12 @@ import { useHistory, Link} from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '../../apis/beehive'
+import * as BK from '../../apis/beekeeper'
+
 
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
-
-import TimelineChart from '../../viz/TimelineChart'
+import TimelineChart, { colors } from '../../viz/TimelineChart'
 
 
 
@@ -15,23 +16,43 @@ export default function TestView() {
   const history  = useHistory()
 
   const { setLoading } = useProgress()
-  const [chartData, setChartData] = useState(null)
+  const [sanity, setSanity] = useState()
+  const [health, setHealth] = useState()
+  const [manifest, setManifest] = useState(null)
+
+  const [error, setError]= useState()
 
   useEffect(() => {
     setLoading(true)
-    BH.getDailyChart()
-      .then((data) => setChartData(data))
+
+    let p1 = BH.getNodeHealth()
+      .then((data) => setHealth(data))
+      .catch((err) => setError(err))
+
+    let p2 = BH.getDailyChart()
+      .then((data) => setSanity(data))
+      .catch((err) => setError(err))
+
+    // temp solution for vsn <-> node id
+    BK.getManifest({by: 'vsn'})
+      .then(data => setManifest(data))
+      .catch((err) => setError(err))
+
+    Promise.all([p1, p2])
       .finally(() => setLoading(false))
 
   }, [setLoading])
 
 
   const handleCellClick = (item) => {
-    history.push(`/node/${item.meta.node}`)
+    const vsn = item.meta.vsn
+    const nodeId = manifest[vsn].node_id
+    history.push(`/node/${nodeId}`)
   }
 
   const handleLabelClick = (label) => {
-    history.push(`/node/${label.toUpperCase()}`)
+    const nodeId = manifest[label].node_id
+    history.push(`/node/${nodeId}`)
   }
 
 
@@ -39,13 +60,32 @@ export default function TestView() {
     <Root>
       <h1>All Nodes</h1>
 
-      <h2 className="flex justify-between items-center">
-        Test Overview
-        <small><Link to="/tests/old">go to old tests view</Link></small>
-      </h2>
-      {chartData &&
+      <h2>Health</h2>
+      {health &&
         <TimelineChart
-          data={chartData}
+          data={health}
+          onRowClick={handleLabelClick}
+          onCellClick={handleCellClick}
+          colorCell={(val, obj) => {
+            if (val == null)
+              return colors.noValue
+            return val == 0 ? colors.red4 : colors.green
+          }}
+          tooltip={(item) =>
+            `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+            ${item.meta.device}<br>
+            <b style="color: ${item.value == 0 ? colors.red4 : colors.green}">
+              ${item.value == 0 ? 'failed' : `success`}
+            </b>
+            `
+          }
+        />
+      }
+
+      <h2>Sanity Tests</h2>
+      {sanity &&
+        <TimelineChart
+          data={sanity}
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
           tooltip={(item) =>
@@ -59,7 +99,6 @@ export default function TestView() {
           showLegend
         />
       }
-
     </Root>
   )
 }

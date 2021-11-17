@@ -73,6 +73,8 @@ export default function NodeView() {
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
   const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
 
+  const [health, setHealth] = useState(null)
+
   const [loading1, setLoading1] = useState(null)
   const [loading2, setLoading2] = useState(null)
   const [loading3, setLoading3] = useState(null)
@@ -81,13 +83,21 @@ export default function NodeView() {
   const [error2, setError2] = useState(null)
   const [error3, setError3] = useState(null)
 
+  const [healthError, setHealthError] = useState(null)
+
+
   useEffect(() => {
     setLoading(true)
 
-    BK.getManifest(node)
+    BK.getManifest({node})
       .then(data => {
         setManifest(data)
-        setVsn(data.vsn)
+
+        const vsn = data.vsn
+        setVsn(vsn)
+        BH.getNodeDeviceHealth(vsn)
+          .then((data) => setHealth(data))
+          .catch((err) => setHealthError(err))
       })
 
     setLoading1(true)
@@ -186,37 +196,62 @@ export default function NodeView() {
 
       <div className="flex">
         <Charts className="flex column">
-          <h2>Plugins</h2>
-          {pluginData &&
+          <h2>Health</h2>
+          {health &&
             <TimelineChart
-              data={pluginData}
+              data={health}
               colorCell={(val, obj) => {
                 if (val == null)
                   return colors.noValue
-
-                if (val <= 0)
-                  return colors.green
-                else if (obj.meta.severity == 'warning')
-                  return colors.orange
-                else
-                  return colors.red4
+                return val == 0 ? colors.red4 : colors.green
               }}
               tooltip={(item) =>
                 `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
-                 ${item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+                ${item.meta.device}<br>
+                <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
+                  ${item.value == 0 ? 'failed' : `success`}
+                </b>
                 `
               }
               margin={{right: 20}}
             />
           }
 
-          {!loading1 && !pluginData &&
-            <p className="muted">No (recent) plugin data available</p>
-          }
+          {/*
+            <h2>Plugins</h2>
+            {pluginData &&
+              <TimelineChart
+                data={pluginData}
+                colorCell={(val, obj) => {
+                  if (val == null)
+                    return colors.noValue
 
-          {error1 &&
-            <Alert severity="error">{error1.message}</Alert>
-          }
+                  if (val <= 0)
+                    return colors.green
+                  else if (obj.meta.severity == 'warning')
+                    return colors.orange
+                  else
+                    return colors.red4
+                }}
+                tooltip={(item) =>
+                  `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+                  <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+                    ${item.value == 0 ? 'running' : `not running (${item.meta.status})`}
+                  </b>
+                  `
+                }
+                margin={{right: 20}}
+              />
+            }
+
+            {!loading1 && !pluginData && !error1 &&
+              <p className="muted">No (recent) plugin data available</p>
+            }
+
+            {error1 &&
+              <Alert severity="error">{error1.message}</Alert>
+            }
+          */}
 
           <h2>Sanity Tests</h2>
           {sanityData &&
@@ -236,7 +271,9 @@ export default function NodeView() {
               }}
               tooltip={(item) =>
                 `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
-                ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+                <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+                  ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+                </b>
                 `
               }
               margin={{right: 20}}

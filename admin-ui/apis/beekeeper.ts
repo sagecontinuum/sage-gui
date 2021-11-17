@@ -61,7 +61,11 @@ async function getMonitorData() {
 
 
 
-export async function getManifest(node?: string, by: 'vsn' | 'id' = 'id' ) {
+type ManifestArgs = {node?: string, by?: 'vsn' | 'id'}
+
+export async function getManifest(params: ManifestArgs) {
+  const {node, by} = params ?? {by: 'id'}
+
   const data = await get(NODE_MANIFEST, {cache: 'reload'})
 
   let mapping

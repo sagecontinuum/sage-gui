@@ -3,6 +3,8 @@ const url = config.beehive
 
 import {groupBy, mapValues} from 'lodash'
 
+import * as BK from './beekeeper'
+
 
 export const cameraOrientations = [
   'top',
@@ -189,7 +191,7 @@ export async function getDailyChart(start?: string) : Promise<Record[]> {
   }
 
   const data = await getData(params)
-  let byNode = groupBy(data, 'meta.node')
+  let byNode = groupBy(data, 'meta.vsn')
   mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
 
   Object.entries(byNode).forEach(([id, obj]) => {
@@ -213,21 +215,44 @@ export async function getDailyChart(start?: string) : Promise<Record[]> {
 
 
 
-export async function getNodeHealth(node?: string, start?: string) : Promise<MetricsObj> {
+export async function getNodeHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
   const params = {
-    start: start || '-2d',
-    bucket: 'testing',
+    start: start ?? '-14d',
+    bucket: 'health-check-test',
     filter: {
-      name: 'node_health_check_summary',
-      ...(node && {node})
+      name: 'node_health_check',
+      ...(vsn && {vsn})
+    }
+  }
+
+  const [data, nodes] = await Promise.all([getData(params), BK.getManifest({by: 'vsn'})])
+  const byNode = groupBy(data, 'meta.vsn')
+
+  // removed unbuilt nodes
+  Object.keys(byNode).forEach(key => {
+    if (!(key in nodes)) delete byNode[key]
+  })
+
+  return byNode
+}
+
+
+
+export async function getNodeDeviceHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
+  const params = {
+    start: start ?? '-14d',
+    bucket: 'health-check-test',
+    filter: {
+      name: 'device_health_check',
+      ...(vsn && {vsn})
     }
   }
 
   const data = await getData(params)
-  const byNode = groupBy(data, 'meta.node')
-  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.component'))
+  const byNode = groupBy(data, 'meta.vsn')
+  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.device'))
 
-  return byNode
+  return vsn ? byNode[vsn] : byNode
 }
 
 

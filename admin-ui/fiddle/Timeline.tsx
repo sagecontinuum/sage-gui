@@ -27,10 +27,8 @@ export default function Timeline() {
 
     // test one: influx aggregated data
     BH.getDailyChart()
-      .then((data) => {
-        console.log('data', data)
-        setData1(data)
-      }).catch((err) => setError2(err))
+      .then((data) => setData1(data))
+      .catch((err) => setError2(err))
 
 
     // test two: node sanity data
@@ -39,8 +37,6 @@ export default function Timeline() {
         const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
         setData2(data)
       }).catch((err) => setError1(err))
-
-
   }, [days, hours])
 
   return (
