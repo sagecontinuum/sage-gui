@@ -184,7 +184,7 @@ export async function getSanityChart(node?: string, start?: string) : Promise<Me
 export async function getDailyChart(start?: string) : Promise<Record[]> {
   const params = {
     bucket: 'downsampled-test',
-    start: start ?? '-7d',
+    start: start ?? '-60h',
     filter: {
       name: 'sanity_test_.*'
     }
@@ -217,7 +217,7 @@ export async function getDailyChart(start?: string) : Promise<Record[]> {
 
 export async function getNodeHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
   const params = {
-    start: start ?? '-14d',
+    start: start ?? '-60h',
     bucket: 'health-check-test',
     filter: {
       name: 'node_health_check',
@@ -240,7 +240,7 @@ export async function getNodeHealth(vsn?: string, start?: string) : Promise<Metr
 
 export async function getNodeDeviceHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
   const params = {
-    start: start ?? '-14d',
+    start: start ?? '-60h',
     bucket: 'health-check-test',
     filter: {
       name: 'device_health_check',

@@ -63,8 +63,8 @@ async function getMonitorData() {
 
 type ManifestArgs = {node?: string, by?: 'vsn' | 'id'}
 
-export async function getManifest(params: ManifestArgs) {
-  const {node, by} = params ?? {by: 'id'}
+export async function getManifest(params?: ManifestArgs) {
+  const {node, by = 'id'} = params || {}
 
   const data = await get(NODE_MANIFEST, {cache: 'reload'})
 

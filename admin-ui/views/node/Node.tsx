@@ -57,6 +57,18 @@ function getDate(hours, days) {
   return d
 }
 
+function sanityColor(val, obj) {
+  if (val == null)
+    return colors.noValue
+
+  if (val <= 0)
+    return colors.green
+  else if (obj.meta.severity == 'warning')
+    return colors.orange
+  else
+    return colors.red4
+
+}
 
 
 export default function NodeView() {
@@ -217,7 +229,7 @@ export default function NodeView() {
             />
           }
 
-          {/*
+          {/* hide just for now
             <h2>Plugins</h2>
             {pluginData &&
               <TimelineChart
@@ -258,20 +270,10 @@ export default function NodeView() {
             <TimelineChart
               data={sanityData}
               yFormat={l => l.split('.').pop()}
-              colorCell={(val, obj) => {
-                if (val == null)
-                  return colors.noValue
-
-                if (val <= 0)
-                  return colors.green
-                else if (obj.meta.severity == 'warning')
-                  return colors.orange
-                else
-                  return colors.red4
-              }}
+              colorCell={sanityColor}
               tooltip={(item) =>
                 `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
-                <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+                <b style="color: ${sanityColor(item.value, item)}">
                   ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
                 </b>
                 `

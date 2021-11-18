@@ -17,7 +17,7 @@ const guideStroke = 3
 
 
 const redSpectrum = [
-  '#d34848',
+  '#ff8686',
   '#890000',
   '#520000'
 ]

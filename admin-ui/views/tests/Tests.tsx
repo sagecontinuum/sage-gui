@@ -10,6 +10,17 @@ import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import TimelineChart, { colors } from '../../viz/TimelineChart'
 
+const timeOpts = { hour: '2-digit', minute:'2-digit' }
+const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
+
+
+function getDateTimeStr(timestamp) {
+  return (
+    `${new Date(timestamp).toLocaleDateString('en-US', dateOpts)}<br>
+    ${new Date(timestamp).toLocaleTimeString('en-US', timeOpts)} - ${new Date(new Date(timestamp).getTime() + 60*60*1000).toLocaleTimeString('en-US', timeOpts)}`
+  )
+}
+
 
 
 export default function TestView() {
@@ -72,11 +83,12 @@ export default function TestView() {
             return val == 0 ? colors.red4 : colors.green
           }}
           tooltip={(item) =>
-            `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
-            ${item.meta.device}<br>
-            <b style="color: ${item.value == 0 ? colors.red4 : colors.green}">
+            `${getDateTimeStr(item.timestamp)}<br>
+            Node: ${item.meta.vsn}<br>
+            <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
               ${item.value == 0 ? 'failed' : `success`}
-            </b>
+            </b><br><br>
+            <small class="muted">(click for details)</small>
             `
           }
         />
@@ -89,14 +101,14 @@ export default function TestView() {
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
           tooltip={(item) =>
-            `${new Date(item.timestamp).toDateString()}<br>
-            ${new Date(item.timestamp).toLocaleTimeString()} - ${new Date(new Date(item.timestamp).getTime() + 60*60*1000).toLocaleTimeString()}<br>
-            ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-            (${item.value} issue${item.value == 1 ? '' : 's'})<br><br>
-            <small>(click for details)</small>
+            `${getDateTimeStr(item.timestamp)}<br>
+            <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+             ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+             </b>
+             (${item.value} issue${item.value == 1 ? '' : 's'})<br><br>
+            <small class="muted">(click for details)</small>
             `
           }
-          showLegend
         />
       }
     </Root>
