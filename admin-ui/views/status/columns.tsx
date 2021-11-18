@@ -20,6 +20,7 @@ import * as BH from '../../apis/beehive'
 
 import config from '../../../config'
 
+
 const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 const TEMP_DASH = `${config.influxDashboard}/082da52c87209000?lower=now%28%29%20-%2024h`
 
@@ -190,8 +191,17 @@ export function getColorClass(val, severe: number, warning: number, defaultClass
 
 function fsAggregator(data) {
   return data?.reduce((acc, o) => {
-    const key = o.meta.fstype + ':' + o.meta.mountpoint
-    acc[key] = o.value
+    const mountPoint = o.meta.mountpoint
+    const mntPath = o.meta.fstype + ':' + mountPoint
+
+    const mntParts = mountPoint.split('/')
+    const mntName = mntParts[mntParts.length - 1]
+    const name = shortMntName(mntName)
+
+    acc[name] = {
+      mntPath,
+      value: o.value
+    }
     return acc
   }, {})
 }
@@ -202,29 +212,27 @@ const shortMntName = name =>
     .replace('core_sdcard_test', 'sdcard')
 
 
-function FSPercent({aggFSSize, aggFSAvail}) {
+function FSPercent({aggFSSize, aggFSAvail, host, mounts}) {
   if (!aggFSSize || !aggFSAvail) return <></>
-
-  // avoid redundant mnts
-  const percents = []
 
   return (
     <>{
-      Object.keys(aggFSSize).sort().map((key) => {
-        const percent = ((aggFSSize[key] - aggFSAvail[key]) / aggFSSize[key] * 100)
+      mounts.map((key) => {
+        const fsSize = aggFSSize[key].value
+        const fsAvail = aggFSAvail[key].value
 
-        if (percents.includes(percent))
+        const percent = ((fsSize - fsAvail) / fsSize * 100)
+
+        // don't care about 'ro' for pi
+        if (host == 'rpi' && key == 'ro') {
           return <React.Fragment key={key}></React.Fragment>
-
-        percents.push(percent)
-        const mntParts = key.split('/')
-        const mntPath = mntParts[mntParts.length - 1]
+        }
 
         return (
           <React.Fragment key={key}>
             <Tooltip title={key} placement="top">
               <FSItem className={getColorClass(percent, 90, 80)}>
-                <div>{shortMntName(mntPath)}</div> {percent.toFixed(2)}%
+                {percent.toFixed(2)}%
               </FSItem>
             </Tooltip>
           </React.Fragment>
@@ -237,10 +245,8 @@ function FSPercent({aggFSSize, aggFSAvail}) {
 
 const FSItem = styled.div`
   margin-right: 1em;
-  font-size: .9em;
-  div {
-    font-size: .9em;
-  }
+  font-size: .85em;
+  width: 40px;
 `
 
 
@@ -405,17 +411,33 @@ const columns = [{
 
     const hosts = Object.keys(val)
 
-    return hosts
-      .map((host, i) => {
-        const aggFSSize = fsAggregator(obj.fsSize[host])
-        const aggFSAvail = fsAggregator(obj.fsAvail[host])
+    return (
+      <>
+        <div className="flex">
+          <FSItem>plugins</FSItem>
+          <FSItem>rw</FSItem>
+          <FSItem>ro</FSItem>
+        </div>
+        {hosts.map((host, i) => {
+          const aggFSSize = fsAggregator(obj.fsSize[host])
+          const aggFSAvail = fsAggregator(obj.fsAvail[host])
 
-        return (
-          <div key={host + i} className="flex justify-between" style={{maxWidth: '200px'}}>
-            <FSPercent aggFSSize={aggFSSize} aggFSAvail={aggFSAvail} />
-          </div>
-        )
-      })
+          return (
+            <div key={host + i} className="flex column">
+              <div className="flex">
+                <FSPercent
+                  aggFSSize={aggFSSize}
+                  aggFSAvail={aggFSAvail}
+                  host={host}
+                  mounts={['plugins', 'rw', 'ro']}
+                />
+              </div>
+            </div>
+          )
+        })
+        }
+      </>
+    )
   }
 }, {
   id: 'rxBytes',
