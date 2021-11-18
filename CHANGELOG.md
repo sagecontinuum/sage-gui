@@ -3,6 +3,34 @@
 The following are some notable changes to the UI
 
 
+## [1.7.0](https://github.com/sagecontinuum/sage-gui/compare/v1.6.0...v1.7.0) (2021-11-18)
+
+
+### Features
+
+* **admin:** add build phase filtering (using mock data) ([ffaab34](https://github.com/sagecontinuum/sage-gui/commit/ffaab349e528b99786fd731b8891678928676ac0))
+* **admin:** add health/sanity sparkline summaries ([707ae84](https://github.com/sagecontinuum/sage-gui/commit/707ae84ed205db0237b10eeb56d7dfb3b3c8ec1e))
+* **admin:** add node monitoring "filter nodes" config ([3daa97f](https://github.com/sagecontinuum/sage-gui/commit/3daa97f43ec727eac8a78585512fa7caa1c8489c))
+* **admin:** add old image/audio warnings and relative times ([3e27395](https://github.com/sagecontinuum/sage-gui/commit/3e2739531755ddf5c7017b985eb82ed0d17dfd5b))
+* **admin:** clean up display of fs util ([4e7e1dd](https://github.com/sagecontinuum/sage-gui/commit/4e7e1dd7d747380cd9753bb41ee04c02529eda79))
+* **admin:** device and nodehealth charts ([fa0ce5b](https://github.com/sagecontinuum/sage-gui/commit/fa0ce5b83108311b0a1d9f500d0e2cce88a121a2))
+* **admin:** manifest table ([b94a95e](https://github.com/sagecontinuum/sage-gui/commit/b94a95e7862aa9b60bedb807e7d512b387ce00d0))
+* **admin:** use aggregated data on "tests" page ([73ce2ab](https://github.com/sagecontinuum/sage-gui/commit/73ce2ab506ef43e61ac5adeba481906e58797f03))
+* **timeline:** add margin api & matrix size function ([9b5fed4](https://github.com/sagecontinuum/sage-gui/commit/9b5fed491d45be25ba8b30c4d75bd6cc5103510a))
+* **timeline:** basic legend support ([dd39e6b](https://github.com/sagecontinuum/sage-gui/commit/dd39e6b15110653feff1f0f9ea55f89635df03be))
+* **timeline:** unobserve resizer; add debouncer ([2ff8d8b](https://github.com/sagecontinuum/sage-gui/commit/2ff8d8b66d1b765b9746c80a616f9897f22bf1d3))
+* new timeline/heatmap viz ([ce4ab4b](https://github.com/sagecontinuum/sage-gui/commit/ce4ab4b05a2c680a9b5de887a7a861ff3ada47e7))
+
+
+### Bug Fixes
+
+* **admin:** add some storage fetch progress ([1dd12d7](https://github.com/sagecontinuum/sage-gui/commit/1dd12d7f1e0b82015f8c5defc79cd2ed28775248))
+* **admin:** allow upper or lower case node urls ([10b0b88](https://github.com/sagecontinuum/sage-gui/commit/10b0b88af2a233a05755dd22dbc45a08398b4799))
+* **admin:** don't crash if requests to fail ([1aff97d](https://github.com/sagecontinuum/sage-gui/commit/1aff97dd0ff683521fe1d9b2528b40491c238e1d))
+* **admin:** minor type and error handling fixes ([7af26b7](https://github.com/sagecontinuum/sage-gui/commit/7af26b75a257b94fda90ef42f076e95d3a45f6da))
+* **ecr:** fix/add sage.yml fetching on branch selection ([9de7967](https://github.com/sagecontinuum/sage-gui/commit/9de79678b3b03b6962b854cb8e423fff635fd701))
+* **ecr:** show ecr error message in app listings ([660f967](https://github.com/sagecontinuum/sage-gui/commit/660f96746baeb22e009fb12af67dc8c58b2c1860))
+
 ## [1.6.0](https://github.com/sagecontinuum/sage-gui/compare/v1.4.0...v1.6.0) (2021-10-13)
 
 
