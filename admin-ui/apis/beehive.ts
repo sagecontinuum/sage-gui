@@ -181,7 +181,30 @@ export async function getSanityChart(node?: string, start?: string) : Promise<Me
 
 
 
-export async function getDailyChart(start?: string) : Promise<Record[]> {
+export async function getNodeHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
+  const params = {
+    start: start ?? '-60h',
+    bucket: 'health-check-test',
+    filter: {
+      name: 'node_health_check',
+      ...(vsn && {vsn})
+    }
+  }
+
+  const [data, nodes] = await Promise.all([getData(params), BK.getManifest({by: 'vsn'})])
+  const byNode = groupBy(data, 'meta.vsn')
+
+  // removed unbuilt nodes
+  Object.keys(byNode).forEach(key => {
+    if (!(key in nodes)) delete byNode[key]
+  })
+
+  return byNode
+}
+
+
+
+export async function getNodeSanity(start?: string) : Promise<Record[]> {
   const params = {
     bucket: 'downsampled-test',
     start: start ?? '-60h',
@@ -212,30 +235,6 @@ export async function getDailyChart(start?: string) : Promise<Record[]> {
 
   return byNode
 }
-
-
-
-export async function getNodeHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
-  const params = {
-    start: start ?? '-60h',
-    bucket: 'health-check-test',
-    filter: {
-      name: 'node_health_check',
-      ...(vsn && {vsn})
-    }
-  }
-
-  const [data, nodes] = await Promise.all([getData(params), BK.getManifest({by: 'vsn'})])
-  const byNode = groupBy(data, 'meta.vsn')
-
-  // removed unbuilt nodes
-  Object.keys(byNode).forEach(key => {
-    if (!(key in nodes)) delete byNode[key]
-  })
-
-  return byNode
-}
-
 
 
 export async function getNodeDeviceHealth(vsn?: string, start?: string) : Promise<MetricsObj> {

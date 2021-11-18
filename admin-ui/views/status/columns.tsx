@@ -12,6 +12,7 @@ import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import MapIcon from '@mui/icons-material/RoomOutlined'
 import ThermoIcon from '@mui/icons-material/ThermostatRounded'
+import Chip from '@material-ui/core/Chip'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -19,6 +20,8 @@ import * as utils from '../../../components/utils/units'
 import * as BH from '../../apis/beehive'
 
 import config from '../../../config'
+
+import {colors} from '../../viz/TimelineChart'
 
 
 const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
@@ -230,7 +233,7 @@ function FSPercent({aggFSSize, aggFSAvail, host, mounts}) {
 
         return (
           <React.Fragment key={key}>
-            <Tooltip title={key} placement="top">
+            <Tooltip title={aggFSSize[key].mntPath} placement="top">
               <FSItem className={getColorClass(percent, 90, 80)}>
                 {percent.toFixed(2)}%
               </FSItem>
@@ -249,19 +252,77 @@ const FSItem = styled.div`
   width: 40px;
 `
 
+const padding = {padding: '5px 0 0 10px'}
+const cellWidth = 3
+const cellHeight = 10
+const cellPad = 1
+
+function healthColor(val, obj) {
+  if (val == null)
+    return colors.noValue
+  return val == 0 ? colors.red4 : colors.green
+}
+
+function sanityColor(val, obj) {
+  if (val == null)
+    return colors.noValue
+  return val == 0 ? colors.green : colors.red4
+}
+
+
+function HealthSparkler(props) {
+  const {data, colorFunc, name} = props
+
+  if (!data) return <></>
+
+  return (
+    <Tooltip title={name} placement="right">
+      <svg width="50" height="15" style={padding}>
+        {data.map((o, j) =>
+          <rect
+            x={j * (cellWidth + cellPad)}
+            width={cellWidth}
+            height={cellHeight}
+            fill={colorFunc(o.value, o)}
+            key={j}
+          />
+        )}
+      </svg>
+    </Tooltip>
+  )
+}
 
 
 const columns = [{
-  id: 'sanity',
-  label: 'Tests',
+  id: 'health',
+  label: 'Health',
   width: '5px',
-  format: (val) => getSanityIcon(val)
-}, {
+  format: (obj, row) => {
+    if (!obj) return
+
+    const {health, sanity} = obj
+
+    return <Link to={`/node/${row.id}`} style={{textDecoration: 'none'}}>
+      {health.failed == 0 ?
+        <Tooltip title={`All health tests passed`} placement="right">
+          <GoodChip icon={<CheckIcon className="success" fontSize="small" />} label="pass" size="small" />
+        </Tooltip> :
+        <HealthSparkler data={health.details} colorFunc={healthColor} name="Node health" />
+      }
+      {sanity.failed == 0 ?
+        <Tooltip title={`All sanity tests passed`} placement="right">
+          <GoodChip icon={<CheckIcon className="success" fontSize="small"  />} label="pass" size="small" />
+        </Tooltip> :
+        <HealthSparkler data={sanity.details} colorFunc={sanityColor} name="Sanity tests" />
+      }
+    </Link>
+  }
+}, /* {
   id: 'pluginStatus',
   label: 'Plugins',
   width: '5px',
   format: (val) => getPluginStatusIcon(val)
-}, {
+}, */ {
   id: 'node_type',
   label: 'Type',
   hide: false
@@ -472,6 +533,20 @@ const NodeCell = styled.div`
   margin-right: .2em;
   .MuiButtonBase-root {
     margin-bottom: 2px;
+  }
+`
+
+const GoodChip = styled(Chip)`
+  &.MuiChip-root {
+    background-color: #3ac37e;
+    color: #fff;
+    font-size: .9em;
+    height: 18px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    svg {
+      height: 15px;
+    }
   }
 `
 

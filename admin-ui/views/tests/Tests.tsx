@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory, Link} from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '../../apis/beehive'
@@ -40,7 +40,7 @@ export default function TestView() {
       .then((data) => setHealth(data))
       .catch((err) => setError(err))
 
-    let p2 = BH.getDailyChart()
+    let p2 = BH.getNodeSanity()
       .then((data) => setSanity(data))
       .catch((err) => setError(err))
 

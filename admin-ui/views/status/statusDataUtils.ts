@@ -129,8 +129,47 @@ function getSanity(
 }
 
 
+export function aggNodeHealth(data) {
+  if (!data) return {}
 
-export function getPluginStatus(data) {
+  let entry = {
+    details: data,
+    passed: 0,
+    failed: 0
+  }
+
+  data.forEach(obj => {
+    const {value} = obj
+    entry.passed = value == 1 ? entry.passed + 1 : entry.passed
+    entry.failed = value <= 0 ? entry.failed + 1 : entry.failed
+  })
+
+  return entry
+}
+
+
+
+export function aggNodeSanity(data) {
+  if (!data) return {}
+
+  let entry = {
+    details: data,
+    passed: 0,
+    failed: 0
+  }
+
+  data.forEach(obj => {
+    const {value} = obj
+    entry.passed = value == 0 ? entry.passed + 1 : entry.passed
+    entry.failed = value > 0 ? entry.failed + 1 : entry.failed
+  })
+
+  return entry
+}
+
+
+
+export function aggPluginStatus(data) {
   if (!data) return {}
 
   let entry = {
@@ -167,16 +206,16 @@ const getFakeIP = (id) =>
 
 // join beehive and beekeeper data, basically
 export function mergeMetrics(
-  data: BK.State[], metrics: BH.AggMetrics, temps, plugins: SES.LatestState
+  data: BK.State[], metrics: BH.AggMetrics, temps, health, sanity
 ) {
-
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
+
     if (!(id in metrics)) return nodeObj
 
     const elaspedTimes = getElaspedTimes(metrics, id)
 
-    // get vsn from arbitrary host
+    // get vsn from arbitrary host; todo(nc): no longer necessary
     const someHost = Object.keys(metrics[id])[0]
     const vsn = metrics[id][someHost]['sys.uptime'][0].meta.vsn
 
@@ -207,9 +246,13 @@ export function mergeMetrics(
       txPackets: getMetric(metrics, id, 'sys.net.tx_packets', false),
       rxBytes: getMetric(metrics, id, 'sys.net.rx_bytes', false),
       rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
-      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value,
-      sanity: getSanity(metrics, id),
-      pluginStatus: plugins ? getPluginStatus(plugins[id.toUpperCase()]) : {}
+      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value || getFakeIP(id),
+      health: {
+        oldSanity: getSanity(metrics, id),
+        sanity: sanity ? aggNodeSanity(sanity[vsn]) : {},
+        health: health ? aggNodeHealth(health[vsn]) : {}
+      }
+      // pluginStatus: plugins ? aggPluginStatus(plugins[id.toUpperCase()]) : {}
     }
   })
 

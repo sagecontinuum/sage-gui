@@ -22,7 +22,7 @@ import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
 import * as SES from '../../apis/ses'
 
-
+const TICKER_START = '-12h'
 const TIME_OUT = 5000
 
 
@@ -35,6 +35,13 @@ const getOptions = (data: object[], field: string) : Option[] =>
 const useParams = () =>
   new URLSearchParams(useLocation().search)
 
+
+const pingRequests = () => [
+  BH.getLatestMetrics(),
+  BH.getLatestTemp(),
+  BH.getNodeHealth(null, TICKER_START),
+  BH.getNodeSanity(TICKER_START)
+]
 
 
 type Option = {
@@ -82,14 +89,10 @@ export default function StatusView() {
     // get latest metrics
     function ping() {
       const handle = setTimeout(async () => {
-        const results = await Promise.allSettled([
-          BH.getLatestMetrics(),
-          BH.getLatestTemp(),
-          SES.getLatestStatus()
-        ])
-        const [metrics, temps, plugins] = results.map(r => r.value)
+        const results = await Promise.allSettled(pingRequests())
+        const [ metrics, temps, health, sanity] = results.map(r => r.value)
 
-        setData(mergeMetrics(dataRef.current, metrics, temps, plugins))
+        setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -101,19 +104,16 @@ export default function StatusView() {
 
     let handle
     setLoading(true)
-    const proms = [
-      BK.fetchState(),
-      BH.getLatestMetrics(),
-      BH.getLatestTemp(),
-      SES.getLatestStatus()
-    ]
+    const proms = [BK.fetchState(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
-        const [state, metrics, temps, plugins] = results.map(r => r.value)
+        const [state, metrics, temps, health, sanity] = results.map(r => r.value)
 
         setData(state)
 
-        const allData = mergeMetrics(state, metrics, temps, plugins)
+        console.log('sanity', sanity)
+
+        const allData = mergeMetrics(state, metrics, temps, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
@@ -233,6 +233,10 @@ export default function StatusView() {
           />
         }
       </Overview>
+
+      {error &&
+        <Alert severity="error">{error.message}</Alert>
+      }
 
       <TableContainer>
         {filtered &&
@@ -368,6 +372,9 @@ const ChartsTitle = styled.h2`
 
 
 const TableContainer = styled.div`
+  table thead th:first-child {
+    padding-left: 15px;  // pad for special viz
+  }
 `
 
 const FilterControls = styled.div`

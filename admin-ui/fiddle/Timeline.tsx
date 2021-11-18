@@ -26,7 +26,7 @@ export default function Timeline() {
   useEffect(() => {
 
     // test one: influx aggregated data
-    BH.getDailyChart()
+    BH.getNodeSanity()
       .then((data) => setData1(data))
       .catch((err) => setError2(err))
 
