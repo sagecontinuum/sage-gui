@@ -89,6 +89,7 @@ export default function CreateApp() {
 
   // app repo
   const [repoURL, setRepoURL] = useState('')
+  const [repoPath, setRepoPath] = useState('')
   const [tag, setTag] = useState({id: 'main', label: 'main'})
   const [tagList, setTagList] = useState([])
 
@@ -127,6 +128,8 @@ export default function CreateApp() {
 
     const path = repoURL.split('.com')[1]
       .replace('.git', '').slice(1)
+    setRepoPath(path)
+
 
     // todo: add rate limit notice, add branch?
     setValidating(true)
@@ -150,9 +153,14 @@ export default function CreateApp() {
       })
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
-      .then(() => fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.json`))
+      .then(() => fetchSageConfig(path, 'main'))
+  }
+
+
+  const fetchSageConfig = (path, branch) => {
+    fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.json`)
       .then(res => res.status == 404 ?
-        fetch(`${GITHUB_STATIC_URL}/${path}/master/sage.yaml`) : res
+        fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.yaml`) : res
       ).then(res => {
 
         // set config type
@@ -167,14 +175,13 @@ export default function CreateApp() {
 
           // update config with repo url and tag (just branch for now)
           obj.source.url = repoURL
-          obj.source.branch = obj.source.branch || tag.id
+          obj.source.branch = obj.source.branch || branch
 
           setForm(obj)
           setConfig(YAML.stringify(obj))
         })
       }).catch(() => setConfigType('none'))
   }
-
 
   const onRepoTagChange = (tagObj) => {
     if (!tagObj) {
@@ -185,10 +192,7 @@ export default function CreateApp() {
     setTag(tagObj)
     setIsValid(true)
 
-    const f = {...form}
-    f.source.branch = tagObj.id
-    setForm(f)
-    setConfig(YAML.stringify(f))
+    fetchSageConfig(repoPath, tagObj.id)
   }
 
 
