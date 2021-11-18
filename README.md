@@ -1,6 +1,6 @@
 # sage-gui
 
-React.js components for the Sage.
+React.js components for Sage UIs.
 
 
 ## Installation

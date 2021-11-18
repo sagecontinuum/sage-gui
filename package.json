@@ -72,7 +72,7 @@
     "typescript": "^4.2.3"
   },
   "standard-version": {
-    "changelogHeader": "# Changelog\n\nThe following are some notable changes to the UI\n\n"
+    "header": "# Changelog\n\nThe following are some notable changes to the UI\n\n"
   },
   "msw": {
     "workerDirectory": "build"
