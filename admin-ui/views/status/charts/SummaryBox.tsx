@@ -16,12 +16,14 @@ export default function SummaryBox(props: StatusProps) {
     <Root {...props} className="flex-grow">
       <div>{label}</div>
 
-      <div className="status-value">
+      <div>
         {value ?
           <div className="flex items-center">
-            <span>{value}</span>&nbsp;{value != 'n/a' && <span className="status-text">issue{value > 1 ? 's' : ''}</span>}
+            <span className="status-value">{value}</span>&nbsp;{value != 'n/a' &&
+               <div className="sub-text"><div>recent</div>issue{value > 1 ? 's' : ''}</div>
+            }
           </div> :
-          <div className="flex items-center"><Check/>&nbsp;ok</div>
+          <div className="flex items-center status-value"><Check/>&nbsp;ok</div>
         }
       </div>
     </Root>
@@ -35,11 +37,11 @@ const Root = styled.a<{value: number}>`
   background: ${props => props.value > 0 ?  '#a30f0f' : '#3ac37e'};
 
   .status-value {
-    font-size: 2em;
+    font-size: 2.5em;
   }
 
-  .status-text {
-    font-size: .4em;
+  .sub-text {
+    font-size: .8em;
   }
 
   :hover {

@@ -25,7 +25,7 @@ type Issues = {
 
 function getIssues(data) : Issues {
   const tests = data.reduce((acc, obj) => {
-    const total = acc + (obj?.sanity?.failed || 0)
+    const total = acc + (obj?.health?.oldSanity?.failed || 0)
     return total
   }, 0)
 
@@ -129,8 +129,7 @@ export default function Charts(props: Props) {
       </div>
 
       <div className="flex gap summary-boxes">
-        {showChart('tests') && <SummaryBox label="Tests" value={issues.tests}/>}
-        {showChart('plugins') && <SummaryBox label="Plugins" value={issues.plugins}/>}
+        {showChart('tests') && <SummaryBox label="Sanity" value={issues.tests}/>}
         {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
         {showChart('fsutil') && <SummaryBox label="FS Util" value={'n/a'}/>}
       </div>
