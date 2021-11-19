@@ -60,16 +60,15 @@ async function getMonitorData() {
 
 
 
-type ManifestArgs = {node?: string, by?: 'vsn' | 'id'}
+type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 
-export async function getManifest(params?: ManifestArgs) {
+export async function getManifest(params?: MetaParams) {
   const {node, by = 'id'} = params || {}
 
   const data = await get(`${url}/production`, {cache: 'reload'})
+  const d = data.filter(obj => 'node_id' in obj)
 
   let mapping
-
-  let d = data.filter(obj => 'node_id' in obj)
   if (by == 'id') {
     mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
   } else if (by == 'vsn') {
@@ -79,13 +78,30 @@ export async function getManifest(params?: ManifestArgs) {
   if (!node) {
     return mapping
   } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
-    return getFactory(node)
+    return getFactory({node})
       .then(factory => ({...mapping[node], factory}))
   } else {
     throw 'getManifest: must provide `by=vsn` option if filtering to a node by VSN'
   }
 }
 
+
+export async function getFactory(params?: MetaParams) {
+  const {node, by = 'id'} = params
+
+  const data = await get(`${url}/factory`)
+  const d = data.filter(obj => 'node_id' in obj)
+
+  let mapping
+  if (by == 'id') {
+    mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
+  } else if (by == 'vsn') {
+    mapping = d.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+  }
+
+  return node ?
+    d.filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0] : mapping
+}
 
 
 function _joinNodeData(nodes, nodeMetas, monitorMeta) {
@@ -122,19 +138,14 @@ export async function getState() : Promise<State[]> {
 
 
 export async function getSuryaState() : Promise<State[]> {
-  const proms = [getNodes(), getManifest(), getMonitorData()]
-  let [nodes, meta, monitorMeta] = await Promise.all(proms)
-  return _joinNodeData(nodes, meta, monitorMeta)
+  const proms = [getNodes(), getManifest(), getMonitorData(), getFactory({by: 'id'})]
+  const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
+
+  const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
+  const allSuryaData = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
+  return allSuryaData
 }
 
-
-export async function getFactory(node: string) {
-  const data = await get(`${url}/factory`)
-
-  return data
-    .filter(obj => 'node_id' in obj)
-    .filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0]
-}
 
 
 export async function getNodes() {

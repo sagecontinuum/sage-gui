@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import { useParams, Link} from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
+import Tooltip from '@material-ui/core/Tooltip'
+import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 
 import {Tabs, Tab} from '../../../components/tabs/Tabs'
 import Table from '../../../components/table/Table'
@@ -13,21 +15,22 @@ import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
-import * as SES from '../../apis/ses'
 
 import * as utils from '../../../components/utils/units'
-import cols, { getColorClass } from '../status/columns'
+import cols, { getColorClass, GoodChip } from '../status/columns'
+
+import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
 import { mergeMetrics } from '../status/statusDataUtils'
 
 
+const SPARKLINE_START = '-12h'
 const TIME_OUT = 5000
 
-const getColumn = (name) => cols.filter(c => c.id == name)[0]
+
+const getColumn = (id) => cols.filter(c => c.id == id)[0]
 
 const columns = [
-  getColumn('sanity'),
-  getColumn('pluginStatus'),
   {
     id: 'id',
     label: 'ID',
@@ -37,7 +40,9 @@ const columns = [
   {
     id: 'vsn',
     label: 'VSN'
-  }, {
+  },
+  getColumn('temp'),
+  {
     id: 'rpi',
     label: 'RPi last updated',
     format: (_, obj) => {
@@ -60,14 +65,104 @@ const columns = [
       </b>
     }
   }, {
+    id: 'health1',
+    label: 'Health',
+    width: '100px',
+    format: (_, row) => {
+      if (!row.health) return '-'
+
+      const {health} = row.health
+
+      return <Link to={`/node/${row.id}`} className="no-style flex justify-center">
+        {health.failed == 0 ?
+          <Tooltip title={`All health tests passed`} placement="top">
+            <GoodChip icon={<CheckIcon className="success" />} label="Good" />
+          </Tooltip> :
+          <HealthSparkler
+            name="Node health"
+            data={health.details}
+            colorFunc={healthColor}
+            width={100}
+            cellW={7}
+            ttPlacement="top"
+          />
+        }
+      </Link>
+    }
+  }, {
+    id: 'health2',
+    label: 'Sanity Tests',
+    width: '100px',
+    format: (_, row) => {
+      if (!row.health) return '-'
+
+      const {sanity} = row.health
+
+      return <Link to={`/node/${row.id}`} className="no-style flex justify-center">
+        {sanity.failed == 0 ?
+          <Tooltip title={`All sanity tests passed`} placement="top">
+            <GoodChip icon={<CheckIcon className="success" />} label="Good" />
+          </Tooltip> :
+          <HealthSparkler
+            name="Sanity tests"
+            data={sanity.details}
+            colorFunc={sanityColor}
+            width={100}
+            cellW={7}
+            ttPlacement="top"
+          />
+        }
+      </Link>
+    }
+  }, {
+    id: 'factory1',
+    label: 'Image Sign-Off',
+    format: (_, row) => phaseItemSignOff(row, 'Image')
+  },
+  {
+    id: 'factory2',
+    label: 'Audio Sign-Off',
+    format: (_, row) => phaseItemSignOff(row, 'Audio')
+  }, {
     id: 'ip',
     label: 'IP',
     hide: true,
     format: val => val ||  '-'
-  },
-  getColumn('temp')
+  }
 ]
 
+
+function phaseItemSignOff(row, name) {
+  const obj = row.factory
+
+  const isPhase2 = row.ip?.split('.')[2] == '12'
+  const isPhase3 = row.ip?.split('.')[2] == '13'
+
+  let column
+  if (isPhase2) {
+    column = `Phase 2 ${name} Sign-off`
+  } else if (isPhase3) {
+    column = `Phase 3 ${name} Sign-off`
+  } else {
+    alert(`the node ${row.id} does not seem to have an IP address!`)
+  }
+
+  if (!obj) return '-'
+  if (typeof obj[column] !== 'boolean')
+    return 'something is wrong!'
+
+  return obj[column] ?
+    <GoodChip icon={<CheckIcon className="success" />} label="Good" /> :
+    <div className="fatal font-bold">No</div>
+}
+
+
+const pingRequests = () => [
+  BH.getLatestMetrics(),
+  BH.getLatestTemp(),
+  BH.getNodeHealth(null, SPARKLINE_START),
+  BH.getNodeSanity(SPARKLINE_START)
+]
 
 
 
@@ -100,15 +195,10 @@ export default function StatusView() {
     // get latest metrics
     function ping() {
       const handle = setTimeout(async () => {
-        const results = await Promise.allSettled([
-          BH.getLatestMetrics(),
-          BH.getLatestTemp(),
-          SES.getLatestStatus()
-        ])
+        const results = await Promise.allSettled(pingRequests())
+        const [ metrics, temps, health, sanity]  = results.map(r => r.value)
 
-        const [metrics, temps, plugins] = results.map(r => r.value)
-
-        setData(mergeMetrics(dataRef.current, metrics, temps, plugins))
+        setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -120,18 +210,13 @@ export default function StatusView() {
 
     let handle
     setLoading(true)
-    const proms = [
-      BK.getSuryaState(),
-      BH.getLatestMetrics(),
-      BH.getLatestTemp(),
-      SES.getLatestStatus()
-    ]
+    const proms = [BK.getSuryaState(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
-        const [state, metrics, temps, plugins] = results.map(r => r.value)
+        const [state, metrics, temps, health, sanity] = results.map(r => r.value)
         setData(state)
 
-        const allData = mergeMetrics(state, metrics, temps, plugins)
+        const allData = mergeMetrics(state, metrics, temps, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
@@ -238,5 +323,11 @@ const Overview = styled.div`
 `
 
 const TableContainer = styled.div`
+  table {
+    th:nth-child(n+6):nth-child(n+3),
+    td:nth-child(n+6):nth-child(n+3) {
+      text-align: center; // center for viz / signoffs
+    }
+  }
 `
 

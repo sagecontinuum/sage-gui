@@ -22,7 +22,7 @@ import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
 import * as SES from '../../apis/ses'
 
-const TICKER_START = '-12h'
+const SPARKLINE_START = '-12h'
 const TIME_OUT = 5000
 
 
@@ -39,8 +39,8 @@ const useParams = () =>
 const pingRequests = () => [
   BH.getLatestMetrics(),
   BH.getLatestTemp(),
-  BH.getNodeHealth(null, TICKER_START),
-  BH.getNodeSanity(TICKER_START)
+  BH.getNodeHealth(null, SPARKLINE_START),
+  BH.getNodeSanity(SPARKLINE_START)
 ]
 
 
@@ -371,7 +371,7 @@ const ChartsTitle = styled.h2`
 
 const TableContainer = styled.div`
   table thead th:first-child {
-    padding-left: 15px;  // pad for special viz
+    text-align: center;
   }
 `
 
