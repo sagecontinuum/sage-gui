@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useParams, useLocation, Link} from 'react-router-dom'
 
+import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import Alert from '@mui/material/Alert'
 
 import * as BH from '../../apis/beehive'
@@ -37,7 +38,9 @@ function format(label: string, val: string) {
   else if (label == 'location')
     return <Link to={`/status?location=${val}`}>{val}</Link>
 
-  return typeof val == 'boolean' ? String(val) : ((!val || val == 'none') ? '-' : val)
+  return typeof val == 'boolean' ?
+    (val ? 'yes' : 'no'):
+    ((!val || val == 'none') ? '-' : val)
 }
 
 
@@ -67,13 +70,56 @@ function sanityColor(val, obj) {
     return colors.orange
   else
     return colors.red4
-
 }
+
+
+function SignOffTable({data}) {
+  return (
+    <SignedTable className="hor-key-value manifest" style={{width: '325px'}}>
+      <tr className="cat-header">
+        <th colSpan="2">Phase 2 Sign-offs</th>
+        <th colSpan="2">Phase 3 Sign-offs</th>
+      </tr>
+
+      <tr>
+        {Object.keys(data)
+          .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+          .sort()
+          .map(label => <th key={label}>{label.replace(/Phase|2|3|Sign\-off/g,'')}</th>)
+        }
+        <th>Final Sign-off</th>
+      </tr>
+
+      <tr>
+        {Object.keys(data)
+          .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+          .sort()
+          .map(name => {
+            const val = data[name]
+            return <td key={name}>
+              {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
+            </td>
+          })}
+        <td>
+          {!data['Final Sign-off'] ?
+            <b className="fatal">No</b> : <CheckIcon className="success" />
+          }
+        </td>
+      </tr>
+    </SignedTable>
+  )
+}
+
+const SignedTable = styled.table`
+  margin-top: 2em;
+`
 
 
 export default function NodeView() {
   const {node} = useParams()
   const params = new URLSearchParams(useLocation().search)
+  const factoryView = params.get('factory')
+
   const hours = params.get('hours')
   const days = params.get('days')
 
@@ -84,6 +130,8 @@ export default function NodeView() {
   const [meta, setMeta] = useState(null)
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
   const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
+
+  const [factory, setFactory] = useState(null)
 
   const [health, setHealth] = useState(null)
 
@@ -111,6 +159,7 @@ export default function NodeView() {
           .then((data) => setHealth(data))
           .catch((err) => setHealthError(err))
       })
+
 
     setLoading1(true)
     const p1 = SES.getGroupedByPlugin(node)
@@ -297,6 +346,7 @@ export default function NodeView() {
         </Charts>
 
         <Data>
+          {factoryView && manifest && <SignOffTable data={manifest.factory} />}
           <RecentData node={node} />
         </Data>
 

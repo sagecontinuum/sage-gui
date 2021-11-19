@@ -2,12 +2,9 @@ import config from '../../config'
 const url = config.beekeeper
 
 import { NodeStatus } from '../node'
-import tokens from '../../tokens'
 
 
-const SHEETS_URL = `https://sheets.googleapis.com/v4/spreadsheets`
 const API_URL = `${url}/api`
-const NODE_MANIFEST = `${url}/production`
 
 
 export type State = {
@@ -52,11 +49,13 @@ function get(endpoint: string, opts={}) {
 
 
 async function getMonitorData() {
-  const data = await get(`${SHEETS_URL}/1ZuwMfmGvHgRLAaoJBlBNJ3MO7FuqmkV__4MFinNm8Fk/values/main!A2:B100?key=${process.env.GOOGLE_TOKEN || tokens.google}`)
+  const data = await get(`${url}/monitoring`)
 
-  return data.values.reduce((acc, [id, expectedState]) =>
-    ({...acc, [id]: {expectedState}})
-  , {})
+  return data
+    .filter(obj => 'node_id' in obj)
+    .reduce((acc, {node_id, expected_online}) =>
+      ({...acc, [node_id]: {expected_online}})
+    , {})
 }
 
 
@@ -66,7 +65,7 @@ type ManifestArgs = {node?: string, by?: 'vsn' | 'id'}
 export async function getManifest(params?: ManifestArgs) {
   const {node, by = 'id'} = params || {}
 
-  const data = await get(NODE_MANIFEST, {cache: 'reload'})
+  const data = await get(`${url}/production`, {cache: 'reload'})
 
   let mapping
 
@@ -80,11 +79,13 @@ export async function getManifest(params?: ManifestArgs) {
   if (!node) {
     return mapping
   } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
-    return mapping[node]
+    return getFactory(node)
+      .then(factory => ({...mapping[node], factory}))
   } else {
     throw 'getManifest: must provide `by=vsn` option if filtering to a node by VSN'
   }
 }
+
 
 
 function _joinNodeData(nodes, nodeMetas, monitorMeta) {
@@ -94,19 +95,20 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
     const meta = nodeMetas[id]
     const monIsAvail = monitorMeta && id in monitorMeta
 
-    const { expectedState = null } = monIsAvail ? monitorMeta[id] : {}
+    const { expected_online = null } = monIsAvail ? monitorMeta[id] : {}
 
     return {
       ...obj,
       ...meta,
-      status: expectedState,
+      status: expected_online ? 'reporting' : 'offline',
       registration_event: new Date(obj.registration_event).getTime()
     }
   })
 }
 
 
-export async function fetchState() : Promise<State[]> {
+
+export async function getState() : Promise<State[]> {
   const proms = [getNodes(), getManifest(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
@@ -119,11 +121,19 @@ export async function fetchState() : Promise<State[]> {
 
 
 
-export async function fetchSuryaState() : Promise<State[]> {
+export async function getSuryaState() : Promise<State[]> {
   const proms = [getNodes(), getManifest(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
   return _joinNodeData(nodes, meta, monitorMeta)
+}
 
+
+export async function getFactory(node: string) {
+  const data = await get(`${url}/factory`)
+
+  return data
+    .filter(obj => 'node_id' in obj)
+    .filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0]
 }
 
 
@@ -131,6 +141,8 @@ export async function getNodes() {
   const data = await get(`${API_URL}/state`)
   return data.data
 }
+
+
 
 export async function getNode(id: string) : Promise<State[]> {
   const data = await get(`${API_URL}/state/${id}`)

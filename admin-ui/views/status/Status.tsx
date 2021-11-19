@@ -104,14 +104,12 @@ export default function StatusView() {
 
     let handle
     setLoading(true)
-    const proms = [BK.fetchState(), ...pingRequests()]
+    const proms = [BK.getState(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
         const [state, metrics, temps, health, sanity] = results.map(r => r.value)
 
         setData(state)
-
-        console.log('sanity', sanity)
 
         const allData = mergeMetrics(state, metrics, temps, health, sanity)
         setData(allData)

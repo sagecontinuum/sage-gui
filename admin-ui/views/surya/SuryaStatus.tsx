@@ -121,7 +121,7 @@ export default function StatusView() {
     let handle
     setLoading(true)
     const proms = [
-      BK.fetchSuryaState(),
+      BK.getSuryaState(),
       BH.getLatestMetrics(),
       BH.getLatestTemp(),
       SES.getLatestStatus()
