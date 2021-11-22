@@ -504,7 +504,7 @@ export const GoodChip = styled(Chip)`
     color: #fff;
     font-size: .9em;
     height: 18px;
-    margin-bottom: 2px;
+    margin-top: 2px;
     cursor: pointer;
     svg {
       height: 15px;

@@ -6,9 +6,8 @@ import {colors} from './TimelineChart'
 
 
 const padding = {padding: '5px 0 0 10px'}
-const canvasHeight = 15
 const cellWidth = 3
-const cellHeight = 10
+const cellHeight = 15
 const cellPad = 1
 
 
@@ -43,7 +42,7 @@ export default function HealthSparkler(props: Props) {
 
   if (!data) return <></>
 
-  let height = props.height || canvasHeight
+  let height = props.height || cellHeight
   let cellW = props.cellW || cellWidth
   let pad = props.cellPad ?? cellPad
 

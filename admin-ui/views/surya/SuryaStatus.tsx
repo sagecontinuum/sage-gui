@@ -24,7 +24,7 @@ import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler
 import { mergeMetrics } from '../status/statusDataUtils'
 
 
-const SPARKLINE_START = '-12h'
+const SPARKLINE_START = '-7d'
 const TIME_OUT = 5000
 
 
@@ -35,7 +35,7 @@ const columns = [
     id: 'id',
     label: 'ID',
     width: '100px',
-    format: (val) => <Link to={`/node/${val}?hours=12`}>{val}</Link>
+    format: (val) => <Link to={`/node/${val}?factory=true`}>{val}</Link>
   },
   {
     id: 'vsn',
@@ -67,50 +67,56 @@ const columns = [
   }, {
     id: 'health1',
     label: 'Health',
-    width: '100px',
     format: (_, row) => {
       if (!row.health) return '-'
 
-      const {health} = row.health
+      const {failed, passed, details} = row.health.health
 
-      return <Link to={`/node/${row.id}`} className="no-style flex justify-center">
-        {health.failed == 0 ?
-          <Tooltip title={`All health tests passed`} placement="top">
-            <GoodChip icon={<CheckIcon className="success" />} label="Good" />
-          </Tooltip> :
-          <HealthSparkler
-            name="Node health"
-            data={health.details}
-            colorFunc={healthColor}
-            width={100}
-            cellW={7}
-            ttPlacement="top"
-          />
-        }
+      const isPhase2 = inPhaseN(2, row.ip)
+      const data = isPhase2 ? details.slice(-12) : details.slice(-7*24)
+
+      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
+        {(failed + passed) == 0 ? <div>no data</div> :
+          (failed == 0 ?
+            <Tooltip title={`All health tests passed`} placement="top">
+              <GoodChip icon={<CheckIcon className="success" />} label="Good" />
+            </Tooltip> :
+            <HealthSparkler
+              name="Node health"
+              data={data}
+              colorFunc={healthColor}
+              cellW={isPhase2 ? 7 : 2}
+              cellPad={isPhase2 ? 1 : 0}
+              ttPlacement="top"
+            />
+          )}
       </Link>
     }
   }, {
     id: 'health2',
     label: 'Sanity Tests',
-    width: '100px',
     format: (_, row) => {
       if (!row.health) return '-'
 
-      const {sanity} = row.health
+      const {failed, passed, details} = row.health.sanity
 
-      return <Link to={`/node/${row.id}`} className="no-style flex justify-center">
-        {sanity.failed == 0 ?
-          <Tooltip title={`All sanity tests passed`} placement="top">
-            <GoodChip icon={<CheckIcon className="success" />} label="Good" />
-          </Tooltip> :
-          <HealthSparkler
-            name="Sanity tests"
-            data={sanity.details}
-            colorFunc={sanityColor}
-            width={100}
-            cellW={7}
-            ttPlacement="top"
-          />
+      const isPhase2 = inPhaseN(2, row.ip)
+      const data = isPhase2 ? details.slice(-12) : details.slice(-7*24)
+
+      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
+        {(failed + passed) == 0 ? <div>no data</div> :
+          (failed == 0 ?
+            <Tooltip title={`All sanity tests passed`} placement="top">
+              <GoodChip icon={<CheckIcon className="success" />} label="Good" />
+            </Tooltip> :
+            <HealthSparkler
+              name="Sanity tests"
+              data={data}
+              colorFunc={sanityColor}
+              cellW={isPhase2 ? 7 : 2}
+              cellPad={isPhase2 ? 1 : 0}
+              ttPlacement="top"
+            />)
         }
       </Link>
     }
@@ -135,8 +141,8 @@ const columns = [
 function phaseItemSignOff(row, name) {
   const obj = row.factory
 
-  const isPhase2 = row.ip?.split('.')[2] == '12'
-  const isPhase3 = row.ip?.split('.')[2] == '13'
+  const isPhase2 = inPhaseN(2, row.ip)
+  const isPhase3 = inPhaseN(3, row.ip)
 
   let column
   if (isPhase2) {
@@ -157,13 +163,17 @@ function phaseItemSignOff(row, name) {
 }
 
 
+
+const inPhaseN = (n, ip) =>
+  ip?.split('.')[2] == `1${n}`
+
+
 const pingRequests = () => [
   BH.getLatestMetrics(),
   BH.getLatestTemp(),
   BH.getNodeHealth(null, SPARKLINE_START),
   BH.getNodeSanity(SPARKLINE_START)
 ]
-
 
 
 export default function StatusView() {
@@ -233,14 +243,14 @@ export default function StatusView() {
   const updateAll = useCallback(() => {
     let filteredData = data
 
-    const phase1 = data.filter(o => o.ip?.split('.')[2] == '11')
-    const phase2 = data.filter(o => o.ip?.split('.')[2] == '12')
-    const phase3 = data.filter(o => o.ip?.split('.')[2] == '13')
+    const phase1 = data.filter(o => inPhaseN(1, o.ip))
+    const phase2 = data.filter(o => inPhaseN(2, o.ip))
+    const phase3 = data.filter(o => inPhaseN(3, o.ip))
 
     if (tabIdx == 0) {
       filteredData = phase1
-      setCols(columns.filter(o =>
-        ['id', 'vsn', 'rpi', 'nx'].includes(o.id))
+      setCols(columns.filter(colObj =>
+        ['id', 'vsn', 'rpi', 'nx'].includes(colObj.id))
       )
     } else if (tabIdx == 1) {
       filteredData = phase2

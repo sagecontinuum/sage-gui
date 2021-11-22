@@ -332,10 +332,6 @@ export default function StatusView() {
           />
         }
       </TableContainer>
-
-      {error &&
-        <Alert severity="error">{error.message}</Alert>
-      }
     </Root>
   )
 }
