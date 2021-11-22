@@ -96,7 +96,10 @@ export default function App() {
                 <Route path="/tests" component={TestView} />
                 <Route path="/audio" component={AudioView} />
                 <Route path="/node/:node" component={NodeView} />
+
+                <Redirect exact from="/surya" to="/surya/phase1" />
                 <Route path="/surya/:phase" component={SuryaView } />
+
                 <Route path="/fiddle/stress" component={Stress} />
                 <Route path="/fiddle/timeline" component={Timeline} />
                 <Route path="*" component={NotFound} />
