@@ -263,7 +263,7 @@ const columns = [{
 
     const {health, sanity} = obj
 
-    return <Link to={`/node/${row.id}`} className="no-style">
+    return <Link to={`/node/${row.id}`} className="no-style flex column">
       {health.failed == 0 ?
         <Tooltip title={`All health tests passed`} placement="right">
           <GoodChip icon={<CheckIcon className="success" />} label="pass" />

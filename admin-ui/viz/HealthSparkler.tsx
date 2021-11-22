@@ -6,7 +6,6 @@ import {colors} from './TimelineChart'
 
 
 const padding = {padding: '5px 0 0 10px'}
-const canvasWidth = 50
 const canvasHeight = 15
 const cellWidth = 3
 const cellHeight = 10
@@ -35,6 +34,7 @@ type Props = {
   width?: number
   height?: number
   cellW?: number
+  cellPad?: number
   ttPlacement?: 'top' | 'right' | 'left' | 'bottom'
 }
 
@@ -43,17 +43,16 @@ export default function HealthSparkler(props: Props) {
 
   if (!data) return <></>
 
-  let width = props.width || canvasWidth
   let height = props.height || canvasHeight
   let cellW = props.cellW || cellWidth
-
+  let pad = props.cellPad ?? cellPad
 
   return (
     <Tooltip title={name} placement={ttPlacement || 'right'}>
-      <svg width={width} height={height} style={padding}>
+      <svg width={data.length * (cellW + pad) + cellW + 5} height={height} style={padding}>
         {data.map((o, j) =>
           <rect
-            x={j * (cellW + cellPad)}
+            x={j * (cellW + pad)}
             width={cellW}
             height={cellHeight}
             fill={colorFunc(o.value, o)}
