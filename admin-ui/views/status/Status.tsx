@@ -92,6 +92,7 @@ export default function StatusView() {
         const results = await Promise.allSettled(pingRequests())
         const [ metrics, temps, health, sanity] = results.map(r => r.value)
 
+
         setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 

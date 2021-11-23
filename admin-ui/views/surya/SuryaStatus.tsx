@@ -43,6 +43,11 @@ const columns = [
   },
   getColumn('temp'),
   {
+    id: 'uptimes',
+    label: 'Uptime',
+    format: (val) =>
+      !val ? '-' : utils.prettyTime(val.nx)
+  }, {
     id: 'rpi',
     label: 'RPi last updated',
     format: (_, obj) => {
@@ -122,13 +127,18 @@ const columns = [
     }
   }, {
     id: 'factory1',
-    label: 'Image Sign-Off',
-    format: (_, row) => phaseItemSignOff(row, 'Image')
-  },
-  {
+    label: 'Image Sign-off',
+    format: (_, row) => {
+      const phase = getPhase(row.ip)
+      return phaseItemSignOff(row, `Phase ${phase} Image Sign-off`)
+    }
+  }, {
     id: 'factory2',
-    label: 'Audio Sign-Off',
-    format: (_, row) => phaseItemSignOff(row, 'Audio')
+    label: 'Audio Sign-off',
+    format: (_, row) => {
+      const phase = getPhase(row.ip)
+      return phaseItemSignOff(row, `Phase ${phase} Audio Sign-off`)
+    }
   }, {
     id: 'ip',
     label: 'IP',
@@ -137,27 +147,25 @@ const columns = [
   }
 ]
 
+const finalSignOff = {
+  id: 'finalSign',
+  label: 'Final Sign-Off',
+  format: (_, row) => {
+    const phase = getPhase(row.ip)
+    return phaseItemSignOff(row, `Phase ${phase} Audio Sign-off`)
+  }
+}
+
+
 
 function phaseItemSignOff(row, name) {
   const obj = row.factory
 
-  const isPhase2 = inPhaseN(2, row.ip)
-  const isPhase3 = inPhaseN(3, row.ip)
-
-  let column
-  if (isPhase2) {
-    column = `Phase 2 ${name} Sign-off`
-  } else if (isPhase3) {
-    column = `Phase 3 ${name} Sign-off`
-  } else {
-    alert(`the node ${row.id} does not seem to have an IP address!`)
-  }
-
   if (!obj) return '-'
-  if (typeof obj[column] !== 'boolean')
+  if (typeof obj[name] !== 'boolean')
     return 'something is wrong!'
 
-  return obj[column] ?
+  return obj[name] ?
     <GoodChip icon={<CheckIcon className="success" />} label="Good" /> :
     <div className="fatal font-bold">No</div>
 }
@@ -166,6 +174,18 @@ function phaseItemSignOff(row, name) {
 
 const inPhaseN = (n, ip) =>
   ip?.split('.')[2] == `1${n}`
+
+
+function getPhase(ip: string) {
+  const part =  ip?.split('.')[2]
+
+  if (part == '11') return 1
+  else if (part == '12') return 2
+  else if (part == '13') return 3
+
+  alert(`${ip} is an invalid IP address!`)
+}
+
 
 
 const pingRequests = () => [
@@ -250,14 +270,14 @@ export default function StatusView() {
     if (tabIdx == 0) {
       filteredData = phase1
       setCols(columns.filter(colObj =>
-        ['id', 'vsn', 'rpi', 'nx'].includes(colObj.id))
+        ['id', 'vsn', 'nx'].includes(colObj.id))
       )
     } else if (tabIdx == 1) {
       filteredData = phase2
       setCols(columns)
     } else if (tabIdx == 2) {
       filteredData = phase3
-      setCols(columns)
+      setCols([...columns, finalSignOff])
     }
 
     setByPhase({phase1, phase2, phase3})

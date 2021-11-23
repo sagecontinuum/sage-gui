@@ -149,7 +149,7 @@ export default function NodeView() {
   useEffect(() => {
     setLoading(true)
 
-    BK.getManifest({node})
+    BK.getManifest({node: node.toUpperCase()})
       .then(data => {
         setManifest(data)
 

@@ -129,65 +129,60 @@ function getSanity(
 }
 
 
-export function aggNodeHealth(data) {
+export function countNodeHealth(data) {
   if (!data) return {}
 
-  let entry = {
-    details: data,
-    passed: 0,
-    failed: 0
-  }
-
+  let passed = 0, failed = 0
   data.forEach(obj => {
     const {value} = obj
-    entry.passed = value == 1 ? entry.passed + 1 : entry.passed
-    entry.failed = value <= 0 ? entry.failed + 1 : entry.failed
+    passed = value == 1 ? passed + 1 : passed
+    failed = value <= 0 ? failed + 1 : failed
   })
 
-  return entry
+  return {
+    details: data,
+    passed,
+    failed
+  }
 }
 
 
 
-export function aggNodeSanity(data) {
+export function countNodeSanity(data) {
   if (!data) return {}
 
-  let entry = {
-    details: data,
-    passed: 0,
-    failed: 0
-  }
-
+  let passed = 0, failed = 0
   data.forEach(obj => {
     const {value} = obj
-    entry.passed = value == 0 ? entry.passed + 1 : entry.passed
-    entry.failed = value > 0 ? entry.failed + 1 : entry.failed
+    passed = value == 0 ? passed + 1 : passed
+    failed = value > 0 ? failed + 1 : failed
   })
 
-  return entry
+  return {
+    details: data,
+    passed,
+    failed
+  }
 }
 
 
 
-export function aggPluginStatus(data) {
+export function countPluginStatus(data) {
   if (!data) return {}
 
-  let entry = {
-    details: data,
-    passed: 0,
-    failed: 0
-  }
-
+  let passed = 0, failed = 0
   data.forEach(obj => {
     const {value} = obj
 
-    entry.passed = value == 0 ? entry.passed + 1 : entry.passed
-    // currently not flagging warnings
-    // valueObj.warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
-    entry.failed = value > 0 ? entry.failed + 1 : entry.failed
+    passed = value == 0 ? passed + 1 : passed
+    failed = value > 0 ? failed + 1 : failed
   })
 
-  return entry
+  return {
+    details: data,
+    passed,
+    failed
+  }
 }
 
 
@@ -246,11 +241,11 @@ export function mergeMetrics(
       txPackets: getMetric(metrics, id, 'sys.net.tx_packets', false),
       rxBytes: getMetric(metrics, id, 'sys.net.rx_bytes', false),
       rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
-      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value,
+      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value || getFakeIP(id),
       health: {
         oldSanity: getSanity(metrics, id),
-        sanity: sanity ? aggNodeSanity(sanity[vsn]) : {},
-        health: health ? aggNodeHealth(health[vsn]) : {}
+        sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
+        health: health ? countNodeHealth(health[vsn]) : {}
       }
       // pluginStatus: plugins ? aggPluginStatus(plugins[id.toUpperCase()]) : {}
     }

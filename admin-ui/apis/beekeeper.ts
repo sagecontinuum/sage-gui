@@ -63,7 +63,7 @@ async function getMonitorData() {
 type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 
 export async function getManifest(params?: MetaParams) {
-  const {node, by = 'id'} = params || {}
+  let {node, by = 'id'} = params || {}
 
   const data = await get(`${url}/production`, {cache: 'reload'})
   const d = data.filter(obj => 'node_id' in obj)
