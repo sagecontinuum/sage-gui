@@ -48,7 +48,7 @@ export default function HealthSparkler(props: Props) {
 
   return (
     <Tooltip title={name} placement={ttPlacement || 'right'}>
-      <svg width={data.length * (cellW + pad) + cellW + 5} height={height} style={padding}>
+      <svg width={data.length * (cellW + pad) + cellW + 10} height={height} style={padding}>
         {data.map((o, j) =>
           <rect
             x={j * (cellW + pad)}

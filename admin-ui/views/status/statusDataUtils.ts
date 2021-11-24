@@ -241,7 +241,7 @@ export function mergeMetrics(
       txPackets: getMetric(metrics, id, 'sys.net.tx_packets', false),
       rxBytes: getMetric(metrics, id, 'sys.net.rx_bytes', false),
       rxPackets: getMetric(metrics, id, 'sys.net.rx_packets', false),
-      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value || getFakeIP(id),
+      ip: getMetric(metrics, id, 'sys.net.ip', false)?.nx?.filter(o => o.meta.device == 'wan0')[0].value,
       health: {
         oldSanity: getSanity(metrics, id),
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},

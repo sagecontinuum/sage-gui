@@ -74,38 +74,44 @@ function sanityColor(val, obj) {
 
 
 function SignOffTable({data}) {
+  if (!data) return <></>
+
   return (
     <SignedTable className="hor-key-value manifest" style={{width: '325px'}}>
-      <tr className="cat-header">
-        <th colSpan="2">Phase 2 Sign-offs</th>
-        <th colSpan="2">Phase 3 Sign-offs</th>
-      </tr>
+      <thead>
+        <tr className="cat-header">
+          <th colSpan="2">Phase 2 Sign-offs</th>
+          <th colSpan="2">Phase 3 Sign-offs</th>
+        </tr>
 
-      <tr>
-        {Object.keys(data)
-          .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
-          .sort()
-          .map(label => <th key={label}>{label.replace(/Phase|2|3|Sign\-off/g,'')}</th>)
-        }
-        <th>Final Sign-off</th>
-      </tr>
-
-      <tr>
-        {Object.keys(data)
-          .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
-          .sort()
-          .map(name => {
-            const val = data[name]
-            return <td key={name}>
-              {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
-            </td>
-          })}
-        <td>
-          {!data['Final Sign-off'] ?
-            <b className="fatal">No</b> : <CheckIcon className="success" />
+        <tr>
+          {Object.keys(data)
+            .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+            .sort()
+            .map(label => <th key={label}>{label.replace(/Phase|2|3|Sign\-off/g,'')}</th>)
           }
-        </td>
-      </tr>
+          <th>Final Sign-off</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          {Object.keys(data)
+            .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+            .sort()
+            .map(name => {
+              const val = data[name]
+              return <td key={name}>
+                {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
+              </td>
+            })}
+          <td>
+            {!data['Final Sign-off'] ?
+              <b className="fatal">No</b> : <CheckIcon className="success" />
+            }
+          </td>
+        </tr>
+      </tbody>
     </SignedTable>
   )
 }
@@ -152,6 +158,9 @@ export default function NodeView() {
     BK.getManifest({node: node.toUpperCase()})
       .then(data => {
         setManifest(data)
+
+        // if no manifest, we can not get the vsn for node health
+        if (!data) return
 
         const vsn = data.vsn
         setVsn(vsn)
@@ -227,31 +236,34 @@ export default function NodeView() {
 
       {manifest &&
         <table className="hor-key-value manifest">
-          <tr className="cat-header">
-            {cols.map(name => name == 'top_camera' ?
-              <th key={name} colSpan="4">Cameras</th> :
-              <th key={name}></th>
-            ).slice(0, -3)
-            }
-            <th></th>
-          </tr>
+          <thead>
+            <tr className="cat-header">
+              {cols.map(name => name == 'top_camera' ?
+                <th key={name} colSpan="4">Cameras</th> :
+                <th key={name}></th>
+              ).slice(0, -3)
+              }
+              <th></th>
+            </tr>
 
-          <tr>
-            {cols.map(name => {
-              const label = name.replace(/_/g, ' ').replace('camera', '')
-                .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-              return <th key={label}>{label}</th>
-            })}
-            <th>Registration</th>
-          </tr>
-
-          <tr>
-            {cols.map(name => {
-              const val = manifest[name]
-              return <td key={name}>{format(name, val)}</td>
-            })}
-            <td>{new Date(meta?.registration_event).toLocaleString()}</td>
-          </tr>
+            <tr>
+              {cols.map(name => {
+                const label = name.replace(/_/g, ' ').replace('camera', '')
+                  .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                return <th key={label}>{label}</th>
+              })}
+              <th>Registration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {cols.map(name => {
+                const val = manifest[name]
+                return <td key={name}>{format(name, val)}</td>
+              })}
+              <td>{new Date(meta?.registration_event).toLocaleString()}</td>
+            </tr>
+          </tbody>
         </table>
       }
 
@@ -346,7 +358,7 @@ export default function NodeView() {
         </Charts>
 
         <Data>
-          {factoryView && manifest && <SignOffTable data={manifest.factory} />}
+          {factoryView && manifest && manifest.factory && <SignOffTable data={manifest.factory} />}
           <RecentData node={node} />
         </Data>
 

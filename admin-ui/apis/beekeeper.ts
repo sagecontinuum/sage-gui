@@ -68,6 +68,7 @@ export async function getManifest(params?: MetaParams) {
   const data = await get(`${url}/production`, {cache: 'reload'})
   const d = data.filter(obj => 'node_id' in obj)
 
+
   let mapping
   if (by == 'id') {
     mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
@@ -78,8 +79,11 @@ export async function getManifest(params?: MetaParams) {
   if (!node) {
     return mapping
   } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
-    return getFactory({node})
-      .then(factory => ({...mapping[node], factory}))
+    if (node in mapping) {
+      return getFactory({node})
+        .then(factory => ({...mapping[node], factory}))
+    }
+    return null
   } else {
     throw 'getManifest: must provide `by=vsn` option if filtering to a node by VSN'
   }

@@ -237,13 +237,13 @@ export async function getNodeSanity(start?: string) : Promise<Record[]> {
 }
 
 
-export async function getNodeDeviceHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
+export async function getNodeDeviceHealth(vsn: string, start?: string) : Promise<MetricsObj> {
   const params = {
     start: start ?? '-60h',
     bucket: 'health-check-test',
     filter: {
       name: 'device_health_check',
-      ...(vsn && {vsn})
+      vsn
     }
   }
 
