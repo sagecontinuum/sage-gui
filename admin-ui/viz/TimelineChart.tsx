@@ -123,12 +123,14 @@ function drawChart(
     size,
     margin,
     data,
+    tailHours,
     yFormat,
     tooltip,
     colorCell,
     onCellClick,
     onRowClick
   } = params
+
 
   const [start, end] = getDomain(data)
   const height = computeCanvasHeight(data, cellHeight)
@@ -140,7 +142,10 @@ function drawChart(
 
   // create scaling functions
   const x = d3.scaleTime()
-    .domain([start, end])
+    .domain([
+      tailHours ? (new Date(end).getTime() - tailHours*60*60*1000) : start,
+      end
+    ])
     .range([0, width])
 
   const y = d3.scaleBand()
@@ -305,13 +310,14 @@ type Data = { [key: string]: Record[] }
 
 type TimelineProps = {
   data: Data
-  yFormat?: (label) => string
-  tooltip?: (item: Record) => string  // update to use React.FC?
-  colorCell?: (val: number, item: Record) => string
-  onRowClick?: (label: string, items: Record[]) => void
-  onCellClick?: (label: string) => void
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
   showLegend?: boolean
+  tailHours?: number
+  yFormat?: (label) => string
+  onRowClick?: (label: string, items: Record[]) => void
+  onCellClick?: (label: string) => void
+  colorCell?: (val: number, item: Record) => string
+  tooltip?: (item: Record) => string  // update to use React.FC?
 }
 
 
@@ -371,7 +377,7 @@ function Chart(props: TimelineProps) {
     return () => {
       ro.unobserve(node)
     }
-  }, [data, rest, margin])
+  }, [data, rest, margin, props.showLegend])
 
   return (
     <div>

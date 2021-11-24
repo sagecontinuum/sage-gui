@@ -36,11 +36,11 @@ export default function TestView() {
   useEffect(() => {
     setLoading(true)
 
-    let p1 = BH.getNodeHealth()
+    let p1 = BH.getNodeHealth(null, '-7d')
       .then((data) => setHealth(data))
       .catch((err) => setError(err))
 
-    let p2 = BH.getNodeSanity()
+    let p2 = BH.getNodeSanity('-7d')
       .then((data) => setSanity(data))
       .catch((err) => setError(err))
 
@@ -91,6 +91,7 @@ export default function TestView() {
             <small class="muted">(click for details)</small>
             `
           }
+          tailHours={48}
         />
       }
 
@@ -109,6 +110,7 @@ export default function TestView() {
             <small class="muted">(click for details)</small>
             `
           }
+          tailHours={48}
         />
       }
     </Root>
