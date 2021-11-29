@@ -77,18 +77,18 @@ function SignOffTable({data}) {
   if (!data) return <></>
 
   return (
-    <SignedTable className="hor-key-value manifest" style={{width: '325px'}}>
+    <SignedTable className="hor-key-value manifest">
       <thead>
         <tr className="cat-header">
-          <th colSpan="2">Phase 2 Sign-offs</th>
-          <th colSpan="2">Phase 3 Sign-offs</th>
+          <th colSpan="3">Phase 2 Sign-offs</th>
+          <th colSpan="3">Phase 3 Sign-offs</th>
         </tr>
 
         <tr>
           {Object.keys(data)
             .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
             .sort()
-            .map(label => <th key={label}>{label.replace(/Phase|2|3|Sign\-off/g,'')}</th>)
+            .map(label => <th key={label}>{label != 'Phase 2 Sign-off' ? label.replace(/Phase|2|3|Sign\-off/g,'') : label.replace(/Phase|2|3/g,'')}</th> )
           }
           <th>Final Sign-off</th>
         </tr>
@@ -164,7 +164,7 @@ export default function NodeView() {
 
         const vsn = data.vsn
         setVsn(vsn)
-        BH.getNodeDeviceHealth(vsn)
+        BH.getNodeDeviceHealth(vsn, '-7d')
           .then((data) => setHealth(data))
           .catch((err) => setHealthError(err))
       })
@@ -176,13 +176,9 @@ export default function NodeView() {
         const d = getDate(hours, days)
 
         for (const key of Object.keys(data)) {
-          data[key] = data[key].sort((a, b) =>
-            +new Date(a.timestamp) - +new Date(b.timestamp)
-          ).filter(obj => new Date(obj.timestamp) > d)
-
           // exclude empty lists (for now)
-          if (data[key].length == 0)
-            delete data[key]
+          // if (data[key].length == 0)
+          //   delete data[key]
         }
 
         if (!Object.keys(data).length) {
@@ -195,7 +191,7 @@ export default function NodeView() {
       .finally(() => setLoading1(false))
 
     setLoading2(true)
-    const p2 = BH.getSanityChart(node.toLowerCase())
+    const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
       .then((sanity) => {
         if (!sanity) {
           setSanityData(sanity)
@@ -203,14 +199,6 @@ export default function NodeView() {
         }
 
         const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
-
-        if (hours || days) {
-          const d = getDate(hours, days)
-
-          for (const key of Object.keys(data)) {
-            data[key] = data[key].filter(obj => new Date(obj.timestamp) > d)
-          }
-        }
 
         setSanityData(data)
       }).catch((err) => setError2(err))
@@ -287,6 +275,7 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
+              tailHours={48}
             />
           }
 
@@ -340,6 +329,7 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
+              tailHours={48}
             />
           }
 

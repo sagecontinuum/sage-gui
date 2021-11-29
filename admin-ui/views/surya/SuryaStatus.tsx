@@ -147,13 +147,17 @@ const columns = [
   }
 ]
 
+
+const phase2SignOff = {
+  id: 'phase2Sign',
+  label: 'Phase 2 Sign-off',
+  format: (_, row) => phaseItemSignOff(row, `Phase 2 Sign-off`)
+}
+
 const finalSignOff = {
   id: 'finalSign',
   label: 'Final Sign-Off',
-  format: (_, row) => {
-    const phase = getPhase(row.ip)
-    return phaseItemSignOff(row, `Phase ${phase} Audio Sign-off`)
-  }
+  format: (_, row) => phaseItemSignOff(row, `Final Sign-off`)
 }
 
 
@@ -274,7 +278,7 @@ export default function StatusView() {
       )
     } else if (tabIdx == 1) {
       filteredData = phase2
-      setCols(columns)
+      setCols([...columns, phase2SignOff])
     } else if (tabIdx == 2) {
       filteredData = phase3
       setCols([...columns, finalSignOff])
