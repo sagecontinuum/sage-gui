@@ -78,7 +78,7 @@ const columns = [
       const {failed, passed, details} = row.health.health
 
       const isPhase2 = inPhaseN(2, row.ip)
-      const data = isPhase2 ? details.slice(-12) : details.slice(-7*24)
+      const data = isPhase2 ? details?.slice(-12) : details?.slice(-7*24)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
         {(failed + passed) == 0 ? <div>no data</div> :
@@ -106,7 +106,7 @@ const columns = [
       const {failed, passed, details} = row.health.sanity
 
       const isPhase2 = inPhaseN(2, row.ip)
-      const data = isPhase2 ? details.slice(-12) : details.slice(-7*24)
+      const data = isPhase2 ? details?.slice(-12) : details?.slice(-7*24)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
         {(failed + passed) == 0 ? <div>no data</div> :
