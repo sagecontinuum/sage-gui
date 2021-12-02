@@ -202,7 +202,7 @@ export default function Search() {
                     value={sort}
                     onChange={evt => alert('Sorting is not implemented yet.  Check back later.') /*setSort(evt.target.value)*/}
                     variant="outlined"
-                    margin="dense"
+                    size="small"
                     style={{marginTop: '1px'}}
                   >
                     <MenuItem value={'most_relevant'}>most relevant</MenuItem>

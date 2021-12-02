@@ -20,9 +20,13 @@ export const featuredApps = [
   'seanshahkarami/raingauge',
   'iperezx/smoke-detection',
   'seanshahkarami/raingauge',
-  'seonghapark/cloudcover-unet',
-  'seonghapark/solarirradiance-unet',
+  'seonghapark/cloudcover',
+  'seonghapark/trafficstate',
+  'seonghapark/solarirradiance',
   'waggle/bird-song-classifier',
+  'bhupendraraut/cmv-fftpc',
+  'rjackson/weather-classification',
+  'dariodematties/avian-diversity-monitoring'
 ]
 
 

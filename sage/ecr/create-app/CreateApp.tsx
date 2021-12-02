@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -41,6 +41,8 @@ const isDevUser = devList.includes(username)
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
 const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
+const EXAMPLE_REPO_2 = 'https://github.com/dariodematties/BirdNET_Plugin'
+
 
 
 function StepTitle(props) {
@@ -60,6 +62,11 @@ const StepRoot = styled.div`
     margin-right: 5px;
   }
 `
+
+
+const getRepoPath = (url: string) =>
+  url.split('.com')[1].replace('.git', '').slice(1)
+
 
 
 const initialState = {
@@ -90,8 +97,8 @@ export default function CreateApp() {
   // app repo
   const [repoURL, setRepoURL] = useState('')
   const [repoPath, setRepoPath] = useState('')
-  const [tag, setTag] = useState({id: 'main', label: 'main'})
-  const [tagList, setTagList] = useState([])
+  const [branch, setBranch] = useState('main')
+  const [branchList, setBranchList] = useState<{id: string, label: string}[]>([])
 
   // app config state
   const [form, setForm] = useState<ECR.AppConfig>(initialState)
@@ -110,57 +117,14 @@ export default function CreateApp() {
   const [devMode, setDevMode] = useState(false)
 
 
-  // remove all verification/error state on changes
-  useEffect(() => {
-    setError(null)
-  }, [repoURL, config])
+  const fetchSageConfig = useCallback(() => {
+    if (!repoURL || !branch) return
 
+    const path = getRepoPath(repoURL)
 
-  // if repo url changes, force user to reverify
-  useEffect(() => {
-    setIsValid(null)
-  }, [repoURL])
-
-
-
-  const onRepoVerify = (evt = null) => {
-    if (evt) evt.preventDefault()
-
-    const path = repoURL.split('.com')[1]
-      .replace('.git', '').slice(1)
-    setRepoPath(path)
-
-
-    // todo: add rate limit notice, add branch?
-    setValidating(true)
-    fetch(`${GITHUB_API}/repos/${path}`)
-      .then(res => {
-        setIsValid(res.ok)
-        return res.json()
-      })
-      .then(data => {
-        // set branch dropdown to github default branch
-        const t = data.default_branch
-        setTag({id: t, label: t})
-
-        // fetch branches for dropdown (this will be tags in future?)
-        fetch(data.branches_url.replace('{/branch}', ''))
-          .then(res => res.json())
-          .then(branches => {
-            const opts = branches.map(b => b.name).map(name => ({id: name, label: name}))
-            setTagList(opts)
-          })
-      })
-      .catch(() => setIsValid(false))
-      .then(() => setValidating(false))
-      .then(() => fetchSageConfig(path, 'main'))
-  }
-
-
-  const fetchSageConfig = (path, branch) => {
-    fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.json`)
+    fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.yaml`)
       .then(res => res.status == 404 ?
-        fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.yaml`) : res
+        fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.json`) : res
       ).then(res => {
 
         // set config type
@@ -181,18 +145,66 @@ export default function CreateApp() {
           setConfig(YAML.stringify(obj))
         })
       }).catch(() => setConfigType('none'))
+  }, [repoURL, branch])
+
+
+  // remove all verification/error state on changes
+  useEffect(() => {
+    setError(null)
+  }, [repoURL, config])
+
+
+  // if repo url changes, force user to reverify
+  useEffect(() => {
+    setIsValid(null)
+  }, [repoURL])
+
+
+  useEffect(() => {
+    fetchSageConfig()
+  }, [fetchSageConfig] )
+
+
+
+  const onRepoVerify = (evt = null) => {
+    if (evt) evt.preventDefault()
+
+    const path = getRepoPath(repoURL)
+
+    // todo: add rate limit notice, add branch?
+    setValidating(true)
+    fetch(`${GITHUB_API}/repos/${path}`)
+      .then(res => {
+        setIsValid(res.ok)
+        return res.json()
+      })
+      .then(data => {
+        // set branch dropdown to github default branch
+        const branch = data.default_branch
+        setBranch(branch)
+
+        // fetch branches for dropdown (this will be tags in future?)
+        fetch(data.branches_url.replace('{/branch}', ''))
+          .then(res => res.json())
+          .then(branches => {
+            const opts = branches.map(b => b.name).map(name => ({id: name, label: name}))
+            setBranchList(opts)
+          })
+      })
+      .catch(() => setIsValid(false))
+      .then(() => setValidating(false))
   }
 
-  const onRepoTagChange = (tagObj) => {
+
+  const onRepoBranchChange = (tagObj) => {
     if (!tagObj) {
       setIsValid(false)
       return
     }
 
-    setTag(tagObj)
+    setBranch(tagObj.id)
     setIsValid(true)
-
-    fetchSageConfig(repoPath, tagObj.id)
+    fetchSageConfig()
   }
 
 
@@ -232,9 +244,9 @@ export default function CreateApp() {
   }
 
 
-  const onExampleOne = () => {
+  const onExample = (url) => {
     setConfig('')
-    setRepoURL(EXAMPLE_REPO_1)
+    setRepoURL(url)
   }
 
 
@@ -270,14 +282,14 @@ export default function CreateApp() {
 
           {isValid &&
             <FilterMenu
-              options={tagList}
+              options={branchList}
               multiple={false}
-              onChange={onRepoTagChange}
-              value={tag}
+              onChange={onRepoBranchChange}
+              value={{id: branch, label: branch}}
               headerText="Select a different branch"
               ButtonComponent={
                 <Button style={{marginLeft: 10}} startIcon={<TagIcon/>}>
-                  {tag?.id}
+                  {branch}
                   <CaretIcon />
                 </Button>
               }
@@ -303,28 +315,28 @@ export default function CreateApp() {
         <StepTitle icon="2" active={true} label="App Name and Version" />
 
         <div className="step">
-          {configType == 'none' &&
-            <p>
-              No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
-              <sup>
-                <Tooltip title="Sage app configuration files can be stored in your repo and loaded here.">
-                  <HelpIcon fontSize="small" />
-                </Tooltip>
-              </sup>
-            </p>
-          }
-
-
           <ConfigForm
             form={form}
             onChange={onUpdateForm}
           />
         </div>
 
+
+
         {isValid &&
           <div className="step">
             <h4>App Config</h4>
-            <pre className="code">{config}</pre>
+            {configType == 'none' &&
+              <p>
+                No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
+                Before registering or building your app, please create one following the
+                directions <a href="https://github.com/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md#adding-hello-world-plugin-packaging-info" target="_blank" rel="noreferrer"><b>here</b></a>.
+              </p>
+            }
+
+            {configType != 'none' &&
+              <pre className="code">{config}</pre>
+            }
 
             {error &&
               <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
@@ -337,7 +349,7 @@ export default function CreateApp() {
             onClick={onRegister}
             variant="outlined"
             color="primary"
-            disabled={!isValid || !form || isRegistering || isBuilding || error}
+            disabled={!isValid || configType == 'none' || isRegistering || isBuilding || error}
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
@@ -346,7 +358,7 @@ export default function CreateApp() {
             onClick={onBuild}
             variant="contained"
             color="primary"
-            disabled={!isValid || !form || isRegistering || isBuilding || error}
+            disabled={!isValid || configType == 'none' || isRegistering || isBuilding || error}
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
@@ -388,10 +400,10 @@ export default function CreateApp() {
               label={<>Show form state</>}
             />
 
+            <h4>Example Apps:</h4>
             <ul className="no-padding list-none">
-              <li><a onClick={onExampleOne}>Use Helloworld ML</a></li>
-              {/*<li><a onClick={onExampleTwo}>Use Example Two</a></li>*/}
-              {/*<li><a onClick={onExampleThree}>Use Example Three</a></li>*/}
+              <li><a onClick={() => onExample(EXAMPLE_REPO_1)}>Helloworld ML</a> [branch: master]</li>
+              <li><a onClick={() => onExample(EXAMPLE_REPO_2)}>BirdNet</a> [branch: main]</li>
             </ul>
           </DebugOptions>
         }

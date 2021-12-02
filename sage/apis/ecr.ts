@@ -85,8 +85,8 @@ export type AppConfig = {
   funding?: string
   collaborators?: string // todo(nc): allow list too?
   thumbnail?: string[] // todo(nc): make single string
-  images: string[]
-  science_description: string[]
+  images?: string[]
+  science_description?: string[]
   source: {
     architectures: Arch[]
     url: string
