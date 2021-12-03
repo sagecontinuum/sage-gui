@@ -272,7 +272,7 @@ async function _findLatestAvail(
   // sequentially attempt to fetch data until we get a 200 response (and include size)
   let latest, i = 1
   for (const obj of data) {
-    latest = await fetch(obj.value.toString())
+    latest = await fetch(obj.value.toString(), {method: 'HEAD'})
       .then(res => {
         if (onProgress) {
           onProgress(position, i)
