@@ -16,24 +16,26 @@ import BeeIcon from 'url:../../../assets/bee.svg'
 import * as Auth from '../../../components/auth/auth'
 import config from '../../../config'
 
-const isSignedIn = Auth.isSignedIn()
+const featuredApps = config.portal.featuredApps
 
-import {featuredApps} from './featuredApps'
+const isSignedIn = Auth.isSignedIn()
 
 
 
 type Props = {
   rows: {[key: string]: any}
-  onComplete: () => void
   view: 'explore' | 'public' | 'mine'
+  onComplete: () => void
   onNavigate: (path: string) => void
 }
 
 
 export default function SpaciousLayout(props: Props) {
-  let {rows, ...rest} = props
+  let {rows, view, ...rest} = props
 
-  rows = rows.filter(row => !featuredApps.includes(`${row.namespace}/${row.name}`))
+  if (view == 'explore') {
+    rows = rows.filter(row => !featuredApps.includes(`${row.namespace}/${row.name}`))
+  }
 
   return (
     <Root>

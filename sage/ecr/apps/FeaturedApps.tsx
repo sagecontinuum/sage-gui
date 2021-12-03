@@ -12,23 +12,7 @@ import BeeIcon from 'url:../../../assets/bee.svg'
 
 import config from '../../../config'
 
-
-
-export const featuredApps = [
-  'seanshahkarami/plugin-iio',
-  'seanshahkarami/motion-detector',
-  'seanshahkarami/raingauge',
-  'iperezx/smoke-detection',
-  'seanshahkarami/raingauge',
-  'seonghapark/cloudcover',
-  'seonghapark/trafficstate',
-  'seonghapark/solarirradiance',
-  'waggle/bird-song-classifier',
-  'bhupendraraut/cmv-fftpc',
-  'rjackson/weather-classification',
-  'dariodematties/avian-diversity-monitoring'
-]
-
+const featuredApps = config.portal.featuredApps
 
 
 type Props = {
