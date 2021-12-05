@@ -101,7 +101,7 @@ export default function NavBar(props: Props) {
 
           {!username && pathname != '/login' &&
             <Button
-              href={`${Auth.url}/?callback=${webOrigin}${pathname}`}
+              href={process.env.NODE_ENV == 'development' ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
               variant="outlined"
               color="primary"
             >

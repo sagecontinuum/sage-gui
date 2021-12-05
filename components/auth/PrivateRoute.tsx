@@ -15,6 +15,20 @@ export default function PrivateRoute({
   component: Component = null,
   ...rest
 }) {
+
+  if (process.env.NODE_ENV == 'development') {
+    return (
+      <Route
+        {...rest}
+        render={props => (
+          _isSignedIn ?
+            Component ? <Component {...props} /> : rest.render(props)
+            : redirect(`/login`)
+        )}
+      />
+    )
+  }
+
   return (
     <Route
       {...rest}
