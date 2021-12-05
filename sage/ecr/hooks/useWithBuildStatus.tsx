@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import config from '../../../config'
 import * as ECR from '../../apis/ecr'
+import { isSignedIn } from '../../../components/auth/auth'
 
 
 
@@ -14,10 +15,14 @@ export default function useWithBuildStatus<T>() {
 
   // effect for updating build status
   useEffect(() => {
+
+    // must be signed in to fetch build status
+    if (!isSignedIn()) return
+
     if (!data || isDone || view =='explore') return
 
     for (const app of data) {
-      ECR.listBuildStatus(app)
+      ECR.getBuildStatus(app)
         .then(status => {
           // if (!ref.current) return
           setData(prev => {

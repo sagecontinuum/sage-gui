@@ -7,14 +7,13 @@ import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
-import { AppConfig } from '../../apis/ecr'
-
+import * as ECR from '../../apis/ecr'
 import * as Auth from '../../../components/auth/auth'
 const username = Auth.getUser()
 
 
 type Props = {
-  form: AppConfig
+  form: ECR.AppMeta
   onChange: (evt: React.ChangeEvent | React.ChangeEvent<{name?: string, value: unknown}>) => void
 }
 

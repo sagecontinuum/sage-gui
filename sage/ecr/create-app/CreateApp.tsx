@@ -101,7 +101,7 @@ export default function CreateApp() {
   const [branchList, setBranchList] = useState<{id: string, label: string}[]>([])
 
   // app config state
-  const [form, setForm] = useState<ECR.AppConfig>(initialState)
+  const [form, setForm] = useState<ECR.AppMeta>(initialState)
   const [config, setConfig] = useState<string>(YAML.stringify(initialState))
   const [configType, setConfigType] = useState<'yaml'|'json'|'none'|string>(null)
 

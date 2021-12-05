@@ -73,7 +73,7 @@ type Arch =
   'linux/arm/v8'
 
 
-export type AppConfig = {
+export type AppMeta = {
   namespace?: string
   name?: string
   version?: string
@@ -111,7 +111,7 @@ export type AppConfig = {
 }
 
 export type AppDetails =
-  AppConfig & {
+  AppMeta & {
     id: string
     owner: string
     frozen: boolean
@@ -323,17 +323,14 @@ export async function listApps(filter: FilterType) {
 }
 
 
-export function listBuildStatus(app: App) {
+export function getBuildStatus(app: App) {
   const {namespace, name, version} = app
   return get(`${url}/builds/${namespace}/${name}/${version}`)
 }
 
 
-export function listBuildStatusBulk(apps: App[]) {
-  const proms = apps.map(app => {
-    listBuildStatus(app)
-  })
-
+export function listBuildStatus(apps: App[]) {
+  const proms = apps.map(app => getBuildStatus(app))
   return Promise.all(proms)
 }
 
@@ -356,7 +353,7 @@ export function getRepo(repo) : Promise<Repo> {
     })
 }
 
-export function getAppConfig(app: App) : Promise<AppConfig> {
+export function getAppConfig(app: App) : Promise<AppMeta> {
   // todo(wg): add `view=app` for repos(?)
   const {namespace, name, version} = app
   return get(`${url}/apps/${namespace}/${name}/${version}?view=app`)

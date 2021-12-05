@@ -10,7 +10,7 @@ import CheckBox from '@mui/material/CheckBox'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 
-import { AppConfig } from '../../../apis/ecr'
+import * as ECR from '../../../apis/ecr'
 
 
 
@@ -25,7 +25,7 @@ const architectures = [
 
 
 type Props = {
-  form: AppConfig
+  form: ECR.AppMeta
   onChange: (evt: React.ChangeEvent, val?: string) => void
 }
 
@@ -74,16 +74,4 @@ export default function ConfigGenerator(props: Props) {
 
 const Root = styled.div`
 
-`
-
-
-const EditorContainer = styled.div`
-  margin-top: 10px;
-`
-
-const Editor = styled.textarea`
-  height: 400px;
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 5px 10px;
 `
