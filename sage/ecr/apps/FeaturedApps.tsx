@@ -10,55 +10,11 @@ import { Item, Title } from '../../common/Layout'
 import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:../../../assets/bee.svg'
 
+import {truncate} from 'lodash'
+
 import config from '../../../config'
 
 const featuredApps = config.portal.featuredApps
-
-
-type Props = {
-  rows: {[key: string]: any}
-  onComplete: () => void
-  view: 'explore' | 'public' | 'mine'
-  onNavigate: (path: string) => void
-}
-
-export default function FeaturedApps(props: Props) {
-  let {rows, ...rest} = props
-
-  rows = rows.filter(row => featuredApps.includes(`${row.namespace}/${row.name}`))
-
-  return (
-    <Root>
-      {rows.map((row) =>
-        <AppBox key={row.id} data={row} {...rest} className="app-box" />
-      )}
-    </Root>
-  )
-}
-
-const Root = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  content: "";
-  flex: auto;
-
-  > div {
-    width: 32%;
-    margin: 0 1px 15px 1px;
-  }
-
-  .thumbnail, .placeholder {
-    width: 80px;
-    height: 80px;
-  }
-
-  @media (max-width: 1200px) {
-    > div {
-      width: 48%;
-    }
-  }
-`
 
 
 
@@ -110,7 +66,7 @@ function AppBox(props) {
             <Title>{formatters.name(name, data)}</Title>
 
             {description &&
-              <p>{description}</p>
+              <p>{truncate(description, {length: 70})}</p>
             }
           </div>
         </div>
@@ -156,6 +112,53 @@ function AppBox(props) {
     </Item>
   )
 }
+
+
+
+type Props = {
+  rows: {[key: string]: any}
+  onComplete: () => void
+  view: 'explore' | 'public' | 'mine'
+  onNavigate: (path: string) => void
+}
+
+export default function FeaturedApps(props: Props) {
+  let {rows, ...rest} = props
+
+  rows = rows.filter(row => featuredApps.includes(`${row.namespace}/${row.name}`))
+
+  return (
+    <Root>
+      {rows.map((row) =>
+        <AppBox key={row.id} data={row} {...rest} className="app-box" />
+      )}
+    </Root>
+  )
+}
+
+const Root = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  content: "";
+  flex: auto;
+
+  > div {
+    width: 32%;
+    margin: 0 1px 15px 1px;
+  }
+
+  .thumbnail, .placeholder {
+    width: 80px;
+    height: 80px;
+  }
+
+  @media (max-width: 1200px) {
+    > div {
+      width: 48%;
+    }
+  }
+`
 
 
 

@@ -29,15 +29,17 @@ export default  {
   portal: {
     featuredApps: [
       'seanshahkarami/plugin-iio',
-      'seanshahkarami/motion-detector',
       'seanshahkarami/raingauge',
       'iperezx/smoke-detection',
-      'seanshahkarami/raingauge',
       'seonghapark/cloudcover',
       'seonghapark/trafficstate',
       'seonghapark/solarirradiance',
+      'seonghapark/objectcounter',
+      'seonghapark/motion-analysis',
+      'seonghapark/surface-water-detection',
+      'seonghapark/motion-detection',
       'waggle/bird-song-classifier',
-      'bhupendraraut/cmv-fftpc',
+      'bhupendraraut/cloudmotion',
       'rjackson/weather-classification',
       'dariodematties/avian-diversity-monitoring'
     ]
