@@ -94,15 +94,6 @@ export default function App() {
             </div>
 
             <p>{latestTag?.description}</p>
-            <div>
-              <Button
-                component={Link}
-                to={`/app-data/${repo.namespace}/${repo.name}`}
-                startIcon={<DataIcon />}
-              >
-                Browse Data
-              </Button>
-            </div>
           </div>
         </div>
 
