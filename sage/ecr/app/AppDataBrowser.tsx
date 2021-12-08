@@ -106,7 +106,7 @@ const getUniqueOpts = (data) =>
     .map(v => ({id: v, label: v}))
 
 const getFilterVal = (items: string[]) =>
-  items.map(v => ({id: v, label: v}))[0]
+  items.map(v => ({id: v, label: v}))[0]?.id
 
 
 async function getFilterSets(plugin) {
@@ -120,7 +120,8 @@ async function getFilterSets(plugin) {
 
   return {
     names: getUniqueOpts(data.map(o => o.name)),
-    nodes: getUniqueOpts(data.map(o => o.meta.vsn))
+    nodes: getUniqueOpts(data.map(o => o.meta.vsn)),
+    sensors: getUniqueOpts(data.map(o => o.meta.sensor))
   }
 }
 
@@ -131,6 +132,7 @@ const initialState = {
   app: [],
   name: [],
   node: [],
+  sensor: []
 }
 
 
@@ -151,6 +153,7 @@ export default function DataPreview() {
   const app = params.get('app')
   const name = params.get('names')
   const node = params.get('nodes')
+  const sensor = params.get('sensors')
 
   const {setLoading} = useProgress()
 
@@ -166,13 +169,18 @@ export default function DataPreview() {
   const [data, setData] = useState(null)
 
   const [apps, setApps] = useState<String[]>()
-  const [names, setNames] = useState<String[]>()
-  const [nodes, setNodes] = useState<String[]>()
+
+  const [menus, setMenus] = useState<{[name: string]: String[]}>({
+    name: [],
+    node: [],
+    sensor: []
+  })
 
   const [filters, setFilters] = useState({
     app: [defaultPlugin],
     name: [],
     node: [],
+    sensor: []
   })
 
 
@@ -184,15 +192,12 @@ export default function DataPreview() {
   useEffect(() => {
     const filterState = getFilterState(params)
     setFilters(filterState)
-  }, [name, node])
+  }, [name, node, sensor])
 
 
   useEffect(() => {
     getFilterSets(app)
-      .then(({names, nodes}) => {
-        setNames(names)
-        setNodes(nodes)
-      })
+      .then((menuItems) => setMenus(menuItems))
   }, [app])
 
 
@@ -273,6 +278,7 @@ export default function DataPreview() {
           onChange={val => handleFilterChange('app', val)}
           noSelectedSort
           multiple={false}
+          disableCloseOnSelect={false}
           ButtonComponent={<div><FilterBtn label="Apps" /></div>}
         />
         <div className="justify-center">
@@ -297,7 +303,7 @@ export default function DataPreview() {
 
         <div className="flex items-center">
           <FilterMenu
-            options={names || []}
+            options={menus.names || []}
             value={getFilterVal(filters.name)}
             onChange={vals => handleFilterChange('names', vals)}
             noSelectedSort
@@ -306,12 +312,21 @@ export default function DataPreview() {
           />
 
           <FilterMenu
-            options={nodes || []}
+            options={menus.nodes || []}
             value={getFilterVal(filters.node)}
             onChange={vals => handleFilterChange('nodes', vals)}
             noSelectedSort
             multiple={false}
             ButtonComponent={<div><FilterBtn label="Nodes" /></div>}
+          />
+
+          <FilterMenu
+            options={menus.sensors || []}
+            value={getFilterVal(filters.sensor)}
+            onChange={vals => handleFilterChange('sensors', vals)}
+            noSelectedSort
+            multiple={false}
+            ButtonComponent={<div><FilterBtn label="Sensors" /></div>}
           />
 
           <Select
@@ -330,6 +345,7 @@ export default function DataPreview() {
             }
           </Select>
 
+
           <VirtDivider />
           {data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>}
           <VirtDivider />
@@ -346,7 +362,7 @@ export default function DataPreview() {
 
       {data &&
         <Table
-          primaryKey="id"
+          primaryKey="timestamp"
           enableSorting
           columns={cols}
           rows={data}

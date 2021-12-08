@@ -141,7 +141,8 @@ export default function FilterMenu(props: Props) {
     onChange,
     headerText,
     noOptionsText,
-    noSelectedSort = false
+    noSelectedSort = false,
+    ...rest
   } = props
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -248,6 +249,7 @@ export default function FilterMenu(props: Props) {
                   placeholder="Filter labels"
                 />
               )}
+              {...rest}
             />
           </div>
         </ClickAwayListener>
