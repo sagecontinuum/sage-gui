@@ -32,6 +32,7 @@ export type Record = {
     node: string
     host?: string
     vsn?: string
+    sensor?: string
   }
 }
 

@@ -303,7 +303,7 @@ export default function StatusView() {
 
   return (
     <Root>
-      {lastUpdate && <h2>Lasted updated: {lastUpdate}</h2>}
+      {lastUpdate && <h2>Last update: {lastUpdate}</h2>}
       <Tabs
         value={tabIdx}
         onChange={(_, idx) => setTabIdx(idx)}
