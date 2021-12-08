@@ -28,7 +28,7 @@ const SPARKLINE_START = '-7d'
 const TIME_OUT = 5000
 
 
-const getColumn = (id) => cols.filter(c => c.id == id)[0]
+const getColumn = (id) => cols.find(c => c.id == id)
 
 const columns = [
   {

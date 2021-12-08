@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import ScienceIcon from '@mui/icons-material/BarChartRounded'
+import ScienceIcon from '@mui/icons-material/ScienceRounded'
+import DataIcon from '@mui/icons-material/ListAltOutlined'
 import TagIcon from '@mui/icons-material/LocalOfferOutlined'
+import Divider from '@mui/material/Divider'
+import Button from '@mui/material/Button'
+
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
@@ -19,7 +23,6 @@ import * as Auth from '../../../components/auth/auth'
 
 
 import marked from 'marked/lib/marked'
-import Divider from '@mui/material/Divider'
 import AppMeta from './AppMeta'
 
 
@@ -91,6 +94,15 @@ export default function App() {
             </div>
 
             <p>{latestTag?.description}</p>
+            <div>
+              <Button
+                component={Link}
+                to={`/app-data/${repo.namespace}/${repo.name}`}
+                startIcon={<DataIcon />}
+              >
+                Browse Data
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -122,8 +134,8 @@ export default function App() {
             onChange={(_, idx) => setTabIndex(idx)}
             aria-label="App details tabs"
           >
-            <Tab label={<div className="flex items-center"><ScienceIcon /> Science Overview</div>} idx={0} />
-            <Tab label={<div className="flex items-center"><TagIcon fontSize="small"/> Tagged Versions ({repo.versions.length})</div>} idx={1}/>
+            <Tab label={<div className="flex items-center"><ScienceIcon fontSize="small" /> Science Overview</div>} idx={0} />
+            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" /> Tagged Versions ({repo.versions.length})</div>} idx={1}/>
           </Tabs>
           <br/>
 
