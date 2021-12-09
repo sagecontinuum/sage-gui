@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
-import { createTheme, ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles'
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
@@ -17,58 +17,12 @@ import Docs from './docs/Page'
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '../components/404'
 
-
-
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 import { SnackbarProvider } from 'notistack'
 
+import theme from '../components/theme'
 import '../assets/styles.scss'
 
-
-declare module '@mui/styles/defaultTheme' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {}
-}
-
-
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      'Roboto'
-    ].join(','),
-    button: {
-      textTransform: 'none',
-      fontWeight: 800
-    }
-  },
-  palette: {
-    mode: 'light',
-    primary: {
-      main: 'rgb(28, 140, 201)'
-    },
-    secondary: {
-      main: '#8166a0'
-    }
-  },
-  components: {
-    MuiButtonBase: {
-      defaultProps: {
-        disableRipple: true
-      },
-      styleOverrides: {
-        root: {
-          textTransform: 'none'
-        }
-      }
-    },
-    MuiTextField: {
-      defaultProps: {
-        size: 'small',
-        variant: 'outlined'
-      }
-    }
-  }
-})
 
 
 const NavMenu = () =>
@@ -78,6 +32,13 @@ const NavMenu = () =>
     {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
 
+
+/*
+const Notice = () =>
+  <Alert severity="warning" style={{borderBottom: '1px solid #ddd' }}>
+    Our team is currently doing maintenance on this application.
+  </Alert>
+*/
 
 
 export default function Sage() {
@@ -93,29 +54,17 @@ export default function Sage() {
           <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
             <Container>
               <ProgressProvider>
-                {/*
-                <Alert severity="warning" style={{borderBottom: '1px solid #ddd' }}>
-                  Our team is currently doing maintenance on this application.
-                </Alert>
-                */}
                 <Switch>
-                  <Route exact path="/">
-                    <Redirect to="/apps/explore" />
-                  </Route>
-                  <Route exact path="/apps">
-                    <Redirect to="/apps/explore" />
-                  </Route>
-
-                  <Route exact path="/login">
-                    <TestSignIn />
-                  </Route>
+                  <Redirect exact from="/" to="/apps/explore" />
+                  <Redirect exact from="/apps" to="/apps/explore" />
 
                   <Route path="/apps" component={Apps} />
                   <Route path="/app-data" component={DataBrowser} />
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
-
                   <Route path="/docs/:page" component={Docs} />
+
+                  <Route exact path="/login" component={TestSignIn} />
                   <Route path="*" component={NotFound} />
                 </Switch>
               </ProgressProvider>

@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
-import { createTheme, ThemeProvider, Theme, StyledEngineProvider } from '@mui/material/styles'
+import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
@@ -20,53 +20,9 @@ import Timeline from './fiddle/Timeline'
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 
+import theme from '../components/theme'
 import '../assets/styles.scss'
 
-
-
-declare module '@mui/styles/defaultTheme' {
-  interface DefaultTheme extends Theme {}
-}
-
-
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      'Roboto'
-    ].join(','),
-    button: {
-      textTransform: 'none',
-      fontWeight: 800
-    }
-  },
-  palette: {
-    mode: 'light',
-    primary: {
-      main: 'rgb(28, 140, 201)'
-    },
-    secondary: {
-      main: '#8166a0'
-    }
-  },
-  components: {
-    MuiButtonBase: {
-      defaultProps: {
-        disableRipple: true
-      },
-      styleOverrides: {
-        root: {
-          textTransform: 'none'
-        }
-      }
-    },
-    MuiTextField: {
-      defaultProps: {
-        size: 'small',
-        variant: 'outlined'
-      }
-    }
-  }
-})
 
 
 const NavMenu = () =>
