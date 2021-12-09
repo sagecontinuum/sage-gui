@@ -213,18 +213,19 @@ button.delete {color: #912341; }
  * global util classes
  */
 
-.code, pre.code {
+p > code, pre {
   background: #f8f8f8;
   border-radius: 5px;
   border: 1px solid #bbb;
+  padding: 10px;
+  color: #222;
+}
+
+.mono-term {
   padding: 1px 2px;
   color: #c52700;
 }
 
-pre.code {
-  padding: 10px;
-  color: #222;
-}
 
 [target=_blank] .external-link {
   visibility: hidden;

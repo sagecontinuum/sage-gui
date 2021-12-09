@@ -9,7 +9,6 @@ import AddIcon from '@mui/icons-material/AddRounded'
 import FeaturedIcon from '@mui/icons-material/StarsRounded'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 
-
 import BeeIcon from 'url:../../../assets/bee.svg'
 
 import ErrorMsg from '../../ErrorMsg'
@@ -25,6 +24,10 @@ import { formatters } from '../formatters'
 import LayoutToggle from '../../common/LayoutToggle'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
+
+import config from '../../../config'
+const {featuredApps, plugins} = config.portal
+
 
 const columns = [
   {
@@ -200,7 +203,7 @@ export default function AppList() {
             <FeaturedIcon/>&nbsp;Featured Apps
           </h2>
           <FeaturedApps
-            rows={rows}
+            rows={rows.filter(row => [...featuredApps, ...plugins].includes(`${row.namespace}/${row.name}`))}
             view={view}
             onComplete={onActionComplete}
             onNavigate={onNavigate}

@@ -16,7 +16,7 @@ import BeeIcon from 'url:../../../assets/bee.svg'
 import * as Auth from '../../../components/auth/auth'
 import config from '../../../config'
 
-const featuredApps = config.portal.featuredApps
+const {featuredApps, plugins} = config.portal
 
 const isSignedIn = Auth.isSignedIn()
 
@@ -34,7 +34,7 @@ export default function SpaciousLayout(props: Props) {
   let {rows, view, ...rest} = props
 
   if (view == 'explore') {
-    rows = rows.filter(row => !featuredApps.includes(`${row.namespace}/${row.name}`))
+    rows = rows.filter(row => ![...featuredApps, ...plugins].includes(`${row.namespace}/${row.name}`))
   }
 
   return (

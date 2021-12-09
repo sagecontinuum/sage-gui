@@ -14,9 +14,6 @@ import {truncate} from 'lodash'
 
 import config from '../../../config'
 
-const featuredApps = config.portal.featuredApps
-
-
 
 function AppBox(props) {
   const {data, view, onNavigate} = props
@@ -124,8 +121,6 @@ type Props = {
 
 export default function FeaturedApps(props: Props) {
   let {rows, ...rest} = props
-
-  rows = rows.filter(row => featuredApps.includes(`${row.namespace}/${row.name}`))
 
   return (
     <Root>

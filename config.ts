@@ -28,20 +28,23 @@ export default  {
   },
   portal: {
     featuredApps: [
-      'seanshahkarami/plugin-iio',
-      'seanshahkarami/raingauge',
       'iperezx/smoke-detection',
-      'seonghapark/cloudcover',
-      'seonghapark/trafficstate',
-      'seonghapark/solarirradiance',
-      'seonghapark/objectcounter',
+      'seonghapark/cloud-cover',
+      'seonghapark/traffic-state',
+      'seonghapark/solar-irradiance',
+      'seonghapark/object-counter',
       'seonghapark/motion-analysis',
       'seonghapark/surface-water-detection',
       'seonghapark/motion-detection',
       'waggle/bird-song-classifier',
-      'bhupendraraut/cloudmotion',
+      'bhupendraraut/cloud-motion',
       'rjackson/weather-classification',
-      'dariodematties/avian-diversity-monitoring'
+      'dariodematties/avian-diversity-monitoring',
+      'dariodematties/sound-event-detection'
+    ],
+    plugins: [
+      'seanshahkarami/plugin-iio',
+      'seanshahkarami/raingauge',
     ]
   }
 }

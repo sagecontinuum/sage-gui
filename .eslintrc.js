@@ -34,6 +34,7 @@ module.exports = {
         forbid: ['>', '}'],
       },
     ],
+    'react/react-in-jsx-scope': 'off'
   },
   'globals': {
     'document': true,

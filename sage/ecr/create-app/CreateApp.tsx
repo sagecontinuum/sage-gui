@@ -328,7 +328,7 @@ export default function CreateApp() {
             <h4>App Config</h4>
             {configType == 'none' &&
               <p>
-                No <span className="code">sage.yaml</span> or <span className="code">sage.json</span> configuration file found.
+                No <span className="mono-term">sage.yaml</span> or <span className="mono-term">sage.json</span> configuration file found.
                 Before registering or building your app, please create one following the
                 directions <a href="https://github.com/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md#adding-hello-world-plugin-packaging-info" target="_blank" rel="noreferrer"><b>here</b></a>.
               </p>
