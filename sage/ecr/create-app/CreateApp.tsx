@@ -65,7 +65,7 @@ const StepRoot = styled.div`
 
 
 const getRepoPath = (url: string) =>
-  url.split('.com')[1].replace('.git', '').slice(1)
+  url.replace('https://github.com/', '').replace('.git', '')
 
 
 
@@ -96,7 +96,6 @@ export default function CreateApp() {
 
   // app repo
   const [repoURL, setRepoURL] = useState('')
-  const [repoPath, setRepoPath] = useState('')
   const [branch, setBranch] = useState('main')
   const [branchList, setBranchList] = useState<{id: string, label: string}[]>([])
 
@@ -117,7 +116,7 @@ export default function CreateApp() {
   const [devMode, setDevMode] = useState(false)
 
 
-  const fetchSageConfig = useCallback(() => {
+  const fetchSageConfig = useCallback((branch) => {
     if (!repoURL || !branch) return
 
     const path = getRepoPath(repoURL)
@@ -145,7 +144,7 @@ export default function CreateApp() {
           setConfig(YAML.stringify(obj))
         })
       }).catch(() => setConfigType('none'))
-  }, [repoURL, branch])
+  }, [repoURL])
 
 
   // remove all verification/error state on changes
@@ -158,12 +157,6 @@ export default function CreateApp() {
   useEffect(() => {
     setIsValid(null)
   }, [repoURL])
-
-
-  useEffect(() => {
-    fetchSageConfig()
-  }, [fetchSageConfig] )
-
 
 
   const onRepoVerify = (evt = null) => {
@@ -190,6 +183,8 @@ export default function CreateApp() {
             const opts = branches.map(b => b.name).map(name => ({id: name, label: name}))
             setBranchList(opts)
           })
+
+        fetchSageConfig(branch)
       })
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
@@ -204,7 +199,7 @@ export default function CreateApp() {
 
     setBranch(tagObj.id)
     setIsValid(true)
-    fetchSageConfig()
+    fetchSageConfig(tagObj.id)
   }
 
 
