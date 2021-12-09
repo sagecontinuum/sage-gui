@@ -1,3 +1,0 @@
-[submodule "components/heatmap"]
-	path = components/heatmap
-	url = git@github.com:nconrad/heatmap-calendar.git
