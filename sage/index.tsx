@@ -111,7 +111,7 @@ export default function Sage() {
                   </Route>
 
                   <Route path="/apps" component={Apps} />
-                  <Route path="/app-data" component={DataBrowser} />
+                  {/*<Route path="/app-data" component={DataBrowser} />*/}
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
 

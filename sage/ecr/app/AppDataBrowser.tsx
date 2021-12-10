@@ -20,6 +20,7 @@ import MenuItem from '@mui/material/MenuItem'
 import ArrowBack from '@mui/icons-material/ArrowBackIosRounded'
 import ArrowForward from '@mui/icons-material/ArrowForwardIosRounded'
 import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
+import UndoIcon from '@mui/icons-material/UndoRounded'
 
 import QueryViewer from '../../../components/QueryViewer'
 
@@ -94,7 +95,7 @@ function TimeIndicator(props: TIProps) {
 }
 
 
-const VirtDivider = () =>
+const VertDivider = () =>
   <Divider orientation="vertical" flexItem style={{margin: '5px 15px' }} />
 
 const FilterBtn = ({label}) =>
@@ -264,6 +265,10 @@ export default function DataPreview() {
     history.push({search: params.toString()})
   }
 
+  const handleRemoveFilters = () => {
+
+  }
+
   return (
     <Root>
       <div className="flex items-center">
@@ -276,6 +281,14 @@ export default function DataPreview() {
           ButtonComponent={<div><FilterBtn label="Apps" /></div>}
         />
         <div className="justify-center">
+          <VertDivider />
+          <Button variant="contained"
+            color="primary"
+            onClick={handleRemoveFilters}
+            startIcon={<UndoIcon />}
+          >
+            Clear
+          </Button>
           <QueryViewer filterState={filters} />
         </div>
       </div>
@@ -320,8 +333,6 @@ export default function DataPreview() {
             value={unit}
             onChange={evt => setUnit(evt.target.value)}
             label="Units"
-            size="small"
-            margin="dense"
           >
             {Object.keys(units)
               .map(k =>
@@ -330,11 +341,12 @@ export default function DataPreview() {
             }
           </Select>
 
-          <VirtDivider />
+
+          <VertDivider />
           {data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>}
-          <VirtDivider />
+          <VertDivider />
           <TimeIndicator page={page} unit={unit}/>
-          <VirtDivider />
+          <VertDivider />
           <IconButton size="small" onClick={() => setPage(prev => prev - 1)} disabled={page == 1}>
             <ArrowBack fontSize="small"/>
           </IconButton>
