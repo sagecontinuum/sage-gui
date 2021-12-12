@@ -210,9 +210,7 @@ export default function CreateApp() {
 
   const onRegister = () => {
     setIsRegistering(true)
-
-    const {namespace, name, version} = form
-    ECR.register({namespace, name, version}, config)
+    ECR.register(config)
       .then(() => {
         enqueueSnackbar('App registered', {variant: 'success'})
         history.push('/apps/my-apps')
@@ -227,9 +225,7 @@ export default function CreateApp() {
 
   const onBuild = () => {
     setIsBuilding(true)
-
-    const {namespace, name, version} = form
-    ECR.registerAndBuild({namespace, name, version}, config)
+    ECR.registerAndBuild(config)
       .then(() => {
         enqueueSnackbar('Build started')
         history.push('/apps/my-apps')
@@ -254,6 +250,10 @@ export default function CreateApp() {
     setConfig(YAML.stringify(f))
   }
 
+
+  const disableSubmit = () =>
+    !form.namespace || !form.name || !isValid ||
+    configType == 'none' || isRegistering || isBuilding || error
 
 
   return (
@@ -344,7 +344,7 @@ export default function CreateApp() {
             onClick={onRegister}
             variant="outlined"
             color="primary"
-            disabled={!isValid || configType == 'none' || isRegistering || isBuilding || error}
+            disabled={disableSubmit()}
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
@@ -353,7 +353,7 @@ export default function CreateApp() {
             onClick={onBuild}
             variant="contained"
             color="primary"
-            disabled={!isValid || configType == 'none' || isRegistering || isBuilding || error}
+            disabled={disableSubmit()}
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
@@ -367,7 +367,13 @@ export default function CreateApp() {
         <ul className="no-padding list-none">
           <li>
             <a href={`${ECR.docs}/tutorials/compute-at-edge`} target="_blank" rel="noreferrer" >
-              Computing at the Edge
+              Computing at the edge
+              <LaunchIcon className="external-link"/>
+            </a>
+          </li>
+          <li>
+            <a href={`${ECR.docs}/tutorials/compute-at-edge#developing-new-edge-applications`} target="_blank" rel="noreferrer" >
+              Developing new edge applications
               <LaunchIcon className="external-link"/>
             </a>
           </li>
