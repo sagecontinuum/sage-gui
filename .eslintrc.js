@@ -6,7 +6,8 @@ module.exports = {
   'extends': [
     'eslint:recommended',
     'plugin:react/recommended',
-    'plugin:react-hooks/recommended'
+    'plugin:react-hooks/recommended',
+    'plugin:react/jsx-runtime'
   ],
   'parser': '@typescript-eslint/parser',
   'parserOptions': {
@@ -33,8 +34,7 @@ module.exports = {
       {
         forbid: ['>', '}'],
       },
-    ],
-    'react/react-in-jsx-scope': 'off'
+    ]
   },
   'globals': {
     'document': true,

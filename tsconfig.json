@@ -1,10 +1,11 @@
 {
   "include": ["admin-ui/**/*", "components/**/*", "config.ts"],
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "lib": ["ES2020", "DOM"],
     "downlevelIteration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowJs": true
   }
 }
