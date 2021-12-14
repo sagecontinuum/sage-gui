@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+/* eslint-disable react/display-name */
+import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import {useLocation, useHistory} from 'react-router-dom'
 
@@ -20,7 +21,8 @@ import {queryData, filterData, mergeMetrics, getFilterState} from './statusDataU
 
 import * as BK from '../../apis/beekeeper'
 import * as BH from '../../apis/beehive'
-import * as SES from '../../apis/ses'
+
+
 
 const SPARKLINE_START = '-12h'
 const TIME_OUT = 5000
@@ -29,6 +31,11 @@ const TIME_OUT = 5000
 const getOptions = (data: object[], field: string) : Option[] =>
   [...new Set(data.map(obj => obj[field])) ]
     .map(name => ({id: name, label: name}))
+    .filter(o => o.id.length)
+
+
+const FilterBtn = ({label}: {label: string}) =>
+  <Button size="medium">{label}<CaretIcon /></Button>
 
 
 
@@ -57,6 +64,7 @@ export default function StatusView() {
   const query = params.get('query') || ''
   const status = params.get('status')
   const project = params.get('project')
+  const focus = params.get('focus')
   const location = params.get('location')
 
   // all data and current state of filtered data
@@ -69,6 +77,7 @@ export default function StatusView() {
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
   const [projects, setProjects] = useState<Option[]>()
+  const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
 
   // filter state
@@ -133,7 +142,7 @@ export default function StatusView() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, location, nodeType])
+  }, [query, status, project, focus, location, nodeType])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -154,6 +163,7 @@ export default function StatusView() {
 
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
+    setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
   }
 
@@ -249,41 +259,13 @@ export default function StatusView() {
             onSelect={handleSelect}
             middleComponent={
               <FilterControls className="flex items-center">
-                {/* hide this toggle (for now)
-                <ToggleButtonGroup
-                  value={nodeType}
-                  exclusive
-                  onChange={(evt, newType) => {
-                    setNodeType(newType == null ? 'all' : newType)
-                    handleFilterChange('nodeType', newType == 'all' || newType == null ? [] :  [{id: newType, label: newType}])
-                  }}
-                  aria-label="filter by node type"
-                  size="small"
-                >
-                  <ToggleButton value="all" aria-label="all nodes">
-                    All
-                  </ToggleButton>
-                  <ToggleButton value="wild sage" aria-label="wild sage nodes">
-                    Wild Sage
-                  </ToggleButton>
-                  <ToggleButton value="dellblade" aria-label="blades">
-                    Blades
-                  </ToggleButton>
-                </ToggleButtonGroup>
-                */}
-
                 {statuses ?
                   <FilterMenu
                     options={statuses}
                     value={filterState.status}
                     onChange={vals => handleFilterChange('status', vals)}
                     noSelectedSort
-                    ButtonComponent={
-                      <Button style={{marginLeft: 10}}>
-                        Status
-                        <CaretIcon />
-                      </Button>
-                    }
+                    ButtonComponent={<div><FilterBtn label="Status" /></div>}
                   /> : <></>
                 }
                 {projects &&
@@ -292,11 +274,16 @@ export default function StatusView() {
                     value={filterState.project}
                     onChange={vals => handleFilterChange('project', vals)}
                     noSelectedSort
-                    ButtonComponent={
-                      <Button>
-                        Project <CaretIcon />
-                      </Button>
-                    }
+                    ButtonComponent={<div><FilterBtn label="Project" /></div>}
+                  />
+                }
+                {focuses &&
+                  <FilterMenu
+                    options={focuses}
+                    value={filterState.focus}
+                    onChange={vals => handleFilterChange('focus', vals)}
+                    noSelectedSort
+                    ButtonComponent={<div><FilterBtn label="Focus" /></div>}
                   />
                 }
                 {locations &&
@@ -304,11 +291,7 @@ export default function StatusView() {
                     options={locations}
                     value={filterState.location}
                     onChange={vals => handleFilterChange('location', vals)}
-                    ButtonComponent={
-                      <Button>
-                        Location <CaretIcon />
-                      </Button>
-                    }
+                    ButtonComponent={<div><FilterBtn label="Location" /></div>}
                   />
                 }
 
@@ -367,15 +350,14 @@ const ChartsTitle = styled.h2`
 
 
 const TableContainer = styled.div`
+  margin-top: .5em;
   table thead th:first-child {
     text-align: center;
   }
 `
 
 const FilterControls = styled.div`
-  margin-Left: 1em;
-  margin-top: 3px;
-
+  margin-left: 1.5em;
 `
 
 

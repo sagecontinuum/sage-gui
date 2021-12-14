@@ -307,8 +307,10 @@ const columns = [{
     </NodeCell>
 }, {
   id: 'project',
-  label: 'Project',
-  width: '140px'
+  label: 'Project'
+}, {
+  id: 'focus',
+  label: 'Focus'
 }, {
   id: 'location',
   label: 'Location',
