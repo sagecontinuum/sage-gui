@@ -34,9 +34,9 @@ const cols = [
 
 function format(label: string, val: string) {
   if (label == 'project')
-    return <Link to={`/status?project=${val}`}>{val}</Link>
+    return <Link to={`/status?project="${encodeURIComponent(val)}"`}>{val}</Link>
   else if (label == 'location')
-    return <Link to={`/status?location=${val}`}>{val}</Link>
+    return <Link to={`/status?location="${encodeURIComponent(val)}"`}>{val}</Link>
 
   return typeof val == 'boolean' ?
     (val ? 'yes' : 'no'):

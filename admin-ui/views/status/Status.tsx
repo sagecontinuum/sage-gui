@@ -178,7 +178,7 @@ export default function StatusView() {
   const handleFilterChange = (field: string, vals: ({id: string, label: string} | string)[]) => {
     // MUI seems to result in vals may be string or option; todo(nc): address this?
     const newStr = vals.map(item =>
-      typeof item == 'string' ? item : item.id
+      `"${typeof item == 'string' ? item : item.id}"`
     ).join(',')
 
 

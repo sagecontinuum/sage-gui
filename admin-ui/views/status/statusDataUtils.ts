@@ -259,7 +259,8 @@ export function mergeMetrics(
 const initialState = {
   status: [],
   project: [],
-  location: []
+  location: [],
+  focus: []
 }
 
 
@@ -267,7 +268,7 @@ export function getFilterState(params) {
   let init = {...initialState}
   for (const [key, val] of params) {
     if (['query'].includes(key)) continue
-    init[key] = val.split(',')
+    init[key] = JSON.parse(`[${val}]`)
   }
 
   return init
