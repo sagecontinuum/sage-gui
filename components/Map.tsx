@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import tokens from '../tokens'
 import config from '../config'
 
+// import Popover from '@mui/material/Popover'
 
 const DISABLE_MAP = config.admin['disableMap'] || false
 const center = [-100, 50]
 const initialZoom = 1.5
+const dotSize = 10
 
 const minHeight = '225px'
 const maxHeight = '350px'
@@ -19,7 +21,7 @@ const loadMap = (domRef) => {
 
   const map = new mapboxgl.Map({
     container: domRef.current,
-    style: 'mapbox://styles/mapbox/light-v10',
+    style: 'mapbox://styles/mapbox/light-v9',
     center,
     zoom: initialZoom
   })
@@ -35,27 +37,58 @@ const loadMap = (domRef) => {
 
 
 
-const getMarkerColor = (status) => {
-  if (status == 'reporting')
-    return '#3ac37e'
-  else if (status == 'degraded')
-    return 'hsl(41, 83%, 35%)'
-  else if (status == 'not reporting')
-    return '#d72020'
-  else
-    return '#aaa'
-}
-
-
-
 const renderMarkers = (map, data) => {
   const markers = data.features.map(marker => {
-    return new mapboxgl.Marker({color: getMarkerColor(marker.status)} )
-      .setLngLat(marker.geometry.coordinates)
+    const {data} = marker.properties
+    // todo: optimize popups by using 'onclick'
+    var el = document.createElement('div')
+    el.className = 'marker'
+    el.innerHTML = `<div class="marker-dot marker-${marker.status.replace(' ', '-')}"></div>`
+
+    return new mapboxgl.Marker(el).setLngLat(marker.geometry.coordinates)
       .addTo(map)
+      .setPopup(
+        new mapboxgl.Popup({ offset: dotSize + 2 })
+          .setHTML(
+            `<h3 class="popup-title">${marker.properties.title}</h3>
+            <table class="key-value simple">
+              <tr><td>Project</td><td>${data.project} (${data.focus})</td><tr>
+              <tr><td>Location</td><td>${data.location}</td><tr>
+              <tr><td>ID</td><td>${data.id}</td><tr>
+              <tr><td>Coordinates</td><td>${data.lat}<br>${data.lng}</td><tr>
+            </table>
+            <p>${marker.properties.description}</p>`
+          )
+      )
   })
 
   return markers
+}
+
+const renderLabels = (map, geoSpec) => {
+
+  if(map.getLayer('marker-labels')) {
+    map.removeLayer('marker-labels')
+      .removeSource('geoSpec')
+  }
+
+  map.addSource('geoSpec', {
+    'type': 'geojson',
+    'data': geoSpec
+  })
+
+  map.addLayer({
+    'id': 'marker-labels',
+    'type': 'symbol',
+    'source': 'geoSpec',
+    'layout': {
+      'text-field': ['get', 'title'],
+      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+      'text-radial-offset': 0.4,
+      'text-justify': 'auto',
+      'icon-image': ['get', 'icon']
+    }
+  })
 }
 
 
@@ -110,16 +143,21 @@ const getGeoSpec = (data) => {
   const nodes = data
     .filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
     .map(obj => ({
-      type: 'FeatureCollection',
+      type: 'Feature',
       status: obj.status,
       geometry: {
         type: 'Point',
         coordinates: [obj.lng, obj.lat]
-      }
+      },
+      properties: {
+        title: obj.vsn,
+        description: '',
+        data: obj
+      },
     }))
 
   return {
-    type: 'Nodes',
+    type: 'FeatureCollection',
     features: nodes
   }
 }
@@ -147,6 +185,8 @@ function Map(props: Props) {
   // keep track of primary keys
   const [lastID, setLastID] = useState(-1)
 
+  // popover content
+  // const [popup, setPopup] = useState<string>(false)
 
 
   useEffect(() => {
@@ -166,9 +206,11 @@ function Map(props: Props) {
         map.resize()
       }, 300)
     }
+
   }, [])
 
   useEffect(() => {
+    if (!map) return
     updateMap()
   }, [map, data, selected, updateID])
 
@@ -211,6 +253,23 @@ function Map(props: Props) {
     // add new markers
     const geoSpec = getGeoSpec(filteredData)
     const newMarkers = renderMarkers(map, geoSpec)
+
+    try {
+      renderLabels(map, geoSpec)
+    } catch(e) {
+      // need delay for initial styling load
+      setTimeout(() => {
+        renderLabels(map, geoSpec)
+      }, 1000)
+    }
+
+    document.querySelectorAll('.mapboxgl-marker').forEach(el =>
+      el.addEventListener('click', (evt) => {
+        evt.target
+      })
+    )
+
+
     setMarkers(newMarkers)
 
     setInit(true)
@@ -221,6 +280,20 @@ function Map(props: Props) {
   return (
     <Root>
       <MapContainer id="map" ref={ref} />
+
+      {/* todo: implement?
+      <Popover
+        open={!!popover}
+        anchorOrigin={{
+          vertical: 'top',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+        }}
+      >
+        {popover}
+      </Popover>
+      */}
     </Root>
   )
 }
@@ -236,6 +309,36 @@ const MapContainer = styled.div`
   width: 100%;
   height: ${maxHeight};
   transition: height 100ms;
+
+  .popup-title {
+    margin-top: 0;
+  }
+
+  .mapboxgl-marker {
+    cursor: pointer;
+  }
+
+  .marker-dot {
+    height: ${dotSize}px;
+    width: ${dotSize}px;
+    background-color: #aaa;
+    border-radius: 50%;
+    opacity: .75;
+    display: inline-block;
+  }
+
+  .marker-reporting  {
+    background: #3ac37e;
+    border: 1px solid #2b9962;
+  }
+
+  .marker-degraded {
+    background: hsl(41, 83%, 35%);
+  }
+
+  .marker-not-reporting {
+     background: #d72020;
+  }
 `
 
 
