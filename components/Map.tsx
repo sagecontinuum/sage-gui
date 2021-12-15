@@ -66,12 +66,6 @@ const renderMarkers = (map, data) => {
 }
 
 const renderLabels = (map, geoSpec) => {
-
-  if(map.getLayer('marker-labels')) {
-    map.removeLayer('marker-labels')
-      .removeSource('geoSpec')
-  }
-
   map.addSource('geoSpec', {
     'type': 'geojson',
     'data': geoSpec
@@ -82,11 +76,15 @@ const renderLabels = (map, geoSpec) => {
     'type': 'symbol',
     'source': 'geoSpec',
     'layout': {
-      'text-field': ['get', 'title'],
+      'text-field': [
+        'format',
+        ['upcase', ['get', 'title']],
+        { 'font-scale': 0.9 },
+      ],
       'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-      'text-radial-offset': 0.4,
+      'text-radial-offset': 0.5,
       'text-justify': 'auto',
-      'icon-image': ['get', 'icon']
+      'icon-image': ['get', 'icon'],
     }
   })
 }
@@ -247,8 +245,13 @@ function Map(props: Props) {
       recenter(map)
     }
 
-    // remove markers (todo: probably use layers?)
+    // remove markers/labels (todo: use layers for markers too?)
     clearMarkers(markers)
+
+    if(map.getLayer('marker-labels')) {
+      map.removeLayer('marker-labels')
+        .removeSource('geoSpec')
+    }
 
     // add new markers
     const geoSpec = getGeoSpec(filteredData)
@@ -265,7 +268,6 @@ function Map(props: Props) {
 
     document.querySelectorAll('.mapboxgl-marker').forEach(el =>
       el.addEventListener('click', (evt) => {
-        evt.target
       })
     )
 
@@ -308,7 +310,6 @@ const MapContainer = styled.div`
   border: 1px solid #ccc;
   width: 100%;
   height: ${maxHeight};
-  transition: height 100ms;
 
   .popup-title {
     margin-top: 0;
