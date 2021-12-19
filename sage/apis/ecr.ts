@@ -253,31 +253,23 @@ export function listVersions(repo: Repo) : Promise<AppDetails[]> {
 
 type FilterType = 'mine' | 'public'
 export async function listApps(filter: FilterType) {
+  const repoFilters = [
+    __token ? `view=permissions` : '',
+    filter == 'mine' ? `nopublic=true` : ''
+  ]
 
-  const repoPerm = get(`${url}/repositories${__token ? `?view=permissions` : ''}`)
-  const appProm = get(`${url}/apps${filter == 'public' ? '?public=true' : ''}`)
+  const appFilters = [
+    filter == 'public' ? 'public=true' : '',
+    filter == 'mine' ? 'nopublic=true' : ''
+  ]
+
+  const repoPerm = get(`${url}/repositories?${repoFilters.join('&')}`)
+  const appProm = get(`${url}/apps?${appFilters.join('&')}`)
 
   return Promise.all([repoPerm, appProm])
     .then(([repoRes, appRes]) => {
 
       let repos = repoRes.data
-
-      if (filter == 'public' && __token) {
-        repos = repos.filter(repo => isPublic(repo.permissions))
-      } else if (filter == 'mine') {
-        // todo(wg): remove un-owned repos (could be part of api)?  i.e., 'owned=true or 'public=false'?)
-        repos = repos.filter(repo => {
-          if (!repo.permissions) return true
-          else if (repo.owner_id == __user) return true
-
-          const _isPublic = isPublic(repo.permissions)
-          return !_isPublic
-        })
-      } else if (!__token) {
-        // pass
-      } else {
-        throw Error(`listApps: must specify filter: ('public' or 'mine')`)
-      }
 
       // create lookup; todo?: could do merging on repos instead
       const repoMap = repos.reduce((acc, r) =>
@@ -340,7 +332,7 @@ export function listBuildStatus(apps: App[]) {
 
 
 /**
- * retrival
+ * retrieval
  */
 
 
