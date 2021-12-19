@@ -14,6 +14,8 @@ import Apps from './ecr/apps/Apps'
 import DataBrowser from './ecr/app/AppDataBrowser'
 import Docs from './docs/Page'
 
+import FilterMenuTest from './fiddle/filter-menu'
+
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '../components/404'
 
@@ -63,6 +65,8 @@ export default function Sage() {
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
                   <Route path="/docs/:page" component={Docs} />
+
+                  <Route path="/fiddle/filter-menu" component={FilterMenuTest} />
 
                   <Route exact path="/login" component={TestSignIn} />
                   <Route path="*" component={NotFound} />

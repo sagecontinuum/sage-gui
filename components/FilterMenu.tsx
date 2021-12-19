@@ -225,7 +225,7 @@ export default function FilterMenu(props: Props) {
                   </li>
                 )}}
               options={
-                multiple && noSelectedSort == false ?
+                noSelectedSort == false ?
                   [...options].sort((a, b) => {
                     // Display the selected labels first.
                     let ai = value.indexOf(a.id)
@@ -235,11 +235,13 @@ export default function FilterMenu(props: Props) {
                     return ai - bi
                   })
                   :
-                  [...options.filter(o => o.id == value?.id), ...options.filter(o => o.id != value?.id)]
+                  options
               }
-              getOptionLabel={(option) => option.label}
+              getOptionLabel={(option) => {
+                return option.label
+              }}
               isOptionEqualToValue={(opt, val) => {
-                return opt.id == val
+                return multiple ? opt.id == val : opt.id == val.id
               }}
               renderInput={(params) => (
                 <StyledInput

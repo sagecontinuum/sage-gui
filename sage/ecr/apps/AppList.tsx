@@ -203,7 +203,7 @@ export default function AppList() {
             <FeaturedIcon/>&nbsp;Featured Apps
           </h2>
           <FeaturedApps
-            rows={rows.filter(row => [...featuredApps, ...plugins].includes(`${row.namespace}/${row.name}`))}
+            rows={rows.filter(row => featuredApps.includes(`${row.namespace}/${row.name}`))}
             view={view}
             onComplete={onActionComplete}
             onNavigate={onNavigate}

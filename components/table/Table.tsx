@@ -1,4 +1,4 @@
-import React, {
+import {
   useState, useEffect, useReducer,
   useRef, useCallback,
   MouseEvent, ChangeEvent
@@ -314,7 +314,7 @@ type Props = {
   total?: number          // for ajax pagination
   search?: string
   sort?: object
-  emptyNotice?: string
+  emptyNotice?: string | JSX.Element
   pagination?: boolean
   offsetHeight?: string | boolean
   checkboxes?: boolean

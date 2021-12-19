@@ -34,7 +34,7 @@ export default function SpaciousLayout(props: Props) {
   let {rows, view, ...rest} = props
 
   if (view == 'explore') {
-    rows = rows.filter(row => ![...featuredApps, ...plugins].includes(`${row.namespace}/${row.name}`))
+    rows = rows.filter(row => !featuredApps.includes(`${row.namespace}/${row.name}`))
   }
 
   return (
