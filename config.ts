@@ -10,8 +10,11 @@ export default  {
   ses: 'https://portal.sagecontinuum.org/ses-plugin-data',
   auth: 'https://auth.sagecontinuum.org',
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/141ded5fedaf67c3/dashboards',
+
+  appDataUrl: 'https://portal.sagecontinuum.org/app-data',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
+
 
   docs: 'https://docs.sagecontinuum.org/docs',
 
@@ -28,7 +31,6 @@ export default  {
   },
   portal: {
     featuredApps: [
-      'iperezx/smoke-detection',
       'seonghapark/cloud-cover',
       'seonghapark/traffic-state',
       'seonghapark/solar-irradiance',
@@ -36,7 +38,7 @@ export default  {
       'seonghapark/motion-analysis',
       'seonghapark/surface-water-detection',
       'seonghapark/motion-detection',
-      'waggle/bird-song-classifier',
+      'seonghapark/wildfire-smoke-detection',
       'bhupendraraut/cloud-motion',
       'rjackson/weather-classification',
       'dariodematties/avian-diversity-monitoring',
