@@ -24,6 +24,7 @@ type Params = {
   }
 }
 
+// standard, most common SDR record
 export type Record = {
   timestamp: string
   name: string
@@ -36,14 +37,24 @@ export type Record = {
   }
 }
 
-
+// records for sanity metrics
 export type SanityMetric = Record & {
   meta: {
     severity: 'fatal' | 'warning'
   }
 }
 
+// type for things like aggregation of sanity metrics
+export type MetricsObj = {
+  [metric: string]: Record[]
+}
 
+// (client side) record type for things stored in OSN
+export type OSNRecord = Record & {
+  size: number
+}
+
+// standard struct for grouping of metrics
 export type AggMetrics = {
   [nodeID: string]: {
     [host: string]: {
@@ -52,16 +63,6 @@ export type AggMetrics = {
   }
 }
 
-
-// type for things like aggregation of sanity metrics
-export type MetricsObj = {
-  [metric: string]: Record[]
-}
-
-// (client side) record type for things stored in OSN
-export type StorageRecord = Record & {
-  size: number
-}
 
 
 function handleErrors(res) {
@@ -261,7 +262,7 @@ async function _findLatestAvail(
   data: Record[],
   position?: string,
   onProgress?: (position: string, remaining: number) => void
-) : Promise<StorageRecord> {
+) : Promise<OSNRecord> {
   if (!data)
     return null
 
@@ -297,7 +298,7 @@ export async function getRecentImages(
   node: string,
   onStart?: (position: string, total: number) => void,
   onProgress?: (position: string, num: number) => void
-) : Promise<{[position: string]: StorageRecord}> {
+) : Promise<{[position: string]: OSNRecord}> {
   // requests for each orientation
   const reqs = cameraOrientations.map(pos => {
     const params = {
@@ -355,6 +356,27 @@ export async function getLatestAudio(node: string) {
   const latestAvail = await _findLatestAvail(data)
 
   return latestAvail
+}
+
+
+type RecentRecordArgs = {
+  node: string,
+  name?: string,
+  sensor?: string
+}
+
+export async function getRecentRecord({node, name, sensor}: RecentRecordArgs) {
+  const data = await getData({
+    start: '-4d',
+    filter: {
+      node,
+      ...(name && {name}),
+      ...(sensor && {sensor})
+    },
+    tail: 1
+  })
+
+  return data
 }
 
 

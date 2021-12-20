@@ -14,7 +14,7 @@ import Table from '../../../components/table/Table'
 import FilterMenu from '../../../components/FilterMenu'
 import Map from '../../../components/Map'
 import Charts from './charts/Charts'
-import QueryViewer from './QueryViewer'
+import QueryViewer from '../../../components/QueryViewer'
 import { useProgress } from '../../../components/progress/ProgressProvider'
 
 import {queryData, filterData, mergeMetrics, getFilterState} from './statusDataUtils'
