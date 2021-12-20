@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
 
@@ -21,6 +21,7 @@ import * as BH from '../../apis/beehive'
 
 import { isOldData } from '../node/RecentData'
 
+
 const colors = colormap({
   colormap: 'hot',
   nshades: 256,
@@ -29,11 +30,12 @@ const colors = colormap({
 
 
 type Props = {
-  node: string
+  node?: string
+  dataURL?: string
 }
 
 export default function Audio(props: Props) {
-  const {node} = props
+  const {node, dataURL} = props
 
   const { setLoading } = useProgress()
 
@@ -43,100 +45,141 @@ export default function Audio(props: Props) {
   const [waveSurf, setWaveSurf] = useState()
   const [isPlaying, setIsPlaying] = useState(false)
 
-  const [audio, setAudio] = useState<BH.Record>()
+  const [meta, setMeta] = useState<BH.OSNRecord>()
+
+  // error for meta requests
   const [error, setError] = useState()
+
+  // wavesurfer error
+  const [vizError, setVizError] = useState()
 
 
   useEffect(() => {
     setLoading(true)
-    BH.getLatestAudio(node.toLowerCase())
-      .then(data => {
-        setAudio(data)
 
-        if (!data) return
+    // if node id is provided, fetch meta from beehive first
+    if (node) {
+      BH.getLatestAudio(node.toLowerCase())
+        .then(meta => {
+          setMeta(meta)
 
-        var wavesurfer = WaveSurfer.create({
-          container: ref.current,
-          waveColor: 'violet',
-          progressColor: 'purple',
-          plugins: [
-            SpectrogramPlugin.create({
-              container: ref2.current,
-              labels: true,
-              colorMap: colors
-            })
-          ]
+          // if we can't find meta, don't load wavesurfer
+          if (!meta) return
+
+          const url = meta.value
+          loadPlayer(url)
         })
+        .catch((err) => setError(err))
+        .finally(() => setLoading(false))
+
+    } else if (dataURL) {
+      // if OSN url is rovidepd, don't get meta
+      loadPlayer(dataURL)
+      setLoading(false)
+    } else {
+      throw 'Audio: no node or url provided'
+    }
+  }, [node, dataURL, setLoading])
 
 
-        wavesurfer.on('ready', function () {
-          // wavesurfer.play()
-          setWaveSurf(wavesurfer)
+  function loadPlayer(url) {
+    var wavesurfer = WaveSurfer.create({
+      container: ref.current,
+      waveColor: 'violet',
+      progressColor: 'purple',
+      plugins: [
+        SpectrogramPlugin.create({
+          container: ref2.current,
+          labels: true,
+          colorMap: colors
         })
+      ]
+    })
 
+    wavesurfer.on('ready', () => setWaveSurf(wavesurfer))
+    wavesurfer.on('play', () => setIsPlaying(true))
+    wavesurfer.on('pause', () => setIsPlaying(false))
 
-        wavesurfer.on('play', function () {
-          setIsPlaying(true)
-        })
-
-        wavesurfer.on('pause', function () {
-          setIsPlaying(false)
-        })
-
-        wavesurfer.load(data.value)
-        setLoading(false)
-      }).catch((err) => {
-        setError(err)
-        setLoading(false)
-      })
-
-  }, [node, setLoading])
+    wavesurfer.load(url)
+    wavesurfer.on('error', (err) => setVizError(err))
+  }
 
   return (
     <Root className="flex column">
-      {audio &&
-        <div style={isOldData(audio.timestamp) ? {border: '10px solid red'} : {}}>
-          <div  className="flex justify-between">
-            <div></div>
-            {waveSurf &&
-              <div className="flex items-center justify-end gap">
-                {!isPlaying &&
-                <Button startIcon={<PlayIcon />} onClick={() => {waveSurf.play() }} variant="outlined" size="small">
-                  play
-                </Button>
-                }
-                {isPlaying &&
-                <Button startIcon={<PauseIcon />} onClick={() => {waveSurf.pause() }} variant="outlined" size="small">
-                  pause
-                </Button>
-                }
-              </div>
-            }
-          </div>
+      {/* fallback to html audio element (if CORS is not configured) */}
+      {vizError && meta &&
+        <HtmlAudio>
+          <audio
+            controls
+            src={meta?.value}>
+              Your browser does not support the
+              <code>audio</code> element.
+          </audio>
+        </HtmlAudio>
+      }
 
-          <div ref={ref}></div>
-          <div ref={ref2}></div>
+
+      <div style={(meta && isOldData(meta.timestamp)) ? {border: '10px solid red'} : {}}>
+        <div  className="flex justify-between">
+          <div></div>
+          {waveSurf &&
+            <div className="flex items-center justify-end gap">
+              {!isPlaying &&
+              <Button
+                startIcon={<PlayIcon />}
+                onClick={() => {waveSurf.play() }}
+                variant="outlined"
+              >
+                play
+              </Button>
+              }
+              {isPlaying &&
+              <Button
+                startIcon={<PauseIcon />}
+                onClick={() => {waveSurf.pause() }}
+                variant="outlined"
+              >
+                pause
+              </Button>
+              }
+            </div>
+          }
+        </div>
+
+        {!vizError &&
+          <div>
+            <div ref={ref}></div>
+            <div ref={ref2}></div>
+          </div>
+        }
+
+        {!dataURL && meta &&
           <div
             className="flex items-center justify-between"
           >
             <div className="flex items-center">
               <div>
-                {isOldData(audio.timestamp) && <WarningIcon className="failed"/>}
+                {isOldData(meta.timestamp) && <WarningIcon className="failed"/>}
               </div>
 
-              <Tooltip title={new Date(audio.timestamp).toLocaleString()} placement="top">
-                <b className={isOldData(audio.timestamp) ? 'failed' : 'muted'}>
-                  ~{msToTime(new Date().getTime() - new Date(audio.timestamp).getTime())}
+              <Tooltip title={new Date(meta.timestamp).toLocaleString()} placement="top">
+                <b className={isOldData(meta.timestamp) ? 'failed' : 'muted'}>
+                  ~{msToTime(new Date().getTime() - new Date(meta.timestamp).getTime())}
                 </b>
               </Tooltip>
             </div>
 
-            <Button startIcon={<DownloadIcon />} size="small" href={audio.value}>{bytesToSizeSI(audio.size)}</Button>
+            <Button
+              startIcon={<DownloadIcon />}
+              href={meta.value}
+            >
+              {bytesToSizeSI(meta.size)}
+            </Button>
           </div>
-        </div>
-      }
+        }
+      </div>
 
-      {audio === null &&
+      {meta === null &&
         <p className="muted">No recent audio available</p>
       }
 
@@ -150,4 +193,10 @@ export default function Audio(props: Props) {
 }
 
 const Root = styled.div`
+`
+
+const HtmlAudio = styled.div`
+  audio {
+    width: 100%;
+  }
 `
