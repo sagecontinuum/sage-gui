@@ -65,6 +65,11 @@ const StyledPopper = styled(Popper)(({ theme }) => ({
   fontSize: 13,
   color: theme.palette.mode === 'light' ? '#24292e' : '#c9d1d9',
   backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1c2128',
+  '& .title': {
+     backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1c2128',
+     color: theme.palette.mode === 'light' ? '#24292e' : '#c9d1d9',
+     padding: 10
+  }
 }))
 
 const StyledInput = styled(InputBase)(({ theme }) => ({
@@ -182,7 +187,7 @@ export default function FilterMenu(props: Props) {
         <ClickAwayListener onClickAway={handleClose}>
           <div>
             {headerText &&
-              <div>{headerText}</div>
+              <div className="title">{headerText}</div>
             }
             <Autocomplete
               open
@@ -225,7 +230,7 @@ export default function FilterMenu(props: Props) {
                   </li>
                 )}}
               options={
-                noSelectedSort == false ?
+                multiple && noSelectedSort == false ?
                   [...options].sort((a, b) => {
                     // Display the selected labels first.
                     let ai = value.indexOf(a.id)

@@ -40,9 +40,12 @@ const isDevUser = devList.includes(username)
 
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
-const EXAMPLE_REPO_1 = 'https://github.com/waggle-sensor/plugin-helloworld-ml'
-const EXAMPLE_REPO_2 = 'https://github.com/dariodematties/BirdNET_Plugin'
 
+const EXAMPLES = {
+  'hello': 'https://github.com/waggle-sensor/plugin-helloworld-ml',
+  'motion': 'https://github.com/waggle-sensor/plugin-motion-analysis',
+  'birdnet': 'https://github.com/dariodematties/BirdNET_Plugin'
+}
 
 
 function StepTitle(props) {
@@ -76,10 +79,10 @@ const initialState = {
   description: '',
   source: {
     architectures: [],
-    branch: '',
     directory: '',
     dockerfile: '',
     url: '',
+    branch: '',
   },
   url: '',
   directory: '',
@@ -122,10 +125,7 @@ export default function CreateApp() {
     const path = getRepoPath(repoURL)
 
     fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.yaml`)
-      .then(res => res.status == 404 ?
-        fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.json`) : res
-      ).then(res => {
-
+      .then(res => {
         // set config type
         const type = res.status == 404 ?
           'none' : res.url.slice(res.url.lastIndexOf('.') + 1)
@@ -193,7 +193,6 @@ export default function CreateApp() {
 
   const onRepoBranchChange = (tagObj) => {
     if (!tagObj) {
-      setIsValid(false)
       return
     }
 
@@ -235,12 +234,6 @@ export default function CreateApp() {
   }
 
 
-  const onExample = (url) => {
-    setConfig('')
-    setRepoURL(url)
-  }
-
-
   const onUpdateForm = (event) => {
     const {name, value} = event.target
 
@@ -273,6 +266,7 @@ export default function CreateApp() {
             helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
             style={{width: 500}}
             InputLabelProps={{ shrink: true }}
+            required
           />
 
           {isValid &&
@@ -323,8 +317,8 @@ export default function CreateApp() {
             <h4>App Config</h4>
             {configType == 'none' &&
               <p>
-                No <span className="mono-term">sage.yaml</span> or <span className="mono-term">sage.json</span> configuration file found.
-                Before registering or building your app, please create one following the
+                No <span className="mono-term">sage.yaml</span> configuration file found.
+                Before registering or building your app, please create a sage.yaml following the
                 directions <a href="https://github.com/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md#adding-hello-world-plugin-packaging-info" target="_blank" rel="noreferrer"><b>here</b></a>.
               </p>
             }
@@ -403,8 +397,9 @@ export default function CreateApp() {
 
             <h4>Example Apps:</h4>
             <ul className="no-padding list-none">
-              <li><a onClick={() => onExample(EXAMPLE_REPO_1)}>Helloworld ML</a> [branch: master]</li>
-              <li><a onClick={() => onExample(EXAMPLE_REPO_2)}>BirdNet</a> [branch: main]</li>
+              <li><a onClick={() => setRepoURL(EXAMPLES.hello)}>Helloworld ML</a> [master branch]</li>
+              <li><a onClick={() => setRepoURL(EXAMPLES.motion)}>Motion Analysis</a> [multiple branches]</li>
+              <li><a onClick={() => setRepoURL(EXAMPLES.birdnet)}>BirdNet</a> [main branch]</li>
             </ul>
           </DebugOptions>
         }

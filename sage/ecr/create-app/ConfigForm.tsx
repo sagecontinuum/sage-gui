@@ -32,14 +32,14 @@ export default function ConfigForm(props: Props) {
   return (
     <Form className="flex column" autoComplete="off">
       <div className="flex row">
-        <FormControl variant="outlined" size="small">
-          <InputLabel id="namespace-label">Namespace</InputLabel>
+        <FormControl>
+          <InputLabel id="namespace-label" required>Namespace</InputLabel>
           <Select
             labelId="namespace-label"
             id="namespace"
             value={username}
             onChange={onChange}
-            label="Namespace"
+            label="Namespace *"
           >
             <MenuItem value={username}>{username}</MenuItem>
           </Select>
@@ -54,15 +54,16 @@ export default function ConfigForm(props: Props) {
           placeholder="my-app"
           error={!isValid}
           helperText={!isValid && 'Only lowercase letters, numbers, "-", or "_" allowed'}
+          required
         />
         <TextField
           label="Version"
           name="version"
           value={form.version}
           onChange={onChange}
-          style={{width: 100, marginLeft: 10}}
+          style={{width: 125, marginLeft: 10}}
           InputLabelProps={{ shrink: true }}
-          placeholder="1.0"
+          placeholder="1.x (optional)"
         />
       </div>
     </Form>
