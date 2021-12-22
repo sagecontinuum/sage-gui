@@ -25,7 +25,7 @@ import * as Auth from '../../../components/auth/auth'
 import * as ECR from '../../apis/ecr'
 import FormControlLabel from '@mui/material/FormControlLabel'
 
-const username = Auth.getUser()
+const user = Auth.getUser()
 
 const devList = [
   'nconrad',
@@ -35,7 +35,7 @@ const devList = [
   'jswantek'
 ]
 
-const isDevUser = devList.includes(username)
+export const isDevUser = devList.includes(user)
 
 
 const GITHUB_API = 'https://api.github.com'
@@ -73,7 +73,7 @@ const getRepoPath = (url: string) =>
 
 
 const initialState = {
-  // namespace: username, // only if supplied?
+  namespace: user,
   // name: '',
   // version: '',
   description: '',
@@ -203,7 +203,7 @@ export default function CreateApp() {
 
 
   const sanitizeForm = (obj) => {
-    return {...obj, namespace: username}
+    return {...obj, namespace: user}
   }
 
 
@@ -356,7 +356,7 @@ export default function CreateApp() {
 
 
       <Help>
-        <h3 className="no-margin">Help</h3>
+        <h3>Help</h3>
         <hr/>
         <ul className="no-padding list-none">
           <li>
@@ -419,6 +419,7 @@ const Root = styled.div`
 `
 
 const Main = styled.div`
+  margin: 10px 0;
   flex-grow: 3;
 
   .step {

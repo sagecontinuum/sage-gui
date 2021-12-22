@@ -9,7 +9,9 @@ import MenuItem from '@mui/material/MenuItem'
 
 import * as ECR from '../../apis/ecr'
 import * as Auth from '../../../components/auth/auth'
-const username = Auth.getUser()
+
+import isDevUser from './ConfigForm'
+const user = Auth.getUser()
 
 
 type Props = {
@@ -36,12 +38,14 @@ export default function ConfigForm(props: Props) {
           <InputLabel id="namespace-label" required>Namespace</InputLabel>
           <Select
             labelId="namespace-label"
-            id="namespace"
-            value={username}
-            onChange={onChange}
+            name="namespace"
+            value={form.namespace}
+            onChange={(evt) => onChange(evt)}
+            style={{width: 125}}
             label="Namespace *"
           >
-            <MenuItem value={username}>{username}</MenuItem>
+            <MenuItem value={user}>{user}</MenuItem>
+            {isDevUser && <MenuItem value="waggle">waggle</MenuItem>}
           </Select>
         </FormControl>
         <Slash>&nbsp;/&nbsp;</Slash>
