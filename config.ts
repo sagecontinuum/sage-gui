@@ -44,6 +44,11 @@ export default  {
       'dariodematties/avian-diversity-monitoring',
       'dariodematties/sound-event-detection'
     ],
+    samplers: [
+      'theone/imagesampler',
+      'theone/videosampler',
+      'waggle/audio-sampler'
+    ],
     plugins: [
       'seanshahkarami/plugin-iio',
       'seanshahkarami/raingauge',

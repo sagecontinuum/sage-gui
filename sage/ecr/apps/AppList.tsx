@@ -7,6 +7,7 @@ import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import AddIcon from '@mui/icons-material/AddRounded'
 import FeaturedIcon from '@mui/icons-material/StarsRounded'
+import SamplersIcon from '@mui/icons-material/CollectionsRounded'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 
 import BeeIcon from 'url:../../../assets/bee.svg'
@@ -26,7 +27,7 @@ import LayoutToggle from '../../common/LayoutToggle'
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 
 import config from '../../../config'
-const {featuredApps, plugins} = config.portal
+const {featuredApps, samplers} = config.portal
 
 
 const columns = [
@@ -208,6 +209,17 @@ export default function AppList() {
             onComplete={onActionComplete}
             onNavigate={onNavigate}
           />
+          <br/>
+          <h2 className="flex items-center">
+            <SamplersIcon/>&nbsp;Featured Samplers
+          </h2>
+          <FeaturedApps
+            rows={rows.filter(row => samplers.includes(`${row.namespace}/${row.name}`))}
+            view={view}
+            onComplete={onActionComplete}
+            onNavigate={onNavigate}
+          />
+          <br/>
         </>
       }
 
