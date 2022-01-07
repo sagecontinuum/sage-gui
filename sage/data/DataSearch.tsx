@@ -24,6 +24,7 @@ import * as utils from '../../components/utils/units'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
+import Sidebar, {FilterTitle} from './DataSidebar'
 
 
 const typeColorMap = {
@@ -164,7 +165,7 @@ export default function Search() {
 
       <div className="flex">
         <Sidebar>
-          <FiltersTitle>Filters</FiltersTitle>
+          <FilterTitle>Filters</FilterTitle>
           {facets && facetList.map(facet => {
             const {title, items} = facets[facet]
             return (
@@ -260,20 +261,6 @@ export default function Search() {
 const Root = styled.div`
   display: flex;
   flex-direction: column;
-`
-
-const Sidebar = styled.div`
-  position: sticky;
-  top: 0;
-  height: calc(100vh - 60px);
-  padding-top: 10px;
-  width: 250px;
-  min-width: 250px;
-  border-right: 1px solid #f5f5f5;
-`
-
-const FiltersTitle = styled.h2`
-  margin-left: 10px;
 `
 
 const Main = styled.div`

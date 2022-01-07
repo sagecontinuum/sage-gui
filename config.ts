@@ -11,7 +11,7 @@ export default  {
   auth: 'https://auth.sagecontinuum.org',
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/141ded5fedaf67c3/dashboards',
 
-  appDataUrl: 'https://portal.sagecontinuum.org/app-data',
+  dataBrowserURL: 'https://portal.sagecontinuum.org/data-browser',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
 

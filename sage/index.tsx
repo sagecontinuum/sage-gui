@@ -11,7 +11,7 @@ import NavBar, {NavItems} from '../components/NavBar'
 import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
-import DataBrowser from './ecr/app/AppDataBrowser'
+import DataBrowser from './data/DataBrowser'
 import Docs from './docs/Page'
 
 import FilterMenuTest from './fiddle/filter-menu'
@@ -61,7 +61,7 @@ export default function Sage() {
                   <Redirect exact from="/apps" to="/apps/explore" />
 
                   <Route path="/apps" component={Apps} />
-                  <Route path="/app-data" component={DataBrowser} />
+                  <Route path="/data-browser" component={DataBrowser} />
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
                   <Route path="/docs/:page" component={Docs} />

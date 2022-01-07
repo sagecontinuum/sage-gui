@@ -3,13 +3,13 @@ import { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Table from '../../../components/table/Table'
-import * as BH from '../../../admin-ui/apis/beehive'
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import * as BH from '../../admin-ui/apis/beehive'
 
-import {msToTime} from '../../../components/utils/units'
-import Checkbox from '../../../components/input/Checkbox'
-import FilterMenu from '../../../components/FilterMenu'
+import Table from '../../components/table/Table'
+import { useProgress } from '../../components/progress/ProgressProvider'
+import { msToTime } from '../../components/utils/units'
+import Checkbox from '../../components/input/Checkbox'
+import FilterMenu from '../../components/FilterMenu'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
@@ -26,12 +26,16 @@ import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 
-import Audio from '../../../admin-ui/views/audio/Audio'
+import { capitalize } from 'lodash'
+
+import Sidebar, {FilterTitle} from './DataSidebar'
+
+import Audio from '../../admin-ui/views/audio/Audio'
 
 import { Line } from 'react-chartjs-2'
 
 
-import QueryViewer from '../../../components/QueryViewer'
+import QueryViewer from '../../components/QueryViewer'
 
 
 const relTime = val =>
@@ -41,6 +45,16 @@ const relTime = val =>
 const columns = [{
   id: 'relTime',
   label: 'Time'
+}, {
+  id: 'vsn',
+  label: 'VSN',
+  format: (val, r) =>
+    <a href={`https://admin.sagecontinuum.org/node/${r.host.split('.')[0].toUpperCase()}`} target="_blank" rel="noreferrer">
+      {val}
+    </a>
+}, {
+  id: 'name',
+  label: 'Name',
 }, {
   id: 'value',
   label: 'Value',
@@ -77,16 +91,6 @@ const columns = [{
     return <a href={val}>{val.split('/').pop()}</a>
   }
 }, {
-  id: 'name',
-  label: 'Name',
-}, {
-  id: 'vsn',
-  label: 'VSN',
-  format: (val, r) =>
-    <a href={`https://admin.sagecontinuum.org/node/${r.host.split('.')[0].toUpperCase()}`} target="_blank" rel="noreferrer">
-      {val}
-    </a>
-}, {
   id: 'job',
   label: 'Job',
 }, {
@@ -108,7 +112,6 @@ const findColumn = (cols, name) =>
   cols.findIndex(o => o.id == name)
 
 
-type Unit = 'm' | 'h' | 'd'
 
 const units = {
   'm': 'min',
@@ -138,8 +141,6 @@ function TimeIndicator(props: TIProps) {
 const VertDivider = () =>
   <Divider orientation="vertical" flexItem style={{margin: '5px 15px' }} />
 
-const FilterBtn = ({label}) =>
-  <Button size="medium">{label}<CaretIcon /></Button>
 
 
 const getUniqueOpts = (data) =>
@@ -147,9 +148,11 @@ const getUniqueOpts = (data) =>
     .map(v => ({id: v, label: v}))
 
 
+
 const getFilterVal = (items: string[]) => {
   return items.map(v => ({id: v, label: v}))
 }
+
 
 
 async function getFilterMenus(plugin) {
@@ -162,8 +165,8 @@ async function getFilterMenus(plugin) {
   })
 
   return {
-    names: getUniqueOpts((data).map(o => o.name)),
     nodes: getUniqueOpts((data).map(o => o.meta.vsn)),
+    names: getUniqueOpts((data).map(o => o.name)),
     sensors: getUniqueOpts((data).map(o => o.meta.sensor))
   }
 }
@@ -187,16 +190,21 @@ function LineChart(props) {
 
 
 const defaultPlugin = 'plugin-iio:0.4.5'
-const initialState = {
-  apps: [],
-  names: [],
+//const defaultNode = 'W023'
+
+const initFilterState = {
+  apps: [defaultPlugin],
   nodes: [],
+  names: [],
   sensors: []
 }
 
+const facetList = Object.keys(initFilterState)
+
+
 
 export function getFilterState(params) {
-  let init = {...initialState}
+  let init = {...initFilterState}
   for (const [key, val] of params) {
     init[key] = val.split(',')
   }
@@ -226,26 +234,27 @@ export default function DataPreview() {
     showMeta: false,
   })
 
-  const [data, setData] = useState()
+  const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
-
-  const [chart, setChart] = useState()
+  const [everyN, setEveryN] = useState<{total: number, every: number}>()
+  // const [chart, setChart] = useState<{x: string, y: number}[]>()
 
   // contents of dropdowns
   const [menus, setMenus] = useState<{[name: string]: string[]}>({
     apps: [],
-    names: [],
     nodes: [],
+    names: [],
     sensors: []
   })
 
   // selected filters
   const [filters, setFilters] = useState({
     apps: [defaultPlugin],
-    names: [],
     nodes: [],
+    names: [],
     sensors: []
   })
+
 
   useEffect(() => {
     const filterState = getFilterState(params)
@@ -260,6 +269,8 @@ export default function DataPreview() {
 
 
   useEffect(() => {
+    const plugin = app || defaultPlugin
+
     async function fetchAppMenu() {
       const query = {
         start: `-4d`,
@@ -282,7 +293,7 @@ export default function DataPreview() {
         start: `-${page}${unit}`,
         end: `-${page - 1}${unit}`,
         filter: {
-          plugin: app || defaultPlugin,
+          plugin: plugin,
           ...(node ? {vsn: node} : {}),
           ...(name ? {name} : {}),
           ...(sensor ? {sensor} : {}),
@@ -293,17 +304,31 @@ export default function DataPreview() {
       BH.getData(query)
         .then((data) => {
           data = (data || [])
+
+          // limit amount of data for now
+          const total = data.length
+          if (total > 5000) {
+            const every = 10
+            data = data.filter((_, i) => i % every == 0)
+            setEveryN({total, every})
+          } else {
+            setEveryN(null)
+          }
+
+          data = data
             .map((o, i) => ({...o, ...o.meta, rowID: i, relTime: relTime(o.timestamp)}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
           setData(data)
 
+          /* experimental chart (todo?)
           if (name) {
-            const chartData = data.filter(o => o.name == name)
+            const chartData = data
               .map(o => ({x: o.timestamp.split('T')[1].split('.').shift(), y: o.value}))
 
             setChart(chartData)
           }
+          */
         }).catch(error => setError(error))
         .finally(() => setLoading(false))
     }
@@ -312,9 +337,8 @@ export default function DataPreview() {
     fetchAppMenu()
     fetchData()
 
-    getFilterMenus(app)
+    getFilterMenus(plugin)
       .then((menuItems) => setMenus(prev => ({...prev, ...menuItems})))
-
   }, [setLoading, page, unit, app, node, name, sensor])
 
 
@@ -334,7 +358,6 @@ export default function DataPreview() {
 
       return prev.slice(0)
     })
-
   }, [checked])
 
 
@@ -353,164 +376,184 @@ export default function DataPreview() {
   }
 
   const handleRemoveFilters = () => {
-    params.delete('names')
     params.delete('nodes')
+    params.delete('names')
     params.delete('sensors')
     params.delete('window')
     params.set('apps', defaultPlugin)
     history.push({search: params.toString()})
   }
 
+
   return (
     <Root>
-      <div className="flex items-center gap">
-        <h1>Data Browser</h1>
-        <div className="flex items-center">
-          <div className="flex items-center">
-            <VertDivider />
-            {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
-                <Button variant="outlined"
-                  onClick={handleRemoveFilters}
-                  startIcon={<UndoIcon />}
-                >
-                  Clear
-                </Button>
-            }
 
-            <QueryViewer
-              filterState={
-                Object.keys(filters)
-                  .filter(k => !['window'].includes(k))
-                  .reduce((acc, k) => ({...acc, [k]: filters[k] }), {})
-              }
-            />
-          </div>
-        </div>
-      </div>
+      <div className="flex">
+        <Sidebar width="200px">
+          <FilterTitle>Filters</FilterTitle>
 
-      {/*chart &&
-        <LineChart data={chart} />
-      */}
-
-      <br/>
-
-      <div className="flex justify-between">
-        <div className="flex items-cetner">
-          <FilterMenu
-            options={menus.apps}
-            value={getFilterVal(filters.apps)[0]}
-            onChange={val => handleFilterChange('apps', val)}
-            noSelectedSort={true}
-            multiple={false}
-            disableCloseOnSelect={false}
-            ButtonComponent={<div>
-              <Button size="medium">{filters.apps.length ? filters.apps[0] : defaultPlugin}<CaretIcon /></Button>
-            </div>}
-          />
-          <FilterMenu
-            options={menus.nodes}
-            value={getFilterVal(filters.nodes)[0]}
-            onChange={vals => handleFilterChange('nodes', vals)}
-            noSelectedSort={true}
-            multiple={false}
-            ButtonComponent={<div><FilterBtn label="Nodes" /></div>}
-          />
-
-          <FilterMenu
-            options={menus.names}
-            value={getFilterVal(filters.names)[0]}
-            onChange={vals => handleFilterChange('names', vals)}
-            noSelectedSort={true}
-            multiple={false}
-            ButtonComponent={<div><FilterBtn label="Names" /></div>}
-          />
-
-          <FilterMenu
-            options={menus.sensors}
-            value={getFilterVal(filters.sensors)[0]}
-            onChange={vals => handleFilterChange('sensors', vals)}
-            noSelectedSort={true}
-            multiple={false}
-            ButtonComponent={<div><FilterBtn label="Sensors" /></div>}
-          />
-
-          <VertDivider />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checked.relativeTime}
-                onChange={(evt) => handleCheck(evt, 'relativeTime')}
+          {menus && facetList.map(facet => {
+            return (
+              <FilterMenu
+                key={facet}
+                options={menus[facet]}
+                value={getFilterVal(filters[facet])[0]}
+                onChange={vals => handleFilterChange(facet, vals)}
+                noSelectedSort={true}
+                multiple={false}
+                disableCloseOnSelect={false}
+                ButtonComponent={
+                  <FilterBtn>
+                    <Button size="medium" fullWidth>{capitalize(facet)}<CaretIcon /></Button>
+                  </FilterBtn>
+                }
               />
-            }
-            label="relative time"
-          />
+            )
+          })}
+        </Sidebar>
 
-          <FormControlLabel
-            control={<Checkbox checked={checked.showMeta} onChange={(evt) => handleCheck(evt, 'showMeta')} />}
-            label="meta"
-          />
-        </div>
-
-
-        <div className="flex items-center">
-          <FormControl variant="outlined" style={{width: '80px', marginLeft: 10}}>
-            <InputLabel id="unit-label">Window</InputLabel>
-            <Select
-              labelId="unit-label"
-              id="unit"
-              value={unit}
-              onChange={evt => handleUnitChange(evt.target.value)}
-              label="Window"
-              margin="dense"
-            >
-              {Object.keys(units)
-                .map(k =>
-                  <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                )
-              }
-            </Select>
-          </FormControl>
-          <VertDivider />
-          {data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>}
-          <VertDivider />
-          <TimeIndicator page={page} unit={unit}/>
-          <VertDivider />
-          <IconButton size="small" onClick={() => setPage(prev => prev - 1)} disabled={page == 1}>
-            <ArrowBack fontSize="small"/>
-          </IconButton>
-          <IconButton size="small" onClick={() => setPage(prev => prev + 1)}>
-            <ArrowForward fontSize="small"/>
-          </IconButton>
-        </div>
-      </div>
-
-
-      {error &&
-        <Alert severity="error">{error.message}</Alert>
-      }
-
-      {data &&
-        <Table
-          primaryKey="rowID"
-          enableSorting
-          columns={cols}
-          rows={data}
-          emptyNotice={
-            <span className="flex"><span>No records found from</span>&nbsp;<TimeIndicator page={page} unit={unit}/></span>
+        <Main>
+          {everyN &&
+            <Alert severity="info">
+              There are {everyN.total.toLocaleString()} records for this query.
+              Showing every {everyN.every.toLocaleString()}.
+            </Alert>
           }
-          disableRowSelect={() => true}
-        />
-      }
+
+          <div className="flex items-center gap">
+            <div className="flex items-center">
+              <div className="flex items-center">
+                {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
+                  <Button
+                    variant="outlined"
+                    onClick={handleRemoveFilters}
+                    startIcon={<UndoIcon />}
+                  >
+                    Reset
+                  </Button>
+                }
+
+                <QueryViewer
+                  filterState={
+                    Object.keys(filters)
+                      .filter(k => !['window'].includes(k))
+                      .reduce((acc, k) => ({...acc, [k]: filters[k] }), {})
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/*chart &&
+            <LineChart data={chart} />
+          */}
+
+          <br/>
+
+          <div className="flex justify-between">
+            <div className="flex items-cetner">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={checked.relativeTime}
+                    onChange={(evt) => handleCheck(evt, 'relativeTime')}
+                  />
+                }
+                label="relative time"
+              />
+
+              <FormControlLabel
+                control={<Checkbox checked={checked.showMeta} onChange={(evt) => handleCheck(evt, 'showMeta')} />}
+                label="meta"
+              />
+            </div>
+
+
+            <div className="flex items-center">
+              <FormControl variant="outlined" style={{width: '80px'}}>
+                <InputLabel id="unit-label">Window</InputLabel>
+                <Select
+                  labelId="unit-label"
+                  id="unit"
+                  value={unit}
+                  onChange={evt => handleUnitChange(evt.target.value)}
+                  label="Window"
+                  margin="dense"
+                >
+                  {Object.keys(units)
+                    .map(k =>
+                      <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                    )
+                  }
+                </Select>
+              </FormControl>
+              <VertDivider />
+              {data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>}
+              <VertDivider />
+              <TimeIndicator page={page} unit={unit}/>
+              <VertDivider />
+              <IconButton size="small" onClick={() => setPage(prev => prev - 1)} disabled={page == 1}>
+                <ArrowBack fontSize="small"/>
+              </IconButton>
+              <IconButton size="small" onClick={() => setPage(prev => prev + 1)}>
+                <ArrowForward fontSize="small"/>
+              </IconButton>
+            </div>
+          </div>
+
+
+          {error &&
+            <Alert severity="error">{error.message}</Alert>
+          }
+
+          {data &&
+            <Table
+              primaryKey="rowID"
+              enableSorting
+              columns={cols}
+              rows={data}
+              emptyNotice={
+                <span className="flex"><span>No records found from</span>&nbsp;<TimeIndicator page={page} unit={unit}/></span>
+              }
+              disableRowSelect={() => true}
+            />
+          }
+        </Main>
+      </div>
     </Root>
   )
 }
 
 const Root = styled.div`
-  margin: 2em;
+  margin-left: 0;
 
   h1 {
     font-size: 1.5em;
   }
 `
 
+const Main = styled.div`
+  position: relative;
+  height: 100%;
+  margin: 30px 20px 30px 0;
+  padding: 0 0 0 20px;
+  width: 100%;
+
+  tr.MuiTableRow-root:hover,
+  .MuiTableRow-hover:hover  {
+    background-color: none !important;
+  }
+
+  .MuiAlert-root {
+    margin-bottom: 1em;
+  }
+`
+
+const FilterBtn = styled.div`
+  button {
+    padding-left: 30px;
+    display: flex;
+    justify-content: start;
+  }
+`
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState, cloneElement } from 'react'
 import PropTypes from 'prop-types'
 import { useTheme, styled } from '@mui/material/styles'
 import Popper from '@mui/material/Popper'
@@ -134,7 +134,8 @@ type Props = {
   headerText?: string
   noOptionsText?: string
   noSelectedSort?: boolean
-  onChange: (opt: (string | Option)[]) => void
+  disableCloseOnSelect?: boolean
+  onChange: (opt: (string | Option)[]) => void,
 }
 
 
@@ -147,13 +148,12 @@ export default function FilterMenu(props: Props) {
     headerText,
     noOptionsText,
     noSelectedSort = false,
-    ...rest
+    disableCloseOnSelect
   } = props
 
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const [value, setValue] = React.useState(props.value)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [value, setValue] = useState(props.value)
   const theme = useTheme()
-
 
 
   useEffect(() => {
@@ -176,10 +176,10 @@ export default function FilterMenu(props: Props) {
   const id = open ? 'autocomplete-filter' : undefined
 
   return (
-    <React.Fragment>
+    <>
       <Box>
         {ButtonComponent ?
-          React.cloneElement(ButtonComponent, {onClick: handleClick}) : []
+          cloneElement(ButtonComponent, {onClick: handleClick}) : []
         }
       </Box>
 
@@ -200,6 +200,10 @@ export default function FilterMenu(props: Props) {
               value={value}
               onChange={(event, newValue) => {
                 onChange(newValue)
+
+                if (disableCloseOnSelect === false) {
+                  setAnchorEl(null)
+                }
               }}
               disableCloseOnSelect
               PopperComponent={PopperComponent}
@@ -256,11 +260,10 @@ export default function FilterMenu(props: Props) {
                   placeholder="Filter labels"
                 />
               )}
-              {...rest}
             />
           </div>
         </ClickAwayListener>
       </StyledPopper>
-    </React.Fragment>
+    </>
   )
 }

@@ -29,8 +29,8 @@ export default function Sidebar() {
 
 const Root = styled.div`
   padding-top: 18px;
-  border-right: 1px solid #ddd;
-  background: #f5f5f5;
+  border-right: 1px solid #f1f1f1;
+  background: #f8f8f8;
   max-width: 75px;
 `
 
