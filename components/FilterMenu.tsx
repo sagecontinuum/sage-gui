@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import { useTheme, styled } from '@mui/material/styles'
 import Popper from '@mui/material/Popper'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
+import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import DoneIcon from '@mui/icons-material/Done'
 import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete'
-import ButtonBase from '@mui/material/ButtonBase'
+import Button from '@mui/material/Button'
 import InputBase from '@mui/material/InputBase'
 import Box from '@mui/material/Box'
-
 
 
 
@@ -96,25 +96,6 @@ const StyledInput = styled(InputBase)(({ theme }) => ({
   },
 }))
 
-const Button = styled(ButtonBase)(({ theme }) => ({
-  fontSize: 13,
-  width: '100%',
-  textAlign: 'left',
-  paddingBottom: 8,
-  color: theme.palette.mode === 'light' ? '#586069' : '#8b949e',
-  fontWeight: 600,
-  '&:hover,&:focus': {
-    color: theme.palette.mode === 'light' ? '#0366d6' : '#58a6ff',
-  },
-  '& span': {
-    width: '100%',
-  },
-  '& svg': {
-    width: 16,
-    height: 16,
-  },
-}))
-
 
 
 type Option = {
@@ -127,16 +108,21 @@ type Option = {
 
 
 type Props = {
-  ButtonComponent: JSX.Element
   options: Option[]
   value: Option | Option[]
+  ButtonComponent?: JSX.Element
+  label?: string
   multiple?: boolean    // default: true
   headerText?: string
   noOptionsText?: string
   noSelectedSort?: boolean
   disableCloseOnSelect?: boolean
   onChange: (opt: (string | Option)[]) => void,
-}
+} & ({
+  ButtonComponent: JSX.Element
+} | {
+  label: string
+})
 
 
 export default function FilterMenu(props: Props) {
@@ -144,6 +130,7 @@ export default function FilterMenu(props: Props) {
     ButtonComponent,
     options,
     multiple = true,
+    label,
     onChange,
     headerText,
     noOptionsText,
@@ -179,7 +166,8 @@ export default function FilterMenu(props: Props) {
     <>
       <Box>
         {ButtonComponent ?
-          cloneElement(ButtonComponent, {onClick: handleClick}) : []
+          cloneElement(ButtonComponent, {onClick: handleClick}) :
+          <Button size="medium" onClick={handleClick}>{label}<CaretIcon /></Button>
         }
       </Box>
 
@@ -189,6 +177,10 @@ export default function FilterMenu(props: Props) {
             {headerText &&
               <div className="title">{headerText}</div>
             }
+            {!headerText && label &&
+              <div className="title">Filter by {label}</div>
+            }
+
             <Autocomplete
               open
               multiple={multiple}
@@ -257,7 +249,7 @@ export default function FilterMenu(props: Props) {
                   ref={params.InputProps.ref}
                   inputProps={params.inputProps}
                   autoFocus
-                  placeholder="Filter labels"
+                  placeholder={`Search for a ${label || 'filter'}`}
                 />
               )}
             />

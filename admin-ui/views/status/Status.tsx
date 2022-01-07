@@ -261,37 +261,37 @@ export default function StatusView() {
               <FilterControls className="flex items-center">
                 {statuses ?
                   <FilterMenu
+                    label="Status"
                     options={statuses}
                     value={filterState.status}
                     onChange={vals => handleFilterChange('status', vals)}
                     noSelectedSort
-                    ButtonComponent={<div><FilterBtn label="Status" /></div>}
                   /> : <></>
                 }
                 {projects &&
                   <FilterMenu
+                    label="Project"
                     options={projects}
                     value={filterState.project}
                     onChange={vals => handleFilterChange('project', vals)}
                     noSelectedSort
-                    ButtonComponent={<div><FilterBtn label="Project" /></div>}
                   />
                 }
                 {focuses &&
                   <FilterMenu
+                    label="Focus"
                     options={focuses}
                     value={filterState.focus}
                     onChange={vals => handleFilterChange('focus', vals)}
                     noSelectedSort
-                    ButtonComponent={<div><FilterBtn label="Focus" /></div>}
                   />
                 }
                 {locations &&
                   <FilterMenu
+                    label="Location"
                     options={locations}
                     value={filterState.location}
                     onChange={vals => handleFilterChange('location', vals)}
-                    ButtonComponent={<div><FilterBtn label="Location" /></div>}
                   />
                 }
 

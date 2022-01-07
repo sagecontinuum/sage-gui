@@ -43,15 +43,18 @@ const relTime = val =>
 
 
 const columns = [{
-  id: 'relTime',
-  label: 'Time'
-}, {
   id: 'vsn',
   label: 'VSN',
   format: (val, r) =>
-    <a href={`https://admin.sagecontinuum.org/node/${r.host.split('.')[0].toUpperCase()}`} target="_blank" rel="noreferrer">
+    <a href={`https://admin.sagecontinuum.org/node/${r.host.split('.')[0].toUpperCase()}`}
+      target="_blank"
+      rel="noreferrer"
+    >
       {val}
     </a>
+}, {
+  id: 'relTime',
+  label: 'Time'
 }, {
   id: 'name',
   label: 'Name',
@@ -393,6 +396,8 @@ export default function DataPreview() {
           <FilterTitle>Filters</FilterTitle>
 
           {menus && facetList.map(facet => {
+            const label = capitalize(facet)
+
             return (
               <FilterMenu
                 key={facet}
@@ -402,9 +407,10 @@ export default function DataPreview() {
                 noSelectedSort={true}
                 multiple={false}
                 disableCloseOnSelect={false}
+                label={label}
                 ButtonComponent={
                   <FilterBtn>
-                    <Button size="medium" fullWidth>{capitalize(facet)}<CaretIcon /></Button>
+                    <Button size="medium" fullWidth>{label}<CaretIcon /></Button>
                   </FilterBtn>
                 }
               />

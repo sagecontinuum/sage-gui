@@ -174,7 +174,7 @@ export default function ColumnMenu(props: Props) {
       >
         {header &&
           <div className={classes.header}>
-            {headerText ? headerText : 'Select columns for this view'}
+            {headerText ? headerText : 'Show/hide columns'}
           </div>
         }
         <Autocomplete
