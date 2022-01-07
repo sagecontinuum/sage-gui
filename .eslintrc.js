@@ -28,6 +28,7 @@ module.exports = {
     'semi': ['error', 'never'],
     'react/prop-types': 0,
     'no-unused-vars': 'off',
+    'max-len': 100,
     '@typescript-eslint/no-unused-vars': 'error',
     'react/no-unescaped-entities': [
       'error',
