@@ -49,3 +49,7 @@ export function msToTimeApprox(ms: number) {
   else return `${days} day${days != 1 ? 's' : ''} ago`
 }
 
+
+export function relTime(val: string) {
+  return msToTime(new Date().getTime() - (new Date(val).getTime()))
+}

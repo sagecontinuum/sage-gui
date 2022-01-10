@@ -323,6 +323,7 @@ export default function NodeView() {
               colorCell={sanityColor}
               tooltip={(item) =>
                 `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
+                ${item.row.split('.').pop()}<br>
                 <b style="color: ${sanityColor(item.value, item)}">
                   ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
                 </b>

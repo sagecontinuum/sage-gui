@@ -8,10 +8,11 @@ import Tooltip from '@material-ui/core/Tooltip'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
 
+import RecentDataTable from './RecentDataTable'
 import Audio from '../audio/Audio'
 import * as BH from '../../apis/beehive'
 
-import {bytesToSizeSI, msToTime} from '../../../components/utils/units'
+import {bytesToSizeSI, relTime} from '../../../components/utils/units'
 
 
 export function isOldData(timestamp, grain = 'hours', amount = 2) {
@@ -37,12 +38,13 @@ type Props = {
 export default function RecentData(props: Props) {
   const {node} = props
 
-  const [images, setImages] = useState<{[pos: string]: BH.StorageRecord}>()
+  const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState()
 
   const [total, setTotal] = useState<{[pos: string]: number}>()
   const [progress, setProgress] = useState<{[pos: string]: number}>()
+
 
   useEffect(() => {
     setLoading(true)
@@ -65,8 +67,31 @@ export default function RecentData(props: Props) {
     setProgress(prev => ({...prev, [position]: count}))
   }
 
+
   return (
     <Root className="flex column">
+
+      <h2>Recent Data</h2>
+      <RecentDataTable
+        items={[{
+          label: 'Temperature',
+          query: {
+            node: node.toLowerCase(),
+            name: 'env.temperature',
+            sensor: 'bme680'
+          },
+          format: v => `${v}°C`,
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+        }, {
+          label: 'Raingauge',
+          query: {
+            node: node.toLowerCase(),
+            name: 'env.raingauge.event_acc'
+          },
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+        }]}
+      />
+
       <h2>Recent Images</h2>
       {images &&
         BH.cameraOrientations.map(pos => {
@@ -91,7 +116,7 @@ export default function RecentData(props: Props) {
 
                   <Tooltip title={new Date(timestamp).toLocaleString()} placement="top">
                     <b className={isOldData(timestamp) ? 'failed' : 'muted'}>
-                      ~{msToTime(new Date().getTime() - new Date(timestamp).getTime())}
+                      {relTime(timestamp)}
                     </b>
                   </Tooltip>
                 </div>
@@ -115,7 +140,7 @@ export default function RecentData(props: Props) {
         <p className="muted">No recent images available</p>
       }
 
-      <h2>Audio</h2>
+      <h2>Recent Audio</h2>
       <Audio node={node} />
 
       {error &&

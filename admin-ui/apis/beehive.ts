@@ -34,6 +34,7 @@ export type Record = {
     host?: string
     vsn?: string
     sensor?: string
+    plugin?: string
   }
 }
 
