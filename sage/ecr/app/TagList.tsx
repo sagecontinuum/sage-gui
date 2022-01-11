@@ -16,8 +16,6 @@ import IconButton from '@mui/material/IconButton'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MoreIcon from '@mui/icons-material/UnfoldMoreOutlined'
 import LessIcon from '@mui/icons-material/UnfoldLessOutlined'
-import CopyIcon from '@mui/icons-material/FileCopyOutlined'
-import DoneIcon from '@mui/icons-material/DoneOutlined'
 import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded'
 import BuildIcon from '@mui/icons-material/BuildRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -34,12 +32,14 @@ import { formatters, Dot } from '../formatters'
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 import BuildIndicator from '../BuildIndicator'
 import ConfirmationDialog from '../../../components/dialogs/ConfirmationDialog'
+import Clipboard from '../../../components/utils/Clipboard'
 
 import * as ECR from '../../apis/ecr'
 import * as Auth from '../../../components/auth/auth'
 const username = Auth.getUser()
 
-
+import config from '../../../config'
+const docker = config.dockerRegistry
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -93,7 +93,6 @@ export default function TagList(props: Props) {
   const [cfgMap, setCfgMap] = useState({})
   const [format, setFormat] = useState<'yaml' | 'json'>('yaml')
   const [showFullConfig, setShowFullConfig] = useState(false)
-  const [isCopied, setIsCopied] = useState(false)
 
   const [loadingConfigs, setLoadingConfigs] = useState(false)
 
@@ -126,13 +125,6 @@ export default function TagList(props: Props) {
   const handleChange = (panel: string) => (_, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false)
   }
-
-  const handleCopy = (ver: string) => {
-    navigator.clipboard.writeText(stringify(cfgMap[ver]))
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 2000)
-  }
-
 
   const onClickDeleteTag = (evt, app) => {
     evt.stopPropagation()
@@ -168,6 +160,7 @@ export default function TagList(props: Props) {
       {versions && versions.map((ver, i) => {
         const {
           namespace,
+          name,
           version,
           description,
           time_last_updated,
@@ -274,11 +267,6 @@ export default function TagList(props: Props) {
                       {showFullConfig ? <LessIcon /> : <MoreIcon />}
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={isCopied ? 'Copied!' : 'Copy yaml config'}>
-                    <IconButton onClick={() => handleCopy(version)} size="small">
-                      {isCopied ? <DoneIcon  />  : <CopyIcon />}
-                    </IconButton>
-                  </Tooltip>
                 </div>
               </div>
 
@@ -286,8 +274,9 @@ export default function TagList(props: Props) {
                   <pre className="code">loading...</pre>
               }
               {version in cfgMap &&
-                  <pre className="code text-xs">
-                    {!showFullConfig ?
+                <Clipboard
+                  content={
+                    !showFullConfig ?
                       (format == 'yaml' ?
                         stringify(cfgMap[version]) :
                         JSON.stringify(cfgMap[version], null, 4)
@@ -297,9 +286,15 @@ export default function TagList(props: Props) {
                         JSON.stringify(versions.filter(ver => ver.version == version)[0], null, 4)
                       )
                     }
-                  </pre>
+                />
               }
+              <br/>
 
+              <h5 className="muted no-margin">Pull this image</h5>
+              <Clipboard
+                content={<>docker pull {docker}/{namespace}/{name}:{version}</>}
+                tooltip="Copy CMD"
+              />
             </AccordionDetails>
           </Accordion>
         )
