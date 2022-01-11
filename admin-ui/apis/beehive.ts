@@ -1,7 +1,7 @@
 import config from '../../config'
 const url = config.beehive
 
-import {groupBy, mapValues} from 'lodash'
+import {groupBy, mapValues, orderBy} from 'lodash'
 
 import * as BK from './beekeeper'
 
@@ -108,18 +108,14 @@ export async function getVSN(node: string) : Promise<string> {
 
 
 
-export async function getLatestMetrics() : Promise<AggMetrics> {
-  let params = {start: '-4d', filter: {name: 'sys.*', vsn: '.*'}, tail: 1}
-  let allMetrics = await getData(params)
-
-  // aggregate all the metrics
-  const byNode = aggregateMetrics(allMetrics)
-
-  return byNode
+export async function getLatestMetrics() : Promise<Record[]> {
+  const params = {start: '-4d', filter: {name: 'sys.*', vsn: '.*'}, tail: 1}
+  const metrics = await getData(params)
+  return metrics
 }
 
 export async function getLatestTemp() {
-  let params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
+  const params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
   const data = await getData(params)
   const byNode = groupBy(data, 'meta.node')
   mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
@@ -129,7 +125,7 @@ export async function getLatestTemp() {
 
 
 
-function aggregateMetrics(data: Record[]) : AggMetrics {
+export function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data)
     return null
 
@@ -167,7 +163,7 @@ function aggregateMetrics(data: Record[]) : AggMetrics {
 
 
 
-export async function getSanityChart(node?: string, start?: string) : Promise<MetricsObj> {
+export async function getSanityChart(node?: string, start?: string) : Promise<AggMetrics> {
   const params = {
     start: start || '-2d',
     filter: {
@@ -377,7 +373,10 @@ export async function getRecentRecord({node, name, sensor}: RecentRecordArgs) {
     tail: 1
   })
 
-  return data
+  // take latest entry in event that the VSN changed
+  return data.sort((a, b) =>
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  ).shift()
 }
 
 

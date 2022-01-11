@@ -43,8 +43,7 @@ export default function RecentDataTable(props: Props) {
             return
           }
 
-          const d = data[0]
-          setRecentData(prev => ({...prev, [label]: d}))
+          setRecentData(prev => ({...prev, [label]: data}))
         }).catch(() => {
           setRecentData(prev => ({...prev, [label]: null}))
         })

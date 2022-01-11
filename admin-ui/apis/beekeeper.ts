@@ -22,6 +22,7 @@ export type State = {
   timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
 
   /* new, proposed fields? */
+  vsn: string
   node_type?: string
   project?: string
   location?: string    // currently part of "project" in mock data
