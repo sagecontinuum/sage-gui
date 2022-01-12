@@ -55,7 +55,7 @@ export default function Timeline() {
         />
       }
       {error1 &&
-        <Alert severity="error">{error2.message}</Alert>
+        <Alert severity="error">{error1.message}</Alert>
       }
 
 

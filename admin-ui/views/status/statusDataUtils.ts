@@ -204,11 +204,11 @@ const getFakeIP = (id) =>
 export function mergeMetrics(
   data: BK.State[], records: BH.Record[], temps, health, sanity
 ) {
-  // If a VSNs is changed, the data api will the latest records for each VSN.
-  // So, only consider metrics with VSNs known by beekeeper
+  // If a VSN is changed, the data api will return latest records for each VSN.
+  // So, we only consider metrics with VSNs which are known by beekeeper
   const vsns = data.map(o => o.vsn)
-  const allMetrics = records.filter(m => vsns.includes(m.meta.vsn))
-  const byNode = aggregateMetrics(allMetrics)
+  const metrics = records.filter(m => vsns.includes(m.meta.vsn))
+  const byNode = aggregateMetrics(metrics)
 
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()

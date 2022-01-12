@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 
+import styled from 'styled-components'
+
 import Tooltip from '@mui/material/Tooltip'
-import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 import { isOldData } from './RecentData'
 import { relTime } from '../../../components/utils/units'
 
 import * as BH from '../../apis/beehive'
 import config from '../../../config'
+
 const dataBrowser = config.dataBrowserURL
 
 
@@ -56,8 +59,12 @@ export default function RecentDataTable(props: Props) {
       {recentData &&
         <table className="simple key-value">
           <thead>
-            <tr><th></th><th>Time</th><th>Value</th></tr>
-            </thead>
+            <tr>
+              <th></th>
+              <th>Time</th>
+              <th>Value</th>
+            </tr>
+          </thead>
           <tbody>
             {items.map(item => {
               const {label, format, linkParams} = item
@@ -67,7 +74,12 @@ export default function RecentDataTable(props: Props) {
 
               return (
                 <tr key={label}>
-                  <td>{label}</td>
+                  <td>
+                    {label}
+                    <Tooltip title={<>{item.query.name}<br/><small>(click for description)</small></>} placement="left">
+                      <a href={`${dataBrowser}/ontology/${item.query.name}`}><HelpIcon /></a>
+                    </Tooltip>
+                  </td>
                   <td>
                     {data &&
                       <Tooltip title={new Date(timestamp).toLocaleString()} placement="right">
@@ -97,4 +109,11 @@ export default function RecentDataTable(props: Props) {
     </>
   )
 }
+
+const HelpIcon = styled(QuestionMark)`
+  position: absolute;
+  width: 12px;
+  top: 0;
+  color: #1c8cc9;
+`
 
