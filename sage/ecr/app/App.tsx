@@ -3,11 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
-import DataIcon from '@mui/icons-material/ListAltOutlined'
-import TagIcon from '@mui/icons-material/LocalOfferOutlined'
+import TagIcon from '@mui/icons-material/LocalOfferRounded'
 import Divider from '@mui/material/Divider'
-import Button from '@mui/material/Button'
-
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'

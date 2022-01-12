@@ -12,6 +12,8 @@ import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
 import DataBrowser from './data/DataBrowser'
+import Ontology from './data/Ontology'
+
 import Docs from './docs/Page'
 
 import FilterMenuTest from './fiddle/filter-menu'
@@ -61,7 +63,8 @@ export default function Sage() {
                   <Redirect exact from="/apps" to="/apps/explore" />
 
                   <Route path="/apps" component={Apps} />
-                  <Route path="/data-browser" component={DataBrowser} />
+                  <Route exact path="/data-browser" component={DataBrowser} />
+                  <Route path="/data-browser/ontology/:name?" component={Ontology} />
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
                   <Route path="/docs/:page" component={Docs} />

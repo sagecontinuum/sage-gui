@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useHistory, useLocation, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '../../admin-ui/apis/beehive'
@@ -58,6 +58,7 @@ const columns = [{
 }, {
   id: 'name',
   label: 'Name',
+  format: (name) => <Link to={`/data-browser/ontology/${name}`}>{name}</Link>
 }, {
   id: 'value',
   label: 'Value',

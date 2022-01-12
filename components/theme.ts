@@ -51,6 +51,11 @@ const theme = createTheme({
         size: 'small',
         variant: 'outlined'
       }
+    },
+    MuiIcon: {
+      defaultProps: {
+        baseClassName: 'material-icons-rounded',
+      }
     }
   }
 })

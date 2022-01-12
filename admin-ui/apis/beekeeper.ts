@@ -29,6 +29,14 @@ export type State = {
   status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 
+ export type OntologyObj = {
+  description: string
+  ontology: string // xxy.yyy.zzz
+  source: string   // url
+  unit: string
+}
+
+
 
 function handleErrors(res) {
   if (res.ok) {
@@ -163,5 +171,17 @@ export async function getNodes() {
 export async function getNode(id: string) : Promise<State[]> {
   const data = await get(`${API_URL}/state/${id}`)
   return data.data
+}
+
+
+
+export async function getOntologyList() : Promise<OntologyObj[]> {
+  const data = await get(`${url}/ontology`)
+  return data
+}
+
+export async function getOntology(name: string) : Promise<OntologyObj> {
+  const data = await getOntologyList()
+  return data.find(o => o.ontology == name) as OntologyObj
 }
 

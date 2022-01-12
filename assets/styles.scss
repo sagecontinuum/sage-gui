@@ -83,16 +83,18 @@ table.simple {
   text-align: left;
 }
 
-table.simple thead th  {
-  vertical-align: bottom;
+table.simple th,
+table.simple td {
+  position: relative;
 }
 
 table.simple th {
+  vertical-align: bottom;
   padding: .1em .5em;
 }
 
 table.simple:not(.dense) td:not(.icon) {
-  padding: .1em .5em;
+  padding: .5em;
 }
 table.simple td {
   border-top: 1px solid #dee2e6;
@@ -217,8 +219,11 @@ p > code, pre {
   background: #f8f8f8;
   border-radius: 5px;
   border: 1px solid #bbb;
-  padding: 10px;
   color: #222;
+}
+
+pre.code {
+  padding: 10px;
 }
 
 .mono-term {
