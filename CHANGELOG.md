@@ -3,6 +3,35 @@
 The following are some notable changes to the UI
 
 
+## [1.8.0](https://github.com/sagecontinuum/sage-gui/compare/v1.7.0...v1.8.0) (2022-01-12)
+
+
+### Features
+
+* **admin:** add map marker labels and basic marker popups; marker styling; bump mapbox dep; SAGE-1172 ([2ce1329](https://github.com/sagecontinuum/sage-gui/commit/2ce1329512cf86c0badd3e1c1f05fa8eafb1c629))
+* **admin:** add ontology link to "recent data"; fix typos ([a68c32a](https://github.com/sagecontinuum/sage-gui/commit/a68c32a0865234bff31d220c0f553ecc92298c6a))
+* **admin:** generic node "recent data" table component ([ceb1e6c](https://github.com/sagecontinuum/sage-gui/commit/ceb1e6cdc197a72f57716dfb8288d7f5e0cb56d2))
+* **ecr:** make version numbers optional; use /submit endpoint; SAGE-1172 ([2157fab](https://github.com/sagecontinuum/sage-gui/commit/2157fab19ce9c45bd7de3bb96ad0e11ad49b9755))
+* **portal:** add docker pull command; add clipboard component ([26d38da](https://github.com/sagecontinuum/sage-gui/commit/26d38da3c7b2e56543d40823534561bed104cf9d))
+* **portal:** add simple ontology page; fix typos/styling ([4d72d51](https://github.com/sagecontinuum/sage-gui/commit/4d72d51f61d0580c4081999adfb8925829f3548b))
+* **portal:** app/plugin data browser prototype ([2982b55](https://github.com/sagecontinuum/sage-gui/commit/2982b553a1174243037f22e4456307d9942c99d1))
+* **viz:** add tailHours (window) option to timeline ([42dd1a9](https://github.com/sagecontinuum/sage-gui/commit/42dd1a9699cdb656c630146bc17ab1043084bef5))
+
+
+### Bug Fixes
+
+* **admin:** add html audio fallback; add audio url option ([1969fa4](https://github.com/sagecontinuum/sage-gui/commit/1969fa438d6836beefb145e9b73f747847c63985))
+* **admin:** allow no vsn on node page; other minor fixes ([ef09dea](https://github.com/sagecontinuum/sage-gui/commit/ef09dea5c2c51b20e5b547276cdc696c832894ef))
+* **admin:** allow VSNs to change; ignore older VSNs ([2eb97d1](https://github.com/sagecontinuum/sage-gui/commit/2eb97d1fdae0d57385af87ee7f3670ae4ef89c88))
+* **admin:** ensure there actually are health details; SAGE-1143 ([f9b9d17](https://github.com/sagecontinuum/sage-gui/commit/f9b9d17a3a53bb996e8893b843016537aa5c69a9))
+* **admin:** fix filtering with commas ([ccf3f78](https://github.com/sagecontinuum/sage-gui/commit/ccf3f7837c0b56136356b2e2dfdc42752950fe18))
+* **admin:** remove transition (breaking map fullscreen button); ignore table clickoutside when focused on node; slightly smaller labels; SAGE-1172 ([0bb5f0f](https://github.com/sagecontinuum/sage-gui/commit/0bb5f0fdc00a392368cee8ff09a78aef5fc147a0))
+* **ecr:** handle other branches (for real); other minor changes/refactoring ([e5bed26](https://github.com/sagecontinuum/sage-gui/commit/e5bed26fdce62f795b70deb422d0e74010ea6fd6))
+* **ecr:** only filter featured apps on explore view; move list of featured apps ([eb22e8b](https://github.com/sagecontinuum/sage-gui/commit/eb22e8b7825d90d4d2348188ba1f1ee819525876))
+* **ecr:** remove weird, unnecessary effect (which was breaking repo url input) ([32f0dda](https://github.com/sagecontinuum/sage-gui/commit/32f0dda901047d16c725b5659aa71e5fe00f23dc))
+* **ecr:** some clarity on 'create app' params; fix dropdown sorting option; SAGE-1172 ([57071f0](https://github.com/sagecontinuum/sage-gui/commit/57071f046db7f3e2e6b74405ce5a13e197c77604))
+* **portal:** data preview improvements ([0b33115](https://github.com/sagecontinuum/sage-gui/commit/0b3311506fc1e2530526b984af19ce22391c729f))
+
 ## [1.7.0](https://github.com/sagecontinuum/sage-gui/compare/v1.6.0...v1.7.0) (2021-11-18)
 
 
