@@ -301,8 +301,7 @@ export async function listApps(filter: FilterType) {
         .map(app => {
           const repo = app.id.split(':')[0]
           const {permissions = []} = repoMap[repo]
-          const isPublic = permissions.filter(p => p.grantee === 'AllUsers').length > 0
-          // const isShared = permissions.filter(p => p.grantee !== 'AllUsers').length > 0
+          const isPublic = !!permissions.find(p => p.resourceType != 'namespace' && p.grantee === 'AllUsers')
 
           return {
             ...app,
