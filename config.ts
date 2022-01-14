@@ -45,8 +45,8 @@ export default  {
       'dariodematties/sound-event-detection'
     ],
     samplers: [
-      'theone/imagesampler',
-      'theone/videosampler',
+      'theone/image-sampler',
+      'theone/video-sampler',
       'waggle/audio-sampler'
     ],
     plugins: [

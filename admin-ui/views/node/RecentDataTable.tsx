@@ -76,7 +76,7 @@ export default function RecentDataTable(props: Props) {
                 <tr key={label}>
                   <td>
                     {label}
-                    <Tooltip title={<>{item.query.name}<br/><small>(click for description)</small></>} placement="left">
+                    <Tooltip title={<>{item.query.name}<br/>{item.query.sensor ? <div>{item.query.sensor}</div> : ''}<small>(click for description)</small></>} placement="left">
                       <a href={`${dataBrowser}/ontology/${item.query.name}`}><HelpIcon /></a>
                     </Tooltip>
                   </td>
