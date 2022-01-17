@@ -4,9 +4,5 @@ test-data/
 *Token*
 build/
 dist/
-.cache/
 .parcel-cache/
 coverage/
-*mock*
-
-components/dialogs/ConfirmProvider.tsx

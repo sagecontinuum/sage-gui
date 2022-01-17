@@ -14,8 +14,6 @@ import Apps from './ecr/apps/Apps'
 import DataBrowser from './data/DataBrowser'
 import Ontology from './data/Ontology'
 
-import Docs from './docs/Page'
-
 import FilterMenuTest from './fiddle/filter-menu'
 
 import TestSignIn from './sign-in/TestSignIn'
@@ -67,7 +65,6 @@ export default function Sage() {
                   <Route path="/data-browser/ontology/:name?" component={Ontology} />
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
-                  <Route path="/docs/:page" component={Docs} />
 
                   <Route path="/fiddle/filter-menu" component={FilterMenuTest} />
 
