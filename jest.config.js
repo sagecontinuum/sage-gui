@@ -1,7 +1,8 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  "transform": {
-    "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/babelJest.js"
-  }
+  setupFiles: ['./jest.setup.js'],
+  roots: ['<rootDir>'],
+  moduleFileExtensions: ['ts', 'js', 'jsx'],
+  collectCoverage: true,
+  clearMocks: true,
+  coverageDirectory: 'coverage'
 }

@@ -1,6 +1,11 @@
 {
   "extends": "@parcel/config-default",
-    "transformers": {
+  "transformers": {
+    // ignore babel config for other tooling (such as Jest)
+    "*.{js,mjs,jsx,cjs,ts,tsx}": [
+      "@parcel/transformer-js",
+      "@parcel/transformer-react-refresh-wrap"
+    ],
     "url:*.svg": ["@parcel/transformer-svgo", "@parcel/transformer-raw"]
   },
   "optimizers": {
