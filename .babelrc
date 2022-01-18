@@ -2,12 +2,10 @@
 // Use parcel config for application dev and builds.
 {
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "targets": "> 0.25%, not dead"
-      }
-    ],
+    ["@babel/preset-env", {
+      "targets": "> 0.25%, not dead"
+    }],
+    ["@babel/preset-typescript"],
     ["@babel/preset-react", {
       "runtime": "automatic"
     }]

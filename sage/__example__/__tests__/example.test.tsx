@@ -12,7 +12,6 @@ import {setupServer} from 'msw/node'
 import {render, fireEvent, waitFor, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-import 'regenerator-runtime/runtime'
 
 import Fetch from '../Example'
 
