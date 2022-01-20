@@ -490,7 +490,43 @@ const columns = [{
   label: 'Registered',
   format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
   hide: true
+}, {
+  id: 'top_camera',
+  label: 'Top Camera',
+  hide: true
+}, {
+  id: 'right_camera',
+  label: 'Right Camera',
+  hide: true
+}, {
+  id: 'left_camera',
+  label: 'Left Camera',
+  hide: true
+}, {
+  id: 'bottom_camera',
+  label: 'Bottom Camera',
+  hide: true
+}, {
+  id: 'commission_date',
+  label: 'Commission Date',
+  hide: true
+}, {
+  id: 'shield',
+  label: 'Has Shield',
+  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  hide: true,
+}, {
+  id: 'modem',
+  label: 'Modem',
+  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  hide: true
+}, {
+  id: 'modem_sim',
+  label: 'Modem Sim',
+  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  hide: true
 }]
+
 
 const NodeCell = styled.div`
   margin-right: .2em;
