@@ -8,8 +8,8 @@ import config from '../config'
 // import Popover from '@mui/material/Popover'
 
 const DISABLE_MAP = config.admin['disableMap'] || false
-const center = [-100, 50]
-const initialZoom = 1.5
+const center = [-99, 38.5]
+const initialZoom = 3.0
 const dotSize = 10
 
 const minHeight = '225px'
