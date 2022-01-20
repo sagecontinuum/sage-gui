@@ -1,6 +1,6 @@
 {
   "name": "sage-gui",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "",
   "scripts": {
     "start": "./node_modules/parcel/lib/bin.js serve ./sage/index.html --dist-dir build/",

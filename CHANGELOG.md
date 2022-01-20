@@ -3,6 +3,14 @@
 The following are some notable changes to the UI
 
 
+### [1.8.1](https://github.com/sagecontinuum/sage-gui/compare/v1.8.0...v1.8.1) (2022-01-20)
+
+
+### Bug Fixes
+
+* **ecr:** add ability to make app public/private when its namespace is public ([f6e8a9f](https://github.com/sagecontinuum/sage-gui/commit/f6e8a9fd5958ef70fc6d1c1abe0951bc5955f8e8))
+* improve "recent data table"; add tests ([8a66ecc](https://github.com/sagecontinuum/sage-gui/commit/8a66eccfb930740c6b859d5e14110e4da1efe069))
+
 ## [1.8.0](https://github.com/sagecontinuum/sage-gui/compare/v1.7.0...v1.8.0) (2022-01-12)
 
 
