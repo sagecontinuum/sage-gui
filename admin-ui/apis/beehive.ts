@@ -90,7 +90,7 @@ export async function getData(params: Params) : Promise<Record[]> {
   const text = await res.text()
 
   if (!text)
-    return null
+    return []
 
   const metrics = text.trim()
     .split('\n')
@@ -356,13 +356,15 @@ export async function getLatestAudio(node: string) {
 }
 
 
-type RecentRecordArgs = {
+type RecentRecArgs = {
   node: string,
   name?: string,
   sensor?: string
 }
 
-export async function getRecentRecord({node, name, sensor}: RecentRecordArgs) {
+export async function getRecentRecord(args: RecentRecArgs) : Promise<Record> {
+  const {node, name, sensor} = args
+
   const data = await getData({
     start: '-4d',
     filter: {

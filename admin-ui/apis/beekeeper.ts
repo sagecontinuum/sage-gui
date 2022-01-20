@@ -74,7 +74,7 @@ type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 export async function getManifest(params?: MetaParams) {
   let {node, by = 'id'} = params || {}
 
-  const data = await get(`${url}/production`, {cache: 'reload'})
+  const data = await get(`${url}/production`)
   const d = data.filter(obj => 'node_id' in obj)
 
 

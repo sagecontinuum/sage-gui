@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, FC } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import sage from 'url:../assets/sage-drawing.png'
@@ -20,11 +20,12 @@ const webOrigin = window.location.origin
 const signOutUrl = `${Auth.url}/portal-logout`
 
 import config from '../config'
+import {version} from '../package.json'
 
 
 type Props = {
   hasSignIn?: boolean
-  Menu?: React.FC
+  Menu?: FC
 }
 
 export default function NavBar(props: Props) {
@@ -51,7 +52,7 @@ export default function NavBar(props: Props) {
       <div className="flex items-center">
         <Link to="/" className="no-style flex items-center">
           <LogoImg src={sage} height="35" />
-          <Logo>
+          <Logo title={`Sage: v${version}`}>
             Sage
             <sup>(beta)</sup>
           </Logo>

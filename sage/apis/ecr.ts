@@ -4,7 +4,6 @@ export const docs = config.docs
 
 import * as Auth from '../../components/auth/auth'
 
-const __user = Auth.getUser()
 const __token = Auth.getToken()
 
 const options = {
