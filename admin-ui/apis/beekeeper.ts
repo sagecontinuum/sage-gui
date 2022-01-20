@@ -1,6 +1,8 @@
 import config from '../../config'
 const url = config.beekeeper
 
+import { abortableFetch, handleErrors } from './fetch-utils'
+
 import { NodeStatus } from '../node'
 
 
@@ -37,20 +39,9 @@ export type State = {
 }
 
 
-
-function handleErrors(res) {
-  if (res.ok) {
-    return res
-  }
-
-  return res.json().then(errorObj => {
-    throw Error(errorObj.error)
-  })
-}
-
-
 function get(endpoint: string, opts={}) {
-  return fetch(endpoint, opts)
+  return abortableFetch(endpoint, opts)
+    .ready
     .then(handleErrors)
     .then(res => res.json())
 }
