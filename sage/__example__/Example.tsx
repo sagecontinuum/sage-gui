@@ -11,9 +11,7 @@
  */
 
 import {useState, useReducer} from 'react'
-import 'regenerator-runtime/runtime'
 
-import fetch from 'node-fetch'
 
 const initialState = {
   error: null,

@@ -7,7 +7,7 @@
     "build": "./node_modules/parcel/lib/bin.js build ./sage/index.html",
     "start-admin": "./node_modules/parcel/lib/bin.js serve ./admin-ui/index.html --dist-dir build/",
     "build-admin": "./node_modules/parcel/lib/bin.js build ./admin-ui/index.html",
-    "test": "node_modules/jest/bin/jest.js sage/ --notify --testPathIgnorePatterns=/__example__/",
+    "test": "node_modules/jest/bin/jest.js sage/ --notify",
     "clean": "rm -rf build/ && rm -rf dist/ && rm -rf .parcel-cache/",
     "mock-beekeeper": "http-server -p 8888 --cors test-data/",
     "docker": "docker build -t sage-admin-ui .",

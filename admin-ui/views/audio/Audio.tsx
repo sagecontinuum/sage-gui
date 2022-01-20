@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
 
 import WaveSurfer from 'wavesurfer.js'
-import SpectrogramPlugin from 'wavesurfer.js/src/plugin/spectrogram'
+import SpectrogramPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.spectrogram'
 import colormap from 'colormap'
 
 import Button from '@mui/material/Button'
