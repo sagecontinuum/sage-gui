@@ -24,9 +24,10 @@ The testing framework is made up 3 core pieces:
 
 - [Jest](https://jestjs.io/) is used for testing running
 - [MSW](https://mswjs.io/) allows us to mock service requests/responses
-- [React-testing-library](https://testing-library.com/docs/react-testing-library/intro) severs a few purposes:
-  * some layers on top of jsdom to make querying and assertion a bit easier with a focus on accessibility
-  * making integration with react easier
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro) serves a few purposes:
+  * "The more your tests resemble the way your software is used, the more confidence they can give you" --Testing Library
+  * The addition of layers on top of jsdom to make querying and assertion easier, and with some focus on accessibility
+  * Making integration with react easier
   * etc
 
 
