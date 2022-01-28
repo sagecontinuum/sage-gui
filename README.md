@@ -72,7 +72,7 @@ Run tests using
 npm test
 ```
 
-Read more about tests [here](docs/tests.md)
+Read more about tests [here](/docs/ui-testing.md).
 
 
 ## Changelog
