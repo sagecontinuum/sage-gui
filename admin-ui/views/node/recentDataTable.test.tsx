@@ -3,9 +3,9 @@ import {setupServer} from 'msw/node'
 import {render, waitFor, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-import RecentDataTable from '../RecentDataTable'
+import RecentDataTable from './RecentDataTable'
 
-import config from '../../../../config'
+import config from '../../../config'
 const url = config.beehive
 
 
@@ -24,7 +24,7 @@ const mockData = {
   }
 }
 
-// todo(nc): abstract mock server
+// todo(nc): abstract mock server?
 const server = setupServer(
   rest.post(`${url}/query`, (req, res, ctx) => {
     return res(ctx.json(mockData))

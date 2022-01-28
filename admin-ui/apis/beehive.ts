@@ -1,7 +1,7 @@
 import config from '../../config'
 const url = config.beehive
 
-import { abortableFetch, handleErrors } from './fetch-utils'
+import { handleErrors } from '../../components/fetch-utils'
 import {groupBy, mapValues} from 'lodash'
 
 import * as BK from './beekeeper'
@@ -67,10 +67,10 @@ export type AggMetrics = {
 
 
 function post(endpoint: string, data = {}) {
-  return abortableFetch(endpoint, {
+  return fetch(endpoint, {
     method: 'POST',
     body: JSON.stringify(data)
-  }).ready.then(handleErrors)
+  }).then(handleErrors)
 }
 
 

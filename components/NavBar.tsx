@@ -17,6 +17,7 @@ import DropdownMenu from '../components/Menu'
 import * as Auth from '../components/auth/auth'
 const username = Auth.getUser()
 const webOrigin = window.location.origin
+
 const signOutUrl = `${Auth.url}/portal-logout`
 
 import config from '../config'

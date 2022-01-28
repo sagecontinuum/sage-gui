@@ -65,6 +65,16 @@ npm run start-admin
 ```
 
 
+### Tests
+
+Run tests using
+```
+npm test
+```
+
+Read more about tests [here]()
+
+
 ## Changelog
 
 [Changelog](https://github.com/sagecontinuum/sage-gui/blob/main/CHANGELOG.md)

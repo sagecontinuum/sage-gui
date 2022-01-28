@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 
 import GitIcon from 'url:../../../assets/git.svg'

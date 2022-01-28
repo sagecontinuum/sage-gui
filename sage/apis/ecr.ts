@@ -2,6 +2,8 @@ import config from '../../config'
 export const url = config.ecr
 export const docs = config.docs
 
+import { handleErrors } from '../../components/fetch-utils'
+
 import * as Auth from '../../components/auth/auth'
 
 const __token = Auth.getToken()
@@ -13,21 +15,13 @@ const options = {
 }
 
 
-function handleErrors(res) {
-  if (res.ok) {
-    return res
-  }
-
-  return res.json().then(errorObj => {
-    throw Error(errorObj.error)
-  })
-}
-
 
 function get(endpoint: string) {
   return fetch(endpoint, options)
     .then(handleErrors)
     .then(res => res.json())
+
+  // return new Promise(prom)
 }
 
 function post(endpoint: string, data = '') {
@@ -85,7 +79,7 @@ export type AppMeta = {
   collaborators?: string // todo(nc): allow list too?
   thumbnail?: string[] // todo(nc): make single string
   images?: string[]
-  science_description?: string[]
+  science_description?: string
   source: {
     architectures: Arch[]
     url: string
@@ -357,6 +351,11 @@ export function getAppDetails(app: App) : Promise<AppDetails> {
   return get(`${url}/apps/${namespace}/${name}/${version}`)
 }
 
+export function getSciMarkdown(path: string) {
+  return fetch(`${url}/meta-files/${path}`, options)
+    .then(handleErrors)
+    .then(res => res.text())
+}
 
 
 /**

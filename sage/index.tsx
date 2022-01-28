@@ -4,6 +4,7 @@ import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
+import theme from '../components/theme'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
@@ -22,7 +23,6 @@ import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 import { SnackbarProvider } from 'notistack'
 
-import theme from '../components/theme'
 import '../assets/styles.scss'
 
 

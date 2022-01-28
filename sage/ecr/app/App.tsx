@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
@@ -29,7 +29,6 @@ export default function App() {
 
   const { loading, setLoading } = useProgress()
   const [repo, setRepo] = useState<ECR.Repo>(null)
-  const [latestTag, setLatestTag] = useState(null)
   const [isPublic, setIsPublic] = useState(null)
   const [sciHtml, setSciHtml] = useState(null)
 
@@ -39,8 +38,7 @@ export default function App() {
 
 
   useEffect(() => {
-
-    const [namespace, name ] = path.split('/')
+    const [namespace, name] = path.split('/')
 
     setLoading(true)
     ECR.getRepo({namespace, name})
@@ -48,18 +46,15 @@ export default function App() {
         setRepo(repo)
 
         const latestTag = repo.versions[0]
-        setLatestTag(latestTag)
-
         const hasSciMarkDown = !!latestTag?.science_description
         const mdPath = hasSciMarkDown ?
           latestTag?.science_description : null
 
         if (mdPath) {
-          fetch(`${ECR.url}/meta-files/${mdPath}`)
-            .then(res => res.text())
+          return ECR.getSciMarkdown(mdPath)
             .then(text => setSciHtml(marked(text)))
         } else {
-          // if no description, we'll only have the tagged versions tab
+          // if no description, just go to the tagged versions tab
           setTabIndex(1)
         }
       })
@@ -74,7 +69,9 @@ export default function App() {
     // todo: implement
   }
 
-  if (loading || !repo) return <></>
+  const versions = repo ? repo.versions : []
+  const latestTag = versions.length ? versions[0] : null
+  const [namespace, name] = path.split('/')
 
   return (
     <Root>
@@ -86,10 +83,7 @@ export default function App() {
           }
 
           <div className="flex column">
-            <div style={{fontSize: '2em', fontWeight: 'bold'}}>
-              {repo.namespace} / {repo.name}
-            </div>
-
+            <h1 className="no-margin">{namespace} / {name}</h1>
             <p>{latestTag?.description}</p>
           </div>
         </div>
@@ -98,11 +92,11 @@ export default function App() {
         {Auth.isSignedIn() &&
           <div className="actions">
             <RepoActions
-              namespace={repo.namespace}
-              name={repo.name}
+              namespace={namespace}
+              name={name}
               condensed={false}
               onComplete={handleActionComplete}
-              versionCount={repo.versions.length}
+              versionCount={versions.length}
               isPublic={isPublic}
             />
           </div>
@@ -123,7 +117,7 @@ export default function App() {
             aria-label="App details tabs"
           >
             <Tab label={<div className="flex items-center"><ScienceIcon fontSize="small" /> Science Overview</div>} idx={0} />
-            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" /> Tagged Versions ({repo.versions.length})</div>} idx={1}/>
+            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" /> Tagged Versions ({versions.length})</div>} idx={1}/>
           </Tabs>
           <br/>
 
@@ -134,19 +128,20 @@ export default function App() {
             </Science>
           }
 
-          {tabIndex == 0 && !sciHtml &&
+          {tabIndex == 0 && sciHtml == null && !loading &&
             <div className="muted">
               No science description available for this app.
             </div>
           }
 
-          {tabIndex == 1 && repo.versions &&
-            <TagList versions={repo.versions} />
+          {tabIndex == 1 && versions.length &&
+            <TagList versions={versions} />
           }
         </Main>
 
-        <AppMeta data={latestTag} />
-
+        {latestTag &&
+          <AppMeta data={latestTag} />
+        }
       </Details>
     </Root>
   )
@@ -156,6 +151,21 @@ export default function App() {
 
 const Root = styled.div`
   padding: 20px 0px;
+
+  // todo(nc): remove thumb component
+  .thumb {
+    width: 125px;
+    height: 125px;
+    object-fit: contain;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 1em;
+
+    &.placeholder {
+      padding: 1em;
+      filter: drop-shadow(0px 0px 0.3rem #ccc);
+    }
+  }
 `
 
 const HR = styled(Divider)`

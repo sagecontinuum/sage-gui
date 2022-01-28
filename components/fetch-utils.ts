@@ -1,5 +1,6 @@
 
-// https://developers.google.com/web/updates/2017/09/abortable-fetch
+
+// other art: https://developers.google.com/web/updates/2017/09/abortable-fetch
 export function abortableFetch(request, opts) {
   const controller = new AbortController()
   const signal = controller.signal
