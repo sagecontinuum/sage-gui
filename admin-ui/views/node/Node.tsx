@@ -30,6 +30,7 @@ const cols = [
   'modem_sim',
   'nx_agent',
   'build_date',
+  'commission_date'
 ]
 
 function format(label: string, val: string) {
