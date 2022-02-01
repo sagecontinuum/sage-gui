@@ -46,10 +46,7 @@ const columns = [{
   id: 'vsn',
   label: 'VSN',
   format: (val, r) =>
-    <a href={`https://admin.sagecontinuum.org/node/${r.host.split('.')[0].toUpperCase()}`}
-      target="_blank"
-      rel="noreferrer"
-    >
+    <a href={`https://admin.sagecontinuum.org/node/${r.node.toUpperCase()}`}>
       {val}
     </a>
 }, {
