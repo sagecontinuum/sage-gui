@@ -15,7 +15,6 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
-import Divider from '@mui/material/Divider'
 
 import MoreIcon from '@mui/icons-material/MoreVert'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -140,7 +139,7 @@ const Row = (props: RowProps) => {
 
       {onMore &&
         <More className="more-btn">
-          <IconButton size="small">
+          <IconButton>
             <MoreIcon />
           </IconButton>
         </More>
@@ -250,6 +249,13 @@ const TableHeadComponent = (props) => {
 }
 
 
+const indexData = (data, key?: string) =>
+  key ?
+    data.map((row) => ({...row, rowID: row[key]})) :
+    data.map((row, i) => ({...row, rowID: i}))
+
+
+
 const clientSideSort = (data, id, direction) => {
   const isArrayCol = Array.isArray(data[0][id])
   const isNumeric = typeof data[0][id] === 'number'
@@ -337,6 +343,7 @@ type Props = {
   greyRow?: (row: object) => boolean
   disableRowSelect?: (row: object) => boolean
 
+  leftComponent?: JSX.Element
   middleComponent?: JSX.Element
   rightComponent?: JSX.Element
 }
@@ -351,7 +358,7 @@ export default function TableComponent(props: Props) {
   const {
     primaryKey = 'rowID',
     pagination, offsetHeight, checkboxes, emptyNotice,
-    middleComponent, rightComponent, stripes = true, enableSorting = false,
+    stripes = true, enableSorting = false,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
@@ -365,11 +372,13 @@ export default function TableComponent(props: Props) {
 
   const tableRef = useRef(null)
 
-  const [rows, setRows] = useState<Rows>(props.rows.map((row, i) => ({...row, rowID: i})))
+  const allData = indexData(props.rows)
+
+  const [rows, setRows] = useState<Rows>(allData) // may contain subset of rows via pagination, filtering, etc
   const [columns, setColumns] = useState(getVisibleColumns(props.columns))
   const [page, setPage] = useState(Number(props.page))
   const [sortBy, setSortBy] = useState((props.sort && parseSort(props.sort)) || {})
-  const [rowsPerPage] = useState(200)
+  const [rowsPerPage] = useState(100)
 
   // keep state on shown/hidden columns
   // initial columns are defined in `columns` spec.
@@ -383,9 +392,9 @@ export default function TableComponent(props: Props) {
   const [selected, dispatch] = useReducer(selectedReducer, initialSelectedState)
 
 
-  // when rows change, add row ids
   useEffect(() => {
-    let newRows = props.rows.map((row, i) => ({...row, rowID: row[primaryKey]}))
+    // when rows change, reindex
+    let newRows = indexData(props.rows, primaryKey)
 
     // need to re-sort if updating table dynamically
     const sortID = Object.keys(sortBy).length ?
@@ -394,8 +403,12 @@ export default function TableComponent(props: Props) {
       newRows = clientSideSort(newRows, sortID, sortBy[sortID])
     }
 
+    if (pagination) {
+      newRows = newRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    }
+
     setRows(newRows)
-  }, [props.rows])
+  }, [props.rows, page])
 
   // listen to columns
   useEffect(() => {
@@ -443,9 +456,9 @@ export default function TableComponent(props: Props) {
     '.MuiDialog-container', '.MuiAutocomplete-popper', '.mapboxgl-canvas-container'])
 
 
-  const onChangePage = (event, newPage) => {
+  const handlePageChange = (event, newPage) => {
     setPage(newPage)
-    props.onPage(newPage)
+    if (props.onPage) props.onPage(newPage)
   }
 
   const handleSelect = (event, rowID, obj) => {
@@ -488,7 +501,13 @@ export default function TableComponent(props: Props) {
 
     // client-side sorting
     if (enableSorting) {
-      setRows(clientSideSort(rows, id, direction))
+      let allRows = indexData(props.rows, primaryKey)
+      allRows = clientSideSort(allRows, id, direction)
+
+      let newRows = pagination ?
+        allRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : allRows
+
+      setRows(newRows)
       setSortBy(newState)
     }
 
@@ -512,6 +531,10 @@ export default function TableComponent(props: Props) {
   return (
     <Root>
       <CtrlContainer>
+        {props.leftComponent &&
+          props.leftComponent
+        }
+
         {onSearch &&
           <TableSearch
             value={props.search}
@@ -520,31 +543,19 @@ export default function TableComponent(props: Props) {
           />
         }
 
-        {middleComponent &&
-          middleComponent
+        {props.middleComponent &&
+          props.middleComponent
         }
 
         {pagination &&
           <>
             <Pagination
-              labelRowsPerPage={''}
               rowsPerPageOptions={[rowsPerPage]}
-              component="div"
-              rowsPerPage={props.limit}
+              count={props.total || props.limit || rows?.length}
+              rowsPerPage={rowsPerPage}
               page={page}
-              backIconButtonProps={{
-                disableRipple: true,
-                'aria-label': 'previous page',
-                style: {marginLeft: '2px'}
-              }}
-              nextIconButtonProps={{
-                disableRipple: true,
-                'aria-label': 'next page',
-              }}
-              count={props.total || (rows && rows.length) || 0}
-              onChangePage={onChangePage}
+              onPageChange={handlePageChange}
             />
-            <Divider orientation="vertical" flexItem style={{margin: '10px 5px'}} />
           </>
         }
 
@@ -558,14 +569,13 @@ export default function TableComponent(props: Props) {
 
         }
 
-        {rightComponent &&
-          rightComponent
+        {props.rightComponent &&
+          props.rightComponent
         }
 
         {onShowDetails &&
           <Tooltip title="Show/hide details" placement="top">
             <IconButton
-              size="small"
               onClick={handleShowDetails}
               style={{background: selected.ids.length ? '#ecf4fb' : '#fff'}}
               className="hover"
@@ -628,24 +638,19 @@ const Root = styled.div`
 `
 
 const CtrlContainer = styled.div`
-  border-bottom: 2px solid #f2f2f2;
   padding-bottom: 10px;
   display: flex;
   align-items: center;
   flex: 1;
+
+  .MuiTablePagination-actions {
+    user-select: none;
+  }
 `
 
 
 const Pagination = styled(TablePagination)`
   flex: 1;
-
-  & .MuiTablePagination-actions {
-    user-select: none;
-    margin: 0;
-  }
-  && .MuiToolbar-root {
-    padding-right: 0;
-  }
 `
 
 const Container = styled(TableContainer)`
