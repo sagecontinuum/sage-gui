@@ -20,7 +20,7 @@ function ProgressProvider(props) {
 }
 
 const Progress = styled(LinearProgress)`
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 3px;
   left: 0;
