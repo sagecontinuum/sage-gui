@@ -633,6 +633,14 @@ const CtrlContainer = styled.div`
   display: flex;
   align-items: center;
   flex: 1;
+
+  .MuiTablePagination-actions {
+    user-select: none;
+  }
+
+  .MuiToolbar-root {
+    border-bottom: none;
+  }
 `
 
 
