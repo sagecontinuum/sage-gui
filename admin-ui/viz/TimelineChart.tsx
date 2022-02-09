@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 import d3 from './d3'
@@ -12,7 +12,6 @@ const cellHeight = 15
 const cellPad = 2
 const borderRadius = 0
 const guideStroke = 3
-
 
 
 
@@ -43,6 +42,7 @@ function parseData(data) {
     const rows = data[key].map(obj => ({
       row: key,
       timestamp: obj.timestamp,
+      end: obj.end,
       meta: obj.meta,
       value: obj.value
     }))
@@ -186,7 +186,7 @@ function drawChart(
     .attr('class', 'cell')
     .attr('x', (d) => x(new Date(d.timestamp)) )
     .attr('y', (d) => y(d.row) + cellPad)
-    .attr('width', (d) => x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) - cellPad)
+    .attr('width', (d) => computeWidth(d, x))
     .attr('height', y.bandwidth() - 2 )
     .attr('rx', borderRadius)
     .attr('stroke-width', 2)
@@ -276,9 +276,19 @@ function drawChart(
 
     cells.selectAll('.cell')
       .attr('x', (d) => newScale(new Date(d.timestamp)))
-      .attr('width', (d) => newScale(new Date(d.timestamp).getTime() + hour) - newScale(new Date(d.timestamp)) - cellPad)
+      .attr('width', (d) => computeWidth(d, newScale))
 
     gX.call(xAxis.scale(newScale))
+  }
+
+  function computeWidth(d, scale) {
+    const x = scale
+
+    let w = d.end ?
+      x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :  // use end time
+      x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) // otherwise, assume hour (for now)
+
+    return w > cellPad ? w - cellPad : cellPad
   }
 }
 
