@@ -12,7 +12,6 @@ import Checkbox from '../../components/input/Checkbox'
 import FilterMenu from '../../components/FilterMenu'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
-import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Select from '@mui/material/Select'
@@ -20,8 +19,6 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
-import ArrowBack from '@mui/icons-material/ArrowBackIosRounded'
-import ArrowForward from '@mui/icons-material/ArrowForwardIosRounded'
 import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
@@ -50,8 +47,9 @@ const columns = [{
       {val}
     </a>
 }, {
-  id: 'relTime',
-  label: 'Time'
+  id: 'timestamp',
+  label: 'Time',
+
 }, {
   id: 'name',
   label: 'Name',
@@ -92,11 +90,11 @@ const columns = [{
     return <a href={val}>{val.split('/').pop()}</a>
   }
 }, {
-  id: 'job',
-  label: 'Job',
-}, {
   id: 'sensor',
   label: 'Sensor',
+}, {
+  id: 'job',
+  label: 'Job',
 }, {
   id: 'meta',
   label: 'Meta',
@@ -117,7 +115,7 @@ const findColumn = (cols, name) =>
 const units = {
   'm': 'min',
   'h': 'hour',
-  // 'd': 'day'
+  'd': 'day'
 }
 
 type TIProps = {
@@ -137,6 +135,26 @@ function TimeIndicator(props: TIProps) {
     </div>
   )
 }
+
+
+type RangeIndicatorProps = {
+  data: BH.Record[]
+}
+
+function RangeIndicator(props: RangeIndicatorProps) {
+  const {data} = props
+  const start = data[0].timestamp
+  const end = data[data.length - 1].timestamp
+
+
+  return (
+    <span>
+      {new Date(end).toLocaleString()} to  {new Date(start).toLocaleTimeString()}
+    </span>
+  )
+}
+
+
 
 
 const VertDivider = () =>
@@ -225,11 +243,13 @@ export default function DataPreview() {
   const unit = params.get('window') || 'm'
 
 
-  const {setLoading} = useProgress()
+  const {loading, setLoading} = useProgress()
 
   const [cols, setCols] = useState(columns)
 
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(0)
+
+
   const [checked, setChecked] = useState({
     relativeTime: true,
     showMeta: false,
@@ -238,6 +258,7 @@ export default function DataPreview() {
   const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
   const [everyN, setEveryN] = useState<{total: number, every: number}>()
+  const [lastN, setLastN] = useState<{total: number, limit: number}>()
   // const [chart, setChart] = useState<{x: string, y: number}[]>()
 
   // contents of dropdowns
@@ -263,7 +284,10 @@ export default function DataPreview() {
   }, [app, name, node, sensor])
 
 
+
   useEffect(() => {
+    if (!app) return
+
     getFilterMenus(app)
       .then((menuItems) => setMenus(prev => ({...prev, ...menuItems})))
   }, [app])
@@ -272,7 +296,7 @@ export default function DataPreview() {
   useEffect(() => {
     const plugin = app || defaultPlugin
 
-    async function fetchAppMenu() {
+    function fetchAppMenu() {
       const query = {
         start: `-4d`,
         tail: 1,
@@ -289,10 +313,16 @@ export default function DataPreview() {
         }).catch(error => setError(error))
     }
 
-    async function fetchData() {
+    function fetchFilterMenus() {
+      getFilterMenus(plugin)
+        .then((menuItems) => {
+          setMenus(prev => ({...prev, ...menuItems}))
+        })
+    }
+
+    function fetchData() {
       const query = {
-        start: `-${page}${unit}`,
-        end: `-${page - 1}${unit}`,
+        start: `-1${unit}`,
         filter: {
           plugin: plugin,
           ...(node ? {vsn: node} : {}),
@@ -308,16 +338,16 @@ export default function DataPreview() {
 
           // limit amount of data for now
           const total = data.length
-          if (total > 5000) {
-            const every = 10
-            data = data.filter((_, i) => i % every == 0)
-            setEveryN({total, every})
+          const limit = 50000
+          if (total > limit) {
+            data = data.slice(0, limit)
+            setLastN({total, limit})
           } else {
-            setEveryN(null)
+            setLastN(null)
           }
 
           data = data
-            .map((o, i) => ({...o, ...o.meta, rowID: i, relTime: relTime(o.timestamp)}))
+            .map((o, i) => ({...o, ...o.meta, rowID: i}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
           setData(data)
@@ -330,17 +360,17 @@ export default function DataPreview() {
             setChart(chartData)
           }
           */
+
+          // reset page any time more data is fetched
+          setPage(0)
         }).catch(error => setError(error))
         .finally(() => setLoading(false))
     }
 
-    setLoading(true)
     fetchAppMenu()
     fetchData()
-
-    getFilterMenus(plugin)
-      .then((menuItems) => setMenus(prev => ({...prev, ...menuItems})))
-  }, [setLoading, page, unit, app, node, name, sensor])
+    fetchFilterMenus()
+  }, [setLoading, unit, app, node, name, sensor])
 
 
   useEffect(() => {
@@ -348,10 +378,10 @@ export default function DataPreview() {
       let idx
       if (checked.relativeTime) {
         idx = findColumn(prev, 'timestamp')
-        prev[idx] = {...prev[idx], id: 'relTime'}
+        prev[idx] = {...prev[idx], format: (val) => relTime(val)}
       } else {
-        idx = findColumn(prev, 'relTime')
-        prev[idx] = {...prev[idx], id: 'timestamp'}
+        idx = findColumn(prev, 'timestamp')
+        prev[idx] = {...prev[idx], format: (val) => val}
       }
 
       idx = findColumn(prev, 'meta')
@@ -377,6 +407,7 @@ export default function DataPreview() {
   }
 
   const handleRemoveFilters = () => {
+    setPage(0)
     params.delete('nodes')
     params.delete('names')
     params.delete('sensors')
@@ -417,10 +448,18 @@ export default function DataPreview() {
         </Sidebar>
 
         <Main>
-          {everyN &&
+          {/* a message if we decide to use sampling
+            everyN &&
+              <Alert severity="info">
+                There are {everyN.total.toLocaleString()} records for this query.
+                Showing every {everyN.every.toLocaleString()}.
+              </Alert>
+          */}
+
+          {lastN &&
             <Alert severity="info">
-              There are {everyN.total.toLocaleString()} records for this query.
-              Showing every {everyN.every.toLocaleString()}.
+              There are {lastN.total.toLocaleString()} records for this query.
+              Showing last {lastN.limit.toLocaleString()}.
             </Alert>
           }
 
@@ -454,57 +493,6 @@ export default function DataPreview() {
 
           <br/>
 
-          <div className="flex justify-between">
-            <div className="flex items-cetner">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={checked.relativeTime}
-                    onChange={(evt) => handleCheck(evt, 'relativeTime')}
-                  />
-                }
-                label="relative time"
-              />
-
-              <FormControlLabel
-                control={<Checkbox checked={checked.showMeta} onChange={(evt) => handleCheck(evt, 'showMeta')} />}
-                label="meta"
-              />
-            </div>
-
-
-            <div className="flex items-center">
-              <FormControl variant="outlined" style={{width: '80px'}}>
-                <InputLabel id="unit-label">Window</InputLabel>
-                <Select
-                  labelId="unit-label"
-                  id="unit"
-                  value={unit}
-                  onChange={evt => handleUnitChange(evt.target.value)}
-                  label="Window"
-                  margin="dense"
-                >
-                  {Object.keys(units)
-                    .map(k =>
-                      <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                    )
-                  }
-                </Select>
-              </FormControl>
-              <VertDivider />
-              {data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>}
-              <VertDivider />
-              <TimeIndicator page={page} unit={unit}/>
-              <VertDivider />
-              <IconButton size="small" onClick={() => setPage(prev => prev - 1)} disabled={page == 1}>
-                <ArrowBack fontSize="small"/>
-              </IconButton>
-              <IconButton size="small" onClick={() => setPage(prev => prev + 1)}>
-                <ArrowForward fontSize="small"/>
-              </IconButton>
-            </div>
-          </div>
-
 
           {error &&
             <Alert severity="error">{error.message}</Alert>
@@ -516,10 +504,65 @@ export default function DataPreview() {
               enableSorting
               columns={cols}
               rows={data}
+              pagination
+              page={page}
+              limit={data.length}
               emptyNotice={
-                <span className="flex"><span>No records found from</span>&nbsp;<TimeIndicator page={page} unit={unit}/></span>
+                <span className="flex">
+                  <span>No records found from</span>&nbsp;<TimeIndicator page={page} unit={unit}/>
+                </span>
               }
               disableRowSelect={() => true}
+
+              leftComponent={
+                <div className="flex justify-between">
+                  <div className="flex items-center">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={checked.relativeTime}
+                          onChange={(evt) => handleCheck(evt, 'relativeTime')}
+                        />
+                      }
+                      label="relative time"
+                    />
+
+                    <FormControlLabel
+                      control={<Checkbox checked={checked.showMeta} onChange={(evt) => handleCheck(evt, 'showMeta')} />}
+                      label="meta"
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <FormControl variant="outlined" style={{width: '80px'}}>
+                      <InputLabel id="unit-label">Window</InputLabel>
+                      <Select
+                        labelId="unit-label"
+                        id="unit"
+                        value={unit}
+                        onChange={evt => handleUnitChange(evt.target.value)}
+                        label="Window"
+                        margin="dense"
+                      >
+                        {Object.keys(units)
+                          .map(k =>
+                            <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                          )
+                        }
+                      </Select>
+                    </FormControl>
+                    <VertDivider />
+
+                    {/*data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>*/}
+
+                    {data &&
+                      <RangeIndicator data={data}/>
+                    }
+
+                    <VertDivider />
+                  </div>
+                </div>
+              }
             />
           }
         </Main>
