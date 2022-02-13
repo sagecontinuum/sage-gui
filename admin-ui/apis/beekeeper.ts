@@ -27,7 +27,7 @@ export type State = {
   vsn: string
   node_type?: string
   project?: string
-  location?: string    // currently part of "project" in mock data
+  location?: string
   status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 

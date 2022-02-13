@@ -1,6 +1,5 @@
-import React from 'react'
 import styled from 'styled-components'
-
+import { prettyTime } from '../../../../components/utils/units'
 
 const barHeight = '10px'
 const barWidth = '100%'
@@ -9,17 +8,19 @@ const barWidth = '100%'
 type StatusProps = {
   values: {[key: string]: number}
   color: {[key: string]: string}
-  ignoreZeroValues?: boolean
+  ignoreZeroValues?: boolean,
+  displayTime?: boolean
 }
 
 export default function SummaryBox(props: StatusProps) {
   const {
     values,
     color,
-    ignoreZeroValues = true
+    ignoreZeroValues = true,
+    displayTime = false
   } = props
 
-  const sum = Object.values(values).reduce((acc, v) => acc + v, 0)
+  const sum = Object.values(values).filter(v => v).reduce((acc, v) => acc + v, 0)
 
   return (
     <Root>
@@ -35,7 +36,10 @@ export default function SummaryBox(props: StatusProps) {
           .filter(([_, val]) => ignoreZeroValues && val)
           .map(([key, val]) =>
             <Label key={key} >
-              <Dot color={color[key]} /> {val} {key}
+              <Dot color={color[key]} />
+              {displayTime ? prettyTime(val / 1000) : val}
+              <br/>
+              {key}
             </Label>
           )}
       </Labels>

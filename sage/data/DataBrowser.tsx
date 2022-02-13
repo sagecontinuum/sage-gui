@@ -498,7 +498,12 @@ export default function DataPreview() {
             <Alert severity="error">{error.message}</Alert>
           }
 
-          {data &&
+          {data?.length == 0 &&
+            <Alert severity="info">No recent data found</Alert>
+          }
+
+          {/* todo(nc): here we have to check data.length because of bug in table component when pagination is used */}
+          {data && data?.length > 0 &&
             <Table
               primaryKey="rowID"
               enableSorting

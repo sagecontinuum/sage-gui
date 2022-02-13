@@ -41,10 +41,7 @@ function parseData(data) {
   Object.keys(data).map((key) => {
     const rows = data[key].map(obj => ({
       row: key,
-      timestamp: obj.timestamp,
-      end: obj.end,
-      meta: obj.meta,
-      value: obj.value
+      ...obj
     }))
 
     array = [...array, ...rows]
@@ -262,6 +259,7 @@ function drawChart(
     )
       .style('top', `${evt.pageY}px`)
       .style('left', `${evt.pageX + 10}px`)
+      .style('z-index', 999)
 
     tt.style('display', null)
   }
@@ -313,7 +311,9 @@ function appendLegend(ele, chartData) {
 type Record = {
   timestamp: string
   value: number
-  meta?: object
+  end?: string
+  meta?: object           // user provided meta is allowed
+  [other: string]: any    // extra user provided key/values is allowed too
 }
 
 type Data = { [key: string]: Record[] }

@@ -16,7 +16,7 @@ const minHeight = '225px'
 const maxHeight = '350px'
 
 
-const loadMap = (domRef) => {
+const loadMap = (domRef, resize) => {
   mapboxgl.accessToken = process.env.MAPBOX_TOKEN || tokens.mapbox
 
   const map = new mapboxgl.Map({
@@ -26,9 +26,11 @@ const loadMap = (domRef) => {
     zoom: initialZoom
   })
 
-  map.on('load', () => {
-    map.resize()
-  })
+  if (resize) {
+    map.on('load', () => {
+      map.resize()
+    })
+  }
 
   map.addControl(new mapboxgl.FullscreenControl({container: domRef.current}))
 
@@ -168,11 +170,17 @@ type Props = {
   data: Data
   selected: Data
   updateID: number
+  resize?: boolean
 }
 
 
 function Map(props: Props) {
-  const {data = null, selected, updateID} = props
+  const {
+    data = null,
+    selected,
+    updateID,
+    resize = true
+  } = props
 
   const ref = useRef()
   const [init, setInit] = useState(false)
@@ -190,7 +198,7 @@ function Map(props: Props) {
   useEffect(() => {
     if (DISABLE_MAP) return
 
-    const map = loadMap(ref)
+    const map = loadMap(ref, resize)
     setMap(map)
 
     window.onscroll = () => {
@@ -200,9 +208,11 @@ function Map(props: Props) {
         document.getElementById('map').style.height = maxHeight
       }
 
-      setTimeout(() => {
-        map.resize()
-      }, 300)
+      if (resize) {
+        setTimeout(() => {
+          map.resize()
+        }, 300)
+      }
     }
 
   }, [])

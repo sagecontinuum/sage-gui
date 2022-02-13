@@ -12,6 +12,7 @@ import NavBar, {NavItems} from '../components/NavBar'
 import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
+import JobStatus from './job-status/JobStatus'
 import DataBrowser from './data/DataBrowser'
 import Ontology from './data/Ontology'
 
@@ -30,7 +31,7 @@ import '../assets/styles.scss'
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps">App Catalog</NavLink></li>
-    {/*<li><NavLink to="/job-status">Job Status</NavLink></li>*/}
+    <li><NavLink to="/job-status">Job Status</NavLink></li>
     {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
 
@@ -66,6 +67,7 @@ export default function Sage() {
                   <Route exact path="/data" component={DataSearch} />
                   <Route path="/data/product/:name" component={DataProduct} />
 
+                  <Route path="/job-status" component={JobStatus} />
                   <Route path="/fiddle/filter-menu" component={FilterMenuTest} />
 
                   <Route exact path="/login" component={TestSignIn} />
