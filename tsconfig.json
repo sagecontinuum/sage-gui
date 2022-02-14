@@ -1,11 +1,17 @@
 {
-  "include": ["admin-ui/**/*", "components/**/*", "config.ts"],
+  "include": ["parcel.d.ts", "admin-ui/**/*", "components/**/*", "sage/**/*", "config.ts"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "lib": ["ES2020", "DOM"],
     "downlevelIteration": true,
     "resolveJsonModule": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "~*": ["./*"],
+    },
+    "moduleResolution": "Node"
+  },
 }
