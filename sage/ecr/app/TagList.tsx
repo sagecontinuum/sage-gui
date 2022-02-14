@@ -31,11 +31,11 @@ import { formatters, Dot } from '../formatters'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 import BuildIndicator from '../BuildIndicator'
-import ConfirmationDialog from '../../../components/dialogs/ConfirmationDialog'
-import Clipboard from '../../../components/utils/Clipboard'
+import ConfirmationDialog from '~/components/dialogs/ConfirmationDialog'
+import Clipboard from '~/components/utils/Clipboard'
 
-import * as ECR from '../../apis/ecr'
-import * as Auth from '../../../components/auth/auth'
+import * as ECR from '~/components/apis/ecr'
+import * as Auth from '~/components/auth/auth'
 const username = Auth.getUser()
 
 import config from '../../../config'

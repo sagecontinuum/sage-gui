@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import {getManifest} from '../apis/beekeeper'
+import {getManifest} from '../../components/apis/beekeeper'
 
-import * as BH from '../apis/beehive'
+import * as BH from '../../components/apis/beehive'
 
 
 export default function Stress() {

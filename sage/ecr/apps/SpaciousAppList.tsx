@@ -13,7 +13,7 @@ import RepoActions from '../RepoActions'
 import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:../../../assets/bee.svg'
 
-import * as Auth from '../../../components/auth/auth'
+import * as Auth from '~/components/auth/auth'
 import config from '../../../config'
 
 const {featuredApps, samplers} = config.portal

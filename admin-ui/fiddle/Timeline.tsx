@@ -3,7 +3,7 @@ import { useLocation, Link} from 'react-router-dom'
 import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
 
-import * as BH from '../apis/beehive'
+import * as BH from '../../components/apis/beehive'
 
 import TimelineChart, {colors} from '../viz/TimelineChart'
 

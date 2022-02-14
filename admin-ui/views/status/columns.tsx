@@ -15,8 +15,8 @@ import ThermoIcon from '@mui/icons-material/ThermostatRounded'
 import Chip from '@material-ui/core/Chip'
 import Tooltip from '@mui/material/Tooltip'
 
-import * as utils from '../../../components/utils/units'
-import * as BH from '../../apis/beehive'
+import * as utils from '~/components/utils/units'
+import * as BH from '~/components/apis/beehive'
 
 import config from '../../../config'
 

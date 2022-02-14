@@ -1,9 +1,9 @@
 import config from '../../config'
 const url = config.beekeeper
 
-import { handleErrors } from '../../components/fetch-utils'
+import { handleErrors } from '../fetch-utils'
 
-import { NodeStatus } from '../node'
+import { NodeStatus } from '../../admin-ui/node'
 
 
 const API_URL = `${url}/api`

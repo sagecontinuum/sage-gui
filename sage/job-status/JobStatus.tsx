@@ -11,7 +11,7 @@ import Table from '../../components/table/Table'
 import JobTimeLine from './JobTimeline'
 import SummaryBar from '../../admin-ui/views/status/charts/SummaryBar'
 
-import * as BH from '../../admin-ui/apis/beehive'
+import * as BH from '../../components/apis/beehive'
 import { useProgress } from '../../components/progress/ProgressProvider'
 
 

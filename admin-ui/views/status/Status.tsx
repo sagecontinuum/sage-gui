@@ -10,17 +10,17 @@ import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
 import columns from './columns'
-import Table from '../../../components/table/Table'
-import FilterMenu from '../../../components/FilterMenu'
-import Map from '../../../components/Map'
+import Table from '~/components/table/Table'
+import FilterMenu from '~/components/FilterMenu'
+import Map from '~/components/Map'
 import Charts from './charts/Charts'
-import QueryViewer from '../../../components/QueryViewer'
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import QueryViewer from '~/components/QueryViewer'
+import { useProgress } from '~/components/progress/ProgressProvider'
 
 import {queryData, filterData, mergeMetrics, getFilterState} from './statusDataUtils'
 
-import * as BK from '../../apis/beekeeper'
-import * as BH from '../../apis/beehive'
+import * as BK from '~/components/apis/beekeeper'
+import * as BH from '~/components/apis/beehive'
 
 
 

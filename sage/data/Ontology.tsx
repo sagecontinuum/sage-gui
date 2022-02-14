@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
-import * as BK from '../../admin-ui/apis/beekeeper'
+import * as BK from '../../components/apis/beekeeper'
 
 
 export default function Ontology() {

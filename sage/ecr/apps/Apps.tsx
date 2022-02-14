@@ -11,7 +11,7 @@ import AppList from './AppList'
 import App from '../app/App'
 import CreateApp from '../create-app/CreateApp'
 
-import PrivateRoute from '../../../components/auth/PrivateRoute'
+import PrivateRoute from '~/components/auth/PrivateRoute'
 
 
 export default function Apps() {

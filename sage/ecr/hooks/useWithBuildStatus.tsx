@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useRouteMatch } from 'react-router-dom'
 import config from '../../../config'
-import * as ECR from '../../apis/ecr'
-import { isSignedIn } from '../../../components/auth/auth'
+import * as ECR from '~/components/apis/ecr'
+import { isSignedIn } from '~/components/auth/auth'
 
 
 

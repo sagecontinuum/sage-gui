@@ -7,16 +7,16 @@ import Alert from '@mui/material/Alert'
 import Tooltip from '@material-ui/core/Tooltip'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 
-import {Tabs, Tab} from '../../../components/tabs/Tabs'
-import Table from '../../../components/table/Table'
+import {Tabs, Tab} from '~/components/tabs/Tabs'
+import Table from '~/components/table/Table'
 import Charts from '../status/charts/Charts'
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import { useProgress } from '~/components/progress/ProgressProvider'
 
 
-import * as BK from '../../apis/beekeeper'
-import * as BH from '../../apis/beehive'
+import * as BK from '~/components/apis/beekeeper'
+import * as BH from '~/components/apis/beehive'
 
-import * as utils from '../../../components/utils/units'
+import * as utils from '~/components/utils/units'
 import cols, { getColorClass, GoodChip } from '../status/columns'
 
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'

@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
-import * as BH from '../../apis/beehive'
-import * as BK from '../../apis/beekeeper'
+import * as BH from '~/components/apis/beehive'
+import * as BK from '~/components/apis/beekeeper'
 
 
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import { useProgress } from '~/components/progress/ProgressProvider'
 
 import TimelineChart, { colors } from '../../viz/TimelineChart'
 

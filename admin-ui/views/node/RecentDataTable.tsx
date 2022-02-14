@@ -7,9 +7,9 @@ import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 import ErrorMsg from '../../../sage/ErrorMsg'
 import { isOldData } from './RecentData'
-import { relTime } from '../../../components/utils/units'
+import { relTime } from '~/components/utils/units'
 
-import * as BH from '../../apis/beehive'
+import * as BH from '~/components/apis/beehive'
 import config from '../../../config'
 
 const dataBrowser = config.dataBrowserURL

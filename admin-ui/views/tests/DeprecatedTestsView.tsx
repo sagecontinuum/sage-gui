@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useHistory, Link} from 'react-router-dom'
 import styled from 'styled-components'
 
-import * as BH from '../../apis/beehive'
+import * as BH from '~/components/apis/beehive'
 
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import { useProgress } from '~/components/progress/ProgressProvider'
 
 import {getMetricBins } from '../../viz/dataUtils'
 import TimelineChart from '../../viz/TimelineChart'

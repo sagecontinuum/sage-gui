@@ -37,9 +37,7 @@ export default function SummaryBox(props: StatusProps) {
           .map(([key, val]) =>
             <Label key={key} >
               <Dot color={color[key]} />
-              {displayTime ? prettyTime(val / 1000) : val}
-              <br/>
-              {key}
+              {displayTime ? <>{prettyTime(val / 1000)}<br/></> : val} {key}
             </Label>
           )}
       </Labels>

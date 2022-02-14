@@ -10,9 +10,9 @@ import WarningIcon from '@mui/icons-material/WarningRounded'
 
 import RecentDataTable from './RecentDataTable'
 import Audio from '../audio/Audio'
-import * as BH from '../../apis/beehive'
+import * as BH from '~/components/apis/beehive'
 
-import {bytesToSizeSI, relTime} from '../../../components/utils/units'
+import {bytesToSizeSI, relTime} from '~/components/utils/units'
 
 
 export function isOldData(timestamp, grain = 'hours', amount = 2) {

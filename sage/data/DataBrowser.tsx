@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useHistory, useLocation, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import * as BH from '../../admin-ui/apis/beehive'
+import * as BH from '../../components/apis/beehive'
 
 import Table from '../../components/table/Table'
 import { useProgress } from '../../components/progress/ProgressProvider'

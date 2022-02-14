@@ -8,7 +8,7 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
 import * as ECR from '../../apis/ecr'
-import * as Auth from '../../../components/auth/auth'
+import * as Auth from '~/components/auth/auth'
 
 import isDevUser from './ConfigForm'
 const user = Auth.getUser()

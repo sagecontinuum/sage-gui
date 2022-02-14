@@ -5,10 +5,10 @@ import { useParams, useLocation, Link} from 'react-router-dom'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import Alert from '@mui/material/Alert'
 
-import * as BH from '../../apis/beehive'
-import * as BK from '../../apis/beekeeper'
-import * as SES from '../../apis/ses'
-import { useProgress } from '../../../components/progress/ProgressProvider'
+import * as BH from '~/components/apis/beehive'
+import * as BK from '~/components/apis/beekeeper'
+import * as SES from '~/components/apis/ses'
+import { useProgress } from '~/components/progress/ProgressProvider'
 
 import TimelineChart, {colors} from '../../viz/TimelineChart'
 

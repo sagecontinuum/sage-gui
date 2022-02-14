@@ -19,7 +19,7 @@ import DataProductList from './SpaciousDataList'
 import QueryViewer from '../../components/QueryViewer'
 import BeeIcon from 'url:../../assets/bee.svg'
 
-import * as Data from '../apis/data'
+import * as Data from '../../components/apis/data'
 import * as utils from '../../components/utils/units'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'

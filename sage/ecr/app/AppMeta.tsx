@@ -4,7 +4,7 @@ import GitIcon from 'url:../../../assets/git.svg'
 import LinkIcon from 'url:../../../assets/link.svg'
 import Chip from '@mui/material/Chip'
 
-import * as ECR from '../../apis/ecr'
+import * as ECR from '~/components/apis/ecr'
 
 const urlShortner = (url) =>
   `${url.slice(0, 40).replace('https://', '')}...`

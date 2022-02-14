@@ -15,8 +15,8 @@ import AddIcon from '@mui/icons-material/AddRounded'
 
 import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded'
 
-import * as Auth from '../../../components/auth/auth'
-import * as ECR from '../../apis/ecr'
+import * as Auth from '~/components/auth/auth'
+import * as ECR from '~/components/apis/ecr'
 
 
 const userId = Auth.getUser()

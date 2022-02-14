@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 
 import Audio from './Audio'
 
-import {getManifest} from '../../apis/beekeeper'
+import {getManifest} from '~/components/apis/beekeeper'
 
 
 function AllAudios() {

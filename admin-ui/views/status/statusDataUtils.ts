@@ -1,9 +1,9 @@
-import * as BK from '../../apis/beekeeper'
-import * as BH from '../../apis/beehive'
-import * as SES from '../../apis/ses'
+import * as BK from '~/components/apis/beekeeper'
+import * as BH from '~/components/apis/beehive'
+import * as SES from '~/components/apis/ses'
 
 import config from '../../../config'
-import { aggregateMetrics } from '../../apis/beehive'
+import { aggregateMetrics } from '~/components/apis/beehive'
 
 
 const ELASPED_THRES = 90000

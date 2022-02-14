@@ -2,9 +2,9 @@ import config from '../../config'
 export const url = config.ecr
 export const docs = config.docs
 
-import { handleErrors } from '../../components/fetch-utils'
+import { handleErrors } from '../fetch-utils'
 
-import * as Auth from '../../components/auth/auth'
+import * as Auth from '../auth/auth'
 
 const __token = Auth.getToken()
 
@@ -21,7 +21,7 @@ function get(endpoint: string) {
     .then(handleErrors)
     .then(res => res.json())
 
-  // return new Promise(prom)
+
 }
 
 function post(endpoint: string, data = '') {

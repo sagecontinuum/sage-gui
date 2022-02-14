@@ -1,10 +1,10 @@
 import config from '../../config'
 const url = config.beehive
 
-import { handleErrors } from '../../components/fetch-utils'
+import { handleErrors } from '../fetch-utils'
 import {groupBy, mapValues} from 'lodash'
 
-import * as BK from './beekeeper'
+import * as BK from '../../components/apis/beekeeper'
 
 
 export const cameraOrientations = [

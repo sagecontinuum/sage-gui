@@ -31,7 +31,7 @@ The testing framework is made up 3 core pieces:
   * etc
 
 
-## File Organization 
+## File Organization
 
 Config:
 
@@ -42,7 +42,7 @@ Mocks:
 
 * [/\__mocks__/](../__mocks__/): any high-level pieces/components related to mocks which are often reused (such as `MockTheme.tsx`)
 * [/\__mocks__/server.ts](/__mocks__/server.ts): configuration for the Mock Service Worker (MSW)
-* [/sage/apis/ecr.mocks.ts](/sage/apis/ecr.mocks.ts): mock data and MSW mock handlers
+* [/components/apis/ecr.mocks.ts](/components/apis/ecr.mocks.ts): mock data and MSW mock handlers
 
 Example Test Code:
 

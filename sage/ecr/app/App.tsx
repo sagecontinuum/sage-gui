@@ -9,14 +9,14 @@ import Divider from '@mui/material/Divider'
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
 
-import {Tabs, Tab} from '../../../components/tabs/Tabs'
-import {useProgress} from '../../../components/progress/ProgressProvider'
+import {Tabs, Tab} from '~/components/tabs/Tabs'
+import {useProgress} from '~/components/progress/ProgressProvider'
 import TagList from './TagList'
 import BeeIcon from 'url:../../../assets/bee.svg'
 import { Thumb } from '../formatters'
 
-import * as ECR from '../../apis/ecr'
-import * as Auth from '../../../components/auth/auth'
+import * as ECR from '~/components/apis/ecr'
+import * as Auth from '~/components/auth/auth'
 
 
 import marked from 'marked/lib/marked'

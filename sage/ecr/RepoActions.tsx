@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/dialogs/ConfirmationDialog'
 import ShareDialog from './dialogs/ShareRepo'
 import { useSnackbar } from 'notistack'
 
-import * as ECR from '../apis/ecr'
+import * as ECR from '../../components/apis/ecr'
 
 
 type ActionBtnProps = {

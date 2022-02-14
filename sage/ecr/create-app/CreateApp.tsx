@@ -18,11 +18,11 @@ import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
 
 import ConfigForm from './ConfigForm'
-import FilterMenu from '../../../components/FilterMenu'
-import CheckBox from '../../../components/input/Checkbox'
+import FilterMenu from '~/components/FilterMenu'
+import CheckBox from '~/components/input/Checkbox'
 
-import * as Auth from '../../../components/auth/auth'
-import * as ECR from '../../apis/ecr'
+import * as Auth from '~/components/auth/auth'
+import * as ECR from '~/components/apis/ecr'
 import FormControlLabel from '@mui/material/FormControlLabel'
 
 const user = Auth.getUser()
