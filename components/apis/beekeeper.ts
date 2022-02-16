@@ -146,6 +146,25 @@ export async function getState() : Promise<State[]> {
     allMeta = allMeta.filter(obj => includeList.includes(obj.id))
   }
 
+  // Add in dell nodes (until they are in beekeeper);
+  // todo(nc): remove once registered!!
+  allMeta = [
+    ...allMeta,
+    ...Object.values(meta)
+      .filter(o => o.node_type == 'Dell' && o.node_id.length == 16)
+      .map(o => ({
+        ...o,
+        id: o.node_id,
+        hasStaticGPS: !!o.gps_lat && !!o.gps_lon,
+        status: 'dell node',
+        lat: o.gps_lat,
+        lng: o.gps_lon
+      }))
+  ].filter((o, i, self) =>
+    i == self.findIndex(o2 => o2.id == o.id)
+  )
+
+
   return allMeta
 }
 
