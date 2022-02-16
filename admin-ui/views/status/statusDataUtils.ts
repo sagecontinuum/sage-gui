@@ -245,7 +245,6 @@ export function mergeMetrics(
       rxPackets: getMetric(byNode, id, 'sys.net.rx_packets', false),
       ip: getMetric(byNode, id, 'sys.net.ip', false)?.nx?.find(o => o.meta.device == 'wan0')?.value,
       health: {
-        oldSanity: getSanity(byNode, id),
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}
       }

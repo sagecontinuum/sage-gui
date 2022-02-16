@@ -18,31 +18,19 @@ const barColors = {
 
 type Issues = {
   tests: number
-  plugins: number
   temps: number
-  fsUtil: number
 }
 
 function getIssues(data) : Issues {
-  const tests = data.reduce((acc, obj) => {
-    const total = acc + (obj?.health?.oldSanity?.failed || 0)
-    return total
-  }, 0)
-
-  const plugins = data.reduce((acc, obj) =>
-    acc + (obj?.pluginStatus?.failed || 0)
+  const tests = data.reduce((acc, obj) =>
+    acc + (obj?.health?.sanity?.failed || 0)
   , 0)
-
 
   const temps = data.reduce((acc, obj) =>
     acc + (obj?.temp >= 70 ? 1 : 0)
   , 0)
 
-  const fsUtil = data.reduce((acc, obj) => {
-    return acc + (obj?.temp >= 70 ? 1 : 0)
-  }, 0)
-
-  return {tests, plugins, temps, fsUtil}
+  return {tests, plugins, temps}
 }
 
 
@@ -87,9 +75,7 @@ export default function Charts(props: Props) {
   // highlevel stats
   const [issues, setIssues] = useState<Issues>({
     tests: null,
-    plugins: null,
-    temps: null,
-    fsUtil: null
+    temps: null
   })
 
 
@@ -131,7 +117,6 @@ export default function Charts(props: Props) {
       <div className="flex gap summary-boxes">
         {showChart('tests') && <SummaryBox label="Sanity" value={issues.tests}/>}
         {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
-        {showChart('fsutil') && <SummaryBox label="FS Util" value={'n/a'}/>}
       </div>
     </Root>
   )
