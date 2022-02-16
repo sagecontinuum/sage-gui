@@ -1,11 +1,9 @@
 /* eslint-disable react/display-name */
-import React from 'react'
+import { Fragment } from 'react'
 import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
-import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-import Dot from '@mui/icons-material/FiberManualRecord'
 import ChartsIcon from '@mui/icons-material/AssessmentOutlined'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Badge from '@mui/material/Badge'
@@ -16,12 +14,10 @@ import Chip from '@material-ui/core/Chip'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '~/components/utils/units'
-import * as BH from '~/components/apis/beehive'
 
 import config from '../../../config'
 
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
-
 
 
 const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
@@ -44,73 +40,6 @@ const sysTimeOtps = {
 }
 
 
-type MetricsByHost = {
-  [host: string]: {
-    [metricName: string]: BH.SanityMetric[] | number
-  }
-}
-
-const getSanityIcon = (sanity: MetricsByHost) => {
-  if (!sanity) return <div className="text-center">-</div>
-
-  const {warnings, failed} = sanity
-
-  // build list of issues for tooltip
-  const tt = []
-  Object.keys(sanity).forEach(key => {
-    if (!key.includes('sys.sanity_status'))
-      return
-
-    const name = key.split('sys.sanity_status.')[1]
-
-    const {value, meta} = sanity[key][0]
-    const hasIssue = value > 0
-    const severity = meta.severity
-    if (hasIssue)
-      tt.push(
-        <div className="flex items-center" key={name}>
-          <Dot className={severity} fontSize="small" />{name}
-        </div>
-      )
-  })
-
-  if (failed) {
-    const issues = failed + (warnings || 0)
-    return (
-      <div className="text-center">
-        <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-          <FailedBadge badgeContent={issues} />
-        </Tooltip>
-      </div>
-    )
-  } else if (warnings) {
-    return (
-      <div className="text-center">
-        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
-          <WarningDot variant="dot" overlap="circular">
-            <CheckIcon className="success flex" />
-          </WarningDot>
-        </Tooltip>
-      </div>
-    )
-  } else if (!failed) {
-    return (
-      <div className="text-center">
-
-        <Tooltip title={`All tests passed`}>
-          <CheckIcon className="success" />
-        </Tooltip>
-      </div>
-    )
-  } else {
-    return (
-      <div className="text-center">
-        <InactiveIcon className="inactive" />
-      </div>
-    )
-  }
-}
-
 const FailedBadge = styled(Badge)`
   color: #fff;
   .MuiBadge-badge {
@@ -123,66 +52,6 @@ const WarningDot = styled(Badge)`
     background-color: #ffbd06;
   }
 `
-
-
-const getPluginStatusIcon = (data) => {
-  if (!data || !data.details) return <div className="text-center">-</div>
-
-  const {warnings, failed} = data
-
-  // build list of issues for tooltip
-  const tt = []
-  data.details.forEach(obj => {
-    const {value, meta} = obj
-    const hasIssue = value > 0
-    const severity = meta.severity
-    const status = meta.status
-
-    if (hasIssue)
-      tt.push(
-        <div className="flex items-center" key={status}>
-          <Dot className={severity} fontSize="small" /> {obj.meta.deployment} ({status})
-        </div>
-      )
-  })
-
-  if (failed) {
-    const issues = failed + (warnings || 0)
-    return (
-      <div className="text-center">
-        <Tooltip title={<><h3 className="no-margin">{issues} recent issue{issues > 1 ? 's' : ''}:</h3><br/> {tt}</>} >
-          <FailedBadge badgeContent={issues} />
-        </Tooltip>
-      </div>
-    )
-  } else if (warnings) {
-    return (
-      <div className="text-center">
-        <Tooltip title={<><h3 className="no-margin">{warnings} warning{warnings > 1 ? 's' : ''}:</h3><br/> {tt}</>}>
-          <WarningDot variant="dot" overlap="circular">
-            <CheckIcon className="success flex" />
-          </WarningDot>
-        </Tooltip>
-      </div>
-    )
-  } else if (!failed) {
-    return (
-      <div className="text-center">
-
-        <Tooltip title={`All tests passed`}>
-          <CheckIcon className="success" />
-        </Tooltip>
-      </div>
-    )
-  } else {
-    return (
-      <div className="text-center">
-        <InactiveIcon className="inactive" />
-      </div>
-    )
-  }
-}
-
 
 export function getColorClass(val, severe: number, warning: number, defaultClass?: string) {
   if (!val || val >= severe) return 'severe font-bold'
@@ -228,17 +97,17 @@ function FSPercent({aggFSSize, aggFSAvail, host, mounts}) {
 
         // don't care about 'ro' for pi
         if (host == 'rpi' && key == 'ro') {
-          return <React.Fragment key={key}></React.Fragment>
+          return <Fragment key={key}></Fragment>
         }
 
         return (
-          <React.Fragment key={key}>
+          <Fragment key={key}>
             <Tooltip title={aggFSSize[key].mntPath} placement="top">
               <FSItem className={getColorClass(percent, 90, 80)}>
                 {percent.toFixed(2)}%
               </FSItem>
             </Tooltip>
-          </React.Fragment>
+          </Fragment>
         )
       })
     }
@@ -278,12 +147,7 @@ const columns = [{
       }
     </Link>
   }
-}, /* {
-  id: 'pluginStatus',
-  label: 'Plugins',
-  width: '5px',
-  format: (val) => getPluginStatusIcon(val)
-}, */ {
+}, {
   id: 'node_type',
   label: 'Type',
   hide: false
