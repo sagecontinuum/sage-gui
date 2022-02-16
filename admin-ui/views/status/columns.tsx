@@ -40,16 +40,11 @@ const sysTimeOtps = {
 }
 
 
-const FailedBadge = styled(Badge)`
-  color: #fff;
+const LiveGPSDot = styled(Badge)`
   .MuiBadge-badge {
-    background-color: hsl(0, 83%, 35%);
-  }
-`
-
-const WarningDot = styled(Badge)`
-  .MuiBadge-badge {
-    background-color: #ffbd06;
+    right: 3px;
+    top: 2px;
+    padding: 0px;
   }
 `
 
@@ -165,8 +160,14 @@ const columns = [{
       <Link to={`node/${obj.id}`}>
         {val ? val : `-`}
       </Link>
-      {obj.lat && obj.lng
-        && <MapIcon fontSize="small"/>
+      {obj.lat && obj.lng &&
+        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
+          {
+          (obj.hasStaticGPS ?
+            <MapIcon fontSize="small"/> :
+            <MapIcon fontSize="small" style={{color: "#176dc4"}}/>)
+          }
+        </LiveGPSDot>
       }
     </NodeCell>
 }, {

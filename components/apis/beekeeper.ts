@@ -4,6 +4,7 @@ const url = config.beekeeper
 import { handleErrors } from '../fetch-utils'
 
 import { NodeStatus } from '../../admin-ui/node'
+import { OpenInBrowser } from '@mui/icons-material'
 
 
 const API_URL = `${url}/api`
@@ -17,7 +18,6 @@ export type State = {
   internet_connection: string
   mode: string
   name: string
-  position: string    // will be point()?
   project_id: null
   registration_event: string // todo: fix format
   server_node: string
@@ -25,6 +25,8 @@ export type State = {
 
   /* new, proposed fields? */
   vsn: string
+  gps_lat: string     // todo: should be number
+  gps_lon: string     // todo: should be number
   node_type?: string
   project?: string
   location?: string
@@ -51,7 +53,6 @@ async function getMonitorData() {
   const data = await get(`${url}/monitoring`)
 
   return data
-    .filter(obj => 'node_id' in obj)
     .reduce((acc, {node_id, expected_online}) =>
       ({...acc, [node_id]: {expected_online}})
     , {})
@@ -64,15 +65,20 @@ type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 export async function getManifest(params?: MetaParams) {
   let {node, by = 'id'} = params || {}
 
-  const data = await get(`${url}/production`)
-  const d = data.filter(obj => 'node_id' in obj)
+  let data = await get(`${url}/production`)
 
+  // special handling of gps since it is string type; todo(nc): remove
+  data = data.map(o => ({
+    ...o,
+    gps_lat: o.gps_lat?.length ? parseFloat(o.gps_lat) : null,
+    gps_lon: o.gps_lon?.length ? parseFloat(o.gps_lon) : null,
+  }))
 
   let mapping
   if (by == 'id') {
-    mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
+    mapping = data.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
   } else if (by == 'vsn') {
-    mapping = d.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+    mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
   }
 
   if (!node) {
@@ -93,17 +99,16 @@ export async function getFactory(params?: MetaParams) {
   const {node, by = 'id'} = params
 
   const data = await get(`${url}/factory`)
-  const d = data.filter(obj => 'node_id' in obj)
 
   let mapping
   if (by == 'id') {
-    mapping = d.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
+    mapping = data.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
   } else if (by == 'vsn') {
-    mapping = d.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+    mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
   }
 
   return node ?
-    d.filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0] : mapping
+    data.filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0] : mapping
 }
 
 
@@ -119,6 +124,7 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
     return {
       ...obj,
       ...meta,
+      expected_online: !!expected_online,
       status: expected_online ? 'reporting' : 'offline',
       registration_event: new Date(obj.registration_event).getTime()
     }
@@ -131,11 +137,16 @@ export async function getState() : Promise<State[]> {
   const proms = [getNodes(), getManifest(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
-  const shouldFilter = monitorMeta && config.admin.filterNodes
-  const includeList = Object.keys(monitorMeta)
-  nodes = nodes.filter(obj => shouldFilter ? includeList.includes(obj.id) : true)
+  let allMeta = _joinNodeData(nodes, meta, monitorMeta)
 
-  return _joinNodeData(nodes, meta, monitorMeta)
+  // whether or not to ignore things like 000000000001, laptop registration, test nodes, etc
+  const shouldSanitizeNodes = monitorMeta && config.admin.filterNodes
+  if (shouldSanitizeNodes) {
+    const includeList = Object.keys(monitorMeta)
+    allMeta = allMeta.filter(obj => includeList.includes(obj.id))
+  }
+
+  return allMeta
 }
 
 

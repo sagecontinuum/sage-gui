@@ -30,7 +30,7 @@ function getIssues(data) : Issues {
     acc + (obj?.temp >= 70 ? 1 : 0)
   , 0)
 
-  return {tests, plugins, temps}
+  return {tests, temps}
 }
 
 

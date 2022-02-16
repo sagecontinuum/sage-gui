@@ -205,7 +205,7 @@ export function mergeMetrics(
   data: BK.State[], records: BH.Record[], temps, health, sanity
 ) {
   // If a VSN is changed, the data api will return latest records for each VSN.
-  // So, we only consider metrics with VSNs which are known by beekeeper
+  // So, we only consider metrics with VSNs which are known by "beekeeper"
   const vsns = data.map(o => o.vsn)
   const metrics = records.filter(m => vsns.includes(m.meta.vsn))
   const byNode = aggregateMetrics(metrics)
@@ -220,6 +220,9 @@ export function mergeMetrics(
       temps[id]['iio.in_temp_input'] : null
     const temp = nodeTemps ? nodeTemps[nodeTemps.length-1].value / 1000 : -999
 
+    const liveLat = getMetric(byNode, id, 'sys.gps.lat').nx
+    const liveLon = getMetric(byNode, id, 'sys.gps.lon').nx
+
     const vsn = nodeObj.vsn
 
     return {
@@ -228,8 +231,10 @@ export function mergeMetrics(
       temp,
       status: determineStatus(elaspedTimes),
       elaspedTimes,
-      lat: getMetric(byNode, id, 'sys.gps.lat').nx,
-      lng: getMetric(byNode, id, 'sys.gps.lon').nx,
+      hasStaticGPS: !!nodeObj.gps_lat && !!nodeObj.gps_lon,
+      hasLiveGPS: !!liveLat && !!liveLon,
+      lat: nodeObj.gps_lat || liveLat,
+      lng: nodeObj.gps_lon || liveLon,
       alt: getMetric(byNode, id, 'sys.gps.alt').nx,
       uptimes: getMetric(byNode, id, 'sys.uptime'),
       sysTimes: getMetric(byNode, id, 'sys.time'),

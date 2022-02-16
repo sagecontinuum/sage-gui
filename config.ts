@@ -26,7 +26,8 @@ export default  {
       'ws-rpi': 'rpi',
       'ws-nxcore': 'nx',
       'ws-nxagent': 'nxagent'
-    }
+    },
+    disableMap: false
   },
   portal: {
     featuredApps: [

@@ -31,7 +31,7 @@ const TIME_OUT = 5000
 const getOptions = (data: object[], field: string) : Option[] =>
   [...new Set(data.map(obj => obj[field])) ]
     .map(name => ({id: name, label: name}))
-    .filter(o => o.id.length)
+    .filter(o => o.id?.length)
 
 
 const FilterBtn = ({label}: {label: string}) =>
