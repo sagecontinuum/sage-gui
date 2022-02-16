@@ -273,7 +273,7 @@ function Map(props: Props) {
       // need delay for initial styling load
       setTimeout(() => {
         renderLabels(map, geoSpec)
-      }, 1000)
+      }, 1500)
     }
 
     document.querySelectorAll('.mapboxgl-marker').forEach(el =>

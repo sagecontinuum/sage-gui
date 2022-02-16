@@ -33,7 +33,7 @@ const dateOpts = {
   second: 'numeric'
 }
 
-const sysTimeOtps = {
+const sysTimeOpts = {
   hour: 'numeric',
   minute: 'numeric',
   second: 'numeric'
@@ -150,22 +150,23 @@ const columns = [{
   id: 'id',
   label: 'ID',
   width: '100px',
-  format: (val) => <Link to={`/node/${val}`}>{val}</Link>
+  format: (val, obj) =>
+    obj.node_type != 'Dell' ?
+      <Link to={`/node/${val}`}>{val}</Link> : val
 }, {
   id: 'vsn',
   label: 'VSN',
   width: '50px',
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
-      <Link to={`node/${obj.id}`}>
-        {val ? val : `-`}
-      </Link>
+      {obj.node_type != 'Dell' ?
+        <Link to={`node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
+      }
       {obj.lat && obj.lng &&
         <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
-          {
-          (obj.hasStaticGPS ?
+          {obj.hasStaticGPS ?
             <MapIcon fontSize="small"/> :
-            <MapIcon fontSize="small" style={{color: "#176dc4"}}/>)
+            <MapIcon fontSize="small" style={{color: "#36b8ff"}}/>
           }
         </LiveGPSDot>
       }
@@ -345,7 +346,7 @@ const columns = [{
 
     return Object.keys(val).map(host =>
       <div key={host}>
-        {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOtps)}
+        {new Date(val[host] * 1000).toLocaleString('en-US', sysTimeOpts)}
       </div>
     )
   },

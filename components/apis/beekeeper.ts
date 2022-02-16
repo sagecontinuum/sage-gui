@@ -4,7 +4,6 @@ const url = config.beekeeper
 import { handleErrors } from '../fetch-utils'
 
 import { NodeStatus } from '../../admin-ui/node'
-import { OpenInBrowser } from '@mui/icons-material'
 
 
 const API_URL = `${url}/api`
@@ -25,8 +24,8 @@ export type State = {
 
   /* new, proposed fields? */
   vsn: string
-  gps_lat: string     // todo: should be number
-  gps_lon: string     // todo: should be number
+  gps_lat: number
+  gps_lon: number
   node_type?: string
   project?: string
   location?: string
@@ -67,7 +66,7 @@ export async function getManifest(params?: MetaParams) {
 
   let data = await get(`${url}/production`)
 
-  // special handling of gps since it is string type; todo(nc): remove
+  // special handling of gps since they are of type 'string'; todo(nc): remove
   data = data.map(o => ({
     ...o,
     gps_lat: o.gps_lat?.length ? parseFloat(o.gps_lat) : null,
@@ -76,7 +75,9 @@ export async function getManifest(params?: MetaParams) {
 
   let mapping
   if (by == 'id') {
-    mapping = data.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
+    mapping = data.reduce((acc, node) =>
+      ({...acc, [node.node_id?.length == 16 ? node.node_id : node.vsn]: node})
+    , {})
   } else if (by == 'vsn') {
     mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
   }
@@ -151,10 +152,10 @@ export async function getState() : Promise<State[]> {
   allMeta = [
     ...allMeta,
     ...Object.values(meta)
-      .filter(o => o.node_type == 'Dell' && o.node_id.length == 16)
+      .filter(o => o.node_type == 'Dell')
       .map(o => ({
         ...o,
-        id: o.node_id,
+        id: o.node_id?.length == 16 ? o.node_id : o.vsn,
         hasStaticGPS: !!o.gps_lat && !!o.gps_lon,
         status: 'dell node',
         lat: o.gps_lat,
