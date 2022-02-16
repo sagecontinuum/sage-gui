@@ -332,15 +332,15 @@ const MapContainer = styled.div`
   .marker-dot {
     height: ${dotSize}px;
     width: ${dotSize}px;
-    background-color: #aaa;
+    border: 1px solid #666;
     border-radius: 50%;
-    opacity: .75;
     display: inline-block;
   }
 
   .marker-reporting  {
     background: #3ac37e;
     border: 1px solid #2b9962;
+    opacity: .65;
   }
 
   .marker-degraded {
@@ -349,6 +349,7 @@ const MapContainer = styled.div`
 
   .marker-not-reporting {
      background: #d72020;
+     border: 1px solid #992727;
   }
 `
 
