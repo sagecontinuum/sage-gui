@@ -20,8 +20,8 @@ import config from '../../../config'
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
 
-const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
-const TEMP_DASH = `${config.influxDashboard}/082da52c87209000?lower=now%28%29%20-%2024h`
+//const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
+const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
 
 
 const dateOpts = {
@@ -194,26 +194,28 @@ const columns = [{
   label: 'Data',
   format: (val, obj) =>
     <>
+     {/*
       <Tooltip
         title={<>View sensors <LaunchIcon style={{fontSize: '1.1em'}}/></>}
         placement="top"
       >
         <IconButton
           size="small"
-          href={`${SENSOR_DASH}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`}
+          href={`${SENSOR_DASH}&vars%5BVSN%5D=${obj.vsn}`}
           target="_blank"
           rel="noreferrer"
         >
           <ChartsIcon />
         </IconButton>
       </Tooltip>
+      */}
       <Tooltip
         title={<>View thermals <LaunchIcon style={{fontSize: '1.1em'}}/></>}
         placement="top"
       >
         <IconButton
           size="small"
-          href={`${TEMP_DASH}&vars%5BnodeID%5D=${obj.id.toLowerCase()}`}
+          href={`${TEMP_DASH}&vars%5BVSN%5D=${obj.vsn}`}
           className="no-style"
           target="_blank"
           rel="noreferrer"
