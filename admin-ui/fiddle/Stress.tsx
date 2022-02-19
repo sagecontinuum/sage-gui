@@ -15,15 +15,18 @@ export default function Stress() {
     // get node list
     getManifest()
       .then(async meta => {
-        const nodeIds = Object.keys(meta)
+        const nodeIds = Object.keys(meta).slice(0,15)
         setNodeIds(nodeIds)
-
 
         const [prom, query] = await BH.stressTest(nodeIds[0].toLowerCase())
         setQuery(query)
 
         // fetch some data
-        const proms = Promise.all(nodeIds.map(id => BH.stressTest(id.toLowerCase())[0] ))
+        const proms = Promise.allSettled(
+          nodeIds.map(id =>
+            BH.stressTest(id.toLowerCase())[0]
+          )
+        )
 
         proms.catch(err => {
           console.log('err', err)

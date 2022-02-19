@@ -5,10 +5,9 @@ import styled from 'styled-components'
 import * as BH from '~/components/apis/beehive'
 import * as BK from '~/components/apis/beekeeper'
 
-
 import { useProgress } from '~/components/progress/ProgressProvider'
-
 import TimelineChart, { colors } from '../../viz/TimelineChart'
+
 
 const timeOpts = { hour: '2-digit', minute:'2-digit' }
 const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
@@ -27,9 +26,9 @@ export default function TestView() {
   const history  = useHistory()
 
   const { setLoading } = useProgress()
-  const [sanity, setSanity] = useState()
-  const [health, setHealth] = useState()
-  const [manifest, setManifest] = useState(null)
+  const [sanity, setSanity] = useState<BH.AggMetrics>()
+  const [health, setHealth] = useState<BH.AggMetrics>()
+  const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
   const [error, setError]= useState()
 
@@ -37,19 +36,30 @@ export default function TestView() {
     setLoading(true)
 
     let p1 = BH.getNodeHealth(null, '-7d')
-      .then((data) => setHealth(data))
       .catch((err) => setError(err))
 
     let p2 = BH.getNodeSanity('-7d')
-      .then((data) => setSanity(data))
       .catch((err) => setError(err))
 
     // temp solution for vsn <-> node id
-    BK.getManifest({by: 'vsn'})
-      .then(data => setManifest(data))
+    const p3 = BK.getManifest({by: 'vsn'})
       .catch((err) => setError(err))
 
-    Promise.all([p1, p2])
+    Promise.all([p1, p2, p3])
+      .then(([health, sanity, meta]) => {
+        const vsns = Object.values(meta)
+          .filter(o => o.node_id?.length && o.node_type !== 'Dell')
+          .map(o => o.vsn)
+
+        const healthSubset = Object.keys(health)
+          .reduce((acc, vsn) =>
+            vsns.includes(vsn) ? {...acc, [vsn]: health[vsn]} : acc
+          , {})
+
+        setManifest(meta)
+        setHealth(healthSubset)
+        setSanity(sanity)
+      })
       .finally(() => setLoading(false))
 
   }, [setLoading])

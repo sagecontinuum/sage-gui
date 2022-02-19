@@ -257,8 +257,8 @@ function drawChart(
        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
        value: ${data.value}`
     )
-      .style('top', `${evt.pageY}px`)
-      .style('left', `${evt.pageX + 10}px`)
+      .style('top', `${evt.pageY + 10}px`)
+      .style('left', `${evt.pageX - 100}px`)
       .style('z-index', 999)
 
     tt.style('display', null)

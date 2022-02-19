@@ -15,6 +15,7 @@ import AudioView from './views/audio/LatestAudio'
 import Stress from './fiddle/Stress'
 import Timeline from './fiddle/Timeline'
 
+import Divider from '@mui/material/Divider'
 import NotFound from '../components/404'
 import { ProgressProvider } from '../components/progress/ProgressProvider'
 
@@ -27,8 +28,8 @@ const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/status">Status</NavLink></li>
     <li><NavLink to="/tests">Tests</NavLink></li>
-    {/*<li><NavLink to="/surya">Surya</NavLink></li>*/}
-    {/*<li><NavLink to="/plugins">Plugins</NavLink></li>*/}
+    <Divider orientation="vertical" flexItem style={{margin: '0 10px' }} />
+    <li><NavLink to="/surya">Factory</NavLink></li>
   </NavItems>
 
 

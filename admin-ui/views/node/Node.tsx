@@ -73,6 +73,19 @@ function sanityColor(val, obj) {
     return colors.red4
 }
 
+const timeOpts = { hour: '2-digit', minute:'2-digit' }
+const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
+
+
+
+function getDateTimeStr(timestamp) {
+  return (
+    `${new Date(timestamp).toLocaleDateString('en-US', dateOpts)}<br>
+    ${new Date(timestamp).toLocaleTimeString('en-US', timeOpts)} - ${new Date(new Date(timestamp).getTime() + 60*60*1000).toLocaleTimeString('en-US', timeOpts)}`
+  )
+}
+
+
 
 function SignOffTable({data}) {
   if (!data) return <></>
@@ -192,10 +205,9 @@ export default function NodeView() {
       .finally(() => setLoading1(false))
 
     setLoading2(true)
-    const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
+    const p2 = BH.getSanityChart(node.toLowerCase(), '-2d')
       .then((sanity) => {
         if (!sanity) {
-          setSanityData(sanity)
           return
         }
 
@@ -383,3 +395,4 @@ const Data = styled.div`
   max-width: 400px;
   margin-left: 2em;
 `
+
