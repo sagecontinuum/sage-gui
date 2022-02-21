@@ -116,7 +116,7 @@ export async function getLatestTemp() {
 
 
 export function aggregateMetrics(data: Record[]) : AggMetrics {
-  if (!data)
+  if (!data.length)
     return null
 
   let byNode = {}

@@ -86,7 +86,6 @@ function getDateTimeStr(timestamp) {
 }
 
 
-
 function SignOffTable({data}) {
   if (!data) return <></>
 
@@ -100,7 +99,7 @@ function SignOffTable({data}) {
 
         <tr>
           {Object.keys(data)
-            .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+            .filter(k => !['vsn', 'node_id', 'Final Sign-off', 'node_type'].includes(k))
             .sort()
             .map(label => <th key={label}>{label != 'Phase 2 Sign-off' ? label.replace(/Phase|2|3|Sign\-off/g,'') : label.replace(/Phase|2|3/g,'')}</th> )
           }
@@ -111,7 +110,7 @@ function SignOffTable({data}) {
       <tbody>
         <tr>
           {Object.keys(data)
-            .filter(k => !['vsn', 'node_id', 'Final Sign-off'].includes(k))
+            .filter(k => !['vsn', 'node_id', 'Final Sign-off', 'node_type'].includes(k))
             .sort()
             .map(name => {
               const val = data[name]

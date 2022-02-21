@@ -82,7 +82,7 @@ export default function StatusView() {
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
-  const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Dell'>('all')
+  const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
   const [selected, setSelected] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)

@@ -151,7 +151,7 @@ const columns = [{
   label: 'ID',
   width: '100px',
   format: (val, obj) =>
-    obj.node_type != 'Dell' ?
+    obj.node_type != 'Blade' ?
       <Link to={`/node/${val}`}>{val}</Link> : val
 }, {
   id: 'vsn',
@@ -159,7 +159,7 @@ const columns = [{
   width: '50px',
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
-      {obj.node_type != 'Dell' ?
+      {obj.node_type != 'Blade' ?
         <Link to={`node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
       }
       {obj.lat && obj.lng &&

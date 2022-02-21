@@ -32,6 +32,32 @@ export type State = {
   status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 
+export type Manifest = {
+  vsn: string
+  commission_date: string
+  project: string
+  focus: string
+  gps_lat: number
+  gps_lon: number
+  left_camera: string
+  location: string
+  modem_sim: string
+  node_id: string
+  node_type: 'Blade' | 'WSN'
+  notes: string
+  modem: boolean
+  nx_agent: boolean
+  retire_date: string
+  bottom_camera: string
+  right_camera: string
+  top_camera: string
+  shield: boolean
+  build_date: string
+  shipping_address: string
+}
+
+
+
  export type OntologyObj = {
   description: string
   ontology: string // xxy.yyy.zzz
@@ -47,21 +73,22 @@ function get(endpoint: string, opts={}) {
 }
 
 
-
-async function getMonitorData() {
-  const data = await get(`${url}/monitoring`)
-
-  return data
-    .reduce((acc, {node_id, expected_online}) =>
-      ({...acc, [node_id]: {expected_online}})
-    , {})
+export async function getNodes() {
+  const data = await get(`${API_URL}/state`)
+  return data.data
 }
 
 
+export async function getNode(id: string) : Promise<State[]> {
+  const data = await get(`${API_URL}/state/${id}`)
+  return data.data
+}
+
 
 type MetaParams = {node?: string, by?: 'vsn' | 'id'}
+export type ManifestMap = {[id_or_vsn: string]: Manifest}
 
-export async function getManifest(params?: MetaParams) {
+export async function getManifest(params?: MetaParams) : Promise<ManifestMap> {
   let {node, by = 'id'} = params || {}
 
   let data = await get(`${url}/production`)
@@ -96,6 +123,18 @@ export async function getManifest(params?: MetaParams) {
 }
 
 
+
+async function getMonitorData() {
+  const data = await get(`${url}/monitoring`)
+
+  return data
+    .reduce((acc, {node_id, expected_online}) =>
+      ({...acc, [node_id]: {expected_online}})
+    , {})
+}
+
+
+
 export async function getFactory(params?: MetaParams) {
   const {node, by = 'id'} = params
 
@@ -111,6 +150,7 @@ export async function getFactory(params?: MetaParams) {
   return node ?
     data.filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0] : mapping
 }
+
 
 
 function _joinNodeData(nodes, nodeMetas, monitorMeta) {
@@ -152,7 +192,7 @@ export async function getState() : Promise<State[]> {
   allMeta = [
     ...allMeta,
     ...Object.values(meta)
-      .filter(o => o.node_type == 'Dell')
+      .filter(o => o.node_type == 'Blade')
       .map(o => ({
         ...o,
         id: o.node_id?.length == 16 ? o.node_id : o.vsn,
@@ -170,7 +210,6 @@ export async function getState() : Promise<State[]> {
 }
 
 
-
 export async function getSuryaState() : Promise<State[]> {
   const proms = [getNodes(), getManifest(), getMonitorData(), getFactory({by: 'id'})]
   const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
@@ -178,20 +217,6 @@ export async function getSuryaState() : Promise<State[]> {
   const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
   const allSuryaData = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
   return allSuryaData
-}
-
-
-
-export async function getNodes() {
-  const data = await get(`${API_URL}/state`)
-  return data.data
-}
-
-
-
-export async function getNode(id: string) : Promise<State[]> {
-  const data = await get(`${API_URL}/state/${id}`)
-  return data.data
 }
 
 

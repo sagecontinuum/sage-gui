@@ -11,7 +11,6 @@ export default  {
   auth: 'https://auth.sagecontinuum.org',
 
   dockerRegistry: 'registry.sagecontinuum.org',
-
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',
   dataBrowserURL: 'https://portal.sagecontinuum.org/data-browser',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
