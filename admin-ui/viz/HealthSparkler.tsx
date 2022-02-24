@@ -1,8 +1,6 @@
-import React from 'react'
-
 import Tooltip from '@mui/material/Tooltip'
-
 import {colors} from './TimelineChart'
+
 
 
 const padding = {padding: '5px 0 0 10px'}
@@ -29,7 +27,7 @@ export function sanityColor(val, obj) {
 type Props = {
   data: {value: number}[]
   colorFunc: (value: number, obj?: object) => string
-  name: string
+  name: string | JSX.Element
   width?: number
   height?: number
   cellW?: number
