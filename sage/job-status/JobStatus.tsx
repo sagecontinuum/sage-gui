@@ -11,29 +11,44 @@ import Table from '../../components/table/Table'
 import JobTimeLine from './JobTimeline'
 import SummaryBar from '../../admin-ui/views/status/charts/SummaryBar'
 
+import * as BK from '../../components/apis/beekeeper'
 import * as BH from '../../components/apis/beehive'
 import { useProgress } from '../../components/progress/ProgressProvider'
 
 
+
+type TaskEvent = {
+  timestamp: string
+  name: string
+  value: {
+    goal_id: string                     // "f50d19ca-7dee-4dee-78f5-05eb258eeecf",
+    k3s_job_name: string                // "surface-water-detection-left-1645641900",
+    k3s_job_status: string              // "Complete",
+    k3s_pod_name: string                // "cloud-cover-top-1645746942-ckwds"
+    k3s_pod_node_name: string           // "000048b02d15bc7c.ws-nxcore"
+    k3s_pod_status: string
+    plugin_args: string                 //  "-stream left -model-path deeplabv2_resnet101_msc-cocostuff164k-100000.pth -config-path configs/cocostuff164k.yaml",
+    plugin_image: string                // "registry.sagecontinuum.org/seonghapark/surface-water-detection:0.0.4",
+    plugin_name: string                 // "surface-water-detection-left",
+    plugin_selector: string             // "map[resource.gpu:true]",
+    plugin_status_by_scheduler: string  // "Running",
+    plugin_task: string                 // "surface-water-detection-left-1645641900"
+  }
+}
+
+
 const columns = [{
-  id: 'vsn',
-  label: 'VSN',
-  format: (v, obj) => obj.meta.vsn
-}, {
-  id: 'job',
-  label: 'Job',
-  format: (v, obj) => obj.meta.job
-}, {
-  id: 'value',
-  label: 'Name'
+  id: 'goalID',
+  label: 'ID',
+  format: (v, obj) => v.split('-')[0]
 }, {
   id: 'appCount',
   label: 'Apps',
-}, {
+}, /*{
   id: 'timestamp',
   label: 'Submitted',
   format: (val) => new Date(val).toLocaleString()
-}, {
+}, */ {
   id: 'metrics',
   label: 'Mean Runtimes',
   format: (metrics) =>
@@ -60,9 +75,6 @@ const endedSignals = [
 ]
 
 
-type GroupedGoals = {
-  [vsn: string]: BH.Record
-}
 
 export type GroupedApps = {
   [app: string]: (
@@ -75,61 +87,144 @@ export type GroupedApps = {
 }
 
 
-function parseData(data: BH.Record[]) : GroupedApps {
-  let grouped : GroupedApps = groupBy(data, 'value')
+function aggregateEvents(data: TaskEvent[]) {
+  // we only care about start / end signals (for now, anyway)
+  data = data.filter(o => startedSignal == o.name || endedSignals.includes(o.name))
 
-  for (const [app, items] of Object.entries(grouped)) {
-    // sort each list by times
-    items.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+  let byTaskIDs = groupBy(data, 'value.plugin_task')
 
-    // now find all started/ended pairs and reduce into single objects
-    let tasks = []
-    let hasStart = false
-    items.forEach(item => {
-      const name = item.name
-      const prevIdx = tasks.length - 1
+  // note: app is an overloaded term here.  it's really more like a taskname
+  const byTaskName = {}
+  for (const [taskID, events] of Object.entries(byTaskIDs)) {
+    const taskName = taskID.slice(0, taskID.lastIndexOf('-'))
+    events.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
 
-      // if we have a start signal, add to tasks
-      if (name == startedSignal) {
-        tasks.push(item)
-        hasStart = true
-        return
+    let hasStart, hasEnd = false
 
-      // if we found start already and have an end signal, complete the task info
-      } else if (
-        endedSignals.includes(name) && hasStart &&
-        tasks[prevIdx].name == startedSignal
-      ) {
-        const prevTime = tasks[prevIdx].timestamp
-        tasks[prevIdx] = {
-          ...tasks[prevIdx],
-          end: item.timestamp,
-          status: name.split('.').pop(),
-          runtime: new Date(item.timestamp).getTime() -  new Date(prevTime).getTime()
-        }
-      // if started, but no end signal, assume running
-      } else if (hasStart) {
-        tasks[prevIdx] = {
-          ...tasks[prevIdx],
-          end: new Date().toISOString(),
-          status: 'running',
-          runtime: new Date().getTime() - new Date(item.timestamp).getTime()
-        }
+    // assume at most two events (for now, anyway)
+    if (events.length == 2) {
+      hasStart = hasEnd = true
+    } else if (events.length == 1) {
+      const name = events[0].name
+      hasStart = name == startedSignal
+      hasEnd = endedSignals.includes(name)
+    } else {
+      console.warn(`parseEvents: wrong number of events for ${taskID}.  found ${events.length} events.  expecting at most 2`)
+      continue
+    }
+
+    let item
+    if (hasStart && hasEnd) {
+      const [startObj, endObj] = events
+      const end = endObj.timestamp
+      item = {
+        ...startObj,
+        end: end,
+        status: endObj.name.split('.').pop(),
+        runtime: new Date(end).getTime() -  new Date(startObj.timestamp).getTime()
+      }
+    } else if (hasEnd) {
+      console.log('todo: add representation for end times with no start?')
+      continue
+    } else if (hasStart) {
+      const startObj = events[0]
+      const start = startObj.timestamp
+
+      item = {
+        ...startObj,
+        end: new Date().toISOString(),
+        status: 'running',
+        runtime: new Date().getTime() - new Date(start).getTime()
       }
 
-      hasStart = false
+      console.warn(`Note: No end signal found for taskID=${taskID}, timestamp=${start}`)
+    }
 
-      // update list of items
-      grouped[app] = tasks
-    })
+    if (taskName in byTaskName)
+      byTaskName[taskName].push(item)
+    else
+      byTaskName[taskName] = [item]
   }
 
-  return grouped
+  return byTaskName
 }
 
 
-// todo(nc): remove
-const VSNs = ['W023']
+function reduceByNode(taskEvents: TaskEvent[]) {
+  let groupedByNode = groupBy(taskEvents, 'meta.vsn')
+
+  let byNode = {}
+  for (const [vsn, events] of Object.entries(groupedByNode)) {
+    byNode[vsn] = aggregateEvents(events)
+  }
+
+  return byNode
+}
+
+
+function mockGoalMetrics(taskEvents: TaskEvent[]) {
+  const byGoal = groupBy(taskEvents, 'value.goal_id')
+
+  let rows = []
+  for (const [goal_id, events] of Object.entries(byGoal)) {
+    const byApp = aggregateEvents(events)
+
+    const metrics = Object.keys(byApp).reduce((acc, appName) => {
+      const meanTime = byApp[appName].reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
+      return {
+        ...acc,
+        [appName]: meanTime
+      }
+    }, {})
+
+    const apps = Object.keys(byApp)
+
+    rows.push({
+      goalID: goal_id,
+      byApp,
+      apps,
+      appCount: apps.length,
+      metrics
+    })
+  }
+
+  return rows
+}
+
+
+const parseSESValue = (data) =>
+  data.map(o => ({
+    ...o,
+    value: JSON.parse(o.value as string)
+  }))
+
+
+
+// fetch tasks state event changes, and parse SES JSON Messages
+function getTaskEvents() {
+  return BH.getData({
+    start: '-2h',
+    filter: {
+      name: 'sys.scheduler.status.plugin.*'
+    }
+  }).then(data => parseSESValue(data))
+}
+
+
+function getGoals() {
+  return BH.getData({
+    start: '-30d',
+    filter: {
+      name: 'sys.scheduler.status.goal.*',
+    }
+  }).then(data => parseSESValue(data))
+  .then(data => {
+    data.sort((a,b) => b.timestamp.localeCompare(a.timestamp))
+    return data
+  })
+}
+
+
 
 
 type GeoData = {id: string, lng: number, lat: number}[]
@@ -138,75 +233,38 @@ export default function JobStatus() {
   const {setLoading} = useProgress()
 
   const [goals, setGoals] = useState<BH.Record[]>()
-  const [apps, setApps] = useState<GroupedApps>()
+  const [byNode, setByNode] = useState()
   const [geo, setGeo] = useState<GeoData>()
-
 
   const [error, setError] = useState()
 
   useEffect(() => {
     setLoading(true)
-    const appProm = BH.getData({
-      start: '-12h',
-      filter: {
-        // name: 'sys.scheduler.*',
-        plugin: 'scheduler.*'
-      }
-    }).then(data => {
-      const byVSN = groupBy(data, 'meta.vsn')
-      return byVSN
-    })
+    const proms = [getTaskEvents()]
 
-    // fetch goals to mockup concept of "jobs"
-    const goalProm = BH.getData({
-      start: '-10d',
-      filter: {
-        name: 'sys.scheduler.newgoal',
-      }
-    }).then(data => {
-      const byVSN : GroupedGoals = groupBy(data, 'meta.vsn')
-      const latest = Object.values(byVSN)
-        .reduce((acc, objs) => ([...acc, objs.pop()]), [])
-      return latest
-    })
+    Promise.all(proms)
+      .then(([taskEvents]) => {
+        const byNode = reduceByNode(taskEvents)
+        const goals = mockGoalMetrics(taskEvents)
 
-    Promise.all([appProm, goalProm])
-      .then(([appsByVsn, goals]) => {
-        const vsn = VSNs[0]
-        const apps = appsByVsn[vsn]
-        const grouped = parseData(apps)
-        setApps(grouped)
-
-        // join in apps to goals and some simple metrics
-        const uniqueApps = Object.keys(grouped)
-        const appCount = uniqueApps.length
-        const metrics = Object.keys(grouped).reduce((acc, appName) => {
-          const meanTime = grouped[appName].reduce((acc, obj) => acc + obj.runtime, 0) / grouped[appName].length
-          return {
-            ...acc,
-            [appName]: meanTime
-          }
-        }, {})
-
-        goals = goals.map(obj => ({...obj, appCount, uniqueApps, metrics}))
+        setByNode(byNode)
+        setGoals(goals)
 
         // also fetch gps for map
-        BH.getData({
-          start: '-4h',
-          filter: {
-            name: 'sys.gps.l.*',
-          },
-          tail: 1
-        }).then(gps => {
-          const byVSN = groupBy(gps, 'meta.vsn')
-          const entries = byVSN[vsn]
-          const lng = entries.find(o => o.name == 'sys.gps.lon').value
-          const lat = entries.find(o => o.name == 'sys.gps.lat').value
+        BK.getManifest({by: 'vsn'})
+          .then(data => {
+            const vsns = Object.keys(byNode)
 
-          setGeo([{id: vsn, vsn, lng, lat, status: 'reporting'}])
-        })
+            const geo = vsns.map(vsn => {
+              const d = data[vsn]
+              const lng = d.gps_lon
+              const lat = d.gps_lat
 
-        setGoals(goals)
+              return {id: vsn, vsn, lng, lat, status: 'reporting'}
+            })
+
+            setGeo(geo)
+          })
       })
       .finally(() => setLoading(false))
   }, [])
@@ -218,13 +276,19 @@ export default function JobStatus() {
 
   return (
     <Root>
-      <h1>Job Status | <small>Last 12 hours</small></h1>
+      <h1>Job Status | <small>Last 24 hours</small></h1>
 
-      <Charts className="flex">
-        {geo && <Map data={geo} selected={null} resize={false} />}
+      <Charts className="flex column">
+        <MapContainer>
+          {geo &&
+            <Map data={geo} selected={null} resize={false} />
+          }
+        </MapContainer>
 
         <TimelineContainer className="flex column" >
-          <JobTimeLine data={apps} />
+          {byNode &&
+            <JobTimeLine data={byNode['W023']} />
+          }
         </TimelineContainer>
       </Charts>
 
@@ -257,8 +321,12 @@ const Charts = styled.div`
 
 `
 
+const MapContainer = styled.div`
+  margin: 0 10%;
+`
+
 const TimelineContainer = styled.div`
-  width: 50%;
+  margin: 0 10%;
 `
 
 const TableContainer = styled.div`

@@ -3,6 +3,16 @@ import TimelineChart, {colors} from '../../admin-ui/viz/TimelineChart'
 import {GroupedApps} from './JobStatus'
 
 
+const formatJSON = (data) =>
+  JSON.stringify(data, null, 4).replace(/,/g, '<br>').replace(/\{|\}|Meta"/g, '')
+
+const colorMap = {
+  'complete': colors.green4,
+  'failed': 'rgb(180, 0, 0, 0.5)',
+  'running': 'rgb(235, 172, 101)',
+  undefined: colors.noValue
+}
+
 type Props = {
   data: GroupedApps
 }
@@ -17,15 +27,15 @@ export default function JobTimeLine(props: Props) {
           data={data}
           colorCell={(val, obj) => {
             if (obj.status === undefined) return colors.noValue
-            return obj.status == 'complete' ? colors.green4 : colors.red4
+            return colorMap[obj.status]
           }}
           tooltip={(obj) => `
             ${new Date(obj.timestamp).toLocaleString()} - ${new Date(obj.end).toLocaleTimeString()}<br>
-            ${obj.value}<br>
+            ${formatJSON(obj.value)}<br>
             start status: ${obj.name.split('.').pop()}<br>
             end status: ${obj.status}<br>
             <br>
-            <code>${JSON.stringify(obj.meta, null, 4).replace(/,/g, '<br>').replace(/\{|\}|"/g, '')}</code>
+            <code>${formatJSON(obj.meta)}</code>
           `}
           onRowClick={(val, data) => console.log('row click', val, data)}
           onCellClick={(data) => console.log('cell click', data)}
