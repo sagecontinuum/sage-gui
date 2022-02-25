@@ -48,7 +48,7 @@ export default function TestView() {
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
         const vsns = Object.values(meta)
-          .filter(o => o.node_id?.length && o.node_type !== 'Dell')
+          .filter(o => o.node_id?.length && o.node_type !== 'Blade')
           .map(o => o.vsn)
 
         const healthSubset = Object.keys(health)

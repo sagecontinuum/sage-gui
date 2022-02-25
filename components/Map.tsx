@@ -201,6 +201,8 @@ function Map(props: Props) {
     const map = loadMap(ref, resize)
     setMap(map)
 
+    if (!resize) return
+
     window.onscroll = () => {
       if (document.documentElement.scrollTop > 0) {
         document.getElementById('map').style.height = minHeight
@@ -208,13 +210,10 @@ function Map(props: Props) {
         document.getElementById('map').style.height = maxHeight
       }
 
-      if (resize) {
-        setTimeout(() => {
-          map.resize()
-        }, 300)
-      }
+      setTimeout(() => {
+        map.resize()
+      }, 300)
     }
-
   }, [])
 
   useEffect(() => {

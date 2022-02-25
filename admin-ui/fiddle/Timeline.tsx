@@ -16,8 +16,8 @@ export default function Timeline() {
   const hours = params.get('hours')
   const days = params.get('days')
 
-  const [data1, setData1] = useState<BH.MetricsObj>(null)
-  const [data2, setData2] = useState<BH.MetricsObj>(null)
+  const [data1, setData1] = useState<BH.ByMetric>(null)
+  const [data2, setData2] = useState<BH.ByMetric>(null)
 
   const [error1, setError1] = useState(null)
   const [error2, setError2] = useState(null)

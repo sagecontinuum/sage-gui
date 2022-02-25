@@ -118,7 +118,6 @@ export default function StatusView() {
     Promise.allSettled(proms)
       .then((results) => {
         const [state, metrics, temps, health, sanity] = results.map(r => r.value)
-
         setData(state)
 
         const allData = mergeMetrics(state, metrics, temps, health, sanity)

@@ -25,18 +25,21 @@ type Params = {
   }
 }
 
+// standard meta.  todo(nc): break into standard meta and "other" meta
+export type Meta = {
+  node: string
+  host?: string
+  vsn?: string
+  sensor?: string
+  plugin?: string
+}
+
 // standard, most common SDR record
 export type Record = {
   timestamp: string
   name: string
   value: string | number
-  meta: {
-    node: string
-    host?: string
-    vsn?: string
-    sensor?: string
-    plugin?: string
-  }
+  meta: Meta
 }
 
 // records for sanity metrics
@@ -47,7 +50,7 @@ export type SanityMetric = Record & {
 }
 
 // type for things like aggregation of sanity metrics
-export type MetricsObj = {
+export type ByMetric = {
   [metric: string]: Record[]
 }
 
@@ -170,7 +173,7 @@ export async function getSanityChart(node?: string, start?: string) : Promise<Ag
 
 
 
-export async function getNodeHealth(vsn?: string, start?: string) : Promise<MetricsObj> {
+export async function getNodeHealth(vsn?: string, start?: string) : Promise<ByMetric> {
   const params = {
     start: start ?? '-60h',
     bucket: 'health-check-test',
@@ -226,7 +229,7 @@ export async function getNodeSanity(start?: string) : Promise<Record[]> {
 }
 
 
-export async function getNodeDeviceHealth(vsn: string, start?: string) : Promise<MetricsObj> {
+export async function getNodeDeviceHealth(vsn: string, start?: string) : Promise<ByMetric> {
   const params = {
     start: start ?? '-60h',
     bucket: 'health-check-test',
@@ -369,23 +372,6 @@ export async function getRecentRecord(args: RecentRecArgs) : Promise<Record> {
   return data.sort((a, b) =>
     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   ).shift()
-}
-
-
-
-export async function stressTest(node: string) {
-  const query = {
-    start: '-1d',
-    filter: {
-      name: 'upload',
-      node,
-      filename: '*.flac',
-    }
-  }
-
-  const data = await getData(query)
-
-  return [data, query]
 }
 
 

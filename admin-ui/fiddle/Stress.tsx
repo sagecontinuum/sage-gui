@@ -1,9 +1,26 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import {getManifest} from '../../components/apis/beekeeper'
-
+import * as BK from '../../components/apis/beekeeper'
 import * as BH from '../../components/apis/beehive'
+
+
+
+async function stressQuery(node: string) {
+  const query = {
+    start: '-1d',
+    filter: {
+      name: 'upload',
+      node,
+      filename: '*.flac',
+    }
+  }
+
+  const data = await BH.getData(query)
+
+  return [data, query]
+}
+
 
 
 export default function Stress() {
@@ -13,18 +30,18 @@ export default function Stress() {
 
   useEffect(() => {
     // get node list
-    getManifest()
+    BK.getManifest()
       .then(async meta => {
         const nodeIds = Object.keys(meta).slice(0,15)
         setNodeIds(nodeIds)
 
-        const [prom, query] = await BH.stressTest(nodeIds[0].toLowerCase())
+        const [prom, query] = await stressQuery(nodeIds[0].toLowerCase())
         setQuery(query)
 
         // fetch some data
         const proms = Promise.allSettled(
           nodeIds.map(id =>
-            BH.stressTest(id.toLowerCase())[0]
+            stressQuery(id.toLowerCase())[0]
           )
         )
 

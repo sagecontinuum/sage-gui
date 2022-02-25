@@ -148,7 +148,7 @@ export default function NodeView() {
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
-  const [sanityData, setSanityData] = useState<BH.MetricsObj>(null)
+  const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
 
   const [factory, setFactory] = useState(null)
 
@@ -204,7 +204,7 @@ export default function NodeView() {
       .finally(() => setLoading1(false))
 
     setLoading2(true)
-    const p2 = BH.getSanityChart(node.toLowerCase(), '-2d')
+    const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
       .then((sanity) => {
         if (!sanity) {
           return
