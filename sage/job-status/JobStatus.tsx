@@ -31,7 +31,7 @@ type TaskEvent = {
     plugin_image: string                // "registry.sagecontinuum.org/seonghapark/surface-water-detection:0.0.4",
     plugin_name: string                 // "surface-water-detection-left",
     plugin_selector: string             // "map[resource.gpu:true]",
-    plugin_status_by_scheduler: string  // "Running",
+    plugin_status_by_scheduler: string  //  "Queued|"Running"|"Completed"|... todo(nc): get types.
     plugin_task: string                 // "surface-water-detection-left-1645641900"
   }
 }
@@ -124,7 +124,7 @@ function aggregateEvents(data: TaskEvent[]) {
         runtime: new Date(end).getTime() -  new Date(startObj.timestamp).getTime()
       }
     } else if (hasEnd) {
-      console.log('todo: add representation for end times with no start?')
+      console.warn('todo: add representation for end times with no start?')
       continue
     } else if (hasStart) {
       const startObj = events[0]
@@ -276,21 +276,26 @@ export default function JobStatus() {
 
   return (
     <Root>
-      <h1>Job Status | <small>Last 24 hours</small></h1>
+      <Top className="flex">
+        <div>
+          <h1 className="no-margin">App Status</h1>
+          <h2 className="no-margin">Last 24 hours</h2>
+        </div>
 
-      <Charts className="flex column">
         <MapContainer>
           {geo &&
             <Map data={geo} selected={null} resize={false} />
           }
         </MapContainer>
 
-        <TimelineContainer className="flex column" >
-          {byNode &&
-            <JobTimeLine data={byNode['W023']} />
-          }
-        </TimelineContainer>
-      </Charts>
+      </Top>
+
+
+          <TimelineContainer className="flex column" >
+            {byNode &&
+              <JobTimeLine data={byNode['W023']} />
+            }
+          </TimelineContainer>
 
       {error &&
         <Alert severity="error">{error.message}</Alert>
@@ -317,16 +322,18 @@ const Root = styled.div`
   margin: 1em;
 `
 
-const Charts = styled.div`
-
+const Top = styled.div`
+  h1 {
+    width: 150px;
+  }
 `
 
 const MapContainer = styled.div`
-  margin: 0 10%;
+  width: 100%;
 `
 
 const TimelineContainer = styled.div`
-  margin: 0 10%;
+
 `
 
 const TableContainer = styled.div`

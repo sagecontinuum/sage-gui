@@ -1,0 +1,75 @@
+{
+  "name": "waggle",
+  "plugins": [
+    {
+      "args": "-stream top",
+      "image": "registry.sagecontinuum.org/seonghapark/cloud-cover",
+      "plugin_name": "cloud-cover-top",
+      "selector": {
+        "resource.gpu": "true"
+      },
+      "version": "0.1.0"
+    },
+    {
+      "args": "--input top",
+      "image": "registry.sagecontinuum.org/bhupendraraut/cloud-motion",
+      "plugin_name": "cloud-motion-top",
+      "version": "0.21.12.7"
+    },
+    {
+      "args": "-stream bottom -all-objects",
+      "image": "registry.sagecontinuum.org/seonghapark/object-counter",
+      "plugin_name": "objectcounter-bottom",
+      "selector": {
+        "resource.gpu": "true"
+      },
+      "version": "0.4.2"
+    },
+    {
+      "args": "-stream left -all-objects",
+      "image": "registry.sagecontinuum.org/seonghapark/object-counter",
+      "plugin_name": "objectcounter-left",
+      "selector": {
+        "resource.gpu": "true"
+      },
+      "version": "0.4.2"
+    },
+    {
+      "args": "left",
+      "image": "registry.sagecontinuum.org/seonghapark/wildfire-smoke-detection",
+      "plugin_name": "wildfire-smoke-detection-left",
+      "version": "0.2.0"
+    },
+    {
+      "args": "-stream left",
+      "image": "registry.sagecontinuum.org/seonghapark/surface-water-detection",
+      "plugin_name": "surface-water-detection-left",
+      "selector": {
+        "resource.gpu": "true"
+      },
+      "version": "0.0.4"
+    },
+    {
+      "args": "-stream left -duration 15",
+      "image": "registry.sagecontinuum.org/seonghapark/motion-analysis",
+      "plugin_name": "motion-analysis-left",
+      "version": "0.0.4"
+    },
+    {
+      "args": "--input left",
+      "image": "registry.sagecontinuum.org/seonghapark/motion-detection",
+      "plugin_name": "motion-detection-left",
+      "version": "0.2.0"
+    }
+  ],
+  "science_rules": {
+    "Run(cloud-cover-top)": "last_executed > 2 * 60",
+    "Run(cloud-motion-top)": "last_executed > 2 * 60",
+    "Run(motion-analysis-left)": "last_executed > 2 * 60",
+    "Run(motion-detection-left)": "last_executed > 2 * 60",
+    "Run(objectcounter-bottom)": "last_executed > 2 * 60",
+    "Run(objectcounter-left)": "last_executed > 2 * 60",
+    "Run(surface-water-detection-left)": "last_executed > 2 * 60",
+    "Run(wildfire-smoke-detection-left)": "last_executed > 2 * 60"
+  }
+}
