@@ -118,38 +118,27 @@ const units = {
   'd': 'day'
 }
 
-type TIProps = {
-  page: number
-  unit: 'm' | 'h' | 'd'
-}
 
-function TimeIndicator(props: TIProps) {
-  const {page, unit} = props
-
-  return (
-    <div>
-      {page == 1 ?
-        `now - 1 ${units[unit]} ago` :
-        `${page - 1} ${units[unit]} ago - ${page } ${units[unit]} ago`
-      }
-    </div>
-  )
-}
-
+type Unit = 'm' | 'h' | 'd'
 
 type RangeIndicatorProps = {
   data: BH.Record[]
+  unit: Unit
 }
 
 function RangeIndicator(props: RangeIndicatorProps) {
-  const {data} = props
+  const {data, unit} = props
   const start = data[0].timestamp
   const end = data[data.length - 1].timestamp
 
 
   return (
     <span>
-      {new Date(end).toLocaleString()} to  {new Date(start).toLocaleTimeString()}
+      {new Date(end).toLocaleString()} to {' '}
+      {['m', 'h'].includes(unit) ?
+          new Date(start).toLocaleTimeString() :
+          new Date(start).toLocaleString()
+      }
     </span>
   )
 }
@@ -514,7 +503,7 @@ export default function DataPreview() {
               limit={data.length}
               emptyNotice={
                 <span className="flex">
-                  <span>No records found from</span>&nbsp;<TimeIndicator page={page} unit={unit}/>
+                  <span>No records found from</span>&nbsp;<RangeIndicator data={data} unit={unit}/>
                 </span>
               }
               disableRowSelect={() => true}
@@ -561,7 +550,7 @@ export default function DataPreview() {
                     {/*data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>*/}
 
                     {data &&
-                      <RangeIndicator data={data}/>
+                      <RangeIndicator data={data} unit={unit}/>
                     }
 
                     <VertDivider />
