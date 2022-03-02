@@ -9,7 +9,6 @@ import Table from '../../components/table/Table'
 import { useProgress } from '../../components/progress/ProgressProvider'
 import { msToTime } from '../../components/utils/units'
 import Checkbox from '../../components/input/Checkbox'
-import FilterMenu from '../../components/FilterMenu'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Button from '@mui/material/Button'
@@ -25,14 +24,17 @@ import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 
 import { capitalize } from 'lodash'
 
-import Sidebar, {FilterTitle} from './DataSidebar'
+import Sidebar from './DataSidebar'
 
 import Audio from '../../admin-ui/views/audio/Audio'
 
 import { Line } from 'react-chartjs-2'
 
-
 import QueryViewer from '../../components/QueryViewer'
+import Autocomplete from '@mui/material/Autocomplete'
+import TextField from '@mui/material/TextField'
+import Popper from '@mui/material/Popper'
+
 
 
 const relTime = val =>
@@ -142,7 +144,6 @@ function RangeIndicator(props: RangeIndicatorProps) {
     </span>
   )
 }
-
 
 
 
@@ -386,7 +387,11 @@ export default function DataPreview() {
   }
 
   const handleFilterChange = (field: string, val: {id: string, label: string}) => {
-    params.set(field, val.id)
+    if (!val) {
+      params.delete(field)
+    } else {
+      params.set(field, val.id)
+    }
     history.push({search: params.toString()})
   }
 
@@ -405,32 +410,27 @@ export default function DataPreview() {
     history.push({search: params.toString()})
   }
 
-
   return (
     <Root>
-
       <div className="flex">
-        <Sidebar width="200px">
-          <FilterTitle>Filters</FilterTitle>
+        <Sidebar width="225px">
+          <h2 className="filter-title">Filters</h2>
 
           {menus && facetList.map(facet => {
             const label = capitalize(facet)
+            const value = filters[facet][0]
 
             return (
-              <FilterMenu
+              <Menu
                 key={facet}
                 options={menus[facet]}
-                value={getFilterVal(filters[facet])[0]}
-                onChange={vals => handleFilterChange(facet, vals)}
-                noSelectedSort={true}
-                multiple={false}
-                disableCloseOnSelect={false}
-                label={label}
-                ButtonComponent={
-                  <FilterBtn>
-                    <Button size="medium" fullWidth>{label}<CaretIcon /></Button>
-                  </FilterBtn>
+                renderInput={(props) => <TextField {...props} label={label} />}
+                PopperComponent={
+                  (props) => <Popper {...props} style={{width: 300, zIndex: 9999}}/>
                 }
+                value={value}
+                onChange={(evt, val) => handleFilterChange(facet, val)}
+                isOptionEqualToValue={(opt, val) => opt == val}
               />
             )
           })}
@@ -571,6 +571,10 @@ const Root = styled.div`
   h1 {
     font-size: 1.5em;
   }
+
+  .filter-title {
+    margin: 20px 5px;
+  }
 `
 
 const Main = styled.div`
@@ -590,11 +594,8 @@ const Main = styled.div`
   }
 `
 
-const FilterBtn = styled.div`
-  button {
-    padding-left: 30px;
-    display: flex;
-    justify-content: start;
-  }
+const Menu = styled(Autocomplete)`
+  margin: 15px 5px;
+  background: #fff;
 `
 
