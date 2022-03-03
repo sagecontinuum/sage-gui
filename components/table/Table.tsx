@@ -315,9 +315,10 @@ type Props = {
   primaryKey: string
   rows: object[]
   columns: object[]
-  page?: number | string  // for ajax pagination
-  limit?: number          // for ajax pagination
-  total?: number          // for ajax pagination
+  page?: number | string
+  limit?: number
+  rowsPerPage?: number
+  total?: number
   search?: string
   sort?: object
   emptyNotice?: string | JSX.Element
@@ -378,7 +379,7 @@ export default function TableComponent(props: Props) {
   const [columns, setColumns] = useState(getVisibleColumns(props.columns))
   const [page, setPage] = useState(Number(props.page))
   const [sortBy, setSortBy] = useState((props.sort && parseSort(props.sort)) || {})
-  const [rowsPerPage] = useState(100)
+  const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage || 100)
 
   // keep state on shown/hidden columns
   // initial columns are defined in `columns` spec.
@@ -387,7 +388,7 @@ export default function TableComponent(props: Props) {
   // disable user-select when shift+click is happening
   const [userSelect, setUserSelect] = useState(true)
 
-  // selected/checkbox state
+  // selected/checkbox statef
   const [allSelected, setAllSelected] = useState<boolean>(false)
   const [selected, dispatch] = useReducer(selectedReducer, initialSelectedState)
 
@@ -408,7 +409,7 @@ export default function TableComponent(props: Props) {
     }
 
     setRows(newRows)
-  }, [props.rows, page])
+  }, [props.rows, page, rowsPerPage])
 
   // listen to columns
   useEffect(() => {
@@ -419,6 +420,11 @@ export default function TableComponent(props: Props) {
   useEffect(() => {
     setPage(Number(props.page))
   }, [props.page])
+
+  // listen to rowsPerPage
+  useEffect(() => {
+    setRowsPerPage(props.rowsPerPage)
+  }, [props.rowsPerPage])
 
   // listen to sort changes
   useEffect(() => {
@@ -555,6 +561,7 @@ export default function TableComponent(props: Props) {
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handlePageChange}
+              component="div"
             />
           </>
         }
@@ -646,15 +653,11 @@ const CtrlContainer = styled.div`
   .MuiTablePagination-actions {
     user-select: none;
   }
-
-  .MuiToolbar-root {
-    border-bottom: none;
-  }
 `
 
 
 const Pagination = styled(TablePagination)`
-  flex: 1;
+  margin-left: auto;
 `
 
 const Container = styled(TableContainer)`
