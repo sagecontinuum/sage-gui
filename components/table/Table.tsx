@@ -555,6 +555,7 @@ export default function TableComponent(props: Props) {
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handlePageChange}
+              component="div"
             />
           </>
         }
