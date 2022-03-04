@@ -388,7 +388,7 @@ export default function TableComponent(props: Props) {
   // disable user-select when shift+click is happening
   const [userSelect, setUserSelect] = useState(true)
 
-  // selected/checkbox statef
+  // selected/checkbox state
   const [allSelected, setAllSelected] = useState<boolean>(false)
   const [selected, dispatch] = useReducer(selectedReducer, initialSelectedState)
 
@@ -553,6 +553,7 @@ export default function TableComponent(props: Props) {
           props.middleComponent
         }
 
+
         {pagination &&
           <>
             <Pagination
@@ -657,7 +658,9 @@ const CtrlContainer = styled.div`
 
 
 const Pagination = styled(TablePagination)`
-  margin-left: auto;
+  .MuiToolbar-root {
+    padding-left: 0;
+  }
 `
 
 const Container = styled(TableContainer)`

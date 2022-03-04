@@ -18,22 +18,22 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Alert from '@mui/material/Alert'
-import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
-
-import { capitalize } from 'lodash'
-
-import Sidebar from './DataSidebar'
-
-import Audio from '../../admin-ui/views/audio/Audio'
-
-import { Line } from 'react-chartjs-2'
-
-import QueryViewer from '../../components/QueryViewer'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Popper from '@mui/material/Popper'
+
+import { capitalize, groupBy} from 'lodash'
+
+import Sidebar from './DataSidebar'
+import Audio from '../../admin-ui/views/audio/Audio'
+import QueryViewer from '../../components/QueryViewer'
+
+import { schemeCategory10 } from 'd3-scale-chromatic'
+import { Line } from 'react-chartjs-2'
+
+
 
 
 
@@ -148,25 +148,20 @@ function RangeIndicator(props: RangeIndicatorProps) {
 
 
 const VertDivider = () =>
-  <Divider orientation="vertical" flexItem style={{margin: '5px 15px' }} />
+  <Divider orientation="vertical" flexItem style={{margin: '0 15px' }} />
 
 
 
 const getUniqueOpts = (data) =>
-  data.filter((v, i, self) => self.indexOf(v) == i)
+  data.filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: v}))
 
-
-
-const getFilterVal = (items: string[]) => {
-  return items.map(v => ({id: v, label: v}))
-}
 
 
 
 async function getFilterMenus(plugin) {
   const data = await BH.getData({
-    start: `-4d`,
+    start: `-1d`,
     tail: 1,
     filter: {
       plugin
@@ -184,13 +179,40 @@ async function getFilterMenus(plugin) {
 function LineChart(props) {
   const {data} = props
 
+  const grouped = groupBy(data, 'name')
+
+  const datasets = Object.keys(grouped)
+    .map((key, i) => {
+      const d = grouped[key].map(o => ({
+        x: new Date(o.timestamp).getTime(),
+        y: o.value
+      }))
+
+      return {
+        label: key,
+        data: d,
+        pointRadius: 1,
+        fill: false,
+        borderColor: schemeCategory10[i % 10] // 'rgb(0, 125, 197)'
+      }
+    })
+
   return (
     <Line
+      options={{
+        scales: {
+          xAxes: [{
+              type: 'time',
+              display: true,
+              scaleLabel: {
+                  display: true,
+                  labelString: "Date",
+              }
+          }]
+        }
+      }}
       data={{
-        labels: data.map(o => o.x),
-        datasets: [
-          {data: data.map(o => o.y)}
-        ]
+        datasets
       }}
     />
   )
@@ -234,11 +256,8 @@ export default function DataPreview() {
 
 
   const {loading, setLoading} = useProgress()
-
   const [cols, setCols] = useState(columns)
-
   const [page, setPage] = useState(0)
-
 
   const [checked, setChecked] = useState({
     relativeTime: true,
@@ -247,9 +266,8 @@ export default function DataPreview() {
 
   const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
-  const [everyN, setEveryN] = useState<{total: number, every: number}>()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
-  // const [chart, setChart] = useState<{x: string, y: number}[]>()
+  const [chart, setChart] = useState<{x: string, y: number}[]>()
 
   // contents of dropdowns
   const [menus, setMenus] = useState<{[name: string]: string[]}>({
@@ -288,7 +306,7 @@ export default function DataPreview() {
 
     function fetchAppMenu() {
       const query = {
-        start: `-4d`,
+        start: `-1d`,
         tail: 1,
         filter: {
           plugin: `.*`
@@ -326,9 +344,9 @@ export default function DataPreview() {
         .then((data) => {
           data = (data || [])
 
-          // limit amount of data for now
+          // limit amount of data
           const total = data.length
-          const limit = 50000
+          const limit = 10000
           if (total > limit) {
             data = data.slice(0, limit)
             setLastN({total, limit})
@@ -340,16 +358,14 @@ export default function DataPreview() {
             .map((o, i) => ({...o, ...o.meta, rowID: i}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
-          setData(data)
-
-          /* experimental chart (todo?)
-          if (name) {
-            const chartData = data
-              .map(o => ({x: o.timestamp.split('T')[1].split('.').shift(), y: o.value}))
-
-            setChart(chartData)
+          // experimental charts
+          if (app && node && (name || sensor)) {
+            setChart(data)
+          } else {
+            setChart(null)
           }
-          */
+
+          setData(data)
 
           // reset page any time more data is fetched
           setPage(0)
@@ -382,6 +398,16 @@ export default function DataPreview() {
   }, [checked])
 
 
+  const clearParams = () => {
+    setPage(0)
+    params.delete('nodes')
+    params.delete('names')
+    params.delete('sensors')
+    params.delete('window')
+    params.delete('apps')
+  }
+
+
   const handleCheck = (evt, name) => {
     setChecked(prev => ({...prev, [name]: evt.target.checked}))
   }
@@ -401,24 +427,40 @@ export default function DataPreview() {
   }
 
   const handleRemoveFilters = () => {
-    setPage(0)
-    params.delete('nodes')
-    params.delete('names')
-    params.delete('sensors')
-    params.delete('window')
+    clearParams()
     params.set('apps', defaultPlugin)
     history.push({search: params.toString()})
   }
 
+
+  const goTo = (appQuery: string) => {
+    params.set('apps', appQuery)
+    history.push({search: params.toString()})
+  }
+
+
+  const isMedia = (app || '').match(/image|audio/g)
+
+
   return (
-    <Root>
+    <Root isMedia={isMedia}>
       <div className="flex">
-        <Sidebar width="225px">
+        <Sidebar width="225px" style={{padding: '0 10px'}}>
           <h2 className="filter-title">Filters</h2>
+
+          <div className="shortcuts">
+            <a onClick={() => goTo('plugin-image-sampler.*')}>Images</a> |{' '}
+            <a onClick={() => goTo('plugin-audio-sampler.*')}>Audio</a>
+          </div>
 
           {menus && facetList.map(facet => {
             const label = capitalize(facet)
-            const value = filters[facet][0]
+            const value = filters[facet][0] || ''
+
+            // if sensor filter, and no options, don't show
+            if (facet == 'sensors' && !menus[facet].length) {
+              return <></>
+            }
 
             return (
               <Menu
@@ -430,25 +472,35 @@ export default function DataPreview() {
                 }
                 value={value}
                 onChange={(evt, val) => handleFilterChange(facet, val)}
-                isOptionEqualToValue={(opt, val) => opt == val}
               />
             )
           })}
+
+          <h3>Time Ranges</h3>
+          <FormControl variant="outlined" style={{width: '80px'}}>
+            <InputLabel id="unit-label">Window</InputLabel>
+            <Select
+              labelId="unit-label"
+              id="unit"
+              value={unit}
+              onChange={evt => handleUnitChange(evt.target.value)}
+              label="Window"
+              margin="dense"
+            >
+              {Object.keys(units)
+                .map(k =>
+                  <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                )
+              }
+            </Select>
+          </FormControl>
         </Sidebar>
 
         <Main>
-          {/* a message if we decide to use sampling
-            everyN &&
-              <Alert severity="info">
-                There are {everyN.total.toLocaleString()} records for this query.
-                Showing every {everyN.every.toLocaleString()}.
-              </Alert>
-          */}
-
           {lastN &&
             <Alert severity="info">
               There are {lastN.total.toLocaleString()} records for this query.
-              Showing last {lastN.limit.toLocaleString()}.
+              Listing the last {lastN.limit.toLocaleString()}.
             </Alert>
           }
 
@@ -476,19 +528,18 @@ export default function DataPreview() {
             </div>
           </div>
 
-          {/*chart &&
+          {chart &&
             <LineChart data={chart} />
-          */}
+          }
 
           <br/>
-
 
           {error &&
             <Alert severity="error">{error.message}</Alert>
           }
 
           {data?.length == 0 &&
-            <Alert severity="info">No recent data found</Alert>
+            <Alert severity="info">No recent data found <b>for the last {units[unit]}</b></Alert>
           }
 
           {/* todo(nc): here we have to check data.length because of bug in table component when pagination is used */}
@@ -500,16 +551,16 @@ export default function DataPreview() {
               rows={data}
               pagination
               page={page}
-              limit={data.length}
+              rowsPerPage={isMedia ? 20 : 100}
+              limit={data.length} //todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
                   <span>No records found from</span>&nbsp;<RangeIndicator data={data} unit={unit}/>
                 </span>
               }
               disableRowSelect={() => true}
-
               leftComponent={
-                <div className="flex justify-between">
+                <div className="flex">
                   <div className="flex items-center">
                     <FormControlLabel
                       control={
@@ -526,36 +577,15 @@ export default function DataPreview() {
                       label="meta"
                     />
                   </div>
-
-                  <div className="flex items-center">
-                    <FormControl variant="outlined" style={{width: '80px'}}>
-                      <InputLabel id="unit-label">Window</InputLabel>
-                      <Select
-                        labelId="unit-label"
-                        id="unit"
-                        value={unit}
-                        onChange={evt => handleUnitChange(evt.target.value)}
-                        label="Window"
-                        margin="dense"
-                      >
-                        {Object.keys(units)
-                          .map(k =>
-                            <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                          )
-                        }
-                      </Select>
-                    </FormControl>
-                    <VertDivider />
-
-                    {/*data && <div>{data.length} record{data.length == 1 ? '' : 's'}</div>*/}
-
-                    {data &&
-                      <RangeIndicator data={data} unit={unit}/>
-                    }
-
-                    <VertDivider />
-                  </div>
                 </div>
+              }
+              middleComponent={
+                <RangeCtrls className="flex">
+                  {data &&
+                    <RangeIndicator data={data} unit={unit}/>
+                  }
+                  <VertDivider />
+                </RangeCtrls>
               }
             />
           }
@@ -565,7 +595,7 @@ export default function DataPreview() {
   )
 }
 
-const Root = styled.div`
+const Root = styled.div<{isMedia: boolean}>`
   margin-left: 0;
 
   h1 {
@@ -573,7 +603,26 @@ const Root = styled.div`
   }
 
   .filter-title {
-    margin: 20px 5px;
+    margin: 20px 0px;
+  }
+
+  .shortcuts {
+    margin-bottom: 30px;
+  }
+
+  .MuiInputBase-root {
+    background: #fff;
+  }
+
+  /* remove some styles when displaying media */
+  ${props => props.isMedia &&
+    `tr:nth-child(odd) {
+      background: none;
+    }
+    tr.MuiTableRow-root:hover {
+      background-color: none;
+    }
+    `
   }
 `
 
@@ -595,7 +644,12 @@ const Main = styled.div`
 `
 
 const Menu = styled(Autocomplete)`
-  margin: 15px 5px;
+  margin: 15px 0px;
   background: #fff;
+`
+
+const RangeCtrls = styled.div`
+  margin-left: auto;
+  height: 100%;
 `
 
