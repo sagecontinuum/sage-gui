@@ -24,15 +24,13 @@ import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Popper from '@mui/material/Popper'
 
-import { capitalize, groupBy } from 'lodash'
+import { capitalize } from 'lodash'
 
 // import Clipboard from '~components/utils/Clipboard'
-import Sidebar from './DataSidebar'
+import Sidebar from '../data/DataSidebar'
 import Audio from '../../admin-ui/views/audio/Audio'
 import QueryViewer from '../../components/QueryViewer'
-
-import { schemeCategory10 } from 'd3-scale-chromatic'
-import { Line } from 'react-chartjs-2'
+import TimeSeries from './TimeSeries'
 
 
 
@@ -178,68 +176,6 @@ async function getFilterMenus(plugin) {
     names: getUniqueOpts((data).map(o => o.name)),
     sensors: getUniqueOpts((data).map(o => o.meta.sensor))
   }
-}
-
-
-function getChartDatasets(data: BH.Record[]) {
-  const datasets = []
-
-  const byName = groupBy(data, 'name')
-
-  let idx = 0
-  Object.keys(byName).forEach((name, i) => {
-    const namedData = byName[name]
-
-    const grouped = groupBy(namedData, 'sensor')
-    const hasSesnors = Object.keys(grouped)[0] != 'undefined'
-
-    Object.keys(grouped)
-      .forEach((key, j) => {
-        const d = grouped[key].map(o => ({
-          x: new Date(o.timestamp).getTime(),
-          y: o.value
-        }))
-
-        datasets.push({
-          label: name + (hasSesnors ? ` - ${key}` : ''),
-          data: d,
-          pointRadius: 0,
-          fill: false,
-          borderColor: schemeCategory10[idx % 10]
-        })
-
-        idx += 1
-      })
-  })
-
-  return datasets
-}
-
-
-function LineChart(props) {
-  const {data} = props
-
-  const datasets = getChartDatasets(data)
-
-  return (
-    <Line
-      options={{
-        scales: {
-          xAxes: [{
-            type: 'time',
-            display: true,
-            scaleLabel: {
-              display: true
-            }
-          }]
-        }
-      }}
-      data={{
-        datasets
-      }}
-    />
-  )
-
 }
 
 
@@ -556,7 +492,7 @@ export default function DataPreview() {
 
           <br />
           {chart &&
-            <LineChart data={chart} />
+            <TimeSeries data={chart} />
           }
 
           {lastN &&

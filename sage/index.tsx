@@ -13,7 +13,7 @@ import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
 import JobStatus from './job-status/JobStatus'
-import DataBrowser from './data/DataBrowser'
+import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data/Ontology'
 
 import FilterMenuTest from './fiddle/filter-menu'
