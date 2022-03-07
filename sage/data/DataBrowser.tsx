@@ -24,15 +24,15 @@ import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Popper from '@mui/material/Popper'
 
-import { capitalize, groupBy} from 'lodash'
+import { capitalize, groupBy } from 'lodash'
 
+// import Clipboard from '~components/utils/Clipboard'
 import Sidebar from './DataSidebar'
 import Audio from '../../admin-ui/views/audio/Audio'
 import QueryViewer from '../../components/QueryViewer'
 
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { Line } from 'react-chartjs-2'
-
 
 
 
@@ -94,10 +94,10 @@ const columns = [{
 }, {
   id: 'sensor',
   label: 'Sensor',
-}, {
+}, /* {
   id: 'job',
   label: 'Job',
-}, {
+},*/ {
   id: 'meta',
   label: 'Meta',
   format: (o) =>
@@ -115,8 +115,9 @@ const findColumn = (cols, name) =>
 
 
 const units = {
-  'm': 'min',
+  'm': 'minute',
   'h': 'hour',
+  '12h': '12 hours',
   'd': 'day'
 }
 
@@ -158,6 +159,10 @@ const getUniqueOpts = (data) =>
 
 
 
+const getCurlCmd = (query: object) => {
+  return `curl -d ${JSON.stringify(query)}`
+}
+
 
 async function getFilterMenus(plugin) {
   const data = await BH.getData({
@@ -176,38 +181,56 @@ async function getFilterMenus(plugin) {
 }
 
 
+function getChartDatasets(data: BH.Record[]) {
+  const datasets = []
+
+  const byName = groupBy(data, 'name')
+
+  let idx = 0
+  Object.keys(byName).forEach((name, i) => {
+    const namedData = byName[name]
+
+    const grouped = groupBy(namedData, 'sensor')
+    const hasSesnors = Object.keys(grouped)[0] != 'undefined'
+
+    Object.keys(grouped)
+      .forEach((key, j) => {
+        const d = grouped[key].map(o => ({
+          x: new Date(o.timestamp).getTime(),
+          y: o.value
+        }))
+
+        datasets.push({
+          label: name + (hasSesnors ? ` - ${key}` : ''),
+          data: d,
+          pointRadius: 0,
+          fill: false,
+          borderColor: schemeCategory10[idx % 10]
+        })
+
+        idx += 1
+      })
+  })
+
+  return datasets
+}
+
+
 function LineChart(props) {
   const {data} = props
 
-  const grouped = groupBy(data, 'name')
-
-  const datasets = Object.keys(grouped)
-    .map((key, i) => {
-      const d = grouped[key].map(o => ({
-        x: new Date(o.timestamp).getTime(),
-        y: o.value
-      }))
-
-      return {
-        label: key,
-        data: d,
-        pointRadius: 1,
-        fill: false,
-        borderColor: schemeCategory10[i % 10] // 'rgb(0, 125, 197)'
-      }
-    })
+  const datasets = getChartDatasets(data)
 
   return (
     <Line
       options={{
         scales: {
           xAxes: [{
-              type: 'time',
-              display: true,
-              scaleLabel: {
-                  display: true,
-                  labelString: "Date",
-              }
+            type: 'time',
+            display: true,
+            scaleLabel: {
+              display: true
+            }
           }]
         }
       }}
@@ -221,7 +244,11 @@ function LineChart(props) {
 
 
 const defaultPlugin = 'plugin-iio:0.4.5'
-//const defaultNode = 'W023'
+
+
+const isMediaApp = (app) =>
+  (app || '').match(/image|audio/g)
+
 
 const initFilterState = {
   apps: [defaultPlugin],
@@ -264,6 +291,7 @@ export default function DataPreview() {
     showMeta: false,
   })
 
+  const [query, setQuery] = useState<object>()
   const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
@@ -285,14 +313,14 @@ export default function DataPreview() {
     sensors: []
   })
 
-
+  // update selected filters whenever url param changes
   useEffect(() => {
     const filterState = getFilterState(params)
     setFilters(filterState)
   }, [app, name, node, sensor])
 
 
-
+  // update filter menus whenever url params changes
   useEffect(() => {
     if (!app) return
 
@@ -330,7 +358,7 @@ export default function DataPreview() {
 
     function fetchData() {
       const query = {
-        start: `-1${unit}`,
+        start: unit == '12h' ? '-12h' : `-1${unit}`,
         filter: {
           plugin: plugin,
           ...(node ? {vsn: node} : {}),
@@ -338,6 +366,7 @@ export default function DataPreview() {
           ...(sensor ? {sensor} : {}),
         }
       }
+      setQuery(query)
 
       setLoading(true)
       BH.getData(query)
@@ -359,7 +388,7 @@ export default function DataPreview() {
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
           // experimental charts
-          if (app && node && (name || sensor)) {
+          if (app && node && !isMediaApp(app) && data.length > 0) {
             setChart(data)
           } else {
             setChart(null)
@@ -379,6 +408,7 @@ export default function DataPreview() {
   }, [setLoading, unit, app, node, name, sensor])
 
 
+  // relative time and show meta checkbox events
   useEffect(() => {
     setCols(prev => {
       let idx
@@ -439,11 +469,8 @@ export default function DataPreview() {
   }
 
 
-  const isMedia = (app || '').match(/image|audio/g)
-
-
   return (
-    <Root isMedia={isMedia}>
+    <Root isMedia={isMediaApp(app)}>
       <div className="flex">
         <Sidebar width="225px" style={{padding: '0 10px'}}>
           <h2 className="filter-title">Filters</h2>
@@ -477,7 +504,7 @@ export default function DataPreview() {
           })}
 
           <h3>Time Ranges</h3>
-          <FormControl variant="outlined" style={{width: '80px'}}>
+          <FormControl variant="outlined" style={{width: 150}}>
             <InputLabel id="unit-label">Window</InputLabel>
             <Select
               labelId="unit-label"
@@ -497,13 +524,6 @@ export default function DataPreview() {
         </Sidebar>
 
         <Main>
-          {lastN &&
-            <Alert severity="info">
-              There are {lastN.total.toLocaleString()} records for this query.
-              Listing the last {lastN.limit.toLocaleString()}.
-            </Alert>
-          }
-
           <div className="flex items-center gap">
             <div className="flex items-center">
               <div className="flex items-center">
@@ -528,11 +548,23 @@ export default function DataPreview() {
             </div>
           </div>
 
+          {/*
+          <Clipboard
+            content={getCurlCmd(query)}
+          />
+          */}
+
+          <br />
           {chart &&
             <LineChart data={chart} />
           }
 
-          <br/>
+          {lastN &&
+            <Alert severity="info">
+              There are {lastN.total.toLocaleString()} records for this query.
+              Listing the last {lastN.limit.toLocaleString()}.
+            </Alert>
+          }
 
           {error &&
             <Alert severity="error">{error.message}</Alert>
@@ -551,7 +583,7 @@ export default function DataPreview() {
               rows={data}
               pagination
               page={page}
-              rowsPerPage={isMedia ? 20 : 100}
+              rowsPerPage={isMediaApp(app) ? 20 : 100}
               limit={data.length} //todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
@@ -616,11 +648,12 @@ const Root = styled.div<{isMedia: boolean}>`
 
   /* remove some styles when displaying media */
   ${props => props.isMedia &&
-    `tr:nth-child(odd) {
+    `
+    tr:nth-child(odd) {
       background: none;
     }
     tr.MuiTableRow-root:hover {
-      background-color: none;
+      background-color: initial;
     }
     `
   }
