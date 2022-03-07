@@ -84,11 +84,11 @@ const columns = [
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
         {(failed + passed) == 0 ? <div>no data</div> :
           (failed == 0 ?
-            <Tooltip title={<>All health tests passed<br/>for last {details.length} hours!</>} placement="top">
+            <Tooltip title={<>All health tests passed<br/>for last {details?.length} hours!</>} placement="top">
               <GoodChip icon={<CheckIcon className="success" />} label="Good" />
             </Tooltip> :
             <HealthSparkler
-              name={<>summary of last (available) {data.length} hours</>}
+              name={<>summary of last (available) {data?.length} hours</>}
               data={data}
               colorFunc={healthColor}
               cellW={isPhase2 ? 7 : 2}
@@ -113,11 +113,11 @@ const columns = [
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
         {(failed + passed) == 0 ? <div>no data</div> :
           (failed == 0 ?
-            <Tooltip title={<>All sanity tests passed<br/>for last {details.length} hours!</>} placement="top">
+            <Tooltip title={<>All sanity tests passed<br/>for last {details?.length} hours!</>} placement="top">
               <GoodChip icon={<CheckIcon className="success" />} label="Good" />
             </Tooltip> :
             <HealthSparkler
-              name={<>summary of last (available) {data.length} hours</>}
+              name={<>summary of last (available) {data?.length} hours</>}
               data={data}
               colorFunc={sanityColor}
               cellW={isPhase2 ? 7 : 2}
@@ -306,6 +306,11 @@ export default function StatusView() {
   return (
     <Root>
       {lastUpdate && <h2>Last update: {lastUpdate}</h2>}
+
+      {error &&
+        <Alert severity="error">{error.message}</Alert>
+      }
+
       <Tabs
         value={tabIdx}
         onChange={(_, idx) => setTabIdx(idx)}
@@ -334,9 +339,6 @@ export default function StatusView() {
         }
       </TableContainer>
 
-      {error &&
-        <Alert severity="error">{error.message}</Alert>
-      }
     </Root>
   )
 }
