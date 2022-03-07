@@ -16,7 +16,7 @@ export const cameraOrientations = [
 
 
 
-type Params = {
+export type Params = {
   start: string
   end?: string
   tail?: number
@@ -194,9 +194,7 @@ export async function getNodeHealth(vsn?: string, start?: string) : Promise<ByMe
   return byNode
 }
 
-
-
-export async function getNodeSanity(start?: string) : Promise<Record[]> {
+export async function getNodeSanity(start?: string) : Promise<ByMetric> {
   const params = {
     bucket: 'downsampled-test',
     start: start ?? '-60h',

@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import styled from 'styled-components'
 
+import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
+import Tooltip from '@mui/material/Tooltip'
+
+import ErrorMsg from '~sage/ErrorMsg'
 import * as BH from '~/components/apis/beehive'
 import * as BK from '~/components/apis/beekeeper'
 
@@ -21,45 +25,90 @@ function getDateTimeStr(timestamp) {
 }
 
 
+const reduceByVSNs = (data: BH.ByMetric, vsns: string[]) =>
+  Object.keys(data)
+    .reduce((acc, vsn) =>
+      vsns.includes(vsn) ? {...acc, [vsn]: data[vsn]} : acc
+    , {})
+
+
+
+const getHealthColor = (val: number) => {
+  if (val == null)
+    return colors.noValue
+  return val == 0 ? colors.red4 : colors.green
+}
+
+
+const healthTooltip = (item) =>
+  `${getDateTimeStr(item.timestamp)}<br>
+  Node: ${item.meta.vsn}<br>
+  <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
+    ${item.value == 0 ? 'failed' : `success`}
+  </b><br><br>
+  <small class="muted">(click for details)</small>
+  `
+
+
+const sanityTooltip = (item) =>
+  `${getDateTimeStr(item.timestamp)}<br>
+  Node: ${item.meta.vsn}<br>
+  <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+  ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
+  </b>
+  (${item.value} issue${item.value == 1 ? '' : 's'})<br><br>
+  <small class="muted">(click for details)</small>
+  `
+
 
 export default function TestView() {
   const history  = useHistory()
 
   const { setLoading } = useProgress()
-  const [sanity, setSanity] = useState<BH.AggMetrics>()
-  const [health, setHealth] = useState<BH.AggMetrics>()
+  const [sanity, setSanity] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
+  const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
-  const [error, setError]= useState()
+  const [error, setError]= useState(null)
 
   useEffect(() => {
     setLoading(true)
 
-    let p1 = BH.getNodeHealth(null, '-7d')
-      .catch((err) => setError(err))
-
-    let p2 = BH.getNodeSanity('-7d')
-      .catch((err) => setError(err))
-
-    // temp solution for vsn <-> node id
-    const p3 = BK.getManifest({by: 'vsn'})
-      .catch((err) => setError(err))
+    const p1 = BH.getNodeHealth(null, '-7d')
+    const p2 = BH.getNodeSanity('-7d')
+    const p3 = BK.getManifest({by: 'vsn'})  // temp solution for vsn <-> node id
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
-        const vsns = Object.values(meta)
-          .filter(o => o.node_id?.length && o.node_type !== 'Blade')
+
+        // sort sanity by node vsn
+        sanity = Object.keys(sanity)
+          .sort()
+          .reduce((acc, key) => (acc[key] = sanity[key], acc), {})
+
+        // only consider WSN nodes with node_id
+        const includeList = Object.values(meta)
+          .filter(o => o.node_id.length && o.node_type !== 'Blade')
+
+        const prodVSNs = includeList
+          .filter(o => o.commission_date.length)
           .map(o => o.vsn)
 
-        const healthSubset = Object.keys(health)
-          .reduce((acc, vsn) =>
-            vsns.includes(vsn) ? {...acc, [vsn]: health[vsn]} : acc
-          , {})
+        const devVSNs = includeList
+          .filter(o => !o.commission_date.length)
+          .map(o => o.vsn)
+
+        let prod = reduceByVSNs(health, prodVSNs)
+        let dev = reduceByVSNs(health, devVSNs)
+        setHealth({dev, prod})
+
+        prod = reduceByVSNs(sanity, prodVSNs)
+        dev = reduceByVSNs(sanity, devVSNs)
+        setSanity({dev, prod})
 
         setManifest(meta)
-        setHealth(healthSubset)
-        setSanity(sanity)
       })
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
   }, [setLoading])
@@ -79,56 +128,86 @@ export default function TestView() {
 
   return (
     <Root>
-      <h1>All Nodes</h1>
+      <h1>
+        Production
+        <sup>
+          <Tooltip title={`Nodes with commission dates`} placement="right">
+            <HelpIcon style={{fontSize: '.75em'}}/>
+          </Tooltip>
+        </sup>
+      </h1>
 
       <h2>Health</h2>
       {health &&
         <TimelineChart
-          data={health}
+          data={health.prod}
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
-          colorCell={(val, obj) => {
-            if (val == null)
-              return colors.noValue
-            return val == 0 ? colors.red4 : colors.green
-          }}
-          tooltip={(item) =>
-            `${getDateTimeStr(item.timestamp)}<br>
-            Node: ${item.meta.vsn}<br>
-            <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
-              ${item.value == 0 ? 'failed' : `success`}
-            </b><br><br>
-            <small class="muted">(click for details)</small>
-            `
-          }
+          colorCell={getHealthColor}
+          tooltip={healthTooltip}
           tailHours={48}
         />
       }
+      {error && <ErrorMsg>{error}</ErrorMsg>}
 
       <h2>Sanity Tests</h2>
       {sanity &&
         <TimelineChart
-          data={sanity}
+          data={sanity.prod}
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
-          tooltip={(item) =>
-            `${getDateTimeStr(item.timestamp)}<br>
-            <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
-             ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
-             </b>
-             (${item.value} issue${item.value == 1 ? '' : 's'})<br><br>
-            <small class="muted">(click for details)</small>
-            `
-          }
+          tooltip={sanityTooltip}
           tailHours={48}
         />
       }
+      {error && <ErrorMsg>{error}</ErrorMsg>}
+
+      <h1>
+        Development
+        <sup>
+          <Tooltip title={`Nodes without commission dates`} placement="right">
+            <HelpIcon style={{fontSize: '.75em'}}/>
+          </Tooltip>
+        </sup>
+      </h1>
+
+      <h2>Health</h2>
+      {health &&
+        <TimelineChart
+          data={health.dev}
+          onRowClick={handleLabelClick}
+          onCellClick={handleCellClick}
+          colorCell={getHealthColor}
+          tooltip={healthTooltip}
+          tailHours={48}
+        />
+      }
+      {error && <ErrorMsg>{error}</ErrorMsg>}
+
+      <h2>Sanity Tests</h2>
+      {sanity &&
+        <TimelineChart
+          data={sanity.dev}
+          onRowClick={handleLabelClick}
+          onCellClick={handleCellClick}
+          tooltip={sanityTooltip}
+          tailHours={48}
+        />
+      }
+      {error && <ErrorMsg>{error}</ErrorMsg>}
     </Root>
   )
 }
 
 const Root = styled.div`
- h2 {
-   width: 100%;
- }
+  margin: 1em;
+
+  h1 {
+    border-bottom: 1px solid rgb(216, 222, 228);
+    margin-bottom: 1em;
+  }
+
+  h2 {
+    margin-left: 50px;
+  }
 `
