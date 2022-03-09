@@ -10,7 +10,9 @@ import WarningIcon from '@mui/icons-material/WarningRounded'
 
 import RecentDataTable from './RecentDataTable'
 import Audio from '../audio/Audio'
+
 import * as BH from '~/components/apis/beehive'
+import {Manifest} from '~/components/apis/beekeeper'
 
 import {bytesToSizeSI, relTime} from '~/components/utils/units'
 
@@ -33,10 +35,11 @@ export function isOldData(timestamp, grain = 'hours', amount = 2) {
 
 type Props = {
   node: string
+  manifest: Manifest
 }
 
 export default function RecentData(props: Props) {
-  const {node} = props
+  const {node, manifest} = props
 
   const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
   const [loading, setLoading] = useState(false)
@@ -48,6 +51,7 @@ export default function RecentData(props: Props) {
 
   useEffect(() => {
     setLoading(true)
+    console.log('called')
     BH.getRecentImages(node.toLowerCase(), onStart, onProgress)
       .then(images => {
         const hasData = !!Object.keys(images).filter(k => images[k]).length
@@ -81,14 +85,14 @@ export default function RecentData(props: Props) {
             sensor: 'bme680'
           },
           format: v => `${v}°C`,
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
         }, {
           label: 'Raingauge',
           query: {
             node: node.toLowerCase(),
             name: 'env.raingauge.event_acc'
           },
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
         }]}
       />
 
@@ -142,6 +146,9 @@ export default function RecentData(props: Props) {
 
       <h2>Recent Audio</h2>
       <Audio node={node} />
+      {manifest?.shield === false &&
+        <p className="muted">This node does not support audio since it doesn't have a shield</p>
+      }
 
       {error &&
         <Alert severity="error">

@@ -361,8 +361,8 @@ export default function NodeView() {
         </Charts>
 
         <Data>
-          {factoryView && manifest && manifest.factory && <SignOffTable data={manifest.factory} />}
-          <RecentData node={node} />
+          {factoryView && manifest?.factory && <SignOffTable data={manifest.factory} />}
+          <RecentData node={node} manifest={manifest} />
         </Data>
 
       </div>
