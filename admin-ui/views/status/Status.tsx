@@ -95,12 +95,15 @@ export default function StatusView() {
    * load data
    */
   useEffect(() => {
+    let done = false
+    let handle
+
     // get latest metrics
     function ping() {
-      const handle = setTimeout(async () => {
+      handle = setTimeout(async () => {
+        if (done) return
         const results = await Promise.allSettled(pingRequests())
         const [ metrics, temps, health, sanity] = results.map(r => r.value)
-
 
         setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
@@ -108,27 +111,27 @@ export default function StatusView() {
         // recursive
         ping()
       }, TIME_OUT)
-
-      return handle
     }
 
-    let handle
     setLoading(true)
     const proms = [BK.getState(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
+        if (done) return
         const [state, metrics, temps, health, sanity] = results.map(r => r.value)
+
         setData(state)
 
         const allData = mergeMetrics(state, metrics, temps, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
-        handle = ping()
+        ping()
       }).catch(err => setError(err))
       .finally(() => setLoading(false))
 
     return () => {
+      done = true
       clearTimeout(handle)
     }
   }, [])

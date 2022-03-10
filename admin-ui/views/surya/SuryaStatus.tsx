@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import styled from 'styled-components'
 import { useParams, Link} from 'react-router-dom'
 
@@ -54,7 +54,7 @@ const columns = [
       if (!obj || !obj.elaspedTimes) return '-'
 
       const val = obj.elaspedTimes['rpi']
-      return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
+      return <b className={getColorClass(val, 360000, 180000, 'success font-bold')}>
         {utils.msToTime(val)}
       </b>
     }
@@ -65,7 +65,7 @@ const columns = [
       if (!obj || !obj.elaspedTimes) return '-'
 
       const val = obj.elaspedTimes['nx']
-      return <b className={getColorClass(val, 90000, 63000, 'success font-bold')}>
+      return <b className={getColorClass(val, 360000, 180000,'success font-bold')}>
         {utils.msToTime(val)}
       </b>
     }
@@ -228,9 +228,13 @@ export default function StatusView() {
    * load data
    */
   useEffect(() => {
+    let done = false
+    let handle
+
     // get latest metrics
     function ping() {
-      const handle = setTimeout(async () => {
+      handle = setTimeout(async () => {
+        if (done) return
         const results = await Promise.allSettled(pingRequests())
         const [ metrics, temps, health, sanity]  = results.map(r => r.value)
 
@@ -240,15 +244,13 @@ export default function StatusView() {
         // recursive
         ping()
       }, TIME_OUT)
-
-      return handle
     }
 
-    let handle
     setLoading(true)
     const proms = [BK.getSuryaState(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
+        if (done) return
         const [state, metrics, temps, health, sanity] = results.map(r => r.value)
         setData(state)
 
@@ -256,11 +258,12 @@ export default function StatusView() {
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
-        handle = ping()
+        ping()
       }).catch(err => setError(err))
       .finally(() => setLoading(false))
 
     return () => {
+      done = true
       clearTimeout(handle)
     }
   }, [setLoading])
