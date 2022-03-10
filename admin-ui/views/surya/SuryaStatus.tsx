@@ -23,7 +23,9 @@ import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler
 
 import { mergeMetrics } from '../status/statusDataUtils'
 
-
+import config from '../../../config'
+const FAIL_THRES = config.admin.elapsedThresholds.fail
+const WARNING_THRES = config.admin.elapsedThresholds.warning
 const SPARKLINE_START = '-7d'
 const TIME_OUT = 5000
 
@@ -51,10 +53,10 @@ const columns = [
     id: 'rpi',
     label: 'RPi last updated',
     format: (_, obj) => {
-      if (!obj || !obj.elaspedTimes) return '-'
+      if (!obj || !obj.elapsedTimes) return '-'
 
-      const val = obj.elaspedTimes['rpi']
-      return <b className={getColorClass(val, 360000, 180000, 'success font-bold')}>
+      const val = obj.elapsedTimes['rpi']
+      return <b className={getColorClass(val, FAIL_THRES, WARNING_THRES, 'success font-bold')}>
         {utils.msToTime(val)}
       </b>
     }
@@ -62,10 +64,10 @@ const columns = [
     id: 'nx',
     label: 'NX last updated',
     format: (_, obj) => {
-      if (!obj || !obj.elaspedTimes) return '-'
+      if (!obj || !obj.elapsedTimes) return '-'
 
-      const val = obj.elaspedTimes['nx']
-      return <b className={getColorClass(val, 360000, 180000,'success font-bold')}>
+      const val = obj.elapsedTimes['nx']
+      return <b className={getColorClass(val, FAIL_THRES, WARNING_THRES,'success font-bold')}>
         {utils.msToTime(val)}
       </b>
     }

@@ -145,7 +145,7 @@ export default function TestView() {
           onCellClick={handleCellClick}
           colorCell={getHealthColor}
           tooltip={healthTooltip}
-          tailHours={48}
+          tailHours={72}
         />
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
@@ -157,7 +157,7 @@ export default function TestView() {
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
           tooltip={sanityTooltip}
-          tailHours={48}
+          tailHours={72}
         />
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
@@ -179,7 +179,7 @@ export default function TestView() {
           onCellClick={handleCellClick}
           colorCell={getHealthColor}
           tooltip={healthTooltip}
-          tailHours={48}
+          tailHours={72}
         />
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
@@ -191,7 +191,7 @@ export default function TestView() {
           onRowClick={handleLabelClick}
           onCellClick={handleCellClick}
           tooltip={sanityTooltip}
-          tailHours={48}
+          tailHours={72}
         />
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}

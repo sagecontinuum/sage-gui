@@ -6,8 +6,7 @@ import config from '../../../config'
 import { aggregateMetrics } from '~/components/apis/beehive'
 
 
-const ELASPED_THRES = 90000
-
+const ELAPSED_FAIL_THRES = config.admin.elapsedThresholds.fail
 const HOST_SUFFIX_MAPPING = config.admin.hostSuffixMapping
 
 
@@ -41,7 +40,7 @@ export function filterData(data: object[], state: object) {
 }
 
 
-function getElaspedTimes(metrics: BH.AggMetrics, nodeID: string) {
+function getElapsedTimes(metrics: BH.AggMetrics, nodeID: string) {
   const byHost = {}
 
   Object.keys(metrics[nodeID]).forEach(host => {
@@ -187,8 +186,8 @@ export function countPluginStatus(data) {
 }
 
 
-const determineStatus = (elaspedTimes: {[host: string]: number}) => {
-  if (Object.values(elaspedTimes).some(val => val > ELASPED_THRES))
+const determineStatus = (elapsedTimes: {[host: string]: number}) => {
+  if (Object.values(elapsedTimes).some(val => val > ELAPSED_FAIL_THRES))
     return 'not reporting'
   return 'reporting'
 }
@@ -214,7 +213,7 @@ export function mergeMetrics(
     const id = nodeObj.id.toLowerCase()
     if (!(id in byNode)) return nodeObj
 
-    const elaspedTimes = getElaspedTimes(byNode, id)
+    const elapsedTimes = getElapsedTimes(byNode, id)
 
     const nodeTemps = (temps[id] && 'iio.in_temp_input' in temps[id]) ?
       temps[id]['iio.in_temp_input'] : null
@@ -229,8 +228,8 @@ export function mergeMetrics(
       ...nodeObj,
       vsn,
       temp,
-      status: determineStatus(elaspedTimes),
-      elaspedTimes,
+      status: determineStatus(elapsedTimes),
+      elapsedTimes,
       hasStaticGPS: !!nodeObj.gps_lat && !!nodeObj.gps_lon,
       hasLiveGPS: !!liveLat && !!liveLon,
       lat: nodeObj.gps_lat || liveLat,

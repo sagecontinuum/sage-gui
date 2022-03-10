@@ -21,11 +21,14 @@ export default  {
   // ui configuration (for admin ui)
   admin: {
     filterNodes: true,      // if true, filter to "node monitoring" list
-    activityLength: 50,     // number of data points for ticker
     hostSuffixMapping: {    // mapping for host suffix to short names (displayed in UI)
       'ws-rpi': 'rpi',
       'ws-nxcore': 'nx',
       'ws-nxagent': 'nxagent'
+    },
+    elapsedThresholds: {
+      fail: 360000,
+      warning: 180000
     },
     disableMap: false
   },

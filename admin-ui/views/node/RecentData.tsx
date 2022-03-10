@@ -51,7 +51,6 @@ export default function RecentData(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    console.log('called')
     BH.getRecentImages(node.toLowerCase(), onStart, onProgress)
       .then(images => {
         const hasData = !!Object.keys(images).filter(k => images[k]).length
@@ -147,7 +146,7 @@ export default function RecentData(props: Props) {
       <h2>Recent Audio</h2>
       <Audio node={node} />
       {manifest?.shield === false &&
-        <p className="muted">This node does not support audio since it doesn't have a shield</p>
+        <p className="muted">This node does not support audio</p>
       }
 
       {error &&

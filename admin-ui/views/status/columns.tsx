@@ -19,9 +19,10 @@ import config from '../../../config'
 
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
-
-//const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
+const FAIL_THRES = config.admin.elapsedThresholds.fail
+const WARNING_THRES = config.admin.elapsedThresholds.warning
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
+//const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 
 
 const dateOpts = {
@@ -241,7 +242,7 @@ const columns = [{
     </>
   }
 }, {
-  id: 'elaspedTimes',
+  id: 'elapsedTimes',
   label: 'Last Updated',
   format: (val) => {
     if (!val) return '-'
@@ -249,7 +250,7 @@ const columns = [{
     return Object.keys(val)
       .map(host =>
         <div key={host}>
-          {host}: <b className={getColorClass(val[host], 90000, 63000, 'success font-bold')}>
+          {host}: <b className={getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')}>
             {utils.msToTime(val[host])}
           </b>
         </div>
