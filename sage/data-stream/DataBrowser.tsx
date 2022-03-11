@@ -155,7 +155,8 @@ const VertDivider = () =>
 
 
 const getUniqueOpts = (data) =>
-  data.filter((v, i, self) => v && self.indexOf(v) == i)
+  data.sort()
+    .filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: v}))
 
 
@@ -163,6 +164,18 @@ const getUniqueOpts = (data) =>
 const getCurlCmd = (query: object) =>
   `curl ${BH.url}/query -d '${JSON.stringify(query)}'`
 
+
+function getAppMenus() {
+  return BH.getData({
+    start: `-1d`,
+    tail: 1,
+    filter: {
+      plugin: `plugin-.*`
+    }
+  }).then((data) =>
+    getUniqueOpts(data.map(o => o.meta.plugin).filter(n => n))
+  )
+}
 
 
 async function getFilterMenus(plugin) {
@@ -175,9 +188,9 @@ async function getFilterMenus(plugin) {
   })
 
   return {
-    nodes: getUniqueOpts(data.map(o => o.meta.vsn).sort()),
-    names: getUniqueOpts(data.map(o => o.name).sort()),
-    sensors: getUniqueOpts(data.map(o => o.meta.sensor).sort())
+    nodes: getUniqueOpts(data.map(o => o.meta.vsn)),
+    names: getUniqueOpts(data.map(o => o.name)),
+    sensors: getUniqueOpts(data.map(o => o.meta.sensor))
   }
 }
 
@@ -307,7 +320,7 @@ export default function DataPreview() {
   }, [app, name, node, sensor])
 
 
-  // update filter menus whenever url params changes
+  // update filter menus whenever app changes
   useEffect(() => {
     if (!app) return
 
@@ -316,27 +329,36 @@ export default function DataPreview() {
   }, [app])
 
 
+  // show/hide sensor column if needed
+  useEffect(() => {
+    if (menus.sensors.length) {
+      setCols(prev => {
+        let idx = findColumn(prev, 'sensor')
+        prev[idx] = {...prev[idx], hide: false}
+        return prev.slice(0)
+      })
+    } else {
+      setCols(prev => {
+        let idx = findColumn(prev, 'sensor')
+        prev[idx] = {...prev[idx], hide: true}
+        return prev.slice(0)
+      })
+    }
+  }, [menus.sensors])
+
+
+  // initial loading of everything
   useEffect(() => {
     const plugin = app || defaultPlugin
 
     function fetchAppMenu() {
-      const query = {
-        start: `-1d`,
-        tail: 1,
-        filter: {
-          plugin: `plugin-.*`
-        }
-      }
-
-      BH.getData(query)
+      getAppMenus()
         .then((data) => {
-          data = getUniqueOpts(data.map(o => o.meta.plugin).filter(n => n))
           setMenus(prev => ({...prev, apps: data}))
         }).catch(error => setError(error))
     }
 
     function fetchFilterMenus() {
-
       getFilterMenus(plugin)
         .then((menuItems) => {
           setMenus(prev => ({...prev, ...menuItems}))
@@ -385,6 +407,7 @@ export default function DataPreview() {
           } else {
             setChart(null)
           }
+
 
           setData(data)
 
