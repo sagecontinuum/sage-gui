@@ -1,5 +1,5 @@
 import config from '../../config'
-const url = config.beehive
+export const url = config.beehive
 
 import { handleErrors } from '../fetch-utils'
 import {groupBy, mapValues} from 'lodash'

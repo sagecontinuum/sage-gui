@@ -25,7 +25,7 @@ export default function Clipboard(props: Props) {
 
   return (
     <Root className="code text-xs">
-      <div ref={ref}>
+      <div ref={ref} className="clipboard-content">
         {content}
       </div>
 
@@ -40,10 +40,21 @@ export default function Clipboard(props: Props) {
 
 const Root = styled.pre`
   position: relative;
+  padding-bottom: 0px !important;
+
+  .clipboard-content {
+    overflow-x: scroll;
+    padding-bottom: 15px;
+  }
 `
 
 const CopyBtn = styled(IconButton)`
   position: absolute;
   right: 0;
   top: 0;
+  background: inherit;
+
+  :hover {
+    background: #ddd;
+  }
 `

@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useHistory, useLocation, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -24,16 +24,21 @@ import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Popper from '@mui/material/Popper'
 
+import DatePicker  from '@mui/lab/DatePicker'
+import TimePicker  from '@mui/lab/TimePicker'
+import LocalizationProvider from '@mui/lab/LocalizationProvider'
+import AdapterDateFns from '@mui/lab/AdapterDateFns'
+
 import { capitalize } from 'lodash'
 
-// import Clipboard from '~components/utils/Clipboard'
+import Clipboard from '~components/utils/Clipboard'
 import Sidebar from '../data/DataSidebar'
 import Audio from '../../admin-ui/views/audio/Audio'
 import QueryViewer from '../../components/QueryViewer'
 import TimeSeries from './TimeSeries'
 
 
-
+const defaultPlugin = 'plugin-iio:0.4.5'
 
 const relTime = val =>
   msToTime(new Date().getTime() - (new Date(val).getTime()))
@@ -111,6 +116,7 @@ const findColumn = (cols, name) =>
   cols.findIndex(o => o.id == name)
 
 
+type Unit = 'm' | 'h' | '12h' | 'd'
 
 const units = {
   'm': 'minute',
@@ -118,9 +124,6 @@ const units = {
   '12h': '12 hours',
   'd': 'day'
 }
-
-
-type Unit = 'm' | 'h' | 'd'
 
 type RangeIndicatorProps = {
   data: BH.Record[]
@@ -157,9 +160,9 @@ const getUniqueOpts = (data) =>
 
 
 
-const getCurlCmd = (query: object) => {
-  return `curl -d ${JSON.stringify(query)}`
-}
+const getCurlCmd = (query: object) =>
+  `curl ${BH.url}/query -d '${JSON.stringify(query)}'`
+
 
 
 async function getFilterMenus(plugin) {
@@ -172,14 +175,59 @@ async function getFilterMenus(plugin) {
   })
 
   return {
-    nodes: getUniqueOpts((data).map(o => o.meta.vsn)),
-    names: getUniqueOpts((data).map(o => o.name)),
-    sensors: getUniqueOpts((data).map(o => o.meta.sensor))
+    nodes: getUniqueOpts(data.map(o => o.meta.vsn).sort()),
+    names: getUniqueOpts(data.map(o => o.name).sort()),
+    sensors: getUniqueOpts(data.map(o => o.meta.sensor).sort())
   }
 }
 
 
-const defaultPlugin = 'plugin-iio:0.4.5'
+const getStartTime = (range: Unit) => {
+  let diff
+  if (['m', 'h', 'd'].includes(range))
+    diff = 1
+  else if (range == '12h')
+    diff = 12
+
+  const datetime = new Date()
+  if (range == 'm')
+    datetime.setMinutes(datetime.getMinutes() - diff)
+  else if (range == 'h')
+    datetime.setHours(datetime.getHours() - diff)
+  else if (range == '12h')
+    datetime.setHours(datetime.getHours() - diff)
+  else if (range == 'd')
+    datetime.setDate(datetime.getDate() - diff)
+  else
+    throw `getStartTime: range (window) not valid.  was window=${range}`
+
+
+  return new Date(datetime).toISOString()
+}
+
+const getEndTime = (start: string, range: Unit) => {
+  const startTime = new Date(start)
+  let endTime = new Date(start)
+
+  let diff
+  if (['m', 'h', 'd'].includes(range))
+    diff = 1
+  else if (range == '12h')
+    diff = 12
+
+  if (range == 'm')
+    endTime.setMinutes(startTime.getMinutes() + diff)
+  else if (range == 'h')
+    endTime.setHours(startTime.getHours() + diff)
+  else if (range == '12h')
+    endTime.setHours(startTime.getHours() + diff)
+  else if (range == 'd')
+    endTime.setDate(startTime.getDate() + diff)
+  else
+    throw `getEndTime: range (window) not valid.  was window=${range}`
+
+  return new Date(endTime).toISOString()
+}
 
 
 const isMediaApp = (app) =>
@@ -200,6 +248,8 @@ const facetList = Object.keys(initFilterState)
 export function getFilterState(params) {
   let init = {...initFilterState}
   for (const [key, val] of params) {
+    if (key == 'start')
+      continue
     init[key] = val.split(',')
   }
 
@@ -215,8 +265,9 @@ export default function DataPreview() {
   const name = params.get('names')
   const node = params.get('nodes')
   const sensor = params.get('sensors')
-  const unit = params.get('window') || 'm'
 
+  const unit: Unit = params.get('window') || 'm'
+  const start = params.get('start')
 
   const {loading, setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
@@ -273,11 +324,10 @@ export default function DataPreview() {
         start: `-1d`,
         tail: 1,
         filter: {
-          plugin: `.*`
+          plugin: `plugin-.*`
         }
       }
 
-      setLoading(true)
       BH.getData(query)
         .then((data) => {
           data = getUniqueOpts(data.map(o => o.meta.plugin).filter(n => n))
@@ -286,6 +336,7 @@ export default function DataPreview() {
     }
 
     function fetchFilterMenus() {
+
       getFilterMenus(plugin)
         .then((menuItems) => {
           setMenus(prev => ({...prev, ...menuItems}))
@@ -293,8 +344,12 @@ export default function DataPreview() {
     }
 
     function fetchData() {
+      const s = start || getStartTime(unit)
+      const end = getEndTime(s, unit)
+
       const query = {
-        start: unit == '12h' ? '-12h' : `-1${unit}`,
+        start: s,
+        end: end,
         filter: {
           plugin: plugin,
           ...(node ? {vsn: node} : {}),
@@ -302,6 +357,7 @@ export default function DataPreview() {
           ...(sensor ? {sensor} : {}),
         }
       }
+
       setQuery(query)
 
       setLoading(true)
@@ -324,7 +380,7 @@ export default function DataPreview() {
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
           // experimental charts
-          if (app && node && !isMediaApp(app) && data.length > 0) {
+          if (plugin && node && !isMediaApp(app) && data.length > 0) {
             setChart(data)
           } else {
             setChart(null)
@@ -335,13 +391,15 @@ export default function DataPreview() {
           // reset page any time more data is fetched
           setPage(0)
         }).catch(error => setError(error))
-        .finally(() => setLoading(false))
+        .finally(() => {
+          setLoading(false)
+        })
     }
 
     fetchAppMenu()
     fetchData()
     fetchFilterMenus()
-  }, [setLoading, unit, app, node, name, sensor])
+  }, [app, node, name, sensor, unit, start])
 
 
   // relative time and show meta checkbox events
@@ -369,8 +427,9 @@ export default function DataPreview() {
     params.delete('nodes')
     params.delete('names')
     params.delete('sensors')
-    params.delete('window')
     params.delete('apps')
+    params.delete('start')
+    params.delete('window')
   }
 
 
@@ -384,31 +443,39 @@ export default function DataPreview() {
     } else {
       params.set(field, val.id)
     }
-    history.push({search: params.toString()})
+    history.replace({search: params.toString()})
+  }
+
+  const handleTimeChange = (val, type: 'date' | 'time') => {
+    // merge time with date
+    const start = new Date(val).toISOString()
+
+    params.set('start', start)
+    history.replace({search: params.toString()})
   }
 
   const handleUnitChange = (val) => {
     params.set('window', val)
-    history.push({search: params.toString()})
+    history.replace({search: params.toString()})
   }
 
   const handleRemoveFilters = () => {
     clearParams()
     params.set('apps', defaultPlugin)
-    history.push({search: params.toString()})
+    history.replace({search: params.toString()})
   }
 
 
   const goTo = (appQuery: string) => {
     params.set('apps', appQuery)
-    history.push({search: params.toString()})
+    history.replace({search: params.toString()})
   }
 
 
   return (
     <Root isMedia={isMediaApp(app)}>
       <div className="flex">
-        <Sidebar width="225px" style={{padding: '0 10px'}}>
+        <Sidebar width="240px" style={{padding: '0 10px'}}>
           <h2 className="filter-title">Filters</h2>
 
           <div className="shortcuts">
@@ -439,24 +506,52 @@ export default function DataPreview() {
             )
           })}
 
-          <h3>Time Ranges</h3>
-          <FormControl variant="outlined" style={{width: 150}}>
-            <InputLabel id="unit-label">Window</InputLabel>
-            <Select
-              labelId="unit-label"
-              id="unit"
-              value={unit}
-              onChange={evt => handleUnitChange(evt.target.value)}
-              label="Window"
-              margin="dense"
-            >
-              {Object.keys(units)
-                .map(k =>
-                  <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                )
-              }
-            </Select>
-          </FormControl>
+          <h3>Time Range</h3>
+
+          <TimeOpts>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Start Date"
+                value={start}
+                onChange={(val) => handleTimeChange(val, 'date')}
+                renderInput={(params) => <TextField {...params} />}
+              />
+
+              <TimePicker
+                label="Start Time"
+                value={start}
+                onChange={(val) => handleTimeChange(val, 'time')}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
+
+
+            <FormControl variant="outlined" style={{width: 150}}>
+              <InputLabel id="unit-label">Window</InputLabel>
+              <Select
+                labelId="unit-label"
+                id="unit"
+                value={unit}
+                onChange={evt => handleUnitChange(evt.target.value)}
+                label="Window"
+                margin="dense"
+              >
+                {Object.keys(units)
+                  .map(k =>
+                    <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                  )
+                }
+              </Select>
+            </FormControl>
+          </TimeOpts>
+
+          <h4 className="muted">Download/CLI</h4>
+          <CurlContainer>
+            <Clipboard
+              content={getCurlCmd(query)}
+              tooltip="Copy curl CMD"
+            />
+          </CurlContainer>
         </Sidebar>
 
         <Main>
@@ -469,7 +564,7 @@ export default function DataPreview() {
                     onClick={handleRemoveFilters}
                     startIcon={<UndoIcon />}
                   >
-                    Reset
+                    Clear
                   </Button>
                 }
 
@@ -483,12 +578,6 @@ export default function DataPreview() {
               </div>
             </div>
           </div>
-
-          {/*
-          <Clipboard
-            content={getCurlCmd(query)}
-          />
-          */}
 
           <br />
           {chart &&
@@ -548,12 +637,12 @@ export default function DataPreview() {
                 </div>
               }
               middleComponent={
-                <RangeCtrls className="flex">
+                <RangeInfo className="flex">
                   {data &&
                     <RangeIndicator data={data} unit={unit}/>
                   }
                   <VertDivider />
-                </RangeCtrls>
+                </RangeInfo>
               }
             />
           }
@@ -613,11 +702,24 @@ const Main = styled.div`
 `
 
 const Menu = styled(Autocomplete)`
-  margin: 15px 0px;
+  margin-bottom: 15px;
   background: #fff;
 `
 
-const RangeCtrls = styled.div`
+const TimeOpts = styled.div`
+  > div {
+    margin-bottom: 15px;
+  }
+`
+
+const CurlContainer = styled.div`
+  pre {
+    border: none;
+    background: #fff !important;
+  }
+`
+
+const RangeInfo = styled.div`
   margin-left: auto;
   height: 100%;
 `
