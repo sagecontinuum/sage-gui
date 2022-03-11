@@ -269,7 +269,7 @@ export default function DataPreview() {
   const unit: Unit = params.get('window') || 'm'
   const start = params.get('start')
 
-  const {loading, setLoading} = useProgress()
+  const {setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
   const [page, setPage] = useState(0)
 
@@ -446,10 +446,8 @@ export default function DataPreview() {
     history.replace({search: params.toString()})
   }
 
-  const handleTimeChange = (val, type: 'date' | 'time') => {
-    // merge time with date
+  const handleTimeChange = (val) => {
     const start = new Date(val).toISOString()
-
     params.set('start', start)
     history.replace({search: params.toString()})
   }
@@ -506,21 +504,22 @@ export default function DataPreview() {
             )
           })}
 
-          <h3>Time Range</h3>
 
           <TimeOpts>
+            <h3>Time Range</h3>
+
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 label="Start Date"
                 value={start}
-                onChange={(val) => handleTimeChange(val, 'date')}
+                onChange={(val) => handleTimeChange(val)}
                 renderInput={(params) => <TextField {...params} />}
               />
 
               <TimePicker
                 label="Start Time"
                 value={start}
-                onChange={(val) => handleTimeChange(val, 'time')}
+                onChange={(val) => handleTimeChange(val)}
                 renderInput={(params) => <TextField {...params} />}
               />
             </LocalizationProvider>
@@ -545,7 +544,7 @@ export default function DataPreview() {
             </FormControl>
           </TimeOpts>
 
-          <h4 className="muted">Download/CLI</h4>
+          <h4>Download/CLI</h4>
           <CurlContainer>
             <Clipboard
               content={getCurlCmd(query)}
@@ -655,8 +654,8 @@ export default function DataPreview() {
 const Root = styled.div<{isMedia: boolean}>`
   margin-left: 0;
 
-  h1 {
-    font-size: 1.5em;
+  h2, h3, h4 {
+    color: #444;
   }
 
   .filter-title {
@@ -707,6 +706,7 @@ const Menu = styled(Autocomplete)`
 `
 
 const TimeOpts = styled.div`
+  margin: 2em 0;
   > div {
     margin-bottom: 15px;
   }
