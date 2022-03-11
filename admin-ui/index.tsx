@@ -51,7 +51,7 @@ export default function App() {
                 <Route path="/audio" component={AudioView} />
                 <Route path="/node/:node" component={NodeView} />
 
-                <Redirect exact from="/surya" to="/surya/phase1" />
+                <Redirect exact from="/surya" to="/surya/phase2" />
                 <Route path="/surya/:phase" component={SuryaView } />
 
                 <Route path="/fiddle/stress" component={Stress} />
