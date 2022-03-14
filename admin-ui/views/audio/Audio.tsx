@@ -39,8 +39,8 @@ export default function Audio(props: Props) {
 
   const { setLoading } = useProgress()
 
-  const ref = useRef()
-  const ref2 = useRef()
+  const audioRef = useRef()
+  const spectroGramRef = useRef()
 
   const [waveSurf, setWaveSurf] = useState()
   const [isPlaying, setIsPlaying] = useState(false)
@@ -73,7 +73,7 @@ export default function Audio(props: Props) {
         .finally(() => setLoading(false))
 
     } else if (dataURL) {
-      // if OSN url is rovidepd, don't get meta
+      // if OSN url is provided, don't get meta
       loadPlayer(dataURL)
       setLoading(false)
     } else {
@@ -84,12 +84,12 @@ export default function Audio(props: Props) {
 
   function loadPlayer(url) {
     var wavesurfer = WaveSurfer.create({
-      container: ref.current,
+      container: audioRef.current,
       waveColor: 'violet',
       progressColor: 'purple',
       plugins: [
         SpectrogramPlugin.create({
-          container: ref2.current,
+          container: spectroGramRef.current,
           labels: true,
           colorMap: colors
         })
@@ -107,13 +107,14 @@ export default function Audio(props: Props) {
   return (
     <Root className="flex column">
       {/* fallback to html audio element (if CORS is not configured) */}
-      {vizError && meta &&
+      {(vizError || meta?.value || dataURL) &&
         <HtmlAudio>
           <audio
+            ref={audioRef}
             controls
-            src={meta?.value}>
-              Your browser does not support the
-              <code>audio</code> element.
+            src={meta?.value || dataURL}
+          >
+            Your browser does not support the <code>audio</code> element.
           </audio>
         </HtmlAudio>
       }
@@ -148,8 +149,8 @@ export default function Audio(props: Props) {
 
         {!vizError &&
           <div>
-            <div ref={ref}></div>
-            <div ref={ref2}></div>
+            <div ref={audioRef}></div>
+            <div ref={spectroGramRef}></div>
           </div>
         }
 
