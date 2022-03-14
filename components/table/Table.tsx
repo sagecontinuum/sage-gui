@@ -373,13 +373,18 @@ export default function TableComponent(props: Props) {
 
   const tableRef = useRef(null)
 
-  const allData = indexData(props.rows)
-
-  const [rows, setRows] = useState<Rows>(allData) // may contain subset of rows via pagination, filtering, etc
   const [columns, setColumns] = useState(getVisibleColumns(props.columns))
   const [page, setPage] = useState(Number(props.page))
   const [sortBy, setSortBy] = useState((props.sort && parseSort(props.sort)) || {})
   const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage || 100)
+
+
+  let data = indexData(props.rows)
+  if (pagination) {
+    data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  }
+
+  const [rows, setRows] = useState<Rows>(data) // may contain subset of rows via pagination, filtering, etc
 
   // keep state on shown/hidden columns
   // initial columns are defined in `columns` spec.
