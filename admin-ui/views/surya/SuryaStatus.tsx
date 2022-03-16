@@ -84,20 +84,16 @@ const columns = [
       const data = details?.slice(-lastN)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
-        {(failed + passed) == 0 ? <div>no data</div> :
-          (failed == 0 ?
-            <Tooltip title={<>All health tests passed<br/>for last {details?.length} hours!</>} placement="top">
-              <GoodChip icon={<CheckIcon className="success" />} label="Good" />
-            </Tooltip> :
-            <HealthSparkler
-              name={<>summary of last (available) {data?.length} hours</>}
-              data={data}
-              colorFunc={healthColor}
-              cellW={isPhase2 ? 7 : 2}
-              cellPad={isPhase2 ? 1 : 0}
-              ttPlacement="top"
-            />
-          )}
+        {!data?.length ? <div>no data</div> :
+          <HealthSparkler
+            name={<>summary of last (available) {data?.length} hours</>}
+            data={data}
+            colorFunc={healthColor}
+            cellW={isPhase2 ? 7 : 2}
+            cellPad={isPhase2 ? 1 : 0}
+            ttPlacement="top"
+          />
+        }
       </Link>
     }
   }, {
@@ -113,19 +109,15 @@ const columns = [
       const data = details?.slice(-lastN)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
-        {(failed + passed) == 0 ? <div>no data</div> :
-          (failed == 0 ?
-            <Tooltip title={<>All sanity tests passed<br/>for last {details?.length} hours!</>} placement="top">
-              <GoodChip icon={<CheckIcon className="success" />} label="Good" />
-            </Tooltip> :
-            <HealthSparkler
-              name={<>summary of last (available) {data?.length} hours</>}
-              data={data}
-              colorFunc={sanityColor}
-              cellW={isPhase2 ? 7 : 2}
-              cellPad={isPhase2 ? 1 : 0}
-              ttPlacement="top"
-            />)
+        {!data?.length ? <div>no data</div> :
+          <HealthSparkler
+            name={<>summary of last (available) {data?.length} hours</>}
+            data={data}
+            colorFunc={sanityColor}
+            cellW={isPhase2 ? 7 : 2}
+            cellPad={isPhase2 ? 1 : 0}
+            ttPlacement="top"
+          />
         }
       </Link>
     }
@@ -367,8 +359,8 @@ const Overview = styled.div`
 
 const TableContainer = styled.div`
   table {
-    th:nth-child(n+6):nth-child(n+3),
-    td:nth-child(n+6):nth-child(n+3) {
+    th:nth-child(n+7):nth-child(n+3),
+    td:nth-child(n+7):nth-child(n+3) {
       text-align: center; // center for viz / signoffs
     }
   }
