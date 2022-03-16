@@ -32,6 +32,7 @@ export type Meta = {
   vsn?: string
   sensor?: string
   plugin?: string
+  task?: string
 }
 
 // standard, most common SDR record

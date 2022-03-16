@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDom from 'react-dom'
-import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -8,6 +8,11 @@ import theme from '../components/theme'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '../components/NavBar'
+
+import AppList from './ecr/apps/AppList'
+import App from './ecr/app/App'
+import CreateApp from './ecr/create-app/CreateApp'
+import RequireAuth from '~/components/auth/RequireAuth'
 
 import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
@@ -57,22 +62,29 @@ export default function Sage() {
           <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
             <Container>
               <ProgressProvider>
-                <Switch>
-                  <Redirect exact from="/" to="/apps/explore" />
-                  <Redirect exact from="/apps" to="/apps/explore" />
+                <Routes>
+                  <Route path="/" element={<Navigate to="apps/explore" />} />
 
-                  <Route path="/apps" component={Apps} />
-                  <Route exact path="/data-browser" component={DataBrowser} />
-                  <Route path="/data-browser/ontology/:name?" component={Ontology} />
-                  <Route exact path="/data" component={DataSearch} />
-                  <Route path="/data/product/:name" component={DataProduct} />
+                  <Route path="apps" element={<Apps />}>
+                    <Route path="explore" element={<AppList />} />
+                    <Route path="app/*" element={<App />} />
+                    <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
+                    <Route path="shared-with-me" element={<RequireAuth><AppList /></RequireAuth>} />
+                    <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
+                  </Route>
 
-                  <Route path="/job-status" component={JobStatus} />
-                  <Route path="/fiddle/filter-menu" component={FilterMenuTest} />
+                  <Route path="data-browser" element={<DataBrowser />} />
+                  <Route path="data-browser/ontology/:name?" element={<Ontology />} />
 
-                  <Route exact path="/login" component={TestSignIn} />
-                  <Route path="*" component={NotFound} />
-                </Switch>
+                  <Route path="data" element={<DataSearch />} />
+                  <Route path="data/product/:name" element={<DataProduct />} />
+
+                  <Route path="job-status" element={<JobStatus />} />
+                  <Route path="fiddle/filter-menu" element={<FilterMenuTest />} />
+
+                  <Route path="login" element={<TestSignIn />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
               </ProgressProvider>
             </Container>
           </SnackbarProvider>

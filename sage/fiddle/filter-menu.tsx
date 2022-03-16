@@ -1,6 +1,6 @@
 
 import {useState, useEffect} from 'react'
-import {useLocation, useHistory} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 import styled from 'styled-components'
 import FilterMenu from '../../components/FilterMenu'
 
@@ -18,7 +18,7 @@ const defaultItem = 'item 1'
 
 export default function FilterMenuTest() {
   const params = new URLSearchParams(useLocation().search)
-  const history = useHistory()
+  const navigate = useNavigate()
   const app = params.get('item')
 
   const [menus, setMenus] = useState({
@@ -36,7 +36,7 @@ export default function FilterMenuTest() {
 
   const handleFilterChange = (field: string, val: {id: string, label: string}) => {
     params.set(field, val.id)
-    history.push({search: params.toString()})
+    navigate({search: params.toString()})
   }
 
 

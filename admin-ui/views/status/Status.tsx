@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import {useLocation, useHistory} from 'react-router-dom'
+import {useLocation, useNavigate} from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -59,7 +59,7 @@ type Option = {
 
 export default function StatusView() {
   const params = useParams()
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const query = params.get('query') || ''
   const status = params.get('status')
@@ -173,7 +173,7 @@ export default function StatusView() {
   const handleQuery = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    history.push({search: params.toString()})
+    navigate({search: params.toString()})
   }
 
 
@@ -187,14 +187,14 @@ export default function StatusView() {
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
 
-    history.push({search: params.toString()})
+    navigate({search: params.toString()})
   }
 
 
   const handleRemoveFilters = () => {
     setNodeType('all')
     params.delete('query')
-    history.push({search: ''})
+    navigate({search: ''})
   }
 
 

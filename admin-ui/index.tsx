@@ -1,5 +1,5 @@
 import ReactDom from 'react-dom'
-import {BrowserRouter, Switch, Route, Redirect, NavLink} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -9,7 +9,7 @@ import NavBar, {NavItems} from '../components/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
 import NodeView from './views/node/Node'
-import SuryaView from './views/surya/Surya'
+import SuryaStatus from './views/surya/SuryaStatus'
 import AudioView from './views/audio/LatestAudio'
 
 import Stress from './fiddle/Stress'
@@ -44,20 +44,21 @@ export default function App() {
 
           <Container>
             <ProgressProvider>
-              <Switch>
-                <Redirect exact from="/" to="status" />
-                <Route path="/status" component={StatusView} />
-                <Route path="/tests" component={TestView} />
-                <Route path="/audio" component={AudioView} />
-                <Route path="/node/:node" component={NodeView} />
+              <Routes>
+                <Route path="/" element={<Navigate to="status" />} />
 
-                <Redirect exact from="/surya" to="/surya/phase2" />
-                <Route path="/surya/:phase" component={SuryaView } />
+                <Route path="status" element={<StatusView/>} />
+                <Route path="tests" element={<TestView />} />
+                <Route path="audio" element={<AudioView />} />
+                <Route path="node/:node" element={<NodeView />} />
 
-                <Route path="/fiddle/stress" component={Stress} />
-                <Route path="/fiddle/timeline" component={Timeline} />
-                <Route path="*" component={NotFound} />
-              </Switch>
+                <Route path="surya" element={<Navigate to="/surya/phase2" />} />
+                <Route path="surya/:phase" element={<SuryaStatus />} />
+
+                <Route path="fiddle/stress" element={<Stress/>} />
+                <Route path="fiddle/timeline" element={<Timeline />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </ProgressProvider>
           </Container>
         </BrowserRouter>

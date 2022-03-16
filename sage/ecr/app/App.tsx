@@ -25,7 +25,7 @@ import AppMeta from './AppMeta'
 
 
 export default function App() {
-  const { path } = useParams()
+  const path = useParams()['*']
 
   const { loading, setLoading } = useProgress()
   const [repo, setRepo] = useState<ECR.Repo>(null)

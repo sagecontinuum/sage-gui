@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
@@ -62,7 +62,7 @@ const sanityTooltip = (item) =>
 
 
 export default function TestView() {
-  const history  = useHistory()
+  const navigate = useNavigate()
 
   const { setLoading } = useProgress()
   const [sanity, setSanity] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
@@ -117,12 +117,12 @@ export default function TestView() {
   const handleCellClick = (item) => {
     const vsn = item.meta.vsn
     const nodeId = manifest[vsn].node_id
-    history.push(`/node/${nodeId}`)
+    navigate(`/node/${nodeId}`)
   }
 
   const handleLabelClick = (label) => {
     const nodeId = manifest[label].node_id
-    history.push(`/node/${nodeId}`)
+    navigate(`/node/${nodeId}`)
   }
 
 

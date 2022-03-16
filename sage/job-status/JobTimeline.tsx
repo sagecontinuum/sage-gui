@@ -1,4 +1,4 @@
-import {useHistory} from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import TimelineChart, {colors} from '../../admin-ui/viz/TimelineChart'
 import {GroupedApps} from './JobStatus'
@@ -19,7 +19,7 @@ type Props = {
 }
 
 export default function JobTimeLine(props: Props) {
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const {data} = props
 
@@ -43,7 +43,7 @@ export default function JobTimeLine(props: Props) {
           onRowClick={(val, data) => {
             const image = data[0].value.plugin_image
             const app = image.slice(image.lastIndexOf('/') + 1)
-            history.push(`/data-browser/?apps=${app}`)
+            navigate(`/data-browser/?apps=${app}`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{right: 0, bottom: 0}}

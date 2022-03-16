@@ -11,15 +11,15 @@ import PublicIcon from '@mui/icons-material/PublicRounded'
 export default function Sidebar() {
   return (
     <Root className="flex-nowrap">
-      <Item to="/apps/explore">
+      <Item to="explore">
         <PublicIcon />
         <div>Explore</div>
       </Item>
-      <Item to="/apps/my-apps">
+      <Item to="my-apps">
         <UserIcon/>
         <div>My Apps</div>
       </Item>
-      <Item to="/apps/shared-with-me">
+      <Item to="shared-with-me">
         <SharedIcon />
         <div>Shared with Me</div>
       </Item>

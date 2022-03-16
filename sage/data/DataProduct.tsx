@@ -101,17 +101,11 @@ export default function Product() {
     if (!isPlugin) return
 
     const sources = data.resources.filter(o => o.url)
-    const {query} = sources[0]
 
     // todo: sage commons should provide valid json
-    let q = JSON.parse(query.replace(/u'/g, '\'').replace(/'/g, '"'))
-
-    // todo: need link between plugin and plugin data
-    setLoading(true)
-    BH.getData(q)
-      .then((data) => setPluginData(data))
-      .catch(error => setError(error))
-      .finally(() => setLoading(false))
+    // const {query} = sources[0]
+    // let q = JSON.parse(query.replace(/u'/g, '\'').replace(/'/g, '"')) : ''
+    // todo: add link to live feed, if we want to continue building on this
   }, [data, setLoading])
 
 

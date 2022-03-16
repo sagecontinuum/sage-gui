@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import { useEffect, useRef, useState } from 'react'
-import { useHistory, useLocation, Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '../../components/apis/beehive'
@@ -273,7 +273,7 @@ export function getFilterState(params) {
 
 export default function DataPreview() {
   const params = new URLSearchParams(useLocation().search)
-  const history = useHistory()
+  const navigate = useNavigate()
   const app = params.get('apps')
   const name = params.get('names')
   const node = params.get('nodes')
@@ -466,24 +466,24 @@ export default function DataPreview() {
     } else {
       params.set(field, val.id)
     }
-    history.replace({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
   const handleTimeChange = (val) => {
     const start = new Date(val).toISOString()
     params.set('start', start)
-    history.replace({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
   const handleUnitChange = (val) => {
     params.set('window', val)
-    history.replace({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
   const handleRemoveFilters = () => {
     clearParams()
     params.set('apps', defaultPlugin)
-    history.replace({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
 
@@ -491,7 +491,7 @@ export default function DataPreview() {
     params.delete('names')
     params.set('apps', appQuery)
     params.set('window', 'h')
-    history.replace({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
 

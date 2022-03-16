@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useRouteMatch } from 'react-router-dom'
+import { useMatch } from 'react-router-dom'
 import config from '../../../config'
 import * as ECR from '~/components/apis/ecr'
 import { isSignedIn } from '~/components/auth/auth'
@@ -7,7 +7,7 @@ import { isSignedIn } from '~/components/auth/auth'
 
 
 export default function useWithBuildStatus<T>() {
-  let { path } = useRouteMatch()
+  let path = useMatch('*').pathname
   const view = path.split('/')[2]
 
   const [isDone, setIsDone] = useState(false)

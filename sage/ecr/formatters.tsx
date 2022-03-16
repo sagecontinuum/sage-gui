@@ -26,7 +26,7 @@ function VersionTooltip(props: VerTooltipProps) {
         </>
       }
     >
-      <Link to={`app/${row.namespace}/${row.name}`}>
+      <Link to={`../app/${row.namespace}/${row.name}`}>
         {versions.length} tag{versions.length > 1 ? 's' : ''}
       </Link>
     </Tooltip>
@@ -36,7 +36,7 @@ function VersionTooltip(props: VerTooltipProps) {
 
 export const formatters = {
   name: (name, o) => {
-    return <Link to={`app/${o.namespace}/${name}`}>{name}</Link>
+    return <Link to={`../app/${o.namespace}/${name}`}>{name}</Link>
   },
   versions: (versions, row) => {
     if (!versions?.length) return '-'

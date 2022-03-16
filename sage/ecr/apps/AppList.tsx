@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
-import { useLocation, useHistory, useRouteMatch } from 'react-router-dom'
+import { useCallback, useEffect, useState, useRef } from 'react'
+import { useLocation, useNavigate, useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -73,10 +73,10 @@ const useQueryParams = () =>
 
 export default function AppList() {
   const params = useQueryParams()
-  let { path } = useRouteMatch()
+  let path = useMatch('*').pathname
   const view = path.split('/')[2]
 
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const query = params.get('query') || ''
 
@@ -136,7 +136,7 @@ export default function AppList() {
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    history.push({search: params.toString()})
+    navigate({search: params.toString()})
   }
 
   const onActionComplete = () => {
@@ -146,7 +146,7 @@ export default function AppList() {
 
 
   const onNavigate = (path: string) => {
-    history.push(path)
+    navigate(path)
   }
 
   if (!data && !error) return <></>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import TextField from '@mui/material/TextField'
@@ -94,7 +94,7 @@ const initialState = {
 
 
 export default function CreateApp() {
-  let history = useHistory()
+  let navigate = useNavigate()
   const { enqueueSnackbar } = useSnackbar()
 
   // app repo
@@ -212,7 +212,7 @@ export default function CreateApp() {
     ECR.register(config)
       .then(() => {
         enqueueSnackbar('App registered', {variant: 'success'})
-        history.push('/apps/my-apps')
+        navigate('/apps/my-apps')
       }).catch(error => {
         if (error.message.includes('force=true')) {
           // todo: implement overwrite
@@ -227,7 +227,7 @@ export default function CreateApp() {
     ECR.registerAndBuild(config)
       .then(() => {
         enqueueSnackbar('Build started')
-        history.push('/apps/my-apps')
+        navigate('/apps/my-apps')
       }).catch(error => {
         setError(error.message)
       }).finally(() => setIsBuilding(false))

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useParams, useLocation, Link} from 'react-router-dom'
 
@@ -150,15 +150,11 @@ export default function NodeView() {
   const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
   const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
 
-  const [factory, setFactory] = useState(null)
-
   const [health, setHealth] = useState(null)
 
-  const [loading1, setLoading1] = useState(null)
   const [loading2, setLoading2] = useState(null)
   const [loading3, setLoading3] = useState(null)
 
-  const [error1, setError1] = useState(null)
   const [error2, setError2] = useState(null)
   const [error3, setError3] = useState(null)
 
@@ -183,26 +179,6 @@ export default function NodeView() {
       })
 
 
-    setLoading1(true)
-    const p1 = SES.getGroupedByPlugin(node)
-      .then((data) => {
-        const d = getDate(hours, days)
-
-        for (const key of Object.keys(data)) {
-          // exclude empty lists (for now)
-          // if (data[key].length == 0)
-          //   delete data[key]
-        }
-
-        if (!Object.keys(data).length) {
-          setPluginData(null)
-          return
-        }
-
-        setPluginData(data)
-      }).catch((err) => setError1(err))
-      .finally(() => setLoading1(false))
-
     setLoading2(true)
     const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
       .then((sanity) => {
@@ -222,7 +198,7 @@ export default function NodeView() {
       .catch(err => setError3(err))
       .finally(() => setLoading3(false))
 
-    Promise.all([p1, p2, p3])
+    Promise.all([p2, p3])
       .then(() => setLoading(false))
 
   }, [node, setLoading, days, hours])
@@ -291,41 +267,6 @@ export default function NodeView() {
             />
           }
 
-          {/* hide just for now
-            <h2>Plugins</h2>
-            {pluginData &&
-              <TimelineChart
-                data={pluginData}
-                colorCell={(val, obj) => {
-                  if (val == null)
-                    return colors.noValue
-
-                  if (val <= 0)
-                    return colors.green
-                  else if (obj.meta.severity == 'warning')
-                    return colors.orange
-                  else
-                    return colors.red4
-                }}
-                tooltip={(item) =>
-                  `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
-                  <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
-                    ${item.value == 0 ? 'running' : `not running (${item.meta.status})`}
-                  </b>
-                  `
-                }
-                margin={{right: 20}}
-              />
-            }
-
-            {!loading1 && !pluginData && !error1 &&
-              <p className="muted">No (recent) plugin data available</p>
-            }
-
-            {error1 &&
-              <Alert severity="error">{error1.message}</Alert>
-            }
-          */}
 
           <h2>Sanity Tests</h2>
           {sanityData &&

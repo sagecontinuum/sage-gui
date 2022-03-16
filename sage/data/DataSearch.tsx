@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import React, { useState, useEffect } from 'react'
-import { Link, useLocation, useHistory } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
@@ -109,7 +109,7 @@ const useQueryParams = () =>
 export default function Search() {
   const params = useQueryParams()
   const query = params.get('query') || ''
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const {setLoading} = useProgress()
   const [rows, setRows] = useState<Data.Result[]>(null)
@@ -141,7 +141,7 @@ export default function Search() {
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    history.push({search: params.toString()})
+    navigate({search: params.toString()})
   }
 
 

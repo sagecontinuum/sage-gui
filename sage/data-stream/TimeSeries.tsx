@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { Line, Bar } from 'react-chartjs-2'
-import { chain, groupBy, countBy, sortBy, sumBy } from 'lodash'
+import { chain, groupBy, sumBy } from 'lodash'
 
 import * as BH from '~/components/apis/beehive'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -23,7 +23,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
     const namedData = byName[name]
 
     const grouped = groupBy(namedData, 'sensor')
-    const hasSesnors = Object.keys(grouped)[0] != 'undefined'
+    const hasSensors = Object.keys(grouped)[0] != 'undefined'
 
     Object.keys(grouped)
       .forEach((key, j) => {
@@ -33,7 +33,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
         }))
 
         datasets.push({
-          label: name + (hasSesnors ? ` - ${key}` : ''),
+          label: name + (hasSensors ? ` - ${key}` : ''),
           data: d,
           pointRadius: opts.showPoints ? 3 : 0,
           fill: false,
