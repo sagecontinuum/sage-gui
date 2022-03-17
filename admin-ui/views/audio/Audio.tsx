@@ -37,12 +37,16 @@ type Props = {
 export default function Audio(props: Props) {
   const {node, dataURL} = props
 
+  if (!node && !dataURL) {
+    throw 'Audio: no node or url provided'
+  }
+
   const { setLoading } = useProgress()
 
   const audioRef = useRef()
   const spectroGramRef = useRef()
 
-  const [waveSurf, setWaveSurf] = useState()
+  const [waveSurf, setWaveSurf] = useState(null)
   const [isPlaying, setIsPlaying] = useState(false)
 
   const [meta, setMeta] = useState<BH.OSNRecord>()
@@ -53,33 +57,30 @@ export default function Audio(props: Props) {
   // wavesurfer error
   const [vizError, setVizError] = useState()
 
-
+  // if node id is provided, find latest audio first
   useEffect(() => {
+    if (!node) return
     setLoading(true)
+    BH.getLatestAudio(node.toLowerCase())
+      .then(meta => {
+        setMeta(meta)
 
-    // if node id is provided, fetch meta from beehive first
-    if (node) {
-      BH.getLatestAudio(node.toLowerCase())
-        .then(meta => {
-          setMeta(meta)
+        // if we can't find meta, don't load wavesurfer
+        if (!meta) return
 
-          // if we can't find meta, don't load wavesurfer
-          if (!meta) return
+        const url = meta.value
+        loadPlayer(url)
+      })
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false))
+  }, [node, setLoading])
 
-          const url = meta.value
-          loadPlayer(url)
-        })
-        .catch((err) => setError(err))
-        .finally(() => setLoading(false))
-
-    } else if (dataURL) {
-      // if OSN url is provided, don't get meta
-      loadPlayer(dataURL)
-      setLoading(false)
-    } else {
-      throw 'Audio: no node or url provided'
-    }
-  }, [node, dataURL, setLoading])
+  // if OSN url is provided just load the player
+  useEffect(() => {
+    if (waveSurf) return
+    const ws = loadPlayer(dataURL)
+    setWaveSurf(ws)
+  }, [dataURL])
 
 
   function loadPlayer(url) {
@@ -96,21 +97,20 @@ export default function Audio(props: Props) {
       ]
     })
 
-    wavesurfer.on('ready', () => setWaveSurf(wavesurfer))
     wavesurfer.on('play', () => setIsPlaying(true))
     wavesurfer.on('pause', () => setIsPlaying(false))
-
-    wavesurfer.load(url)
     wavesurfer.on('error', (err) => setVizError(err))
+    wavesurfer.load(url)
+
+    return wavesurfer
   }
 
   return (
     <Root className="flex column">
       {/* fallback to html audio element (if CORS is not configured) */}
-      {(vizError || meta?.value || dataURL) &&
+      {vizError && (meta?.value || dataURL) &&
         <HtmlAudio>
           <audio
-            ref={audioRef}
             controls
             src={meta?.value || dataURL}
           >
@@ -121,27 +121,27 @@ export default function Audio(props: Props) {
 
 
       <div style={(meta && isOldData(meta.timestamp)) ? {border: '10px solid red'} : {}}>
-        <div  className="flex justify-between">
+        <div className="flex justify-between">
           <div></div>
-          {waveSurf &&
+          {waveSurf && !vizError &&
             <div className="flex items-center justify-end gap">
               {!isPlaying &&
-              <Button
-                startIcon={<PlayIcon />}
-                onClick={() => {waveSurf.play() }}
-                variant="outlined"
-              >
-                play
-              </Button>
+                <Button
+                  startIcon={<PlayIcon />}
+                  onClick={() => {waveSurf.play() }}
+                  variant="outlined"
+                >
+                  play
+                </Button>
               }
               {isPlaying &&
-              <Button
-                startIcon={<PauseIcon />}
-                onClick={() => {waveSurf.pause() }}
-                variant="outlined"
-              >
-                pause
-              </Button>
+                <Button
+                  startIcon={<PauseIcon />}
+                  onClick={() => {waveSurf.pause() }}
+                  variant="outlined"
+                >
+                  pause
+                </Button>
               }
             </div>
           }
@@ -155,9 +155,7 @@ export default function Audio(props: Props) {
         }
 
         {!dataURL && meta &&
-          <div
-            className="flex items-center justify-between"
-          >
+          <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div>
                 {isOldData(meta.timestamp) && <WarningIcon className="failed"/>}
