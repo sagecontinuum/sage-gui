@@ -1,6 +1,5 @@
 import * as BK from '~/components/apis/beekeeper'
 import * as BH from '~/components/apis/beehive'
-import * as SES from '~/components/apis/ses'
 
 import config from '../../../config'
 import { aggregateMetrics } from '~/components/apis/beehive'
@@ -140,7 +139,7 @@ export function countNodeHealth(data) {
   })
 
   return {
-    details: data,
+    details: data.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
     passed,
     failed
   }
@@ -159,31 +158,12 @@ export function countNodeSanity(data) {
   })
 
   return {
-    details: data,
+    details: data.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
     passed,
     failed
   }
 }
 
-
-
-export function countPluginStatus(data) {
-  if (!data) return {}
-
-  let passed = 0, failed = 0
-  data.forEach(obj => {
-    const {value} = obj
-
-    passed = value == 0 ? passed + 1 : passed
-    failed = value > 0 ? failed + 1 : failed
-  })
-
-  return {
-    details: data,
-    passed,
-    failed
-  }
-}
 
 
 const determineStatus = (elapsedTimes: {[host: string]: number}) => {
