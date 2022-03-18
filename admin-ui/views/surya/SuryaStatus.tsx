@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { useParams, Link} from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
-import Tooltip from '@material-ui/core/Tooltip'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 
 import {Tabs, Tab} from '~/components/tabs/Tabs'
@@ -55,6 +54,9 @@ const columns = [
     format: (_, obj) => {
       if (!obj || !obj.elapsedTimes) return '-'
 
+      if (!obj.shield)
+        return <span className="muted">no shield</span>
+
       const val = obj.elapsedTimes['rpi']
       return <b className={getColorClass(val, FAIL_THRES, WARNING_THRES, 'success font-bold')}>
         {utils.msToTime(val)}
@@ -77,10 +79,10 @@ const columns = [
     format: (_, row) => {
       if (!row.health) return '-'
 
-      const {failed, passed, details} = row.health.health
+      const {details} = row.health.health
 
       const isPhase2 = inPhaseN(2, row.ip)
-      const lastN = isPhase2 ? 12 : 7*24
+      const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
@@ -89,7 +91,7 @@ const columns = [
             name={<>summary of last (available) {data?.length} hours</>}
             data={data}
             colorFunc={healthColor}
-            cellW={isPhase2 ? 7 : 2}
+            cellW={isPhase2 ? 2 : 2}
             cellPad={isPhase2 ? 1 : 0}
             ttPlacement="top"
           />
@@ -102,10 +104,10 @@ const columns = [
     format: (_, row) => {
       if (!row.health) return '-'
 
-      const {failed, passed, details} = row.health.sanity
+      const {details} = row.health.sanity
 
       const isPhase2 = inPhaseN(2, row.ip)
-      const lastN = isPhase2 ? 12 : 7*24
+      const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
       return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
@@ -114,7 +116,7 @@ const columns = [
             name={<>summary of last (available) {data?.length} hours</>}
             data={data}
             colorFunc={sanityColor}
-            cellW={isPhase2 ? 7 : 2}
+            cellW={isPhase2 ? 2 : 2}
             cellPad={isPhase2 ? 1 : 0}
             ttPlacement="top"
           />
