@@ -73,17 +73,15 @@ function sanityColor(val, obj) {
     return colors.red4
 }
 
-const timeOpts = { hour: '2-digit', minute:'2-digit' }
-const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
 
-
-
-function getDateTimeStr(timestamp) {
-  return (
-    `${new Date(timestamp).toLocaleDateString('en-US', dateOpts)}<br>
-    ${new Date(timestamp).toLocaleTimeString('en-US', timeOpts)} - ${new Date(new Date(timestamp).getTime() + 60*60*1000).toLocaleTimeString('en-US', timeOpts)}`
-  )
-}
+const signoffCols = [
+  'Phase 2 Image Sign-off',
+  'Phase 2 Audio Sign-off',
+  'Phase 2 Sign-off',
+  'Phase 3 Image Sign-off',
+  'Phase 3 Audio Sign-off',
+  'Final Sign-off'
+]
 
 
 function SignOffTable({data}) {
@@ -98,31 +96,25 @@ function SignOffTable({data}) {
         </tr>
 
         <tr>
-          {Object.keys(data)
-            .filter(k => !['vsn', 'node_id', 'Final Sign-off', 'node_type'].includes(k))
-            .sort()
-            .map(label => <th key={label}>{label != 'Phase 2 Sign-off' ? label.replace(/Phase|2|3|Sign\-off/g,'') : label.replace(/Phase|2|3/g,'')}</th> )
-          }
-          <th>Final Sign-off</th>
+          {signoffCols.map((label) =>
+            <th key={label}>
+              {!['Phase 2 Sign-off', 'Final Sign-off'].includes(label) ?
+                label.replace(/Phase|2|3|Sign\-off/g,'') :
+                label.replace(/Phase|2|3/g,'')
+              }
+            </th>
+          )}
         </tr>
       </thead>
 
       <tbody>
         <tr>
-          {Object.keys(data)
-            .filter(k => !['vsn', 'node_id', 'Final Sign-off', 'node_type'].includes(k))
-            .sort()
-            .map(name => {
-              const val = data[name]
-              return <td key={name}>
-                {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
-              </td>
-            })}
-          <td>
-            {!data['Final Sign-off'] ?
-              <b className="fatal">No</b> : <CheckIcon className="success" />
-            }
-          </td>
+          {signoffCols.map(name => {
+            const val = data[name]
+            return <td key={name}>
+              {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
+            </td>
+          })}
         </tr>
       </tbody>
     </SignedTable>
@@ -263,7 +255,7 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
-              tailHours={48}
+              tailHours={72}
             />
           }
 
@@ -283,7 +275,7 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
-              tailHours={48}
+              tailHours={72}
             />
           }
 

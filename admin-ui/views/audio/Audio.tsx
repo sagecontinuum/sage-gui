@@ -77,7 +77,7 @@ export default function Audio(props: Props) {
 
   // if OSN url is provided just load the player
   useEffect(() => {
-    if (waveSurf) return
+    if (!dataURL || waveSurf) return
     const ws = loadPlayer(dataURL)
     setWaveSurf(ws)
   }, [dataURL])
