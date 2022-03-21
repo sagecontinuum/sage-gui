@@ -333,6 +333,7 @@ export default function StatusView() {
             rows={filtered}
             columns={cols}
             enableSorting
+            sort={'+vsn'}
             emptyNotice={`No nodes found in phase ${tabIdx+1}`}
           />
         }

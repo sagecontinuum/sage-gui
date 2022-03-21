@@ -257,8 +257,14 @@ const indexData = (data, key?: string) =>
 
 
 const clientSideSort = (data, id, direction) => {
-  const isArrayCol = Array.isArray(data[0][id])
-  const isNumeric = typeof data[0][id] === 'number'
+  let isArrayCol, isNumeric
+  try {
+    isArrayCol = Array.isArray(data[0][id])
+    isNumeric = typeof data[0][id] === 'number'
+  } catch {
+    isArrayCol = false
+    isNumeric = false
+  }
 
   if (isArrayCol) {
     // just use array lengths for now
@@ -320,7 +326,7 @@ type Props = {
   rowsPerPage?: number
   total?: number
   search?: string
-  sort?: object
+  sort?: `+${string}` | `-${string}`
   emptyNotice?: string | JSX.Element
   pagination?: boolean
   offsetHeight?: string | boolean
