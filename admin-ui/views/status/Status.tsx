@@ -173,7 +173,7 @@ export default function StatusView() {
   const handleQuery = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
 
@@ -187,14 +187,14 @@ export default function StatusView() {
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
 
-    navigate({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
 
   const handleRemoveFilters = () => {
     setNodeType('all')
     params.delete('query')
-    navigate({search: ''})
+    navigate({search: ''}, {replace: true})
   }
 
 

@@ -189,6 +189,9 @@ function getPhase(ip: string) {
 }
 
 
+const getTabIdx = (phase: string) =>
+  Number((phase || '1').slice(-1)) - 1
+
 
 const pingRequests = () => [
   BH.getLatestMetrics(),
@@ -201,8 +204,6 @@ const pingRequests = () => [
 export default function StatusView() {
   const {phase} = useParams()
 
-  const view = Number((phase || '1').slice(-1)) - 1  // covert to tab index
-
   // all data and current state of filtered data
   const { setLoading } = useProgress()
   const [data, setData] = useState(null)
@@ -214,11 +215,15 @@ export default function StatusView() {
 
   const [lastUpdate, setLastUpdate] = useState(null)
 
-  const [tabIdx, setTabIdx] = useState(view || 0)
+  // covert phaseX to tab index
+  const [tabIdx, setTabIdx] = useState<number>(getTabIdx(phase))
 
   const dataRef = useRef(null)
   dataRef.current = data
 
+  useEffect(() => {
+    setTabIdx(getTabIdx(phase))
+  }, [phase])
 
   /**
    * load data

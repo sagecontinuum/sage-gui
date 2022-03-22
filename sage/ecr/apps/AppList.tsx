@@ -136,7 +136,7 @@ export default function AppList() {
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()})
+    navigate({search: params.toString()}, {replace: true})
   }
 
   const onActionComplete = () => {

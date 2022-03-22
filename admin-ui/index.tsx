@@ -45,14 +45,14 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route path="/" element={<Navigate to="status" />} />
+                <Route path="/" element={<Navigate to="status" replace />} />
 
                 <Route path="status" element={<StatusView/>} />
                 <Route path="tests" element={<TestView />} />
                 <Route path="audio" element={<AudioView />} />
                 <Route path="node/:node" element={<NodeView />} />
 
-                <Route path="surya" element={<Navigate to="/surya/phase2" />} />
+                <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                 <Route path="surya/:phase" element={<SuryaStatus />} />
 
                 <Route path="fiddle/stress" element={<Stress/>} />

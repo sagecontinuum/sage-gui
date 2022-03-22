@@ -63,7 +63,7 @@ export default function Sage() {
             <Container>
               <ProgressProvider>
                 <Routes>
-                  <Route path="/" element={<Navigate to="apps/explore" />} />
+                  <Route path="/" element={<Navigate to="apps/explore" replace />} />
 
                   <Route path="apps" element={<Apps />}>
                     <Route path="explore" element={<AppList />} />
