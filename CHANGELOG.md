@@ -3,7 +3,8 @@
 The following are some notable changes to the UI
 
 
-## [1.9.0](https://github.com/sagecontinuum/sage-gui/compare/v1.8.1...v1.9.0) (2022-03-22)
+
+## [1.10.0](https://github.com/sagecontinuum/sage-gui/compare/v1.8.1...v1.9.0) (2022-03-22)
 
 
 ### Features
