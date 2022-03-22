@@ -15,13 +15,13 @@ import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '/components/utils/units'
 
-import config from '/config'
+import settings from '../../settings'
 
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
-const FAIL_THRES = config.admin.elapsedThresholds.fail
-const WARNING_THRES = config.admin.elapsedThresholds.warning
-const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
+const FAIL_THRES = settings.elapsedThresholds.fail
+const WARNING_THRES = settings.elapsedThresholds.warning
+const TEMP_DASH = `${settings.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
 //const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 
 

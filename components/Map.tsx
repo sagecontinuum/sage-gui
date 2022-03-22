@@ -3,11 +3,11 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import tokens from '../tokens'
-import config from '../config'
+import settings from '/apps/admin-ui/settings'
 
 // import Popover from '@mui/material/Popover'
 
-const DISABLE_MAP = config.admin['disableMap'] || false
+const DISABLE_MAP = settings['disableMap'] || false
 const center = [-99, 38.5]
 const initialZoom = 3.0
 const dotSize = 10

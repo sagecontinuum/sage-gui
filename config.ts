@@ -17,44 +17,4 @@ export default  {
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
 
   docs: 'https://docs.sagecontinuum.org/docs',
-
-  // ui configuration (for admin ui)
-  admin: {
-    filterNodes: true,      // if true, filter to "node monitoring" list
-    hostSuffixMapping: {    // mapping for host suffix to short names (displayed in UI)
-      'ws-rpi': 'rpi',
-      'ws-nxcore': 'nx',
-      'ws-nxagent': 'nxagent'
-    },
-    elapsedThresholds: {
-      fail: 360000,
-      warning: 180000
-    },
-    disableMap: false
-  },
-  portal: {
-    featuredApps: [
-      'seonghapark/cloud-cover',
-      'seonghapark/traffic-state',
-      'seonghapark/solar-irradiance',
-      'seonghapark/object-counter',
-      'seonghapark/motion-analysis',
-      'seonghapark/surface-water-detection',
-      'seonghapark/motion-detection',
-      'seonghapark/wildfire-smoke-detection',
-      'bhupendraraut/cloud-motion',
-      'rjackson/weather-classification',
-      'dariodematties/avian-diversity-monitoring',
-      'dariodematties/sound-event-detection'
-    ],
-    samplers: [
-      'theone/image-sampler',
-      'theone/video-sampler',
-      'waggle/audio-sampler'
-    ],
-    plugins: [
-      'seanshahkarami/plugin-iio',
-      'seanshahkarami/raingauge',
-    ]
-  }
 }

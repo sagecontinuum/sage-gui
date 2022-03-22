@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
 import Tooltip from '@mui/material/Tooltip'
 
-import ErrorMsg from '/sage/ErrorMsg'
+import ErrorMsg from '/apps/sage/ErrorMsg'
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 

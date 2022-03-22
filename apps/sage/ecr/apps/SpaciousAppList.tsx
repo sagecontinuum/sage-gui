@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 
 import Tooltip from '@mui/material/Tooltip'
@@ -14,9 +13,8 @@ import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:/assets/bee.svg'
 
 import * as Auth from '/components/auth/auth'
-import config from '/config'
-
-const {featuredApps, samplers} = config.portal
+import settings from '../../settings'
+const {featuredApps, samplers} = settings
 
 const isSignedIn = Auth.isSignedIn()
 

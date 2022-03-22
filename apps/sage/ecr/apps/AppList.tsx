@@ -26,8 +26,8 @@ import LayoutToggle from '../../common/LayoutToggle'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 
-import config from '/config'
-const {featuredApps, samplers} = config.portal
+import settings from '../../settings'
+const {featuredApps, samplers} = settings
 
 
 const columns = [
