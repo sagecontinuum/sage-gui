@@ -1,5 +1,5 @@
 {
-  "include": ["parcel.d.ts", "admin-ui/**/*", "components/**/*", "sage/**/*", "config.ts"],
+  "include": ["parcel.d.ts", "config.ts", "components/**/*", "apps/**/*"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -8,9 +8,10 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "experimentalDecorators": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "~*": ["./*"],
+      "/*": ["./*"],
     },
     "moduleResolution": "Node"
   },
