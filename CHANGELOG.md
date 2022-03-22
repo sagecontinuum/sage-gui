@@ -3,6 +3,44 @@
 The following are some notable changes to the UI
 
 
+## [1.10.0](https://github.com/sagecontinuum/sage-gui/compare/v1.8.1...v1.10.0) (2022-03-22)
+
+
+### Features
+
+* add commission date; SAGE-1207 ([0335c5d](https://github.com/sagecontinuum/sage-gui/commit/0335c5deb0a933a9dc31f45cbc31581a8e2dec69))
+* **admin:** add simple counts to factory testing tooltips ([fe983e0](https://github.com/sagecontinuum/sage-gui/commit/fe983e090eda8fbd9bd0b4ebd8bc498c351829d9))
+* **admin:** add some support for static gps data; (cleanup parsing some) ([a415f82](https://github.com/sagecontinuum/sage-gui/commit/a415f827cc2eebb28d5519b2eb2e99e0d652f2a7))
+* **data:** add date/time picker; add copy curl cmd ([0a3475a](https://github.com/sagecontinuum/sage-gui/commit/0a3475a578d8c2c2bedfa7731395817ba1b6be6c))
+* **data:** add end dates for range bigger than min/hour ([9d4b92a](https://github.com/sagecontinuum/sage-gui/commit/9d4b92a2341f8bfbf8b521c10e84446e2ddb6df6))
+* **data:** add simple line chart; shortcuts; minor styling ([32943c9](https://github.com/sagecontinuum/sage-gui/commit/32943c9d8481f8f68ed11cdffa4b2c5bd8e6efae))
+* **data:** add simple line chart; shortcuts; minor styling ([a2ce0e5](https://github.com/sagecontinuum/sage-gui/commit/a2ce0e5e64faaa3916c18af721b28b065b28f0f2))
+* **data:** show inputValue (instead of using custom component) ([e623183](https://github.com/sagecontinuum/sage-gui/commit/e6231837f356e851df70ae7d91cf630f22884029))
+* **ses:** revised SDR parsing, data structs, some cleanup ([dfbb102](https://github.com/sagecontinuum/sage-gui/commit/dfbb10207d1cc2e136b8c74b8688b3786380dfd0))
+
+
+### Bug Fixes
+
+* **admin:** add "no shield" to factory page; change phase 2 sanity/health worm to 3 days; specify columns in signoff table ([017670e](https://github.com/sagecontinuum/sage-gui/commit/017670e1aa3caa6015d97751a4cc43b67a37e8e6))
+* **admin:** add "no shield" to factory page; change phase 2 sanity/health worm to 3 days; specify columns in signoff table ([f236375](https://github.com/sagecontinuum/sage-gui/commit/f236375006d4c1515631536cfcd03a1477427a97))
+* **admin:** add "node does not support audio" note ([b2e70d6](https://github.com/sagecontinuum/sage-gui/commit/b2e70d617b7732eea78612357828cf3952cf3d5a))
+* **admin:** cleanup pinging tear down ([0cbf104](https://github.com/sagecontinuum/sage-gui/commit/0cbf104fe17ff1c58b3aa1223e8a5e57daec6ed8))
+* **admin:** fix "no data" on factory page; remove "good" chip for health/sanity ([735cffc](https://github.com/sagecontinuum/sage-gui/commit/735cffc99df183158c9975956267c9b4d20ff951))
+* **admin:** fix recent sanity count (and cleanup) ([db6186c](https://github.com/sagecontinuum/sage-gui/commit/db6186cc96e59cc5f41247672a980e735a38a0f0))
+* **admin:** fix thermal link ([8578d3c](https://github.com/sagecontinuum/sage-gui/commit/8578d3c5ff36a3af5ccca80271cd3550e7ba21eb))
+* **admin:** sort factory pages by vsn ([e396caf](https://github.com/sagecontinuum/sage-gui/commit/e396caf13fa63916a543eeab2e41548bedc4b015))
+* **admin:** sort factory pages by vsn ([74c2108](https://github.com/sagecontinuum/sage-gui/commit/74c2108ba8d159661daa7111004af2043fc37b81))
+* **admin:** sort health/sanity rollups by time (in case there's node VSNs with multiple node ids ([186906c](https://github.com/sagecontinuum/sage-gui/commit/186906c6400c3694757a302364f5adb7902c61be))
+* **admin:** sort health/sanity rollups by time (in case there's node VSNs with multiple node ids ([8797d8d](https://github.com/sagecontinuum/sage-gui/commit/8797d8dc3ff9307bb2dd4221fcba977cbf66c577))
+* **admin:** workaround for no vsn to node_id connection (factory view) ([68c1ada](https://github.com/sagecontinuum/sage-gui/commit/68c1ada3e2f5dd40081412a00caf12a56db88b7c))
+* **data:** delete names, change window for media filters ([b516e32](https://github.com/sagecontinuum/sage-gui/commit/b516e32f566b903297e27f8d254d23c4f55f6341))
+* fix client side pagination intial rendering ([b904bc4](https://github.com/sagecontinuum/sage-gui/commit/b904bc4b70324e3df901ff4ae786b244479e762e))
+* fix node link from data browser to admin; SAGE-1207 ([87b48a0](https://github.com/sagecontinuum/sage-gui/commit/87b48a0fda9d8dc5ca0c3e39f6136898fa4ac8a9))
+* remove extra dom ref in audio; minor refactor ([fa34f2e](https://github.com/sagecontinuum/sage-gui/commit/fa34f2e429d2ae10bd88e062f139165ef57f621a))
+* routing fixes ([e36f671](https://github.com/sagecontinuum/sage-gui/commit/e36f671047e8bd79783288476c6cb2318f3964fa))
+* temp fix to support html5 audio fallback for 'dataURL' param ([cb20809](https://github.com/sagecontinuum/sage-gui/commit/cb20809b3afe58e21cf3658673a5151612271cb4))
+* use fixed positioning for progress bar (for scrolling) ([2b27b8a](https://github.com/sagecontinuum/sage-gui/commit/2b27b8ad1805fce1c07313f93de69801d6444354))
+
 ## [1.9.0](https://github.com/sagecontinuum/sage-gui/compare/v1.8.1...v1.9.0) (2022-03-22)
 
 
