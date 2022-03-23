@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
-import Audio from './Audio'
+import Audio from '/components/viz/Audio'
 
 import {getManifest} from '/components/apis/beekeeper'
 

@@ -59,3 +59,20 @@ export function msToTimeApprox(ms: number) {
 export function relTime(val: string) {
   return msToTime(new Date().getTime() - (new Date(val).getTime()))
 }
+
+
+export function isOldData(timestamp, grain = 'hours', amount = 2) {
+  let date = new Date(timestamp)
+
+  let d
+  if (grain == 'hours') {
+    d = new Date()
+    d.setHours(d.getHours() - amount)
+  } else if (grain == 'minutes') {
+    d = new Date()
+    d.setMinutes(d.getMinutes() - amount)
+  }
+
+  return date < d
+}
+

@@ -9,28 +9,13 @@ import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
 
 import RecentDataTable from './RecentDataTable'
-import Audio from '../audio/Audio'
+import Audio from '/components/viz/Audio'
 
 import * as BH from '/components/apis/beehive'
 import {Manifest} from '/components/apis/beekeeper'
 
-import {bytesToSizeSI, relTime} from '/components/utils/units'
+import {bytesToSizeSI, relTime, isOldData} from '/components/utils/units'
 
-
-export function isOldData(timestamp, grain = 'hours', amount = 2) {
-  let date = new Date(timestamp)
-
-  let d
-  if (grain == 'hours') {
-    d = new Date()
-    d.setHours(d.getHours() - amount)
-  } else if (grain == 'minutes') {
-    d = new Date()
-    d.setMinutes(d.getMinutes() - amount)
-  }
-
-  return date < d
-}
 
 
 type Props = {

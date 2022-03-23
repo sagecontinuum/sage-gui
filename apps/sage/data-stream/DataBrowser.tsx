@@ -33,7 +33,7 @@ import { capitalize } from 'lodash'
 
 import Clipboard from '/components/utils/Clipboard'
 import Sidebar from '../data/DataSidebar'
-import Audio from '../../admin/views/audio/Audio'
+import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 

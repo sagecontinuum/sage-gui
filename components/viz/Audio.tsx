@@ -14,12 +14,10 @@ import PauseIcon from '@mui/icons-material/PauseCircleFilledRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
 
-import {bytesToSizeSI, msToTime} from '/components/utils/units'
+import {bytesToSizeSI, msToTime, isOldData} from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as BH from '/components/apis/beehive'
-
-import { isOldData } from '../node/RecentData'
 
 
 const colors = colormap({
