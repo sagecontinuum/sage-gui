@@ -1,4 +1,4 @@
-import { useState, FC } from 'react'
+import { useState, ReactNode } from 'react'
 import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import sage from 'url:../assets/sage-drawing.png'
@@ -26,12 +26,13 @@ import {version} from '../package.json'
 
 type Props = {
   hasSignIn?: boolean
-  Menu?: FC
+  menu?: ReactNode
+  logo?: ReactNode
 }
 
 export default function NavBar(props: Props) {
   const {pathname} = useLocation()
-  const { Menu, hasSignIn} = props
+  const { menu, hasSignIn, logo} = props
 
 
   const [signingOut, setSigningOut] = useState(false)
@@ -52,16 +53,20 @@ export default function NavBar(props: Props) {
     <Root>
       <div className="flex items-center">
         <Link to="/" className="no-style flex items-center">
-          <LogoImg src={sage} height="35" />
-          <Logo title={`Sage: v${version}`}>
-            Sage
-            <sup>(beta)</sup>
-          </Logo>
+          {logo ? logo :
+            <>
+              <LogoImg src={sage} height="35" />
+              <Logo title={`Sage: v${version}`}>
+                Sage
+                <sup>(beta)</sup>
+              </Logo>
+            </>
+          }
         </Link>
         <Divider orientation="vertical" flexItem style={{margin: '5px 0' }} />
       </div>
 
-      {Menu && <Menu />}
+      {menu}
 
       <Spacer/>
 

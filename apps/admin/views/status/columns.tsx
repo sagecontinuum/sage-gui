@@ -162,7 +162,7 @@ const columns = [{
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
       {obj.node_type != 'Blade' ?
-        <Link to={`node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
+        <Link to={`/node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
       }
       {obj.lat && obj.lng &&
         <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">

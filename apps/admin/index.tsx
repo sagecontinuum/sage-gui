@@ -16,10 +16,10 @@ import Stress from './fiddle/Stress'
 import Timeline from './fiddle/Timeline'
 
 import Divider from '@mui/material/Divider'
-import NotFound from '../../components/404'
-import { ProgressProvider } from '../../components/progress/ProgressProvider'
+import NotFound from '/components/404'
+import { ProgressProvider } from '/components/progress/ProgressProvider'
 
-import theme from '../../components/theme'
+import theme from '/components/theme'
 import '/assets/styles.scss'
 
 
@@ -40,7 +40,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <CssBaseline/>
-          <NavBar Menu={NavMenu} />
+          <NavBar menu={<NavMenu />} />
 
           <Container>
             <ProgressProvider>
