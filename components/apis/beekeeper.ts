@@ -1,11 +1,11 @@
-import config from '../../config'
+import config from '/config'
 const url = config.beekeeper
 
 import { handleErrors } from '../fetch-utils'
+import { NodeStatus } from '../../apps/admin/node'
 
-import { NodeStatus } from '../../apps/admin-ui/node'
 
-
+const FILTER_NODES = true  // if true, filter to "node monitoring" list
 const API_URL = `${url}/api`
 
 
@@ -181,7 +181,7 @@ export async function getState() : Promise<State[]> {
   let allMeta = _joinNodeData(nodes, meta, monitorMeta)
 
   // whether or not to ignore things like 000000000001, laptop registration, test nodes, etc
-  const shouldSanitizeNodes = monitorMeta && config.admin.filterNodes
+  const shouldSanitizeNodes = monitorMeta && FILTER_NODES
   if (shouldSanitizeNodes) {
     const includeList = Object.keys(monitorMeta)
     allMeta = allMeta.filter(obj => includeList.includes(obj.id))

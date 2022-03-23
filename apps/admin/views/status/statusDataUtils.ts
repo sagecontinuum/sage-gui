@@ -1,12 +1,12 @@
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
-import config from '/config'
+import settings from '/apps/admin/settings'
 import { aggregateMetrics } from '/components/apis/beehive'
 
 
-const ELAPSED_FAIL_THRES = config.admin.elapsedThresholds.fail
-const HOST_SUFFIX_MAPPING = config.admin.hostSuffixMapping
+const ELAPSED_FAIL_THRES = settings.elapsedThresholds.fail
+const HOST_SUFFIX_MAPPING = settings.hostSuffixMapping
 
 
 

@@ -1,5 +1,5 @@
 {
-  "name": "admin-ui",
+  "name": "admin",
   "version": "1.0.0",
   "description": "a UI for monitoring nodes",
   "scripts": {

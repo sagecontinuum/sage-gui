@@ -9,7 +9,7 @@ import Alert from '@mui/material/Alert'
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import JobTimeLine from './JobTimeline'
-import SummaryBar from '/apps/admin-ui/views/status/charts/SummaryBar'
+import SummaryBar from '../../admin/views/status/charts/SummaryBar'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'

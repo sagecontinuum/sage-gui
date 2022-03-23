@@ -22,9 +22,9 @@ import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler
 
 import { mergeMetrics } from '../status/statusDataUtils'
 
-import config from '/config'
-const FAIL_THRES = config.admin.elapsedThresholds.fail
-const WARNING_THRES = config.admin.elapsedThresholds.warning
+import settings from '/apps/admin/settings'
+const FAIL_THRES = settings.elapsedThresholds.fail
+const WARNING_THRES = settings.elapsedThresholds.warning
 const SPARKLINE_START = '-7d'
 const TIME_OUT = 5000
 

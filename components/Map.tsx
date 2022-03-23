@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
 import tokens from '../tokens'
-import settings from '/apps/admin-ui/settings'
+import settings from '../apps/admin/settings'
 
 // import Popover from '@mui/material/Popover'
 

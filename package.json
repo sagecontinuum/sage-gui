@@ -19,7 +19,7 @@
     "header": "# Changelog\n\nThe following are some notable changes to the UI\n\n"
   },
   "workspaces": [
-    "apps/admin-ui",
+    "apps/admin",
     "apps/sage"
   ],
   "msw": {
