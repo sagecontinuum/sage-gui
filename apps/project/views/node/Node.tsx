@@ -7,149 +7,74 @@ import Alert from '@mui/material/Alert'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
-import * as SES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
 
+import wsnode from 'url:/assets/wsn-closed.png'
 
-import RecentData from './RecentData'
+import RecentDataTable from '/apps/common/RecentDataTable'
+import ManifestTable from '/apps/common/ManifestTable'
+import RecentImages from '/apps/common/RecentImages'
+import Audio from '/components/viz/Audio
 
-
-const cols = [
-  'node_type',
-  // 'vsn',
-  // 'node_id',
-  'project',
-  'location',
-  'top_camera',
-  'bottom_camera',
-  'left_camera',
-  'right_camera',
-  'shield',
-  'modem',
-  'modem_sim',
-  'nx_agent',
-  'build_date',
-  'commission_date'
-]
-
-function format(label: string, val: string) {
-  if (label == 'project')
-    return <Link to={`/status?project="${encodeURIComponent(val)}"`}>{val}</Link>
-  else if (label == 'location')
-    return <Link to={`/status?location="${encodeURIComponent(val)}"`}>{val}</Link>
-
-  return typeof val == 'boolean' ?
-    (val ? 'yes' : 'no'):
-    ((!val || val == 'none') ? '-' : val)
-}
+import Hotspot from './Hotspot'
 
 
-function getDate(hours, days) {
-  let d
-  if (hours) {
-    d = new Date()
-    d.setHours(d.getHours() - hours)
-  } else if (days) {
-    d = new Date()
-    d.setDate(d.getDate() - days)
-  } else {
-    d = new Date()
-    d.setDate(d.getDate() - 2)
-  }
+const LeftDataTable = ({node}) =>
+  <RecentDataTable
+    items={[{
+      label: 'Temperature',
+      query: {
+        node: (node || '').toLowerCase(),
+        name: 'env.temperature',
+        sensor: 'bme680'
+      },
+      format: v => `${v}°C`,
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+    }, {
+      label: 'Humidity',
+      query: {
+        node:  (node || '').toLowerCase(),
+        name: 'env.relative_humidity',
+        sensor: 'bme680'
+      },
+      format: v => `${v}`,
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+    }, {
+      label: 'Pressure',
+      query: {
+        node:  (node || '').toLowerCase(),
+        name: 'env.pressure',
+        sensor: 'bme680'
+      },
+      format: v => `${v}`,
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+    }]}
+  />
 
-  return d
-}
-
-function sanityColor(val, obj) {
-  if (val == null)
-    return colors.noValue
-
-  if (val <= 0)
-    return colors.green
-  else if (obj.meta.severity == 'warning')
-    return colors.orange
-  else
-    return colors.red4
-}
-
-
-const signoffCols = [
-  'Phase 2 Image Sign-off',
-  'Phase 2 Audio Sign-off',
-  'Phase 2 Sign-off',
-  'Phase 3 Image Sign-off',
-  'Phase 3 Audio Sign-off',
-  'Final Sign-off'
-]
-
-
-function SignOffTable({data}) {
-  if (!data) return <></>
-
-  return (
-    <SignedTable className="hor-key-value manifest">
-      <thead>
-        <tr className="cat-header">
-          <th colSpan="3">Phase 2 Sign-offs</th>
-          <th colSpan="3">Phase 3 Sign-offs</th>
-        </tr>
-
-        <tr>
-          {signoffCols.map((label) =>
-            <th key={label}>
-              {!['Phase 2 Sign-off', 'Final Sign-off'].includes(label) ?
-                label.replace(/Phase|2|3|Sign\-off/g,'') :
-                label.replace(/Phase|2|3/g,'')
-              }
-            </th>
-          )}
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          {signoffCols.map(name => {
-            const val = data[name]
-            return <td key={name}>
-              {!val ? <b className="fatal">No</b> : <CheckIcon className="success" />}
-            </td>
-          })}
-        </tr>
-      </tbody>
-    </SignedTable>
-  )
-}
-
-const SignedTable = styled.table`
-  margin-top: 2em;
-`
+const RightDataTable = ({node}) =>
+  <RecentDataTable
+  items={[{
+    label: 'Raingauge',
+    query: {
+      node:  (node || '').toLowerCase(),
+      name: 'env.raingauge.event_acc'
+    },
+    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
+  }]}
+  />
 
 
 export default function NodeView() {
   const {node} = useParams()
   const params = new URLSearchParams(useLocation().search)
-  const factoryView = params.get('factory')
-
   const hours = params.get('hours')
   const days = params.get('days')
 
   const { setLoading } = useProgress()
 
-  const [manifest, setManifest] = useState(null)
+  const [manifest, setManifest] = useState<BK.Manifest>(null)
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
-  const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
-  const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
-
-  const [health, setHealth] = useState(null)
-
-  const [loading2, setLoading2] = useState(null)
-  const [loading3, setLoading3] = useState(null)
-
-  const [error2, setError2] = useState(null)
-  const [error3, setError3] = useState(null)
-
-  const [healthError, setHealthError] = useState(null)
 
 
   useEffect(() => {
@@ -164,82 +89,60 @@ export default function NodeView() {
 
         const vsn = data.vsn
         setVsn(vsn)
-        BH.getNodeDeviceHealth(vsn, '-7d')
-          .then((data) => setHealth(data))
-          .catch((err) => setHealthError(err))
+
       })
 
-
-    setLoading2(true)
-    const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
-      .then((sanity) => {
-        if (!sanity) {
-          return
-        }
-
-        const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
-
-        setSanityData(data)
-      }).catch((err) => setError2(err))
-      .finally(() => setLoading2(false))
-
-    setLoading3(true)
-    const p3 = BK.getNode(node)
+    BK.getNode(node)
       .then(data => setMeta(data))
-      .catch(err => setError3(err))
-      .finally(() => setLoading3(false))
-
-    Promise.all([p2, p3])
-      .then(() => setLoading(false))
+      .catch(err => setError(err))
+      .finally(() => setLoading(false))
 
   }, [node, setLoading, days, hours])
 
 
+  const {
+    shield, top_camera, bottom_camera,
+    left_camera, right_camera
+  } = manifest || {}
+
   return (
     <Root>
-      <h1>
-        Node {vsn} | <small className="muted">{node}</small>
-      </h1>
+      <h1>Node {vsn} | <small className="muted">{node}</small></h1>
 
-      {manifest &&
-        <table className="hor-key-value manifest">
-          <thead>
-            <tr className="cat-header">
-              {cols.map(name => name == 'top_camera' ?
-                <th key={name} colSpan="4">Cameras</th> :
-                <th key={name}></th>
-              ).slice(0, -3)
-              }
-              <th></th>
-            </tr>
-
-            <tr>
-              {cols.map(name => {
-                const label = name.replace(/_/g, ' ').replace('camera', '')
-                  .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
-                return <th key={label}>{label}</th>
-              })}
-              <th>Registration</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              {cols.map(name => {
-                const val = manifest[name]
-                return <td key={name}>{format(name, val)}</td>
-              })}
-              <td>{new Date(meta?.registration_event).toLocaleString()}</td>
-            </tr>
-          </tbody>
-        </table>
-      }
+      <ManifestTable manifest={manifest} meta={meta} />
 
       <div className="flex">
-        <Data>
-          {factoryView && manifest?.factory && <SignOffTable data={manifest.factory} />}
-          <RecentData node={node} manifest={manifest} />
-        </Data>
+        <div className="flex-grow">
+          <h2>Sensor Data</h2>
+          <div className="flex data-tables">
+            <LeftDataTable node={node} />
+            <RightDataTable node={node} />
+          </div>
 
+          <h2>Images</h2>
+          <RecentImages node={node} horizontal />
+
+          <h2>Audio</h2>
+          <Audio node={node} horizontal />
+        </div>
+
+        <div>
+          <WSNView>
+            <img src={wsnode} width={WSN_VIEW_WIDTH} />
+            <VSN>{vsn}</VSN>
+            {manifest &&
+              <>
+                {shield                   && <Hotspot top="62%" left="10%" title="ETS ML1-WS" pos="left" />}
+                {shield                   && <Hotspot top="40%" left="10%" title="BME680" pos="left"/>}
+                {                            <Hotspot top="40%" left="10%" title="BME680" pos="left"/>}
+                {top_camera != 'none'     && <Hotspot top="7%"  left="61%" title={top_camera} pos="left" />}
+                {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" title={bottom_camera} pos="bottom" />}
+                {left_camera != 'none'    && <Hotspot top="49%" left="90%" title={left_camera}/>}
+                {right_camera != 'none'   && <Hotspot top="49%" left="8%"  title={right_camera}/>}
+              </>
+            }
+          </WSNView>
+        </div>
       </div>
     </Root>
   )
@@ -254,19 +157,33 @@ const Root = styled.div`
     margin-bottom: 1em;
   }
 
-  p {
-    margin-bottom: 30px;
+  p { margin-bottom: 30px; }
+
+  .data-tables div {
+    width: 100%;
+    margin-right: 3em
   }
 `
 
-const Charts = styled.div`
-  flex-grow: 1;
-  margin-bottom: 50px;
+const WSN_VIEW_WIDTH = 400
+
+const WSNView = styled.div`
+  position: relative;
+
+  img {
+    padding: 50px;
+  }
 `
 
-const Data = styled.div`
-  min-width: 400px;
-  max-width: 400px;
-  margin-left: 2em;
+const VSN = styled.div`
+  position: absolute;
+  width: 33%;
+  height: 12%;
+  top: 51%;
+  left: 48%;
+  font-size: 3.5em;
+  padding: 0;
+  background: #b3b3b3;
 `
+
 

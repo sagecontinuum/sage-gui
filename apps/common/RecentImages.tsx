@@ -1,38 +1,31 @@
 
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-
-import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import Tooltip from '@material-ui/core/Tooltip'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
-
-import RecentDataTable from './RecentDataTable'
-import Audio from '/components/viz/Audio'
-
-import * as BH from '/components/apis/beehive'
-import {Manifest} from '/components/apis/beekeeper'
+import Alert from '@mui/material/Alert'
 
 import {bytesToSizeSI, relTime, isOldData} from '/components/utils/units'
+import * as BH from '/components/apis/beehive'
 
 
 
 type Props = {
-  node: string
-  manifest: Manifest
+  node: string,
+  horizontal?: boolean
 }
 
-export default function RecentData(props: Props) {
-  const {node, manifest} = props
+export default function RecentImages(props: Props) {
+  const {node, horizontal} = props
 
-  const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
   const [loading, setLoading] = useState(false)
+  const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
   const [error, setError] = useState()
 
   const [total, setTotal] = useState<{[pos: string]: number}>()
   const [progress, setProgress] = useState<{[pos: string]: number}>()
-
 
   useEffect(() => {
     setLoading(true)
@@ -57,30 +50,7 @@ export default function RecentData(props: Props) {
 
 
   return (
-    <Root className="flex column">
-
-      <h2>Recent Data</h2>
-      <RecentDataTable
-        items={[{
-          label: 'Temperature',
-          query: {
-            node: node.toLowerCase(),
-            name: 'env.temperature',
-            sensor: 'bme680'
-          },
-          format: v => `${v}°C`,
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
-        }, {
-          label: 'Raingauge',
-          query: {
-            node: node.toLowerCase(),
-            name: 'env.raingauge.event_acc'
-          },
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
-        }]}
-      />
-
-      <h2>Recent Images</h2>
+    <Root className={horizontal ? 'flex' : ''}>
       {images &&
         BH.cameraOrientations.map(pos => {
           if (!images[pos])
@@ -128,12 +98,6 @@ export default function RecentData(props: Props) {
         <p className="muted">No recent images available</p>
       }
 
-      <h2>Recent Audio</h2>
-      <Audio node={node} />
-      {manifest?.shield === false &&
-        <p className="muted">This node does not support audio</p>
-      }
-
       {error &&
         <Alert severity="error">
           {error.message}
@@ -144,8 +108,5 @@ export default function RecentData(props: Props) {
 }
 
 const Root = styled.div`
-  img {
-    max-width: 100%;
-    margin: 1px;
-  }
+
 `

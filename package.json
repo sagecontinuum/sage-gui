@@ -1,6 +1,6 @@
 {
   "name": "sage-gui",
-  "version": "1.10.0",
+  "version": "1.10.1-pre.11",
   "description": "",
   "scripts": {
     "start": "npm start --workspace sage",
@@ -20,7 +20,8 @@
   },
   "workspaces": [
     "apps/admin",
-    "apps/sage"
+    "apps/sage",
+    "apps/project"
   ],
   "msw": {
     "workerDirectory": "build"

@@ -74,7 +74,7 @@ export default function Sage() {
                   </Route>
 
                   <Route path="data-browser" element={<DataBrowser />} />
-                  <Route path="data-browser/ontology/:name?" element={<Ontology />} />
+                  <Route path="data-browser/ontology/:name" element={<Ontology />} />
 
                   <Route path="data" element={<DataSearch />} />
                   <Route path="data/product/:name" element={<DataProduct />} />

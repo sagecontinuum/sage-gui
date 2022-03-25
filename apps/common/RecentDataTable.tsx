@@ -5,8 +5,8 @@ import styled from 'styled-components'
 import Tooltip from '@mui/material/Tooltip'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
-import ErrorMsg from '../../../sage/ErrorMsg'
-import { relTime, isOldData } from '/components/utils/units'
+import ErrorMsg from '../sage/ErrorMsg'
+import { relTime, isOldData} from '/components/utils/units'
 
 import * as BH from '/components/apis/beehive'
 import config from '/config'
@@ -78,7 +78,7 @@ export default memo(function RecentDataTable(props: Props) {
                   <td>
                     {label}
                     <Tooltip title={<>{item.query.name}<br/>{item.query.sensor ? <div>{item.query.sensor}</div> : ''}<small>(click for description)</small></>} placement="left">
-                      <a href={`${dataBrowser}/ontology/${item.query.name}`} target="_blank"><HelpIcon /></a>
+                      <a href={`${dataBrowser}/ontology/${item.query.name}`}><HelpIcon /></a>
                     </Tooltip>
                   </td>
                   <td className={isOldData(timestamp) ? 'failed font-bold' : 'muted'}>
@@ -99,7 +99,7 @@ export default memo(function RecentDataTable(props: Props) {
                   </td>
                   <td>
                     {data && linkParams &&
-                      <a href={`${dataBrowser}?${linkParams(data)}`} target="_blank">more...</a>
+                      <a href={`${dataBrowser}?${linkParams(data)}`}>more...</a>
                     }
                   </td>
                 </tr>

@@ -12,7 +12,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 
 import TimelineChart, {colors} from '../../viz/TimelineChart'
 
-import RecentData from './RecentData'
+import RecentData from '/apps/common/AllRecentData'
 
 
 const cols = [
@@ -139,7 +139,6 @@ export default function NodeView() {
   const [manifest, setManifest] = useState(null)
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
-  const [pluginData, setPluginData] = useState<SES.GroupedByPlugin>()
   const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
 
   const [health, setHealth] = useState(null)
