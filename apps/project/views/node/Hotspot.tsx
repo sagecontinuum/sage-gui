@@ -1,24 +1,41 @@
 import styled from 'styled-components'
+import Tooltip from '@mui/material/Tooltip'
 
 
 const HOT_SPOT_SIZE = 20
 
-
 export default function Hotspot(props) {
-  const {top, left, title} = props
+  const {label, title, onMouseOver, onMouseOut, hoverid} = props
+
+  const handleOver = () => {
+    if (onMouseOver) onMouseOver(hoverid, label, title)
+  }
+
+  const handleOut = () => {
+    if(onMouseOut) onMouseOut(hoverid, label, title)
+  }
 
   return (
     <HotspotRoot {...props}>
-      <div className="title">{title}</div>
-      <HotspotDot>
-        <div className="dot"></div>
-      </HotspotDot>
+      <Tooltip
+        title={title}
+        placement="top"
+        onMouseOver={handleOver}
+        onMouseOut={handleOut}
+      >
+        <div>
+          <div className="label">{label}</div>
+          <HotspotDot>
+            <div className="dot"></div>
+          </HotspotDot>
+        </div>
+      </Tooltip>
     </HotspotRoot>
   )
 }
 
 const getLabelTop = (pos) => {
-  if (pos == 'left')
+  if (pos == 'left' || pos == 'right')
     return '0px'
   else if (pos == 'bottom')
     return '20px'
@@ -29,6 +46,8 @@ const getLabelTop = (pos) => {
 const getLabelLeft = (pos) => {
   if (pos == 'left')
     return `-${HOT_SPOT_SIZE + 5}px`
+  else if (pos == 'right')
+    return `${HOT_SPOT_SIZE + 5}px`
   return '0'
 }
 
@@ -36,6 +55,8 @@ const getLabelLeft = (pos) => {
 const getLabelJustifyContent = (pos) => {
   if (pos == 'left')
     return 'right'
+  else if (pos == 'right')
+    return 'left'
   return 'center'
 }
 
@@ -44,8 +65,9 @@ const HotspotRoot = styled.div<{top: string, left: string, pos?: 'left' }>`
   position: absolute;
   top: ${props => props.top};
   left: ${props => props.left};
+  cursor: default;
 
-  .title {
+  .label {
     position: absolute;
     white-space: nowrap;
     font-weight: 800;
@@ -61,11 +83,25 @@ const HotspotRoot = styled.div<{top: string, left: string, pos?: 'left' }>`
     justify-content: ${({pos}) => getLabelJustifyContent(pos)};
     align-items: center;
   }
+
+  :hover .dot {
+    border-color: #1283c8 !important;
+    animation-play-state: paused;
+    color: #fff;
+  }
+
+  :hover .dot::after {
+    background-color: #9ec7e0;
+  }
+
+  /*
+  @keyframes pulse {
+    50% { border-color: rgb(255, 255, 255, 0.2); }
+    100% { border-color: rgb(255, 255, 255, 0.8); }
+  }*/
 `
 
 const HotspotDot = styled.div`
-  position: relative;
-
   .dot {
     width: ${HOT_SPOT_SIZE}px;
     height: ${HOT_SPOT_SIZE}px;
@@ -90,20 +126,5 @@ const HotspotDot = styled.div`
     transition: all 0.2s;
   }
 
-  .dot:hover {
-    border-color: #1283c8 !important;
-    animation-play-state: paused;
-    color: #fff;
-  }
-
-  .dot:hover::after {
-    background-color: #9ec7e0;
-  }
-
-  /*
-  @keyframes pulse {
-    50% { border-color: rgb(255, 255, 255, 0.2); }
-    100% { border-color: rgb(255, 255, 255, 0.8); }
-  }*/
 `
 

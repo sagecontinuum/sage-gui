@@ -30,10 +30,11 @@ const colors = colormap({
 type Props = {
   node?: string
   dataURL?: string
+  className?: string
 }
 
 export default function Audio(props: Props) {
-  const {node, dataURL} = props
+  const {node, dataURL, className=''} = props
 
   if (!node && !dataURL) {
     throw 'Audio: no node or url provided'
@@ -67,7 +68,8 @@ export default function Audio(props: Props) {
         if (!meta) return
 
         const url = meta.value
-        loadPlayer(url)
+        const ws = loadPlayer(url)
+        setWaveSurf(ws)
       })
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
@@ -104,7 +106,7 @@ export default function Audio(props: Props) {
   }
 
   return (
-    <Root className="flex column">
+    <Root className={`flex column ${className}`}>
       {/* fallback to html audio element (if CORS is not configured) */}
       {vizError && (meta?.value || dataURL) &&
         <HtmlAudio>
@@ -121,7 +123,7 @@ export default function Audio(props: Props) {
       <div style={(meta && isOldData(meta.timestamp)) ? {border: '10px solid red'} : {}}>
         <div className="flex justify-between">
           <div></div>
-          {waveSurf && !vizError &&
+          {!vizError &&
             <div className="flex items-center justify-end gap">
               {!isPlaying &&
                 <Button

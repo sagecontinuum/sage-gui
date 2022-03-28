@@ -1,30 +1,37 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation, Link} from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 
-import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import Alert from '@mui/material/Alert'
+import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
+
+import wsnode from 'url:/assets/wsn-closed.png'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import wsnode from 'url:/assets/wsn-closed.png'
-
 import RecentDataTable from '/apps/common/RecentDataTable'
 import ManifestTable from '/apps/common/ManifestTable'
 import RecentImages from '/apps/common/RecentImages'
-import Audio from '/components/viz/Audio
+import Audio from '/components/viz/Audio'
+import Map from './LeafMap'
 
 import Hotspot from './Hotspot'
 
+import adminSettings from '/apps/admin/settings'
+import Clipboard from '/components/utils/Clipboard'
 
-const LeftDataTable = ({node}) =>
+
+const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
+
+
+const LeftDataTable = ({node, className}) =>
   <RecentDataTable
     items={[{
       label: 'Temperature',
       query: {
-        node: (node || '').toLowerCase(),
+        node: node.toLowerCase(),
         name: 'env.temperature',
         sensor: 'bme680'
       },
@@ -33,7 +40,7 @@ const LeftDataTable = ({node}) =>
     }, {
       label: 'Humidity',
       query: {
-        node:  (node || '').toLowerCase(),
+        node:  node.toLowerCase(),
         name: 'env.relative_humidity',
         sensor: 'bme680'
       },
@@ -42,26 +49,47 @@ const LeftDataTable = ({node}) =>
     }, {
       label: 'Pressure',
       query: {
-        node:  (node || '').toLowerCase(),
+        node:  node.toLowerCase(),
         name: 'env.pressure',
         sensor: 'bme680'
       },
       format: v => `${v}`,
       linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
     }]}
+    className={className}
   />
 
-const RightDataTable = ({node}) =>
+const RightDataTable = ({node, className}) =>
   <RecentDataTable
-  items={[{
-    label: 'Raingauge',
-    query: {
-      node:  (node || '').toLowerCase(),
-      name: 'env.raingauge.event_acc'
-    },
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
-  }]}
+    items={[{
+      label: 'Raingauge',
+      query: {
+        node:  node.toLowerCase(),
+        name: 'env.raingauge.event_acc'
+      },
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
+    }]}
+    className={className}
   />
+
+const metaCols1 = [
+  'project',
+  'location',
+  'shield',
+  'modem',
+  'modem_sim',
+  'nx_agent',
+  'build_date',
+  'commission_date',
+  'registration'
+]
+
+const metaCols2 = [
+  'top_camera',
+  'bottom_camera',
+  'left_camera',
+  'right_camera'
+]
 
 
 export default function NodeView() {
@@ -75,11 +103,13 @@ export default function NodeView() {
   const [manifest, setManifest] = useState<BK.Manifest>(null)
   const [vsn, setVsn] = useState(null)
   const [meta, setMeta] = useState(null)
+  const [status, setStatus] = useState<string>()
 
+  const [error, setError] = useState(null)
+
+  const [hover, setHover] = useState<string>('')
 
   useEffect(() => {
-    setLoading(true)
-
     BK.getManifest({node: node.toUpperCase()})
       .then(data => {
         setManifest(data)
@@ -90,15 +120,32 @@ export default function NodeView() {
         const vsn = data.vsn
         setVsn(vsn)
 
+        BH.getSimpleNodeStatus(vsn)
+          .then((records) => {
+            const elapsed = records.map(o => new Date().getTime() - new Date(o.timestamp).getTime())
+            const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
+            setStatus(isReporting ? 'reporting' : 'not reporting')
+          })
       })
 
     BK.getNode(node)
       .then(data => setMeta(data))
       .catch(err => setError(err))
-      .finally(() => setLoading(false))
 
   }, [node, setLoading, days, hours])
 
+
+  const onOver = (id) => {
+    const cls = `.hover-${id}`
+    document.querySelector(cls).style.outline = '3px solid #1a779c'
+    setHover(cls)
+  }
+
+  const onOut = (id) => {
+    document.querySelector(hover).style.outline = 'none'
+  }
+
+  const mouse = {onMouseOver: onOver, onMouseOut: onOut}
 
   const {
     shield, top_camera, bottom_camera,
@@ -107,42 +154,75 @@ export default function NodeView() {
 
   return (
     <Root>
-      <h1>Node {vsn} | <small className="muted">{node}</small></h1>
 
-      <ManifestTable manifest={manifest} meta={meta} />
+      {error &&
+        <Alert severity="error">{error.message}</Alert>
+      }
 
       <div className="flex">
-        <div className="flex-grow">
+        <LeftSide className="flex-grow">
+          <div className="flex items-center justify-between left-details">
+            <h1>Node {vsn} | <small className="muted">{node}</small></h1>
+            <div className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
+              {status}
+              {manifest && <a href={`https://admin.sagecontinuum.org/node/${manifest.node_id}`}><AdminPanelIcon /></a>}
+            </div>
+          </div>
+          <div className="meta-table-top">
+            <ManifestTable
+              manifest={manifest}
+              meta={meta}
+              columns={metaCols1}
+            />
+          </div>
+          <br/>
+          <div className="flex justify-between">
+            <div className="meta-table-bottom" style={{width: '50%'}}>
+              <ManifestTable
+                manifest={manifest}
+                meta={meta}
+                columns={metaCols2}
+              />
+            </div>
+            <div className="gps">
+              <h5 className="muted no-margin">GPS</h5>
+              {manifest && <Clipboard content={`${manifest.gps_lat}, ${manifest.gps_lon}`} />}
+            </div>
+          </div>
+          <br/>
           <h2>Sensor Data</h2>
           <div className="flex data-tables">
-            <LeftDataTable node={node} />
-            <RightDataTable node={node} />
+            <LeftDataTable node={node} className="hover-bme" />
+            <RightDataTable node={node} className="hover-rain" />
           </div>
 
           <h2>Images</h2>
-          <RecentImages node={node} horizontal />
+          <Imgs>
+            <RecentImages node={node} horizontal />
+          </Imgs>
 
           <h2>Audio</h2>
-          <Audio node={node} horizontal />
-        </div>
+          <Audio node={node} className="hover-audio"/>
+        </LeftSide>
 
-        <div>
+        <RightSide>
+          <Map manifest={manifest} />
           <WSNView>
             <img src={wsnode} width={WSN_VIEW_WIDTH} />
             <VSN>{vsn}</VSN>
             {manifest &&
               <>
-                {shield                   && <Hotspot top="62%" left="10%" title="ETS ML1-WS" pos="left" />}
-                {shield                   && <Hotspot top="40%" left="10%" title="BME680" pos="left"/>}
-                {                            <Hotspot top="40%" left="10%" title="BME680" pos="left"/>}
-                {top_camera != 'none'     && <Hotspot top="7%"  left="61%" title={top_camera} pos="left" />}
-                {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" title={bottom_camera} pos="bottom" />}
-                {left_camera != 'none'    && <Hotspot top="49%" left="90%" title={left_camera}/>}
-                {right_camera != 'none'   && <Hotspot top="49%" left="8%"  title={right_camera}/>}
+                {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
+                {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme"/>}
+                {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
+                {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
+                {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
+                {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
+                {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
               </>
             }
           </WSNView>
-        </div>
+        </RightSide>
       </div>
     </Root>
   )
@@ -150,11 +230,13 @@ export default function NodeView() {
 
 
 const Root = styled.div`
-  margin: 20px;
-
-  table.manifest {
+  .meta-table-top table {
     width: 100%;
     margin-bottom: 1em;
+  }
+
+  .meta-table-bottom table {
+    width: 100%;
   }
 
   p { margin-bottom: 30px; }
@@ -165,6 +247,21 @@ const Root = styled.div`
   }
 `
 
+const Imgs = styled.div`
+  img {
+    height: 175px;
+    width: auto;
+  }
+`
+
+const LeftSide = styled.div`
+  margin: 20px;
+`
+
+const RightSide = styled.div`
+  margin: 20px;
+`
+
 const WSN_VIEW_WIDTH = 400
 
 const WSNView = styled.div`
@@ -172,6 +269,8 @@ const WSNView = styled.div`
 
   img {
     padding: 50px;
+    -webkit-filter: drop-shadow(2px 2px 2px #ccc);
+    filter: drop-shadow(2px 2px 2px #ccc);
   }
 `
 
@@ -185,5 +284,4 @@ const VSN = styled.div`
   padding: 0;
   background: #b3b3b3;
 `
-
 

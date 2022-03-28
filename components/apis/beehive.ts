@@ -118,6 +118,13 @@ export async function getLatestTemp() {
 }
 
 
+export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {
+  const params = {start: '-4d', filter: {name: 'sys.uptime', vsn}, tail: 1}
+  const metrics = await getData(params)
+  return metrics
+}
+
+
 
 export function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data.length)

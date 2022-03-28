@@ -20,7 +20,7 @@ import cols, { getColorClass, GoodChip } from '../status/columns'
 
 import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
-import { mergeMetrics } from '../status/statusDataUtils'
+import { mergeMetrics } from '/apps/common/statusDataUtils'
 
 import settings from '/apps/admin/settings'
 const FAIL_THRES = settings.elapsedThresholds.fail

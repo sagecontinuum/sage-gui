@@ -15,7 +15,7 @@ import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import {queryData, filterData, getFilterState} from './statusDataUtils'
+import {queryData, filterData, getFilterState} from '/apps/common/statusDataUtils'
 
 import * as BK from '/components/apis/beekeeper'
 import settings from '../../settings'

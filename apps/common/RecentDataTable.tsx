@@ -8,6 +8,7 @@ import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 import ErrorMsg from '../sage/ErrorMsg'
 import { relTime, isOldData} from '/components/utils/units'
 
+import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'
 import config from '/config'
 
@@ -25,21 +26,29 @@ type Props = {
     format?: (val: string) => string
     linkParams?: (data: BH.Record) => string
   }[]
+  className?: string
 }
 
 
 
 export default memo(function RecentDataTable(props: Props) {
-  const {items} = props
+  const {items, className} = props
 
-  const [recentData, setRecentData] = useState({})
+  const {loading, setLoading} = useProgress()
+  const [recentData, setRecentData] = useState(
+    items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
+  )
   const [error, setError] = useState(null)
 
+
   useEffect(() => {
+    setLoading(true)
+
+    let proms = []
     for (const item of items) {
       const {label, query} = item
 
-      BH.getRecentRecord(query)
+      const p = BH.getRecentRecord(query)
         .then(data => {
           if (!data) {
             setRecentData(prev => ({...prev, [label]: null}))
@@ -51,14 +60,18 @@ export default memo(function RecentDataTable(props: Props) {
           setRecentData(prev => ({...prev, [label]: null}))
           setError(err)
         })
+      proms.push(p)
     }
+
+    Promise.allSettled(proms)
+      .finally(() => setLoading(false))
   }, [items])
 
 
   return (
     <div>
       {recentData &&
-        <table className="simple key-value">
+        <table className={`simple key-value ${className}`}>
           <thead>
             <tr>
               <th></th>
@@ -92,13 +105,16 @@ export default memo(function RecentDataTable(props: Props) {
                     {!timestamp && '-'}
                   </td>
                   <td>
-                    {value != null && format ? format(value) : value}
+                    {value == 'loading' &&
+                      <span className="muted">loading...</span>
+                    }
+                    {(value && value != 'loading' && format) && format(value)}
                     {value == null &&
                       <span className="muted">Not available</span>
                     }
                   </td>
                   <td>
-                    {data && linkParams &&
+                    {data && linkParams && data.value != 'loading' &&
                       <a href={`${dataBrowser}?${linkParams(data)}`}>more...</a>
                     }
                   </td>

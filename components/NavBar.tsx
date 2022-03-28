@@ -129,7 +129,7 @@ const Root = styled.div`
   top: 0;
   width: 100%;
   background: #fff;
-  z-index: 1000;
+  z-index: 9000;
   padding: 2px 20px 0 20px;
   height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);

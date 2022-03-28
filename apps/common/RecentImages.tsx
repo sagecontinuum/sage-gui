@@ -50,7 +50,7 @@ export default function RecentImages(props: Props) {
 
 
   return (
-    <Root className={horizontal ? 'flex' : ''}>
+    <Root className={horizontal ? 'flex horizontal' : ''}>
       {images &&
         BH.cameraOrientations.map(pos => {
           if (!images[pos])
@@ -63,6 +63,7 @@ export default function RecentImages(props: Props) {
             <div key={pos}>
               <h3>{title}</h3>
               <img
+                className={`hover-${pos}-camera`}
                 src={value}
                 style={isOldData(timestamp) ? {border: '10px solid red'} : {}}
               />
@@ -108,5 +109,7 @@ export default function RecentImages(props: Props) {
 }
 
 const Root = styled.div`
-
+  &.horizontal > div {
+    margin-right: 2em;
+  }
 `

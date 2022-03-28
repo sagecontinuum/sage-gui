@@ -13,6 +13,7 @@ import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:/assets/bee.svg'
 
 import * as Auth from '/components/auth/auth'
+import config from '/config'
 import settings from '../../settings'
 const {featuredApps, samplers} = settings
 

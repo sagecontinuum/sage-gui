@@ -1,5 +1,5 @@
 
 export default {
-  project: 'SAGE',
+  project: 'sage',
   focus: null
 }

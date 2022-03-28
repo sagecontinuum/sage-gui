@@ -17,7 +17,7 @@ import Charts from './charts/Charts'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import {queryData, filterData, mergeMetrics, getFilterState} from './statusDataUtils'
+import {queryData, filterData, mergeMetrics, getFilterState} from '/apps/common/statusDataUtils'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
