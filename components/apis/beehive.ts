@@ -2,7 +2,7 @@ import config from '../../config'
 export const url = config.beehive
 
 import { handleErrors } from '../fetch-utils'
-import {groupBy, mapValues} from 'lodash'
+import {groupBy, mapValues, flatten} from 'lodash'
 
 import * as BK from '../../components/apis/beekeeper'
 
@@ -102,20 +102,50 @@ export async function getVSN(node: string) : Promise<string> {
 
 
 
+export function getAdminData() : Promise<Record[]> {
+  const proms = [
+    getData({start: '-4d', filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: '-6m', filter: {name: 'sys.gps.*'}, tail: 1}),
+    getData({start: '-6m', filter: {name: 'sys.mem.*'}, tail: 1}),
+    getData({start: '-6m', filter: {name: 'sys.fs.*'}, tail: 1}),
+    getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
+  ]
+
+  return Promise.all(proms)
+    .then((recs) => flatten(recs))
+}
+
+
+
+export function getFactoryData() : Promise<Record[]> {
+  const proms = [
+    getData({start: '-4d', filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: '-4d', filter: {name: 'sys.net.ip'}, tail: 1}),
+    getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
+  ]
+
+  return Promise.all(proms)
+    .then((recs) => flatten(recs))
+}
+
+
+
 export async function getLatestMetrics() : Promise<Record[]> {
   const params = {start: '-4d', filter: {name: 'sys.*', vsn: '.*'}, tail: 1}
   const metrics = await getData(params)
   return metrics
 }
 
+
+
 export async function getLatestTemp() {
   const params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
   const data = await getData(params)
   const byNode = groupBy(data, 'meta.node')
   mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
-
   return byNode
 }
+
 
 
 export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {

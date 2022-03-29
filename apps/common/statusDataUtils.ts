@@ -181,7 +181,7 @@ const getFakeIP = (id) =>
 
 // join beehive and beekeeper data, basically
 export function mergeMetrics(
-  data: BK.State[], records: BH.Record[], temps, health, sanity
+  data: BK.State[], records: BH.Record[], health, sanity
 ) {
   // If a VSN is changed, the data api will return latest records for each VSN.
   // So, we only consider metrics with VSNs which are known by "beekeeper"
@@ -195,10 +195,7 @@ export function mergeMetrics(
 
     const elapsedTimes = getElapsedTimes(byNode, id)
 
-    const nodeTemps = (temps[id] && 'iio.in_temp_input' in temps[id]) ?
-      temps[id]['iio.in_temp_input'] : null
-    const temp = nodeTemps ? nodeTemps[nodeTemps.length-1].value / 1000 : -999
-
+    const temp = getMetric(byNode, id, 'iio.in_temp_input').nx
     const liveLat = getMetric(byNode, id, 'sys.gps.lat').nx
     const liveLon = getMetric(byNode, id, 'sys.gps.lon').nx
 
@@ -207,7 +204,7 @@ export function mergeMetrics(
     return {
       ...nodeObj,
       vsn,
-      temp,
+      temp: temp ? temp / 1000 : -999, // use -999 for better sorting
       status: determineStatus(elapsedTimes),
       elapsedTimes,
       hasStaticGPS: !!nodeObj.gps_lat && !!nodeObj.gps_lon,
@@ -216,23 +213,22 @@ export function mergeMetrics(
       lng: nodeObj.gps_lon || liveLon,
       alt: getMetric(byNode, id, 'sys.gps.alt').nx,
       uptimes: getMetric(byNode, id, 'sys.uptime'),
-      sysTimes: getMetric(byNode, id, 'sys.time'),
-      cpu: getMetric(byNode, id, 'sys.cpu_seconds', false),
       memTotal: getMetric(byNode, id, 'sys.mem.total'),
       memFree: getMetric(byNode, id, 'sys.mem.free'),
       memAvail: getMetric(byNode, id, 'sys.mem.avail'),
       fsAvail: getMetric(byNode, id, 'sys.fs.avail', false),
       fsSize: getMetric(byNode, id, 'sys.fs.size', false),
-      txBytes: getMetric(byNode, id, 'sys.net.tx_bytes', false),
-      txPackets: getMetric(byNode, id, 'sys.net.tx_packets', false),
-      rxBytes: getMetric(byNode, id, 'sys.net.rx_bytes', false),
-      rxPackets: getMetric(byNode, id, 'sys.net.rx_packets', false),
+      // cpu: getMetric(byNode, id, 'sys.cpu_seconds', false),
+      // sysTimes: getMetric(byNode, id, 'sys.time'),
+      // txBytes: getMetric(byNode, id, 'sys.net.tx_bytes', false),
+      // txPackets: getMetric(byNode, id, 'sys.net.tx_packets', false),
+      // rxBytes: getMetric(byNode, id, 'sys.net.rx_bytes', false),
+      // rxPackets: getMetric(byNode, id, 'sys.net.rx_packets', false),
       ip: getMetric(byNode, id, 'sys.net.ip', false)?.nx?.find(o => o.meta.device == 'wan0')?.value,
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}
       }
-      // pluginStatus: plugins ? aggPluginStatus(plugins[id.toUpperCase()]) : {}
     }
   })
 

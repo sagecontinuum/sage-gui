@@ -202,8 +202,7 @@ const getTabIdx = (phase: string) =>
 
 
 const pingRequests = () => [
-  BH.getLatestMetrics(),
-  BH.getLatestTemp(),
+  BH.getFactoryData(),
   BH.getNodeHealth(null, SPARKLINE_START),
   BH.getNodeSanity(SPARKLINE_START)
 ]
@@ -245,9 +244,9 @@ export default function StatusView() {
       handle = setTimeout(async () => {
         if (done) return
         const results = await Promise.allSettled(pingRequests())
-        const [ metrics, temps, health, sanity]  = results.map(r => r.value)
+        const [ metrics, health, sanity]  = results.map(r => r.value)
 
-        setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
+        setData(mergeMetrics(dataRef.current, metrics, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
@@ -260,10 +259,10 @@ export default function StatusView() {
     Promise.allSettled(proms)
       .then((results) => {
         if (done) return
-        const [state, metrics, temps, health, sanity] = results.map(r => r.value)
+        const [state, metrics, health, sanity] = results.map(r => r.value)
         setData(state)
 
-        const allData = mergeMetrics(state, metrics, temps, health, sanity)
+        const allData = mergeMetrics(state, metrics, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)

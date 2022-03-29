@@ -44,8 +44,7 @@ const useParams = () =>
 
 
 const pingRequests = () => [
-  BH.getLatestMetrics(),
-  BH.getLatestTemp(),
+  BH.getAdminData(),
   BH.getNodeHealth(null, SPARKLINE_START),
   BH.getNodeSanity(SPARKLINE_START)
 ]
@@ -103,9 +102,9 @@ export default function StatusView() {
       handle = setTimeout(async () => {
         if (done) return
         const results = await Promise.allSettled(pingRequests())
-        const [ metrics, temps, health, sanity] = results.map(r => r.value)
+        const [ metrics, health, sanity] = results.map(r => r.value)
 
-        setData(mergeMetrics(dataRef.current, metrics, temps, health, sanity))
+        setData(mergeMetrics(dataRef.current, metrics, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
         // recursive
