@@ -45,22 +45,6 @@ function format(label: string, val: string) {
 }
 
 
-function getDate(hours, days) {
-  let d
-  if (hours) {
-    d = new Date()
-    d.setHours(d.getHours() - hours)
-  } else if (days) {
-    d = new Date()
-    d.setDate(d.getDate() - days)
-  } else {
-    d = new Date()
-    d.setDate(d.getDate() - 2)
-  }
-
-  return d
-}
-
 function sanityColor(val, obj) {
   if (val == null)
     return colors.noValue
@@ -119,6 +103,25 @@ function SignOffTable({data}) {
       </tbody>
     </SignedTable>
   )
+}
+
+
+function FactoryNotes({data}) {
+  const note2 = data[`Phase 2 Note`]
+  const note3 = data[`Phase 3 Note`]
+
+  const notes = <ul>
+    {note2?.length == 0 && note3?.length == 0 &&
+      <span className="muted">No factory notes</span>
+    }
+    {note2?.length > 0 && <li><b>Phase 2 Note:</b> {note2}</li>}
+    {note3?.length > 0 && <li><b>Phase 3 Note:</b> {note3}</li>}
+  </ul>
+
+  return <div>
+    <h4>Notes</h4>
+    {notes}
+  </div>
 }
 
 const SignedTable = styled.table`
@@ -293,7 +296,12 @@ export default function NodeView() {
         </Charts>
 
         <Data>
-          {factoryView && manifest?.factory && <SignOffTable data={manifest.factory} />}
+          {factoryView && manifest?.factory &&
+            <>
+              <SignOffTable data={manifest.factory} />
+              <FactoryNotes data={manifest.factory} />
+            </>
+          }
           <RecentData node={node} manifest={manifest} />
         </Data>
 

@@ -85,7 +85,7 @@ const columns = [
       const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
-      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
+      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-end">
         {!data?.length ? <div>no data</div> :
           <HealthSparkler
             name={<>summary of last (available) {data?.length} hours</>}
@@ -110,7 +110,7 @@ const columns = [
       const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
-      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-center">
+      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-end">
         {!data?.length ? <div>no data</div> :
           <HealthSparkler
             name={<>summary of last (available) {data?.length} hours</>}
@@ -122,6 +122,14 @@ const columns = [
           />
         }
       </Link>
+    }
+  }, {
+    id: 'Note',
+    label: 'Note',
+    format: (_, row) => {
+      const phase = getPhase(row.ip)
+      const note = row.factory[`Phase ${phase} Note`]
+      return <div className="text-left">{note?.length > 0 ? note : '-'}</div>
     }
   }, {
     id: 'factory1',
@@ -367,10 +375,14 @@ const Overview = styled.div`
 
 const TableContainer = styled.div`
   table {
-    th:nth-child(n+7):nth-child(n+3),
-    td:nth-child(n+7):nth-child(n+3) {
+    th:nth-child(n+7):not(:nth-child(9)),
+    td:nth-child(n+7):not(:nth-child(9)) {
       text-align: center; // center for viz / signoffs
     }
+  }
+
+  .MuiChip-root {
+    cursor: initial;
   }
 `
 
