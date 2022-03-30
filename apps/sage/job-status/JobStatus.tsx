@@ -203,7 +203,7 @@ const parseSESValue = (data) =>
 // fetch tasks state event changes, and parse SES JSON Messages
 function getTaskEvents() {
   return BH.getData({
-    start: '-2h',
+    start: '-24h',
     filter: {
       name: 'sys.scheduler.status.plugin.*'
     }

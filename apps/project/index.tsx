@@ -7,7 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '/components/NavBar'
 import Nodes from './views/nodes/Nodes'
-import Node from './views/node/Node'
+import Node from '../common/node/Node'
 
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'

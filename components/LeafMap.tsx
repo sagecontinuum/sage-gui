@@ -18,9 +18,13 @@ export default function LeafMap(props: Props) {
 
 
   useEffect(() => {
-    if (!manifest || init) return
+    if (!manifest || init)
+      return
 
     const {gps_lat, gps_lon} = manifest
+
+    if (!gps_lat && !gps_lon)
+      return <></>
 
     let map = L.map(ref.current).setView([gps_lat, gps_lon], 13);
 

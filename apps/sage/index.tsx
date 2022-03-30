@@ -17,6 +17,7 @@ import RequireAuth from '/components/auth/RequireAuth'
 import DataSearch from './data/DataSearch'
 import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
+import Node from '../common/node/Node'
 import JobStatus from './job-status/JobStatus'
 import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data/Ontology'
@@ -35,7 +36,7 @@ import '/assets/styles.scss'
 
 const NavMenu = () =>
   <NavItems>
-    <li><NavLink to="/apps">App Catalog</NavLink></li>
+    <li><NavLink to="/apps/explore">App Catalog</NavLink></li>
     {/*<li><NavLink to="/job-status">Job Status</NavLink></li>*/}
     {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
@@ -64,6 +65,7 @@ export default function Sage() {
               <ProgressProvider>
                 <Routes>
                   <Route path="/" element={<Navigate to="apps/explore" replace />} />
+                  <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
 
                   <Route path="apps" element={<Apps />}>
                     <Route path="explore" element={<AppList />} />
@@ -78,6 +80,8 @@ export default function Sage() {
 
                   <Route path="data" element={<DataSearch />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
+
+                  <Route path="node/:node" element={<Node />} />
 
                   <Route path="job-status" element={<JobStatus />} />
                   <Route path="fiddle/filter-menu" element={<FilterMenuTest />} />

@@ -9,6 +9,8 @@ export default function RequireAuth({children}) {
       <Navigate to="/login" replace />
   }
 
-  return _isSignedIn ? children :
-    <Navigate to={`${Auth.url}/?callback=${window.location.href}`} replace />
+  if (_isSignedIn)
+    return children
+
+  window.location.href = `${Auth.url}/?callback=${window.location.href}`
 }
