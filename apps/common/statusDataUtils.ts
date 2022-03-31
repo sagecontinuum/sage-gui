@@ -40,20 +40,27 @@ export function filterData(data: object[], state: object) {
 
 
 function getElapsedTimes(metrics: BH.AggMetrics, nodeID: string) {
-  const byHost = {}
+  const byHost = metrics[nodeID]
+  const elapsedByHost = {}
 
-  Object.keys(metrics[nodeID]).forEach(host => {
-
-    const timestamp = metrics[nodeID][host]['sys.uptime'][0].timestamp
-
-    const elapsedTime = (new Date().getTime() - new Date(timestamp).getTime())
+  const mostRecent = {}
+  Object.keys(byHost).forEach(host => {
+    const timestamp = byHost[host]['sys.uptime'][0].timestamp
 
     const suffix = host.split('.')[1]
     const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-    byHost[key] = elapsedTime
+
+    // ensure the latest time per host is used; mostly for the factory
+    if (mostRecent[key]?.localeCompare(timestamp)) {
+      return
+    }
+
+    const elapsedTime = new Date().getTime() - new Date(timestamp).getTime()
+    elapsedByHost[key] = elapsedTime
+    mostRecent[key] = timestamp
   })
 
-  return byHost
+  return elapsedByHost
 }
 
 

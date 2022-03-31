@@ -215,8 +215,12 @@ export async function getSuryaState() : Promise<State[]> {
   const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
 
   const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
-  const allSuryaData = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
-  return allSuryaData
+  let data = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
+
+  // ignore nodes with no factory state or which have final sign-off
+  data = data.filter(obj => !obj.factory || !obj.factory['Final Sign-off'])
+
+  return data
 }
 
 

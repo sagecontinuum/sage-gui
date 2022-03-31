@@ -127,6 +127,8 @@ const columns = [
     id: 'Note',
     label: 'Note',
     format: (_, row) => {
+      if (!row.factory) return <></>
+
       const phase = getPhase(row.ip)
       const note = row.factory[`Phase ${phase} Note`]
       return <div className="text-left">{note?.length > 0 ? note : '-'}</div>
