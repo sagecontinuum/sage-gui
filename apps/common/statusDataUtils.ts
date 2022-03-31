@@ -81,53 +81,6 @@ function getMetric(
 }
 
 
-
-function getSanity(
-  metrics: BH.AggMetrics,
-  nodeID: string
-) {
-  const metricObjs = metrics[nodeID]
-
-  // todo(nc): assume data is only attached to nx?
-  // update when dealing with blades?
-  // todo(nc): really should organize this better.
-  // i.e., {warnings, failed, details: [...]}
-  let valueObj
-  Object.keys(metricObjs).forEach(host => {
-
-    if (!host.includes('ws-nxcore'))
-      return
-
-    const metric = metricObjs[host]
-    if (!metric) return
-
-    let passed = 0
-    let warnings = 0
-    let failed = 0
-
-    // determine pass ratio
-    Object.keys(metric).forEach(key => {
-      if (!key.includes('sys.sanity_status'))
-        return
-
-      const {value, meta} = metric[key][0]
-      const severity = meta['severity']
-
-      passed = value == 0 ? passed + 1 : passed
-      warnings = value > 0 && severity == 'warning' ? warnings + 1 : warnings
-      failed = value > 0 && severity == 'fatal' ? failed + 1 : failed
-    })
-
-    valueObj = metric
-    valueObj.passed = passed
-    valueObj.warnings = warnings
-    valueObj.failed = failed
-  })
-
-  return valueObj
-}
-
-
 export function countNodeHealth(data) {
   if (!data) return {}
 
