@@ -167,10 +167,10 @@ const getCurlCmd = (query: object) =>
 
 function getAppMenus() {
   return BH.getData({
-    start: `-1d`,
+    start: `-12h`,
     tail: 1,
     filter: {
-      plugin: `plugin-.*`
+      plugin: `.*`
     }
   }).then((data) =>
     getUniqueOpts(data.map(o => o.meta.plugin).filter(n => n))

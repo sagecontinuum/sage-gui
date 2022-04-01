@@ -219,14 +219,16 @@ export default function StatusView() {
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
 
-  const [byPhase, setByPhase] = useState({phase1: null, phase2: null, phase3: null})
+  const [byPhase, setByPhase] = useState({phase1: null, phase2: null, phase3: null, phase4: null})
   const [cols, setCols] = useState(columns)
 
   const [lastUpdate, setLastUpdate] = useState(null)
 
   // covert phaseX to tab index
   const [tabIdx, setTabIdx] = useState<number>(getTabIdx(phase))
+  const [noMoreConfetti, setNoMoreConfetti] = useState(false)
 
+  const confettiRef = useRef()
   const dataRef = useRef(null)
   dataRef.current = data
 
@@ -284,22 +286,32 @@ export default function StatusView() {
 
     const phase1 = data.filter(o => inPhaseN(1, o.ip))
     const phase2 = data.filter(o => inPhaseN(2, o.ip))
-    const phase3 = data.filter(o => inPhaseN(3, o.ip))
+    const phase3 = data.filter(o => inPhaseN(3, o.ip) && (!o.factory || !o.factory['Final Sign-off']))
+    const phase4 = data.filter(o => o.factory && o.factory['Final Sign-off'])
 
     if (tabIdx == 0) {
       filteredData = phase1
       setCols(columns.filter(colObj =>
-        ['id', 'vsn', 'nx'].includes(colObj.id))
-      )
+        ['id', 'vsn', 'nx'].includes(colObj.id)
+      ))
     } else if (tabIdx == 1) {
       filteredData = phase2
       setCols([...columns, phase2SignOff])
     } else if (tabIdx == 2) {
       filteredData = phase3
       setCols([...columns, finalSignOff])
+    } else if (tabIdx == 3) {
+      filteredData = phase4
+      setCols([
+        ...columns.filter(colObj => ['id', 'vsn'].includes(colObj.id)),
+        getColumn('project'),
+        getColumn('focus'),
+        {...getColumn('location'), hide: false},
+        finalSignOff
+      ])
     }
 
-    setByPhase({phase1, phase2, phase3})
+    setByPhase({phase1, phase2, phase3, phase4})
     setFiltered(filteredData)
   }, [data, tabIdx])
 
@@ -310,14 +322,42 @@ export default function StatusView() {
     updateAll()
   }, [data, updateAll])
 
+  useEffect(() => {
+    if (tabIdx == 3 && !noMoreConfetti) {
+      const cfetti = confetti.create(confettiRef.current, {
+        resize: true,
+        useWorker: true
+      })
+
+      cfetti({
+        angle: 60,
+        spread: 55,
+        particleCount: 100,
+        origin: { x: 0 },
+        disableForReducedMotion: true
+      })
+
+      cfetti({
+        angle: 120,
+        spread: 55,
+        particleCount: 100,
+        origin: { x: 1 },
+        disableForReducedMotion: true
+      })
+
+      setNoMoreConfetti(true)
+    }
+  }, [tabIdx])
+
 
   const getCountIndicator = (phase: string) =>
     byPhase[phase] ? `(${byPhase[phase].length})` : ''
 
 
-
   return (
     <Root>
+      <canvas ref={confettiRef}></canvas>
+
       {lastUpdate && <h2>Last update: {lastUpdate}</h2>}
 
       {error &&
@@ -332,7 +372,9 @@ export default function StatusView() {
         <Tab label={`NX flash ${getCountIndicator('phase1')}`} idx={0} component={Link} to="/surya/phase1" />
         <Tab label={`Open build ${getCountIndicator('phase2')}`} idx={1} component={Link} to="/surya/phase2" />
         <Tab label={`Long soak ${getCountIndicator('phase3')}`} idx={2} component={Link} to="/surya/phase3" />
+        <Tab label={`Completed ${getCountIndicator('phase4')}`} idx={3} component={Link} to="/surya/phase4" className="completed-tab" />
       </Tabs>
+
 
       {['phase2', 'phase3'].includes(phase) && byPhase[phase]?.length > 0 &&
         <Overview>
@@ -352,17 +394,25 @@ export default function StatusView() {
           />
         }
       </TableContainer>
-
     </Root>
   )
 }
 
 const Root = styled.div`
-
   .MuiTabs-indicator {
     transition: none;
   }
 
+  .completed-tab {
+    margin-left: auto;
+  }
+
+  canvas {
+    position: absolute;
+    width: 100%;
+    z-index: 9999;
+    pointer-events: none;
+  }
 `
 
 const Overview = styled.div`

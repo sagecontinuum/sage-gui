@@ -28,7 +28,6 @@ const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/status">Status</NavLink></li>
     <li><NavLink to="/tests">Tests</NavLink></li>
-    <Divider orientation="vertical" flexItem style={{margin: '0 10px' }} />
     <li><NavLink to="/surya">Factory</NavLink></li>
   </NavItems>
 

@@ -15,7 +15,7 @@ import RecentDataTable from '/apps/common/RecentDataTable'
 import ManifestTable from '/apps/common/ManifestTable'
 import RecentImages from '/apps/common/RecentImages'
 import Audio from '/components/viz/Audio'
-import Map from '/components/LeafMap'
+import Map from '/components/LeafletMap'
 
 import Hotspot from './Hotspot'
 
@@ -206,7 +206,7 @@ export default function NodeView() {
         </LeftSide>
 
         <RightSide>
-          <Map manifest={manifest} />
+          {manifest && <Map data={{lat: manifest.gps_lat, lon: manifest.gps_lon}} />}
           <WSNView>
             <img src={wsnode} width={WSN_VIEW_WIDTH} />
             <VSN>{vsn}</VSN>
