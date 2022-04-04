@@ -34,16 +34,25 @@ export default function JobTimeLine(props: Props) {
           }}
           tooltip={(obj) => `
             ${new Date(obj.timestamp).toLocaleString()} - ${new Date(obj.end).toLocaleTimeString()}<br>
-            ${formatJSON(obj.value)}<br>
+
+            goal id: ${obj.value.goal_id}<br>
+            image: ${obj.value.plugin_image}<br>
+            task: ${obj.value.plugin_task}<br>
+            args: ${obj.value.plugin_args}<br>
+            selector: ${obj.value.plugin_selector}<br>
             start status: ${obj.name.split('.').pop()}<br>
             end status: ${obj.status}<br>
             <br>
             <code>${formatJSON(obj.meta)}</code>
           `}
           onRowClick={(val, data) => {
-            const image = data[0].value.plugin_image
+            const d = data[0]
+            const {value, meta} = d
+            const image = value.plugin_image
+            const node = meta.vsn
             const app = image.slice(image.lastIndexOf('/') + 1)
-            navigate(`/data-browser/?apps=${app}`)
+
+            navigate(`/data-browser/?apps=${app}&nodes=${node}&window=d`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{right: 0, bottom: 0}}

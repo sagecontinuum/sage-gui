@@ -137,28 +137,33 @@ export default function TestView() {
         </sup>
       </h1>
 
-      <h2>Health</h2>
       {health &&
-        <TimelineChart
-          data={health.prod}
-          onRowClick={handleLabelClick}
-          onCellClick={handleCellClick}
-          colorCell={getHealthColor}
-          tooltip={healthTooltip}
-          tailHours={72}
-        />
+        <>
+          <h2>Health</h2>
+          <TimelineChart
+            data={health.prod}
+            onRowClick={handleLabelClick}
+            onCellClick={handleCellClick}
+            colorCell={getHealthColor}
+            tooltip={healthTooltip}
+            tailHours={72}
+          />
+        </>
       }
+
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
-      <h2>Sanity Tests</h2>
       {sanity &&
-        <TimelineChart
-          data={sanity.prod}
-          onRowClick={handleLabelClick}
-          onCellClick={handleCellClick}
-          tooltip={sanityTooltip}
-          tailHours={72}
-        />
+        <>
+          <h2>Sanity Tests</h2>
+          <TimelineChart
+            data={sanity.prod}
+            onRowClick={handleLabelClick}
+            onCellClick={handleCellClick}
+            tooltip={sanityTooltip}
+            tailHours={72}
+          />
+        </>
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
@@ -171,28 +176,32 @@ export default function TestView() {
         </sup>
       </h1>
 
-      <h2>Health</h2>
       {health &&
-        <TimelineChart
-          data={health.dev}
-          onRowClick={handleLabelClick}
-          onCellClick={handleCellClick}
-          colorCell={getHealthColor}
-          tooltip={healthTooltip}
-          tailHours={72}
-        />
+        <>
+          <h2>Health</h2>
+          <TimelineChart
+            data={health.dev}
+            onRowClick={handleLabelClick}
+            onCellClick={handleCellClick}
+            colorCell={getHealthColor}
+            tooltip={healthTooltip}
+            tailHours={72}
+          />
+        </>
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
-      <h2>Sanity Tests</h2>
       {sanity &&
-        <TimelineChart
-          data={sanity.dev}
-          onRowClick={handleLabelClick}
-          onCellClick={handleCellClick}
-          tooltip={sanityTooltip}
-          tailHours={72}
-        />
+        <>
+          <h2>Sanity Tests</h2>
+          <TimelineChart
+            data={sanity.dev}
+            onRowClick={handleLabelClick}
+            onCellClick={handleCellClick}
+            tooltip={sanityTooltip}
+            tailHours={72}
+          />
+        </>
       }
       {error && <ErrorMsg>{error}</ErrorMsg>}
     </Root>
@@ -208,6 +217,7 @@ const Root = styled.div`
   }
 
   h2 {
-    margin-left: 50px;
+    margin: 0 0 0 115px;
+    float: left;
   }
 `

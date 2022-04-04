@@ -19,8 +19,7 @@ const cellPad = 2
 const borderRadius = 0
 const guideStroke = 3
 
-const panAmount = 50
-const zoomAmount = 5
+const panAmount = 100
 
 const redSpectrum = [
   '#ff8686',
@@ -308,7 +307,7 @@ function drawChart(
     const amount = dir == 'right' ? panAmount : -panAmount
     const t = d3.zoomTransform(svg.node())
     const transform = d3.zoomIdentity.translate(t.x - amount, t.y).scale(t.k)
-    zoom.transform(svg, transform)
+    zoom.transform(svg.transition().duration(200).ease(d3.easeLinear), transform)
   }
 
   function zoomTo(dir) {
@@ -339,11 +338,11 @@ function drawChart(
     x = (x - center) * factor + center;
 
     const transform = d3.zoomIdentity.translate(x, zoomTransform.y).scale(targetScale)
-    zoom.transform(svg, transform);
+    zoom.transform(svg.transition().duration(200).ease(d3.easeLinear), transform);
   }
 
   function reset() {
-    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+    svg.transition().duration(500).ease(d3.easeLinear).call(zoom.transform, d3.zoomIdentity);
   }
 }
 
@@ -393,7 +392,7 @@ function Chart(props: TimelineProps) {
   let {
     data,
     margin,
-    showButtons = false,
+    showButtons = true,
     ...rest
   } = props
 
@@ -454,7 +453,7 @@ function Chart(props: TimelineProps) {
       <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
 
       {showButtons &&
-        <Ctrls> {/* note: controls are assumed to be a direct child node for events */}
+        <Ctrls style={{marginRight: margin.right}}> {/* note: controls are assumed to be a direct child node for events */}
           <button className="reset" title="reset zoom/panning"><HomeIcon /></button>
           <button className="pan-left" title="pan left"><ArrowLeft /></button>
           <button className="zoom-in" title="zoomin"><ZoomInIcon /></button>
@@ -497,7 +496,7 @@ const Root = styled.div`
 const Ctrls = styled.div`
   display: flex;
   justify-content: end;
-  margin: 0 15px 15px 15px;
+  margin: 0 20px 15px 15px;
 
   button {
     margin: 0 2px;

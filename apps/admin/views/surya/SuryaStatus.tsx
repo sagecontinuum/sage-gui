@@ -416,7 +416,7 @@ const Root = styled.div`
 `
 
 const Overview = styled.div`
-  margin: 30px 10px;
+  margin: 20px 10px 0 10px;
 
   .summary-bar {
     margin: 0 20px 0 0;

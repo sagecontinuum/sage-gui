@@ -238,7 +238,7 @@ export default function NodeView() {
       }
 
       <div className="flex">
-        <Charts className="flex column">
+        <Charts>
           <h2>Health</h2>
           {health &&
             <TimelineChart
@@ -327,6 +327,10 @@ const Root = styled.div`
 const Charts = styled.div`
   flex-grow: 1;
   margin-bottom: 50px;
+
+  h2 {
+    float: left;
+  }
 `
 
 const Data = styled.div`
