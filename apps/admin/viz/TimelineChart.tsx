@@ -112,19 +112,18 @@ function showGuide(ref, svg, y) {
 
 function drawChart(
   domEle: HTMLElement,
-  params: {
+  params: TimelineProps & {
     width: number,
     yLabels: string[],
     size: {m: number, n: number},
-    margin
-  } & TimelineProps
+  }
 ) {
 
   const {
     width = defaultWidth,
     yLabels,
-    size,
     margin,
+    endTime,
     data,
     tailHours,
     yFormat,
@@ -147,7 +146,7 @@ function drawChart(
   const x = d3.scaleTime()
     .domain([
       tailHours ? (new Date(end).getTime() - tailHours*60*60*1000) : start,
-      end
+      endTime || end
     ])
     .range([0, width])
 
@@ -376,6 +375,7 @@ type Data = { [key: string]: Record[] }
 
 type TimelineProps = {
   data: Data
+  endTime?: Date
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
   tailHours?: number
   showLegend?: boolean

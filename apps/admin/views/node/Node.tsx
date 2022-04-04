@@ -58,6 +58,12 @@ function sanityColor(val, obj) {
 }
 
 
+function ceilingHour(date: Date) {
+  const ms = 60 * 60 * 1000
+  return new Date(Math.ceil(date.getTime() / ms ) * ms);
+}
+
+
 const signoffCols = [
   'Phase 2 Image Sign-off',
   'Phase 2 Audio Sign-off',
@@ -243,6 +249,7 @@ export default function NodeView() {
           {health &&
             <TimelineChart
               data={health}
+              endTime={ceilingHour(new Date())}
               colorCell={(val, obj) => {
                 if (val == null)
                   return colors.noValue
@@ -266,6 +273,7 @@ export default function NodeView() {
           {sanityData &&
             <TimelineChart
               data={sanityData}
+              endTime={ceilingHour(new Date())}
               yFormat={l => l.split('.').pop()}
               colorCell={sanityColor}
               tooltip={(item) =>
