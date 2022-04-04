@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { groupBy } from 'lodash'
 
-import { schemeCategory10 } from 'd3-scale-chromatic'
-
 import Alert from '@mui/material/Alert'
 
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import JobTimeLine from './JobTimeline'
+import Sidebar from '../data/DataSidebar'
+
 import SummaryBar from '../../admin/views/status/charts/SummaryBar'
+import { schemeCategory10 } from 'd3-scale-chromatic'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
@@ -48,7 +49,10 @@ const columns = [{
   id: 'timestamp',
   label: 'Submitted',
   format: (val) => new Date(val).toLocaleString()
-}, */ {
+}, */ ]
+
+/*
+{
   id: 'metrics',
   label: 'Mean Runtimes',
   format: (metrics) =>
@@ -63,7 +67,8 @@ const columns = [{
         }
       />
     </div>
-}]
+}
+*/
 
 
 
@@ -203,7 +208,7 @@ const parseSESValue = (data) =>
 // fetch tasks state event changes, and parse SES JSON Messages
 function getTaskEvents() {
   return BH.getData({
-    start: '-24h',
+    start: '-48h',
     filter: {
       name: 'sys.scheduler.status.plugin.*'
     }
@@ -276,56 +281,57 @@ export default function JobStatus() {
 
   return (
     <Root>
-      <Top className="flex">
-        <div>
-          <h1 className="no-margin">App Status</h1>
-          <h2 className="no-margin">Last 24 hours</h2>
-        </div>
 
-        <MapContainer>
-          {geo &&
-            <Map data={geo} selected={null} resize={false} />
-          }
-        </MapContainer>
+      <div className="flex">
 
-      </Top>
-
-
-          <TimelineContainer className="flex column" >
-            {byNode &&
-              <JobTimeLine data={byNode['W023']} />
+        <Sidebar width="240px" style={{padding: '0 10px'}}>
+          <h2>Science Goals</h2>
+          <TableContainer>
+            {goals &&
+              <Table
+                primaryKey="goalID"
+                rows={goals}
+                columns={columns}
+                enableSorting
+                onSearch={() => {}}
+                onSelect={handleSelect}
+              />
             }
+          </TableContainer>
+        </Sidebar>
+
+        <Main className="flex column">
+          <MapContainer>
+            {geo &&
+              <Map data={geo} selected={null} resize={false} updateID={null} />
+            }
+          </MapContainer>
+
+          <TimelineContainer>
+            {byNode && Object.keys(byNode).map((node, i) =>
+              <div key={i}>
+                <h4>{node}</h4>
+                <JobTimeLine data={byNode[node]} />
+              </div>
+            )}
           </TimelineContainer>
 
-      {error &&
-        <Alert severity="error">{error.message}</Alert>
-      }
-
-      <TableContainer>
-        {goals &&
-          <Table
-            primaryKey="timestamp" // todo(nc): need job ids
-            rows={goals}
-            columns={columns}
-            enableSorting
-            onSearch={() => {}}
-            onColumnMenuChange={() => {}}
-            onSelect={handleSelect}
-          />
-        }
-      </TableContainer>
+          {error &&
+            <Alert severity="error">{error.message}</Alert>
+          }
+        </Main>
+      </div>
     </Root>
   )
 }
 
 const Root = styled.div`
-  margin: 1em;
+
 `
 
-const Top = styled.div`
-  h1 {
-    width: 150px;
-  }
+const Main = styled.div`
+  width: 100%;
+  margin-bottom: 1400px;
 `
 
 const MapContainer = styled.div`
@@ -333,9 +339,30 @@ const MapContainer = styled.div`
 `
 
 const TimelineContainer = styled.div`
+  padding: 0 1.2em;
 
+  h4 {
+    float: left;
+    margin: 5px;
+  }
 `
 
 const TableContainer = styled.div`
   margin-top: 1em;
+
+  & .MuiInputBase-root {
+    max-width: 100%;
+    background: #fff;
+  }
+
+  table {
+    background: #fff;
+
+    tr:nth-child(odd) {
+      background: none;
+    }
+    tr.MuiTableRow-root:hover {
+      background-color: initial;
+    }
+  }
 `

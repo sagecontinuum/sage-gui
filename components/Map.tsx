@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import mapboxgl from 'mapbox-gl'
 import tokens from '../tokens'
 import settings from '../apps/admin/settings'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 // import Popover from '@mui/material/Popover'
 
@@ -270,9 +271,9 @@ function Map(props: Props) {
       renderLabels(map, geoSpec)
     } catch(e) {
       // need delay for initial styling load
-      setTimeout(() => {
+      map.on('load', () => {
         renderLabels(map, geoSpec)
-      }, 1500)
+      })
     }
 
     document.querySelectorAll('.mapboxgl-marker').forEach(el =>
@@ -280,9 +281,7 @@ function Map(props: Props) {
       })
     )
 
-
     setMarkers(newMarkers)
-
     setInit(true)
     setTotal(data.length)
     setLastID(updateID)

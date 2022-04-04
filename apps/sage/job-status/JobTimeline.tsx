@@ -29,6 +29,7 @@ export default function JobTimeLine(props: Props) {
         <TimelineChart
           data={data}
           endTime={new Date()}
+          scaleExtent={[.2, 1000]}
           colorCell={(val, obj) => {
             if (obj.status === undefined) return colors.noValue
             return colorMap[obj.status]
