@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import styled from 'styled-components'
 
-import d3 from './d3'
+import * as d3 from 'd3'
 import Legend from './d3-color-legend'
 
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
