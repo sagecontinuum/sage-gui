@@ -4,6 +4,12 @@ import styled from 'styled-components'
 import * as d3 from 'd3'
 import Legend from './d3-color-legend'
 
+import ArrowLeft from '@mui/icons-material/ArrowBackIosNew'
+import ArrowRight from '@mui/icons-material/ArrowForwardIos'
+import ZoomInIcon from '@mui/icons-material/ZoomIn'
+import ZoomOutIcon from '@mui/icons-material/ZoomOut'
+import HomeIcon from '@mui/icons-material/HomeOutlined'
+
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
 const defaultWidth = 800
 const hour = 60 * 60 * 1000
@@ -13,7 +19,8 @@ const cellPad = 2
 const borderRadius = 0
 const guideStroke = 3
 
-
+const panAmount = 50
+const zoomAmount = 5
 
 const redSpectrum = [
   '#ff8686',
@@ -288,6 +295,56 @@ function drawChart(
 
     return w > cellPad ? w - cellPad : cellPad
   }
+
+  // add events for button controls
+  const ctrls = d3.select(domEle).select(function() { return this.parentNode })
+  ctrls.select('.pan-left').on('click', () => pan('left'))
+  ctrls.select('.pan-right').on('click', () => pan('right'))
+  ctrls.select('.zoom-in').on('click', () => zoomTo('in'))
+  ctrls.select('.zoom-out').on('click', () => zoomTo('out'))
+  ctrls.select('.reset').on('click', () => reset())
+
+  function pan(dir) {
+    const amount = dir == 'right' ? panAmount : -panAmount
+    const t = d3.zoomTransform(svg.node())
+    const transform = d3.zoomIdentity.translate(t.x - amount, t.y).scale(t.k)
+    zoom.transform(svg, transform)
+  }
+
+  function zoomTo(dir) {
+    const center = width / 2
+
+    const zoomTransform = d3.zoomTransform(svg.node())
+
+    let scale = zoomTransform.k,
+        extent = zoom.scaleExtent(),
+        x = zoomTransform.x,
+        factor = dir == 'in' ? 1.5 : 1 / 1.5,
+        targetScale = scale * factor;
+
+    // Don't pass scaling extent in either direction
+    if (targetScale < extent[0] || targetScale > extent[1]) {
+        return false;
+    }
+
+    // If the factor is too much, scale it down to reach the extent exactly
+    let clampedTargetScale = Math.max(extent[0], Math.min(extent[1], targetScale));
+
+    if (clampedTargetScale != targetScale) {
+        targetScale = clampedTargetScale;
+        factor = targetScale / scale;
+    }
+
+    // Center each vector, stretch, then put back
+    x = (x - center) * factor + center;
+
+    const transform = d3.zoomIdentity.translate(x, zoomTransform.y).scale(targetScale)
+    zoom.transform(svg, transform);
+  }
+
+  function reset() {
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  }
 }
 
 
@@ -321,8 +378,9 @@ type Data = { [key: string]: Record[] }
 type TimelineProps = {
   data: Data
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
-  showLegend?: boolean
   tailHours?: number
+  showLegend?: boolean
+  showButtons?: boolean
   yFormat?: (label) => string
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (label: string) => void
@@ -335,6 +393,7 @@ function Chart(props: TimelineProps) {
   let {
     data,
     margin,
+    showButtons = false,
     ...rest
   } = props
 
@@ -389,9 +448,21 @@ function Chart(props: TimelineProps) {
     }
   }, [data, rest, margin, props.showLegend])
 
+
   return (
     <div>
       <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
+
+      {showButtons &&
+        <Ctrls> {/* note: controls are assumed to be a direct child node for events */}
+          <button className="reset" title="reset zoom/panning"><HomeIcon /></button>
+          <button className="pan-left" title="pan left"><ArrowLeft /></button>
+          <button className="zoom-in" title="zoomin"><ZoomInIcon /></button>
+          <button className="zoom-out" title="zoom out"><ZoomOutIcon /></button>
+          <button className="pan-right" title="pan right"><ArrowRight /></button>
+        </Ctrls>
+      }
+
       <div ref={ref}></div>
     </div>
   )
@@ -421,5 +492,35 @@ export default function TimelineContainer(props: TimelineProps) {
 
 const Root = styled.div`
 
+`
+
+const Ctrls = styled.div`
+  display: flex;
+  justify-content: end;
+  margin: 0 15px 15px 15px;
+
+  button {
+    margin: 0 2px;
+    background: none;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, .2);
+
+    :hover {
+      border: 1px solid #1d7198;
+      .MuiSvgIcon-root {
+        color: #1d7198;
+      }
+    }
+
+    .MuiSvgIcon-root {
+      font-size: 1.25rem;
+      padding-top: 2px;
+    }
+  }
+
+  .reset {
+    margin-right: 15px;
+  }
 `
 
