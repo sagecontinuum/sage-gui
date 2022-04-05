@@ -382,16 +382,19 @@ export default function DataPreview() {
 
       setQuery(query)
 
+      // cancel old requests
+      BH.abort()
+
       setLoading(true)
-      BH.getData(query)
+      BH.getData(query, true)
         .then((data) => {
           data = (data || [])
 
           // limit amount of data
           const total = data.length
-          const limit = 10000
+          const limit = 100000
           if (total > limit) {
-            data = data.slice(0, limit)
+            data = data.slice(-limit)
             setLastN({total, limit})
           } else {
             setLastN(null)
@@ -408,13 +411,14 @@ export default function DataPreview() {
             setChart(null)
           }
 
-
           setData(data)
 
           // reset page any time more data is fetched
           setPage(0)
-        }).catch(error => setError(error))
-        .finally(() => {
+          setLoading(false)
+        }).catch(error => {
+          if (error.name == 'AbortError') return
+          setError(error)
           setLoading(false)
         })
     }

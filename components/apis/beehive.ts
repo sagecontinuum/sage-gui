@@ -6,6 +6,13 @@ import {groupBy, mapValues, flatten} from 'lodash'
 
 import * as BK from '../../components/apis/beekeeper'
 
+let _controller
+
+export function abort(){
+  if (!_controller) return
+  _controller.abort()
+}
+
 
 export const cameraOrientations = [
   'top',
@@ -70,17 +77,24 @@ export type AggMetrics = {
 }
 
 
-function post(endpoint: string, data = {}) {
+function post(endpoint: string, data = {}, signal) {
   return fetch(endpoint, {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    ...(signal ? {signal} : {})
   }).then(handleErrors)
 }
 
 
 
-export async function getData(params: Params) : Promise<Record[]> {
-  const res = await post(`${url}/query`, params)
+export async function getData(params: Params, abortable?: boolean) : Promise<Record[]> {
+  let signal
+  if (abortable) {
+    _controller = new AbortController()
+    signal = _controller.signal
+  }
+
+  const res = await post(`${url}/query`, params, signal)
   const text = await res.text()
 
   if (!text)
