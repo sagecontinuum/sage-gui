@@ -120,12 +120,13 @@ function drawChart(
 ) {
 
   const {
-    width = defaultWidth,
-    yLabels,
-    margin,
-    endTime,
     data,
+    endTime,
+    scaleExtent,
+    margin,
+    width = defaultWidth,
     tailHours,
+    yLabels,
     yFormat,
     tooltip,
     colorCell,
@@ -139,7 +140,7 @@ function drawChart(
 
   const zoom = d3.zoom()
     .filter((evt) => evt.type === 'wheel' ? evt.ctrlKey : true)
-    .scaleExtent([.2, 8])
+    .scaleExtent(scaleExtent || [.2, 30])
     .on('zoom', zoomed)
 
   // create scaling functions
@@ -149,6 +150,7 @@ function drawChart(
       endTime || end
     ])
     .range([0, width])
+
 
   const y = d3.scaleBand()
     .domain(yLabels)
@@ -376,6 +378,7 @@ type Data = { [key: string]: Record[] }
 type TimelineProps = {
   data: Data
   endTime?: Date
+  scaleExtent?: [number, number]
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
   tailHours?: number
   showLegend?: boolean
@@ -456,7 +459,7 @@ function Chart(props: TimelineProps) {
         <Ctrls style={{marginRight: margin.right}}> {/* note: controls are assumed to be a direct child node for events */}
           <button className="reset" title="reset zoom/panning"><HomeIcon /></button>
           <button className="pan-left" title="pan left"><ArrowLeft /></button>
-          <button className="zoom-in" title="zoomin"><ZoomInIcon /></button>
+          <button className="zoom-in" title="zoom in"><ZoomInIcon /></button>
           <button className="zoom-out" title="zoom out"><ZoomOutIcon /></button>
           <button className="pan-right" title="pan right"><ArrowRight /></button>
         </Ctrls>
