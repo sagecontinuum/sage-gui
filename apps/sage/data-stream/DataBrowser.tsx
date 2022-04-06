@@ -295,7 +295,7 @@ export default function DataPreview() {
   const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
-  const [chart, setChart] = useState<{x: string, y: number}[]>()
+  const [chart, setChart] = useState<BH.Record[]>()
 
   // contents of dropdowns
   const [menus, setMenus] = useState<{[name: string]: string[]}>({
@@ -615,7 +615,7 @@ export default function DataPreview() {
           {lastN &&
             <Alert severity="info">
               There are {lastN.total.toLocaleString()} records for this query.
-              Listing the last {lastN.limit.toLocaleString()}.
+              Listing the most recent {lastN.limit.toLocaleString()}.
             </Alert>
           }
 

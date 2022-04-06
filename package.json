@@ -3,7 +3,8 @@
   "version": "1.10.1-pre.11",
   "description": "",
   "scripts": {
-    "start": "npm start --workspace sage",
+    "start": "npm start -w sage",
+    "clean": "npm run clean --workspaces",
     "release": "standard-version"
   },
   "repository": {

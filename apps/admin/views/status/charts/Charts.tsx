@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import 'chartjs-plugin-datalabels'
-
 import SummaryBar from './SummaryBar'
 import SummaryBox from './SummaryBox'
 
-import * as BK from '../../../../components/apis/beekeeper'
+import * as BK from '/components/apis/beekeeper'
 
 const barColors = {
   'reporting': '#3ac37e',

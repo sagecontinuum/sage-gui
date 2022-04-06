@@ -37,7 +37,7 @@ import '/assets/styles.scss'
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps/explore">App Catalog</NavLink></li>
-    {/*<li><NavLink to="/job-status">Job Status</NavLink></li>*/}
+    {/*<li><NavLink to="/job-status">Status</NavLink></li>*/}
     {/*<li><NavLink to="/data">Data</NavLink></li>*/}
   </NavItems>
 

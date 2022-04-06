@@ -21,8 +21,6 @@
     "@mui/material": "^5.5.0",
     "@mui/styles": "^5.5.0",
     "@types/date-fns": "^2.6.0",
-    "chart.js": "^2.9.4",
-    "chartjs-plugin-datalabels": "^0.7.0",
     "colormap": "^2.3.2",
     "d3": "^7.1.1",
     "lodash": "^4.17.21",
@@ -30,12 +28,13 @@
     "marked": "^2.0.4",
     "notistack": "^1.0.5",
     "react": "^17.0.1",
-    "react-chartjs-2": "^2.11.2",
     "react-dom": "^17.0.1",
     "react-router-dom": "^6.2.2",
     "styled-components": "^5.2.1",
     "wavesurfer.js": "^5.2.0",
-    "yaml": "^1.10.2"
+    "yaml": "^1.10.2",
+    "chart.js": "^3.7.1",
+    "chartjs-adapter-date-fns": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef} from 'react'
 import styled from 'styled-components'
 import { schemeCategory10 } from 'd3-scale-chromatic'
-import { Line, Bar } from 'react-chartjs-2'
 import { chain, groupBy, sumBy } from 'lodash'
 
 import * as BH from '/components/apis/beehive'
+
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '/components/input/Checkbox'
 import FormControl from '@mui/material/FormControl'
@@ -12,9 +12,70 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 
+import { Chart as ChartJS,
+  Tooltip,
+  Legend,
+  LineController,
+  BarController,
+  LineElement,
+  PointElement,
+  LinearScale,
+  TimeScale,
+  BarElement,
+  CategoryScale,
+  Title,
+  Decimation,
+} from 'chart.js'
+import 'chartjs-adapter-date-fns'
+
+ChartJS.register(
+  Tooltip, Legend, LineController, BarController, LineElement, PointElement,
+  LinearScale, TimeScale, CategoryScale, BarElement, Title, Decimation
+)
+
+
+// data will be downsampled at this amount or more
+export const DOWNSAMPLE_THRESHOLD = 10000
+
+
+
+const lineConfig = {
+  type: 'line',
+  options: {
+    animation: false,
+    parsing: false,
+    interaction: {
+      mode: 'nearest',
+      intersect: false
+    },
+    scales: {
+      x: {
+        type: 'time'
+      }
+    },
+    plugins: {
+      decimation: {
+        enabled: true,
+        threshold: DOWNSAMPLE_THRESHOLD,
+        algorithm: 'lttb'
+      }
+    }
+  }
+}
+
+const barConfig = {
+  type: 'bar',
+  scales: {
+    y: {
+      display: true,
+      min: 0
+    }
+  }
+}
+
 
 function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
-  const datasets = []
+  let datasets = []
 
   const byName = groupBy(records, 'name')
 
@@ -36,10 +97,9 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
           label: name + (hasSensors ? ` - ${key}` : ''),
           data: d,
           pointRadius: opts.showPoints ? 3 : 0,
-          fill: false,
           showLine: opts.showLines,
-          tension: 0,
-          borderColor: schemeCategory10[idx % 10]
+          borderColor: schemeCategory10[idx % 10],
+          borderWidth: 2
         })
 
         idx += 1
@@ -117,9 +177,10 @@ const chartOpts = {
 export default function TimeSeries(props) {
   const {data} = props
 
-  const [datasets, setDatasets] = useState<object[]>()
   const [opts, setOpts] = useState<ChartOpts>(chartOpts)
 
+  const chartRef = useRef()
+  const [chart, setChart] = useState(null)
 
   useEffect(() => {
     let datasets
@@ -130,7 +191,35 @@ export default function TimeSeries(props) {
     else
       datasets = getLineDatasets(data, opts)
 
-    setDatasets(datasets)
+
+    let config
+    if (opts.chartType == 'frequency') {
+      config = {
+        ...barConfig,
+        data: {...datasets}
+      }
+    } else if (opts.chartType == 'sum') {
+      config = {
+        ...barConfig,
+        data: {...datasets}
+      }
+    } else {
+      config = {
+        ...lineConfig,
+        data: { datasets }
+      }
+    }
+
+    if (chart) {
+      chart.destroy()
+    }
+
+    const c = new ChartJS(
+      chartRef.current,
+      config
+    )
+
+    setChart(c)
   }, [data, opts])
 
 
@@ -140,105 +229,65 @@ export default function TimeSeries(props) {
     setOpts(prev => ({...prev, [option]: val}))
   }
 
+
   return (
     <Root>
-      <Chart>
-        {opts.chartType == 'timeseries' && Array.isArray(datasets) &&
-          <Line
-            options={{
-              scales: {
-                xAxes: [{
-                  type: 'time',
-                  display: true,
-                  scaleLabel: {
-                    display: true
-                  }
-                }]
-              }
-            }}
-            data={{
-              datasets
-            }}
-          />
-        }
-
-        {opts.chartType == 'frequency' &&
-          <Bar
-            options={{
-              scales: {
-                yAxes: [{
-                    display: true,
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-              }
-            }}
-            data={{
-              ...datasets
-            }}
-          />
-        }
-
-        {opts.chartType == 'sum' &&
-          <Bar
-            options={{
-              scales: {
-                yAxes: [{
-                    display: true,
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-              }
-            }}
-            data={{
-              ...datasets
-            }}
-          />
-        }
-      </Chart>
+      <ChartContainer>
+        <canvas ref={chartRef}></canvas>
+      </ChartContainer>
 
 
-      <div className="flex justify-end">
-        {opts.chartType == 'timeseries' &&
-          <>
-          <CB
-            control={
-              <Checkbox
-                checked={opts.showLines}
-                onChange={(evt) => handleOpts(evt, 'showLines')}
+      <Ctrls className="flex items-center justify-between">
+        <div>
+          {data.length >= DOWNSAMPLE_THRESHOLD &&
+            <span>
+              Note: data in this chart has been downsampled using <a href="http://hdl.handle.net/1946/15343" target="_blank">LTTB</a>.
+            </span>
+          }
+        </div>
+
+        <div className="flex items-center">
+          <div>
+            {opts.chartType == 'timeseries' &&
+              <CB
+                control={
+                  <Checkbox
+                    checked={opts.showLines}
+                    onChange={(evt) => handleOpts(evt, 'showLines')}
+                  />
+                }
+                label="lines"
               />
             }
-            label="lines"
-          />
-          <CB
-            control={
-              <Checkbox
-                checked={opts.showPoints}
-                onChange={(evt) => handleOpts(evt, 'showPoints')}
+            {opts.chartType == 'timeseries' &&
+              <CB
+                control={
+                  <Checkbox
+                    checked={opts.showPoints}
+                    onChange={(evt) => handleOpts(evt, 'showPoints')}
+                  />
+                }
+                label="points"
               />
             }
-            label="points"
-          />
-          </>
-        }
+          </div>
 
-        <FormControl variant="outlined">
-          <InputLabel id="chart-type">Type</InputLabel>
-          <Select
-            labelId="chart-type"
-            value={opts.chartType}
-            onChange={evt => handleOpts(evt, 'chartType')}
-            label="Type"
-            margin="dense"
-          >
-            <MenuItem value='timeseries'>Timeseries</MenuItem>
-            <MenuItem value='frequency'>Frequency</MenuItem>
-            <MenuItem value='sum'>Sum</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
+          <FormControl variant="outlined">
+            <InputLabel id="chart-type">Type</InputLabel>
+            <Select
+              labelId="chart-type"
+              value={opts.chartType}
+              onChange={evt => handleOpts(evt, 'chartType')}
+              label="Type"
+              margin="dense"
+            >
+              <MenuItem value='timeseries'>Timeseries</MenuItem>
+              <MenuItem value='frequency'>Frequency</MenuItem>
+              <MenuItem value='sum'>Sum</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+      </Ctrls>
     </Root>
   )
 
@@ -250,13 +299,18 @@ const Root = styled.div`
   padding-bottom: 1em;
 `
 
-const Chart = styled.div`
+const ChartContainer = styled.div`
 
+`
+
+const Ctrls = styled.div`
+  margin-top: 1em;
 `
 
 const CB = styled(FormControlLabel)`
   .MuiFormControlLabel-label {
     font-size: 1em;
   }
-
 `
+
+
