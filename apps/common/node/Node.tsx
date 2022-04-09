@@ -72,6 +72,9 @@ const RightDataTable = ({node, className}) =>
     className={className}
   />
 
+const hasStaticGPS = manifest =>
+  manifest?.gps_lat && manifest?.gps_lat
+
 const metaCols1 = [
   'project',
   'location',
@@ -101,9 +104,10 @@ export default function NodeView() {
   const { setLoading } = useProgress()
 
   const [manifest, setManifest] = useState<BK.Manifest>(null)
-  const [vsn, setVsn] = useState(null)
-  const [meta, setMeta] = useState(null)
+  const [vsn, setVsn] = useState<string>(null)
+  const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
+  const [liveGPS, setLiveGPS] = useState<{lat: Number, lon: Number}>()
 
   const [error, setError] = useState(null)
 
@@ -126,12 +130,13 @@ export default function NodeView() {
             const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
             setStatus(isReporting ? 'reporting' : 'not reporting')
           })
+        BH.getGPS(vsn)
+          .then(d => setLiveGPS(d))
       })
 
     BK.getNode(node)
       .then(data => setMeta(data))
       .catch(err => setError(err))
-
   }, [node, setLoading, days, hours])
 
 
@@ -161,7 +166,7 @@ export default function NodeView() {
 
       <div className="flex">
         <LeftSide className="flex-grow">
-          <div className="flex items-center justify-between left-details">
+          <div className="flex items-center justify-between">
             <h1>Node {vsn} | <small className="muted">{node}</small></h1>
             <div className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
               {status}
@@ -177,7 +182,7 @@ export default function NodeView() {
           </div>
           <br/>
           <div className="flex justify-between">
-            <div className="meta-table-bottom" style={{width: '50%'}}>
+            <div className="meta-table-bottom">
               <ManifestTable
                 manifest={manifest}
                 meta={meta}
@@ -185,8 +190,15 @@ export default function NodeView() {
               />
             </div>
             <div className="gps">
-              <h5 className="muted no-margin">GPS</h5>
-              {manifest && <Clipboard content={`${manifest.gps_lat}, ${manifest.gps_lon}`} />}
+              <h5 className="muted no-margin">
+                GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})
+              </h5>
+              {hasStaticGPS(manifest) &&
+                <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+              }
+              {!hasStaticGPS(manifest) && liveGPS &&
+                <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+              }
             </div>
           </div>
           <br/>
@@ -206,7 +218,12 @@ export default function NodeView() {
         </LeftSide>
 
         <RightSide>
-          {manifest && <Map data={{lat: manifest.gps_lat, lon: manifest.gps_lon}} />}
+          {hasStaticGPS(manifest) &&
+            <Map data={{lat: manifest.gps_lat, lon: manifest.gps_lon}} />
+          }
+          {!hasStaticGPS(manifest) && liveGPS &&
+            <Map data={liveGPS} />
+          }
           <WSNView>
             <img src={wsnode} width={WSN_VIEW_WIDTH} />
             <VSN>{vsn}</VSN>
@@ -235,8 +252,11 @@ const Root = styled.div`
     margin-bottom: 1em;
   }
 
-  .meta-table-bottom table {
-    width: 100%;
+  .meta-table-bottom {
+    flex: 1;
+    margin-right: 30px;
+
+    table { width: 100%;}
   }
 
   p { margin-bottom: 30px; }
@@ -245,11 +265,20 @@ const Root = styled.div`
     width: 100%;
     margin-right: 3em
   }
+
+  .gps {
+    width: 150px;
+    margin-bottom: 1em;
+    .clipboard-content {
+      // less padding since scroll not needed
+      padding-bottom: 8px;
+    }
+  }
 `
 
 const Imgs = styled.div`
   img {
-    height: 175px;
+    height: 300px;
     width: auto;
   }
 `
@@ -284,4 +313,36 @@ const VSN = styled.div`
   padding: 0;
   background: #b3b3b3;
 `
+
+
+
+
+/* todo(nc): propose new meta tables:
+function SimpleMetaTable(props) {
+  const {keys, data} = props
+  return (
+    <table className="simple key-value">
+      <tbody>
+        {keys.map((key) => {
+          return (
+            <tr key={key}>
+              <td>{key.replace(/_/g, ' ').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}</td>
+              <td>{(data[key] || '-').toString() || '-'}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
+}
+
+<SimpleMetaTable
+  keys={metaCols1}
+  data={{...manifest, ...meta}}
+/>
+<SimpleMetaTable
+  keys={metaCols2}
+  data={{...manifest, ...meta}}
+/>
+*/
 

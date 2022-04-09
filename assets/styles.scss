@@ -200,9 +200,8 @@ button.delete {color: #912341; }
 .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 
-.flex-nowrap {
-  flex-shrink: 0;
-}
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-shrink: 0; }
 
 
 .font-normal {font-weight: 400; }
