@@ -400,28 +400,37 @@ export async function getLatestAudio(node: string) {
 
 
 type RecentRecArgs = {
-  node: string,
-  name?: string,
+  node: string
+  name?: string
   sensor?: string
+  start?: string // default: '-4d'
+  tail?: number  // default: 1
 }
 
-export async function getRecentRecord(args: RecentRecArgs) : Promise<Record> {
-  const {node, name, sensor} = args
+export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
+  const {node, name, sensor, start = '-4d', tail = null} = args
 
   const data = await getData({
-    start: '-4d',
+    start,
     filter: {
       node,
       ...(name && {name}),
       ...(sensor && {sensor})
     },
-    tail: 1
+    ...(tail && {tail})
   })
 
-  // take latest entry in event that the VSN changed
+  // take sort in event that the VSN or id changed
   return data.sort((a, b) =>
-    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  ).shift()
+    new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  )
+}
+
+
+export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> {
+  const d = await getData({start: '-6m', filter: {name: 'sys.gps.*', vsn}, tail: 1})
+  const [lat, lon] = [d.find(o => o.name === 'sys.gps.lat').value, d.find(o => o.name === 'sys.gps.lon').value]
+  return {lat, lon}
 }
 
 

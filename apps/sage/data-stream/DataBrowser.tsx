@@ -69,7 +69,7 @@ const columns = [{
     if (val.includes('.jpg')) {
       return (
         <div className="flex column">
-          <img src={val} width="550"/>
+          <img src={val} style={{maxWidth: '760px'}} />
           <div className="flex justify-center">
             <Button startIcon={<DownloadIcon />} href={val}>
               {val.split('/').pop()}
@@ -78,8 +78,7 @@ const columns = [{
         </div>
       )
     }
-
-    if (val.includes('.flac')) {
+    else if (val.includes('.flac')) {
       return (
         <div className="flex column">
           <Audio dataURL={val}/>
@@ -140,8 +139,8 @@ function RangeIndicator(props: RangeIndicatorProps) {
     <span>
       {new Date(end).toLocaleString()} to {' '}
       {['m', 'h'].includes(unit) ?
-          new Date(start).toLocaleTimeString() :
-          new Date(start).toLocaleString()
+        new Date(start).toLocaleTimeString() :
+        new Date(start).toLocaleString()
       }
     </span>
   )
@@ -199,6 +198,8 @@ const getStartTime = (range: Unit) => {
   let diff
   if (['m', 'h', 'd'].includes(range))
     diff = 1
+  else if (range == '7d')
+    diff = 7
   else if (range == '12h')
     diff = 12
 
@@ -211,9 +212,12 @@ const getStartTime = (range: Unit) => {
     datetime.setHours(datetime.getHours() - diff)
   else if (range == 'd')
     datetime.setDate(datetime.getDate() - diff)
-  else
-    throw `getStartTime: range (window) not valid.  was window=${range}`
-
+  else if (range == '7d')
+    datetime.setDate(datetime.getDate() - diff)
+  else {
+    alert(`getStartTime: range (window) not valid.  was window=${range}`)
+    return
+  }
 
   return new Date(datetime).toISOString()
 }
@@ -225,6 +229,8 @@ const getEndTime = (start: string, range: Unit) => {
   let diff
   if (['m', 'h', 'd'].includes(range))
     diff = 1
+  else if (range == '7d')
+    diff = 7
   else if (range == '12h')
     diff = 12
 
@@ -236,8 +242,12 @@ const getEndTime = (start: string, range: Unit) => {
     endTime.setHours(startTime.getHours() + diff)
   else if (range == 'd')
     endTime.setDate(startTime.getDate() + diff)
-  else
-    throw `getEndTime: range (window) not valid.  was window=${range}`
+  else if (range == '7d')
+    endTime.setDate(startTime.getDate() + diff)
+  else {
+    alert(`getEndTime: range (window) not valid.  was window=${range}`)
+    return
+  }
 
   return new Date(endTime).toISOString()
 }
@@ -390,7 +400,14 @@ export default function DataPreview() {
         .then((data) => {
           data = (data || [])
 
-          // limit amount of data
+          // experimental charts
+          if (plugin && node && !isMediaApp(app) && data.length > 0) {
+            setChart(data)
+          } else {
+            setChart(null)
+          }
+
+          // limit amount of data for table
           const total = data.length
           const limit = 100000
           if (total > limit) {
@@ -403,13 +420,6 @@ export default function DataPreview() {
           data = data
             .map((o, i) => ({...o, ...o.meta, rowID: i}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-
-          // experimental charts
-          if (plugin && node && !isMediaApp(app) && data.length > 0) {
-            setChart(data)
-          } else {
-            setChart(null)
-          }
 
           setData(data)
 

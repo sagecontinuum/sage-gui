@@ -11,6 +11,7 @@ import { relTime, isOldData} from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'
 import config from '/config'
+import SparkLine from './SparkLine'
 
 const dataBrowser = config.dataBrowserURL
 
@@ -26,20 +27,31 @@ type Props = {
     format?: (val: string) => string
     linkParams?: (data: BH.Record) => string
   }[]
-  className?: string
+  showSparkline?: boolean
+  className?: string,
+}
+
+const getStartTime = () => {
+  let datetime = new Date()
+  datetime.setDate(datetime.getDate() - 1)
+
+  return new Date(datetime).toISOString()
 }
 
 
-
 export default memo(function RecentDataTable(props: Props) {
-  const {items, className} = props
+  const {items, showSparkline = true, className} = props
 
   const {loading, setLoading} = useProgress()
   const [recentData, setRecentData] = useState(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )
+  const [sLines, setSLines] = useState(
+    items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
+  )
   const [error, setError] = useState(null)
 
+  const start = showSparkline ? getStartTime() : null
 
   useEffect(() => {
     setLoading(true)
@@ -48,14 +60,18 @@ export default memo(function RecentDataTable(props: Props) {
     for (const item of items) {
       const {label, query} = item
 
-      const p = BH.getRecentRecord(query)
+
+      const q = start ? {...query, start} : query
+      const p = BH.getRecentRecord(q)
         .then(data => {
-          if (!data) {
+          const d = data.pop()
+          if (!d) {
             setRecentData(prev => ({...prev, [label]: null}))
             return
           }
 
-          setRecentData(prev => ({...prev, [label]: data}))
+          setRecentData(prev => ({...prev, [label]: d}))
+          setSLines(prev => ({...prev, [label]: data}))
         }).catch((err) => {
           setRecentData(prev => ({...prev, [label]: null}))
           setError(err)
@@ -75,8 +91,9 @@ export default memo(function RecentDataTable(props: Props) {
           <thead>
             <tr>
               <th></th>
-              <th>Time</th>
+              <th>Latest Time</th>
               <th>Value</th>
+
             </tr>
           </thead>
           <tbody>
@@ -108,16 +125,28 @@ export default memo(function RecentDataTable(props: Props) {
                     {value == 'loading' &&
                       <span className="muted">loading...</span>
                     }
-                    {(value && value != 'loading' && format) && format(value)}
+                    {(value && value != 'loading' && format) ? format(value) : (value != 'loading' && value)}
                     {value == null &&
                       <span className="muted">Not available</span>
                     }
                   </td>
-                  <td>
-                    {data && linkParams && data.value != 'loading' &&
-                      <a href={`${dataBrowser}?${linkParams(data)}`}>more...</a>
-                    }
-                  </td>
+                  {!showSparkline &&
+                    <td>
+                      {data && linkParams && data.value != 'loading' &&
+                        <a href={`${dataBrowser}?${linkParams(data)}`}>more...</a>
+                      }
+                    </td>
+                  }
+
+                  {showSparkline &&
+                    <td>
+                      {data && linkParams && data.value != 'loading' &&
+                        <a href={`${dataBrowser}?${linkParams(data)}`}>
+                          <SparkLine data={sLines[label]}/>
+                        </a>
+                      }
+                    </td>
+                  }
                 </tr>
               )
             })}

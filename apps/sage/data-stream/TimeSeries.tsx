@@ -12,6 +12,8 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 
+import Button from '@mui/material/Button'
+
 import { Chart as ChartJS,
   Tooltip,
   Legend,
@@ -83,7 +85,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
   Object.keys(byName).forEach((name) => {
     const namedData = byName[name]
 
-    const grouped = groupBy(namedData, 'sensor')
+    const grouped = groupBy(namedData, 'meta.sensor')
     const hasSensors = Object.keys(grouped)[0] != 'undefined'
 
     Object.keys(grouped)
@@ -99,7 +101,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
           pointRadius: opts.showPoints ? 3 : 0,
           showLine: opts.showLines,
           borderColor: schemeCategory10[idx % 10],
-          borderWidth: 2
+          borderWidth: 1,
         })
 
         idx += 1
@@ -181,6 +183,7 @@ export default function TimeSeries(props) {
 
   const chartRef = useRef()
   const [chart, setChart] = useState(null)
+  const [disableDownsampling, setDisableDownsampling] = useState(false)
 
   useEffect(() => {
     let datasets
@@ -190,7 +193,6 @@ export default function TimeSeries(props) {
       datasets = getSumData(data, opts)
     else
       datasets = getLineDatasets(data, opts)
-
 
     let config
     if (opts.chartType == 'frequency') {
@@ -204,6 +206,7 @@ export default function TimeSeries(props) {
         data: {...datasets}
       }
     } else {
+      lineConfig.options.plugins.decimation.enabled = !disableDownsampling
       config = {
         ...lineConfig,
         data: { datasets }
@@ -214,13 +217,9 @@ export default function TimeSeries(props) {
       chart.destroy()
     }
 
-    const c = new ChartJS(
-      chartRef.current,
-      config
-    )
-
+    const c = new ChartJS(chartRef.current, config)
     setChart(c)
-  }, [data, opts])
+  }, [data, opts, disableDownsampling])
 
 
   const handleOpts = (evt, option: string) => {
@@ -233,16 +232,24 @@ export default function TimeSeries(props) {
   return (
     <Root>
       <ChartContainer>
-        <canvas ref={chartRef}></canvas>
+      <canvas ref={chartRef}></canvas>
       </ChartContainer>
 
 
       <Ctrls className="flex items-center justify-between">
         <div>
-          {data.length >= DOWNSAMPLE_THRESHOLD &&
-            <span>
-              Note: data in this chart has been downsampled using <a href="http://hdl.handle.net/1946/15343" target="_blank">LTTB</a>.
-            </span>
+          {data.length >= DOWNSAMPLE_THRESHOLD && chart &&
+            <DownsampleOpts>
+              <Button onClick={() => setDisableDownsampling(prev => !prev)}>
+                {!disableDownsampling ? 'Disable' : 'Enable'} Downsampling
+              </Button>
+
+              {!disableDownsampling &&
+                <span>
+                  Note: data in this chart has been downsampled using <a href="http://hdl.handle.net/1946/15343" target="_blank">LTTB</a>.
+                </span>
+              }
+            </DownsampleOpts>
           }
         </div>
 
@@ -301,6 +308,13 @@ const Root = styled.div`
 
 const ChartContainer = styled.div`
 
+`
+
+const DownsampleOpts = styled.div`
+  button {
+
+    margin: 0 5px 2px 0;
+  }
 `
 
 const Ctrls = styled.div`

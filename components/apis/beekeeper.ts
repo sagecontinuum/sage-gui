@@ -79,7 +79,7 @@ export async function getNodes() {
 }
 
 
-export async function getNode(id: string) : Promise<State[]> {
+export async function getNode(id: string) : Promise<State> {
   const data = await get(`${API_URL}/state/${id}`)
   return data.data
 }

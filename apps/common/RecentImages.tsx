@@ -50,7 +50,7 @@ export default function RecentImages(props: Props) {
 
 
   return (
-    <Root className={horizontal ? 'flex horizontal' : ''}>
+    <Root className={horizontal ? 'flex horizontal flex-wrap' : ''}>
       {images &&
         BH.cameraOrientations.map(pos => {
           if (!images[pos])
