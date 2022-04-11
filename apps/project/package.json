@@ -16,6 +16,8 @@
     "@mui/lab": "^5.0.0-alpha.64",
     "@mui/material": "^5.5.0",
     "@mui/styles": "^5.5.0",
+    "chart.js": "^3.7.1",
+    "chartjs-adapter-date-fns": "^2.0.0",
     "leaflet": "^1.7.1",
     "lodash": "^4.17.21",
     "mapbox-gl": "^2.6.1",
