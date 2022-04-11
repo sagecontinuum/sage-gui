@@ -29,14 +29,14 @@ export default function RecentData(props: Props) {
             sensor: 'bme680'
           },
           format: v => `${v}°C`,
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
         }, {
           label: 'Raingauge',
           query: {
             node: node.toLowerCase(),
             name: 'env.raingauge.event_acc'
           },
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
+          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
         }]}
       />
 

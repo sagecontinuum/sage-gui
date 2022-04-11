@@ -36,7 +36,7 @@ const LeftDataTable = ({node, className}) =>
         sensor: 'bme680'
       },
       format: v => `${v}°C`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
     }, {
       label: 'Humidity',
       query: {
@@ -45,7 +45,7 @@ const LeftDataTable = ({node, className}) =>
         sensor: 'bme680'
       },
       format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
     }, {
       label: 'Pressure',
       query: {
@@ -54,7 +54,7 @@ const LeftDataTable = ({node, className}) =>
         sensor: 'bme680'
       },
       format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=12h`
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
     }]}
     className={className}
   />
@@ -67,7 +67,7 @@ const RightDataTable = ({node, className}) =>
         node:  node.toLowerCase(),
         name: 'env.raingauge.event_acc'
       },
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=12h`
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
     }]}
     className={className}
   />
