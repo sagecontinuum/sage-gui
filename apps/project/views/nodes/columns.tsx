@@ -70,9 +70,16 @@ const columns = [ {
       {obj.node_type != 'Blade' ?
         <Link to={`/node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
       }
-      {obj.lat && obj.lng && <MapIcon fontSize="small"/> }
+      {obj.lat && obj.lng &&
+        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
+          {obj.hasStaticGPS ?
+            <MapIcon fontSize="small"/> :
+            <MapIcon fontSize="small" style={{color: "#36b8ff"}}/>
+          }
+        </LiveGPSDot>
+      }
     </NodeCell>
-}, {
+},  {
   id: 'id',
   label: 'ID',
   width: '100px',
@@ -90,8 +97,8 @@ const columns = [ {
   id: 'gps',
   label: 'GPS',
   format: (val, obj) => {
-    if (!obj || !obj.gps_lat || !obj.gps_lon) return '-'
-    return `${obj.gps_lat}, ${obj.gps_lon}`
+    if (!obj || !obj.lat || !obj.lng) return '-'
+    return `${obj.lat}, ${obj.lng}`
   }
 }, {
   id: 't_sensors',

@@ -6,6 +6,7 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '/components/NavBar'
+import Links from './views/DataLinks'
 import Nodes from './views/nodes/Nodes'
 import Node from '../common/node/Node'
 
@@ -20,12 +21,13 @@ import settings from './settings'
 
 const NavMenu = () =>
   <NavItems>
-    <li><NavLink to="/nodes">Nodes</NavLink></li>
+    <li><NavLink to="nodes">Nodes</NavLink></li>
+    <li><NavLink to="data-links">Data</NavLink></li>
   </NavItems>
 
 
 const LogoPlaceHolder = () =>
-  <Logo>{settings.project || settings.focus}</Logo>
+  <Logo>{settings.logo || settings.project || settings.focus}</Logo>
 
 
 
@@ -36,8 +38,9 @@ export default function App() {
         <BrowserRouter>
           <CssBaseline/>
           <NavBar
-            logo={settings.project?.toLowerCase() != 'sage' ? <LogoPlaceHolder/> : false}
+            logo={<LogoPlaceHolder/>}
             menu={<NavMenu />}
+            hasDocsLink
           />
 
           <Container>
@@ -46,6 +49,7 @@ export default function App() {
                 <Route path="/" element={<Navigate to="nodes" replace />} />
 
                 <Route path="nodes" element={<Nodes/>} />
+                <Route path="data-links" element={<Links/>} />
                 <Route path="node/:node" element={<Node />} />
 
                 <Route path="*" element={<NotFound />} />

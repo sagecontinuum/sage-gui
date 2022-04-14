@@ -15,11 +15,14 @@ import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import {queryData, filterData, getFilterState} from '/apps/common/statusDataUtils'
+import {queryData, filterData, getFilterState, mergeMetrics} from '/apps/common/statusDataUtils'
 
 import * as BK from '/components/apis/beekeeper'
+import * as BH from '/components/apis/beehive'
+
 import settings from '../../settings'
 
+const TIME_OUT = 10000
 
 const getOptions = (data: object[], field: string) : Option[] =>
   [...new Set(data.map(obj => obj[field])) ]
@@ -94,15 +97,47 @@ export default function Nodes() {
 
   // load data
   useEffect(() => {
-    setLoading(true)
 
-    getProjectNodes()
-      .then(data => {
-        setData(data)
+
+    let done = false
+    let handle
+
+    // get latest metrics
+    function ping() {
+      handle = setTimeout(async () => {
+        if (done) return
+        const results = await Promise.allSettled([BH.getAdminData()])
+        const [ metrics ] = results.map(r => r.value)
+
+        setData(mergeMetrics(dataRef.current, metrics, null, null))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
-      })
-      .catch(err => setError(err))
+
+        // recursive
+        ping()
+      }, TIME_OUT)
+    }
+
+    setLoading(true)
+    const proms = [getProjectNodes(), BH.getAdminData()]
+    Promise.allSettled(proms)
+      .then((results) => {
+        if (done) return
+        const [state, metrics] = results.map(r => r.value)
+
+        setData(state)
+
+        const allData = mergeMetrics(state, metrics, null, null)
+        setData(allData)
+        setLastUpdate(new Date().toLocaleTimeString('en-US'))
+        setLoading(false)
+        ping()
+      }).catch(err => setError(err))
       .finally(() => setLoading(false))
+
+    return () => {
+      done = true
+      clearTimeout(handle)
+    }
   }, [])
 
 
