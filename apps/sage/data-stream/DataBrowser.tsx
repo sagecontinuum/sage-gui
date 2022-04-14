@@ -29,7 +29,7 @@ import TimePicker  from '@mui/lab/TimePicker'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
 
-import { capitalize } from 'lodash'
+import { capitalize, lastIndexOf } from 'lodash'
 
 import Clipboard from '/components/utils/Clipboard'
 import Sidebar from '../data/DataSidebar'
@@ -37,6 +37,11 @@ import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 
+
+const exts = {
+  image: ['.jpg', '.jpeg', '.png', '.gif'],
+  video: ['.mp4']
+}
 
 const defaultPlugin = 'plugin-iio:0.4.5'
 
@@ -66,6 +71,8 @@ const columns = [{
     const isInOSN = /^https:\/\/storage.sagecontinuum.org/i.test(val)
     if (!isInOSN) return val
 
+    const suffix = val.slice(val.lastIndexOf('.'))
+
     if (val.includes('.jpg')) {
       return (
         <div className="flex column">
@@ -82,6 +89,22 @@ const columns = [{
       return (
         <div className="flex column">
           <Audio dataURL={val}/>
+          <div className="flex justify-center">
+            <Button startIcon={<DownloadIcon />} href={val}>
+              {val.split('/').pop()}
+            </Button>
+          </div>
+        </div>
+      )
+    } else if (exts.video.includes(suffix)) {
+      return (
+        <div className="flex column">
+          {/*
+          <video style={{maxWidth: '1280px'}} controls>
+            <source src={val} type="video/mp4" />
+            Your browser does not support video
+          </video>
+          */}
           <div className="flex justify-center">
             <Button startIcon={<DownloadIcon />} href={val}>
               {val.split('/').pop()}
@@ -166,7 +189,7 @@ const getCurlCmd = (query: object) =>
 
 function getAppMenus() {
   return BH.getData({
-    start: `-12h`,
+    start: `-1d`,
     tail: 1,
     filter: {
       plugin: `.*`
@@ -254,8 +277,11 @@ const getEndTime = (start: string, range: Unit) => {
 
 
 const isMediaApp = (app) =>
-  (app || '').match(/image|audio/g)
+  (app || '').match(/image|audio|video|mobotix/g)
 
+
+const isVideoApp = (app) =>
+  (app || '').match(/video/g)
 
 const initFilterState = {
   apps: [defaultPlugin],
@@ -646,7 +672,7 @@ export default function DataPreview() {
               rows={data}
               pagination
               page={page}
-              rowsPerPage={isMediaApp(app) ? 20 : 100}
+              rowsPerPage={isVideoApp(app) ? 20 : (isMediaApp(app) ? 20 : 100)}
               limit={data.length} //todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">

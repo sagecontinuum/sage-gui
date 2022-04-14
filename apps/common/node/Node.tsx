@@ -3,7 +3,9 @@ import styled from 'styled-components'
 import { useParams, useLocation } from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
-import AdminPanelIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
+import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 import wsnode from 'url:/assets/wsn-closed.png'
 
@@ -29,7 +31,7 @@ const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 const LeftDataTable = ({node, className}) =>
   <RecentDataTable
     items={[{
-      label: 'Temperature',
+      label: 'Temp',
       query: {
         node: node.toLowerCase(),
         name: 'env.temperature',
@@ -55,6 +57,15 @@ const LeftDataTable = ({node, className}) =>
       },
       format: v => `${v}`,
       linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
+    }, {
+      label: 'Gas',
+      query: {
+        node:  node.toLowerCase(),
+        name: 'iio.in_resistance_input',
+        sensor: 'bme680'
+      },
+      format: v => `${v}`,
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
     }]}
     className={className}
   />
@@ -68,6 +79,13 @@ const RightDataTable = ({node, className}) =>
         name: 'env.raingauge.event_acc'
       },
       linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+    }, {
+      label: 'Air quality',
+      query: {
+        node:  node.toLowerCase(),
+        name: 'env.air_quality.conc'
+      },
+      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=7d`
     }]}
     className={className}
   />
@@ -168,10 +186,13 @@ export default function NodeView() {
         <LeftSide className="flex-grow">
           <div className="flex items-center justify-between">
             <h1>Node {vsn} | <small className="muted">{node}</small></h1>
-            <div className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
-              {status}
-              {manifest && <a href={`https://admin.sagecontinuum.org/node/${manifest.node_id}`}><AdminPanelIcon /></a>}
-            </div>
+            <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
+              <Button href={manifest ? `https://admin.sagecontinuum.org/node/${manifest.node_id}` : ''} target="_blank">
+                <span className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
+                  {status}
+                </span>
+              </Button>
+            </Tooltip>
           </div>
           <div className="meta-table-top">
             <ManifestTable
@@ -294,7 +315,9 @@ const RightSide = styled.div`
 const WSN_VIEW_WIDTH = 400
 
 const WSNView = styled.div`
-  position: relative;
+  position: sticky;
+  top: 60px;
+
 
   img {
     padding: 50px;

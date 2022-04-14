@@ -111,6 +111,6 @@ export default function SparkLine(props: Props) {
 const Root = styled.div`
   canvas {
     max-height: 50px;
-    max-width: 150px;
+    max-width: 175px;
   }
 `

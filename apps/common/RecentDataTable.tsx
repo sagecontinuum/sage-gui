@@ -85,7 +85,7 @@ export default memo(function RecentDataTable(props: Props) {
 
 
   return (
-    <div>
+    <Root>
       {recentData &&
         <table className={`simple key-value ${className}`}>
           <thead>
@@ -93,7 +93,6 @@ export default memo(function RecentDataTable(props: Props) {
               <th></th>
               <th>Latest Time</th>
               <th>Value</th>
-
             </tr>
           </thead>
           <tbody>
@@ -111,7 +110,7 @@ export default memo(function RecentDataTable(props: Props) {
                       <a href={`${dataBrowser}/ontology/${item.query.name}`}><HelpIcon /></a>
                     </Tooltip>
                   </td>
-                  <td className={isOldData(timestamp) ? 'failed font-bold' : 'muted'}>
+                  <td className={isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap'}>
                     {data &&
                       <Tooltip title={new Date(timestamp).toLocaleString()} placement="right">
                         <span>
@@ -157,9 +156,13 @@ export default memo(function RecentDataTable(props: Props) {
       {error &&
         <ErrorMsg>{error.message}</ErrorMsg>
       }
-    </div>
+    </Root>
   )
 }, (prev, next) => prev.items != next.items)
+
+const Root = styled.div`
+
+`
 
 const HelpIcon = styled(QuestionMark)`
   position: absolute;

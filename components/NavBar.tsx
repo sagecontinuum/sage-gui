@@ -25,14 +25,15 @@ import {version} from '../package.json'
 
 
 type Props = {
-  hasSignIn?: boolean
   menu?: ReactNode
   logo?: ReactNode
+  hasSignIn?: boolean
+  hasDocsLink?: boolean
 }
 
 export default function NavBar(props: Props) {
   const {pathname} = useLocation()
-  const { menu, hasSignIn, logo} = props
+  const { menu, hasSignIn, hasDocsLink, logo} = props
 
 
   const [signingOut, setSigningOut] = useState(false)
@@ -70,8 +71,9 @@ export default function NavBar(props: Props) {
 
       <Spacer/>
 
-      {hasSignIn &&
-        <div className="flex items-center gap">
+
+      <div className="flex items-center gap">
+        {hasDocsLink &&
           <NavItems>
             <li>
               <a
@@ -84,39 +86,40 @@ export default function NavBar(props: Props) {
               </a>
             </li>
           </NavItems>
+        }
 
-          {username &&
-            <DropdownMenu
-              label={
-                <div className="flex items-center">
-                  <AccountIcon />&nbsp;{username}
-                </div>
-              }
-              caret={false}
-              menu={
-                <DropDown>
-                  <MenuItem onClick={handleSignOut} disableRipple>
-                    {signingOut ?
-                      <><Progress size={20}/>&nbsp;Signing out...</> :
-                      <><ExitIcon/>&nbsp;Sign out</>
-                    }
-                  </MenuItem>
-                </DropDown>
-              }
-            />
-          }
+        {hasSignIn && username &&
+          <DropdownMenu
+            label={
+              <div className="flex items-center">
+                <AccountIcon />&nbsp;{username}
+              </div>
+            }
+            caret={false}
+            menu={
+              <DropDown>
+                <MenuItem onClick={handleSignOut} disableRipple>
+                  {signingOut ?
+                    <><Progress size={20}/>&nbsp;Signing out...</> :
+                    <><ExitIcon/>&nbsp;Sign out</>
+                  }
+                </MenuItem>
+              </DropDown>
+            }
+          />
+        }
 
-          {!username && pathname != '/login' &&
-            <Button
-              href={process.env.NODE_ENV == 'development' ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
-              variant="outlined"
-              color="primary"
-            >
-              Sign In
-            </Button>
-          }
-        </div>
-      }
+        {hasSignIn && !username && pathname != '/login' &&
+          <Button
+            href={process.env.NODE_ENV == 'development' ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
+            variant="outlined"
+            color="primary"
+          >
+            Sign In
+          </Button>
+        }
+      </div>
+
     </Root>
   )
 }
