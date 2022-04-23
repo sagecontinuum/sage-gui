@@ -3,15 +3,21 @@ import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
+import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
+import ErrorIcon from '@mui/icons-material/ErrorRounded'
 import Badge from '@mui/material/Badge'
 import MapIcon from '@mui/icons-material/RoomOutlined'
-import Chip from '@material-ui/core/Chip'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '/components/utils/units'
-import config from '/config'
 import settings from '../../settings'
+import config from '/config'
 
+
+const FAIL_THRES = settings.elapsedThresholds.fail
+const WARNING_THRES = settings.elapsedThresholds.warning
+
+const {additional_sensors} = config
 
 const dateOpts = {
   month: 'long',
@@ -57,10 +63,22 @@ const FSItem = styled.div`
   width: 40px;
 `
 
-const columns = [ {
+const columns = [{
+  id: 'status',
+  label: 'Status',
+  format: (val) => {
+
+    if (val == 'reporting')
+      return <CheckIcon className="success status-icon" />
+    else if (val == 'not reporting')
+      return <ErrorIcon className="failed status-icon" />
+    else
+      return <InactiveIcon className="inactive status-icon" />
+  },
+  width: '1px'
+}, {
   id: 'node_type',
-  label: 'Type',
-  hide: false
+  label: 'Type'
 }, {
   id: 'vsn',
   label: 'VSN',
@@ -90,6 +108,33 @@ const columns = [ {
 }, {
   id: 'focus',
   label: 'Focus'
+}, {
+  id: 'elapsedTimes',
+  label: 'Last Updated',
+  format: (val) => {
+    if (!val) return '-'
+
+    return Object.keys(val)
+      .map(host =>
+        <div key={host}>
+          {host}: <b className={getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')}>
+            {utils.msToTime(val[host])}
+          </b>
+        </div>
+      )
+  },
+  hide: true
+}, {
+  id: 'uptimes',
+  label: 'Uptime',
+  format: (val) => {
+    if (!val) return '-'
+
+    return Object.keys(val).map(host =>
+      <div key={host}>{utils.prettyTime(val[host])}</div>
+      )
+    },
+    hide: true
 }, {
   id: 'location',
   label: 'Location',
@@ -157,7 +202,17 @@ const columns = [ {
   }
 }, {
   id: 'additional_sensors',
-  label: 'Addional Sensors'
+  label: 'Additional Sensors',
+  format: (_, obj) => {
+    const {vsn} = obj
+    const sensors = additional_sensors[vsn]
+    if (!sensors)
+      return '-'
+
+    return <SensorList>
+      {sensors.map(name => <li key={name}>{name}</li>)}
+    </SensorList>
+  }
 }, {
   id: 'registration_event',
   label: 'Registered',

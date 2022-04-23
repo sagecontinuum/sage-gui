@@ -17,4 +17,28 @@ export default  {
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
 
   docs: 'https://docs.sagecontinuum.org/docs',
+
+  // temp solution for additonal meta
+  additional_sensors: {
+    'W022': [
+      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
+      'ORTEC digiBASE PMT with NaI detector'
+    ],
+    'W01A': [
+      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
+      'ORTEC digiBASE PMT with NaI detector'
+    ],
+    'W01B': [
+      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
+      'ORTEC digiBASE PMT with NaI detector'
+    ],
+    'W01C': [
+      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
+      'ORTEC digiBASE PMT with NaI detector'
+    ],
+    'V008': [
+      'Mobotix M16'
+    ]
+  }
+
 }
