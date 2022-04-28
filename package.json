@@ -1,6 +1,6 @@
 {
   "name": "sage-gui",
-  "version": "1.10.1-pre.11",
+  "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
     "start": "npm start -w sage",

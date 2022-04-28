@@ -109,7 +109,7 @@ export default function Audio(props: Props) {
     <Root className={`flex column ${className}`}>
       {/* fallback to html audio element (if CORS is not configured) */}
       {vizError && (meta?.value || dataURL) &&
-        <HtmlAudio>
+      <HtmlAudio>
           <audio
             controls
             src={meta?.value || dataURL}
@@ -120,10 +120,10 @@ export default function Audio(props: Props) {
       }
 
 
-      <div style={(meta && isOldData(meta.timestamp)) ? {border: '10px solid red'} : {}}>
+      <div style={(meta && isOldData(meta.timestamp)) ? {} : {}}>
         <div className="flex justify-between">
           <div></div>
-          {!vizError &&
+          {!vizError && (meta || dataURL)  &&
             <div className="flex items-center justify-end gap">
               {!isPlaying &&
                 <Button

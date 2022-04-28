@@ -107,7 +107,7 @@ export default memo(function RecentDataTable(props: Props) {
                   <td>
                     {label}
                     <Tooltip title={<>{item.query.name}<br/>{item.query.sensor ? <div>{item.query.sensor}</div> : ''}<small>(click for description)</small></>} placement="left">
-                      <a href={`${dataBrowser}/ontology/${item.query.name}`}><HelpIcon /></a>
+                      <a href={`${dataBrowser}/ontology/${item.query.name}`} target="_blank"><HelpIcon /></a>
                     </Tooltip>
                   </td>
                   <td className={isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap'}>
@@ -140,7 +140,7 @@ export default memo(function RecentDataTable(props: Props) {
                   {showSparkline &&
                     <td>
                       {data && linkParams && data.value != 'loading' &&
-                        <a href={`${dataBrowser}?${linkParams(data)}`}>
+                        <a href={`${dataBrowser}?${linkParams(data)}`} target="_blank">
                           <SparkLine data={sLines[label]}/>
                         </a>
                       }

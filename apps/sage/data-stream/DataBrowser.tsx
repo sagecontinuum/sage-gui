@@ -37,6 +37,9 @@ import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 
+// support custom viewers?
+// import SmokeMap from './viewers/SmokeMap'
+
 
 const exts = {
   image: ['.jpg', '.jpeg', '.png', '.gif'],
@@ -282,6 +285,13 @@ const isMediaApp = (app) =>
 
 const isVideoApp = (app) =>
   (app || '').match(/video/g)
+
+const isAudioApp = (app) =>
+  (app || '').match(/audio/g)
+
+const isSmokeApp = (app) =>
+  (app || '').match(/smoke/g)
+
 
 const initFilterState = {
   apps: [defaultPlugin],
@@ -644,9 +654,13 @@ export default function DataPreview() {
           </div>
 
           <br />
-          {chart &&
+          {chart && !isSmokeApp(app) &&
             <TimeSeries data={chart} />
           }
+
+          {/*chart && isSmokeApp(app) &&
+            <SmokeMap data={chart} />
+          */}
 
           {lastN &&
             <Alert severity="info">
@@ -672,7 +686,7 @@ export default function DataPreview() {
               rows={data}
               pagination
               page={page}
-              rowsPerPage={isVideoApp(app) ? 20 : (isMediaApp(app) ? 20 : 100)}
+              rowsPerPage={isAudioApp(app) ? 10 : (isMediaApp(app) ? 20 : 100)}
               limit={data.length} //todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">

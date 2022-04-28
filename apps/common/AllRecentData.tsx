@@ -11,6 +11,8 @@ import type {Manifest} from '/components/apis/beekeeper'
 type Props = {
   node: string
   manifest: Manifest
+  disableData?: boolean
+  disableAudio?: boolean
 }
 
 export default function RecentData(props: Props) {
@@ -19,34 +21,42 @@ export default function RecentData(props: Props) {
   return (
     <Root className="flex column">
 
-      <h2>Recent Data</h2>
-      <RecentDataTable
-        items={[{
-          label: 'Temperature',
-          query: {
-            node: node.toLowerCase(),
-            name: 'env.temperature',
-            sensor: 'bme680'
-          },
-          format: v => `${v}°C`,
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-        }, {
-          label: 'Raingauge',
-          query: {
-            node: node.toLowerCase(),
-            name: 'env.raingauge.event_acc'
-          },
-          linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-        }]}
-      />
+      {!props.disableData &&
+        <>
+          <h2>Recent Data</h2>
+          <RecentDataTable
+            items={[{
+              label: 'Temperature',
+              query: {
+                node: node.toLowerCase(),
+                name: 'env.temperature',
+                sensor: 'bme680'
+              },
+              format: v => `${v}°C`,
+              linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+            }, {
+              label: 'Raingauge',
+              query: {
+                node: node.toLowerCase(),
+                name: 'env.raingauge.event_acc'
+              },
+              linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+            }]}
+          />
+        </>
+      }
 
       <h2>Recent Images</h2>
       <RecentImages node={node}/>
 
-      <h2>Recent Audio</h2>
-      <Audio node={node} />
-      {manifest?.shield === false &&
-        <p className="muted">This node does not support audio</p>
+      {!props.disableAudio &&
+        <>
+          <h2>Recent Audio</h2>
+          <Audio node={node} />
+          {manifest?.shield === false &&
+            <p className="muted">This node does not support audio</p>
+          }
+        </>
       }
     </Root>
   )

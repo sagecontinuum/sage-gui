@@ -22,7 +22,7 @@ import * as BH from '/components/apis/beehive'
 
 import settings from '../../settings'
 
-const TIME_OUT = 10000
+const TIME_OUT = 5000
 
 const getOptions = (data: object[], field: string) : Option[] =>
   [...new Set(data.map(obj => obj[field])) ]
@@ -211,14 +211,11 @@ export default function Nodes() {
   return (
     <Root>
       <Overview className="flex">
-        {/*
-        <ChartsContainer className="flex column" >
-          filtered && !selected?.length &&
-            <ChartsTitle>
-              {filtered.length} Node{filtered.length == 1 ? '' : 's'}
-            </ChartsTitle>
-        </ChartsContainer>
-        */}
+        {filtered && !selected?.length &&
+          <Title>
+            {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
+          </Title>
+        }
 
         {filtered &&
           <Map
@@ -325,19 +322,19 @@ const Overview = styled.div`
   border-bottom: 1px solid #f2f2f2;
 `
 
-const ChartsContainer = styled.div`
-  margin: 0px 20px;
-
-`
-
-const ChartsTitle = styled.h2`
-  margin-top: 0;
-  margin-bottom: 36px;
+const Title = styled.h2`
+  margin: .5em;
+  position: absolute;
+  z-index: 1000;
 `
 
 
 const TableContainer = styled.div`
   margin-top: .5em;
+
+  .status-icon {
+    margin: 0 10px;
+  }
 `
 
 const FilterControls = styled.div`
