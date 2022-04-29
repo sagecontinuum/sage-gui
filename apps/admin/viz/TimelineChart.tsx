@@ -27,7 +27,7 @@ const redSpectrum = [
   '#520000'
 ]
 
-export const colors = {
+export const color = {
   noValue: '#efefef',
   green: '#4cc948',
   green1: '#b2dfb0',
@@ -41,6 +41,9 @@ export const colors = {
   orange: '#d49318',
 }
 
+export const colors = {
+  blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c']
+}
 
 function parseData(data) {
   let array = []
@@ -81,7 +84,7 @@ function computeSize(data: Data) : {m: number, n: number} {
 }
 
 
-export function getColorScale(data) {
+export function getColorScale(data, spectrum: string) {
   const [min, max] = getMinMax(data)
 
   const colorScale = d3.scaleLinear()
@@ -198,9 +201,9 @@ function drawChart(
       if (colorCell)
         return colorCell(d.value, d)
       else if (d.value > 0 && d.meta.severity == 'warning')
-        return colors.orange
+        return color.orange
       else
-        return d.value == 0 ? colors.green : colorScale(d.value)
+        return d.value == 0 ? color.green : colorScale(d.value)
     })
     .on('mouseenter', function(evt, data) {
       // showGuide(this, svg, y)
@@ -353,7 +356,7 @@ function appendLegend(ele, chartData) {
 
   const legend = Legend(
     d3.scaleOrdinal(
-      ['pass', '1 issue', '≥10 issues', `${max} issues`], [colors.green, ...redSpectrum]
+      ['pass', '1 issue', '≥10 issues', `${max} issues`], [color.green, ...redSpectrum]
     ), {
       title: 'Legend',
       tickSize: 0

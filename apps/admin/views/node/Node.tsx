@@ -10,7 +10,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as SES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import TimelineChart, {colors} from '../../viz/TimelineChart'
+import TimelineChart, {color} from '../../viz/TimelineChart'
 
 import AllRecentData from '/apps/common/AllRecentData'
 
@@ -47,14 +47,14 @@ function format(label: string, val: string) {
 
 function sanityColor(val, obj) {
   if (val == null)
-    return colors.noValue
+    return color.noValue
 
   if (val <= 0)
-    return colors.green
+    return color.green
   else if (obj.meta.severity == 'warning')
-    return colors.orange
+    return color.orange
   else
-    return colors.red4
+    return color.red4
 }
 
 
@@ -252,13 +252,13 @@ export default function NodeView() {
               endTime={ceilingHour(new Date())}
               colorCell={(val, obj) => {
                 if (val == null)
-                  return colors.noValue
-                return val == 0 ? colors.red4 : colors.green
+                  return color.noValue
+                return val == 0 ? color.red4 : color.green
               }}
               tooltip={(item) =>
                 `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
                 ${item.meta.device}<br>
-                <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
+                <b style="color: ${item.value == 0 ? color.red3 : color.green}">
                   ${item.value == 0 ? 'failed' : `success`}
                 </b>
                 `
@@ -310,7 +310,7 @@ export default function NodeView() {
               <FactoryNotes data={manifest.factory} />
             </>
           }
-          <AllRecentData node={node} vsn={vsn} manifest={manifest} />
+          {vsn && <AllRecentData node={node} vsn={vsn} manifest={manifest} />}
         </Data>
 
       </div>

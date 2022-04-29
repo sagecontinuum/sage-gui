@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import TimelineChart, {colors} from '../../admin/viz/TimelineChart'
+import TimelineChart, {color} from '../../admin/viz/TimelineChart'
 import {GroupedApps} from './JobStatus'
 
 
@@ -8,10 +8,10 @@ const formatJSON = (data) =>
   JSON.stringify(data, null, 4).replace(/,/g, '<br>').replace(/\{|\}|Meta"/g, '')
 
 const colorMap = {
-  'complete': colors.green4,
+  'complete': color.green4,
   'failed': 'rgb(180, 0, 0, 0.5)',
   'running': 'rgb(235, 172, 101)',
-  undefined: colors.noValue
+  undefined: color.noValue
 }
 
 type Props = {
@@ -31,7 +31,7 @@ export default function JobTimeLine(props: Props) {
           endTime={new Date()}
           scaleExtent={[.2, 1000]}
           colorCell={(val, obj) => {
-            if (obj.status === undefined) return colors.noValue
+            if (obj.status === undefined) return color.noValue
             return colorMap[obj.status]
           }}
           tooltip={(obj) => `

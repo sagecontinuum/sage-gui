@@ -1,5 +1,5 @@
 import Tooltip from '@mui/material/Tooltip'
-import {colors} from './TimelineChart'
+import {color} from './TimelineChart'
 
 
 
@@ -11,15 +11,15 @@ const cellPad = 1
 
 export function healthColor(val, obj) {
   if (val == null)
-    return colors.noValue
-  return val == 0 ? colors.red4 : colors.green
+    return color.noValue
+  return val == 0 ? color.red4 : color.green
 }
 
 
 export function sanityColor(val, obj) {
   if (val == null)
-    return colors.noValue
-  return val == 0 ? colors.green : colors.red4
+    return color.noValue
+  return val == 0 ? color.green : color.red4
 }
 
 

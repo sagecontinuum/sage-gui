@@ -10,7 +10,7 @@ import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
 import { useProgress } from '/components/progress/ProgressProvider'
-import TimelineChart, { colors } from '../../viz/TimelineChart'
+import TimelineChart, { color } from '../../viz/TimelineChart'
 
 
 const timeOpts = { hour: '2-digit', minute:'2-digit' }
@@ -35,15 +35,15 @@ const reduceByVSNs = (data: BH.ByMetric, vsns: string[]) =>
 
 const getHealthColor = (val: number) => {
   if (val == null)
-    return colors.noValue
-  return val == 0 ? colors.red4 : colors.green
+    return color.noValue
+  return val == 0 ? color.red4 : color.green
 }
 
 
 const healthTooltip = (item) =>
   `${getDateTimeStr(item.timestamp)}<br>
   Node: ${item.meta.vsn}<br>
-  <b style="color: ${item.value == 0 ? colors.red3 : colors.green}">
+  <b style="color: ${item.value == 0 ? color.red3 : color.green}">
     ${item.value == 0 ? 'failed' : `success`}
   </b><br><br>
   <small class="muted">(click for details)</small>
@@ -53,7 +53,7 @@ const healthTooltip = (item) =>
 const sanityTooltip = (item) =>
   `${getDateTimeStr(item.timestamp)}<br>
   Node: ${item.meta.vsn}<br>
-  <b style="color: ${item.value == 0 ? colors.green : colors.red3}">
+  <b style="color: ${item.value == 0 ? color.green : color.red3}">
   ${item.value == 0 ? 'passed' : (item.meta.severity == 'warning' ? 'warning' : 'failed')}
   </b>
   (${item.value} issue${item.value == 1 ? '' : 's'})<br><br>

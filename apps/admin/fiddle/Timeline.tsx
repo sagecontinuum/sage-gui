@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert'
 
 import * as BH from '/components/apis/beehive'
 
-import TimelineChart, {colors} from '../viz/TimelineChart'
+import TimelineChart, {color} from '../viz/TimelineChart'
 
 
 const node = '000048B02D05A0A4'
@@ -66,14 +66,14 @@ export default function Timeline() {
           yFormat={l => l.split('.').pop()}
           colorCell={(val, obj) => {
             if (val == null)
-              return colors.noValue
+              return color.noValue
 
             if (val <= 0)
-              return colors.green
+              return color.green
             else if (obj.meta.severity == 'warning')
-              return colors.orange
+              return color.orange
             else
-              return colors.red4
+              return color.red4
           }}
           tooltip={(item) =>
             `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
