@@ -68,9 +68,8 @@ function getMinMax(data) {
   return [sorted[0].value, sorted.pop().value]
 }
 
-function computeCanvasHeight(data, cellHeight: number) : number {
-  const rowCount = new Set(data.map(o => o.row)).size
-  return rowCount * cellHeight
+function computeCanvasHeight(yLabels: string[], cellHeight: number) : number {
+  return yLabels.length * cellHeight
 }
 
 function computeSize(data: Data) : {m: number, n: number} {
@@ -136,7 +135,7 @@ function drawChart(
 
 
   const [start, end] = getDomain(data)
-  const height = computeCanvasHeight(data, cellHeight)
+  const height = computeCanvasHeight(yLabels, cellHeight)
 
   const zoom = d3.zoom()
     .filter((evt) => evt.type === 'wheel' ? evt.ctrlKey : true)
