@@ -1,7 +1,7 @@
 
 // no trailing slashes in endpoints, please
 
-export default  {
+const config = {
   // api endpoints
   beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org',
@@ -36,9 +36,22 @@ export default  {
       'OS0-64-GEN2.0 Gen2 64 Below Horizon',
       'ORTEC digiBASE PMT with NaI detector'
     ],
+    'W027': [
+      'Met One ES-642'
+    ],
+    'W038': [
+      'Met One ES-642'
+    ],
     'V008': [
       'Mobotix M16'
     ]
   }
+}
 
+export default config
+
+export const hasMetOne = (vsn) => {
+  const sensors = config.additional_sensors
+  const nodes = Object.keys(sensors).filter(k => sensors[k].includes('Met One ES-642'))
+  return nodes.includes(vsn)
 }

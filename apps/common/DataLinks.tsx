@@ -20,6 +20,8 @@ import RecentData from '/apps/common/AllRecentData'
 import Audio from '/components/viz/Audio'
 import format from '/components/data/dataFormatter'
 
+// todo(nc): remove hardcoded additional sensors
+import {hasMetOne} from '/config'
 
 
 export default function LinkPage() {
@@ -99,16 +101,22 @@ export default function LinkPage() {
               const {vsn} = manifests[id]
               return (
                 <div style={{margin: '0 10px', width: '33%'}} key={id}>
-                  <h2>{vsn} Sensors</h2>
+                  <h1>Node <Link to={`/node/${id}`}>{vsn}</Link></h1>
                   <RecentDataTable
-                    items={format(['temp', 'es642Temp', 'humidity', 'pressure', 'raingauge', 'es642AirQuality'], vsn)}
+                    items={
+                      format(
+                        hasMetOne(vsn) ?
+                          ['temp', 'es642Temp', 'humidity', 'pressure', 'raingauge', 'es642AirQuality'] :
+                          ['temp', 'humidity', 'pressure', 'raingauge']
+                      , vsn)
+                    }
                   />
                   <RecentData node={id} vsn={vsn} manifest={manifests[id]} noAudio noData/>
                 </div>
               )
             })}
           </div>
-          <div>
+          <div style={{margin: '0 10px'}}>
             <h2>Recent Audio</h2>
             {'000048B02D15C332' in manifests &&
               <Audio node={manifests['000048B02D15C332'].node_id} />

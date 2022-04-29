@@ -90,8 +90,8 @@ export default function RecentImages(props: Props) {
 
       {loading && total && progress &&
         BH.cameraOrientations.map(pos => {
-          return total[pos] && total[pos] != progress[pos] &&
-            <span key={pos}><b>{pos}</b>: Searching {progress[pos]} of {total[pos]}</span>
+          return total[pos] > 0 && total[pos] != progress[pos] &&
+            <div key={pos}><b>{pos}</b>: Searching {progress[pos]} of {total[pos]}</div>
         })
       }
 

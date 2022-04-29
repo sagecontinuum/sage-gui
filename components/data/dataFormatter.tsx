@@ -46,7 +46,7 @@ const formatters = {
     linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
   },
   es642Temp: {
-    label: <>Temp <br/>(Met One)</>,
+    label: 'Temp (Met One)',
     query: {
       name: 'env.temperature',
       sensor: 'es642'
@@ -55,7 +55,7 @@ const formatters = {
     linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
   },
   es642AirQuality: {
-    label: <>Air Quality <br/>(Met One)</>,
+    label: 'Air Quality',
     query: {
       name: 'env.air_quality.conc'
     },

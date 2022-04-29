@@ -22,13 +22,13 @@ import Map from '/components/LeafletMap'
 import Hotspot from './Hotspot'
 
 import adminSettings from '/apps/admin/settings' // todo(nc): organize
-import settings from '../settings'
 import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
-const MDP_NODE_IDS = settings.mdpNodes  // todo(nc): everything should be VSNs from this point on
 
+// todo(nc): remove hardcoded additional sensors
+import {hasMetOne} from '/config'
 
 
 const hasStaticGPS = manifest =>
@@ -181,9 +181,9 @@ export default function NodeView() {
                   items={format(['raingauge'], vsn)}
                   className="hover-rain"
                 />
-                {MDP_NODE_IDS.includes(vsn) &&
+                {hasMetOne(vsn) &&
                   <RecentDataTable
-                    items={format(['airQuality'], vsn)}
+                    items={format(['es642AirQuality'], vsn)}
                   />
                 }
               </div>
