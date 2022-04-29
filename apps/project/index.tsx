@@ -6,9 +6,9 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, {NavItems} from '/components/NavBar'
-import Links from './views/DataLinks'
-import Nodes from './views/nodes/Nodes'
+import Links from '../common/DataLinks'
 import Node from '../common/node/Node'
+import Nodes from './views/nodes/Nodes'
 
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
@@ -18,11 +18,14 @@ import '/assets/styles.scss'
 import settings from './settings'
 
 
+const isMDP = () =>
+  settings.focus?.toLowerCase() == 'neon-mdp'
+
 
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="nodes">Nodes</NavLink></li>
-    <li><NavLink to="data-links">Data</NavLink></li>
+    {isMDP() && <li><NavLink to="data-links">Data</NavLink></li>}
   </NavItems>
 
 
@@ -49,8 +52,10 @@ export default function App() {
                 <Route path="/" element={<Navigate to="nodes" replace />} />
 
                 <Route path="nodes" element={<Nodes/>} />
-                <Route path="data-links" element={<Links/>} />
                 <Route path="node/:node" element={<Node />} />
+
+                {isMDP() && <Route path="data-links/" element={<Navigate to="/data-links/control" replace />} />}
+                {isMDP() && <Route path="data-links/:tab" element={<Links/>} />}
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

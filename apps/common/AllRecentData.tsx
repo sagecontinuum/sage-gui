@@ -4,52 +4,43 @@ import styled from 'styled-components'
 import RecentDataTable from './RecentDataTable'
 import RecentImages from './RecentImages'
 import Audio from '/components/viz/Audio'
+import format from '/components/data/dataFormatter'
 
 import type {Manifest} from '/components/apis/beekeeper'
 
 
 type Props = {
   node: string
+  vsn: string
   manifest: Manifest
-  disableData?: boolean
-  disableAudio?: boolean
+
+  noData?: boolean
+  noImages?: boolean
+  noAudio?: boolean
 }
 
 export default function RecentData(props: Props) {
-  const {node, manifest} = props
+  const {node, vsn, manifest} = props
 
   return (
     <Root className="flex column">
-
-      {!props.disableData &&
+      {!props.noData &&
         <>
           <h2>Recent Data</h2>
           <RecentDataTable
-            items={[{
-              label: 'Temperature',
-              query: {
-                node: node.toLowerCase(),
-                name: 'env.temperature',
-                sensor: 'bme680'
-              },
-              format: v => `${v}°C`,
-              linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-            }, {
-              label: 'Raingauge',
-              query: {
-                node: node.toLowerCase(),
-                name: 'env.raingauge.event_acc'
-              },
-              linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-            }]}
+            items={format(['temp', 'raingauge'], vsn)}
           />
         </>
       }
 
-      <h2>Recent Images</h2>
-      <RecentImages node={node}/>
+      {!props.noImages &&
+        <>
+          <h2>Recent Images</h2>
+          <RecentImages node={node}/>
+        </>
+      }
 
-      {!props.disableAudio &&
+      {!props.noAudio &&
         <>
           <h2>Recent Audio</h2>
           <Audio node={node} />

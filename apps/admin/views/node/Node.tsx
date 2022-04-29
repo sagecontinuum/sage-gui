@@ -12,7 +12,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 
 import TimelineChart, {colors} from '../../viz/TimelineChart'
 
-import RecentData from '/apps/common/AllRecentData'
+import AllRecentData from '/apps/common/AllRecentData'
 
 
 const cols = [
@@ -310,7 +310,7 @@ export default function NodeView() {
               <FactoryNotes data={manifest.factory} />
             </>
           }
-          <RecentData node={node} manifest={manifest} />
+          <AllRecentData node={node} vsn={vsn} manifest={manifest} />
         </Data>
 
       </div>

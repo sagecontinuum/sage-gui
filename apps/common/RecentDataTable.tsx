@@ -20,7 +20,8 @@ type Props = {
   items: {
     label: string
     query: {
-      node: string
+      node?: string // todo(nc): remove; only allow vsns
+      vsn?: string
       name: string
       sensor?: string
     },
@@ -42,7 +43,7 @@ const getStartTime = () => {
 export default memo(function RecentDataTable(props: Props) {
   const {items, showSparkline = true, className} = props
 
-  const {loading, setLoading} = useProgress()
+  const {setLoading} = useProgress()
   const [recentData, setRecentData] = useState(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )

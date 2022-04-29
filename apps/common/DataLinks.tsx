@@ -18,73 +18,8 @@ import * as BK from '/components/apis/beekeeper'
 import RecentDataTable from './RecentDataTable'
 import RecentData from '/apps/common/AllRecentData'
 import Audio from '/components/viz/Audio'
+import format from '/components/data/dataFormatter'
 
-
-const DTable = ({node}) =>
-  <RecentDataTable
-    items={[{
-      label: 'Temp (bme680)',
-      query: {
-        node: node.toLowerCase(),
-        name: 'env.temperature',
-        sensor: 'bme680'
-      },
-      format: v => `${v}°C`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, {
-      label: <>Temp <br/>(Met One)</>,
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.temperature',
-        sensor: 'es642'
-      },
-      format: v => `${v}°C`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-    }, {
-      label: 'Humidity',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.relative_humidity',
-        sensor: 'bme680'
-      },
-      format: v => `${v}%`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, {
-      label: 'Pressure',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.pressure',
-        sensor: 'bme680'
-      },
-      format: v => `${v} Pa`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, /* {
-      label: 'Gas',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'iio.in_resistance_input',
-        sensor: 'bme680'
-      },
-      format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    },*/ {
-      label: 'Raingauge',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.raingauge.event_acc'
-      },
-      format: v => `${v}mm`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-    }, {
-      label: <>Air Quality<br/>(Met One)</>,
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.air_quality.conc'
-      },
-      format: v => `${v}mg/m3`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-    }]}
-  />
 
 
 export default function LinkPage() {
@@ -165,8 +100,10 @@ export default function LinkPage() {
               return (
                 <div style={{margin: '0 10px', width: '33%'}} key={id}>
                   <h2>{vsn} Sensors</h2>
-                  <DTable node={id} />
-                  <RecentData node={id} manifest={manifests[id]} disableAudio disableData/>
+                  <RecentDataTable
+                    items={format(['temp', 'es642Temp', 'humidity', 'pressure', 'raingauge', 'es642AirQuality'], vsn)}
+                  />
+                  <RecentData node={id} vsn={vsn} manifest={manifests[id]} noAudio noData/>
                 </div>
               )
             })}

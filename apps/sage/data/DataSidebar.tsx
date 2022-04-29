@@ -11,6 +11,7 @@ const Sidebar = styled.div<{width?: string}>`
   min-width: ${props => props.width || '250px'};
   border-right: 1px solid #f1f1f1;
   background: #f8f8f8;
+  overflow-y: scroll;
 `
 
 export const FilterTitle = styled.h2`

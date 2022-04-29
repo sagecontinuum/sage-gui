@@ -400,7 +400,8 @@ export async function getLatestAudio(node: string) {
 
 
 type RecentRecArgs = {
-  node: string
+  node?: string  // todo(nc): remove?
+  vsn?: string
   name?: string
   sensor?: string
   start?: string // default: '-4d'
@@ -408,12 +409,13 @@ type RecentRecArgs = {
 }
 
 export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
-  const {node, name, sensor, start = '-4d', tail = null} = args
+  const {node, vsn, name, sensor, start = '-4d', tail = null} = args
 
   const data = await getData({
     start,
     filter: {
-      node,
+      ...(node && {node}),
+      ...(vsn && {vsn}),
       ...(name && {name}),
       ...(sensor && {sensor})
     },

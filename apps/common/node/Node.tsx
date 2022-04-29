@@ -21,77 +21,19 @@ import Map from '/components/LeafletMap'
 
 import Hotspot from './Hotspot'
 
-import adminSettings from '/apps/admin/settings'
+import adminSettings from '/apps/admin/settings' // todo(nc): organize
+import settings from '../settings'
 import Clipboard from '/components/utils/Clipboard'
-
+import format from '/components/data/dataFormatter'
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
+const MDP_NODE_IDS = settings.mdpNodes  // todo(nc): everything should be VSNs from this point on
 
 
-const LeftDataTable = ({node, className}) =>
-  <RecentDataTable
-    items={[{
-      label: 'Temp',
-      query: {
-        node: node.toLowerCase(),
-        name: 'env.temperature',
-        sensor: 'bme680'
-      },
-      format: v => `${v}°C`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, {
-      label: 'Humidity',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.relative_humidity',
-        sensor: 'bme680'
-      },
-      format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, {
-      label: 'Pressure',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.pressure',
-        sensor: 'bme680'
-      },
-      format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }, {
-      label: 'Gas',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'iio.in_resistance_input',
-        sensor: 'bme680'
-      },
-      format: v => `${v}`,
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
-    }]}
-    className={className}
-  />
-
-const RightDataTable = ({node, className}) =>
-  <RecentDataTable
-    items={[{
-      label: 'Raingauge',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.raingauge.event_acc'
-      },
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
-    }, {
-      label: 'Air quality',
-      query: {
-        node:  node.toLowerCase(),
-        name: 'env.air_quality.conc'
-      },
-      linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=7d`
-    }]}
-    className={className}
-  />
 
 const hasStaticGPS = manifest =>
-  manifest?.gps_lat && manifest?.gps_lat
+  manifest && manifest.gps_lat && manifest.gps_lat
+
 
 const metaCols1 = [
   'project',
@@ -220,14 +162,33 @@ export default function NodeView() {
               {!hasStaticGPS(manifest) && liveGPS &&
                 <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
               }
+              {!hasStaticGPS(manifest) && !liveGPS &&
+                <span className="muted">not available</span>
+              }
             </div>
           </div>
           <br/>
           <h2>Sensor Data</h2>
-          <div className="flex data-tables">
-            <LeftDataTable node={node} className="hover-bme" />
-            <RightDataTable node={node} className="hover-rain" />
-          </div>
+          {vsn &&
+            <div className="flex data-tables">
+              <RecentDataTable
+                items={format(['temp', 'humidity', 'pressure'], vsn)}
+                className="hover-bme"
+              />
+
+              <div>
+                <RecentDataTable
+                  items={format(['raingauge'], vsn)}
+                  className="hover-rain"
+                />
+                {MDP_NODE_IDS.includes(vsn) &&
+                  <RecentDataTable
+                    items={format(['airQuality'], vsn)}
+                  />
+                }
+              </div>
+            </div>
+          }
 
           <h2>Images</h2>
           <Imgs>
