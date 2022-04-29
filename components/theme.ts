@@ -41,6 +41,11 @@ const theme = createTheme({
         size: 'small'
       },
     },
+    MuiToggleButtonGroup: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
     MuiSelect: {
       defaultProps: {
         size:'small'

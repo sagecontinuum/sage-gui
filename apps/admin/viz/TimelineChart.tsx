@@ -42,7 +42,7 @@ export const color = {
 }
 
 export const colors = {
-  blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c']
+  blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c', '#053e78']
 }
 
 function parseData(data) {
@@ -84,7 +84,7 @@ function computeSize(data: Data) : {m: number, n: number} {
 }
 
 
-export function getColorScale(data, spectrum: string) {
+export function getColorScale(data) {
   const [min, max] = getMinMax(data)
 
   const colorScale = d3.scaleLinear()

@@ -22,6 +22,9 @@ import JobStatus from './job-status/JobStatus'
 import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data/Ontology'
 
+import DataExplorer from './data-explorer/DataExplorer'
+
+
 import FilterMenuTest from './fiddle/filter-menu'
 
 import TestSignIn from './sign-in/TestSignIn'
@@ -75,6 +78,7 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
+                  <Route path="data-explorer" element={<DataExplorer />} />
                   <Route path="data-browser" element={<DataBrowser />} />
                   <Route path="data-browser/ontology/:name" element={<Ontology />} />
 

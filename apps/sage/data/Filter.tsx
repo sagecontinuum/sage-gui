@@ -132,15 +132,18 @@ export default function Filter(props: Props) {
       </Header>
 
       {showSearch &&
-        <TextField
-          autoFocus
-          placeholder={`Filter ${title}`}
-          onChange={evt => setQuery(evt.target.value)}
-          InputProps={{
-            style: {margin: '5px 10px', height: 26}
-          }}
-          variant="outlined"
-        />
+        <div style={{margin: '5px 0 5px 10px'}}>
+          <TextField
+            autoFocus
+            placeholder={`Filter ${title}`}
+            onChange={evt => setQuery(evt.target.value)}
+            InputProps={{
+              style: {height: 26}
+            }}
+            fullWidth
+            variant="outlined"
+          />
+        </div>
       }
 
       {/* ranges are not currently supported
