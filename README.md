@@ -5,7 +5,7 @@ React.js components for Sage UIs.
 
 ## Installation
 
-Requires [node.js](https://nodejs.org) v14+
+Requires [node.js](https://nodejs.org) (v16+ recommended).
 
 Clone this repo, `cd` to that directory, and run:
 
@@ -16,56 +16,44 @@ npm install
 
 ## Development
 
-### Admin UI
-
-To start the Admin UI dev server:
+Start a dev server:
 ```
-npm run start-admin
+npm start
 ```
 
-
-### Sage UI
-
-To start the Sage UI dev server:
-```
-npm run start
-```
+> You can start a dev server for a different app with `npm start -w <app>`.  For example, `npm start -w project`
 
 
 ## Builds
 
-Builds are done using [parcel](https://parceljs.org/) v2.
+```
+npm run build -w sage
+```
+> or, `npm run build -w <app>`
 
-### Admin UI
 
-To create an Admin UI build in `dist/`:
+## Notes
+
+#### Project pages
+
+The [config](./apps/project/settings.ts) for a project page is controlled with the env variable `SAGE_UI_PROJECT`.  I.e.,
 
 ```
-npm run build-admin
+export SAGE_UI_PROJECT=DAWN
+npm start -w admin
 ```
 
-### Sage UI
+#### Third-party tokens
 
-To create an Sage UI build in `dist/`:
-
-```
-npm run build
-```
-
-
-#### Notes
-
-If you want to use mapbox, you can use a local env variable `MAPBOX_TOKEN`.
-
-Example:
+To use [Mapbox](https://www.mapbox.com/), you can use a local env variable `MAPBOX_TOKEN`:
 
 ```
 export MAPBOX_TOKEN=<token_string>
-npm run start-admin
+npm start -w admin
 ```
 
 
-### Tests
+## Tests
 
 Run tests using
 ```
