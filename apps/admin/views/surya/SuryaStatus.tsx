@@ -11,14 +11,11 @@ import Table from '/components/table/Table'
 import Charts from '../status/charts/Charts'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
-
 import * as utils from '/components/utils/units'
+import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
 import cols, { getColorClass, GoodChip } from '../status/columns'
-
-import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
 
 import { mergeMetrics } from '/apps/common/statusDataUtils'
 

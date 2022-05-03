@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert'
 
 import * as BH from '/components/apis/beehive'
 
-import TimelineChart, {color} from '../viz/TimelineChart'
+import TimelineChart, {color} from '/components/viz/TimelineChart'
 
 
 const node = '000048B02D05A0A4'

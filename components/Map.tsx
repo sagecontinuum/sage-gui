@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
-import tokens from '../tokens'
-import settings from '../apps/admin/settings'
+import tokens from '/tokens'
+import config from '/config'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 // import Popover from '@mui/material/Popover'
 
-const DISABLE_MAP = settings['disableMap'] || false
+const DISABLE_MAP = config['disableMaps'] || false
 const center = [-99, 38.5]
 const initialZoom = 3.0
 const dotSize = 10

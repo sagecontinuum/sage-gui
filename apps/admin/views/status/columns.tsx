@@ -18,7 +18,7 @@ import * as utils from '/components/utils/units'
 import config from '/config'
 import settings from '../../settings'
 
-import HealthSparkler, {healthColor, sanityColor} from '../../viz/HealthSparkler'
+import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
 
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning

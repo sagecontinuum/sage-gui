@@ -29,7 +29,7 @@ import TimePicker  from '@mui/lab/TimePicker'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import AdapterDateFns from '@mui/lab/AdapterDateFns'
 
-import { capitalize, lastIndexOf } from 'lodash'
+import { capitalize } from 'lodash'
 
 import Clipboard from '/components/utils/Clipboard'
 import Sidebar from '../data/DataSidebar'

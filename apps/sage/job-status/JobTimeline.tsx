@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import TimelineChart, {color} from '../../admin/viz/TimelineChart'
+import TimelineChart, {color} from '/components/viz/TimelineChart'
 import {GroupedApps} from './JobStatus'
 
 

@@ -15,8 +15,9 @@ const config = {
   dataBrowserURL: 'https://portal.sagecontinuum.org/data-browser',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
-
   docs: 'https://docs.sagecontinuum.org/docs',
+
+  disableMaps: false,
 
   // temp solution for additonal meta
   additional_sensors: {

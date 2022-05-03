@@ -45,7 +45,12 @@ function getElapsedTimes(metrics: BH.AggMetrics, nodeID: string) {
 
   const mostRecent = {}
   Object.keys(byHost).forEach(host => {
-    const timestamp = byHost[host]['sys.uptime'][0].timestamp
+    const uptimes = byHost[host]['sys.uptime']
+
+    // there may not be metrics in last x days
+    if (!uptimes) return
+
+    const timestamp = uptimes[0].timestamp
 
     const suffix = host.split('.')[1]
     const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host

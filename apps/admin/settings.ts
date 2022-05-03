@@ -8,6 +8,5 @@ export default {
   elapsedThresholds: {
     fail: 360000,
     warning: 180000
-  },
-  disableMap: false
+  }
 }

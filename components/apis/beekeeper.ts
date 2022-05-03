@@ -2,7 +2,7 @@ import config from '/config'
 const url = config.beekeeper
 
 import { handleErrors } from '../fetch-utils'
-import { NodeStatus } from '../../apps/admin/node'
+import { NodeStatus } from './node'
 
 
 const FILTER_NODES = true  // if true, filter to "node monitoring" list

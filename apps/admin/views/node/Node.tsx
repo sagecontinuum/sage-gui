@@ -7,10 +7,9 @@ import Alert from '@mui/material/Alert'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
-import * as SES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import TimelineChart, {color} from '../../viz/TimelineChart'
+import TimelineChart, {color} from '/components/viz/TimelineChart'
 
 import AllRecentData from '/apps/common/AllRecentData'
 

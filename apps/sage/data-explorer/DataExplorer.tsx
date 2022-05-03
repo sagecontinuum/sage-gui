@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import Sidebar, {FilterTitle} from '../data/DataSidebar'
 import Filter from '../data/Filter'
 
-import TimelineChart, {colors} from '/apps/admin/viz/TimelineChart'
+import TimelineChart, {colors} from '/components/viz/TimelineChart'
 import {chain, groupBy} from 'lodash'
 
 import * as BK from '/components/apis/beekeeper'

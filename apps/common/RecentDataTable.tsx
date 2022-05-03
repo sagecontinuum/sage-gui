@@ -11,7 +11,7 @@ import { relTime, isOldData} from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'
 import config from '/config'
-import SparkLine from './SparkLine'
+import SparkLine from '/components/viz/SparkLine'
 
 const dataBrowser = config.dataBrowserURL
 
