@@ -10,7 +10,7 @@ import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import MapIcon from '@mui/icons-material/RoomOutlined'
 import ThermoIcon from '@mui/icons-material/ThermostatRounded'
-import Chip from '@material-ui/core/Chip'
+import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '/components/utils/units'

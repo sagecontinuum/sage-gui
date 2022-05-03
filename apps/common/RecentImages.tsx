@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Button from '@mui/material/Button'
-import Tooltip from '@material-ui/core/Tooltip'
+import Tooltip from '@mui/material/Tooltip'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
 import Alert from '@mui/material/Alert'
