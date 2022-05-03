@@ -26,6 +26,24 @@ const theme = createTheme({
     }
   },
   components: {
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          borderBottom: '1px solid #e8e8e8',
+        }
+      }
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+          '&:not(.Mui-selected):hover': {
+            color: '#222',
+            opacity: 1,
+          }
+        }
+      }
+    },
     MuiButtonBase: {
       defaultProps: {
         disableRipple: true
