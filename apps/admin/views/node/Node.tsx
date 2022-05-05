@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation, Link} from 'react-router-dom'
+import { useParams, useLocation, Link } from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import Alert from '@mui/material/Alert'
@@ -8,11 +8,10 @@ import Alert from '@mui/material/Alert'
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 import { useProgress } from '/components/progress/ProgressProvider'
-
-import TimelineChart, {color} from '/components/viz/TimelineChart'
+import TimelineChart, { color } from '/components/viz/TimelineChart'
 
 import AllRecentData from '/apps/common/AllRecentData'
-
+import { startCase } from 'lodash'
 
 const cols = [
   'node_type',
@@ -223,8 +222,7 @@ export default function NodeView() {
 
             <tr>
               {cols.map(name => {
-                const label = name.replace(/_/g, ' ').replace('camera', '')
-                  .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                const label = startCase(name.replace(/_/g, ' ').replace('camera', ''))
                 return <th key={label}>{label}</th>
               })}
               <th>Registration</th>

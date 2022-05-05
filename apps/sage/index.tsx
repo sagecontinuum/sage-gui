@@ -1,4 +1,3 @@
-import React from 'react'
 import ReactDom from 'react-dom'
 import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
 import styled from 'styled-components'
@@ -23,9 +22,6 @@ import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data/Ontology'
 
 import DataExplorer from './data-explorer/DataExplorer'
-
-
-import FilterMenuTest from './fiddle/filter-menu'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -88,7 +84,6 @@ export default function Sage() {
                   <Route path="node/:node" element={<Node />} />
 
                   <Route path="job-status" element={<JobStatus />} />
-                  <Route path="fiddle/filter-menu" element={<FilterMenuTest />} />
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />

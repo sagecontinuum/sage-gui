@@ -14,14 +14,14 @@ import * as BK from '/components/apis/beekeeper'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import RecentDataTable from '/apps/common/RecentDataTable'
-import ManifestTable from '/apps/common/ManifestTable'
 import RecentImages from '/apps/common/RecentImages'
 import Audio from '/components/viz/Audio'
 import Map from '/components/LeafletMap'
-
+import MetaTable from '/components/utils/MetaTable'
 import Hotspot from './Hotspot'
 
 import adminSettings from '/apps/admin/settings' // todo(nc): organize
+import config from '/config'
 import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 
@@ -34,26 +34,46 @@ import {hasMetOne} from '/config'
 const hasStaticGPS = manifest =>
   manifest && manifest.gps_lat && manifest.gps_lat
 
+const noneFormatter = (val) =>
+  typeof val == 'boolean' ?
+    (val ? 'yes' : 'no') :
+    ((!val || val == 'none' || '') ? '-' : val)
 
-const metaCols1 = [
-  'project',
-  'location',
-  'shield',
-  'modem',
-  'modem_sim',
-  'nx_agent',
-  'build_date',
-  'commission_date',
-  'registration'
+
+const metaRows1 = [{
+  id: 'project',
+  format: (val) => <a href={`${config.adminURL}/status?project="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+}, {
+  id: 'focus',
+  format: (val) => <a href={`${config.adminURL}/status?focus="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+}, {
+  id: 'location',
+  format: (val) => <a href={`${config.adminURL}/status?location="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+}, {
+  id: 'build_date',
+  label: 'Built'
+}, {
+  id: 'commission_date',
+  label: 'Commissioned'
+}, {
+  id: 'registration_event',
+  label: 'Registration',
+  format: (val) => new Date(val).toLocaleString()
+}]
+
+const metaRows2 = [
+  {id: 'shield', format: noneFormatter},
+  {id: 'modem', format: noneFormatter},
+  {id: 'modem_sim', format: noneFormatter},
+  {id: 'nx_agent', format: noneFormatter}
 ]
 
-const metaCols2 = [
-  'top_camera',
-  'bottom_camera',
-  'left_camera',
-  'right_camera'
+const cameraMetaRows = [
+  {id: 'top_camera', label: 'Top', format: noneFormatter},
+  {id: 'bottom_camera',  label: 'Bottom', format: noneFormatter},
+  {id: 'left_camera', label: 'Left', format: noneFormatter},
+  {id: 'right_camera', label: 'Right', format: noneFormatter}
 ]
-
 
 export default function NodeView() {
   const {node} = useParams()
@@ -75,7 +95,7 @@ export default function NodeView() {
 
   useEffect(() => {
     BK.getManifest({node: node.toUpperCase()})
-      .then(data => {
+      .then(data => {noneFormatter
         setManifest(data)
 
         // if no manifest, we can not get the vsn for node health
@@ -125,50 +145,59 @@ export default function NodeView() {
       }
 
       <div className="flex">
-        <LeftSide className="flex-grow">
+        <LeftSide>
           <div className="flex items-center justify-between">
             <h1>Node {vsn} | <small className="muted">{node}</small></h1>
             <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
-              <Button href={manifest ? `https://admin.sagecontinuum.org/node/${manifest.node_id}` : ''} target="_blank">
+              <Button href={manifest ? `${config.adminURL}/node/${manifest.node_id}` : ''} target="_blank">
                 <span className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
                   {status}
                 </span>
               </Button>
             </Tooltip>
           </div>
-          <div className="meta-table-top">
-            <ManifestTable
-              manifest={manifest}
-              meta={meta}
-              columns={metaCols1}
-            />
-          </div>
-          <br/>
-          <div className="flex justify-between">
-            <div className="meta-table-bottom">
-              <ManifestTable
-                manifest={manifest}
-                meta={meta}
-                columns={metaCols2}
+          <div className="flex items-start meta-tables">
+            <div className="meta-left">
+              <MetaTable
+                title="Overview"
+                rows={[
+                  ...metaRows1,
+                  {
+                    id: 'gps',
+                    label: <> GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
+                    format: () =>
+                      <div className="gps">
+                        {hasStaticGPS(manifest) &&
+                          <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+                        }
+                        {!hasStaticGPS(manifest) && liveGPS &&
+                          <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+                        }
+                        {!hasStaticGPS(manifest) && !liveGPS &&
+                          <span className="muted">not available</span>
+                        }
+                      </div>
+                  }
+                ]}
+                data={{...manifest, ...meta}}
               />
             </div>
-            <div className="gps">
-              <h5 className="muted no-margin">
-                GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})
-              </h5>
-              {hasStaticGPS(manifest) &&
-                <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
-              }
-              {!hasStaticGPS(manifest) && liveGPS &&
-                <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
-              }
-              {!hasStaticGPS(manifest) && !liveGPS &&
-                <span className="muted">not available</span>
-              }
+            <div className="meta-right">
+              <MetaTable
+                title="Hardware"
+                rows={metaRows2}
+                data={{...manifest, ...meta}}
+              />
+
+              <MetaTable
+                title="Cameras"
+                rows={cameraMetaRows}
+                data={{...manifest, ...meta}}
+              />
             </div>
           </div>
-          <br/>
-          <h2>Sensor Data</h2>
+
+          <h2>Sensors</h2>
           {vsn &&
             <div className="flex data-tables">
               <RecentDataTable
@@ -199,7 +228,7 @@ export default function NodeView() {
           <Audio node={node} className="hover-audio"/>
         </LeftSide>
 
-        <RightSide>
+        <RightSide className="justify-end">
           {hasStaticGPS(manifest) &&
             <Map data={{lat: manifest.gps_lat, lon: manifest.gps_lon}} />
           }
@@ -229,19 +258,20 @@ export default function NodeView() {
 
 
 const Root = styled.div`
-  .meta-table-top table {
-    width: 100%;
-    margin-bottom: 1em;
+  .meta-tables {
+    table {
+
+    }
   }
 
-  .meta-table-bottom {
+  .meta-left {
     flex: 1;
-    margin-right: 30px;
-
-    table { width: 100%;}
+    margin-right: 2em;
   }
 
-  p { margin-bottom: 30px; }
+  .meta-right {
+    flex: 1;
+  }
 
   .data-tables div {
     width: 100%;
@@ -267,10 +297,13 @@ const Imgs = styled.div`
 
 const LeftSide = styled.div`
   margin: 20px;
+  flex: 2 1 auto;
 `
 
 const RightSide = styled.div`
   margin: 20px;
+  width: 100%;
+  flex: 1;
 `
 
 const WSN_VIEW_WIDTH = 400
@@ -297,36 +330,4 @@ const VSN = styled.div`
   padding: 0;
   background: #b3b3b3;
 `
-
-
-
-
-/* todo(nc): propose new meta tables:
-function SimpleMetaTable(props) {
-  const {keys, data} = props
-  return (
-    <table className="simple key-value">
-      <tbody>
-        {keys.map((key) => {
-          return (
-            <tr key={key}>
-              <td>{key.replace(/_/g, ' ').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}</td>
-              <td>{(data[key] || '-').toString() || '-'}</td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
-  )
-}
-
-<SimpleMetaTable
-  keys={metaCols1}
-  data={{...manifest, ...meta}}
-/>
-<SimpleMetaTable
-  keys={metaCols2}
-  data={{...manifest, ...meta}}
-/>
-*/
 

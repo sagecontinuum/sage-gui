@@ -1,5 +1,6 @@
 import styled from 'styled-components'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import { startCase } from 'lodash'
 
 function format(label: string, val: string) {
   if (label == 'project')
@@ -65,8 +66,7 @@ export default function ManifestTable(props: Props) {
               {cols
                 .filter(name => name != 'registration')
                 .map(name => {
-                  const label = name.replace(/_/g, ' ').replace('camera', '')
-                    .replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())
+                  const label = startCase(name.replace(/_/g, ' ').replace('camera', ''))
                   return <th key={label}>{label}</th>
                 })
               }

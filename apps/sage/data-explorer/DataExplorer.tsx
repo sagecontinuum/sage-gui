@@ -5,13 +5,14 @@ import Sidebar, {FilterTitle} from '../data/DataSidebar'
 import Filter from '../data/Filter'
 
 import TimelineChart, {colors} from '/components/viz/TimelineChart'
-import {chain, groupBy} from 'lodash'
+import {chain, groupBy, startCase} from 'lodash'
 
 import * as BK from '/components/apis/beekeeper'
 import {handleErrors} from '/components/fetch-utils'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
+
 
 
 // No assignment represents null, and is same as empty string in this view
@@ -182,7 +183,7 @@ export default function DataExplorer() {
           return (
             <Filter
               key={title}
-              title={title.replace('res_', '').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}
+              title={startCase(title.replace('res_', ''))}
               checked={filterState[facet]}
               onCheck={(val) => handleFilter(facet, val)}
               type="text"
