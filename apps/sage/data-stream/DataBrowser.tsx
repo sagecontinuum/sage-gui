@@ -56,7 +56,7 @@ const columns = [{
   id: 'vsn',
   label: 'VSN',
   format: (val, r) =>
-    <a href={`https://admin.sagecontinuum.org/node/${r.node.toUpperCase()}`}>
+    <a href={`/node/${r.node.toUpperCase()}`}>
       {val}
     </a>
 }, {
