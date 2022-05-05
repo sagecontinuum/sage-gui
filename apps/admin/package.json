@@ -6,7 +6,7 @@
     "start": "parcel serve ./index.html --dist-dir build/",
     "build": "parcel build ./index.html",
     "test": "jest",
-    "clean": "rm -rf build/ && rm -rf dist/ && rm -rf .parcel-cache/",
+    "clean": "rm -rf build/ && rm -rf dist/",
     "release": "standard-version"
   },
   "dependencies": {
