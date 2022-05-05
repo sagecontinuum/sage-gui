@@ -11,6 +11,10 @@ const configs = {
     logo: 'NEON-MDP',
     project: 'SAGE',
     focus: 'NEON-MDP'
+  },
+  'vto': {
+    logo: 'VTO',
+    project: 'VTO'
   }
 }
 
