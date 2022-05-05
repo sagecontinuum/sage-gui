@@ -172,6 +172,7 @@ function drawChart(
   const svg = d3.select(domEle).append('svg')
     .attr('width', width + margin.left)
     .attr('height',  height + margin.top + margin.bottom)
+    .attr('cursor', 'grab')
 
   const gX = svg.append('g')
     .attr('cursor', 'grab')
@@ -236,6 +237,7 @@ function drawChart(
     .attr('height', height)
 
   svg.append('g')
+    .attr('class', `y-axis`)
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
     .call(yAxis)
     .on('click', (evt) => {
@@ -488,14 +490,24 @@ const _debounce = function(ms, fn) {
 
 export default function TimelineContainer(props: TimelineProps) {
   return (
-    <Root>
+    <Root colorLinks={!!props.onRowClick}>
       <Chart {...props} />
     </Root>
   )
 }
 
-const Root = styled.div`
-
+const Root = styled.div<{colorLinks: boolean}>`
+  ${props => props.colorLinks && `
+    .y-axis text {
+        color: #0080c7;
+        font-size: 1.2em;
+      }
+      .y-axis text:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }`
+  }
 `
 
 const Ctrls = styled.div`
