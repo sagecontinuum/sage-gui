@@ -86,8 +86,8 @@ export default function Filter(props: Props) {
   }, [query, allData, checked])
 
 
-  const handleCheck = (value) => {
-    onCheck(value)
+  const handleCheck = (evt, value) => {
+    onCheck(evt, value)
   }
 
   const handleShowAll = () => {
@@ -194,7 +194,7 @@ export default function Filter(props: Props) {
                 control={
                   <Checkbox
                     checked={checked.includes(name)}
-                    onChange={() => handleCheck(name)}
+                    onChange={(evt) => handleCheck(evt, name)}
                   />
                 }
                 label={

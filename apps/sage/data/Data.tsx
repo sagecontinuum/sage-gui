@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -58,30 +58,52 @@ function getMockByApp(data) {
 }
 
 
-const getFilters = (data, name) =>
+const getFacets = (data, name) =>
   chain(data)
     .countBy(name)
     .map((count, name) => ({name: name.length ? name : NO_ASSIGNMENT, count}))
     .value()
 
 
-const getVSNs = (data, name, value) =>
-  data.filter(o => o[name] == value).map(o => o.vsn)
-
-
-const getTitle = (nodes, apps) =>
-  nodes ?
-    `${nodes?.length} Nodes` :
-  apps ?
-    `${apps?.length} Apps` : ''
-
-
-  const stdColor = (val, obj) => {
-    if (val == null)
-      return colors.noValue
-
-    return colors.blues[4]
+// core logic for intersection of unions; could be optimized or simplified if needed
+const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
+  let filtered = []
+  for (const manifest of manifests) {
+    for (const [field, vals] of Object.entries(filters)) {
+      if (!vals.includes(manifest[field])) continue
+      filtered.push(manifest)
+    }
   }
+
+  let vsns = filtered.map(o => o.vsn)
+
+  // find intersection of vsns and data vsns
+  let vsnSubset = Object.keys(data)
+    .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
+
+  vsnSubset = sortVSNs(vsnSubset)
+  return vsnSubset
+}
+
+
+// sort by node, then blade
+const sortVSNs = (vsns: string[]) => ([
+  ...vsns.filter(vsn => vsn.charAt(0) == 'W').sort(),
+  ...vsns.filter(vsn => vsn.charAt(0) == 'V').sort()
+])
+
+
+
+const getSubTitle = (nodes, apps) =>
+  nodes ?
+    `${nodes.length} nodes with data` :
+  apps ?
+    `${apps.length} apps with data` : ''
+
+
+const stdColor = (val) =>
+  val == null ? colors.noValue : colors.blues[4]
+
 
 const colorDensity = (val, obj) => {
   if (val == null)
@@ -106,7 +128,7 @@ const getInfiniteEnd = (page: number) =>
 
 
 
-type FilterState = {
+type Filters = {
   [name: string]: string[]
 }
 
@@ -116,12 +138,72 @@ type Facets = {
   [name: string]: {title: string, items: FacetItem[] }
 }
 
-
 const initFilterState = {
-  'projects': [],
+  'project': [],
   'focus': [],
   'location': []
 }
+
+const initDataState = {
+  data: [],
+  filtered: [],
+  filters: initFilterState
+}
+
+function dataReducer(state, action) {
+  // todo(nc): note: we likely won't need both ADD_FILTER and RM_FILTER?
+  switch (action.type) {
+    case 'INIT_DATA': {
+      return {
+        ...state,
+        data: action.data,
+        filtered: sortVSNs(Object.keys(action.data)),
+      }
+    }
+    case 'ADD_FILTER': {
+      const {data, filters} = state
+      const {manifests, facet, val} = action
+
+      // new filter state
+      const newFilters = {
+        ...filters,
+        [facet]: [...filters[facet], val]
+      }
+
+      // new filtered data, using "manifest" data
+      const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+      return {
+        ...state,
+        filtered,
+        filters: newFilters
+      }
+    }
+    case 'RM_FILTER': {
+      const {data, filters} = state
+      const {manifests, facet, val} = action
+
+      // new filter state
+      const newFilters = {
+        ...filters,
+        [facet]: filters[facet].filter(v => v != val)
+      }
+
+      // new filtered data, using "manifest" data
+      const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+      return {
+        ...state,
+        filtered,
+        filters: newFilters
+      }
+    }
+    default: {
+      return state
+    }
+  }
+}
+
 
 const facetList = Object.keys(initFilterState)
 
@@ -139,16 +221,17 @@ export default function Data() {
 
   // main data views
   const {loading, setLoading} = useProgress()
-  const [data, setData] = useState()
+  const [{data, filtered, filters}, dispatch] = useReducer(
+    dataReducer,
+    initDataState,
+  )
+
   const [error, setError] = useState()
 
   const [byApp, setByApp] = useState()
-
-  const [vsns, setVsns] = useState<string[]>([])
   const [apps, setApps] = useState<string[]>()
 
   const [facets, setFacets] = useState<Facets>(null)
-  const [filterState, setFilterState] = useState<FilterState>(initFilterState)
 
   // options
   const [display, setDisplay] = useState<'nodes' | 'apps'>('nodes')
@@ -164,21 +247,20 @@ export default function Data() {
         setManifestByVSN(data) // todo(nc): remove
         setManifests(Object.values(data))
 
-        const projects = getFilters(data, 'project')
-        const focuses = getFilters(data, 'focus')
-        const locations = getFilters(data, 'location')
+        const projects = getFacets(data, 'project')
+        const focuses = getFacets(data, 'focus')
+        const locations = getFacets(data, 'location')
 
         setFacets({
-          projects: {title: 'Project', items: projects},
+          project: {title: 'Project', items: projects},
           focus: {title: 'Focus', items: focuses},
           location: {title: 'Location', items: locations}
         })
       }).catch(err => setError(err))
 
-    //fetchMockRollup({})
     const dProm = fetchRollup({})
       .then(data => {
-        setData(data)
+        dispatch({type: 'INIT_DATA', data})
       })
       .catch(err => setError(err))
 
@@ -190,6 +272,7 @@ export default function Data() {
   useEffect(() => {
     if (!data) return
     const mockByApp = getMockByApp(data)
+
     setByApp(mockByApp)
     setApps(Object.keys(mockByApp))
   }, [display])
@@ -202,7 +285,7 @@ export default function Data() {
     setLoadingMore(true)
     setTimeout(() => {
       setPage(prev => prev + 1)
-    }, 100)
+    })
   }, [])
 
 
@@ -224,17 +307,10 @@ export default function Data() {
   }, [page])
 
 
-  const handleFilter = (facet: string, val: string) => {
-    setFilterState(prev => {
-      return {
-        ...prev,
-        [facet]: prev[facet].includes(val) ?
-          prev[facet].filter(v => v != val) : [...prev[facet], val]
-      }
-    })
-
-    const vsns = getVSNs(manifests, facet, val)
-    setVsns(vsns)
+  const handleFilter = (evt, facet: string, val: string) => {
+    const checked = evt.target.checked
+    if (checked) dispatch({type: 'ADD_FILTER', manifests, facet, val})
+    else dispatch({type: 'RM_FILTER', manifests, facet, val})
   }
 
 
@@ -242,12 +318,6 @@ export default function Data() {
     setOpts(prev => ({...prev, [name]: evt.target.checked}))
   }
 
-
-  let nodes
-  if (display == 'nodes') {
-    nodes = data && Object.keys(data)
-      .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
-  }
 
   return (
     <Root className="flex">
@@ -260,8 +330,8 @@ export default function Data() {
             <Filter
               key={title}
               title={startCase(title.replace('res_', ''))}
-              checked={filterState[facet]}
-              onCheck={(val) => handleFilter(facet, val)}
+              checked={filters[facet]}
+              onCheck={(evt, val) => handleFilter(evt, facet, val)}
               type="text"
               data={items}
             />
@@ -270,10 +340,11 @@ export default function Data() {
       </Sidebar>
       <Main>
         <Top>
-          <Controls className="flex">
-            <h2 className="no-margin">
-              {getTitle(nodes, apps)}
-            </h2>
+          <Controls className="flex items-center">
+            <div className="flex column">
+              <h2 className="title no-margin">Explore Data</h2>
+              <h5 className="subtitle no-margin muted">{getSubTitle(filtered, apps)}</h5>
+            </div>
 
             <div>
               <ToggleButtonGroup
@@ -296,15 +367,15 @@ export default function Data() {
                     onChange={(evt) => handleCheck(evt, 'colorCounts')}
                   />
                 }
-                label="color counts"
+                label="show density"
               />
             </div>
           </Controls>
         </Top>
 
 
-        {display == 'nodes' && nodes && manifestByVSN &&
-          nodes
+        {display == 'nodes' && filtered && manifestByVSN &&
+          filtered
             .slice(0, getInfiniteEnd(page))
             .map(vsn => {
               const timelineData = groupBy(data[vsn], 'meta.plugin')
@@ -382,14 +453,14 @@ export default function Data() {
           <ErrorMsg>{error.message}</ErrorMsg>
         }
 
-        {(loading || loadingMore) && (nodes && !(getInfiniteEnd(page) > nodes.length)) &&
+        {(loading || loadingMore) && (getInfiniteEnd(page) < filtered?.length) &&
           [...Array(ITEMS_INITIALLY)]
             .map((_, i) =>
-              <TimelineSkeleton />
+              <TimelineSkeleton key={i} />
             )
         }
 
-        {loadingMore && (nodes && !(getInfiniteEnd(page) > nodes.length)) &&
+        {loadingMore && (getInfiniteEnd(page) < filtered?.length) &&
           <LoadingMore className="flex items-center muted">
             <div>loading...</div>
           </LoadingMore>
@@ -415,13 +486,9 @@ const Main = styled.div`
   padding: 0 0 0 20px;
   width: 100%;
 
-  h1 {
-    margin-right: 1em;
-  }
-
-  h2 {
-    float: left;
-    margin: 5px 20px;
+  h2.title,
+  .subtitle {
+    margin-right: 20px;
   }
 `
 

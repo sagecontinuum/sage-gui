@@ -145,7 +145,7 @@ export default function Search() {
   }
 
 
-  const handleFilter = (facet: string, val: string) => {
+  const handleFilter = (evt, facet: string, val: string) => {
     setFilterState(prev => {
       return {
         ...prev,
@@ -173,7 +173,7 @@ export default function Search() {
                 key={title}
                 title={title.replace('res_', '').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}
                 checked={filterState[facet]}
-                onCheck={(val) => handleFilter(facet, val)}
+                onCheck={(evt, val) => handleFilter(evt, facet, val)}
                 type="text"
                 data={items}
               />

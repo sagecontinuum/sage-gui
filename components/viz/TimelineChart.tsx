@@ -387,6 +387,7 @@ type TimelineProps = {
   tailHours?: number
   showLegend?: boolean
   showButtons?: boolean
+  limitRowCount?: number
   yFormat?: (label) => string
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (label: string) => void
@@ -399,7 +400,9 @@ function Chart(props: TimelineProps) {
   let {
     data,
     margin,
+    showLegend,
     showButtons = true,
+    limitRowCount,
     ...rest
   } = props
 
@@ -431,10 +434,12 @@ function Chart(props: TimelineProps) {
         svg.remove()
       }
 
+      yLabels = limitRowCount ? yLabels.slice(0, limitRowCount) : yLabels,
+
       drawChart(node, {
         data: chartData,
-        width,
         yLabels,
+        width,
         size,
         margin,
         ...rest
@@ -445,14 +450,14 @@ function Chart(props: TimelineProps) {
 
     const legendNode = legendRef.current
     const legendSvg = legendNode.querySelector('svg')
-    if (props.showLegend && !legendSvg) {
+    if (showLegend && !legendSvg) {
       appendLegend(legendNode, chartData)
     }
 
     return () => {
       ro.unobserve(node)
     }
-  }, [data, rest, margin, props.showLegend])
+  }, [data, rest, margin, showLegend, limitRowCount])
 
 
   return (
