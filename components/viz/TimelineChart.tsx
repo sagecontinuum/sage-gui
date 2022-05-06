@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import * as d3 from 'd3'
@@ -9,6 +9,8 @@ import ArrowRight from '@mui/icons-material/ArrowForwardIos'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import ZoomOutIcon from '@mui/icons-material/ZoomOut'
 import HomeIcon from '@mui/icons-material/HomeOutlined'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded'
+import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded'
 
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
 const defaultWidth = 800
@@ -409,6 +411,9 @@ function Chart(props: TimelineProps) {
   // merge margins together
   margin = {...defaultMargin, ...props.margin}
 
+  const [showAllRows, setShowAllRows] = useState(false)
+  const [totalRows, setTotalRows] = useState(0)
+
   const ref = useRef(null)
   const legendRef = useRef(null)
 
@@ -434,7 +439,10 @@ function Chart(props: TimelineProps) {
         svg.remove()
       }
 
-      yLabels = limitRowCount ? yLabels.slice(0, limitRowCount) : yLabels,
+      if (limitRowCount) {
+        setTotalRows(yLabels.length)
+        yLabels = (limitRowCount && !showAllRows) ? yLabels.slice(0, limitRowCount) : yLabels
+      }
 
       drawChart(node, {
         data: chartData,
@@ -475,6 +483,15 @@ function Chart(props: TimelineProps) {
       }
 
       <div ref={ref}></div>
+
+      {limitRowCount && totalRows > limitRowCount &&
+        <button onClick={() => setShowAllRows(prev => !prev)} className="more-btn" style={{marginLeft: margin.left}}>
+          {showAllRows ?
+            <>hide rows <ExpandLessIcon /></> :
+            <>show {totalRows - limitRowCount} more rows <ExpandMoreIcon /></>
+          }
+        </button>
+      }
     </div>
   )
 }
@@ -502,25 +519,6 @@ export default function TimelineContainer(props: TimelineProps) {
 }
 
 const Root = styled.div<{colorLinks: boolean}>`
-  ${props => props.colorLinks && `
-    .y-axis text {
-        color: #444;
-        font-size: 1.2em;
-        font-weight: 600;
-      }
-      .y-axis text:hover {
-        cursor: pointer;
-        text-decoration: underline;
-      }
-    }`
-  }
-`
-
-const Ctrls = styled.div`
-  display: flex;
-  justify-content: end;
-  margin: 0 20px 15px 15px;
-
   button {
     margin: 0 2px;
     background: none;
@@ -540,6 +538,30 @@ const Ctrls = styled.div`
       padding-top: 2px;
     }
   }
+
+  button.more-btn {
+    display: flex;
+    align-items: center;
+  }
+
+  ${props => props.colorLinks && `
+    .y-axis text {
+        color: #444;
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+      .y-axis text:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }`
+  }
+`
+
+const Ctrls = styled.div`
+  display: flex;
+  justify-content: end;
+  margin: 0 20px 15px 15px;
 
   .reset {
     margin-right: 15px;
