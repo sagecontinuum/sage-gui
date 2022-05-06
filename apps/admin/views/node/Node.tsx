@@ -287,7 +287,10 @@ export default function NodeView() {
           }
 
           {!loading2 && !sanityData &&
-            <p className="muted">No sanity data available</p>
+            <p className="muted">
+              <div className="clearfix"></div>
+              No sanity data available
+            </p>
           }
 
           {error2 &&

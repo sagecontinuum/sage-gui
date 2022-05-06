@@ -74,12 +74,12 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
-                  <Route path="data-explorer" element={<DataExplorer />} />
+                  <Route path="data" element={<DataExplorer />} />
                   <Route path="data-browser" element={<DataBrowser />} />
                   <Route path="data-browser/ontology/:name" element={<Ontology />} />
 
-                  <Route path="data" element={<DataSearch />} />
-                  <Route path="data/product/:name" element={<DataProduct />} />
+                  <Route path="data-commons-demo" element={<DataSearch />} />
+                  <Route path="data-commons-demo/product/:name" element={<DataProduct />} />
 
                   <Route path="node/:node" element={<Node />} />
 

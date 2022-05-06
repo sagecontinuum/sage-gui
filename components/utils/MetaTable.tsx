@@ -40,10 +40,11 @@ export default function MetaTable(props:Props) {
 
 
 const Table = styled.table`
-  thead tr {
-    border-top: 1px solid #b8b8b8;
-    border-bottom: 1px solid #b8b8b8 !important;
-    background: #e2e2e2
+  thead th {
+    color: #fff;
+    border-radius: 5px 5px 0 0;
+    border-bottom: 1px solid #558672 !important;
+    background: #69cba5;
   }
 `
 

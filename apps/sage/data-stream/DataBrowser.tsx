@@ -325,7 +325,7 @@ export default function DataPreview() {
   const node = params.get('nodes')
   const sensor = params.get('sensors')
 
-  const unit: Unit = params.get('window') || 'm'
+  const unit: Unit = params.get('window') || 'h'
   const start = params.get('start')
 
   const {setLoading} = useProgress()

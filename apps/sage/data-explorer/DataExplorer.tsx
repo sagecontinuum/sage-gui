@@ -1,34 +1,42 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
+// import {fetchMockRollup} from './fetchMockRollup'
+import TimelineSkeleton from './TimelineSkeleton'
+import {Top} from '../common/Layout'
 import Sidebar, {FilterTitle} from '../data/DataSidebar'
 import Filter from '../data/Filter'
+import ErrorMsg from '../ErrorMsg'
 
+import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, {colors} from '/components/viz/TimelineChart'
-import {chain, groupBy, startCase} from 'lodash'
-
 import * as BK from '/components/apis/beekeeper'
-import {handleErrors} from '/components/fetch-utils'
-import ErrorMsg from '/apps/sage/ErrorMsg'
+import * as BH from '/components/apis/beehive'
+
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
 
+
+import {chain, groupBy, startCase} from 'lodash'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '/components/input/Checkbox'
 
 
 // No assignment represents null, and is same as empty string in this view
 const NO_ASSIGNMENT = 'None'
 const TIME_GRAIN = 'hour'
 
+const ITEMS_INITIALLY = 10
+const ITEMS_PER_PAGE = 5
 
-function fetchMockRollup({byVersion = false, groupName = 'meta.vsn'}) {
-  return fetch('http://127.0.0.1:8080/last-30d-april-26-2022.json')
-    .then(handleErrors)
-    .then(res => res.json())
+
+function fetchRollup({byVersion = false, groupName = 'meta.vsn'}) {
+  return BH.getPluginCounts()
     .then(data => data.map(o => {
       const { plugin } = o.meta
       return {
         ...o,
-        timestamp: o.timestamp.split('+')[0]+'Z',
         meta: {
           ...o.meta,
           plugin: byVersion ? plugin : plugin.split(':')[0]
@@ -62,8 +70,18 @@ const getVSNs = (data, name, value) =>
 
 
 const getTitle = (nodes, apps) =>
-  nodes ? `${nodes?.length} Nodes` : `${apps?.length} Apps`
+  nodes ?
+    `${nodes?.length} Nodes` :
+  apps ?
+    `${apps?.length} Apps` : ''
 
+
+  const stdColor = (val, obj) => {
+    if (val == null)
+      return colors.noValue
+
+    return colors.blues[4]
+  }
 
 const colorDensity = (val, obj) => {
   if (val == null)
@@ -82,6 +100,9 @@ const colorDensity = (val, obj) => {
   else
     return colors.blues[6]
 }
+
+const getInfiniteEnd = (page: number) =>
+  page == 1 ? ITEMS_INITIALLY : page * ITEMS_PER_PAGE
 
 
 
@@ -106,9 +127,18 @@ const facetList = Object.keys(initFilterState)
 
 
 export default function DataExplorer() {
-  const [manifests, setManifests] = useState<BK.Manifests[]>()
+  const navigate = useNavigate()
+
+  const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
+  const [manifests, setManifests] = useState<BK.Manifest[]>()
+
+  // infinite scroll
+  const [page, setPage] = useState(1)
+  const loader = useRef(null)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   // main data views
+  const {loading, setLoading} = useProgress()
   const [data, setData] = useState()
   const [error, setError] = useState()
 
@@ -120,13 +150,18 @@ export default function DataExplorer() {
   const [facets, setFacets] = useState<Facets>(null)
   const [filterState, setFilterState] = useState<FilterState>(initFilterState)
 
-  // option state
+  // options
   const [display, setDisplay] = useState<'nodes' | 'apps'>('nodes')
+  const [opts, setOpts] = useState<{colorCounts: boolean}>({
+    colorCounts: false
+  })
 
 
   useEffect(() => {
-    BK.getManifest({by: 'vsn'})
+    setLoading(true)
+    const mProm = BK.getManifest({by: 'vsn'})
       .then(data => {
+        setManifestByVSN(data) // todo(nc): remove
         setManifests(Object.values(data))
 
         const projects = getFilters(data, 'project')
@@ -140,11 +175,15 @@ export default function DataExplorer() {
         })
       }).catch(err => setError(err))
 
-    fetchMockRollup({})
+    //fetchMockRollup({})
+    const dProm = fetchRollup({})
       .then(data => {
         setData(data)
       })
       .catch(err => setError(err))
+
+    Promise.all([mProm, dProm])
+      .finally(() => setLoading(false))
   }, [])
 
 
@@ -154,6 +193,35 @@ export default function DataExplorer() {
     setByApp(mockByApp)
     setApps(Object.keys(mockByApp))
   }, [display])
+
+
+  const handleObserver = useCallback((entries) => {
+    const target = entries[0]
+    if (!target.isIntersecting) return
+
+    setLoadingMore(true)
+    setTimeout(() => {
+      setPage(prev => prev + 1)
+    }, 100)
+  }, [])
+
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0
+    };
+    const observer = new IntersectionObserver(handleObserver, option)
+    if (loader.current) observer.observe(loader.current)
+  }, [handleObserver])
+
+
+  useEffect(() => {
+    // todo(nc): page > 1 may not be enough depending on position in page?
+    if (page > 1)
+      setLoadingMore(false)
+  }, [page])
 
 
   const handleFilter = (facet: string, val: string) => {
@@ -170,8 +238,16 @@ export default function DataExplorer() {
   }
 
 
-  const nodes = data && Object.keys(data)
-    .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
+  const handleCheck = (evt, name) => {
+    setOpts(prev => ({...prev, [name]: evt.target.checked}))
+  }
+
+
+  let nodes
+  if (display == 'nodes') {
+    nodes = data && Object.keys(data)
+      .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
+  }
 
   return (
     <Root className="flex">
@@ -193,39 +269,54 @@ export default function DataExplorer() {
         })}
       </Sidebar>
       <Main>
-        <div className="flex">
-          <h1 className="no-margin">
-            {getTitle(nodes, apps)}
-          </h1>
-          <ToggleButtonGroup
-            value={display}
-            onChange={(evt, val) => setDisplay(val)}
-            aria-label="high-levrel group by"
-            exclusive
-          >
-            <ToggleButton value="nodes" aria-label="nodes">
-              Nodes
-            </ToggleButton>
-            <ToggleButton value="apps" aria-label="apps">
-              Apps
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </div>
+        <Top>
+          <Controls className="flex">
+            <h2 className="no-margin">
+              {getTitle(nodes, apps)}
+            </h2>
+
+            <div>
+              <ToggleButtonGroup
+                value={display}
+                onChange={(evt, val) => setDisplay(val)}
+                aria-label="high-levrel group by"
+                exclusive
+              >
+                <ToggleButton value="nodes" aria-label="nodes">
+                  Nodes
+                </ToggleButton>
+                <ToggleButton value="apps" aria-label="apps">
+                  Apps
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={opts.colorCounts}
+                    onChange={(evt) => handleCheck(evt, 'colorCounts')}
+                  />
+                }
+                label="color counts"
+              />
+            </div>
+          </Controls>
+        </Top>
 
 
-        {display == 'nodes' && data &&
-          Object.keys(data)
-            .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
-            .slice(0, 10)
+        {display == 'nodes' && nodes && manifestByVSN &&
+          nodes
+            .slice(0, getInfiniteEnd(page))
             .map(vsn => {
               const timelineData = groupBy(data[vsn], 'meta.plugin')
 
               return (
                 <TimelineContainer key={vsn}>
-                  <h2 className="pull-left">{vsn}</h2>
+                  <h2 className="pull-left">
+                    <Link to={`/node/${manifestByVSN[vsn].node_id}`}>{vsn}</Link>
+                  </h2>
                   <TimelineChart
                     data={timelineData}
-                    colorCell={colorDensity}
+                    colorCell={opts.colorCounts ? colorDensity : stdColor}
                     tooltip={(item) =>
                       `
                       <div style="margin-bottom: 5px;">
@@ -251,6 +342,7 @@ export default function DataExplorer() {
 
         {display == 'apps' && byApp &&
           apps
+            .slice(0, getInfiniteEnd(page))
             .map(name => {
               const timelineData = byApp[name]
               return (
@@ -258,7 +350,7 @@ export default function DataExplorer() {
                   <h2 className="pull-left">{name}</h2>
                   <TimelineChart
                     data={timelineData}
-                    colorCell={colorDensity}
+                    colorCell={opts.colorCounts ? colorDensity : stdColor}
                     tooltip={(item) =>
                       `
                       <div style="margin-bottom: 5px;">
@@ -267,13 +359,16 @@ export default function DataExplorer() {
                       ${item.meta.plugin}<br>
                       ${item.value.toLocaleString()} records`
                     }
-                    onRowClick={(val, data) =>
-                      console.log('row click', val, data)
-                    }
+                    onRowClick={(val, data) => {
+                      const {meta} = data[0]
+                      const {node} = meta
+                      navigate(`/node/${node.toUpperCase()}`)
+                      window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                    }}
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta
-                      window.open(`https://portal.sagecontinuum.org/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                      window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
                     }}
                     margin={{right: 0, bottom: 0}}
                   />
@@ -286,6 +381,21 @@ export default function DataExplorer() {
         {error &&
           <ErrorMsg>{error.message}</ErrorMsg>
         }
+
+        {(loading || loadingMore) && (nodes && !(getInfiniteEnd(page) > nodes.length)) &&
+          [...Array(ITEMS_INITIALLY)]
+            .map((_, i) =>
+              <TimelineSkeleton />
+            )
+        }
+
+        {loadingMore && (nodes && !(getInfiniteEnd(page) > nodes.length)) &&
+          <LoadingMore className="flex items-center muted">
+            <div>loading...</div>
+          </LoadingMore>
+        }
+
+        <div ref={loader} />
       </Main>
     </Root>
   )
@@ -299,8 +409,9 @@ const Root = styled.div`
 `
 
 const Main = styled.div`
-  height: 100%;
-  margin: 30px 20px 30px 0;
+
+
+  margin: 0px 20px 30px 0;
   padding: 0 0 0 20px;
   width: 100%;
 
@@ -314,6 +425,21 @@ const Main = styled.div`
   }
 `
 
+const Controls = styled.div`
+  background-color: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+
+  [role=group] {
+    margin-right: 10px;
+  }
+`
+
 const TimelineContainer = styled.div`
   margin-bottom: 100px;
+`
+
+const LoadingMore = styled.div`
+  font-size: 2em;
+
 `

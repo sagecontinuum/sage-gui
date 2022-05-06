@@ -499,8 +499,9 @@ export default function TimelineContainer(props: TimelineProps) {
 const Root = styled.div<{colorLinks: boolean}>`
   ${props => props.colorLinks && `
     .y-axis text {
-        color: #0080c7;
+        color: #444;
         font-size: 1.2em;
+        font-weight: 600;
       }
       .y-axis text:hover {
         cursor: pointer;

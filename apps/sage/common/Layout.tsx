@@ -33,7 +33,7 @@ export const Title = styled.div`
   font-weight: 800;
 `
 
-export const Top = styled.div<{top: string}>`
+export const Top = styled.div<{top?: string}>`
   position: sticky;
   top: ${props => props.top || '60px'};
   z-index: 100;

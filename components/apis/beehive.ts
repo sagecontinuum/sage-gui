@@ -436,3 +436,12 @@ export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> 
 }
 
 
+export async function getPluginCounts() : Promise<Record[]> {
+  const params = {
+    bucket: 'plugin-stats',
+    start: '-30d'
+  }
+
+  const data = await getData(params)
+  return data
+}
