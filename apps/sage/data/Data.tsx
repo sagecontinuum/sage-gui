@@ -5,8 +5,8 @@ import styled from 'styled-components'
 // import {fetchMockRollup} from './fetchMockRollup'
 import TimelineSkeleton from './TimelineSkeleton'
 import {Top} from '../common/Layout'
-import Sidebar, {FilterTitle} from '../data/DataSidebar'
-import Filter from '../data/Filter'
+import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
+import Filter from '../data-commons/Filter'
 import ErrorMsg from '../ErrorMsg'
 
 import { useProgress } from '/components/progress/ProgressProvider'
@@ -126,7 +126,7 @@ const initFilterState = {
 const facetList = Object.keys(initFilterState)
 
 
-export default function DataExplorer() {
+export default function Data() {
   const navigate = useNavigate()
 
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()

@@ -13,15 +13,15 @@ import App from './ecr/app/App'
 import CreateApp from './ecr/create-app/CreateApp'
 import RequireAuth from '/components/auth/RequireAuth'
 
-import DataSearch from './data/DataSearch'
-import DataProduct from './data/DataProduct'
 import Apps from './ecr/apps/Apps'
 import Node from '../common/node/Node'
 import JobStatus from './job-status/JobStatus'
 import DataBrowser from './data-stream/DataBrowser'
-import Ontology from './data/Ontology'
+import Ontology from './data-commons/Ontology'
+import Data from './data/Data'
+import DataSearch from './data-commons/DataSearch'
+import DataProduct from './data-commons/DataProduct'
 
-import DataExplorer from './data-explorer/DataExplorer'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -74,7 +74,7 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
-                  <Route path="data" element={<DataExplorer />} />
+                  <Route path="data" element={<Data />} />
                   <Route path="data-browser" element={<DataBrowser />} />
                   <Route path="data-browser/ontology/:name" element={<Ontology />} />
 

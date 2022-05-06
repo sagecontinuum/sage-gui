@@ -32,7 +32,7 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import { capitalize } from 'lodash'
 
 import Clipboard from '/components/utils/Clipboard'
-import Sidebar from '../data/DataSidebar'
+import Sidebar from '../data-commons/DataSidebar'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'

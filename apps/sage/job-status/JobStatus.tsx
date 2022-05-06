@@ -7,7 +7,7 @@ import Alert from '@mui/material/Alert'
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import JobTimeLine from './JobTimeline'
-import Sidebar from '../data/DataSidebar'
+import Sidebar from '../data-commons/DataSidebar'
 
 import SummaryBar from '../../admin/views/status/charts/SummaryBar'
 import { schemeCategory10 } from 'd3-scale-chromatic'
