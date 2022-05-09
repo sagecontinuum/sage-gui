@@ -16,11 +16,12 @@ import * as BH from '/components/apis/beehive'
 
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '/components/input/Checkbox'
 
 
 import {chain, groupBy, startCase} from 'lodash'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Checkbox from '/components/input/Checkbox'
+import {hourlyToDailyRollup} from './rollupUtils'
 
 
 // No assignment represents null, and is same as empty string in this view
@@ -31,7 +32,20 @@ const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
 
-function fetchRollup({byVersion = false, groupName = 'meta.vsn'}) {
+type FetchRollupProps = {
+  byVersion?: boolean
+  groupName?: string
+  grain?: 'hourly' | 'daily'
+}
+
+
+function fetchRollup(props: FetchRollupProps = {}) {
+  const {
+    byVersion = false,
+    groupName = 'meta.vsn',
+    grain = 'hourly'
+  } = props
+
   return BH.getPluginCounts()
     .then(data => data.map(o => {
       const { plugin } = o.meta
@@ -43,14 +57,31 @@ function fetchRollup({byVersion = false, groupName = 'meta.vsn'}) {
         }
       }
     }))
-    .then(d => groupBy(d, groupName))
+    .then(d => {
+      const data = parseData({data: d, groupName, grain})
+      return {rawData: d, data}
+    })
 }
 
 
-function getMockByApp(data) {
-  const d = Object.values(data).flat()
+function parseData({data, groupName = 'meta.vsn', grain = 'daily'}) {
+  const hourlyByVsn = groupBy(data, groupName)
 
-  let byApp = groupBy(d, 'meta.plugin')
+  if (grain == 'hourly') {
+    const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
+      ...acc,
+      [vsn]: groupBy(hourlyByVsn[vsn], 'meta.plugin')
+    }), {})
+    return hourly
+  } else if (grain == 'daily') {
+    return hourlyToDailyRollup(hourlyByVsn)
+  }
+
+  throw `parseData: grain='${grain}' not valid`
+}
+
+function getMockByApp(data) {
+  let byApp = groupBy(data, 'meta.plugin')
   const byAppByPlugin = Object.keys(byApp)
     .reduce((acc, app) => ({...acc, [app]: groupBy(byApp[app], 'meta.vsn')}), {})
 
@@ -145,7 +176,8 @@ const initFilterState = {
 }
 
 const initDataState = {
-  data: [],
+  rawData: null,
+  data: null,
   filtered: [],
   filters: initFilterState
 }
@@ -156,8 +188,15 @@ function dataReducer(state, action) {
     case 'INIT_DATA': {
       return {
         ...state,
+        rawData: action.data.rawData,
+        data: action.data.data,
+        filtered: sortVSNs(Object.keys(action.data.data)),
+      }
+    }
+    case 'SET_DATA': {
+      return {
+        ...state,
         data: action.data,
-        filtered: sortVSNs(Object.keys(action.data)),
       }
     }
     case 'ADD_FILTER': {
@@ -198,10 +237,21 @@ function dataReducer(state, action) {
         filters: newFilters
       }
     }
+    case 'ERROR': {
+      return ({
+        ...state,
+        error: action.error
+      })
+    }
     default: {
       return state
     }
   }
+}
+
+type Options = {
+  colorDensity: boolean
+  grain: 'hourly' | 'daily'
 }
 
 
@@ -221,12 +271,10 @@ export default function Data() {
 
   // main data views
   const {loading, setLoading} = useProgress()
-  const [{data, filtered, filters}, dispatch] = useReducer(
+  const [{data, filtered, filters, rawData, error}, dispatch] = useReducer(
     dataReducer,
     initDataState,
   )
-
-  const [error, setError] = useState()
 
   const [byApp, setByApp] = useState()
   const [apps, setApps] = useState<string[]>()
@@ -235,8 +283,9 @@ export default function Data() {
 
   // options
   const [display, setDisplay] = useState<'nodes' | 'apps'>('nodes')
-  const [opts, setOpts] = useState<{colorCounts: boolean}>({
-    colorCounts: false
+  const [opts, setOpts] = useState<Options>({
+    colorDensity: false,
+    grain: 'hourly'
   })
 
 
@@ -256,26 +305,17 @@ export default function Data() {
           focus: {title: 'Focus', items: focuses},
           location: {title: 'Location', items: locations}
         })
-      }).catch(err => setError(err))
+      }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup({})
+    const dProm = fetchRollup()
       .then(data => {
         dispatch({type: 'INIT_DATA', data})
       })
-      .catch(err => setError(err))
+      .catch(err => error => dispatch({type: 'ERROR', error}))
 
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
   }, [])
-
-
-  useEffect(() => {
-    if (!data) return
-    const mockByApp = getMockByApp(data)
-
-    setByApp(mockByApp)
-    setApps(Object.keys(mockByApp))
-  }, [display])
 
 
   const handleObserver = useCallback((entries) => {
@@ -294,18 +334,29 @@ export default function Data() {
       root: null,
       rootMargin: '100px',
       threshold: 0
-    };
+    }
     const observer = new IntersectionObserver(handleObserver, option)
     if (loader.current) observer.observe(loader.current)
   }, [handleObserver])
 
 
-  useEffect(() => {
-    // todo(nc): page > 1 may not be enough depending on position in page?
-    if (page > 1)
-      setLoadingMore(false)
-  }, [page])
+  const handleSetDisplay = (val) => {
+    if (!rawData) return
 
+    if (val == 'apps') {
+      const mockByApp = getMockByApp(rawData)
+
+      setPage(1)
+      setLoadingMore(true) // show skeletons
+
+      setTimeout(() => {
+        setByApp(mockByApp)
+        setApps(Object.keys(mockByApp))
+      })
+    }
+
+    setDisplay(val)
+  }
 
   const handleFilter = (evt, facet: string, val: string) => {
     const checked = evt.target.checked
@@ -314,7 +365,14 @@ export default function Data() {
   }
 
 
-  const handleCheck = (evt, name) => {
+  const handleOptionChange = (evt, name) => {
+    if (name == 'grain') {
+      const grain = evt.target.value
+      const data = parseData({data: rawData, grain})
+      dispatch({type: 'SET_DATA', data})
+      setOpts(prev => ({...prev, [name]: grain}))
+      return
+    }
     setOpts(prev => ({...prev, [name]: evt.target.checked}))
   }
 
@@ -349,8 +407,8 @@ export default function Data() {
             <div>
               <ToggleButtonGroup
                 value={display}
-                onChange={(evt, val) => setDisplay(val)}
-                aria-label="high-levrel group by"
+                onChange={(evt, val) => handleSetDisplay(val)}
+                aria-label="group by"
                 exclusive
               >
                 <ToggleButton value="nodes" aria-label="nodes">
@@ -360,107 +418,127 @@ export default function Data() {
                   Apps
                 </ToggleButton>
               </ToggleButtonGroup>
+
+              <ToggleButtonGroup
+                value={opts.grain}
+                onChange={(evt) => handleOptionChange(evt, 'grain')}
+                aria-label="change grain (windows)"
+                exclusive
+              >
+                <ToggleButton value="hourly" aria-label="hourly">
+                  hourly
+                </ToggleButton>
+                <ToggleButton value="daily" aria-label="daily">
+                  daily
+                </ToggleButton>
+              </ToggleButtonGroup>
+
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={opts.colorCounts}
-                    onChange={(evt) => handleCheck(evt, 'colorCounts')}
+                    checked={opts.colorDensity}
+                    onChange={(evt) => handleOptionChange(evt, 'colorDensity')}
                   />
                 }
-                label="show density"
+                label="color density"
               />
+
             </div>
           </Controls>
         </Top>
 
+        <Items>
+          {display == 'nodes' && filtered && manifestByVSN &&
+            filtered
+              .slice(0, getInfiniteEnd(page))
+              .map(vsn => {
+                const timelineData = data[vsn]
+                // const timelineData = groupBy(data[vsn], 'meta.plugin')
 
-        {display == 'nodes' && filtered && manifestByVSN &&
-          filtered
-            .slice(0, getInfiniteEnd(page))
-            .map(vsn => {
-              const timelineData = groupBy(data[vsn], 'meta.plugin')
+                return (
+                  <TimelineContainer key={vsn}>
+                    <h2>
+                      <Link to={`/node/${manifestByVSN[vsn].node_id}`}>{vsn}</Link>
+                    </h2>
+                    <TimelineChart
+                      data={timelineData}
+                      cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
+                      colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      tooltip={(item) =>
+                        `
+                        <div style="margin-bottom: 5px;">
+                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
+                        </div>
+                        ${item.meta.plugin}<br>
+                        ${item.value.toLocaleString()} records`
+                      }
+                      onRowClick={(val, data) =>
+                        console.log('row click', val, data)
+                      }
+                      onCellClick={(data) => {
+                        const {timestamp, meta} = data
+                        const {vsn, plugin} = meta
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                      }}
+                      margin={{right: 0, bottom: 0}}
+                    />
+                  </TimelineContainer>
+                )
+              })
+          }
 
-              return (
-                <TimelineContainer key={vsn}>
-                  <h2 className="pull-left">
-                    <Link to={`/node/${manifestByVSN[vsn].node_id}`}>{vsn}</Link>
-                  </h2>
-                  <TimelineChart
-                    data={timelineData}
-                    colorCell={opts.colorCounts ? colorDensity : stdColor}
-                    tooltip={(item) =>
-                      `
-                      <div style="margin-bottom: 5px;">
-                        ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
-                      </div>
-                      ${item.meta.plugin}<br>
-                      ${item.value.toLocaleString()} records`
-                    }
-                    onRowClick={(val, data) =>
-                      console.log('row click', val, data)
-                    }
-                    onCellClick={(data) => {
-                      const {timestamp, meta} = data
-                      const {vsn, plugin} = meta
-                      window.open(`https://portal.sagecontinuum.org/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
-                    }}
-                    margin={{right: 0, bottom: 0}}
-                  />
-                </TimelineContainer>
-              )
-            })
-        }
+          {display == 'apps' && apps && byApp &&
+            apps
+              .slice(0, getInfiniteEnd(page))
+              .map(name => {
+                const timelineData = byApp[name]
+                return (
+                  <TimelineContainer key={name}>
+                    <h2>{name}</h2>
+                    <TimelineChart
+                      data={timelineData}
+                      limitRowCount={10}
+                      cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
+                      colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      tooltip={(item) =>
+                        `
+                        <div style="margin-bottom: 5px;">
+                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
+                        </div>
+                        ${item.meta.plugin}<br>
+                        ${item.value.toLocaleString()} records`
+                      }
+                      onRowClick={(val, data) => {
+                        const {meta} = data[0]
+                        const {node} = meta
+                        navigate(`/node/${node.toUpperCase()}`)
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                      }}
+                      onCellClick={(data) => {
+                        const {timestamp, meta} = data
+                        const {vsn, plugin} = meta
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                      }}
+                      margin={{right: 0, bottom: 0}}
+                    />
+                  </TimelineContainer>
+                )
+              })
+          }
+        </Items>
 
-        {display == 'apps' && byApp &&
-          apps
-            .slice(0, getInfiniteEnd(page))
-            .map(name => {
-              const timelineData = byApp[name]
-              return (
-                <TimelineContainer key={name}>
-                  <h2 className="pull-left">{name}</h2>
-                  <TimelineChart
-                    data={timelineData}
-                    colorCell={opts.colorCounts ? colorDensity : stdColor}
-                    tooltip={(item) =>
-                      `
-                      <div style="margin-bottom: 5px;">
-                        ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
-                      </div>
-                      ${item.meta.plugin}<br>
-                      ${item.value.toLocaleString()} records`
-                    }
-                    onRowClick={(val, data) => {
-                      const {meta} = data[0]
-                      const {node} = meta
-                      navigate(`/node/${node.toUpperCase()}`)
-                      window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
-                    }}
-                    onCellClick={(data) => {
-                      const {timestamp, meta} = data
-                      const {vsn, plugin} = meta
-                      window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
-                    }}
-                    margin={{right: 0, bottom: 0}}
-                  />
-                </TimelineContainer>
-              )
-            })
-        }
-
-        <br/>
         {error &&
           <ErrorMsg>{error.message}</ErrorMsg>
         }
 
-        {(loading || loadingMore) && (getInfiniteEnd(page) < filtered?.length) &&
+        {(loading || loadingMore) && (data ? getInfiniteEnd(page) < data?.length : true) &&
           [...Array(ITEMS_INITIALLY)]
             .map((_, i) =>
               <TimelineSkeleton key={i} />
             )
         }
 
-        {loadingMore && (getInfiniteEnd(page) < filtered?.length) &&
+        {loadingMore && (data ? getInfiniteEnd(page) < data?.length : true) &&
           <LoadingMore className="flex items-center muted">
             <div>loading...</div>
           </LoadingMore>
@@ -480,8 +558,6 @@ const Root = styled.div`
 `
 
 const Main = styled.div`
-
-
   margin: 0px 20px 30px 0;
   padding: 0 0 0 20px;
   width: 100%;
@@ -504,9 +580,17 @@ const Controls = styled.div`
 
 const TimelineContainer = styled.div`
   margin-bottom: 100px;
+
+  h2 {
+    float: left;
+    margin: 0;
+  }
+`
+
+const Items = styled.div`
+  margin-top: 40px;
 `
 
 const LoadingMore = styled.div`
   font-size: 2em;
-
 `

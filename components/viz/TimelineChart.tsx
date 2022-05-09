@@ -12,9 +12,16 @@ import HomeIcon from '@mui/icons-material/HomeOutlined'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded'
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded'
 
+const HOUR = 60 * 60 * 1000
+const DAY = 24 * HOUR
+
+const CELL_UNITS = {
+  'hour': HOUR,
+  'day': DAY
+}
+
 const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
 const defaultWidth = 800
-const hour = 60 * 60 * 1000
 
 const cellHeight = 15
 const cellPad = 2
@@ -61,10 +68,10 @@ function parseData(data) {
 }
 
 
-function getDomain(data) {
+function getDomain(data, cellUnit) {
   const sorted = [...data].sort((a, b) => +new Date(a.timestamp) - +new Date(b.timestamp))
   const start = new Date(sorted[0].timestamp)
-  const end =  new Date( new Date(sorted[sorted.length - 1].timestamp).getTime() + hour)
+  const end =  new Date( new Date(sorted[sorted.length - 1].timestamp).getTime() + cellUnit)
   return [start, end]
 }
 
@@ -138,8 +145,9 @@ function drawChart(
     onRowClick
   } = params
 
+  const cellUnit = params.cellUnit ? CELL_UNITS[params.cellUnit] : CELL_UNITS.hour
 
-  const [start, end] = getDomain(data)
+  const [start, end] = getDomain(data, cellUnit)
   const height = computeCanvasHeight(yLabels, cellHeight)
 
   const zoom = d3.zoom()
@@ -297,7 +305,7 @@ function drawChart(
 
     let w = d.end ?
       x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :  // use end time
-      x(new Date(d.timestamp).getTime() + hour) - x(new Date(d.timestamp)) // otherwise, assume hour (for now)
+      x(new Date(d.timestamp).getTime() + cellUnit) - x(new Date(d.timestamp)) // note: cellUnit is an hour unless user provided
 
     return w > cellPad ? w - cellPad : cellPad
   }
@@ -390,6 +398,7 @@ type TimelineProps = {
   showLegend?: boolean
   showButtons?: boolean
   limitRowCount?: number
+  cellUnit?: 'hour' | 'day'
   yFormat?: (label) => string
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (label: string) => void
@@ -422,6 +431,7 @@ function Chart(props: TimelineProps) {
 
     let yLabels, chartData, size
     if (typeof data == 'object') {
+      // todo(nc): optimize by removing grouped api requirement.  allow flat array of objs?
       yLabels = Object.keys(data)
       chartData = parseData(data)
       size = computeSize(data)
@@ -442,6 +452,7 @@ function Chart(props: TimelineProps) {
       if (limitRowCount) {
         setTotalRows(yLabels.length)
         yLabels = (limitRowCount && !showAllRows) ? yLabels.slice(0, limitRowCount) : yLabels
+        chartData = chartData.filter(o => yLabels.includes(o.row) )
       }
 
       drawChart(node, {
