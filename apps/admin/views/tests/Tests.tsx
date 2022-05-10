@@ -11,7 +11,7 @@ import * as BK from '/components/apis/beekeeper'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, { color } from '/components/viz/TimelineChart'
-
+import { endOfHour, subDays } from 'date-fns'
 
 const timeOpts = { hour: '2-digit', minute:'2-digit' }
 const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
@@ -142,11 +142,12 @@ export default function TestView() {
           <h2>Health</h2>
           <TimelineChart
             data={health.prod}
+            startTime={subDays(new Date(), 3)}
+            endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
             colorCell={getHealthColor}
             tooltip={healthTooltip}
-            tailHours={72}
           />
         </>
       }
@@ -158,10 +159,11 @@ export default function TestView() {
           <h2>Sanity Tests</h2>
           <TimelineChart
             data={sanity.prod}
+            startTime={subDays(new Date(), 3)}
+            endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
             tooltip={sanityTooltip}
-            tailHours={72}
           />
         </>
       }
@@ -181,11 +183,12 @@ export default function TestView() {
           <h2>Health</h2>
           <TimelineChart
             data={health.dev}
+            startTime={subDays(new Date(), 3)}
+            endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
             colorCell={getHealthColor}
             tooltip={healthTooltip}
-            tailHours={72}
           />
         </>
       }
@@ -196,10 +199,11 @@ export default function TestView() {
           <h2>Sanity Tests</h2>
           <TimelineChart
             data={sanity.dev}
+            startTime={subDays(new Date(), 3)}
+            endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
             tooltip={sanityTooltip}
-            tailHours={72}
           />
         </>
       }

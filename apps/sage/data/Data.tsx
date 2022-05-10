@@ -464,6 +464,8 @@ export default function Data() {
                       data={timelineData}
                       cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      startTime={subDays(new Date(), 30)}
+                      endTime={endOfHour(new Date())}
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">
@@ -500,6 +502,8 @@ export default function Data() {
                       limitRowCount={10}
                       cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      startTime={subDays(new Date(), 30)}
+                      endTime={endOfHour(new Date())}
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">

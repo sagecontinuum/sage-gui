@@ -12,6 +12,7 @@ import TimelineChart, { color } from '/components/viz/TimelineChart'
 
 import AllRecentData from '/apps/common/AllRecentData'
 import { startCase } from 'lodash'
+import { endOfHour, subDays } from 'date-fns'
 
 const cols = [
   'node_type',
@@ -53,12 +54,6 @@ function sanityColor(val, obj) {
     return color.orange
   else
     return color.red4
-}
-
-
-function ceilingHour(date: Date) {
-  const ms = 60 * 60 * 1000
-  return new Date(Math.ceil(date.getTime() / ms ) * ms);
 }
 
 
@@ -246,7 +241,8 @@ export default function NodeView() {
           {health &&
             <TimelineChart
               data={health}
-              endTime={ceilingHour(new Date())}
+              startTime={subDays(new Date(), 3)}
+              endTime={endOfHour(new Date())}
               colorCell={(val, obj) => {
                 if (val == null)
                   return color.noValue
@@ -261,7 +257,6 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
-              tailHours={72}
             />
           }
 
@@ -270,7 +265,8 @@ export default function NodeView() {
           {sanityData &&
             <TimelineChart
               data={sanityData}
-              endTime={ceilingHour(new Date())}
+              startTime={subDays(new Date(), 3)}
+              endTime={endOfHour(new Date())}
               yFormat={l => l.split('.').pop()}
               colorCell={sanityColor}
               tooltip={(item) =>
@@ -282,7 +278,6 @@ export default function NodeView() {
                 `
               }
               margin={{right: 20}}
-              tailHours={72}
             />
           }
 

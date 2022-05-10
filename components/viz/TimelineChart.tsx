@@ -132,11 +132,11 @@ function drawChart(
 
   const {
     data,
+    startTime,
     endTime,
     scaleExtent,
     margin,
     width = defaultWidth,
-    tailHours,
     yLabels,
     yFormat,
     tooltip,
@@ -158,7 +158,7 @@ function drawChart(
   // create scaling functions
   const x = d3.scaleTime()
     .domain([
-      tailHours ? (new Date(end).getTime() - tailHours*60*60*1000) : start,
+      startTime || start,
       endTime || end
     ])
     .range([0, width])
@@ -391,10 +391,10 @@ type Data = { [key: string]: Record[] }
 
 type TimelineProps = {
   data: Data
+  startTime?: Date
   endTime?: Date
   scaleExtent?: [number, number]
   margin?: {top?: number, right?: number, bottom?: number, left?: number}
-  tailHours?: number
   showLegend?: boolean
   showButtons?: boolean
   limitRowCount?: number
