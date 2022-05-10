@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState, memo } from 'react'
 import styled from 'styled-components'
 
 import * as d3 from 'd3'
@@ -521,13 +521,13 @@ const _debounce = function(ms, fn) {
 
 
 
-export default function TimelineContainer(props: TimelineProps) {
+export default memo(function TimelineContainer(props: TimelineProps) {
   return (
     <Root colorLinks={!!props.onRowClick}>
       <Chart {...props} />
     </Root>
   )
-}
+}, (prev, next) => prev.data === next.data && prev.colorCell === next.colorCell)
 
 const Root = styled.div<{colorLinks: boolean}>`
   button {
