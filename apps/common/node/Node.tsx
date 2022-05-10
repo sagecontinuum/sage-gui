@@ -302,8 +302,6 @@ const LeftSide = styled.div`
 
 const RightSide = styled.div`
   margin: 20px;
-  width: 100%;
-  flex: 1;
 `
 
 const WSN_VIEW_WIDTH = 400
