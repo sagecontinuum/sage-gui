@@ -17,10 +17,12 @@ import * as BH from '/components/apis/beehive'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import Divider from '@mui/material/Divider'
 import Checkbox from '/components/input/Checkbox'
 
 
 import {chain, groupBy, startCase} from 'lodash'
+import { endOfHour, subDays } from 'date-fns'
 import {hourlyToDailyRollup} from './rollupUtils'
 
 
@@ -28,6 +30,7 @@ import {hourlyToDailyRollup} from './rollupUtils'
 const NO_ASSIGNMENT = 'None'
 const TIME_GRAIN = 'hour'
 
+const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
@@ -79,6 +82,7 @@ function parseData({data, groupName = 'meta.vsn', grain = 'daily'}) {
 
   throw `parseData: grain='${grain}' not valid`
 }
+
 
 function getMockByApp(data) {
   let byApp = groupBy(data, 'meta.plugin')
@@ -404,44 +408,54 @@ export default function Data() {
               <h5 className="subtitle no-margin muted">{getSubTitle(filtered, apps)}</h5>
             </div>
 
-            <div>
-              <ToggleButtonGroup
-                value={display}
-                onChange={(evt, val) => handleSetDisplay(val)}
-                aria-label="group by"
-                exclusive
-              >
-                <ToggleButton value="nodes" aria-label="nodes">
-                  Nodes
-                </ToggleButton>
-                <ToggleButton value="apps" aria-label="apps">
-                  Apps
-                </ToggleButton>
-              </ToggleButtonGroup>
+            <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
 
-              <ToggleButtonGroup
-                value={opts.grain}
-                onChange={(evt) => handleOptionChange(evt, 'grain')}
-                aria-label="change grain (windows)"
-                exclusive
-              >
-                <ToggleButton value="hourly" aria-label="hourly">
-                  hourly
-                </ToggleButton>
-                <ToggleButton value="daily" aria-label="daily">
-                  daily
-                </ToggleButton>
-              </ToggleButtonGroup>
+            <div className="flex">
+              <div>
+                <h5 className="subtitle no-margin muted">Group by</h5>
+                <ToggleButtonGroup
+                  value={display}
+                  onChange={(evt, val) => handleSetDisplay(val)}
+                  aria-label="group by"
+                  exclusive
+                >
+                  <ToggleButton value="nodes" aria-label="nodes">
+                    Nodes
+                  </ToggleButton>
+                  <ToggleButton value="apps" aria-label="apps">
+                    Apps
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </div>
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={opts.colorDensity}
-                    onChange={(evt) => handleOptionChange(evt, 'colorDensity')}
-                  />
-                }
-                label="color density"
-              />
+              <div>
+                <h5 className="subtitle no-margin muted">Time</h5>
+                <ToggleButtonGroup
+                  value={opts.grain}
+                  onChange={(evt) => handleOptionChange(evt, 'grain')}
+                  aria-label="change grain (windows)"
+                  exclusive
+                >
+                  <ToggleButton value="hourly" aria-label="hourly">
+                    hourly
+                  </ToggleButton>
+                  <ToggleButton value="daily" aria-label="daily">
+                    daily
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </div>
+
+              <div className="checkboxes">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={opts.colorDensity}
+                      onChange={(evt) => handleOptionChange(evt, 'colorDensity')}
+                    />
+                  }
+                  label="color density"
+                />
+              </div>
 
             </div>
           </Controls>
@@ -482,7 +496,7 @@ export default function Data() {
                         const {vsn, plugin} = meta
                         window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
                       }}
-                      margin={{right: 0, bottom: 0}}
+                      margin={TIMELINE_MARGIN}
                     />
                   </TimelineContainer>
                 )
@@ -523,7 +537,7 @@ export default function Data() {
                         const {vsn, plugin} = meta
                         window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
                       }}
-                      margin={{right: 0, bottom: 0}}
+                      margin={TIMELINE_MARGIN}
                     />
                   </TimelineContainer>
                 )
@@ -565,11 +579,6 @@ const Main = styled.div`
   margin: 0px 20px 30px 0;
   padding: 0 0 0 20px;
   width: 100%;
-
-  h2.title,
-  .subtitle {
-    margin-right: 20px;
-  }
 `
 
 const Controls = styled.div`
@@ -580,6 +589,14 @@ const Controls = styled.div`
   [role=group] {
     margin-right: 10px;
   }
+
+  .MuiToggleButtonGroup-root {
+    height: 25px;
+  }
+
+  .checkboxes {
+    margin: 17px 10px 0 10px;
+  }
 `
 
 const TimelineContainer = styled.div`
@@ -587,7 +604,7 @@ const TimelineContainer = styled.div`
 
   h2 {
     float: left;
-    margin: 0;
+    margin: 0 0 0 20px;
   }
 `
 

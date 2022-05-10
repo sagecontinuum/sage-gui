@@ -13,7 +13,6 @@
     "url": "git+https://github.com/sagecontinuum/sage-gui.git"
   },
   "dependencies": {
-    "@date-io/date-fns": "^2.13.1",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@mui/icons-material": "^5.5.0",
