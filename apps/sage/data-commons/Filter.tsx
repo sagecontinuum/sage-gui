@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import {useState, useEffect, ChangeEvent } from 'react'
 import styled from 'styled-components'
 
 import IconButton from '@mui/material/IconButton'
@@ -28,14 +28,20 @@ type Props = {
   data: {name: string, count: number}[]
   type?: string
   checked: string[]
-  onCheck: (val: string) => void
   hideSearch?: boolean
   hideSelectAll?: boolean
+  onCheck: (evt: ChangeEvent<HTMLInputElement>, val: string) => void
+  onSelectAll: (evt: ChangeEvent<HTMLInputElement>, val: string[]) => void
 }
 
 export default function Filter(props: Props) {
   const {
-    title, type, onCheck, hideSearch, hideSelectAll
+    title,
+    type,
+    hideSearch,
+    hideSelectAll,
+    onCheck,
+    onSelectAll
   } = props
 
 
@@ -94,7 +100,8 @@ export default function Filter(props: Props) {
     setShowAll(!showAll)
   }
 
-  const handleSelectAll = () => {
+  const handleSelectAll = (evt) => {
+    onSelectAll(evt, props.data.map(o => o.name))
   }
 
   const onSubmitRange = (evt) => {
@@ -114,7 +121,7 @@ export default function Filter(props: Props) {
           {!hideSelectAll &&
             <Checkbox
               checked={selectAll}
-              onChange={handleSelectAll}
+              onChange={(evt) => handleSelectAll(evt)}
               indeterminate={showUndo && !selectAll}
             />
           }

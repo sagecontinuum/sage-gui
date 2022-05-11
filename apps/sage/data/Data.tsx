@@ -2,7 +2,12 @@ import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
-// import {fetchMockRollup} from './fetchMockRollup'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import ToggleButton from '@mui/material/ToggleButton'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Divider from '@mui/material/Divider'
+import Checkbox from '/components/input/Checkbox'
+
 import TimelineSkeleton from './TimelineSkeleton'
 import {Top} from '../common/Layout'
 import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
@@ -13,17 +18,12 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, {colors} from '/components/viz/TimelineChart'
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
+import * as ECR from '/components/apis/ecr'
+// import {fetchMockRollup} from './fetchMockRollup'
 
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import ToggleButton from '@mui/material/ToggleButton'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
-import Checkbox from '/components/input/Checkbox'
-
-
-import {chain, groupBy, startCase} from 'lodash'
+import { chain, groupBy, startCase, intersection, sum} from 'lodash'
 import { endOfHour, subDays } from 'date-fns'
-import {hourlyToDailyRollup} from './rollupUtils'
+import { hourlyToDailyRollup } from './rollupUtils'
 
 
 // No assignment represents null, and is same as empty string in this view
@@ -102,19 +102,26 @@ const getFacets = (data, name) =>
 
 // core logic for intersection of unions; could be optimized or simplified if needed
 const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
-  let filtered = []
-  for (const manifest of manifests) {
-    for (const [field, vals] of Object.entries(filters)) {
-      if (!vals.includes(manifest[field])) continue
-      filtered.push(manifest)
+  const vsnsByField = {}
+  for (const [field, vals] of Object.entries(filters)) {
+    for (const manifest of manifests) {
+      if (!vals.includes(manifest[field]))
+        continue
+
+      const vsn = manifest.vsn
+      vsnsByField[field] = field in vsnsByField ?
+        [...vsnsByField[field], vsn] : [vsn]
     }
   }
 
-  let vsns = filtered.map(o => o.vsn)
+  const count = sum(Object.values(vsnsByField).map(vals => vals.length))
+
+  let vsns = count ?
+    intersection(...Object.values(vsnsByField)) : manifests.map(m => m.vsn)
 
   // find intersection of vsns and data vsns
   let vsnSubset = Object.keys(data)
-    .filter(vsn => vsns.length ? vsns.includes(vsn) : true)
+    .filter(vsn => vsns.includes(vsn))
 
   vsnSubset = sortVSNs(vsnSubset)
   return vsnSubset
@@ -160,6 +167,12 @@ const colorDensity = (val, obj) => {
 
 const getInfiniteEnd = (page: number) =>
   page == 1 ? ITEMS_INITIALLY : page * ITEMS_PER_PAGE
+
+
+// todo(nc): temp solution until we have references!
+// use the most recent app with same substring, ignoring "plugin-" and version
+const findApp = (apps, name) =>
+  apps.find(o => o.id.includes(name.replace('plugin-', '')))
 
 
 
@@ -241,6 +254,32 @@ function dataReducer(state, action) {
         filters: newFilters
       }
     }
+    case 'SELECT_ALL': {
+      const {data, filters} = state
+      const {manifests, facet, vals} = action
+
+      const newFilters = {...filters, [facet]: vals}
+      const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+      return {
+        ...state,
+        filtered,
+        filters: newFilters
+      }
+    }
+    case 'CLEAR_CATEGORY': {
+      const {data, filters} = state
+      const {manifests, facet} = action
+
+      const newFilters = {...filters, [facet]: []}
+      const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+      return {
+        ...state,
+        filtered,
+        filters: newFilters
+      }
+    }
     case 'ERROR': {
       return ({
         ...state,
@@ -267,6 +306,7 @@ export default function Data() {
 
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
   const [manifests, setManifests] = useState<BK.Manifest[]>()
+  const [ecr, setECR] = useState<BK.Manifest[]>()
 
   // infinite scroll
   const [page, setPage] = useState(1)
@@ -319,6 +359,10 @@ export default function Data() {
 
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
+
+    // temp solution for ECR app links
+    ECR.listApps('public')
+      .then(apps => setECR(apps))
   }, [])
 
 
@@ -368,6 +412,12 @@ export default function Data() {
     else dispatch({type: 'RM_FILTER', manifests, facet, val})
   }
 
+  const handleSelectAll = (evt, facet: string, vals: string[]) => {
+    const checked = evt.target.checked
+    if (checked) dispatch({type: 'SELECT_ALL', manifests, facet, vals})
+    else dispatch({type: 'CLEAR_CATEGORY', manifests, facet})
+  }
+
 
   const handleOptionChange = (evt, name) => {
     if (name == 'grain') {
@@ -394,6 +444,7 @@ export default function Data() {
               title={startCase(title.replace('res_', ''))}
               checked={filters[facet]}
               onCheck={(evt, val) => handleFilter(evt, facet, val)}
+              onSelectAll={(evt, vals) => handleSelectAll(evt, facet, vals)}
               type="text"
               data={items}
             />
@@ -453,7 +504,7 @@ export default function Data() {
                       onChange={(evt) => handleOptionChange(evt, 'colorDensity')}
                     />
                   }
-                  label="color density"
+                  label="density"
                 />
               </div>
 
@@ -480,21 +531,21 @@ export default function Data() {
                       colorCell={opts.colorDensity ? colorDensity : stdColor}
                       startTime={subDays(new Date(), 30)}
                       endTime={endOfHour(new Date())}
-                      tooltip={(item) =>
-                        `
+                      tooltip={(item) => `
                         <div style="margin-bottom: 5px;">
                           ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
                         </div>
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
                       }
-                      onRowClick={(val, data) =>
-                        console.log('row click', val, data)
-                      }
+                      onRowClick={(name, data) => {
+                        const app = findApp(ecr, name)
+                        navigate(`/apps/app/${app.id.split(':')[0]}`)
+                      }}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />
@@ -530,12 +581,11 @@ export default function Data() {
                         const {meta} = data[0]
                         const {node} = meta
                         navigate(`/node/${node.toUpperCase()}`)
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
                       }}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`)
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />
