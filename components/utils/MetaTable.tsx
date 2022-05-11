@@ -43,7 +43,7 @@ const Table = styled.table`
   thead th {
     color: #fff;
     border-radius: 5px 5px 0 0;
-    border-bottom: 1px solid #558672 !important;
+    border-bottom: 1px solid #6bad94 !important;
     background: #69cba5;
   }
 `
