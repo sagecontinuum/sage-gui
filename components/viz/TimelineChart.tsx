@@ -527,7 +527,12 @@ export default memo(function TimelineContainer(props: TimelineProps) {
       <Chart {...props} />
     </Root>
   )
-}, (prev, next) => prev.data === next.data && prev.colorCell === next.colorCell)
+}, (prev, next) =>
+  prev.data === next.data &&
+  prev.colorCell === next.colorCell &&
+  prev.onRowClick === next.onRowClick &&
+  prev.onCellClick === next.onCellClick
+)
 
 const Root = styled.div<{colorLinks: boolean}>`
   button {

@@ -14,7 +14,7 @@ import Breadcrumbs from './BreadCrumbs'
 import { formatter } from './DataSearch'
 import {Top} from '../common/Layout'
 
-import * as Data from '/components/apis/data'
+import * as Data from '/components/apis/dataCommons'
 import * as BH from '/components/apis/beehive'
 
 import Table from '/components/table/Table'

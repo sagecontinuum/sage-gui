@@ -11,7 +11,7 @@ import Checkbox from '/components/input/Checkbox'
 import TimelineSkeleton from './TimelineSkeleton'
 import {Top} from '../common/Layout'
 import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
-import Filter from '../data-commons/Filter'
+import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
 import { useProgress } from '/components/progress/ProgressProvider'
@@ -21,7 +21,7 @@ import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
 // import {fetchMockRollup} from './fetchMockRollup'
 
-import { chain, groupBy, startCase, intersection, sum} from 'lodash'
+import { chain, groupBy, startCase, intersection, sum, memoize } from 'lodash'
 import { endOfHour, subDays } from 'date-fns'
 import { hourlyToDailyRollup } from './rollupUtils'
 
@@ -42,7 +42,7 @@ type FetchRollupProps = {
 }
 
 
-function fetchRollup(props: FetchRollupProps = {}) {
+const fetchRollup = memoize(function(props: FetchRollupProps = {}) {
   const {
     byVersion = false,
     groupName = 'meta.vsn',
@@ -64,7 +64,7 @@ function fetchRollup(props: FetchRollupProps = {}) {
       const data = parseData({data: d, groupName, grain})
       return {rawData: d, data}
     })
-}
+})
 
 
 function parseData({data, groupName = 'meta.vsn', grain = 'daily'}) {
@@ -359,10 +359,13 @@ export default function Data() {
 
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
+  }, [])
 
+
+  useEffect(() => {
     // temp solution for ECR app links
     ECR.listApps('public')
-      .then(apps => setECR(apps))
+      .then(ecr => setECR(ecr))
   }, [])
 
 
@@ -518,7 +521,6 @@ export default function Data() {
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
                 const timelineData = data[vsn]
-                // const timelineData = groupBy(data[vsn], 'meta.plugin')
 
                 return (
                   <TimelineContainer key={vsn}>
@@ -538,7 +540,7 @@ export default function Data() {
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
                       }
-                      onRowClick={(name, data) => {
+                      onRowClick={(name) => {
                         const app = findApp(ecr, name)
                         navigate(`/apps/app/${app.id.split(':')[0]}`)
                       }}
