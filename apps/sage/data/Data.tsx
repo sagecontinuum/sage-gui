@@ -371,6 +371,10 @@ export default function Data() {
 
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
+
+    // temp solution for ECR app links
+    ECR.listApps('public')
+      .then(apps => setECR(apps))
   }, [])
 
 
