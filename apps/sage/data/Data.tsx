@@ -43,38 +43,43 @@ type FetchRollupProps = {
 
 
 const fetchRollup = memoize(function(props: FetchRollupProps = {}) {
-  const {
-    byVersion = false,
-    groupName = 'meta.vsn',
-    grain = 'hourly'
-  } = props
-
   return BH.getPluginCounts()
-    .then(data => data.map(o => {
-      const { plugin } = o.meta
-      return {
-        ...o,
-        meta: {
-          ...o.meta,
-          plugin: byVersion ? plugin : plugin.split(':')[0]
-        }
-      }
-    }))
     .then(d => {
-      const data = parseData({data: d, groupName, grain})
+      const data = parseData({data: d, ...props})
       return {rawData: d, data}
     })
 })
 
 
-function parseData({data, groupName = 'meta.vsn', grain = 'daily'}) {
-  const hourlyByVsn = groupBy(data, groupName)
+type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
+
+function parseData(props: ParseDataProps) {
+  const {
+    data,
+    byVersion = false,
+    groupName = 'meta.vsn',
+    grain = 'hourly'
+  } = props
+
+  const d = data.map(o => {
+    const { plugin } = o.meta
+    return {
+      ...o,
+      meta: {
+        ...o.meta,
+        plugin: byVersion ? plugin : plugin.split(':')[0]
+      }
+    }
+  })
+
+  const hourlyByVsn = groupBy(d, groupName)
 
   if (grain == 'hourly') {
     const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
       ...acc,
       [vsn]: groupBy(hourlyByVsn[vsn], 'meta.plugin')
     }), {})
+
     return hourly
   } else if (grain == 'daily') {
     return hourlyToDailyRollup(hourlyByVsn)
@@ -293,7 +298,8 @@ function dataReducer(state, action) {
 }
 
 type Options = {
-  colorDensity: boolean
+  density: boolean
+  versions: boolean
   grain: 'hourly' | 'daily'
 }
 
@@ -328,7 +334,8 @@ export default function Data() {
   // options
   const [display, setDisplay] = useState<'nodes' | 'apps'>('nodes')
   const [opts, setOpts] = useState<Options>({
-    colorDensity: false,
+    density: false,
+    versions: false,
     grain: 'hourly'
   })
 
@@ -429,7 +436,14 @@ export default function Data() {
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: grain}))
       return
+    } else if (name == 'versions') {
+      const byVersion = evt.target.checked
+      const data = parseData({data: rawData, grain: opts.grain, byVersion})
+      dispatch({type: 'SET_DATA', data})
+      setOpts(prev => ({...prev, [name]: byVersion}))
+      return
     }
+
     setOpts(prev => ({...prev, [name]: evt.target.checked}))
   }
 
@@ -503,8 +517,17 @@ export default function Data() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={opts.colorDensity}
-                      onChange={(evt) => handleOptionChange(evt, 'colorDensity')}
+                      checked={opts.versions}
+                      onChange={(evt) => handleOptionChange(evt, 'versions')}
+                    />
+                  }
+                  label="versions"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={opts.density}
+                      onChange={(evt) => handleOptionChange(evt, 'density')}
                     />
                   }
                   label="density"
@@ -530,7 +553,7 @@ export default function Data() {
                     <TimelineChart
                       data={timelineData}
                       cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      colorCell={opts.density ? colorDensity : stdColor}
                       startTime={subDays(new Date(), 30)}
                       endTime={endOfHour(new Date())}
                       tooltip={(item) => `
@@ -569,7 +592,7 @@ export default function Data() {
                       data={timelineData}
                       limitRowCount={10}
                       cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.colorDensity ? colorDensity : stdColor}
+                      colorCell={opts.density ? colorDensity : stdColor}
                       startTime={subDays(new Date(), 30)}
                       endTime={endOfHour(new Date())}
                       tooltip={(item) =>

@@ -81,7 +81,7 @@ const StyledCheckbox = memo(function StyledCheckbox(props: Props) {
     />
   )
 }, (prev, next) =>
-  prev.checked == next.checked && prev.indeterminate == next.indeterminate
+  prev.checked == next.checked && prev.indeterminate == next.indeterminate && prev.onChange == next.onChange
 )
 
 export default StyledCheckbox
