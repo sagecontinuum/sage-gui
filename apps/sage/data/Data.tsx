@@ -547,7 +547,8 @@ export default function Data() {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`, '_blank')
+                        const win = opts.grain == 'daily' ? 'd' : 'h'
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />
@@ -587,7 +588,8 @@ export default function Data() {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=h`, '_blank')
+                        const win = opts.grain == 'daily' ? 'd' : 'h'
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />
