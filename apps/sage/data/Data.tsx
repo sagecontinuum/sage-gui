@@ -28,7 +28,7 @@ import { hourlyToDailyRollup } from './rollupUtils'
 
 // No assignment represents null, and is same as empty string in this view
 const NO_ASSIGNMENT = 'None'
-const TIME_GRAIN = 'hour'
+const TIME_WINDOW = 'hour'
 
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const ITEMS_INITIALLY = 10
@@ -38,7 +38,7 @@ const ITEMS_PER_PAGE = 5
 type FetchRollupProps = {
   byVersion?: boolean
   groupName?: string
-  grain?: 'hourly' | 'daily'
+  time?: 'hourly' | 'daily'
 }
 
 
@@ -58,7 +58,7 @@ function parseData(props: ParseDataProps) {
     data,
     byVersion = false,
     groupName = 'meta.vsn',
-    grain = 'hourly'
+    time = 'hourly'
   } = props
 
   const d = data.map(o => {
@@ -74,14 +74,14 @@ function parseData(props: ParseDataProps) {
 
   const hourlyByVsn = groupBy(d, groupName)
 
-  if (grain == 'hourly') {
+  if (time == 'hourly') {
     const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
       ...acc,
       [vsn]: groupBy(hourlyByVsn[vsn], 'meta.plugin')
     }), {})
 
     return hourly
-  } else if (grain == 'daily') {
+  } else if (time == 'daily') {
     return hourlyToDailyRollup(hourlyByVsn)
   }
 
@@ -194,7 +194,8 @@ type Facets = {
 const initFilterState = {
   'project': [],
   'focus': [],
-  'location': []
+  'location': [],
+  'vsn': []
 }
 
 const initDataState = {
@@ -300,7 +301,7 @@ function dataReducer(state, action) {
 type Options = {
   density: boolean
   versions: boolean
-  grain: 'hourly' | 'daily'
+  time: 'hourly' | 'daily'
 }
 
 
@@ -336,7 +337,7 @@ export default function Data() {
   const [opts, setOpts] = useState<Options>({
     density: false,
     versions: false,
-    grain: 'hourly'
+    time: 'hourly'
   })
 
 
@@ -350,11 +351,15 @@ export default function Data() {
         const projects = getFacets(data, 'project')
         const focuses = getFacets(data, 'focus')
         const locations = getFacets(data, 'location')
+        const vsns = getFacets(data, 'vsn')
+
+        console.log('data', data)
 
         setFacets({
           project: {title: 'Project', items: projects},
           focus: {title: 'Focus', items: focuses},
-          location: {title: 'Location', items: locations}
+          location: {title: 'Location', items: locations},
+          vsn: {title: 'Node', items: vsns}
         })
       }).catch(error => dispatch({type: 'ERROR', error}))
 
@@ -430,15 +435,15 @@ export default function Data() {
 
 
   const handleOptionChange = (evt, name) => {
-    if (name == 'grain') {
-      const grain = evt.target.value
-      const data = parseData({data: rawData, grain})
+    if (name == 'time') {
+      const time = evt.target.value
+      const data = parseData({data: rawData, time})
       dispatch({type: 'SET_DATA', data})
-      setOpts(prev => ({...prev, [name]: grain}))
+      setOpts(prev => ({...prev, [name]: time}))
       return
     } else if (name == 'versions') {
       const byVersion = evt.target.checked
-      const data = parseData({data: rawData, grain: opts.grain, byVersion})
+      const data = parseData({data: rawData, time: opts.time, byVersion})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: byVersion}))
       return
@@ -450,7 +455,7 @@ export default function Data() {
 
   return (
     <Root className="flex">
-      <Sidebar width="260px" style={{padding: '0 10px'}}>
+      <Sidebar width="260px" style={{padding: '10px 0 100px 0'}}>
         <FilterTitle>Filters</FilterTitle>
         {facets && facetList.map(facet => {
           const {title, items} = facets[facet]
@@ -499,9 +504,9 @@ export default function Data() {
               <div>
                 <h5 className="subtitle no-margin muted">Time</h5>
                 <ToggleButtonGroup
-                  value={opts.grain}
-                  onChange={(evt) => handleOptionChange(evt, 'grain')}
-                  aria-label="change grain (windows)"
+                  value={opts.time}
+                  onChange={(evt) => handleOptionChange(evt, 'time')}
+                  aria-label="change time (windows)"
                   exclusive
                 >
                   <ToggleButton value="hourly" aria-label="hourly">
@@ -552,13 +557,13 @@ export default function Data() {
                     </h2>
                     <TimelineChart
                       data={timelineData}
-                      cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
+                      cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
                       startTime={subDays(new Date(), 30)}
                       endTime={endOfHour(new Date())}
                       tooltip={(item) => `
                         <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
+                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
                         </div>
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
@@ -570,7 +575,7 @@ export default function Data() {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        const win = opts.grain == 'daily' ? 'd' : 'h'
+                        const win = opts.time == 'daily' ? 'd' : 'h'
                         window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
@@ -591,14 +596,14 @@ export default function Data() {
                     <TimelineChart
                       data={timelineData}
                       limitRowCount={10}
-                      cellUnit={opts.grain == 'daily' ? 'day' : 'hour'}
+                      cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
                       startTime={subDays(new Date(), 30)}
                       endTime={endOfHour(new Date())}
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_GRAIN})
+                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
                         </div>
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
@@ -611,7 +616,7 @@ export default function Data() {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        const win = opts.grain == 'daily' ? 'd' : 'h'
+                        const win = opts.time == 'daily' ? 'd' : 'h'
                         window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
