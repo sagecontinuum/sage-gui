@@ -282,10 +282,6 @@ const getEndTime = (start: string, range: Unit) => {
 const isMediaApp = (app) =>
   (app || '').match(/image|audio|video|mobotix/g)
 
-
-const isVideoApp = (app) =>
-  (app || '').match(/video/g)
-
 const isAudioApp = (app) =>
   (app || '').match(/audio/g)
 

@@ -10,7 +10,7 @@ export default {
     'seonghapark/wildfire-smoke-detection',
     'bhupendraraut/cloud-motion',
     'rjackson/weather-classification',
-    'dariodematties/avian-diversity-monitoring',
+    'dariodematties1/avian-diversity-monitoring',
     'dariodematties/sound-event-detection'
   ],
   samplers: [
