@@ -29,10 +29,11 @@ import { Chart as ChartJS,
   Decimation,
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 ChartJS.register(
   Tooltip, Legend, LineController, BarController, LineElement, PointElement,
-  LinearScale, TimeScale, CategoryScale, BarElement, Title, Decimation
+  LinearScale, TimeScale, CategoryScale, BarElement, Title, Decimation, zoomPlugin
 )
 
 
@@ -60,6 +61,19 @@ const lineConfig = {
         enabled: true,
         threshold: DOWNSAMPLE_THRESHOLD,
         algorithm: 'lttb'
+      },
+      zoom: {
+        pan: {
+          enabled: true,
+          modifierKey: 'ctrl'
+        },
+        zoom: {
+          drag: {
+            enabled: true,
+          },
+          mode: 'x',
+          onZoomComplete: () => {}
+        },
       }
     }
   }
@@ -184,6 +198,7 @@ export default function TimeSeries(props) {
   const chartRef = useRef()
   const [chart, setChart] = useState(null)
   const [disableDownsampling, setDisableDownsampling] = useState(false)
+  const [isZoomed, setIsZoomed] = useState(false)
 
   useEffect(() => {
     let datasets
@@ -207,6 +222,7 @@ export default function TimeSeries(props) {
       }
     } else {
       lineConfig.options.plugins.decimation.enabled = !disableDownsampling
+      lineConfig.options.plugins.zoom.zoom.onZoomComplete = () => setIsZoomed(true)
       config = {
         ...lineConfig,
         data: { datasets }
@@ -228,6 +244,10 @@ export default function TimeSeries(props) {
     setOpts(prev => ({...prev, [option]: val}))
   }
 
+  const handleZoomReset = () => {
+    chart.resetZoom()
+    setIsZoomed(false)
+  }
 
   return (
     <Root>
@@ -238,10 +258,15 @@ export default function TimeSeries(props) {
 
       <Ctrls className="flex items-center justify-between">
         <div>
+          {opts.chartType == 'timeseries' && isZoomed &&
+            <Button onClick={handleZoomReset} color="primary" variant="contained">
+              Reset zoom
+            </Button>
+          }
           {data.length >= DOWNSAMPLE_THRESHOLD && chart &&
             <DownsampleOpts>
               <Button onClick={() => setDisableDownsampling(prev => !prev)}>
-                {!disableDownsampling ? 'Disable' : 'Enable'} Downsampling
+                {!disableDownsampling ? 'Disable' : 'Enable'} downsampling
               </Button>
 
               {!disableDownsampling &&

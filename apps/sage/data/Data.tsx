@@ -30,6 +30,7 @@ import { hourlyToDailyRollup } from './rollupUtils'
 const NO_ASSIGNMENT = 'None'
 const TIME_WINDOW = 'hour'
 
+const SIDEBAR_WIDTH = '260'
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
