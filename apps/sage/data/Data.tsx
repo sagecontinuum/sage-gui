@@ -21,7 +21,7 @@ import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
 // import {fetchMockRollup} from './fetchMockRollup'
 
-import { chain, groupBy, startCase, intersection, sum, memoize } from 'lodash'
+import { chain, groupBy, startCase, intersection, sum, memoize, pick } from 'lodash'
 import { endOfHour, subDays } from 'date-fns'
 import { hourlyToDailyRollup } from './rollupUtils'
 
@@ -42,7 +42,7 @@ type FetchRollupProps = {
 }
 
 
-const fetchRollup = memoize(function(props: FetchRollupProps = {}) {
+const fetchRollup = memoize((props: FetchRollupProps = {}) => {
   return BH.getPluginCounts()
     .then(d => {
       const data = parseData({data: d, ...props})
@@ -85,16 +85,21 @@ function parseData(props: ParseDataProps) {
     return hourlyToDailyRollup(hourlyByVsn)
   }
 
-  throw `parseData: grain='${grain}' not valid`
+  throw `parseData: grain='${time}' not valid`
 }
 
 
-function getMockByApp(data) {
-  let byApp = groupBy(data, 'meta.plugin')
-  const byAppByPlugin = Object.keys(byApp)
-    .reduce((acc, app) => ({...acc, [app]: groupBy(byApp[app], 'meta.vsn')}), {})
+function groupByApp(data: BH.Record[], vsns: string[] ) {
+  const byApp = groupBy(data, 'meta.plugin')
+  let byAppByNode = Object.keys(byApp)
+    .reduce((acc, app) => {
+      let grouped = groupBy(byApp[app], 'meta.vsn')
+      grouped = pick(grouped, vsns)
+      const hasData = !!Object.keys(grouped).length
+      return hasData ? {...acc, [app]: grouped} : acc
+    }, {})
 
-  return byAppByPlugin
+  return byAppByNode
 }
 
 
@@ -138,14 +143,6 @@ const sortVSNs = (vsns: string[]) => ([
   ...vsns.filter(vsn => vsn.charAt(0) == 'W').sort(),
   ...vsns.filter(vsn => vsn.charAt(0) == 'V').sort()
 ])
-
-
-
-const getSubTitle = (nodes, apps) =>
-  nodes ?
-    `${nodes.length} nodes with data` :
-  apps ?
-    `${apps.length} apps with data` : ''
 
 
 const stdColor = (val) =>
@@ -198,6 +195,8 @@ const initFilterState = {
   'vsn': []
 }
 
+const facetList = Object.keys(initFilterState)
+
 const initDataState = {
   rawData: null,
   data: null,
@@ -209,11 +208,14 @@ function dataReducer(state, action) {
   // todo(nc): note: we likely won't need both ADD_FILTER and RM_FILTER?
   switch (action.type) {
     case 'INIT_DATA': {
+      const {rawData, data} = action.data
+      const filtered = sortVSNs(Object.keys(data))
       return {
         ...state,
-        rawData: action.data.rawData,
-        data: action.data.data,
-        filtered: sortVSNs(Object.keys(action.data.data)),
+        rawData,
+        data,
+        filtered,
+        byApp: groupByApp(rawData, filtered)
       }
     }
     case 'SET_DATA': {
@@ -238,7 +240,8 @@ function dataReducer(state, action) {
       return {
         ...state,
         filtered,
-        filters: newFilters
+        filters: newFilters,
+        byApp: groupByApp(state.rawData, filtered)
       }
     }
     case 'RM_FILTER': {
@@ -257,7 +260,8 @@ function dataReducer(state, action) {
       return {
         ...state,
         filtered,
-        filters: newFilters
+        filters: newFilters,
+        byApp: groupByApp(state.rawData, filtered)
       }
     }
     case 'SELECT_ALL': {
@@ -270,7 +274,8 @@ function dataReducer(state, action) {
       return {
         ...state,
         filtered,
-        filters: newFilters
+        filters: newFilters,
+        byApp: groupByApp(state.rawData, filtered)
       }
     }
     case 'CLEAR_CATEGORY': {
@@ -283,7 +288,8 @@ function dataReducer(state, action) {
       return {
         ...state,
         filtered,
-        filters: newFilters
+        filters: newFilters,
+        byApp: groupByApp(state.rawData, filtered)
       }
     }
     case 'ERROR': {
@@ -305,8 +311,6 @@ type Options = {
 }
 
 
-const facetList = Object.keys(initFilterState)
-
 
 export default function Data() {
   const navigate = useNavigate()
@@ -322,13 +326,10 @@ export default function Data() {
 
   // main data views
   const {loading, setLoading} = useProgress()
-  const [{data, filtered, filters, rawData, error}, dispatch] = useReducer(
+  const [{data, filtered, filters, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
     initDataState,
   )
-
-  const [byApp, setByApp] = useState()
-  const [apps, setApps] = useState<string[]>()
 
   const [facets, setFacets] = useState<Facets>(null)
 
@@ -353,8 +354,6 @@ export default function Data() {
         const locations = getFacets(data, 'location')
         const vsns = getFacets(data, 'vsn')
 
-        console.log('data', data)
-
         setFacets({
           project: {title: 'Project', items: projects},
           focus: {title: 'Focus', items: focuses},
@@ -367,7 +366,7 @@ export default function Data() {
       .then(data => {
         dispatch({type: 'INIT_DATA', data})
       })
-      .catch(err => error => dispatch({type: 'ERROR', error}))
+      .catch(error => dispatch({type: 'ERROR', error}))
 
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
@@ -409,19 +408,7 @@ export default function Data() {
 
   const handleSetDisplay = (val) => {
     if (!rawData) return
-
-    if (val == 'apps') {
-      const mockByApp = getMockByApp(rawData)
-
-      setPage(1)
-      setLoadingMore(true) // show skeletons
-
-      setTimeout(() => {
-        setByApp(mockByApp)
-        setApps(Object.keys(mockByApp))
-      })
-    }
-
+    setPage(1) // reset page
     setDisplay(val)
   }
 
@@ -482,7 +469,14 @@ export default function Data() {
           <Controls className="flex items-center">
             <div className="flex column">
               <h2 className="title no-margin">Explore Data</h2>
-              <h5 className="subtitle no-margin muted">{getSubTitle(filtered, apps)}</h5>
+              <h5 className="subtitle no-margin muted">
+                {display == 'nodes' &&
+                  `${filtered.length} nodes with data`
+                }
+                {display == 'apps' && byApp &&
+                  `${Object.keys(byApp).length} apps with data`
+                }
+              </h5>
             </div>
 
             <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
@@ -589,8 +583,8 @@ export default function Data() {
               })
           }
 
-          {display == 'apps' && apps && byApp &&
-            apps
+          {display == 'apps' && byApp &&
+            Object.keys(byApp)
               .slice(0, getInfiniteEnd(page))
               .map(name => {
                 const timelineData = byApp[name]
@@ -629,6 +623,8 @@ export default function Data() {
                 )
               })
           }
+
+          <div ref={loader} />
         </Items>
 
         {error &&
@@ -647,8 +643,6 @@ export default function Data() {
             <div>loading...</div>
           </LoadingMore>
         }
-
-        <div ref={loader} />
       </Main>
     </Root>
   )
