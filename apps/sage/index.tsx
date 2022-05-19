@@ -57,7 +57,7 @@ export default function Sage() {
         <CssBaseline/>
 
         <BrowserRouter>
-          <NavBar menu={<NavMenu />} hasSignIn />
+          <NavBar menu={<NavMenu />} hasSignIn hasDocsLink />
 
           <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
             <Container>
