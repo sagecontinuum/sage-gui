@@ -141,13 +141,17 @@ const findColumn = (cols, name) =>
   cols.findIndex(o => o.id == name)
 
 
-type Unit = 'm' | 'h' | '12h' | 'd'
+type Unit = 'm' | 'h' | 'd'
 
 const units = {
   'm': 'minute',
   'h': 'hour',
   '12h': '12 hours',
-  'd': 'day'
+  'd': 'day',
+  '2d': '2 days',
+  '7d': '7 days',
+  '30d': '30 days [slow]',
+  '90d': '90 days [very slow]'
 }
 
 type RangeIndicatorProps = {
@@ -220,58 +224,39 @@ async function getFilterMenus(plugin) {
 }
 
 
-const getStartTime = (range: Unit) => {
-  let diff
-  if (['m', 'h', 'd'].includes(range))
-    diff = 1
-  else if (range == '7d')
-    diff = 7
-  else if (range == '12h')
-    diff = 12
+const getStartTime = (win: Unit) => {
+  const amount = Number(win.slice(0, -1)) || 1
+  const unit = win.charAt(win.length - 1)
 
   const datetime = new Date()
-  if (range == 'm')
-    datetime.setMinutes(datetime.getMinutes() - diff)
-  else if (range == 'h')
-    datetime.setHours(datetime.getHours() - diff)
-  else if (range == '12h')
-    datetime.setHours(datetime.getHours() - diff)
-  else if (range == 'd')
-    datetime.setDate(datetime.getDate() - diff)
-  else if (range == '7d')
-    datetime.setDate(datetime.getDate() - diff)
+  if (unit == 'm')
+    datetime.setMinutes(datetime.getMinutes() - amount)
+  else if (unit == 'h')
+    datetime.setHours(datetime.getHours() - amount)
+  else if (win == 'd')
+    datetime.setDate(datetime.getDate() - amount)
   else {
-    alert(`getStartTime: range (window) not valid.  was window=${range}`)
+    alert(`getStartTime: win (window) not valid.  was window=${win}`)
     return
   }
 
   return new Date(datetime).toISOString()
 }
 
-const getEndTime = (start: string, range: Unit) => {
+const getEndTime = (start: string, win: Unit) => {
+  const amount = Number(win.slice(0, -1)) || 1
+  const unit = win.charAt(win.length - 1)
+
   const startTime = new Date(start)
   let endTime = new Date(start)
-
-  let diff
-  if (['m', 'h', 'd'].includes(range))
-    diff = 1
-  else if (range == '7d')
-    diff = 7
-  else if (range == '12h')
-    diff = 12
-
-  if (range == 'm')
-    endTime.setMinutes(startTime.getMinutes() + diff)
-  else if (range == 'h')
-    endTime.setHours(startTime.getHours() + diff)
-  else if (range == '12h')
-    endTime.setHours(startTime.getHours() + diff)
-  else if (range == 'd')
-    endTime.setDate(startTime.getDate() + diff)
-  else if (range == '7d')
-    endTime.setDate(startTime.getDate() + diff)
+  if (unit == 'm')
+    endTime.setMinutes(startTime.getMinutes() + amount)
+  else if (unit == 'h')
+    endTime.setHours(startTime.getHours() + amount)
+  else if (unit == 'd')
+    endTime.setDate(startTime.getDate() + amount)
   else {
-    alert(`getEndTime: range (window) not valid.  was window=${range}`)
+    alert(`getEndTime: win (window) not valid.  was window=${win}`)
     return
   }
 
