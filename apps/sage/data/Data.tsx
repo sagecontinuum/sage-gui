@@ -2,13 +2,11 @@ import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import ToggleButton from '@mui/material/ToggleButton'
-import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
-import Checkbox from '/components/input/Checkbox'
 
 import TimelineSkeleton from './TimelineSkeleton'
+import DataOptions from './DataOptions'
+
 import {Top} from '../common/Layout'
 import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
 import Filter from '../common/FacetFilter'
@@ -19,7 +17,6 @@ import TimelineChart, {colors} from '/components/viz/TimelineChart'
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
-// import {fetchMockRollup} from './fetchMockRollup'
 
 import { chain, groupBy, startCase, intersection, sum, memoize, pick } from 'lodash'
 import { endOfHour, subDays } from 'date-fns'
@@ -36,7 +33,7 @@ const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
 
-type FetchRollupProps = {
+export type FetchRollupProps = {
   byVersion?: boolean
   groupName?: string
   time?: 'hourly' | 'daily'
@@ -54,7 +51,7 @@ const fetchRollup = memoize((props: FetchRollupProps = {}) => {
 
 type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
 
-function parseData(props: ParseDataProps) {
+export function parseData(props: ParseDataProps) {
   const {
     data,
     byVersion = false,
@@ -305,10 +302,11 @@ function dataReducer(state, action) {
   }
 }
 
-type Options = {
+export type Options = {
+  display: 'nodes' | 'apps'
+  time: 'hourly' | 'daily'
   density: boolean
   versions: boolean
-  time: 'hourly' | 'daily'
 }
 
 
@@ -335,8 +333,8 @@ export default function Data() {
   const [facets, setFacets] = useState<Facets>(null)
 
   // options
-  const [display, setDisplay] = useState<'nodes' | 'apps'>('nodes')
   const [opts, setOpts] = useState<Options>({
+    display: 'nodes',
     density: false,
     versions: false,
     time: 'hourly'
@@ -407,17 +405,12 @@ export default function Data() {
   }, [handleObserver])
 
 
-  const handleSetDisplay = (val) => {
-    if (!rawData) return
-    setPage(1) // reset page
-    setDisplay(val)
-  }
-
   const handleFilter = (evt, facet: string, val: string) => {
     const checked = evt.target.checked
     if (checked) dispatch({type: 'ADD_FILTER', manifests, facet, val})
     else dispatch({type: 'RM_FILTER', manifests, facet, val})
   }
+
 
   const handleSelectAll = (evt, facet: string, vals: string[]) => {
     const checked = evt.target.checked
@@ -427,7 +420,11 @@ export default function Data() {
 
 
   const handleOptionChange = (evt, name) => {
-    if (name == 'time') {
+    if (['nodes', 'apps'].includes(name)) {
+      setPage(1) // reset page
+      setOpts(prev => ({...prev, display: name}))
+      return
+    } else  if (name == 'time') {
       const time = evt.target.value
       const data = parseData({data: rawData, time})
       dispatch({type: 'SET_DATA', data})
@@ -471,10 +468,10 @@ export default function Data() {
             <div className="flex column">
               <h2 className="title no-margin">Explore Data</h2>
               <h5 className="subtitle no-margin muted">
-                {display == 'nodes' &&
+                {opts.display == 'nodes' &&
                   `${filtered.length} nodes with data`
                 }
-                {display == 'apps' && byApp &&
+                {opts.display == 'apps' && byApp &&
                   `${Object.keys(byApp).length} apps with data`
                 }
               </h5>
@@ -482,68 +479,12 @@ export default function Data() {
 
             <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
 
-            <div className="flex">
-              <div>
-                <h5 className="subtitle no-margin muted">Group by</h5>
-                <ToggleButtonGroup
-                  value={display}
-                  onChange={(evt, val) => handleSetDisplay(val)}
-                  aria-label="group by"
-                  exclusive
-                >
-                  <ToggleButton value="nodes" aria-label="nodes">
-                    Nodes
-                  </ToggleButton>
-                  <ToggleButton value="apps" aria-label="apps">
-                    Apps
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </div>
-
-              <div>
-                <h5 className="subtitle no-margin muted">Time</h5>
-                <ToggleButtonGroup
-                  value={opts.time}
-                  onChange={(evt) => handleOptionChange(evt, 'time')}
-                  aria-label="change time (windows)"
-                  exclusive
-                >
-                  <ToggleButton value="hourly" aria-label="hourly">
-                    hourly
-                  </ToggleButton>
-                  <ToggleButton value="daily" aria-label="daily">
-                    daily
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </div>
-
-              <div className="checkboxes">
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={opts.versions}
-                      onChange={(evt) => handleOptionChange(evt, 'versions')}
-                    />
-                  }
-                  label="versions"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={opts.density}
-                      onChange={(evt) => handleOptionChange(evt, 'density')}
-                    />
-                  }
-                  label="density"
-                />
-              </div>
-
-            </div>
+            <DataOptions onChange={handleOptionChange} opts={opts}/>
           </Controls>
         </Top>
 
         <Items>
-          {display == 'nodes' && filtered && manifestByVSN &&
+          {opts.display == 'nodes' && filtered && manifestByVSN &&
             filtered
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
@@ -584,7 +525,7 @@ export default function Data() {
               })
           }
 
-          {display == 'apps' && byApp &&
+          {opts.display == 'apps' && byApp &&
             Object.keys(byApp)
               .slice(0, getInfiniteEnd(page))
               .map(name => {
