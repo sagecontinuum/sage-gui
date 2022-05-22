@@ -19,7 +19,7 @@ import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
 
 import { chain, groupBy, startCase, intersection, sum, memoize, pick } from 'lodash'
-import { endOfHour, subDays } from 'date-fns'
+import { addDays, endOfHour, subDays } from 'date-fns'
 import { hourlyToDailyRollup } from './rollupUtils'
 
 
@@ -34,14 +34,15 @@ const ITEMS_PER_PAGE = 5
 
 
 export type FetchRollupProps = {
-  byVersion?: boolean
+  versions?: boolean
   groupName?: string
   time?: 'hourly' | 'daily'
+  start?: Date
 }
 
-
-const fetchRollup = memoize((props: FetchRollupProps = {}) => {
-  return BH.getPluginCounts()
+const fetchRollup = memoize((props: FetchRollupProps) => {
+  const {start} = props
+  return BH.getPluginCounts(start)
     .then(d => {
       const data = parseData({data: d, ...props})
       return {rawData: d, data}
@@ -54,21 +55,25 @@ type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
 export function parseData(props: ParseDataProps) {
   const {
     data,
-    byVersion = false,
+    versions = false,
     groupName = 'meta.vsn',
     time = 'hourly'
   } = props
 
-  const d = data.map(o => {
-    const { plugin } = o.meta
-    return {
-      ...o,
-      meta: {
-        ...o.meta,
-        plugin: byVersion ? plugin : plugin.split(':')[0]
+  let d = data
+
+  if (!versions) {
+    d = d.map(o => {
+      const { plugin } = o.meta
+      return {
+        ...o,
+        meta: {
+          ...o.meta,
+          plugin: plugin.split(':')[0]
+        }
       }
-    }
-  })
+    })
+  }
 
   const hourlyByVsn = groupBy(d, groupName)
 
@@ -307,6 +312,7 @@ export type Options = {
   time: 'hourly' | 'daily'
   density: boolean
   versions: boolean
+  start: Date
 }
 
 
@@ -337,9 +343,12 @@ export default function Data() {
     display: 'nodes',
     density: false,
     versions: false,
-    time: 'hourly'
+    time: 'hourly',
+    start: subDays(new Date(), 30)
   })
 
+  // note: endtime is not currently an option
+  const [end, setEnd] = useState<Date>(endOfHour(new Date()))
 
   useEffect(() => {
     setLoading(true)
@@ -361,16 +370,17 @@ export default function Data() {
         })
       }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup()
+    const dProm = fetchRollup(opts)
       .then(data => {
         dispatch({type: 'INIT_DATA', data})
       })
       .catch(error => dispatch({type: 'ERROR', error}))
 
+
     Promise.all([mProm, dProm])
       .finally(() => setLoading(false))
 
-  }, [])
+  }, [opts.start])
 
 
   useEffect(() => {
@@ -428,20 +438,28 @@ export default function Data() {
       setOpts(prev => ({...prev, [name]: time}))
       return
     } else if (name == 'versions') {
-      const byVersion = evt.target.checked
-      const data = parseData({data: rawData, time: opts.time, byVersion})
+      const versions = evt.target.checked
+      const data = parseData({data: rawData, time: opts.time, versions})
       dispatch({type: 'SET_DATA', data})
-      setOpts(prev => ({...prev, [name]: byVersion}))
+      setOpts(prev => ({...prev, [name]: versions}))
       return
+    } else if (name == 'density') {
+      setOpts(prev => ({...prev, [name]: evt.target.checked}))
     }
 
-    setOpts(prev => ({...prev, [name]: evt.target.checked}))
+    throw `unhandled option state change name=${name}`
+  }
+
+
+  const handleDateChange = (start: Date) => {
+    setOpts(prev => ({...prev, start}))
+    setEnd(addDays(start, 30))
   }
 
 
   return (
     <Root className="flex">
-      <Sidebar width="260px" style={{padding: '10px 0 100px 0'}}>
+      <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <FilterTitle>Filters</FilterTitle>
         {facets && facetList.map(facet => {
           const {title, items} = facets[facet]
@@ -476,7 +494,7 @@ export default function Data() {
 
             <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
 
-            <DataOptions onChange={handleOptionChange} opts={opts}/>
+            <DataOptions onChange={handleOptionChange} onDateChange={handleDateChange} opts={opts} />
           </Controls>
         </Top>
 
@@ -496,8 +514,8 @@ export default function Data() {
                       data={timelineData}
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
-                      startTime={subDays(new Date(), 30)}
-                      endTime={endOfHour(new Date())}
+                      startTime={opts.start}
+                      endTime={end}
                       tooltip={(item) => `
                         <div style="margin-bottom: 5px;">
                           ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
@@ -535,8 +553,8 @@ export default function Data() {
                       limitRowCount={10}
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
-                      startTime={subDays(new Date(), 30)}
-                      endTime={endOfHour(new Date())}
+                      startTime={opts.start}
+                      endTime={end}
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">
@@ -604,18 +622,6 @@ const Controls = styled.div`
   background-color: #fff;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
-
-  [role=group] {
-    margin-right: 10px;
-  }
-
-  .MuiToggleButtonGroup-root {
-    height: 25px;
-  }
-
-  .checkboxes {
-    margin: 17px 10px 0 10px;
-  }
 `
 
 const TimelineContainer = styled.div`

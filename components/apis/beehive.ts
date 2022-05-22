@@ -2,7 +2,8 @@ import config from '../../config'
 export const url = config.beehive
 
 import { handleErrors } from '../fetch-utils'
-import {groupBy, mapValues, flatten} from 'lodash'
+import { groupBy, mapValues, flatten } from 'lodash'
+import { addDays } from 'date-fns'
 
 import * as BK from '../../components/apis/beekeeper'
 
@@ -436,10 +437,11 @@ export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> 
 }
 
 
-export async function getPluginCounts() : Promise<Record[]> {
+export async function getPluginCounts(start?: Date) : Promise<Record[]> {
   const params = {
     bucket: 'plugin-stats',
-    start: '-30d'
+    start: start || '-30d',
+    ...(start && {end: addDays(start, 30)})
   }
 
   const data = await getData(params)
