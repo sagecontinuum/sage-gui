@@ -445,9 +445,9 @@ export default function Data() {
       return
     } else if (name == 'density') {
       setOpts(prev => ({...prev, [name]: evt.target.checked}))
+    } else {
+      throw `unhandled option state change name=${name}`
     }
-
-    throw `unhandled option state change name=${name}`
   }
 
 

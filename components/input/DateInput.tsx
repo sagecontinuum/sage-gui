@@ -1,4 +1,4 @@
-import { memo, ChangeEvent } from 'react'
+import { memo } from 'react'
 import styled from 'styled-components'
 
 import { format } from 'date-fns'
@@ -12,11 +12,13 @@ type Props = {
 }
 
 export default memo(function DateInput(props: Props) {
-  const { value, name, min, max, onChange} = props
+  const { value, name, min, max, onChange } = props
 
   const handleChange = (evt) => {
     const val = evt.target.value
-    onChange(new Date(val))
+    const dt = new Date(val)
+    const date = new Date(dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000)
+    onChange(new Date(date))
   }
 
   return (
@@ -29,7 +31,6 @@ export default memo(function DateInput(props: Props) {
         max={max || format(new Date(), 'yyyy-MM-dd')}
         onChange={handleChange}
       />
-
     </Root>
   )
 }, (prev, next) => prev.value == next.value)
