@@ -437,11 +437,15 @@ export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> 
 }
 
 
-export async function getPluginCounts(start?: Date, vsn?: string) : Promise<Record[]> {
+type PluginCountsProps = {start?: Date, end?: Date, vsn?: string}
+
+export async function getPluginCounts(props: PluginCountsProps) : Promise<Record[]> {
+  const {start, end, vsn} = props
+
   const params = {
     bucket: 'plugin-stats',
     start: start || '-30d',
-    ...(start && {end: addDays(start, 30)}),
+    ...(end && {end}),
     filter: {
       ...(vsn && {vsn})
     }

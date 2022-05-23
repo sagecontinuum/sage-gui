@@ -145,7 +145,7 @@ export default function Data() {
         })
       }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup(opts)
+    const dProm = fetchRollup({...opts, end: addDays(opts.start, 30)})
       .then(data => {
         dispatch({type: 'INIT_DATA', data})
       })

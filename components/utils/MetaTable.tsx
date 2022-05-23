@@ -12,7 +12,7 @@ export default function MetaTable(props:Props) {
   const {title, rows, data} = props
 
   return (
-    <Table className="simple key-value">
+    <Table className="simple key-value striped">
       {title &&
         <thead>
           <tr><th colSpan={2}>{title}</th></tr>
@@ -41,10 +41,10 @@ export default function MetaTable(props:Props) {
 
 const Table = styled.table`
   thead th {
-    color: #fff;
-    border-radius: 5px 5px 0 0;
-    border-bottom: 2px solid #888 !important;
-    background: #999;
+    border-bottom: 2px solid #888;
+    color: #222;
+    border-top: 2px solid #888;
+    background: #e0e0e0;
   }
 `
 

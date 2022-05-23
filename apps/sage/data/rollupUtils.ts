@@ -9,12 +9,13 @@ export type FetchRollupProps = {
   groupName?: string
   time?: 'hourly' | 'daily'
   start?: Date
+  end?: Date
   vsn?: string  // for single node views
 }
 
 export function fetchRollup(props: FetchRollupProps) {
-  const {start, vsn} = props
-  return BH.getPluginCounts(start, vsn)
+  const {start, end, vsn} = props
+  return BH.getPluginCounts({start, end, vsn})
     .then(d => {
       const data = parseData({data: d, ...props})
       return {rawData: d, data}

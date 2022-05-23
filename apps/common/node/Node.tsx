@@ -32,7 +32,7 @@ import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import DataOptions from '/apps/sage/data/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
-import { type Options, colorDensity } from '/apps/sage/data/Data'
+import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays } from 'date-fns'
 
@@ -41,6 +41,7 @@ const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const TIME_WINDOW = 'hour'
+const TAIL_DAYS = 45
 
 
 // todo(nc): remove hardcoded additional sensors
@@ -122,7 +123,7 @@ export default function NodeView() {
     density: true,
     versions: false,
     time: 'hourly',
-    start: subDays(new Date(), 30)
+    start: subDays(new Date(), TAIL_DAYS)
   })
 
   // note: endtime is not currently an option
@@ -270,9 +271,10 @@ export default function NodeView() {
           <br/>
 
           <div className="timeline-title flex items-center">
-            <h2>Last 30 days of Data</h2>
-            <div className="clearfix"></div>
-            <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+            <h2>Last {TAIL_DAYS} days of Data</h2>
+            {Object.keys(data || {}).length > 0 &&
+              <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+            }
           </div>
 
           {loadingTL && !tlError &&
@@ -281,7 +283,11 @@ export default function NodeView() {
             </div>
           }
 
-          {data && vsn &&
+          {!Object.keys(data || {}).length &&
+            <div className="clearfix muted">No data available</div>
+          }
+
+          {Object.keys(data || {}).length > 0 && vsn &&
             <Timeline
               data={data[vsn]}
               cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
