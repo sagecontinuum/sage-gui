@@ -97,8 +97,6 @@ export default function Nodes() {
 
   // load data
   useEffect(() => {
-
-
     let done = false
     let handle
 
@@ -131,7 +129,7 @@ export default function Nodes() {
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         setLoading(false)
         ping()
-      }).catch(err => setError(err))
+      }).catch(err => {console.log('err', err) ; setError(err)})
       .finally(() => setLoading(false))
 
     return () => {

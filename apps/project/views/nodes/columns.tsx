@@ -67,7 +67,6 @@ const columns = [{
   id: 'status',
   label: 'Status',
   format: (val) => {
-
     if (val == 'reporting')
       return <CheckIcon className="success status-icon" />
     else if (val == 'not reporting')
