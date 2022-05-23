@@ -232,7 +232,7 @@ const getStartTime = (win: Unit) => {
     datetime.setMinutes(datetime.getMinutes() - amount)
   else if (unit == 'h')
     datetime.setHours(datetime.getHours() - amount)
-  else if (win == 'd')
+  else if (unit == 'd')
     datetime.setDate(datetime.getDate() - amount)
   else {
     alert(`getStartTime: win (window) not valid.  was window=${win}`)
