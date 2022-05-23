@@ -4,7 +4,7 @@ import {Link} from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
-import ErrorIcon from '@mui/icons-material/ErrorRounded'
+import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import Badge from '@mui/material/Badge'
 import MapIcon from '@mui/icons-material/RoomOutlined'
 import Tooltip from '@mui/material/Tooltip'

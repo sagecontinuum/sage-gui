@@ -25,8 +25,13 @@ export function dataReducer(state, action) {
   // todo(nc): note: we likely won't need both ADD_FILTER and RM_FILTER?
   switch (action.type) {
     case 'INIT_DATA': {
+      const {filters} = state
+      const {manifests} = action
       const {rawData, data} = action.data
-      const filtered = sortVSNs(Object.keys(data))
+
+      let filtered = sortVSNs(Object.keys(data))
+      filtered = getFilteredVSNs(manifests, data, filters)
+
       return {
         ...state,
         rawData,

@@ -32,6 +32,14 @@ const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
 
+const MDP_START = new Date('2022-04-05T12:00:00Z')
+const MDP_END = new Date('2022-05-05T12:00:00Z')
+
+
+const isMDP = (name) =>
+  name?.toLowerCase() == 'neon-mdp'
+
+
 
 const getFacets = (data, name) =>
   chain(data)
@@ -79,7 +87,8 @@ type Facets = {
 }
 
 
-const facetList = Object.keys(initFilterState)
+const filterOn = (data: BK.Manifest[], key: string, match?: string) =>
+  data.filter(o => o[key].toLowerCase() == match?.toLowerCase())
 
 
 export type Options = {
@@ -91,8 +100,18 @@ export type Options = {
 }
 
 
+type Props = {
+  project?: string
+  focus?: string
+}
 
-export default function Data() {
+export default function Data(props: Props) {
+  // alter init data state if project/focus is provided
+  const {project, focus} = props
+
+  if (project) initDataState.filters.project = [project]
+  if (focus) initDataState.filters.focus = [focus]
+
   const navigate = useNavigate()
 
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
@@ -108,9 +127,10 @@ export default function Data() {
   const {loading, setLoading} = useProgress()
   const [{data, filtered, filters, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
-    initDataState,
+    initDataState
   )
 
+  const facetList = Object.keys(initFilterState)
   const [facets, setFacets] = useState<Facets>(null)
 
   // options
@@ -119,40 +139,45 @@ export default function Data() {
     density: true,
     versions: false,
     time: 'hourly',
-    start: subDays(new Date(), 30)
+    start: isMDP(focus) ? MDP_START : subDays(new Date(), 30)
   })
 
   // note: endtime is not currently an option
-  const [end, setEnd] = useState<Date>(endOfHour(new Date()))
+  const [end, setEnd] = useState<Date>(isMDP(focus) ? MDP_END : endOfHour(new Date()))
 
   useEffect(() => {
     setLoading(true)
     const mProm = BK.getManifest({by: 'vsn'})
       .then(data => {
         setManifestByVSN(data) // todo(nc): remove
-        setManifests(Object.values(data))
 
-        const projects = getFacets(data, 'project')
-        const focuses = getFacets(data, 'focus')
-        const locations = getFacets(data, 'location')
-        const vsns = getFacets(data, 'vsn')
+        let manifests = Object.values(data)
+
+        if (project) manifests = filterOn(manifests, 'project', project)
+        if (focus) manifests = filterOn(manifests, 'focus', focus)
+
+        setManifests(manifests)
+
+        const projects = getFacets(manifests, 'project')
+        const focuses = getFacets(manifests, 'focus')
+        const locations = getFacets(manifests, 'location')
+        const vsns = getFacets(manifests, 'vsn')
 
         setFacets({
-          project: {title: 'Project', items: projects},
-          focus: {title: 'Focus', items: focuses},
+          project: {title: 'Project', items: projects, hide: !!project},
+          focus: {title: 'Focus', items: focuses, hide: !!focus},
           location: {title: 'Location', items: locations},
           vsn: {title: 'Node', items: vsns}
         })
+
+        return manifests
       }).catch(error => dispatch({type: 'ERROR', error}))
 
     const dProm = fetchRollup({...opts, end: addDays(opts.start, 30)})
-      .then(data => {
-        dispatch({type: 'INIT_DATA', data})
-      })
-      .catch(error => dispatch({type: 'ERROR', error}))
-
 
     Promise.all([mProm, dProm])
+      .then(([manifests, data]) => dispatch({type: 'INIT_DATA', data, manifests}))
+      .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoading(false))
 
   }, [opts.start])
@@ -237,7 +262,9 @@ export default function Data() {
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <FilterTitle>Filters</FilterTitle>
         {facets && facetList.map(facet => {
-          const {title, items} = facets[facet]
+          const {title, items, hide} = facets[facet]
+
+          if (hide) return <div key={title}></div>
 
           return (
             <Filter
