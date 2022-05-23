@@ -4,6 +4,69 @@ import startOfDay from 'date-fns/startOfDay'
 import * as BH from '/components/apis/beehive'
 
 
+export type FetchRollupProps = {
+  versions?: boolean
+  groupName?: string
+  time?: 'hourly' | 'daily'
+  start?: Date
+  vsn?: string  // for single node views
+}
+
+export function fetchRollup(props: FetchRollupProps) {
+  const {start, vsn} = props
+  return BH.getPluginCounts(start, vsn)
+    .then(d => {
+      const data = parseData({data: d, ...props})
+      return {rawData: d, data}
+    })
+}
+
+
+type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
+
+export function parseData(props: ParseDataProps) {
+  const {
+    data,
+    versions = false,
+    groupName = 'meta.vsn',
+    time = 'hourly'
+  } = props
+
+  let d = data
+
+  if (!versions) {
+    d = d.map(o => {
+      const { plugin } = o.meta
+      return {
+        ...o,
+        meta: {
+          ...o.meta,
+          plugin: plugin.split(':')[0]
+        }
+      }
+    })
+  }
+
+  const hourlyByVsn = groupBy(d, groupName)
+
+  if (time == 'hourly') {
+    const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
+      ...acc,
+      [vsn]: groupBy(hourlyByVsn[vsn], 'meta.plugin')
+    }), {})
+
+    return hourly
+  } else if (time == 'daily') {
+    return hourlyToDailyRollup(hourlyByVsn)
+  }
+
+  throw `parseData: grain='${time}' not valid`
+}
+
+
+
+
+
 type HourlyToDailyProps = {
   [vsn: string]: BH.Record[]
 }

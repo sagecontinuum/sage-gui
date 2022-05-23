@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 import Divider from '@mui/material/Divider'
 
-import TimelineSkeleton from './TimelineSkeleton'
+import TimelineSkeleton from '../../../components/viz/TimelineSkeleton'
 import DataOptions from './DataOptions'
 
 import {Top} from '../common/Layout'
@@ -15,95 +15,22 @@ import ErrorMsg from '../ErrorMsg'
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, {colors} from '/components/viz/TimelineChart'
 import * as BK from '/components/apis/beekeeper'
-import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
 
-import { chain, groupBy, startCase, intersection, sum, memoize, pick } from 'lodash'
+import { chain, startCase } from 'lodash'
 import { addDays, endOfHour, subDays } from 'date-fns'
-import { hourlyToDailyRollup } from './rollupUtils'
+import { fetchRollup, parseData } from './rollupUtils'
+import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
 
 // No assignment represents null, and is same as empty string in this view
 const NO_ASSIGNMENT = 'None'
 const TIME_WINDOW = 'hour'
 
-const SIDEBAR_WIDTH = '260'
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
-
-export type FetchRollupProps = {
-  versions?: boolean
-  groupName?: string
-  time?: 'hourly' | 'daily'
-  start?: Date
-}
-
-const fetchRollup = memoize((props: FetchRollupProps) => {
-  const {start} = props
-  return BH.getPluginCounts(start)
-    .then(d => {
-      const data = parseData({data: d, ...props})
-      return {rawData: d, data}
-    })
-})
-
-
-type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
-
-export function parseData(props: ParseDataProps) {
-  const {
-    data,
-    versions = false,
-    groupName = 'meta.vsn',
-    time = 'hourly'
-  } = props
-
-  let d = data
-
-  if (!versions) {
-    d = d.map(o => {
-      const { plugin } = o.meta
-      return {
-        ...o,
-        meta: {
-          ...o.meta,
-          plugin: plugin.split(':')[0]
-        }
-      }
-    })
-  }
-
-  const hourlyByVsn = groupBy(d, groupName)
-
-  if (time == 'hourly') {
-    const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
-      ...acc,
-      [vsn]: groupBy(hourlyByVsn[vsn], 'meta.plugin')
-    }), {})
-
-    return hourly
-  } else if (time == 'daily') {
-    return hourlyToDailyRollup(hourlyByVsn)
-  }
-
-  throw `parseData: grain='${time}' not valid`
-}
-
-
-function groupByApp(data: BH.Record[], vsns: string[] ) {
-  const byApp = groupBy(data, 'meta.plugin')
-  let byAppByNode = Object.keys(byApp)
-    .reduce((acc, app) => {
-      let grouped = groupBy(byApp[app], 'meta.vsn')
-      grouped = pick(grouped, vsns)
-      const hasData = !!Object.keys(grouped).length
-      return hasData ? {...acc, [app]: grouped} : acc
-    }, {})
-
-  return byAppByNode
-}
 
 
 const getFacets = (data, name) =>
@@ -113,46 +40,11 @@ const getFacets = (data, name) =>
     .value()
 
 
-// core logic for intersection of unions; could be optimized or simplified if needed
-const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
-  const vsnsByField = {}
-  for (const [field, vals] of Object.entries(filters)) {
-    for (const manifest of manifests) {
-      if (!vals.includes(manifest[field]))
-        continue
-
-      const vsn = manifest.vsn
-      vsnsByField[field] = field in vsnsByField ?
-        [...vsnsByField[field], vsn] : [vsn]
-    }
-  }
-
-  const count = sum(Object.values(vsnsByField).map(vals => vals.length))
-
-  let vsns = count ?
-    intersection(...Object.values(vsnsByField)) : manifests.map(m => m.vsn)
-
-  // find intersection of vsns and data vsns
-  let vsnSubset = Object.keys(data)
-    .filter(vsn => vsns.includes(vsn))
-
-  vsnSubset = sortVSNs(vsnSubset)
-  return vsnSubset
-}
-
-
-// sort by node, then blade
-const sortVSNs = (vsns: string[]) => ([
-  ...vsns.filter(vsn => vsn.charAt(0) == 'W').sort(),
-  ...vsns.filter(vsn => vsn.charAt(0) == 'V').sort()
-])
-
-
-const stdColor = (val) =>
+export const stdColor = (val) =>
   val == null ? colors.noValue : colors.blues[4]
 
 
-const colorDensity = (val, obj) => {
+export const colorDensity = (val, obj) => {
   if (val == null)
     return colors.noValue
 
@@ -180,132 +72,15 @@ const findApp = (apps, name) =>
   apps.find(o => o.id.includes(name.replace('plugin-', '')))
 
 
-
-type Filters = {
-  [name: string]: string[]
-}
-
 type FacetItem = {name: string, count: number}
 
 type Facets = {
   [name: string]: {title: string, items: FacetItem[] }
 }
 
-const initFilterState = {
-  'project': [],
-  'focus': [],
-  'location': [],
-  'vsn': []
-}
 
 const facetList = Object.keys(initFilterState)
 
-const initDataState = {
-  rawData: null,
-  data: null,
-  filtered: [],
-  filters: initFilterState
-}
-
-function dataReducer(state, action) {
-  // todo(nc): note: we likely won't need both ADD_FILTER and RM_FILTER?
-  switch (action.type) {
-    case 'INIT_DATA': {
-      const {rawData, data} = action.data
-      const filtered = sortVSNs(Object.keys(data))
-      return {
-        ...state,
-        rawData,
-        data,
-        filtered,
-        byApp: groupByApp(rawData, filtered)
-      }
-    }
-    case 'SET_DATA': {
-      return {
-        ...state,
-        data: action.data,
-      }
-    }
-    case 'ADD_FILTER': {
-      const {data, filters} = state
-      const {manifests, facet, val} = action
-
-      // new filter state
-      const newFilters = {
-        ...filters,
-        [facet]: [...filters[facet], val]
-      }
-
-      // new filtered data, using "manifest" data
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
-    }
-    case 'RM_FILTER': {
-      const {data, filters} = state
-      const {manifests, facet, val} = action
-
-      // new filter state
-      const newFilters = {
-        ...filters,
-        [facet]: filters[facet].filter(v => v != val)
-      }
-
-      // new filtered data, using "manifest" data
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
-    }
-    case 'SELECT_ALL': {
-      const {data, filters} = state
-      const {manifests, facet, vals} = action
-
-      const newFilters = {...filters, [facet]: vals}
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
-    }
-    case 'CLEAR_CATEGORY': {
-      const {data, filters} = state
-      const {manifests, facet} = action
-
-      const newFilters = {...filters, [facet]: []}
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
-    }
-    case 'ERROR': {
-      return ({
-        ...state,
-        error: action.error
-      })
-    }
-    default: {
-      return state
-    }
-  }
-}
 
 export type Options = {
   display: 'nodes' | 'apps'
@@ -341,7 +116,7 @@ export default function Data() {
   // options
   const [opts, setOpts] = useState<Options>({
     display: 'nodes',
-    density: false,
+    density: true,
     versions: false,
     time: 'hourly',
     start: subDays(new Date(), 30)
@@ -425,7 +200,7 @@ export default function Data() {
     else dispatch({type: 'CLEAR_CATEGORY', manifests, facet})
   }
 
-
+  // todo(nc): refactor into provider
   const handleOptionChange = (evt, name) => {
     if (['nodes', 'apps'].includes(name)) {
       setPage(1) // reset page

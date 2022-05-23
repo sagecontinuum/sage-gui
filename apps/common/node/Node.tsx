@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
 import { useParams, useLocation } from 'react-router-dom'
 
@@ -20,12 +20,28 @@ import Map from '/components/LeafletMap'
 import MetaTable from '/components/utils/MetaTable'
 import Hotspot from './Hotspot'
 
-import adminSettings from '/apps/admin/settings' // todo(nc): organize
+import adminSettings from '/apps/admin/settings' // todo(nc): organize, maybe?
 import config from '/config'
 import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 
+import Timeline from '/components/viz/TimelineChart'
+import TimelineSkeleton from '/components/viz/TimelineSkeleton'
+
+// todo(nc): promote/refactor into component/ lib
+import DataOptions from '/apps/sage/data/DataOptions'
+import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
+import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
+import { type Options, colorDensity } from '/apps/sage/data/Data'
+
+import { endOfHour, subDays } from 'date-fns'
+
+
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
+
+const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
+const TIME_WINDOW = 'hour'
+
 
 // todo(nc): remove hardcoded additional sensors
 import {hasMetOne} from '/config'
@@ -93,6 +109,26 @@ export default function NodeView() {
 
   const [hover, setHover] = useState<string>('')
 
+  // todo(nc): refactor into provider?
+  const [{data, rawData, error: tlError}, dispatch] = useReducer(
+    dataReducer,
+    initDataState,
+  )
+
+  const [loadingTL, setLoadingTL] = useState(false)
+
+  const [opts, setOpts] = useState<Options>({
+    display: 'nodes',
+    density: true,
+    versions: false,
+    time: 'hourly',
+    start: subDays(new Date(), 30)
+  })
+
+  // note: endtime is not currently an option
+  const [end, setEnd] = useState<Date>(endOfHour(new Date()))
+
+
   useEffect(() => {
     BK.getManifest({node: node.toUpperCase()})
       .then(data => {noneFormatter
@@ -120,6 +156,17 @@ export default function NodeView() {
   }, [node, setLoading, days, hours])
 
 
+  // data timeline
+  useEffect(() => {
+    if (!vsn) return
+    setLoadingTL(true)
+    fetchRollup({...opts, vsn})
+      .then(data => dispatch({type: 'INIT_DATA', data}))
+      .catch(error => dispatch({type: 'ERROR', error}))
+      .finally(() => setLoadingTL(false))
+  }, [vsn])
+
+
   const onOver = (id) => {
     const cls = `.hover-${id}`
     document.querySelector(cls).style.outline = '3px solid #1a779c'
@@ -131,6 +178,30 @@ export default function NodeView() {
   }
 
   const mouse = {onMouseOver: onOver, onMouseOut: onOut}
+
+  const handleOptionChange = (evt, name) => {
+    if (['nodes', 'apps'].includes(name)) {
+      setOpts(prev => ({...prev, display: name}))
+      return
+    } else  if (name == 'time') {
+      const time = evt.target.value
+      const data = parseData({data: rawData, time})
+      dispatch({type: 'SET_DATA', data})
+      setOpts(prev => ({...prev, [name]: time}))
+      return
+    } else if (name == 'versions') {
+      const versions = evt.target.checked
+      const data = parseData({data: rawData, time: opts.time, versions})
+      dispatch({type: 'SET_DATA', data})
+      setOpts(prev => ({...prev, [name]: versions}))
+      return
+    } else if (name == 'density') {
+      setOpts(prev => ({...prev, [name]: evt.target.checked}))
+    } else {
+      throw `unhandled option state change name=${name}`
+    }
+  }
+
 
   const {
     shield, top_camera, bottom_camera,
@@ -196,6 +267,48 @@ export default function NodeView() {
               />
             </div>
           </div>
+          <br/>
+
+          <div className="timeline-title flex items-center">
+            <h2>Last 30 days of Data</h2>
+            <div className="clearfix"></div>
+            <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+          </div>
+
+          {loadingTL && !tlError &&
+            <div className="clearfix w-full">
+              <TimelineSkeleton />
+            </div>
+          }
+
+          {data && vsn &&
+            <Timeline
+              data={data[vsn]}
+              cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
+              colorCell={opts.density ? colorDensity : stdColor}
+              startTime={opts.start}
+              endTime={end}
+              tooltip={(item) => `
+                <div style="margin-bottom: 5px;">
+                  ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
+                </div>
+                ${item.meta.plugin}<br>
+                ${item.value.toLocaleString()} records`
+              }
+              onRowClick={(name) => {
+                const app = findApp(ecr, name)
+                navigate(`/apps/app/${app.id.split(':')[0]}`)
+              }}
+              onCellClick={(data) => {
+                const {timestamp, meta} = data
+                const {vsn, plugin} = meta
+                const win = opts.time == 'daily' ? 'd' : 'h'
+                window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+              }}
+              margin={TIMELINE_MARGIN}
+            />
+          }
+          <br/>
 
           <h2>Sensors</h2>
           {vsn &&
@@ -258,12 +371,6 @@ export default function NodeView() {
 
 
 const Root = styled.div`
-  .meta-tables {
-    table {
-
-    }
-  }
-
   .meta-left {
     flex: 1;
     margin-right: 2em;
@@ -285,6 +392,11 @@ const Root = styled.div`
       // less padding since scroll not needed
       padding-bottom: 8px;
     }
+  }
+
+  .timeline-title {
+    float: left;
+    h2 { margin-right: 1em; }
   }
 `
 

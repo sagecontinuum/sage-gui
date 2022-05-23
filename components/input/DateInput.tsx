@@ -38,7 +38,7 @@ export default memo(function DateInput(props: Props) {
 
 const Root = styled.div`
   input[type="date"] {
-    padding: 3px 5px ;
+    padding: 3px 5px 4px 5px;
     border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 4px;
   }

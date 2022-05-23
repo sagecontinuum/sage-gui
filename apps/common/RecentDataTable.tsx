@@ -94,6 +94,7 @@ export default memo(function RecentDataTable(props: Props) {
               <th></th>
               <th>Latest Time</th>
               <th>Value</th>
+              <th>Last Hour</th>
             </tr>
           </thead>
           <tbody>
