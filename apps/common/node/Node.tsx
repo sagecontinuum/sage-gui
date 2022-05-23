@@ -159,13 +159,13 @@ export default function NodeView() {
 
   // data timeline
   useEffect(() => {
-    if (!vsn) return
+    if (!vsn || !manifest) return
     setLoadingTL(true)
     fetchRollup({...opts, vsn})
-      .then(data => dispatch({type: 'INIT_DATA', data}))
+      .then(data => dispatch({type: 'INIT_DATA', data, manifests: [manifest]}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [vsn])
+  }, [vsn, manifest])
 
 
   const onOver = (id) => {
