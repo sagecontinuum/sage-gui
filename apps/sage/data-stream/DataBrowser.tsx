@@ -66,7 +66,7 @@ const columns = [{
 }, {
   id: 'name',
   label: 'Name',
-  format: (name) => <Link to={`/data-browser/ontology/${name}`}>{name}</Link>
+  format: (name) => <Link to={`/data/ontology/${name}`}>{name}</Link>
 }, {
   id: 'value',
   label: 'Value',
