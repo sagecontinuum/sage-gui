@@ -365,4 +365,14 @@ const TableContainer = styled.div`
       background-color: initial;
     }
   }
+
+  .MuiInputBase-root {
+    color: #aaa;
+    pointer-events: none;
+    background: #f2f2f2;
+  }
+
+  .MuiFormControl-root:hover {
+    cursor: not-allowed;
+  }
 `

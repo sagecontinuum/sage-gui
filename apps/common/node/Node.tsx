@@ -271,7 +271,7 @@ export default function NodeView() {
           <br/>
 
           <div className="timeline-title flex items-center">
-            <h2>Last {TAIL_DAYS} days of Data</h2>
+            <h2>Last {TAIL_DAYS} days of data</h2>
             {Object.keys(data || {}).length > 0 &&
               <DataOptions onChange={handleOptionChange} opts={opts} condensed />
             }

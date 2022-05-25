@@ -424,6 +424,10 @@ const Controls = styled.div`
   background-color: #fff;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
+
+  .checkboxes {
+    margin-top: 17px;
+  }
 `
 
 const TimelineContainer = styled.div`
