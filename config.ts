@@ -14,13 +14,13 @@ const config = {
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',
   dataBrowserURL: 'https://portal.sagecontinuum.org/data-browser',
   adminURL: 'https://admin.sagecontinuum.org',
-  sageCommons: 'https://sage-commons.sdsc.edu/api',
+  sageCommons: 'https://wifire-data.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://docs.sagecontinuum.org/docs',
 
   disableMaps: false,
 
-  // temp solution for additonal meta
+  // temp solution for additional meta
   additional_sensors: {
     'W022': [
       'OS0-64-GEN2.0 Gen2 64 Below Horizon',

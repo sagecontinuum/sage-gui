@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import { formatter } from './DataSearch'
+import { formatter } from './DataProductSearch'
 import { Item, Title } from '../common/Layout'
 import { Link } from 'react-router-dom'
 import highlightText from '/components/utils/text'
@@ -66,7 +66,7 @@ function Row(props) {
       </div>
 
       <div className="flex items-center gap muted">
-        <Type>{formatter.resources(resources)}</Type>
+        <Type className="flex">{formatter.resources(resources)}</Type>
         <div>Updated {formatter.time(metadata_modified+'Z')}</div>
         <div>{license_title}</div>
       </div>
@@ -86,5 +86,7 @@ const Keywords = styled.p`
 `
 
 const Type = styled.div`
-
+  div {
+    margin: 2px 3px 2px 0;
+  }
 `

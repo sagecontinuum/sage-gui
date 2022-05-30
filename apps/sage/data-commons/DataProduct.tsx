@@ -5,23 +5,19 @@ import styled from 'styled-components'
 import Chip from '@mui/material/Chip'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
-import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import DownloadIcon from '@mui/icons-material/FileDownloadRounded'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '../ErrorMsg'
 
 import Breadcrumbs from './BreadCrumbs'
-import { formatter } from './DataSearch'
+import { formatter } from './DataProductSearch'
+import { FileFormatDot } from './FileFormatDot'
 import {Top} from '../common/Layout'
 
 import * as Data from '/components/apis/dataCommons'
-import * as BH from '/components/apis/beehive'
-
 import Table from '/components/table/Table'
 
-function getDownloadURL(id) {
-  return `${Data.downloadUrl}/${id}?bom=True`
-}
 
 
 function formatNotes(text: string) : string {
@@ -29,41 +25,25 @@ function formatNotes(text: string) : string {
 }
 
 
+const columns = [{
+  id: 'name',
+  label: 'Name',
+  format: (val, obj) =>
+    <a href={obj.url} className="flex items-center" download>
+      <DownloadIcon color="primary"/>{val}
+    </a>
+},   {
+  id: 'description',
+  label: 'Description',
+}, {
+  id: 'format',
+  label: 'Format',
+  format: (val) => <FileFormatDot format={val} />
+}]
 
-const columns = [
-  {
-    id: 'timestamp',
-    label: 'Time',
-  },   {
-    id: 'name',
-    label: 'Name',
-  }, {
-    id: 'value',
-    label: 'Value',
-  }, {
-    id: 'meta',
-    label: 'Meta',
-    format: (o) =>
-      Object.keys(o).map(k => {
-        return <div key={k}><b>{k}</b>: {o[k]}</div>
-      })
-  },
-]
 
-function checkIfPlugin(data) {
-  return data.extras.filter(o => o.key == 'ecr_plugin_url').length > 0
-}
-
-// todo: refactor into resource fetching
-function handleErrors(res) {
-  if (res.ok) {
-    return res
-  }
-
-  return res.json().then(errorObj => {
-    throw Error(errorObj)
-  })
-}
+const checkIfPlugin = (data) =>
+  data.extras.filter(o => o.key == 'ecr_plugin_url').length > 0
 
 
 export default function Product() {
@@ -71,13 +51,8 @@ export default function Product() {
 
   const {setLoading} = useProgress()
 
-  const [cols, setCols] = useState(columns)
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
-
-  // const [resources, setResources] = useState(null)
-  const [objData, setObjData] = useState(null)
-  const [pluginData, setPluginData] = useState(null)
 
 
   useEffect(() => {
@@ -109,33 +84,6 @@ export default function Product() {
   }, [data, setLoading])
 
 
-  useEffect(() => {
-    if (!data) return
-
-    const isPlugin = checkIfPlugin(data)
-    if (isPlugin) return
-
-    const {resources} = data
-    const sources = resources.filter(o => o.url)
-    const {url} = sources[0]
-
-    // todo: need link between plugin and plugin data
-    setLoading(true)
-    fetch(url)
-      .then(handleErrors)
-      .then(res => res.json())
-      .then((data) => {
-        const cols = Object.keys(data[0]).map((k) => ({id: k, label: k}))
-        setCols(cols)
-        setObjData(data)
-      })
-      .catch(error => {
-        // setError(error) // ignore error now
-      })
-      .finally(() => setLoading(false))
-
-  }, [data, setLoading])
-
   return (
     <Root>
       <Alert severity="info" style={{borderBottom: '1px solid #f2f2f2' }}>
@@ -143,7 +91,6 @@ export default function Product() {
         Pease check back later when more data is available.
       </Alert>
       <Main>
-
         <Sidebar>
           {/*<a type="submit" href="https://web.lcrc.anl.gov/public/waggle/sagedata/measurements/sys.boot_time/2021-04-21.csv.gz">Download!</a>*/}
 
@@ -172,6 +119,7 @@ export default function Product() {
           <div>{data?.license_title || 'N/A'}</div>
         </Sidebar>
 
+
         <Details>
           <Top>
             <Breadcrumbs path={`/data/${name}`} />
@@ -179,17 +127,6 @@ export default function Product() {
 
           <div className="flex items-center justify-between">
             <h1>{name}</h1>
-
-            {data &&
-              <Button
-                href={getDownloadURL(data.resources[0].id)}
-                startIcon={<DownloadIcon/>}
-                variant="contained"
-                color="primary"
-              >
-                Download
-              </Button>
-            }
           </div>
 
           {data &&
@@ -200,31 +137,15 @@ export default function Product() {
             <ErrorMsg>{error.message}</ErrorMsg>
           }
 
-          <PreviewTable>
-            {pluginData &&
-              <>
-                <h3>Preview of Most Recent Data</h3>
-                <Table
-                  primaryKey="id"
-                  enableSorting
-                  columns={cols}
-                  rows={pluginData}
-                />
-              </>
-            }
-
-            {objData &&
-              <>
-                <h3>Data</h3>
-                <Table
-                  primaryKey="id"
-                  enableSorting
-                  columns={cols}
-                  rows={pluginData}
-                />
-              </>
-            }
-          </PreviewTable>
+          <h2>Downloads</h2>
+          {data &&
+            <Table
+              primaryKey="name"
+              enableSorting
+              columns={columns}
+              rows={data.resources}
+            />
+          }
         </Details>
       </Main>
     </Root>
@@ -258,8 +179,4 @@ const Keywords = styled.div`
 
 const Details = styled.div`
   width: 100%;
-`
-
-const PreviewTable = styled.div`
-  margin-top: 5em;
 `

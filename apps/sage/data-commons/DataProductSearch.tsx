@@ -25,28 +25,23 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import Sidebar, {FilterTitle} from './DataSidebar'
+import { FileFormatDot } from './FileFormatDot'
 
 
-const typeColorMap = {
-  default: 'rgb(28,140,201)',
-  JSON: '#efdb50',
-  PDF: '#ac3535',
-  TAR: '#4e4e4e',
-}
 
 export const formatter = {
   title: (val, obj) => {
     return <Link to={`/data/product/${obj.name}`}>{val.replace(`: ${obj.name}`, '')}</Link>
   },
-  resources: (arr) => (
-    arr.filter(o => o.format)
-      .map(o =>
-        <div key={o.format} className="flex items-center">
-          <Dot style={{backgroundColor: o.format in typeColorMap ? typeColorMap[o.format] : typeColorMap.default}} />
-          <div className="muted">{o.format.toLowerCase()}</div>
+  resources: (arr) =>
+    arr.map(o => o.format)
+      .filter((v, i, arr) => v && arr.indexOf(v) == i)
+      .map(format =>
+        <div key={format} className="flex items-center">
+          <FileFormatDot format={format} />
         </div>
       )
-  ),
+  ,
   tags: (obj) =>
     obj.map(tag => <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>)
   ,
@@ -54,14 +49,6 @@ export const formatter = {
     return utils.msToTimeApprox(Date.now() - new Date(val).getTime())
   }
 }
-
-const Dot = styled.div`
-  display: inline-block;
-  height: 12px;
-  width: 12px;
-  border-radius: 50%;
-  margin-right: 3px;
-`
 
 
 const columns = [
@@ -131,7 +118,9 @@ export default function Search() {
         setRows(results)
         setFacets(search_facets)
       })
-      .catch(error => setError(error))
+      .catch(error => {
+        // setError(error)
+      })
       .finally(() => setLoading(false))
 
   }, [setLoading, query, filterState])
@@ -199,7 +188,7 @@ export default function Search() {
                 <FormControl variant="outlined" className="flex self-center">
                   <Select
                     labelId="namespace-label"
-                    id="namepsace"
+                    id="namespace"
                     value={sort}
                     onChange={evt => alert('Sorting is not implemented yet.  Check back later.') /*setSort(evt.target.value)*/}
                     variant="outlined"

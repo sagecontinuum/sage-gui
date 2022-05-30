@@ -19,7 +19,7 @@ import JobStatus from './job-status/JobStatus'
 import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
-import DataSearch from './data-commons/DataSearch'
+import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
 
 
@@ -76,10 +76,10 @@ export default function Sage() {
 
                   <Route path="data" element={<Data />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
+                  <Route path="data/product/:name" element={<DataProduct />} />
                   <Route path="data-browser" element={<DataBrowser />} />
 
-                  <Route path="data-commons-demo" element={<DataSearch />} />
-                  <Route path="data-commons-demo/product/:name" element={<DataProduct />} />
+                  <Route path="data-commons-demo" element={<DataProductSearch />} />
 
                   <Route path="node/:node" element={<Node />} />
 

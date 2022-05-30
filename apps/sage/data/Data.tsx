@@ -326,8 +326,14 @@ export default function Data(props: Props) {
                         ${item.value.toLocaleString()} records`
                       }
                       onRowClick={(name) => {
-                        const app = findApp(ecr, name)
-                        navigate(`/apps/app/${app.id.split(':')[0]}`)
+                        const id = findApp(ecr, name).id.split(':')[0]
+                        const origin = window.location.origin
+                        const portal = 'https://portal.sagecontinuum.org'
+
+                        if (origin == portal)
+                          navigate(`/apps/app/${id}`)
+                        else
+                          window.open(`${portal}/apps/app/${id}`, '_blank')
                       }}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
