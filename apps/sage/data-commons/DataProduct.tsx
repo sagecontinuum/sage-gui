@@ -3,10 +3,8 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Chip from '@mui/material/Chip'
-import Alert from '@mui/material/Alert'
-import Button from '@mui/material/Button'
 import DownloadIcon from '@mui/icons-material/FileDownloadRounded'
-
+import wifireLogo from 'url:/assets/wifire-commons-logo.png'
 import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '../ErrorMsg'
 
@@ -21,7 +19,8 @@ import Table from '/components/table/Table'
 
 
 function formatNotes(text: string) : string {
-  return text.replace(/\n/g, '<br>').replace(/\*/g, '•');
+  text.replace(/http/g, '<br>').replace(/\*/g, '•')
+  return text.replace(/\n/g, '<br>').replace(/\*/g, '•')
 }
 
 
@@ -30,11 +29,15 @@ const columns = [{
   label: 'Name',
   format: (val, obj) =>
     <a href={obj.url} className="flex items-center" download>
-      <DownloadIcon color="primary"/>{val}
+      <DownloadIcon className="download-icon"/>{val}
     </a>
-},   {
+}, {
   id: 'description',
   label: 'Description',
+}, {
+  id: 'created',
+  label: 'Created',
+  format: (val) => new Date(val).toLocaleString()
 }, {
   id: 'format',
   label: 'Format',
@@ -52,6 +55,7 @@ export default function Product() {
   const {setLoading} = useProgress()
 
   const [data, setData] = useState(null)
+  const [doi, setDoi] = useState(null)
   const [error, setError] = useState(null)
 
 
@@ -59,8 +63,10 @@ export default function Product() {
     setLoading(true)
 
     Data.getPackage(name)
-      .then(data => {
-        const {result} = data
+      .then(({result}) => {
+        const doi = result.extras.find(obj => obj.key == 'doi').value
+        setDoi(doi)
+
         setData(result)
       })
       .catch(error => setError(error))
@@ -69,31 +75,10 @@ export default function Product() {
 
 
 
-  useEffect(() => {
-    if (!data) return
-
-    const isPlugin = checkIfPlugin(data)
-    if (!isPlugin) return
-
-    const sources = data.resources.filter(o => o.url)
-
-    // todo: sage commons should provide valid json
-    // const {query} = sources[0]
-    // let q = JSON.parse(query.replace(/u'/g, '\'').replace(/'/g, '"')) : ''
-    // todo: add link to live feed, if we want to continue building on this
-  }, [data, setLoading])
-
-
   return (
     <Root>
-      <Alert severity="info" style={{borderBottom: '1px solid #f2f2f2' }}>
-        The data explorer is currently under development and available here for <b>early preview</b>.
-        Pease check back later when more data is available.
-      </Alert>
       <Main>
         <Sidebar>
-          {/*<a type="submit" href="https://web.lcrc.anl.gov/public/waggle/sagedata/measurements/sys.boot_time/2021-04-21.csv.gz">Download!</a>*/}
-
           <h2>About</h2>
 
           <h4>Organization</h4>
@@ -126,7 +111,7 @@ export default function Product() {
           </Top>
 
           <div className="flex items-center justify-between">
-            <h1>{name}</h1>
+            <h1>{data?.title}</h1>
           </div>
 
           {data &&
@@ -137,7 +122,17 @@ export default function Product() {
             <ErrorMsg>{error.message}</ErrorMsg>
           }
 
-          <h2>Downloads</h2>
+          <div className="flex items-end justify-between">
+            <h2>Downloads</h2>
+            <div className="flex column items-end">
+              {doi &&
+                <>
+                  <a href={doi} target="_blank"><img src={wifireLogo} height="50" /></a>
+                  <a href={doi} target="_blank"><b>{doi}</b></a>
+                </>
+              }
+            </div>
+          </div>
           {data &&
             <Table
               primaryKey="name"
@@ -155,6 +150,10 @@ export default function Product() {
 const Root = styled.div`
   display: flex;
   flex-direction: column;
+
+  .download-icon {
+    color: #666;
+  }
 `
 
 const Sidebar = styled.div`
@@ -179,4 +178,5 @@ const Keywords = styled.div`
 
 const Details = styled.div`
   width: 100%;
+  margin-bottom: 50px;
 `

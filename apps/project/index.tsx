@@ -11,6 +11,7 @@ import Nodes from './views/nodes/Nodes'
 import Data from '/apps/sage/data/Data'
 import DataBrowser from '/apps/sage/data-stream/DataBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
+import DataProduct from '/apps/sage/data-commons/DataProduct'
 // import Links from '../common/DataLinks'
 
 import NotFound from '/components/404'
@@ -55,6 +56,7 @@ export default function App() {
 
                 <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
                 <Route path="data/ontology/:name" element={<Ontology />} />
+                <Route path="data/product/:name" element={<DataProduct />} />
                 <Route path="data-browser" element={<DataBrowser />} />
 
                 <Route path="*" element={<NotFound />} />

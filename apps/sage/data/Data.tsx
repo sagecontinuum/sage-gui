@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Divider from '@mui/material/Divider'
+import Button from '@mui/material/Button'
+import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
-import TimelineSkeleton from '../../../components/viz/TimelineSkeleton'
 import DataOptions from './DataOptions'
 
 import {Top} from '../common/Layout'
@@ -12,6 +13,7 @@ import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
+import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, {colors} from '/components/viz/TimelineChart'
 import * as BK from '/components/apis/beekeeper'
@@ -21,6 +23,9 @@ import { chain, startCase } from 'lodash'
 import { addDays, endOfHour, subDays } from 'date-fns'
 import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
+
+import settings from '/apps/common/settings'
+const MDP_NODES = settings.mdpNodes
 
 
 // No assignment represents null, and is same as empty string in this view
@@ -72,6 +77,18 @@ export const colorDensity = (val, obj) => {
 
 const getInfiniteEnd = (page: number) =>
   page == 1 ? ITEMS_INITIALLY : page * ITEMS_PER_PAGE
+
+const getDownloadLink = (vsn: string) =>
+  MDP_NODES.includes(vsn) ?
+    <Button
+      startIcon={<FileDownloadRounded />}
+      to="/data/product/neon-mdp-sage-wifire-bp3d-konza-prairie-burn-experiment"
+      variant="outlined"
+      component={Link}
+    >
+      Download
+    </Button>
+    : <></>
 
 
 // todo(nc): temp solution until we have references!
@@ -306,12 +323,22 @@ export default function Data(props: Props) {
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
                 const timelineData = data[vsn]
+                const {node_id, location} = manifestByVSN[vsn]
 
                 return (
                   <TimelineContainer key={vsn}>
-                    <h2>
-                      <Link to={`/node/${manifestByVSN[vsn].node_id}`}>{vsn}</Link>
-                    </h2>
+                    <div className="flex justify-between title-row">
+                      <div className="flex column">
+                        <div>
+                          <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                        </div>
+                        <div>{location}</div>
+                      </div>
+
+                      <div className="data-opts">
+                        {getDownloadLink(vsn)}
+                      </div>
+                    </div>
                     <TimelineChart
                       data={timelineData}
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -439,9 +466,11 @@ const Controls = styled.div`
 const TimelineContainer = styled.div`
   margin-bottom: 100px;
 
-  h2 {
-    float: left;
-    margin: 0 0 0 20px;
+  .title-row {
+    margin 0 20px;
+    h2 {
+      margin: 0;
+    }
   }
 `
 

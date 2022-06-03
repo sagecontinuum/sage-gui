@@ -562,8 +562,7 @@ const Root = styled.div<{colorLinks: boolean}>`
 `
 
 const Ctrls = styled.div`
-  display: flex;
-  justify-content: end;
+  float: right;
   margin: 0 20px 15px 15px;
 
   .reset {
