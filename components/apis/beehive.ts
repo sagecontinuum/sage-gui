@@ -432,7 +432,12 @@ export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
 
 export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> {
   const d = await getData({start: '-6m', filter: {name: 'sys.gps.*', vsn}, tail: 1})
-  const [lat, lon] = [d.find(o => o.name === 'sys.gps.lat').value, d.find(o => o.name === 'sys.gps.lon').value]
+  const lat = Number(d.find(o => o.name === 'sys.gps.lat')?.value)
+  const lon = Number(d.find(o => o.name === 'sys.gps.lon')?.value)
+
+  if (!lat || !lon)
+    return null
+
   return {lat, lon}
 }
 
