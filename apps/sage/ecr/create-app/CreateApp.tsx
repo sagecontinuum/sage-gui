@@ -1,35 +1,34 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import TextField from '@mui/material/TextField'
-import StepIcon from '@mui/material/StepIcon'
 import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
+import FormHelperText from '@mui/material/FormHelperText'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import CheckIcon from '@mui/icons-material/Check'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
 import TagIcon from '@mui/icons-material/LocalOfferOutlined'
-import FormHelperText from '@mui/material/FormHelperText'
-
 import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
+
 
 import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
 
+import { StepTitle, Step, StepForm } from '../../common/FormLayout'
 import ConfigForm from './ConfigForm'
 import FilterMenu from '/components/FilterMenu'
 import CheckBox from '/components/input/Checkbox'
 
 import * as Auth from '/components/auth/auth'
 import * as ECR from '/components/apis/ecr'
-import FormControlLabel from '@mui/material/FormControlLabel'
 
 const user = Auth.getUser()
 
 const devList = [
   'nconrad',
-  'wgerlach',
   'gemblerz',
   'seanshahkarami',
   'jswantek'
@@ -47,24 +46,6 @@ const EXAMPLES = {
   'birdnet': 'https://github.com/dariodematties/BirdNET_Plugin'
 }
 
-
-function StepTitle(props) {
-  return (
-    <StepRoot>
-      <StepIcon {...props}/> <span>{props.label}</span>
-    </StepRoot>
-  )
-}
-
-const StepRoot = styled.div`
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  margin-bottom: 10px;
-  .MuiStepIcon-root {
-    margin-right: 5px;
-  }
-`
 
 
 const getRepoPath = (url: string) =>
@@ -256,7 +237,7 @@ export default function CreateApp() {
 
         <StepTitle icon="1" active={true} label="Repo URL"/>
 
-        <form className="step step-1 flex items-center gap" onSubmit={onRepoVerify}>
+        <StepForm className="repo-step flex items-center gap" onSubmit={onRepoVerify}>
           <TextField
             label="GitHub Repo URL"
             placeholder="https://github.com/me/my-edge-app"
@@ -298,22 +279,20 @@ export default function CreateApp() {
           {isValid &&
             <CheckIcon className="success" />
           }
-        </form>
+        </StepForm>
 
 
         <StepTitle icon="2" active={true} label="App Name and Version" />
 
-        <div className="step">
+        <Step>
           <ConfigForm
             form={form}
             onChange={onUpdateForm}
           />
-        </div>
-
-
+        </Step>
 
         {isValid &&
-          <div className="step">
+          <Step>
             <h4>App Config</h4>
             {configType == 'none' &&
               <p>
@@ -330,10 +309,10 @@ export default function CreateApp() {
             {error &&
               <FormHelperText style={{fontSize: '1.1em'}} error>{error}</FormHelperText>
             }
-          </div>
+          </Step>
         }
 
-        <div className="step">
+        <Step className="submit">
           <Button
             onClick={onRegister}
             variant="outlined"
@@ -351,7 +330,7 @@ export default function CreateApp() {
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
-        </div>
+        </Step>
       </Main>
 
 
@@ -422,19 +401,15 @@ const Main = styled.div`
   margin: 10px 0;
   flex-grow: 3;
 
-  .step {
-    margin: 0px 25px 40px 25px;
-
-    .MuiButton-root {
-      margin-right: 10px;
-    }
-  }
-
-  .step-1 {
+  .repo-step {
     margin-top: 2em;
     button, svg {
       margin-left: 10px;
     }
+  }
+
+  .submit .MuiButton-root {
+    margin-right: 10px;
   }
 `
 
