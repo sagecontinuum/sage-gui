@@ -43,6 +43,9 @@ export default function useWithBuildStatus<T>() {
             return newRows
           })
         })
+        .catch(error => {
+          // pass
+        })
     }
 
     setIsDone(true)
