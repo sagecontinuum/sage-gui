@@ -23,6 +23,7 @@ import ArrowUp from '@mui/icons-material/ArrowDropUp'
 
 import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
+import Checkbox from '/components/input/Checkbox'
 
 import selectedReducer, { SelectedState, initialSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
@@ -83,7 +84,7 @@ type RowProps = {
   id: number,
   emptyCell: boolean,
   selected: any, //todo: type
-  // checkboxes: boolean,
+  checkboxes: boolean,
   onSelect?: (
     evt: MouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>,
     id: number,
@@ -101,7 +102,7 @@ const Row = (props: RowProps) => {
     id,
     emptyCell,
     selected,
-    //checkboxes,
+    checkboxes,
     onSelect,
     onDoubleClick,
     onMore,
@@ -122,14 +123,13 @@ const Row = (props: RowProps) => {
     >
       {emptyCell && <Cell></Cell>}
 
-      {/*checkboxes &&
+      {checkboxes &&
         <Cell key={id + '-checkbox'} style={{padding: 0, width: 1}}>
           <Checkbox
             checked={selected.ids.includes(rowID)}
             onClick={evt => onSelect(evt, rowID, row)}
           />
         </Cell>
-        */
       }
 
       <RowCells
@@ -226,12 +226,12 @@ const TableHeadComponent = (props) => {
 
   return (
     <TableRow>
-      {/* if table has checkboxes (if table has sslect all checkbox) */}
-      {/*checkboxes &&
+      {/* if table has checkboxes (if table has select all checkbox) */}
+      {checkboxes &&
         <TableCell style={{padding: 0, width: 1}} onClick={handleSelectAll}>
           <Checkbox checked={allSelected} />
         </TableCell>
-      *}
+      }
 
       {/* the main thead parts */}
       {columns.map(col => (
@@ -334,7 +334,7 @@ type Props = {
   searchPlaceholder?: string
   stripes?: boolean
   enableSorting?: boolean
-
+  disableClickOutside?: boolean
   onSearch?: ({query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
@@ -364,8 +364,12 @@ type Rows = Row[]
 export default function TableComponent(props: Props) {
   const {
     primaryKey = 'rowID',
-    pagination, offsetHeight, checkboxes, emptyNotice,
-    stripes = true, enableSorting = false,
+    pagination,
+    offsetHeight,
+    checkboxes,
+    emptyNotice,
+    stripes = true,
+    enableSorting = false,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
@@ -468,6 +472,7 @@ export default function TableComponent(props: Props) {
 
 
   useClickOutside(tableRef, () => {
+    if (props.disableClickOutside) return
     dispatch({type: 'CLEAR'})
   }, ['button', 'a', 'input', '.ignore-click-outside',
     '.MuiDialog-container', '.MuiAutocomplete-popper', '.mapboxgl-canvas-container'])
