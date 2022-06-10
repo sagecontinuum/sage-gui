@@ -42,7 +42,7 @@ import config from '/config'
 const docker = config.dockerRegistry
 
 
-const useStyles = makeStyles((theme: Theme) =>
+export const useAccordionStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       marginBottom: -1,
@@ -86,7 +86,7 @@ type Props = {
 export default function TagList(props: Props) {
   const { enqueueSnackbar } = useSnackbar()
 
-  const classes = useStyles()
+  const classes = useAccordionStyles()
 
   const [versions, setVersions] = useWithBuildStatus()
 
@@ -320,7 +320,7 @@ const Root = styled.div`
 
 `
 
-const Accordion = styled(MuiAccordion) `
+export const Accordion = styled(MuiAccordion) `
   position: relative;
   border: 1px solid #ddd;
   border-radius: 0 2px 2px 0 ;

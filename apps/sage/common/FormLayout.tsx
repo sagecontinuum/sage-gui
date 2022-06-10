@@ -3,35 +3,58 @@ import StepIcon from '@mui/material/StepIcon'
 
 
 export const Main = styled.div`
-  margin: 10px 0;
+  margin: 10px 0 40px 0;
   flex-grow: 3;
 `
 
+type LabelProps = {
+  label: string
+  icon: string
+}
 
-export function StepTitle(props) {
+type StepProps = {
+  label?: string
+  icon?: string
+  children: JSX.Element
+}
+
+export function Step(props: StepProps) {
+  const {label, icon} = props
   return (
-    <StepRoot>
-      <StepIcon {...props}/> <span>{props.label}</span>
-    </StepRoot>
+    <div>
+      {props.label && <StepTitle icon={icon} label={label} />}
+      <StepContent>
+        {props.children}
+      </StepContent>
+    </div>
   )
 }
 
-const StepRoot = styled.h3`
+
+export function StepTitle(props: LabelProps) {
+  const { label, ...rest } = props
+
+  return (
+    <StepTitleRoot>
+      <StepIcon active={true} {...rest}/> <h3>{label}</h3>
+    </StepTitleRoot>
+  )
+}
+
+const StepTitleRoot = styled.div`
   display: flex;
   align-items: center;
   font-weight: bold;
-  margin-bottom: 10px;
   .MuiStepIcon-root {
     margin-right: 5px;
   }
 `
 
-
 const step = css`
   margin: 0px 25px 40px 25px;
 `
 
-export const Step = styled.div`
+const StepContent = styled.div`
   ${step}
 `
 

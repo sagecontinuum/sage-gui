@@ -232,3 +232,13 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
   return data.find(o => o.ontology == name) as OntologyObj
 }
 
+
+
+export async function getNodeDetails() {
+  const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'id'})])
+  const nodeDetails = bkData
+    .map(obj => ({...obj, ...details[obj.id]}))
+    .filter(o => o.commission_date?.length)
+
+  return nodeDetails
+}

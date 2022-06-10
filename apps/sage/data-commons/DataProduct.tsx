@@ -87,7 +87,7 @@ export default function Product() {
           <h4>Keywords</h4>
           <Keywords>
             {data && data.tags.map(tag =>
-              <Chip key={tag.name} label={tag.display_name} variant="outlined" size="small"/>
+              <Chip key={tag.name} label={tag.display_name} />
             )}
           </Keywords>
 

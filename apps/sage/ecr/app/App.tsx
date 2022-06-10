@@ -19,7 +19,7 @@ import * as ECR from '/components/apis/ecr'
 import * as Auth from '/components/auth/auth'
 
 
-import marked from 'marked/lib/marked'
+import { marked } from 'marked'
 import AppMeta from './AppMeta'
 
 

@@ -75,6 +75,12 @@ const theme = createTheme({
         variant: 'outlined'
       }
     },
+    MuiChip: {
+      defaultProps: {
+        size: 'small',
+        variant: 'outlined'
+      }
+    },
     MuiIcon: {
       defaultProps: {
         baseClassName: 'material-icons-rounded',

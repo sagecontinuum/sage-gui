@@ -15,7 +15,8 @@ import RequireAuth from '/components/auth/RequireAuth'
 
 import Apps from './ecr/apps/Apps'
 import Node from '../common/node/Node'
-import JobStatus from './job-status/JobStatus'
+import JobStatus from './jobs/JobStatus'
+import CreateJob from './jobs/create-job/CreateJob'
 import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
@@ -36,7 +37,7 @@ import '/assets/styles.scss'
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps/explore">App Catalog</NavLink></li>
-    {/*<li><NavLink to="/job-status">Status</NavLink></li>*/}
+    <li><NavLink to="/job-status">Job Status</NavLink></li>
     <li><NavLink to="/data">Data</NavLink></li>
   </NavItems>
 
@@ -74,6 +75,9 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
+                  <Route path="job-status" element={<JobStatus />} />
+                  <Route path="create-job" element={<CreateJob />} />
+
                   <Route path="data" element={<Data />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
@@ -83,7 +87,6 @@ export default function Sage() {
 
                   <Route path="node/:node" element={<Node />} />
 
-                  <Route path="job-status" element={<JobStatus />} />
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
