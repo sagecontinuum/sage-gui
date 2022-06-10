@@ -372,7 +372,7 @@ export default function TableComponent(props: Props) {
     disableRowSelect = () => false
   } = props
 
-  if (pagination && (props.page === undefined || !props.limit)) {
+  if (pagination && (props.page === undefined || isNaN(props.limit)) ){
     throw `Grid component must provide 'page' and 'limit' when 'pagination' is used.
       page value was: ${props.page}; limit value was: ${props.limit}.`
   }
