@@ -13,15 +13,16 @@ type LabelProps = {
 }
 
 type StepProps = {
+  children: JSX.Element | JSX.Element[]
   label?: string
   icon?: string
-  children: JSX.Element
+  className?: string
 }
 
 export function Step(props: StepProps) {
-  const {label, icon} = props
+  const {label, icon, className} = props
   return (
-    <div>
+    <div className={className}>
       {props.label && <StepTitle icon={icon} label={label} />}
       <StepContent>
         {props.children}
