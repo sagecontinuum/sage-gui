@@ -97,6 +97,7 @@ export type AppMeta = {
   inputs?: {
     id: string,
     type: 'boolean' | 'int' | 'long' | 'float' | 'double' | 'string' | 'File'
+    description: string
   }[]
   metadata?: {
     [item: string]: any

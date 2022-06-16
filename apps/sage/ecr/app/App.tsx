@@ -3,8 +3,10 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
+import InputIcon from '@mui/icons-material/InputRounded'
 import TagIcon from '@mui/icons-material/LocalOfferRounded'
 import Divider from '@mui/material/Divider'
+import BeeIcon from 'url:/assets/bee.svg'
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
@@ -12,7 +14,7 @@ import RepoActions from '../RepoActions'
 import {Tabs, Tab} from '/components/tabs/Tabs'
 import {useProgress} from '/components/progress/ProgressProvider'
 import TagList from './TagList'
-import BeeIcon from 'url:/assets/bee.svg'
+import InputsList from './InputList'
 import { Thumb } from '../formatters'
 
 import * as ECR from '/components/apis/ecr'
@@ -116,8 +118,9 @@ export default function App() {
             onChange={(_, idx) => setTabIndex(idx)}
             aria-label="App details tabs"
           >
-            <Tab label={<div className="flex items-center"><ScienceIcon  /> Science Overview</div>} />
-            <Tab label={<div className="flex items-center"><TagIcon /> Tagged Versions ({versions.length})</div>} />
+            <Tab label={<div className="flex items-center"><ScienceIcon fontSize="small" />&nbsp;Science Overview</div>} />
+            <Tab label={<div className="flex items-center"><InputIcon fontSize="small" />&nbsp;Input Arguments</div>} />
+            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" />&nbsp;Tagged Versions ({versions.length})</div>} />
           </Tabs>
           <br/>
 
@@ -135,8 +138,13 @@ export default function App() {
           }
 
           {tabIndex == 1 && versions.length &&
+            <InputsList versions={versions} />
+          }
+
+          {tabIndex == 2 && versions.length &&
             <TagList versions={versions} />
           }
+
         </Main>
 
         {latestTag &&

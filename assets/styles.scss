@@ -224,7 +224,7 @@ button.delete {color: #912341; }
  * global util classes
  */
 
-p > code, pre {
+pre {
   background: #f8f8f8;
   border-radius: 5px;
   border: 1px solid #bbb;
@@ -232,9 +232,12 @@ p > code, pre {
   padding: 10px;
 }
 
-.mono-term {
-  padding: 1px 2px;
+.mono-term, p > code {
+  padding: 0px 2px;
   color: #c52700;
+  background: #f8f8f8;
+  border-radius: 5px;
+  border: 1px solid #bbb;
 }
 
 

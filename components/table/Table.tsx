@@ -645,7 +645,7 @@ export default function TableComponent(props: Props) {
         </Table>
 
         {rows.length == 0 &&
-          <NoneFoundNotice offset={offsetHeight}>
+          <NoneFoundNotice>
             {emptyNotice || 'No results found'}
           </NoneFoundNotice>
         }
@@ -746,10 +746,10 @@ const Container = styled(TableContainer)`
 `
 
 const NoneFoundNotice = styled.div`
-  height: ${props => `calc(100% - ${props.offset || '500px'})`};
   display: flex;
   justify-content: center;
   transform: translate(0%, 20%);
   color: #666;
   font-size: 1.5em;
+  margin: 100px 0;
 `
