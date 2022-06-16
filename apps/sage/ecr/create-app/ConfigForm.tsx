@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import styled from 'styled-components'
 
 import FormControl from '@mui/material/FormControl'
@@ -7,7 +7,7 @@ import InputLabel from '@mui/material/InputLabel'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
-import * as ECR from '../../apis/ecr'
+import { AppMeta } from '/components/apis/ecr'
 import * as Auth from '/components/auth/auth'
 
 import isDevUser from './ConfigForm'
@@ -15,8 +15,8 @@ const user = Auth.getUser()
 
 
 type Props = {
-  form: ECR.AppMeta
-  onChange: (evt: React.ChangeEvent | React.ChangeEvent<{name?: string, value: unknown}>) => void
+  form: AppMeta
+  onChange: (evt: ChangeEvent | ChangeEvent<{name?: string, value: unknown}>) => void
 }
 
 export default function ConfigForm(props: Props) {
@@ -75,8 +75,6 @@ export default function ConfigForm(props: Props) {
 }
 
 const Form = styled.form`
-  margin-top: 15px;
-
   .MuiTextField-root, .MuiFormControl-root {
     margin: 10px 0;
   }

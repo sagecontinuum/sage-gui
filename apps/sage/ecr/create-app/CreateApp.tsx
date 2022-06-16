@@ -235,8 +235,7 @@ export default function CreateApp() {
       <Main>
         <h1>Create App</h1>
 
-        <StepTitle icon="1" active={true} label="Repo URL"/>
-
+        <StepTitle icon="1" label="Repo URL"/>
         <StepForm className="repo-step flex items-center gap" onSubmit={onRepoVerify}>
           <TextField
             label="GitHub Repo URL"
@@ -282,14 +281,14 @@ export default function CreateApp() {
         </StepForm>
 
 
-        <StepTitle icon="2" active={true} label="App Name and Version" />
-
+        <StepTitle icon="2" label="App Name and Version" />
         <Step>
           <ConfigForm
             form={form}
             onChange={onUpdateForm}
           />
         </Step>
+
 
         {isValid &&
           <Step>
@@ -312,12 +311,14 @@ export default function CreateApp() {
           </Step>
         }
 
-        <Step className="submit">
+
+        <Step>
           <Button
             onClick={onRegister}
             variant="outlined"
             color="primary"
             disabled={disableSubmit()}
+            className="register-app"
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
@@ -402,13 +403,13 @@ const Main = styled.div`
   flex-grow: 3;
 
   .repo-step {
-    margin-top: 2em;
+    margin-top: 6px;
     button, svg {
       margin-left: 10px;
     }
   }
 
-  .submit .MuiButton-root {
+  .register-app {
     margin-right: 10px;
   }
 `
