@@ -366,10 +366,10 @@ export default function StatusView() {
         onChange={(_, idx) => setTabIdx(idx)}
         aria-label="Build phase tabs"
       >
-        <Tab label={`NX flash ${getCountIndicator('phase1')}`} idx={0} component={Link} to="/surya/phase1" />
-        <Tab label={`Open build ${getCountIndicator('phase2')}`} idx={1} component={Link} to="/surya/phase2" />
-        <Tab label={`Long soak ${getCountIndicator('phase3')}`} idx={2} component={Link} to="/surya/phase3" />
-        <Tab label={`Completed ${getCountIndicator('phase4')}`} idx={3} component={Link} to="/surya/phase4" className="completed-tab" />
+        <Tab label={`NX flash ${getCountIndicator('phase1')}`} component={Link} to="/surya/phase1" />
+        <Tab label={`Open build ${getCountIndicator('phase2')}`} component={Link} to="/surya/phase2" />
+        <Tab label={`Long soak ${getCountIndicator('phase3')}`} component={Link} to="/surya/phase3" />
+        <Tab label={`Completed ${getCountIndicator('phase4')}`} component={Link} to="/surya/phase4" className="completed-tab" />
       </Tabs>
 
 

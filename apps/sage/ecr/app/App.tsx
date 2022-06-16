@@ -116,8 +116,8 @@ export default function App() {
             onChange={(_, idx) => setTabIndex(idx)}
             aria-label="App details tabs"
           >
-            <Tab label={<div className="flex items-center"><ScienceIcon fontSize="small" /> Science Overview</div>} idx={0} />
-            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" /> Tagged Versions ({versions.length})</div>} idx={1}/>
+            <Tab label={<div className="flex items-center"><ScienceIcon  /> Science Overview</div>} />
+            <Tab label={<div className="flex items-center"><TagIcon /> Tagged Versions ({versions.length})</div>} />
           </Tabs>
           <br/>
 
