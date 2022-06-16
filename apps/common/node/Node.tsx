@@ -17,7 +17,7 @@ import RecentDataTable from '/apps/common/RecentDataTable'
 import RecentImages from '/apps/common/RecentImages'
 import Audio from '/components/viz/Audio'
 import Map from '/components/LeafletMap'
-import MetaTable from '/components/utils/MetaTable'
+import MetaTable from '/components/table/MetaTable'
 import Hotspot from './Hotspot'
 
 import adminSettings from '/apps/admin/settings' // todo(nc): organize, maybe?
