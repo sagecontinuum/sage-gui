@@ -34,8 +34,9 @@ const useParams = () =>
   new URLSearchParams(useLocation().search)
 
 
+// helper to filter against project/focuses in setting file
 const filterOn = (data: BK.State[], key: string) =>
-  data.filter(o => o[key].toLowerCase() == settings[key]?.toLowerCase())
+  data.filter(o => o[key]?.toLowerCase() == settings[key]?.toLowerCase())
 
 
 function getProjectNodes() {
@@ -104,8 +105,7 @@ export default function Nodes() {
     function ping() {
       handle = setTimeout(async () => {
         if (done) return
-        const results = await Promise.allSettled([BH.getAdminData()])
-        const [ metrics ] = results.map(r => r.value)
+        const metrics = await BH.getAdminData()
 
         setData(mergeMetrics(dataRef.current, metrics, null, null))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
@@ -117,10 +117,9 @@ export default function Nodes() {
 
     setLoading(true)
     const proms = [getProjectNodes(), BH.getAdminData()]
-    Promise.allSettled(proms)
-      .then((results) => {
+    Promise.all(proms)
+      .then(([state, metrics]) => {
         if (done) return
-        const [state, metrics] = results.map(r => r.value)
 
         setData(state)
 
