@@ -61,6 +61,7 @@ export function getColorClass(val, severe: number, warning: number, defaultClass
 function fsAggregator(data) {
   return data?.reduce((acc, o) => {
     const mountPoint = o.meta.mountpoint
+    console.log(mountPoint);
     const mntPath = o.meta.fstype + ':' + mountPoint
 
     const mntParts = mountPoint.split('/')
