@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useData } from "../utilities/firebase";
 import { StepTitle, Step, StepForm } from "../../common/FormLayout";
+import CountDownTimer from "./CountDownTimer"
 
 import { makeStyles } from "@mui/styles";
 import {
@@ -27,6 +28,8 @@ import BeeIcon from "url:/assets/bee.svg";
 import ErrorMsg from "../../ErrorMsg";
 import * as Auth from "/components/auth/auth";
 import { registerNanosInFirebase } from "../utilities/RegisterNanos";
+import RegistrationKeyLists from "./ApiFunctions";
+import { ClassNames } from "@emotion/react";
 
 const useStyles = makeStyles({
   container: {
@@ -79,6 +82,8 @@ export default function NanoList() {
     useData("/nanoDevices", getNanoList)
   );
   const [hardware, setHardware] = useState("");
+  const [registrationKey, setRegistrationKey] = useState(false);
+  const hoursMinSecs = {hours:0, minutes: 0, seconds: 5}
 
   if (nanoListLoading) {
     return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
@@ -99,6 +104,15 @@ export default function NanoList() {
     });
 
     setNanoTags([]);
+  };
+
+  const handlePublish = () => {
+    setRegistrationKey(true);
+  };
+
+  const handleCancelPublish = () => {
+    console.log(registrationKey)
+    setRegistrationKey(false);
   };
 
   const handleChange = (event: SelectChangeEvent) => {
@@ -172,7 +186,7 @@ export default function NanoList() {
         >
           <h1>Publish Your Nano Device</h1>
           <StepTitle icon="1" label="Enter Nano Information" />
-         
+
           <TextField
             id="uid"
             label="User ID"
@@ -180,19 +194,14 @@ export default function NanoList() {
             defaultValue={user}
             className={classes.field}
           />
-           <FormControl sx={{ m: 1, width:'100%' }}>
-          <InputLabel id="hardware">Hardware</InputLabel>
-          <Select
-          value={hardware}
-          label="Hardware"
-          onChange={handleChange}
-        >
-          
-          <MenuItem value="Nano">Nano</MenuItem>
-          <MenuItem value="RPI">Raspberrypi</MenuItem>
-        </Select>
-        </FormControl>
-          
+          <FormControl sx={{ m: 1, width: "100%" }}>
+            <InputLabel id="hardware">Hardware</InputLabel>
+            <Select value={hardware} label="Hardware" onChange={handleChange}>
+              <MenuItem value="Nano">Nano</MenuItem>
+              <MenuItem value="RPI">Raspberrypi</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
             id="nano-id"
             label="Nano ID"
@@ -212,7 +221,6 @@ export default function NanoList() {
             defaultValue={Date()}
             className={classes.field}
           />
-          
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "center", m: 2 }}>
@@ -220,7 +228,7 @@ export default function NanoList() {
             <Button
               variant="contained"
               type="submit"
-              onClick={() => console.log("Publish + Send POST request")}
+              onClick={() => handlePublish()}
             >
               Publish Nano
             </Button>
@@ -228,12 +236,21 @@ export default function NanoList() {
               variant="outlined"
               color="error"
               type="submit"
-              onClick={() => console.log("Cancel")}
+              onClick={() => handleCancelPublish()}
             >
               Cancel
             </Button>
           </Stack>
         </Box>
+
+        <Box className={classes.form}>
+        <div>
+            <CountDownTimer hoursMinSecs={hoursMinSecs}/>
+        </div>
+
+        {registrationKey? <RegistrationKeyLists/> : <></>}
+        </Box>
+
       </Card>
     </>
   );

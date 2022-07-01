@@ -3,7 +3,7 @@
   "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
-    "start": "npm start -w sage",
+    "start": "PORT=3000 npm start -w sage",
     "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
     "release": "standard-version"
   },

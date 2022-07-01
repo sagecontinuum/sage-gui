@@ -1,10 +1,18 @@
+# # build
+# FROM node:14.16 AS build
+# ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
+# WORKDIR /app
+# COPY . .
+# RUN npm install -s --production
+# RUN npm run build-admin
+
 # build
-FROM node:14.16 AS build
+FROM node:16.15 AS build
 ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
 WORKDIR /app
 COPY . .
-#RUN npm install -s --production
-#RUN npm run build-admin
+RUN npm install -w sage
+RUN npm run build -w sage
 
 # server
 FROM nginx:1.18-alpine
