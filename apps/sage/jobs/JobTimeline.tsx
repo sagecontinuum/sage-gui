@@ -57,7 +57,7 @@ export default function JobTimeLine(props: Props) {
             navigate(`/data-browser/?apps=${app}&nodes=${node}&window=d`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
-          margin={{right: 0, bottom: 0}}
+          margin={{left: 175, right: 0, bottom: 0}}
         />
       }
     </Root>
