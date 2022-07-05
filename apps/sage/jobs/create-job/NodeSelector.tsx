@@ -56,7 +56,7 @@ const columns = [{
 }, {
   id: 'View',
   format: (_, obj) =>
-    <Link to={`/node/${obj.id}`} target="_blank">
+    <Link to={`/node/${obj.node_id}`} target="_blank">
       view node <LaunchIcon className="external-link"/>
     </Link>
 }]
@@ -77,7 +77,7 @@ const parseManifest = (data) => data.map(o => ({
 
 
 type Props = {
-  onSelected: (apps: object[]) => void
+  onSelected: (apps: BK.Manifest[]) => void
 }
 
 export default function NodeSelector(props: Props) {
