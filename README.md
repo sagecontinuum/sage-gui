@@ -76,7 +76,7 @@ Build/run:
 
 ```
 export MAPBOX_TOKEN=<token_string>
-docker build --build-arg MAPBOX_TOKEN -t sage-admin-ui .
-docker run -dp 8080:80 sage-admin-ui
+docker build --build-arg MAPBOX_TOKEN -t sage-ui .
+docker run -dp 8080:80 sage-ui
 ```
 

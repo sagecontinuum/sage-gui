@@ -17,13 +17,14 @@ type StepProps = {
   label?: string
   icon?: string
   className?: string
+  active?: boolean
 }
 
 export function Step(props: StepProps) {
-  const {label, icon, className} = props
+  const {className, ...rest} = props
   return (
     <div className={className}>
-      {props.label && <StepTitle icon={icon} label={label} />}
+      {props.label && <StepTitle {...rest} />}
       <StepContent>
         {props.children}
       </StepContent>
