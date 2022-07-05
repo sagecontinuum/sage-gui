@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import mapboxgl from 'mapbox-gl'
-import tokens from '/tokens'
 import config from '/config'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -18,7 +17,7 @@ const maxHeight = '350px'
 
 
 const loadMap = (domRef, resize) => {
-  mapboxgl.accessToken = process.env.MAPBOX_TOKEN || tokens.mapbox
+  mapboxgl.accessToken = process.env.MAPBOX_TOKEN || 'xyz.123'
 
   const map = new mapboxgl.Map({
     container: domRef.current,

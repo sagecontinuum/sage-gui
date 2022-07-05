@@ -5,11 +5,8 @@ import styled from 'styled-components'
 import CheckIcon from '@mui/icons-material/CheckRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
-import SelectedAppTable from './SelectedAppTable'
 import Table from '/components/table/Table'
 import { queryData } from './createJobUtils'
-import { Step, StepTitle } from '../../common/FormLayout'
-import { Item } from '../../common/Layout'
 import * as ECR from '/components/apis/ecr'
 
 import { formatDistance } from 'date-fns'
@@ -58,7 +55,7 @@ export type AppRow = {
 
 
 type Props = {
-  onSelected: (apps: object[]) => void
+  onSelected: (apps: ECR.App[]) => void
 }
 
 
