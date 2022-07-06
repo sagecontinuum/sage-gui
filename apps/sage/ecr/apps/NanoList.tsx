@@ -4,12 +4,11 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useData } from "../utilities/firebase";
 import { StepTitle, Step, StepForm } from "../../common/FormLayout";
-import CountDownTimer from "./CountDownTimer"
+import CountDownTimer from "./CountDownTimer";
 
 import { makeStyles } from "@mui/styles";
 import {
   Box,
-  Typography,
   TextField,
   Button,
   FormControl,
@@ -20,7 +19,6 @@ import {
   Chip,
   MenuItem,
   Card,
-  CardHeader,
   Stack,
 } from "@mui/material";
 
@@ -47,6 +45,7 @@ const useStyles = makeStyles({
     padding: "0px 24px 20px 24px",
     marginTop: "13px",
     height: "100%",
+    width: "50%",
     justifyContent: "space-evenly",
     "& .MuiTextField-root": { MimeTypeArray: 1, width: "100%" },
   },
@@ -83,7 +82,7 @@ export default function NanoList() {
   );
   const [hardware, setHardware] = useState("");
   const [registrationKey, setRegistrationKey] = useState(false);
-  const hoursMinSecs = {hours:0, minutes: 0, seconds: 5}
+  const hoursMinSecs = { hours: 0, minutes: 0, seconds: 5 };
 
   if (nanoListLoading) {
     return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
@@ -106,15 +105,6 @@ export default function NanoList() {
     setNanoTags([]);
   };
 
-  const handlePublish = () => {
-    setRegistrationKey(true);
-  };
-
-  const handleCancelPublish = () => {
-    console.log(registrationKey)
-    setRegistrationKey(false);
-  };
-
   const handleChange = (event: SelectChangeEvent) => {
     setHardware(event.target.value);
   };
@@ -123,9 +113,10 @@ export default function NanoList() {
     <>
       <Card className={classes.container} sx={{ mb: 3 }}>
         <Box className={classes.form}>
-          <h1>Register Your Nano Devices</h1>
-          <FormControl sx={{ my: 1, width: "100%" }}>
-            <InputLabel sx={{ fontSize: "14px" }}>Nanos</InputLabel>
+        <h1>Register Your Waggle Devices</h1>
+          <FormControl sx={{ my: 1, width: "100%" }} className={classes.field}>
+          
+            <InputLabel>Waggles</InputLabel>
             <Select
               className={classes.field}
               multiple
@@ -162,9 +153,26 @@ export default function NanoList() {
               ))}
             </Select>
           </FormControl>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ justifyContent: "center", margin: "16px" }}
+          >
           <Button
+            variant="contained"
+            type="submit"
+            onClick={() => {
+              if (nanoTags.length > 0) handleRegister();
+            }}
+          >
+          Register
+          </Button>
+            </Stack>
+        </Box>
+
+        {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button
             variant="contained"
             type="submit"
             onClick={() => {
@@ -174,7 +182,7 @@ export default function NanoList() {
           >
             Register
           </Button>
-        </Box>
+        </Box> */}
       </Card>
 
       <Card className={classes.container}>
@@ -184,7 +192,7 @@ export default function NanoList() {
             "& .MuiTextField-root": { m: 1, width: "25ch" },
           }}
         >
-          <h1>Publish Your Nano Device</h1>
+          <h1>Publish Your Waggle Device</h1>
           <StepTitle icon="1" label="Enter Nano Information" />
 
           <TextField
@@ -195,10 +203,14 @@ export default function NanoList() {
             className={classes.field}
           />
           <FormControl sx={{ m: 1, width: "100%" }}>
-            <InputLabel id="hardware">Hardware</InputLabel>
-            <Select value={hardware} label="Hardware" onChange={handleChange}>
-              <MenuItem value="Nano">Nano</MenuItem>
-              <MenuItem value="RPI">Raspberrypi</MenuItem>
+            <InputLabel id="beehive-selection">Beehive</InputLabel>
+            <Select
+              value={hardware}
+              label="Beehive Selection"
+              onChange={handleChange}
+            >
+              <MenuItem value="Nano">Beehive Dev</MenuItem>
+              <MenuItem value="RPI">Beehive Prod</MenuItem>
             </Select>
           </FormControl>
 
@@ -208,27 +220,16 @@ export default function NanoList() {
             variant="outlined"
             className={classes.field}
           />
-          <TextField
-            id="location"
-            label="Location"
-            variant="outlined"
-            className={classes.field}
-          />
-          <TextField
-            id="register-date"
-            label="Date"
-            variant="outlined"
-            defaultValue={Date()}
-            className={classes.field}
-          />
-        </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "center", m: 2 }}>
-          <Stack direction="row" spacing={2}>
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ justifyContent: "center", margin: "16px" }}
+          >
             <Button
               variant="contained"
               type="submit"
-              onClick={() => handlePublish()}
+              onClick={() => console.log("publish")}
             >
               Publish Nano
             </Button>
@@ -236,21 +237,12 @@ export default function NanoList() {
               variant="outlined"
               color="error"
               type="submit"
-              onClick={() => handleCancelPublish()}
+              onClick={() => console.log("cancel")}
             >
               Cancel
             </Button>
           </Stack>
         </Box>
-
-        <Box className={classes.form}>
-        <div>
-            <CountDownTimer hoursMinSecs={hoursMinSecs}/>
-        </div>
-
-        {registrationKey? <RegistrationKeyLists/> : <></>}
-        </Box>
-
       </Card>
     </>
   );

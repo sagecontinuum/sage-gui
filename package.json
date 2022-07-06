@@ -3,8 +3,10 @@
   "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
-    "start": "PORT=3000 npm start -w sage",
-    "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
+    "start": "node /Users/sammi9070/sage-gui/apps/sage/ecr/utilities/RegistrationApi.tsx",
+    "server": "nodemon /Users/sammi9070/sage-gui/apps/sage/ecr/utilities/RegistrationApi.tsx",
+    "client": "PORT=3000 npm start -w sage",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
     "release": "standard-version"
   },
   "repository": {
@@ -13,6 +15,8 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "concurrently": "^7.2.2",
+    "nodemon": "^2.0.7",
     "process": "^0.11.10",
     "standard-version": "^9.3.0"
   },
@@ -23,5 +27,10 @@
     "apps/admin",
     "apps/sage",
     "apps/project"
-  ]
+  ],
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase": "^9.8.4"
+  },
+  "proxy": "http://localhost:5000"
 }

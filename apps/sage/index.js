@@ -74,7 +74,7 @@ export default function Sage() {
                     <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="shared-with-me" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
-                    <Route path="my-nanos" element={<RequireAuth><NanoList /></RequireAuth>} />
+                    <Route path="my-waggles" element={<RequireAuth><NanoList /></RequireAuth>} />
                   </Route>
 
                   <Route path="job-status" element={<JobStatus />} />

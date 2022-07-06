@@ -23,9 +23,9 @@ export default function Sidebar() {
         <SharedIcon />
         <div>Shared with Me</div>
       </Item> */}
-      <Item to="my-nanos">
+      <Item to="my-waggles">
         <FlagCircleIcon />
-        <div>My Nano Devices</div>
+        <div>My Waggle Devices</div>
       </Item>
     </Root>
   )
