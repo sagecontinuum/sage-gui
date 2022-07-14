@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useData } from "../utilities/firebase";
 import { StepTitle, Step, StepForm } from "../../common/FormLayout";
-import CountDownTimer from "./CountDownTimer";
 
 import { makeStyles } from "@mui/styles";
 import {
@@ -80,15 +79,11 @@ export default function NanoList() {
   const [nanoList, nanoListLoading] = Object.values(
     useData("/nanoDevices", getNanoList)
   );
-  const [hardware, setHardware] = useState("");
-  const [registrationKey, setRegistrationKey] = useState(false);
-  const hoursMinSecs = { hours: 0, minutes: 0, seconds: 5 };
+  const [beehive, setBeehive] = useState("");
 
   if (nanoListLoading) {
     return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
   }
-
-  console.log(nanoList);
 
   const handleNanoTagsChange = (event) => {
     const {
@@ -106,16 +101,53 @@ export default function NanoList() {
   };
 
   const handleChange = (event: SelectChangeEvent) => {
-    setHardware(event.target.value);
+    setBeehive(event.target.value);
+  };
+
+
+  async function postData(url = '', data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: 'GET', 
+      mode: 'cors', 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    return response.json(); 
+  }
+  
+  const handlePublish = async (e) => {
+    
+    const parameters = {
+      uid: user,
+      BH: beehive
+    }
+
+    const result = await fetch('http://localhost:5000/set', {
+      method: "POST", 
+      headers: {
+        'content-type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(parameters)
+    }).then((res) => res.json())
+    .catch((error) => console.log(error));
+    
+    // get result from api (do not delete it)
+    fetch("http://localhost:5000/register")
+      .then((res) => res.json())
+      .then((data) => console.log(data));
+
   };
 
   return (
     <>
       <Card className={classes.container} sx={{ mb: 3 }}>
         <Box className={classes.form}>
-        <h1>Register Your Waggle Devices</h1>
+          <h1>Register Your Waggle Devices</h1>
           <FormControl sx={{ my: 1, width: "100%" }} className={classes.field}>
-          
             <InputLabel>Waggles</InputLabel>
             <Select
               className={classes.field}
@@ -159,30 +191,17 @@ export default function NanoList() {
             spacing={2}
             sx={{ justifyContent: "center", margin: "16px" }}
           >
-          <Button
-            variant="contained"
-            type="submit"
-            onClick={() => {
-              if (nanoTags.length > 0) handleRegister();
-            }}
-          >
-          Register
-          </Button>
-            </Stack>
+            <Button
+              variant="contained"
+              type="submit"
+              onClick={() => {
+                if (nanoTags.length > 0) handleRegister();
+              }}
+            >
+              Register
+            </Button>
+          </Stack>
         </Box>
-
-        {/* <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Button
-            variant="contained"
-            type="submit"
-            onClick={() => {
-              if (nanoTags.length > 0) handleRegister();
-            }}
-            sx={{ mb: "13px" }}
-          >
-            Register
-          </Button>
-        </Box> */}
       </Card>
 
       <Card className={classes.container}>
@@ -194,7 +213,6 @@ export default function NanoList() {
         >
           <h1>Publish Your Waggle Device</h1>
           <StepTitle icon="1" label="Enter Nano Information" />
-
           <TextField
             id="uid"
             label="User ID"
@@ -205,12 +223,12 @@ export default function NanoList() {
           <FormControl sx={{ m: 1, width: "100%" }}>
             <InputLabel id="beehive-selection">Beehive</InputLabel>
             <Select
-              value={hardware}
+              value={beehive}
               label="Beehive Selection"
               onChange={handleChange}
             >
-              <MenuItem value="Nano">Beehive Dev</MenuItem>
-              <MenuItem value="RPI">Beehive Prod</MenuItem>
+              <MenuItem value="beehive-dev">Beehive Dev</MenuItem>
+              <MenuItem value="beehive-prod">Beehive Prod</MenuItem>
             </Select>
           </FormControl>
 
@@ -229,9 +247,10 @@ export default function NanoList() {
             <Button
               variant="contained"
               type="submit"
-              onClick={() => console.log("publish")}
+              id="publish-waggle"
+              onClick={handlePublish}
             >
-              Publish Nano
+              Publish Waggle
             </Button>
             <Button
               variant="outlined"
