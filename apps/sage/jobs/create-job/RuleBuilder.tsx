@@ -127,7 +127,7 @@ function CronInput(props: CronProps) {
 
 
 /**
- *  test app
+ *  minimal app example
 /*
 const apps = [{
   "id": "dariodematties1/avian-diversity-monitoring:0.2.4",
@@ -141,10 +141,6 @@ const apps = [{
 */
 
 
-
-/**
- * other types
- **/
 
 type RulesProps = {
   onChange: (rules: Rule[], booleanLogics: BooleanLogic[]) => void

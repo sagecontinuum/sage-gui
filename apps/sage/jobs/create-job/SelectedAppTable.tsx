@@ -62,7 +62,6 @@ export default function SelectedTable(props: SelectedTableProps) {
     const {type, name, value, checked} = evt.target
 
     if (type == 'checkbox') {
-      console.log('checked', checkName, checked)
       setForm(prev => ({...prev, [appName]: {...prev[appName], [checkName]: checked}}))
     } else {
       setForm(prev => ({...prev, [appName]: {...prev[appName], [name]: value}}))

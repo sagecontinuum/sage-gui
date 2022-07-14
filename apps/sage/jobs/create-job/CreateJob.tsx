@@ -19,6 +19,9 @@ import { type Manifest } from '/components/apis/beekeeper'
 import * as Auth from '/components/auth/auth'
 const user = Auth.username
 
+import config from '/config'
+const docker = config.dockerRegistry
+
 
 const getCronString = ({amount, unit}) => `'${[
   unit == 'min' ? `*/${amount}` : '*',
@@ -28,7 +31,7 @@ const getCronString = ({amount, unit}) => `'${[
 ].join(' ')}'`
 
 
-const getRuleString = (appName, rule: Rule) =>
+const getRuleString = (appName: string, rule: Rule) =>
   'name' in rule ?
     `v('${rule.name}') ${rule.op} ${rule.value}` :
     `cronjob(${appName}, ${getCronString(rule)})`
@@ -41,6 +44,9 @@ const createRuleStrings = (appName: string, rules: Rule[], logics: BooleanLogic[
     `${getRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
   ).join('')
 
+
+const appIdToName = (id: string) =>
+  id.slice(id.indexOf('/') + 1, id.lastIndexOf(':'))
 
 
 type State = {
@@ -119,8 +125,9 @@ export default function CreateJob() {
       name,
       ...(user && {user}),
       plugins: apps.map(o => ({
+        name: appIdToName(o.id),
         pluginSpec: {
-          image: o.id,
+          image: `${docker}/${o.id}`,
           args: appParams[o.id] ?
             Object.entries(appParams[o.id]).map(([k, v]) => [`-${k}`, v]).flat() : []
         }
