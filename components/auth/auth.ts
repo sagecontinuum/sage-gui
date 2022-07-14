@@ -1,5 +1,6 @@
 import config from '../../config'
 export const url = config.auth
+export const username = getUser()
 
 
 export function signIn(user: string, token: string) {

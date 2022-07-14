@@ -16,6 +16,8 @@ import * as YAML from 'yaml'
 import { type App } from '/components/apis/ecr'
 import { type Manifest } from '/components/apis/beekeeper'
 
+import * as Auth from '/components/auth/auth'
+const user = Auth.username
 
 
 const getCronString = ({amount, unit}) => `'${[
@@ -115,6 +117,7 @@ export default function CreateJob() {
   const getYaml = () => {
     return YAML.stringify({
       name,
+      ...(user && {user}),
       plugins: apps.map(o => ({
         pluginSpec: {
           image: o.id,
