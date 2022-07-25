@@ -156,7 +156,7 @@ export default function CreateJob() {
             label="Name"
             placeholder="my science goal"
             value={name}
-            onChange={evt => dispatch({type: 'SET_NAME', value: evt.target.value})}
+            onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
             style={{width: 500}}
           />
         </Step>
