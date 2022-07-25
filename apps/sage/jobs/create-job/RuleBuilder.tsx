@@ -52,18 +52,35 @@ type ConditionalInputProps =
 function ConditionalInput(props: ConditionalInputProps) {
   const {names, name, onChange} = props
 
+  const [newInput, setNewInput] = useState(false)
+
   return (
     <div className="flex items-center gap">
-      <h4>Run when</h4>
-      <FilterMenu
-        options={(names || []).map(n => ({id: n, label: n}))}
-        multiple={false}
-        onChange={(val) => onChange('name', val?.id)}
-        value={{id: name, label: name}}
-        ButtonComponent={
-          <Button>{name} <CaretIcon /></Button>
-        }
-      />
+      <div className="flex column">
+        <h4 className="no-margin">Run when</h4>
+        <small>
+          (<a onClick={() => setNewInput(!newInput)}>
+            {newInput ? 'filter menu' : 'free input'}
+          </a>)
+        </small>
+      </div>
+
+      {newInput ?
+        <TextField
+          placeholder="env.some.value"
+          onChange={(evt) => onChange('name', evt.target.value)}
+        /> :
+        <FilterMenu
+          options={(names || []).map(n => ({id: n, label: n}))}
+          multiple={false}
+          disableCloseOnSelect={false}
+          onChange={(val) => onChange('name', val?.id)}
+          value={{id: name, label: name}}
+          ButtonComponent={
+            <Button>{name} <CaretIcon /></Button>
+          }
+        />
+      }
 
       <TextField select
         defaultValue={'>'}
