@@ -3,12 +3,11 @@
   "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
-    "start": "node /apps/sage/ecr/utilities/RegistrationApi.tsx",
-    "server": "nodemon /apps/sage/ecr/utilities/RegistrationApi.tsx",
+    "start": "node ./apps/backend/RegistrationApi.tsx",
+    "server": "nodemon ./apps/backend/RegistrationApi.tsx",
     "client": "PORT=3000 npm start -w sage",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "release": "standard-version"
-
   },
   "repository": {
     "type": "git",
@@ -25,15 +24,12 @@
   "workspaces": [
     "apps/admin",
     "apps/sage",
-    "apps/project"
+    "apps/project",
+    "apps/backend"
   ],
+  "proxy": "http://localhost:5000",
   "dependencies": {
-    "archiver": "^5.3.1",
-    "async": "^3.2.4",
-    "file-saver": "^2.0.5",
-    "firebase": "^9.9.1",
-    "jszip": "^3.10.0"
-  },
-  
-  "proxy": "http://localhost:5000"
+    "concurrently": "^7.3.0",
+    "nodemon": "^2.0.19"
+  }
 }
