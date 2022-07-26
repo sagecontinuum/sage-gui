@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useData } from "../utilities/firebase";
 import { StepTitle, Step, StepForm } from "../../common/FormLayout";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 import { makeStyles } from "@mui/styles";
 import {
@@ -25,8 +27,8 @@ import BeeIcon from "url:/assets/bee.svg";
 import ErrorMsg from "../../ErrorMsg";
 import * as Auth from "/components/auth/auth";
 import { registerNanosInFirebase } from "../utilities/RegisterNanos";
-import RegistrationKeyLists from "./ApiFunctions";
 import { ClassNames } from "@emotion/react";
+import { async } from "@firebase/util";
 
 const useStyles = makeStyles({
   container: {
@@ -80,6 +82,7 @@ export default function NanoList() {
     useData("/nanoDevices", getNanoList)
   );
   const [beehive, setBeehive] = useState("");
+  const [regKey, setRegKey] = useState(false);
 
   if (nanoListLoading) {
     return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
@@ -104,41 +107,63 @@ export default function NanoList() {
     setBeehive(event.target.value);
   };
 
-
-  async function postData(url = '', data = {}) {
+  async function postData(url = "", data = {}) {
     // Default options are marked with *
     const response = await fetch(url, {
-      method: 'GET', 
-      mode: 'cors', 
+      method: "GET",
+      mode: "cors",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
-    return response.json(); 
+    return response.json();
   }
-  
+
   const handlePublish = async (e) => {
-    
     const parameters = {
       uid: user,
-      BH: beehive
-    }
+      BH: beehive,
+    };
 
-    const result = await fetch('http://localhost:5000/set', {
-      method: "POST", 
+    const result = await fetch("http://localhost:5000/set", {
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        'Accept': 'application/json'
+        "content-type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify(parameters)
-    }).then((res) => res.json())
-    .catch((error) => console.log(error));
-    
-    // get result from api (do not delete it)
-    fetch("http://localhost:5000/register")
+      body: JSON.stringify(parameters),
+    })
       .then((res) => res.json())
-      .then((data) => console.log(data));
+      .catch((error) => console.log(error));
+
+    // // get result from backend
+    // fetch("http://localhost:5000/register")
+    //   .then((res) => res.json())
+    //   .then((key) => {
+    //     setRegKey(key.data);
+    //     // //wrap reg key into a zip file and download
+    //     // var zip = new JSZip();
+    //     // zip.file("registration-cert.pub.txt", key.data);
+    //     // zip.generateAsync({ type: "blob" }).then(function (content) {
+    //     //   saveAs(content, "Registration Key.zip");
+    //     // });
+    //     console.log("Reg key created successfully!")
+    //   })
+    //   .catch((err) => console.log(err));
+
+
+
+
+    // get result from backend
+    fetch("http://localhost:5000/register")
+      .then((res) => {
+        if(res.statusText == "OK") {
+          setRegKey(true);
+          console.log("Reg key created succesfully!");
+        };
+      })
+      .catch((err) => console.log(err));
 
   };
 
@@ -245,14 +270,6 @@ export default function NanoList() {
             sx={{ justifyContent: "center", margin: "16px" }}
           >
             <Button
-              variant="contained"
-              type="submit"
-              id="publish-waggle"
-              onClick={handlePublish}
-            >
-              Publish Waggle
-            </Button>
-            <Button
               variant="outlined"
               color="error"
               type="submit"
@@ -260,7 +277,22 @@ export default function NanoList() {
             >
               Cancel
             </Button>
+            <Button
+              variant="contained"
+              type="submit"
+              id="publish-waggle"
+              onClick={handlePublish}
+            >
+              Publish Waggle
+            </Button>
           </Stack>
+          {regKey ? (
+            <>
+              <h5>Check your download folder for registration keys!</h5>
+            </>
+          ) : (
+            <h5></h5>
+          )}
         </Box>
       </Card>
     </>

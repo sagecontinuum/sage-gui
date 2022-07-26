@@ -3,11 +3,12 @@
   "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
-    "start": "node /Users/sammi9070/sage-gui/apps/sage/ecr/utilities/RegistrationApi.tsx",
-    "server": "nodemon /Users/sammi9070/sage-gui/apps/sage/ecr/utilities/RegistrationApi.tsx",
+    "start": "node /apps/sage/ecr/utilities/RegistrationApi.tsx",
+    "server": "nodemon /apps/sage/ecr/utilities/RegistrationApi.tsx",
     "client": "PORT=3000 npm start -w sage",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "release": "standard-version"
+
   },
   "repository": {
     "type": "git",
@@ -15,19 +16,8 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "assert": "^2.0.0",
-    "browserify-zlib": "^0.2.0",
-    "concurrently": "^7.2.2",
-    "crypto-browserify": "^3.12.0",
-    "nodemon": "^2.0.7",
-    "path-browserify": "^1.0.1",
     "process": "^0.11.10",
-    "querystring-es3": "^0.2.1",
-    "standard-version": "^9.3.0",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "url": "^0.11.0",
-    "util": "^0.12.4"
+    "standard-version": "^9.3.0"
   },
   "standard-version": {
     "header": "# Changelog\n\nThe following are some notable changes to the UI\n\n"
@@ -38,10 +28,12 @@
     "apps/project"
   ],
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "firebase": "^9.8.4",
-    "react-scripts": "^5.0.1"
+    "archiver": "^5.3.1",
+    "async": "^3.2.4",
+    "file-saver": "^2.0.5",
+    "firebase": "^9.9.1",
+    "jszip": "^3.10.0"
   },
+  
   "proxy": "http://localhost:5000"
 }
