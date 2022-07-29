@@ -32,12 +32,12 @@ app.get("/register", (req, res) => {
   tmpDir = tmpobj.name;
 
   exec(
-    __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -n -o " + __dirname + "/cert",
+    __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -o " + tmpDir,
     (err, stdout, stderr) => {
       if (err !== null) {
+        console.log(stdout)
         return res.status(400).json({ output: null, error: err.message });
       } else {
-        console.log(stdout)
         if (err) throw err;
 
         //wrapping key files in tmpDir to a zip file

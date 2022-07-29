@@ -133,24 +133,6 @@ export default function NanoList() {
       .then((res) => res.json())
       .catch((error) => console.log(error));
 
-    // // get result from backend
-    // fetch("http://localhost:5000/register")
-    //   .then((res) => res.json())
-    //   .then((key) => {
-    //     setRegKey(key.data);
-    //     // //wrap reg key into a zip file and download
-    //     // var zip = new JSZip();
-    //     // zip.file("registration-cert.pub.txt", key.data);
-    //     // zip.generateAsync({ type: "blob" }).then(function (content) {
-    //     //   saveAs(content, "Registration Key.zip");
-    //     // });
-    //     console.log("Reg key created successfully!")
-    //   })
-    //   .catch((err) => console.log(err));
-
-
-
-
     // get result from backend
     fetch("http://localhost:5000/register")
       .then((res) => {
