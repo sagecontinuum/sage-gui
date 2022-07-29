@@ -1,7 +1,7 @@
 #!/bin/bash -e
-DEFAULT_CA_PATH="/Users/sammi9070/sage-gui/apps/backend/beekeeper-keys/certca/beekeeper_ca_key"
-DEFAULT_KEY_PATH="/Users/sammi9070/sage-gui/apps/backend/beekeeper-keys/registration_keys/registration.pub"
-DEFAULT_OUT_PATH="/Users/sammi9070/sage-gui/apps/backend/cert"
+DEFAULT_CA_PATH="/Users/sammi9070/sage-gui/apps/registration-api/beekeeper-keys/certca/beekeeper_ca_key"
+DEFAULT_KEY_PATH="/Users/sammi9070/sage-gui/apps/registration-api/beekeeper-keys/registration_keys/registration.pub"
+DEFAULT_OUT_PATH="/Users/sammi9070/sage-gui/apps/registration-api/cert"
 print_help() {
   echo """
 usage: create-key-cert.sh -b <beehive name> [-e <expire date>] [-c <CA path>] [-k <registration public key path>] [-o <outdir>] [-n]

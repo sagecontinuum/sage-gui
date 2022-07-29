@@ -3,8 +3,9 @@
   "version": "1.10.1-pre.72",
   "description": "",
   "scripts": {
-    "start": "node ./apps/backend/RegistrationApi.tsx",
-    "server": "nodemon ./apps/backend/RegistrationApi.tsx",
+    "start": "PORT=3000 npm start -w sage",
+    "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
+    "server": "nodemon /Users/sammi9070/sage-gui/apps/registration-api/RegistrationApi.tsx",
     "client": "PORT=3000 npm start -w sage",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "release": "standard-version"
