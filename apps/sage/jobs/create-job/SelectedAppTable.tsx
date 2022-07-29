@@ -8,24 +8,37 @@ import TextField from '@mui/material/TextField'
 
 import { Item } from '../../common/Layout'
 import { Accordion, useAccordionStyles } from '../../ecr/app/TagList'
+import Checkbox from '/components/input/Checkbox'
 
-import { AppRow } from './AppSelector'
-import Button from '@mui/material/Button'
+import { type AppRow } from './AppSelector'
 
 
+const placeholder = {
+  int: 123,
+  float: '123.123 (a float)',
+  string: 'some string'
+}
+
+
+type FormState = {
+  [app: string]: {
+    [input: string]: number | boolean | string
+  }
+}
 
 
 type SelectedTableProps = {
   selected: AppRow[]
+  onChange: (form: FormState) => void
 }
 
 export default function SelectedTable(props: SelectedTableProps) {
-  const {selected} = props
+  const {selected, onChange} = props
 
   const classes = useAccordionStyles()
 
   const [items, setItems] = useState<AppRow[]>(selected)
-  const [form, setForm] = useState<{[app: string]: string}>({})
+  const [form, setForm] = useState<FormState>({})
   const [focusedID, setFocusedID] = useState<AppRow["id"]>(selected[0].id)
 
 
@@ -35,66 +48,93 @@ export default function SelectedTable(props: SelectedTableProps) {
   }, [selected])
 
 
+  useEffect(() => {
+    onChange(form)
+  }, [form])
+
+
   const handleExpand = (panel: string) => {
     setFocusedID(panel)
   }
 
-  const handleAddAppParam = (name: string, val) => {
-    // append to input form
-    setForm(prev => ({
-      ...prev,
-      [name]: (prev[name] ? `${prev[name]} ` : '')  + ' ' + `-${val} `
-    }))
+  // todo(nc): allow name attr on checkbox input!
+  const handleUpdateForm = (evt, appName: string, checkName?: string) => {
+    const {type, name, value, checked} = evt.target
+
+    if (type == 'checkbox') {
+      setForm(prev => ({...prev, [appName]: {...prev[appName], [checkName]: checked}}))
+    } else {
+      setForm(prev => ({...prev, [appName]: {...prev[appName], [name]: value}}))
+    }
+  }
+
+  const getAppParamString = (appName) => {
+    const f = form[appName]
+    if (!f)
+      return ''
+
+    return Object.keys(f).map(field => `-${field} ${f[field]}`).join(' ')
   }
 
 
   return (
     <SelectedTableRoot>
       {items.map(item => {
-        const {id} = item
-        const appName = id
+        const appID = item.id
+        const appName = appID
 
         const inputs = items.find(o => o.id == focusedID)?.inputs
-        const placeholder = inputs?.map(o => `-${o.id} <${o.type}>`).join(' ')
+        const phText = inputs?.map(o => `-${o.id} <${o.type}>`).join(' ')
 
         return (
           <Accordion
             className={classes.root}
-            expanded={focusedID === id}
-            onChange={() => handleExpand(id)}
-            key={id}
+            expanded={focusedID === appID}
+            onChange={() => handleExpand(appID)}
+            key={appID}
           >
 
             <AccordionSummary
               expandIcon={<ExpandMoreIcon className="caret"/>}
-              aria-controls={`${id}-content`}
-              id={`${id}-content`}
+              aria-controls={`${appID}-content`}
+              id={`${appID}-content`}
             >
-              {id}
+              {appID}
             </AccordionSummary>
 
             <AccordionDetails className="flex column">
-              <TextField
-                label="App params"
-                placeholder={placeholder || '-some-param <example>'}
-                value={form[focusedID]}
-                onChange={evt => setForm({value: evt.target.value})}
-                //error={isValid == false}
-                //helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
-                InputLabelProps={{ shrink: true }}
-                required
-              />
-
-              <h4>Params:</h4>
               {inputs?.length > 0 &&
-                <table>
+                <h3 className="no-margin">Input Arguments</h3>}
+
+              {!inputs?.length &&
+                <div className="muted">No input arguments provided to ECR</div>}
+
+              {inputs?.length > 0 &&
+                <table className="simple">
                   <tbody>
                     {inputs.map(obj => {
                       const {id, type} = obj
                       return (
                         <tr key={id}>
-                          <td><Button onClick={() => handleAddAppParam(appName, id)}>{id}</Button></td>
+                          <td>{id}</td>
                           <td>{type}</td>
+                          <td>
+                            {type == 'boolean' &&
+                              <Checkbox
+                                checked={(appName in form && id in form[appName] && form[appName][id]) ? true : false}
+                                onChange={(evt) => handleUpdateForm(evt, appName, id)}
+                              />
+                            }
+                            {type != 'boolean' &&
+                              <TextField
+                                size="small"
+                                type={['int', 'float'].includes(type) ? 'number' : 'text'}
+                                placeholder={placeholder[type]}
+                                name={id}
+                                onChange={(evt) => handleUpdateForm(evt, appName)}
+                              />
+                            }
+                          </td>
                         </tr>
                       )}
                     )}
@@ -102,9 +142,14 @@ export default function SelectedTable(props: SelectedTableProps) {
                 </table>
               }
 
-              {!inputs?.length &&
-                <div className="muted">None provided to ECR</div>
-              }
+              <h4>{inputs?.length ? 'Input Arguments Preview' : 'Input Arguments'}</h4>
+              <TextField
+                label="App params"
+                placeholder={phText || '-some-param <example>'}
+                value={getAppParamString(appName)}
+                onChange={evt => setForm({value: evt.target.value})}
+                InputLabelProps={{ shrink: true }}
+              />
             </AccordionDetails>
           </Accordion>
         )
@@ -117,7 +162,6 @@ export default function SelectedTable(props: SelectedTableProps) {
 
 
 
-
 const SelectedTableRoot = styled.div`
   margin-bottom: 50px;
 
@@ -126,10 +170,6 @@ const SelectedTableRoot = styled.div`
   ul {
     width: 50%;
     margin: 0;
-  }
-
-  table {
-    width: 20%;
   }
 `
 

@@ -44,7 +44,12 @@ export default function InputList(props: Props) {
       </div>
 
       {inputs &&
-        <Table primaryKey="id" columns={columns} rows={inputs} />
+        <Table
+          primaryKey="id"
+          columns={columns}
+          rows={inputs}
+          emptyNotice="No input arguments were provided"
+        />
       }
     </div>
   )

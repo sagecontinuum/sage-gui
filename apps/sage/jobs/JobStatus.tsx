@@ -39,6 +39,9 @@ type TaskEvent = {
 
 
 const columns = [{
+  id: 'name',
+  label: 'Name'
+}, {
   id: 'goalID',
   label: 'ID',
   format: (v, obj) => v.split('-')[0]
@@ -98,7 +101,7 @@ function aggregateEvents(data: TaskEvent[]) {
 
   let byTaskIDs = groupBy(data, 'value.plugin_task')
 
-  // note: app is an overloaded term here.  it's really more like a taskname
+  // note: app is an overloaded term here.  it's really more like a task name
   const byTaskName = {}
   for (const [taskID, events] of Object.entries(byTaskIDs)) {
     const taskName = taskID.slice(0, taskID.lastIndexOf('-'))
@@ -163,6 +166,17 @@ function reduceByNode(taskEvents: TaskEvent[]) {
     byNode[vsn] = aggregateEvents(events)
   }
 
+  // organize by orange/red statuses below 'complete'
+  // High-level metrics could make this make this clear, in lieu of better design
+  for (const [vsn, byApp] of Object.entries(byNode)) {
+    for (const [app, objs] of Object.entries(byApp)) {
+      byNode[vsn][app] = [
+        ...objs.filter(obj => obj.status != 'complete'),
+        ...objs.filter(obj => obj.status == 'complete')
+      ]
+    }
+  }
+
   return byNode
 }
 
@@ -171,21 +185,26 @@ function mockGoalMetrics(taskEvents: TaskEvent[]) {
   const byGoal = groupBy(taskEvents, 'value.goal_id')
 
   let rows = []
-  for (const [goal_id, events] of Object.entries(byGoal)) {
+  for (const [goalID, events] of Object.entries(byGoal)) {
     const byApp = aggregateEvents(events)
 
+    let name
     const metrics = Object.keys(byApp).reduce((acc, appName) => {
-      const meanTime = byApp[appName].reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
-      return {
-        ...acc,
-        [appName]: meanTime
+      const appEvents = byApp[appName]
+      const meanTime = appEvents.reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
+
+      if (!name) {
+        name = appEvents[0].meta.job
       }
+
+      return {...acc, [appName]: meanTime}
     }, {})
 
     const apps = Object.keys(byApp)
 
     rows.push({
-      goalID: goal_id,
+      goalID,
+      name,
       byApp,
       apps,
       appCount: apps.length,

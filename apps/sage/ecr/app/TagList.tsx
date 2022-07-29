@@ -36,7 +36,6 @@ import Clipboard from '/components/utils/Clipboard'
 
 import * as ECR from '/components/apis/ecr'
 import * as Auth from '/components/auth/auth'
-const username = Auth.getUser()
 
 import config from '/config'
 const docker = config.dockerRegistry
@@ -195,7 +194,7 @@ export default function TagList(props: Props) {
 
                 <div className="tag-actions flex" >
                   {/* todo(nc): allow actions on write or appropriate access */}
-                  {namespace == username &&
+                  {namespace == Auth.username &&
                     <div className="flex gap">
                       <Tooltip title="Rebuild this tagged version">
                         <Button
