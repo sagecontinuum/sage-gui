@@ -25,7 +25,7 @@
     "apps/admin",
     "apps/sage",
     "apps/project",
-    "apps/backend"
+    "apps/registration-api"
   ],
   "proxy": "http://localhost:5000",
   "dependencies": {

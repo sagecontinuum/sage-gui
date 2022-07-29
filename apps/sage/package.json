@@ -37,8 +37,7 @@
     "react-router-dom": "^6.2.2",
     "styled-components": "^5.2.1",
     "wavesurfer.js": "^5.2.0",
-    "yaml": "^1.10.2",
-    "express": "^4.16.2"
+    "yaml": "^1.10.2"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",

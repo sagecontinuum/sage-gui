@@ -1,8 +1,0 @@
-node_modules/
-dist/
-build/
-.parcel-cache/
-*.md
-.gitignore
-Dockerfile
-*token*

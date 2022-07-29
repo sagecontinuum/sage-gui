@@ -2,10 +2,8 @@ import { useCallback, useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useMatch, Navigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { useData } from "../../../backend/firebase";
+import { useData } from "../../../registration-api/firebase";
 import { StepTitle, Step, StepForm } from "../../common/FormLayout";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
 
 import { makeStyles } from "@mui/styles";
 import {
@@ -253,7 +251,7 @@ export default function NanoList() {
               onChange={handleChange}
             >
               <MenuItem value="beehive-dev">Beehive Dev</MenuItem>
-              <MenuItem value="beehive-prod">Beehive Prod</MenuItem>
+              <MenuItem value="beehive-prod" disabled>Beehive Prod</MenuItem>
             </Select>
           </FormControl>
 
