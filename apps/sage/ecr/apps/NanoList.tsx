@@ -21,10 +21,8 @@ import {
   Stack,
 } from "@mui/material";
 
-import BeeIcon from "url:/assets/bee.svg";
-import ErrorMsg from "../../ErrorMsg";
-import * as Auth from "/components/auth/auth";
-import { registerNanosInFirebase } from "../utilities/RegisterNanos";
+import * as Auth from "../../../../components/auth/auth";
+import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos"
 import { ClassNames } from "@emotion/react";
 import { async } from "@firebase/util";
 
