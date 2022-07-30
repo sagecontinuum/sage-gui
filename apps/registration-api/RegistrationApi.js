@@ -32,7 +32,7 @@ app.get("/register", (req, res) => {
   tmpDir = tmpobj.name;
 
   exec(
-    __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -o " + tmpDir,
+    __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -o " + tmpDir + " -c " + __dirname + "/beekeeper-keys/certca/beekeeper_ca_key",
     (err, stdout, stderr) => {
       if (err !== null) {
         console.log(stdout)

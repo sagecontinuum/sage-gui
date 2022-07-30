@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-DEFAULT_CA_PATH="/Users/sammi9070/sage-gui/apps/registration-api/beekeeper-keys/certca/beekeeper_ca_key"
-DEFAULT_OUT_PATH="/Users/sammi9070/sage-gui/apps/registration-api/cert"
+DEFAULT_CA_PATH=./beekeeper-keys/certca/beekeeper_ca_key
+DEFAULT_OUT_PATH=./cert
 DEFAULT_KEY_GEN_TYPE=ed25519
 DEFAULT_REG_KEY=sage_registration
 
