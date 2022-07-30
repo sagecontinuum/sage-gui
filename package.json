@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "PORT=3000 npm start -w sage",
+    "build": "npm run build -w sage",
     "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
     "server": "nodemon /Users/sammi9070/sage-gui/apps/registration-api/RegistrationApi.js",
     "client": "PORT=3000 npm start -w sage",
