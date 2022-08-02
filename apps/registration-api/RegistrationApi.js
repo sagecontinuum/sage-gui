@@ -35,7 +35,6 @@ app.get("/register", (req, res) => {
     __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -o " + tmpDir + " -c " + __dirname + "/beekeeper-keys/certca/beekeeper_ca_key",
     (err, stdout, stderr) => {
       if (err !== null) {
-        console.log(stdout)
         return res.status(400).json({ output: null, error: err.message });
       } else {
         if (err) throw err;
