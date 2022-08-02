@@ -6,9 +6,9 @@
     "start": "PORT=3000 npm start -w sage",
     "build": "npm run build -w sage",
     "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
-    "server": "nodemon /Users/sammi9070/sage-gui/apps/registration-api/RegistrationApi.js",
+    "regapi": "npm run start -w registration-api",
     "client": "PORT=3000 npm start -w sage",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "concurrently \"npm run regapi\" \"npm run client\"",
     "release": "standard-version"
   },
   "repository": {
@@ -30,7 +30,6 @@
     "apps/registration-api"
   ],
   "dependencies": {
-    "concurrently": "^7.3.0",
-    "nodemon": "^2.0.19"
+    "concurrently": "^7.3.0"
   }
 }
