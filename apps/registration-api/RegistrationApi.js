@@ -2,9 +2,7 @@ const express = require("express");
 const { exec } = require("child_process");
 const { join } = require("path");
 const cors = require("cors");
-const axios = require("axios");
 const fs = require("fs");
-var async = require("async");
 const tmp = require("tmp");
 const archiver = require("archiver");
 
@@ -16,26 +14,15 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(join(__dirname, "static")));
 
-var BH = "";
-var uid = "";
-app.post("/set", (req, res) => {
-  uid = req.body.uid;
-  BH = req.body.BH;
-  res.status(201).json({
-    status: "OK",
-  });
-});
-
 app.get("/register", (req, res) => {
-  let tmpDir = "";
-  const tmpobj = tmp.dirSync();
-  tmpDir = tmpobj.name;
+  const tmpObj = tmp.dirSync();
+  const tmpDir = tmpObj.name;
 
   exec(
-    __dirname + "/create-key-cert.sh" + " -b " + BH.trim() + " -e +1d -o " + tmpDir + " -c " + __dirname + "/beekeeper-keys/certca/beekeeper_ca_key",
+    __dirname + "/create-key-cert.sh" + " -b beehive-dev -e +1d -o " + tmpDir + " -c " + __dirname + "/beekeeper-keys/certca/beekeeper_ca_key",
     (err, stdout, stderr) => {
       if (err !== null) {
-        return res.status(400).json({ output: null, error: err.message });
+        return res.status(400).json({ error: err.message });
       } else {
         if (err) throw err;
 
@@ -58,7 +45,7 @@ app.get("/register", (req, res) => {
           }
         });
 
-        // //Delete the temp folder
+        // todo(SH): Delete the temp folder
         // fs.readdir(tmpDir, (err, files) => {
         //   if (err) throw err;
         //   for (const file of files) {
