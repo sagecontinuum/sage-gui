@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 
 import * as Auth from "../../../../components/auth/auth";
-import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos"
+import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos";
 import { ClassNames } from "@emotion/react";
 import { async } from "@firebase/util";
 
@@ -117,37 +117,36 @@ export default function NanoList() {
   }
 
   const handlePublish = async (e) => {
-    const parameters = {
-      uid: user,
-      BH: beehive,
-    };
+    // const parameters = {
+    //   uid: user,
+    //   BH: beehive,
+    // };
 
-    const result = await fetch("http://localhost:5000/set", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(parameters),
-    })
-      .then((res) => res.json())
-      .catch((error) => console.log(error));
+    // const result = await fetch("http://localhost:5000/set", {
+    //   method: "POST",
+    //   headers: {
+    //     "content-type": "application/json",
+    //     Accept: "application/json",
+    //   },
+    //   body: JSON.stringify(parameters),
+    // })
+    //   .then((res) => res.json())
+    //   .catch((error) => console.log(error));
 
     // get result from backend
     fetch("http://localhost:5000/register")
       .then((res) => {
-        if(res.statusText == "OK") {
+        if (res.statusText == "OK") {
           setRegKey(true);
           console.log("Reg key created succesfully!");
-        };
+        }
       })
       .catch((err) => console.log(err));
-
   };
 
   return (
     <>
-      <Card className={classes.container} sx={{ mb: 3 }}>
+      {/* <Card className={classes.container} sx={{ mb: 3 }}>
         <Box className={classes.form}>
           <h1>Register Your Waggle Devices</h1>
           <FormControl sx={{ my: 1, width: "100%" }} className={classes.field}>
@@ -205,7 +204,7 @@ export default function NanoList() {
             </Button>
           </Stack>
         </Box>
-      </Card>
+      </Card> */}
 
       <Card className={classes.container}>
         <Box
@@ -214,8 +213,8 @@ export default function NanoList() {
             "& .MuiTextField-root": { m: 1, width: "25ch" },
           }}
         >
-          <h1>Publish Your Waggle Device</h1>
-          <StepTitle icon="1" label="Enter Nano Information" />
+          <h2>Get Development Beehive Keys for Your Waggle Device</h2>
+          <StepTitle icon="1" label="Enter Waggle Information" />
           <TextField
             id="uid"
             label="User ID"
@@ -223,18 +222,6 @@ export default function NanoList() {
             defaultValue={user}
             className={classes.field}
           />
-          <FormControl sx={{ m: 1, width: "100%" }}>
-            <InputLabel id="beehive-selection">Beehive</InputLabel>
-            <Select
-              value={beehive}
-              label="Beehive Selection"
-              onChange={handleChange}
-            >
-              <MenuItem value="beehive-dev">Beehive Dev</MenuItem>
-              <MenuItem value="beehive-prod" disabled>Beehive Prod</MenuItem>
-            </Select>
-          </FormControl>
-
           <TextField
             id="nano-id"
             label="Nano ID"
@@ -264,13 +251,7 @@ export default function NanoList() {
               Publish Waggle
             </Button>
           </Stack>
-          {regKey ? (
-            <>
-              <h5>Check your download folder for registration keys!</h5>
-            </>
-          ) : (
-            <h5></h5>
-          )}
+          {regKey && <h5>Check your download folder for registration keys!</h5>}
         </Box>
       </Card>
     </>
