@@ -117,22 +117,7 @@ export default function NanoList() {
   }
 
   const handlePublish = async (e) => {
-    // const parameters = {
-    //   uid: user,
-    //   BH: beehive,
-    // };
-
-    // const result = await fetch("http://localhost:5000/set", {
-    //   method: "POST",
-    //   headers: {
-    //     "content-type": "application/json",
-    //     Accept: "application/json",
-    //   },
-    //   body: JSON.stringify(parameters),
-    // })
-    //   .then((res) => res.json())
-    //   .catch((error) => console.log(error));
-
+    
     // get result from backend
     fetch("http://localhost:5000/register")
       .then((res) => {
