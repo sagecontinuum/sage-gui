@@ -146,66 +146,6 @@ export default function NanoList() {
 
   return (
     <>
-      {/* <Card className={classes.container} sx={{ mb: 3 }}>
-        <Box className={classes.form}>
-          <h1>Register Your Waggle Devices</h1>
-          <FormControl sx={{ my: 1, width: "100%" }} className={classes.field}>
-            <InputLabel>Waggles</InputLabel>
-            <Select
-              className={classes.field}
-              multiple
-              value={nanoTags}
-              onChange={handleNanoTagsChange}
-              input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-              MenuProps={MenuProps}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} />
-                  ))}
-                </Box>
-              )}
-            >
-              {nanoList?.map((tags) => (
-                <MenuItem
-                  sx={{
-                    fontSize: "14px",
-                    "&.Mui-selected": {
-                      // <-- mixing the two classes
-                      backgroundColor: "#ececec",
-                    },
-                    "&.Mui-selected:hover": {
-                      // <-- mixing the two classes
-                      backgroundColor: "#ececec",
-                    },
-                  }}
-                  key={tags.id}
-                  value={tags.id}
-                >
-                  {tags.id}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ justifyContent: "center", margin: "16px" }}
-          >
-            <Button
-              variant="contained"
-              type="submit"
-              onClick={() => {
-                if (nanoTags.length > 0) handleRegister();
-              }}
-            >
-              Register
-            </Button>
-          </Stack>
-        </Box>
-      </Card> */}
-
       <Card className={classes.container}>
         <Box
           className={classes.form}
