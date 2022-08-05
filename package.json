@@ -3,12 +3,11 @@
   "version": "2.1.0",
   "description": "",
   "scripts": {
-    "start": "PORT=3000 npm start -w sage",
+    "start": "npm start -w sage",
     "build": "npm run build -w sage",
     "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
-    "regapi": "npm run start -w registration-api",
-    "client": "PORT=3000 npm start -w sage",
-    "dev": "concurrently \"npm run regapi\" \"npm run client\"",
+    "reg-api": "npm run start -w registration-api",
+    "dev": "concurrently \"npm run reg-api\" \"npm start\"",
     "release": "standard-version"
   },
   "repository": {
