@@ -1,22 +1,12 @@
-import { useCallback, useEffect, useState, useRef } from "react";
-import { useLocation, useNavigate, useMatch, Navigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
+import { useState } from "react";
 import { useData } from "../../../registration-api/firebase";
-import { StepTitle, Step, StepForm } from "../../common/FormLayout";
+import { StepTitle } from "../../common/FormLayout";
 
 import { makeStyles } from "@mui/styles";
 import {
   Box,
   TextField,
   Button,
-  FormControl,
-  InputLabel,
-  Select,
-  SelectChangeEvent,
-  OutlinedInput,
-  Chip,
-  MenuItem,
   Card,
   Stack,
 } from "@mui/material";
@@ -24,7 +14,6 @@ import {
 import * as Auth from "../../../../components/auth/auth";
 import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos";
 import { ClassNames } from "@emotion/react";
-import { async } from "@firebase/util";
 
 const useStyles = makeStyles({
   container: {
@@ -82,38 +71,6 @@ export default function NanoList() {
 
   if (nanoListLoading) {
     return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
-  }
-
-  const handleNanoTagsChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setNanoTags(typeof value === "string" ? value.split(",") : value);
-  };
-
-  const handleRegister = async () => {
-    const nanoId = registerNanosInFirebase({
-      RegisteredNanos: nanoTags,
-    });
-
-    setNanoTags([]);
-  };
-
-  const handleChange = (event: SelectChangeEvent) => {
-    setBeehive(event.target.value);
-  };
-
-  async function postData(url = "", data = {}) {
-    // Default options are marked with *
-    const response = await fetch(url, {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    return response.json();
   }
 
   const handlePublish = async (e) => {
