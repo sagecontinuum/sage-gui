@@ -19,7 +19,7 @@ app.get("/register", (req, res) => {
   const tmpDir = tmpObj.name;
 
   exec(
-    __dirname + "/create-key-cert.sh" + " -b beehive-dev -e +1d -o " + tmpDir + " -c " + __dirname + "/beekeeper-keys/certca/beekeeper_ca_key",
+    `${__dirname}/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${__dirname}/beekeeper-keys/certca/beekeeper_ca_key`,
     (err, stdout, stderr) => {
       if (err !== null) {
         return res.status(400).json({ error: err.message });
@@ -27,7 +27,7 @@ app.get("/register", (req, res) => {
         if (err) throw err;
 
         //wrapping key files in tmpDir to a zip file
-        const output = fs.createWriteStream('/Users/sammi9070/Downloads/registration.zip');
+        const output = fs.createWriteStream('./registration.zip');
         const zipArchiver = archiver('zip');
         
 
