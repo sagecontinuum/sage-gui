@@ -16,7 +16,7 @@ const config = {
   adminURL: 'https://admin.sagecontinuum.org',
   sageCommons: 'https://wifire-data.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
-  docs: 'https://docs.sagecontinuum.org/docs',
+  docs: 'https://docs.waggle-edge.ai/docs',
 
   disableMaps: false,
 
