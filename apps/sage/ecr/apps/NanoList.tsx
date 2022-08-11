@@ -68,15 +68,6 @@ export default function NanoList() {
   }
 
   const handlePublish = async (e) => {
-    // // get result from backend
-    // fetch("http://localhost:5000/register")
-    //   .then((res) => {
-    //     if (res.statusText == "OK") {
-    //       setRegKey(true);
-    //       console.log("Reg key created succesfully!");
-    //     }
-    //   })
-    //   .catch((err) => console.log(err));
 
     fetch("http://localhost:5000/register")
       .then((res) => res.blob())
