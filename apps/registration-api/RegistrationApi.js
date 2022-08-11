@@ -5,9 +5,13 @@ const cors = require("cors");
 const fs = require("fs");
 const tmp = require("tmp");
 const archiver = require("archiver");
+const os = require("os");
+const http = require("http");
+const { isBuffer } = require("util");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const osUser = os.userInfo().homedir;
 
 //take the body of incoming POST requests and turn it into a JavaScript object
 app.use(express.json());
@@ -26,24 +30,35 @@ app.get("/register", (req, res) => {
       } else {
         if (err) throw err;
 
-        //wrapping key files in tmpDir to a zip file
-        const output = fs.createWriteStream('./registration.zip');
-        const zipArchiver = archiver('zip');
-        
+        // //wrapping key files in tmpDir to a zip file
+        // const output = fs.createWriteStream(
+        //   `${osUser}/Downloads/registration.zip`
+        // );
 
-        //append each file in the temp folder to the zip file
+        res.writeHead(200, {
+          "Content-Type": "application/zip",
+          "Content-disposition": "attachment; filename=registration.zip",
+        });
+
         fs.readdir(tmpDir, (err, files) => {
           if (err !== null) {
             console.log(err.message);
           } else {
+            const zipArchiver = archiver("zip");
+            zipArchiver.pipe(res);
+
             files.forEach((file) => {
-              zipArchiver.append(fs.createReadStream(tmpDir + "/" + file), {'name': file});
+              zipArchiver.append(fs.createReadStream(tmpDir + "/" + file), {
+                name: file,
+              });
             });
-            zipArchiver.pipe(output);
+
             zipArchiver.finalize();
-            res.status(200).json({output: "success"});
+
           }
         });
+
+
 
         // todo(SH): Delete the temp folder
         // fs.readdir(tmpDir, (err, files) => {
@@ -54,8 +69,6 @@ app.get("/register", (req, res) => {
         //     });
         //   }
         // });
-
-
       }
     }
   );

@@ -3,13 +3,7 @@ import { useData } from "../../../registration-api/firebase";
 import { StepTitle } from "../../common/FormLayout";
 
 import { makeStyles } from "@mui/styles";
-import {
-  Box,
-  TextField,
-  Button,
-  Card,
-  Stack,
-} from "@mui/material";
+import { Box, TextField, Button, Card, Stack } from "@mui/material";
 
 import * as Auth from "../../../../components/auth/auth";
 import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos";
@@ -74,16 +68,24 @@ export default function NanoList() {
   }
 
   const handlePublish = async (e) => {
-    
-    // get result from backend
+    // // get result from backend
+    // fetch("http://localhost:5000/register")
+    //   .then((res) => {
+    //     if (res.statusText == "OK") {
+    //       setRegKey(true);
+    //       console.log("Reg key created succesfully!");
+    //     }
+    //   })
+    //   .catch((err) => console.log(err));
+
     fetch("http://localhost:5000/register")
-      .then((res) => {
-        if (res.statusText == "OK") {
-          setRegKey(true);
-          console.log("Reg key created succesfully!");
-        }
-      })
-      .catch((err) => console.log(err));
+      .then((res) => res.blob())
+      .then((data) => {
+        var a = document.createElement("a");
+        a.href = window.URL.createObjectURL(data);
+        a.download = "registration.zip";
+        a.click();
+      });
   };
 
   return (
