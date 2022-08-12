@@ -5,13 +5,9 @@ const cors = require("cors");
 const fs = require("fs");
 const tmp = require("tmp");
 const archiver = require("archiver");
-const os = require("os");
-const http = require("http");
-const { isBuffer } = require("util");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const osUser = os.userInfo().homedir;
 
 //take the body of incoming POST requests and turn it into a JavaScript object
 app.use(express.json());
@@ -29,11 +25,6 @@ app.get("/register", (req, res) => {
         return res.status(400).json({ error: err.message });
       } else {
         if (err) throw err;
-
-        // //wrapping key files in tmpDir to a zip file
-        // const output = fs.createWriteStream(
-        //   `${osUser}/Downloads/registration.zip`
-        // );
 
         res.writeHead(200, {
           "Content-Type": "application/zip",

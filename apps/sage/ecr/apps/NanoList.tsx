@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useData } from "../../../registration-api/firebase";
 import { StepTitle } from "../../common/FormLayout";
 
 import { makeStyles } from "@mui/styles";
 import { Box, TextField, Button, Card, Stack } from "@mui/material";
 
 import * as Auth from "../../../../components/auth/auth";
-import { registerNanosInFirebase } from "../../../registration-api/RegisterNanos";
-import { ClassNames } from "@emotion/react";
 
 const useStyles = makeStyles({
   container: {
@@ -34,38 +31,10 @@ const useStyles = makeStyles({
   },
 });
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 6.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
-// get nano list from firebase
-const getNanoList = (nano) => {
-  const listOfNano = Object.entries(nano).map(([nanoId, nanoObj]) => {
-    return { ...(nanoObj as Record<string, any>), id: nanoId };
-  });
-  return listOfNano;
-};
-
 export default function NanoList() {
   const user = Auth.getUser();
   const classes = useStyles();
-  const [nanoTags, setNanoTags] = useState([]);
-  const [nanoList, nanoListLoading] = Object.values(
-    useData("/nanoDevices", getNanoList)
-  );
-  const [beehive, setBeehive] = useState("");
   const [regKey, setRegKey] = useState(false);
-
-  if (nanoListLoading) {
-    return <h1 style={{ marginLeft: 20 }}>Loading...</h1>;
-  }
 
   const handlePublish = async (e) => {
 
