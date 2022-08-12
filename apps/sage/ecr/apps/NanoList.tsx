@@ -41,6 +41,7 @@ export default function NanoList() {
     fetch("http://localhost:5000/register")
       .then((res) => res.blob())
       .then((data) => {
+        setRegKey(true);
         var a = document.createElement("a");
         a.href = window.URL.createObjectURL(data);
         a.download = "registration.zip";
