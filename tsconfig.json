@@ -1,6 +1,6 @@
 {
   "include": ["parcel.d.ts", "config.ts", "components/**/*", "apps/**/*"],
-  "exclude": ["**/node_modules/"],
+  "exclude": ["**/node_modules/", "**/dist", "**/build"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "esModuleInterop": true,

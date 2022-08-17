@@ -5,9 +5,10 @@
   "scripts": {
     "start": "npm start -w sage",
     "build": "npm run build -w sage",
-    "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
     "reg-api": "npm run start -w registration-api",
     "dev": "concurrently \"npm run reg-api\" \"npm start\"",
+    "clean": "npm run clean --workspaces --if-present && rm -rf .parcel-cache/",
+
     "release": "standard-version"
   },
   "repository": {
@@ -36,4 +37,5 @@
   "dependencies": {
     "concurrently": "^7.3.0"
   }
+
 }
