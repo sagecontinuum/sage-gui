@@ -4,7 +4,7 @@ import cors from "cors";
 import fs from "fs";
 import tmp from "tmp";
 import archiver from  "archiver";
-import regAuthCheck from "./regAuthCheck";
+import regAuthCheck from "./regAuthCheck.js";
 
 const PORT = 3001;
 const CA_KEY = '/add/CA/key/path';
