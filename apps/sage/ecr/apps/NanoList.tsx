@@ -5,6 +5,11 @@ import { makeStyles } from "@mui/styles";
 import { Box, TextField, Button, Card, Stack } from "@mui/material";
 
 import * as Auth from "../../../../components/auth/auth";
+import * as REGAPI from "/components/apis/regApi";
+import config from '/config';
+
+const user = Auth.getUser();
+const url = config.deviceRegistration;
 
 const useStyles = makeStyles({
   container: {
@@ -38,15 +43,15 @@ export default function NanoList() {
 
   const handlePublish = async (e) => {
 
-    fetch("http://localhost:5000/register")
-      .then((res) => res.blob())
+    REGAPI.register()
       .then((data) => {
         setRegKey(true);
         var a = document.createElement("a");
         a.href = window.URL.createObjectURL(data);
         a.download = "registration.zip";
         a.click();
-      });
+      }).catch(err => console.log(err.message));
+
   };
 
   return (

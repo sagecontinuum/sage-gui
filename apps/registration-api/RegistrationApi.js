@@ -4,8 +4,9 @@ import cors from "cors";
 import fs from "fs";
 import tmp from "tmp";
 import archiver from  "archiver";
+import regAuthCheck from "./regAuthCheck";
 
-const PORT = process.env.PORT || 5000;
+const PORT = 3001;
 const CA_KEY = '/add/CA/key/path';
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 app.use(cors());
 
 
-app.get("/register", (req, res) => {
+app.get("/register", regAuthCheck, (req, res) => {
   const tmpObj = tmp.dirSync();
   const tmpDir = tmpObj.name;
 
