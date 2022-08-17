@@ -1,8 +1,8 @@
 {
   "name": "registration-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Device registration service",
+  "type": "module",
   "scripts": {
     "start": "nodemon RegistrationApi.js",
     "test": "echo \"Error: no test specified\" && exit 1"

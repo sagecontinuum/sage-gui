@@ -1,25 +1,24 @@
-const express = require("express");
-const { exec } = require("child_process");
-const { join } = require("path");
-const cors = require("cors");
-const fs = require("fs");
-const tmp = require("tmp");
-const archiver = require("archiver");
+import express from "express";
+import { exec } from "child_process";
+import cors from "cors";
+import fs from "fs";
+import tmp from "tmp";
+import archiver from  "archiver";
+
+const PORT = process.env.PORT || 5000;
+const CA_KEY = '/add/CA/key/path';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-//take the body of incoming POST requests and turn it into a JavaScript object
 app.use(express.json());
 app.use(cors());
-app.use(express.static(join(__dirname, "static")));
+
 
 app.get("/register", (req, res) => {
   const tmpObj = tmp.dirSync();
   const tmpDir = tmpObj.name;
 
   exec(
-    `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${__dirname}/beekeeper-keys/certca/beekeeper_ca_key`,
+    `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
     (err, stdout, stderr) => {
       if (err !== null) {
         return res.status(400).json({ error: err.message });
