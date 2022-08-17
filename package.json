@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm start -w sage",
     "build": "npm run build -w sage",
-    "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
+    "clean": "npm run clean --workspaces --if-present && rm -rf .parcel-cache/",
     "release": "standard-version"
   },
   "repository": {
