@@ -1,26 +1,14 @@
 module.exports = {
-  'env': {
-    'node': true,
-    'es2020': true,
-  },
-  'extends': [
+  extends: [
     'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
     'plugin:react/jsx-runtime'
   ],
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    'ecmaFeatures': {
-      'jsx': true
-    },
-    'ecmaVersion': 12,
-    'sourceType': 'module',
-    'enforceDynamicLinks': 'never'
-  },
-  'plugins': [
-    '@typescript-eslint'
-  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  root: true,
   'rules': {
     'indent': ['error', 2],
     'linebreak-style': ['error','unix'],
@@ -28,7 +16,7 @@ module.exports = {
     'semi': ['error', 'never'],
     'react/prop-types': 0,
     'no-unused-vars': 'off',
-    'max-len': 100,
+    'max-len': ['error', {'code': 100}],
     '@typescript-eslint/no-unused-vars': 'error',
     'react/no-unescaped-entities': [
       'error',
@@ -58,4 +46,4 @@ module.exports = {
     'HTMLElement': true,
     'HTMLInputElement': true
   }
-}
+};
