@@ -340,14 +340,14 @@ export default function CreateApp() {
         <hr/>
         <ul className="no-padding list-none">
           <li>
-            <a href={`${ECR.docs}/tutorials/compute-at-edge`} target="_blank" rel="noreferrer" >
-              Computing at the edge
+            <a href={`${ECR.docs}/tutorials/edge-apps/intro-to-edge-apps`} target="_blank" rel="noreferrer" >
+              Intro to edge apps
               <LaunchIcon className="external-link"/>
             </a>
           </li>
           <li>
-            <a href={`${ECR.docs}/tutorials/compute-at-edge#developing-new-edge-applications`} target="_blank" rel="noreferrer" >
-              Developing new edge applications
+            <a href={`${ECR.docs}/tutorials/edge-apps/creating-an-edge-app`} target="_blank" rel="noreferrer" >
+              Creating an edge app
               <LaunchIcon className="external-link"/>
             </a>
           </li>
