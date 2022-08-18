@@ -5,7 +5,9 @@
   "scripts": {
     "start": "npm start -w sage",
     "build": "npm run build -w sage",
-    "clean": "npm run clean --workspaces && rm -rf .parcel-cache/",
+    "reg-api": "npm run start -w registration-api",
+    "dev": "concurrently \"npm run reg-api\" \"npm start\"",
+    "clean": "npm run clean --workspaces --if-present && rm -rf .parcel-cache/",
     "release": "standard-version"
   },
   "repository": {
@@ -14,6 +16,11 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
+    "eslint": "^8.22.0",
+    "eslint-plugin-react": "^7.30.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "process": "^0.11.10",
     "standard-version": "^9.3.0"
   },
@@ -23,6 +30,10 @@
   "workspaces": [
     "apps/admin",
     "apps/sage",
-    "apps/project"
-  ]
+    "apps/project",
+    "apps/registration-api"
+  ],
+  "dependencies": {
+    "concurrently": "^7.3.0"
+  }
 }

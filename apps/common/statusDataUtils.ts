@@ -157,7 +157,7 @@ export function mergeMetrics(
   const joinedData = data.map(nodeObj => {
     const id = nodeObj.id.toLowerCase()
     if (!byNode || !(id in byNode))
-      return {...nodeObj, status: 'not reporting'}
+      return {...nodeObj, status: 'offline'}
 
     const elapsedTimes = getElapsedTimes(byNode, id)
 

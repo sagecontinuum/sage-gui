@@ -22,6 +22,7 @@ import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
+import NanoList from './ecr/apps/NanoList'
 
 
 import TestSignIn from './sign-in/TestSignIn'
@@ -73,6 +74,7 @@ export default function Sage() {
                     <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="shared-with-me" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
+                    <Route path="my-waggles" element={<RequireAuth><NanoList /></RequireAuth>} />
                   </Route>
 
                   <Route path="job-status" element={<JobStatus />} />

@@ -46,7 +46,7 @@ const exts = {
   video: ['.mp4']
 }
 
-const defaultPlugin = 'plugin-iio:0.4.5'
+const defaultPlugin = 'plugin-iio.*'
 
 const relTime = val =>
   msToTime(new Date().getTime() - (new Date(val).getTime()))
