@@ -6,5 +6,6 @@ RUN apt-get install -y nodejs
 RUN npm install
 EXPOSE 3001
 ENV NODE_ENV production
+ENV authURL 'https://auth.sagecontinuum.org'
 ENV tokenInfoPassword=${tokenInfoPassword}
 CMD [ "node", "RegistrationApi.js"]
