@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "nano-registration" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
