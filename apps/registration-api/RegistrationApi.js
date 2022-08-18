@@ -1,53 +1,52 @@
-import express from "express";
-import { exec } from "child_process";
-import cors from "cors";
-import fs from "fs";
-import tmp from "tmp";
-import archiver from  "archiver";
-import regAuthCheck from "./regAuthCheck.js";
+import express from 'express'
+import { exec } from 'child_process'
+import cors from 'cors'
+import fs from 'fs'
+import tmp from 'tmp'
+import archiver from  'archiver'
+import regAuthCheck from './regAuthCheck.js'
 
-const PORT = 3001;
-const CA_KEY = '/add/CA/key/path';
+const PORT = 3001
+const CA_KEY = '/add/CA/key/path'
 
-const app = express();
-app.use(express.json());
-app.use(cors());
+const app = express()
+app.use(express.json())
+app.use(cors())
 
 
-app.get("/register", regAuthCheck, (req, res) => {
-  const tmpObj = tmp.dirSync();
-  const tmpDir = tmpObj.name;
+app.get('/register', regAuthCheck, (req, res) => {
+  const tmpObj = tmp.dirSync()
+  const tmpDir = tmpObj.name
 
   exec(
     `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
     (err, stdout, stderr) => {
       if (err !== null) {
-        return res.status(400).json({ error: err.message });
+        return res.status(400).json({ error: err.message })
       } else {
-        if (err) throw err;
+        if (err) throw err
 
         res.writeHead(200, {
-          "Content-Type": "application/zip",
-          "Content-disposition": "attachment; filename=registration.zip",
-        });
+          'Content-Type': 'application/zip',
+          'Content-disposition': 'attachment; filename=registration.zip',
+        })
 
         fs.readdir(tmpDir, (err, files) => {
           if (err !== null) {
-            console.log(err.message);
+            console.log(err.message)
           } else {
-            const zipArchiver = archiver("zip");
-            zipArchiver.pipe(res);
+            const zipArchiver = archiver('zip')
+            zipArchiver.pipe(res)
 
             files.forEach((file) => {
-              zipArchiver.append(fs.createReadStream(tmpDir + "/" + file), {
+              zipArchiver.append(fs.createReadStream(tmpDir + '/' + file), {
                 name: file,
-              });
-            });
+              })
+            })
 
-            zipArchiver.finalize();
-
+            zipArchiver.finalize()
           }
-        });
+        })
 
 
 
@@ -62,9 +61,9 @@ app.get("/register", regAuthCheck, (req, res) => {
         // });
       }
     }
-  );
-});
+  )
+})
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}.`);
-});
+  console.log(`Server listening on port ${PORT}.`)
+})
