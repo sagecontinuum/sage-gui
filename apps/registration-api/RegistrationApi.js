@@ -22,7 +22,6 @@ app.get("/register", regAuthCheck, (req, res) => {
     `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
     (err, stdout, stderr) => {
       if (err !== null) {
-<<<<<<< HEAD
         return res.status(400).json({ error: err.message });
       } else {
         if (err) throw err;
@@ -49,33 +48,6 @@ app.get("/register", regAuthCheck, (req, res) => {
 
           }
         });
-=======
-        return res.status(400).json({ error: err.message })
-      } else {
-        if (err) throw err
-
-        res.writeHead(200, {
-          'Content-Type': 'application/zip',
-          'Content-disposition': 'attachment; filename=registration.zip',
-        })
-
-        fs.readdir(tmpDir, (err, files) => {
-          if (err !== null) {
-            console.log(err.message)
-          } else {
-            const zipArchiver = archiver('zip')
-            zipArchiver.pipe(res)
-
-            files.forEach((file) => {
-              zipArchiver.append(fs.createReadStream(tmpDir + '/' + file), {
-                name: file,
-              })
-            })
-
-            zipArchiver.finalize()
-          }
-        })
->>>>>>> 82fe1beca73f97a8384fa453eef7a98a0ca353f0
 
 
 
@@ -90,18 +62,9 @@ app.get("/register", regAuthCheck, (req, res) => {
         // });
       }
     }
-<<<<<<< HEAD
   );
 });
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`);
 });
-=======
-  )
-})
-
-app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}.`)
-})
->>>>>>> 82fe1beca73f97a8384fa453eef7a98a0ca353f0
