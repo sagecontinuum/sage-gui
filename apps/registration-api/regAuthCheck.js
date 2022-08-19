@@ -1,7 +1,5 @@
 import fetch from 'node-fetch';
-// import config from "../../config";
-const url = 'https://auth.sagecontinuum.org/token_info/';
-// const url = `${config.auth}/token_info/`
+const authURL = process.env.authURL
 const tokenInfoPassword = process.env.tokenInfoPassword;
 
 export default function regAuthCheck(req, res, next) {
@@ -12,7 +10,7 @@ export default function regAuthCheck(req, res, next) {
     return;
   }
   
-  fetch(url, {
+  fetch(`${authURL}/token_info`, {
     body: `token=${token}`,
     headers: {
       Accept: "application/json",
