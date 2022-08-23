@@ -1,109 +1,78 @@
-import { useState } from "react";
-import { StepTitle } from "../../common/FormLayout";
+import { useState } from 'react'
+import { Step } from '../../common/FormLayout'
+import styled from 'styled-components'
+import { TextField, Button } from '@mui/material'
+import * as REGAPI from '/components/apis/regApi'
 
-import { makeStyles } from "@mui/styles";
-import { Box, TextField, Button, Card, Stack } from "@mui/material";
 
-import * as Auth from "../../../../components/auth/auth";
-import * as REGAPI from "/components/apis/regApi";
-import config from '/config';
+const Root = styled.div`
+  display: flex;
+  margin: 0 25px;
+`
 
-const user = Auth.getUser();
-const url = config.deviceRegistration;
+const Main = styled.div`
+  margin: 10px 0;
+  flex-grow: 3;
 
-const useStyles = makeStyles({
-  container: {
-    alignItems: "left",
-    justifyContent: "flex-start",
-    backgroundColor: "white",
-    minHeight: "20vh",
-    display: "flex",
-    flexDirection: "column",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "left",
-    padding: "0px 24px 20px 24px",
-    marginTop: "13px",
-    height: "100%",
-    width: "50%",
-    justifyContent: "space-evenly",
-    "& .MuiTextField-root": { MimeTypeArray: 1, width: "100%" },
-  },
-  field: {
-    // width: "50%",
-  },
-});
+  .repo-step {
+    margin-top: 6px;
+    button, svg {
+      margin-left: 10px;
+    }
+  }
+
+  .register-app {
+    margin-right: 10px;
+  }
+`
 
 export default function NanoList() {
-  const user = Auth.getUser();
-  const classes = useStyles();
-  const [regKey, setRegKey] = useState(false);
+  const [regKey, setRegKey] = useState(false)
 
-  const handlePublish = async (e) => {
+  const handlePublish = async () => {
 
     REGAPI.register()
       .then((data) => {
-        setRegKey(true);
-        var a = document.createElement("a");
-        a.href = window.URL.createObjectURL(data);
-        a.download = "registration.zip";
-        a.click();
-      }).catch(err => console.log(err.message));
+        setRegKey(true)
+        const a = document.createElement('a')
+        a.href = window.URL.createObjectURL(data)
+        a.download = 'registration.zip'
+        a.click()
+      }).catch(err => console.log(err.message))
 
-  };
+  }
 
   return (
-    <>
-      <Card className={classes.container}>
-        <Box
-          className={classes.form}
-          sx={{
-            "& .MuiTextField-root": { m: 1, width: "25ch" },
-          }}
-        >
-          <h2>Get Development Beehive Keys for Your Waggle Device</h2>
-          <StepTitle icon="1" label="Enter Waggle Information" />
-          <TextField
-            id="uid"
-            label="User ID"
-            variant="outlined"
-            defaultValue={user}
-            className={classes.field}
-          />
+
+    <Root>
+      <Main>
+        <h1>Get Development Beehive Keys for Your Waggle Device</h1>
+
+        <Step>
+          <h3 style={{ marginTop: 30 }}>Enter Waggle Device ID</h3>
           <TextField
             id="nano-id"
             label="Nano ID"
             variant="outlined"
-            className={classes.field}
+            style={{ width: 500 }}
           />
+        </Step>
 
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{ justifyContent: "center", margin: "16px" }}
+        <Step>
+          <Button
+            variant="contained"
+            type="submit"
+            id="publish-waggle"
+            style={{ width: 120 }}
+            onClick={handlePublish}
           >
-            <Button
-              variant="outlined"
-              color="error"
-              type="submit"
-              onClick={() => console.log("cancel")}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              id="publish-waggle"
-              onClick={handlePublish}
-            >
-              Publish Waggle
-            </Button>
-          </Stack>
-          {regKey && <h5>Check your download folder for registration keys!</h5>}
-        </Box>
-      </Card>
-    </>
-  );
+            Publish Waggle
+          </Button>
+        </Step>
+
+        {regKey && <h5>Check your download folder for registration keys!</h5>}
+
+      </Main>
+    </Root>
+  )
 }

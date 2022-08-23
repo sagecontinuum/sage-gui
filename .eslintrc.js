@@ -41,9 +41,11 @@ module.exports = {
     'describe': true,
     'navigator': true,
     'ResizeObserver': true,
+    'process': true,
+    'console': true,
 
     'Document': true,
     'HTMLElement': true,
     'HTMLInputElement': true
   }
-};
+}

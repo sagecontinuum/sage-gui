@@ -10,6 +10,7 @@ import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
+import FlagCircleIcon from '@mui/icons-material/FlagCircle'
 
 import DropdownMenu from '../components/Menu'
 
@@ -104,6 +105,11 @@ export default function NavBar(props: Props) {
                     <><ExitIcon/>&nbsp;Sign out</>
                   }
                 </MenuItem>
+                <Link to='/apps/my-waggles'>
+                <MenuItem>
+                  <><FlagCircleIcon />My Waggle Devices</>
+                </MenuItem>
+                </Link>
               </DropDown>
             }
           />

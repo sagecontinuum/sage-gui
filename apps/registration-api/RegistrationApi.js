@@ -13,7 +13,6 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-
 app.get('/register', regAuthCheck, (req, res) => {
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
