@@ -6,15 +6,15 @@ export default function regAuthCheck(req, res, next) {
 
   const authHeader = req.get('Authorization')
 
-  if (typeof authHeader !== 'string') {
-    res.sendStatus(401)
+  if (!authHeader) {
+    res.status(401).send({message: 'no authorization header provided'})
     return
   }
   
   const token = authHeader.split(' ')[1]
 
   if (!token) {
-    res.sendStatus(401)
+    res.status(401).send({message: 'no token provided'})
     return
   }
   
