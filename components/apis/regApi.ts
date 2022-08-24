@@ -14,7 +14,7 @@ const options = {
 
 
 export function register() {
-  return fetch(url, options)
+  return fetch(`${url}/register`, options)
     .then(handleErrors)
     .then(res => res.blob())
 

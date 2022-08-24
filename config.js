@@ -9,7 +9,7 @@ const config = {
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   ses: 'https://portal.sagecontinuum.org/ses-plugin-data',
   auth: 'https://auth.sagecontinuum.org',
-  deviceRegistration:'http://localhost:3001/register',
+  deviceRegistration:'https://registration.sagecontinuum.org',
 
   dockerRegistry: 'registry.sagecontinuum.org',
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',

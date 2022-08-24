@@ -66,7 +66,7 @@ export default function NanoList() {
             style={{ width: 120 }}
             onClick={handlePublish}
           >
-            Publish Waggle
+            Get Keys
           </Button>
         </Step>
 
