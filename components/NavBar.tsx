@@ -10,7 +10,7 @@ import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
-import FlagCircleIcon from '@mui/icons-material/FlagCircle'
+import ImportantDevicesIcon from '@mui/icons-material/ImportantDevices'
 
 import DropdownMenu from '../components/Menu'
 
@@ -22,7 +22,7 @@ const webOrigin = window.location.origin
 const signOutUrl = `${Auth.url}/portal-logout`
 
 import config from '../config'
-import {version} from '../package.json'
+import { version } from '../package.json'
 
 
 type Props = {
@@ -33,8 +33,8 @@ type Props = {
 }
 
 export default function NavBar(props: Props) {
-  const {pathname} = useLocation()
-  const { menu, hasSignIn, hasDocsLink, logo} = props
+  const { pathname } = useLocation()
+  const { menu, hasSignIn, hasDocsLink, logo } = props
 
 
   const [signingOut, setSigningOut] = useState(false)
@@ -65,12 +65,12 @@ export default function NavBar(props: Props) {
             </>
           }
         </Link>
-        <Divider orientation="vertical" flexItem style={{margin: '5px 0' }} />
+        <Divider orientation="vertical" flexItem style={{ margin: '5px 0' }} />
       </div>
 
       {menu}
 
-      <Spacer/>
+      <Spacer />
 
 
       <div className="flex items-center gap">
@@ -83,7 +83,7 @@ export default function NavBar(props: Props) {
                 rel="noreferrer"
               >
                 Docs
-                <LaunchIcon className="external-link" sx={{marginTop: '3px'}}/>
+                <LaunchIcon className="external-link" sx={{ marginTop: '3px' }} />
               </a>
             </li>
           </NavItems>
@@ -101,14 +101,14 @@ export default function NavBar(props: Props) {
               <DropDown>
                 <MenuItem onClick={handleSignOut} disableRipple>
                   {signingOut ?
-                    <><Progress size={20}/>&nbsp;Signing out...</> :
-                    <><ExitIcon/>&nbsp;Sign out</>
+                    <><Progress size={20} />&nbsp;Signing out...</> :
+                    <><ExitIcon />&nbsp;Sign out</>
                   }
                 </MenuItem>
                 <Link to='/apps/my-waggles'>
-                <MenuItem>
-                  <><FlagCircleIcon />My Waggle Devices</>
-                </MenuItem>
+                  <MenuItem>
+                    <><ImportantDevicesIcon />&nbsp;My Waggle Devices</>
+                  </MenuItem>
                 </Link>
               </DropDown>
             }
@@ -171,7 +171,6 @@ const Spacer = styled.div`
 `
 
 const DropDown = styled.div`
-  display: flex;
   align-items: stretch;
 
   .MuiListItem-root {

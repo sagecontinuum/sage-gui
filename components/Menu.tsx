@@ -26,7 +26,7 @@ const StyledMenu = withStyles({
 ))
 
 
-export default function CustomizedMenus(props) {
+export default function DropdownMenu(props) {
   const {menu, label, caret = true, ...rest} = props
 
   const [anchorEl, setAnchorEl] = React.useState(null)
