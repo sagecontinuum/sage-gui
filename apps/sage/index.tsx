@@ -74,9 +74,8 @@ export default function Sage() {
                     <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="shared-with-me" element={<RequireAuth><AppList /></RequireAuth>} />
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
-                    <Route path="my-waggles" element={<RequireAuth><NanoList /></RequireAuth>} />
                   </Route>
-
+                  
                   <Route path="job-status" element={<JobStatus />} />
                   <Route path="create-job" element={<CreateJob />} />
 
@@ -89,6 +88,7 @@ export default function Sage() {
 
                   <Route path="node/:node" element={<Node />} />
 
+                  <Route path="my-devices" element={<RequireAuth><NanoList /></RequireAuth>} />
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
