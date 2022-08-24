@@ -7,11 +7,11 @@ import * as REGAPI from '/components/apis/regApi'
 
 const Root = styled.div`
   display: flex;
-  margin: 0 25px;
+  height: 100%
 `
 
 const Main = styled.div`
-  margin: 10px 0;
+  margin: 10px 100px;
   flex-grow: 3;
 
   .repo-step {
@@ -29,7 +29,7 @@ const Main = styled.div`
 export default function NanoList() {
   const [regKey, setRegKey] = useState(false)
 
-  const handlePublish = async () => {
+  const handlePublish = () => {
 
     REGAPI.register()
       .then((data) => {

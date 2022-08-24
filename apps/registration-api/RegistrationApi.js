@@ -14,6 +14,7 @@ app.use(express.json())
 app.use(cors())
 
 app.get('/register', regAuthCheck, (req, res) => {
+  
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
 
@@ -24,7 +25,7 @@ app.get('/register', regAuthCheck, (req, res) => {
         return res.status(400).json({ error: err.message })
       } else {
         if (err) throw err
-
+        
         res.writeHead(200, {
           'Content-Type': 'application/zip',
           'Content-disposition': 'attachment; filename=registration.zip',

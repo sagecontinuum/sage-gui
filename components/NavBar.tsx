@@ -105,7 +105,7 @@ export default function NavBar(props: Props) {
                     <><ExitIcon />&nbsp;Sign out</>
                   }
                 </MenuItem>
-                <Link to='/apps/my-waggles'>
+                <Link to='/my-devices'>
                   <MenuItem>
                     <><ImportantDevicesIcon />&nbsp;My Waggle Devices</>
                   </MenuItem>

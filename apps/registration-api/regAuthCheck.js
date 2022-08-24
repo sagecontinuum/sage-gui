@@ -14,7 +14,7 @@ export default function regAuthCheck(req, res, next) {
   const token = authHeader.split(' ')[1]
 
   if (!token) {
-    res.status(401).send({message: 'no token provided'})
+    res.status(401).send({message: 'Authorization string format not valid'})
     return
   }
   
