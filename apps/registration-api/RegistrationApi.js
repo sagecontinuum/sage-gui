@@ -7,7 +7,7 @@ import archiver from  'archiver'
 import regAuthCheck from './regAuthCheck.js'
 
 const PORT = 3001
-const CA_KEY = '/add/CA/key/path'
+const CA_KEY = process.env.CA_PATH
 
 const app = express()
 app.use(express.json())
