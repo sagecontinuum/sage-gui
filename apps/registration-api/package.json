@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon RegistrationApi.js",
+    "dev": "concurrently \"npm run start -w registration-api\" \"npm start -w sage\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -12,7 +13,10 @@
     "cors": "^2.8.5",
     "express": "^4.18.1",
     "node-fetch": "^3.2.10",
-    "nodemon": "^2.0.19",
     "tmp": "^0.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19",
+    "concurrently": "^7.3.0"
   }
 }
