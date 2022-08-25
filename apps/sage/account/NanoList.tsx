@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Step } from '../../common/FormLayout'
+import { Step } from '../common/FormLayout'
 import styled from 'styled-components'
 import { TextField, Button } from '@mui/material'
 import * as REGAPI from '/components/apis/regApi'
@@ -7,7 +7,7 @@ import * as REGAPI from '/components/apis/regApi'
 
 const Root = styled.div`
   display: flex;
-  height: 100%
+  height: 100%;
 `
 
 const Main = styled.div`
