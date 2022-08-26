@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build registration api
-      working-directory: APP_PATH
+      working-directory: $APP_PATH
       run: |
         docker build -t test-device-reg-api .
         docker run -d -t test-device-reg-api
