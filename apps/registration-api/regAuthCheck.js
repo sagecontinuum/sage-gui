@@ -10,14 +10,14 @@ export default function regAuthCheck(req, res, next) {
     res.status(401).send({message: 'no authorization header provided'})
     return
   }
-  
+
   const token = authHeader.split(' ')[1]
 
   if (!token) {
     res.status(401).send({message: 'Authorization string format not valid'})
     return
   }
-  
+
   fetch(`${authURL}/token_info/`, {
     body: `token=${token}`,
     headers: {
@@ -26,16 +26,17 @@ export default function regAuthCheck(req, res, next) {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     method: 'POST',
+  }).then(async data => {
+    const {status} = data
+    const obj = await data.json()
+    if (status === 200) {
+      req.username = obj.username
+      next()
+    } else {
+      res.status(status).send(obj)
+    }
+  }).catch(err => {
+    res.status(err.status).send(err.message)
   })
-    .then(async data => {
-      const {status} = data
-      if (status === '200') {
-        next()
-      } else {
-        const obj = await data.json()
-        res.status(status).send(obj)
-      }
-    
-    }).catch(err => {res.status(err.status).send(err.message)})
 
 }
