@@ -3,18 +3,23 @@ import { exec } from 'child_process'
 import cors from 'cors'
 import fs from 'fs'
 import tmp from 'tmp'
-import archiver from  'archiver'
+import archiver from 'archiver'
 import regAuthCheck from './regAuthCheck.js'
+import morgan from 'morgan'
 
 const PORT = 3001
 const CA_KEY = process.env.CA_PATH
 
+//morgan settings
+morgan.token('httpLog', '[:date[clf]] :url :status :method ')
+
 const app = express()
 app.use(express.json())
 app.use(cors())
+app.use(morgan('httpLog'))
 
 app.get('/register', regAuthCheck, (req, res) => {
-  
+
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
 
@@ -24,8 +29,7 @@ app.get('/register', regAuthCheck, (req, res) => {
       if (err) {
         return res.status(500).send({ error: 'could not run script' })
       } else {
-        if (err) throw err
-        
+
         res.writeHead(200, {
           'Content-Type': 'application/zip',
           'Content-disposition': 'attachment; filename=registration.zip',
