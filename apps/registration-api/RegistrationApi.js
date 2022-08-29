@@ -10,13 +10,11 @@ import morgan from 'morgan'
 const PORT = 3001
 const CA_KEY = process.env.CA_PATH
 
-// morgan settings
-morgan.token('httpLog', '[:date[clf]] :url :status :method')
-
 const app = express()
 app.use(express.json())
 app.use(cors())
-app.use(morgan('httpLog'))
+app.use(morgan('combined'))
+
 
 app.get('/register', regAuthCheck, (req, res) => {
 
