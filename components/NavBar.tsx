@@ -107,7 +107,7 @@ export default function NavBar(props: Props) {
                 </MenuItem>
                 <Link to='/my-devices'>
                   <MenuItem>
-                    <><ImportantDevicesIcon />&nbsp;My Waggle Devices</>
+                    <><ImportantDevicesIcon />&nbsp;My Devices</>
                   </MenuItem>
                 </Link>
               </DropDown>
