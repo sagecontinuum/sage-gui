@@ -16,7 +16,8 @@ morgan.token('httpLog', '[:date[clf]] :url :status :method ')
 const app = express()
 app.use(express.json())
 app.use(cors())
-app.use(morgan('httpLog'))
+app.use(morgan('combined'))
+
 
 app.get('/register', regAuthCheck, (req, res) => {
 
@@ -25,45 +26,42 @@ app.get('/register', regAuthCheck, (req, res) => {
 
   exec(
     `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
-    (err, stdout, stderr) => {
+    (err) => {
       if (err) {
         return res.status(500).send({ error: 'could not run script' })
-      } else {
-
-        res.writeHead(200, {
-          'Content-Type': 'application/zip',
-          'Content-disposition': 'attachment; filename=registration.zip',
-        })
-
-        fs.readdir(tmpDir, (err, files) => {
-          if (err !== null) {
-            console.log(err.message)
-          } else {
-            const zipArchiver = archiver('zip')
-            zipArchiver.pipe(res)
-
-            files.forEach((file) => {
-              zipArchiver.append(fs.createReadStream(tmpDir + '/' + file), {
-                name: file,
-              })
-            })
-
-            zipArchiver.finalize()
-          }
-        })
-
-
-
-        // todo(SH): Delete the temp folder
-        // fs.readdir(tmpDir, (err, files) => {
-        //   if (err) throw err;
-        //   for (const file of files) {
-        //     fs.unlink(tmpDir + "/" + file, err => {
-        //       if (err) throw err;
-        //     });
-        //   }
-        // });
       }
+
+      res.writeHead(200, {
+        'Content-Type': 'application/zip',
+        'Content-disposition': 'attachment; filename=registration.zip',
+      })
+
+      fs.readdir(tmpDir, (err, files) => {
+        if (err) {
+          console.error(err)
+        } else {
+          const zipArchiver = archiver('zip')
+          zipArchiver.pipe(res)
+
+          files.forEach((file) => {
+            zipArchiver.append(fs.createReadStream(tmpDir + '/' + file), {
+              name: file,
+            })
+          })
+
+          zipArchiver.finalize()
+        }
+      })
+
+      // todo(SH): Delete the temp folder
+      // fs.readdir(tmpDir, (err, files) => {
+      //   if (err) throw err;
+      //   for (const file of files) {
+      //     fs.unlink(tmpDir + "/" + file, err => {
+      //       if (err) throw err;
+      //     });
+      //   }
+      // });
     }
   )
 })
@@ -71,3 +69,6 @@ app.get('/register', regAuthCheck, (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}.`)
 })
+
+
+export default app

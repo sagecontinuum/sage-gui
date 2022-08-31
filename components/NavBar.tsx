@@ -8,10 +8,10 @@ import Divider from '@mui/material/Divider'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import DevicesIcon from '@mui/icons-material/Devices'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
 import ImportantDevicesIcon from '@mui/icons-material/ImportantDevices'
-
 import DropdownMenu from '../components/Menu'
 
 
@@ -99,6 +99,16 @@ export default function NavBar(props: Props) {
             caret={false}
             menu={
               <DropDown>
+                <Link to='/my-profile'>
+                  <MenuItem>
+                    <><AccountIcon />&nbsp;My profile</>
+                  </MenuItem>
+                </Link>
+                <Link to='/my-devices'>
+                  <MenuItem>
+                    <><DevicesIcon />&nbsp;My devices</>
+                  </MenuItem>
+                </Link>
                 <MenuItem onClick={handleSignOut} disableRipple>
                   {signingOut ?
                     <><Progress size={20} />&nbsp;Signing out...</> :
@@ -117,7 +127,10 @@ export default function NavBar(props: Props) {
 
         {hasSignIn && !username && pathname != '/login' &&
           <Button
-            href={process.env.NODE_ENV == 'development' ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
+            href={
+              process.env.NODE_ENV == 'development' ?
+                '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`
+            }
             variant="outlined"
             color="primary"
           >
@@ -142,7 +155,10 @@ const Root = styled.div`
   padding: 2px 20px 0 20px;
   height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow:  0px 2px 4px -1px rgb(0 0 0 / 0%), 0px 4px 5px 0px rgb(0 0 0 / 0%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+  box-shadow:
+    0px 2px 4px -1px rgb(0 0 0 / 0%),
+    0px 4px 5px 0px rgb(0 0 0 / 0%),
+    0px 1px 10px 0px rgb(0 0 0 / 12%);
 `
 
 const LogoImg = styled.img`

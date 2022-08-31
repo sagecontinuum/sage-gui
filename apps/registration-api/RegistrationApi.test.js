@@ -9,17 +9,21 @@ const tokenInfoPassword = process.env.tokenInfoPassword
 
 if (!authURL) {
   console.error('Must provide "authURL" env variable to run tests')
-  return
+  process.exit(1)
 }
 
 if (!tokenInfoPassword) {
   console.error('Must provide "tokenInfoPassword" env variable to run tests')
-  return
+  process.exit(1)
 }
 
 // required to run all tests
 const USER_TOKEN = process.env.USER_TOKEN
-console.log('Running tests with "USER_TOKEN" env variable:', USER_TOKEN)
+if (USER_TOKEN) {
+  console.log('Running tests with provided "USER_TOKEN" env variable')
+} else {
+  console.log('Running tests WITHOUT any "USER_TOKEN" env variable')
+}
 
 
 describe('GET /register', () => {
