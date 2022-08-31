@@ -81,6 +81,11 @@ const theme = createTheme({
         variant: 'outlined'
       }
     },
+    MuiMenu: {
+      defaultProps: {
+        transitionDuration: 50
+      }
+    },
     MuiIcon: {
       defaultProps: {
         baseClassName: 'material-icons-rounded',

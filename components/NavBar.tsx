@@ -5,6 +5,7 @@ import sage from 'url:../assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
+import ListItemIcon from '@mui/material/ListItemIcon'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -99,20 +100,33 @@ export default function NavBar(props: Props) {
             caret={false}
             menu={
               <DropDown>
-                <Link to='/my-profile'>
-                  <MenuItem>
-                    <><AccountIcon />&nbsp;My profile</>
-                  </MenuItem>
-                </Link>
-                <Link to='/my-devices'>
-                  <MenuItem>
-                    <><DevicesIcon />&nbsp;My devices</>
-                  </MenuItem>
-                </Link>
+                <MenuItem component={Link} to='/my-profile'>
+                  <ListItemIcon>
+                    <AccountIcon />
+                  </ListItemIcon>
+                  My profile
+                </MenuItem>
+                <MenuItem component={Link} to='/my-devices'>
+                  <ListItemIcon>
+                    <DevicesIcon />
+                  </ListItemIcon>
+                  My devices
+                </MenuItem>
+                <Divider />
                 <MenuItem onClick={handleSignOut} disableRipple>
                   {signingOut ?
-                    <><Progress size={20} />&nbsp;Signing out...</> :
-                    <><ExitIcon />&nbsp;Sign out</>
+                    <>
+                      <ListItemIcon>
+                        <Progress size={20} />
+                      </ListItemIcon>
+                      Signing out...
+                    </> :
+                    <>
+                      <ListItemIcon>
+                        <ExitIcon />
+                      </ListItemIcon>
+                      Sign out
+                    </>
                   }
                 </MenuItem>
               </DropDown>

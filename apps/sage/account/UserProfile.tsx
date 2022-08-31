@@ -21,8 +21,9 @@ const fields = [
 export default function UserProfile() {
   const {loading, setLoading} = useProgress()
   const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [data, setData] = useState<User.Info>()
-  const [state, setState] = useState<User.Info>({})
+  const [state, setState] = useState<User.Info>()
   const [error, setError] = useState()
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function UserProfile() {
         setData(data)
         setState(data)
       })
-      .catch(err => setError(err))
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [setLoading])
 
@@ -48,14 +49,14 @@ export default function UserProfile() {
   }
 
   const handleSave = () => {
-    setLoading(true)
+    setIsSaving(true)
     User.saveUserInfo(state)
       .then(data => {
         setIsEditing(false)
         setData(data)
       })
       .catch(err => setError(err))
-      .finally(() => setLoading(false))
+      .finally(() => setIsSaving(false))
   }
 
 
@@ -92,8 +93,8 @@ export default function UserProfile() {
                 <h2>{label}</h2>
                 {isEditing && edit != false ?
                   <TextField
-                    name={key}
                     label={`My ${label}`}
+                    name={key}
                     onChange={handleChange}
                     value={state[key]}
                     multiline={type == 'textarea'}
@@ -117,13 +118,13 @@ export default function UserProfile() {
             onClick={handleSave}
             disabled={loading}
           >
-            {loading ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         }
       </div>
 
       {error &&
-        <Alert severity="error">{error.message}</Alert>
+        <Alert severity="error">{error}</Alert>
       }
 
     </Root>
@@ -131,7 +132,7 @@ export default function UserProfile() {
 }
 
 const Root = styled.div`
-  margin: 2em 2em 5em 2em;
+  margin: 2rem 2rem 5rem 2rem;
   width: 500px;
 
   .user-info {

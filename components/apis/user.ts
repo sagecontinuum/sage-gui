@@ -2,8 +2,6 @@ import config from '../../config'
 export const url = config.auth
 export const docs = config.docs
 
-import { handleErrors } from '../fetch-utils'
-
 import * as Auth from '../auth/auth'
 const username = Auth.username
 
@@ -15,6 +13,16 @@ const options = {
   } : {}
 }
 
+
+function handleErrors(res) {
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(error => {
+    throw Error(error.detail)
+  })
+}
 
 
 function get(endpoint: string) {
