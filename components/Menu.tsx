@@ -1,32 +1,12 @@
 import React from 'react'
-import withStyles from '@mui/styles/withStyles'
+import styled from 'styled-components'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 
-const StyledMenu = withStyles({
-  paper: {
-    border: '1px solid #d3d4d5',
-    transition: 'none !important'
-  },
-})((props) => (
-  <Menu
-    elevation={0}
-    getContentAnchorEl={null}
-    anchorOrigin={{
-      vertical: 'bottom',
-      horizontal: 'center',
-    }}
-    transformOrigin={{
-      vertical: 'top',
-      horizontal: 'center',
-    }}
-    {...props}
-  />
-))
 
 
-export default function CustomizedMenus(props) {
+export default function DropdownMenu(props) {
   const {menu, label, caret = true, ...rest} = props
 
   const [anchorEl, setAnchorEl] = React.useState(null)
@@ -40,7 +20,7 @@ export default function CustomizedMenus(props) {
   }
 
   return (
-    <span>
+    <div>
       <Button
         aria-controls="menu"
         aria-haspopup="true"
@@ -51,16 +31,36 @@ export default function CustomizedMenus(props) {
       >
         {label} {caret && <CaretIcon/>}
       </Button>
-      <StyledMenu
+      <Dropdown
         id="menu"
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
         onClick={handleClose}
+        elevation={0}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
       >
         {menu}
-      </StyledMenu>
-    </span>
+      </Dropdown>
+    </div>
   )
 }
 
+
+const Dropdown = styled(Menu)`
+  z-index: 9001;    // only actually for navbar
+  .MuiPaper-root {
+    border: 1px solid #d3d4d5;
+  }
+
+  .MuiListItemIcon-root {
+    color: rgba(0, 0, 0, 0.7);
+  }
+`

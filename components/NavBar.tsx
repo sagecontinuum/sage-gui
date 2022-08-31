@@ -5,9 +5,11 @@ import sage from 'url:../assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
+import ListItemIcon from '@mui/material/ListItemIcon'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import DevicesIcon from '@mui/icons-material/Devices'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
 
@@ -21,7 +23,7 @@ const webOrigin = window.location.origin
 const signOutUrl = `${Auth.url}/portal-logout`
 
 import config from '../config'
-import {version} from '../package.json'
+import { version } from '../package.json'
 
 
 type Props = {
@@ -32,8 +34,8 @@ type Props = {
 }
 
 export default function NavBar(props: Props) {
-  const {pathname} = useLocation()
-  const { menu, hasSignIn, hasDocsLink, logo} = props
+  const { pathname } = useLocation()
+  const { menu, hasSignIn, hasDocsLink, logo } = props
 
 
   const [signingOut, setSigningOut] = useState(false)
@@ -64,12 +66,12 @@ export default function NavBar(props: Props) {
             </>
           }
         </Link>
-        <Divider orientation="vertical" flexItem style={{margin: '5px 0' }} />
+        <Divider orientation="vertical" flexItem style={{ margin: '5px 0' }} />
       </div>
 
       {menu}
 
-      <Spacer/>
+      <Spacer />
 
 
       <div className="flex items-center gap">
@@ -82,7 +84,7 @@ export default function NavBar(props: Props) {
                 rel="noreferrer"
               >
                 Docs
-                <LaunchIcon className="external-link" sx={{marginTop: '3px'}}/>
+                <LaunchIcon className="external-link" sx={{ marginTop: '3px' }} />
               </a>
             </li>
           </NavItems>
@@ -98,10 +100,33 @@ export default function NavBar(props: Props) {
             caret={false}
             menu={
               <DropDown>
+                <MenuItem component={Link} to='/my-profile'>
+                  <ListItemIcon>
+                    <AccountIcon />
+                  </ListItemIcon>
+                  My profile
+                </MenuItem>
+                <MenuItem component={Link} to='/my-devices'>
+                  <ListItemIcon>
+                    <DevicesIcon />
+                  </ListItemIcon>
+                  My devices
+                </MenuItem>
+                <Divider />
                 <MenuItem onClick={handleSignOut} disableRipple>
                   {signingOut ?
-                    <><Progress size={20}/>&nbsp;Signing out...</> :
-                    <><ExitIcon/>&nbsp;Sign out</>
+                    <>
+                      <ListItemIcon>
+                        <Progress size={20} />
+                      </ListItemIcon>
+                      Signing out...
+                    </> :
+                    <>
+                      <ListItemIcon>
+                        <ExitIcon />
+                      </ListItemIcon>
+                      Sign out
+                    </>
                   }
                 </MenuItem>
               </DropDown>
@@ -111,7 +136,10 @@ export default function NavBar(props: Props) {
 
         {hasSignIn && !username && pathname != '/login' &&
           <Button
-            href={process.env.NODE_ENV == 'development' ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
+            href={
+              process.env.NODE_ENV == 'development' ?
+                '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`
+            }
             variant="outlined"
             color="primary"
           >
@@ -136,7 +164,10 @@ const Root = styled.div`
   padding: 2px 20px 0 20px;
   height: 60px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow:  0px 2px 4px -1px rgb(0 0 0 / 0%), 0px 4px 5px 0px rgb(0 0 0 / 0%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+  box-shadow:
+    0px 2px 4px -1px rgb(0 0 0 / 0%),
+    0px 4px 5px 0px rgb(0 0 0 / 0%),
+    0px 1px 10px 0px rgb(0 0 0 / 12%);
 `
 
 const LogoImg = styled.img`
@@ -165,7 +196,6 @@ const Spacer = styled.div`
 `
 
 const DropDown = styled.div`
-  display: flex;
   align-items: stretch;
 
   .MuiListItem-root {

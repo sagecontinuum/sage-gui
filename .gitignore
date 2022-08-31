@@ -6,3 +6,6 @@ build/
 dist/
 .parcel-cache/
 coverage/
+.DS_Store
+beekeeper-keys/
+*.log

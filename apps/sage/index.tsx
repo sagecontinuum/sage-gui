@@ -22,6 +22,8 @@ import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
+import NanoList from './account/NanoList'
+import UserProfile from './account/UserProfile'
 
 
 import TestSignIn from './sign-in/TestSignIn'
@@ -87,6 +89,8 @@ export default function Sage() {
 
                   <Route path="node/:node" element={<Node />} />
 
+                  <Route path="my-devices" element={<RequireAuth><NanoList /></RequireAuth>} />
+                  <Route path="my-profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />

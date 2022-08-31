@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom'
 import UserIcon from '@mui/icons-material/AccountCircleRounded'
 import SharedIcon from '@mui/icons-material/SupervisedUserCircle'
 import PublicIcon from '@mui/icons-material/PublicRounded'
-
+import FlagCircleIcon from '@mui/icons-material/FlagCircle'
 
 
 export default function Sidebar() {
@@ -18,10 +18,6 @@ export default function Sidebar() {
       <Item to="my-apps">
         <UserIcon/>
         <div>My Apps</div>
-      </Item>
-      <Item to="shared-with-me">
-        <SharedIcon />
-        <div>Shared with Me</div>
       </Item>
     </Root>
   )

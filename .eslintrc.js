@@ -14,6 +14,7 @@ module.exports = {
     'linebreak-style': ['error','unix'],
     'quotes': ['error', 'single', {'allowTemplateLiterals': true}],
     'semi': ['error', 'never'],
+    'spaced-comment': ['error', 'always'],
     'react/prop-types': 0,
     'no-unused-vars': 'off',
     'max-len': ['error', {'code': 100}],
@@ -41,9 +42,11 @@ module.exports = {
     'describe': true,
     'navigator': true,
     'ResizeObserver': true,
+    'process': true,
+    'console': true,
 
     'Document': true,
     'HTMLElement': true,
     'HTMLInputElement': true
   }
-};
+}
