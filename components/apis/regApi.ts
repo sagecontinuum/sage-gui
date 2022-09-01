@@ -18,8 +18,7 @@ function handleRegErrors(res) {
   }
 
   return res.json().then(errorObj => {
-    console.log(errorObj.detail)
-    throw Error(errorObj.error)
+    throw Error(errorObj.message)
   })
 }
 

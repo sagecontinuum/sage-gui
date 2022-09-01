@@ -7,17 +7,17 @@ export default function regAuthCheck(req, res, next) {
   const authHeader = req.get('Authorization')
 
   if (!authHeader) {
-    let detail = 'no authorization header provided'
-    console.log(detail)
-    return res.status(401).send({detail})
+    let message = 'No authorization header provided'
+    console.log(message)
+    return res.status(401).send({message})
   }
 
   const token = authHeader.split(' ')[1]
 
   if (!token) {
-    let detail = 'Authorization string format not valid'
-    console.log(detail)
-    return res.status(401).send({detail})
+    let message = 'Authorization string format not valid'
+    console.log(message)
+    return res.status(401).send({message})
   }
 
   fetch(`${authURL}/token_info/`, {
