@@ -11,7 +11,6 @@ import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import DevicesIcon from '@mui/icons-material/Devices'
 import MenuItem from '@mui/material/MenuItem'
 import Progress from '@mui/material/CircularProgress'
-import ImportantDevicesIcon from '@mui/icons-material/ImportantDevices'
 import DropdownMenu from '../components/Menu'
 
 
@@ -115,11 +114,6 @@ export default function NavBar(props: Props) {
                     <><ExitIcon />&nbsp;Sign out</>
                   }
                 </MenuItem>
-                <Link to='/my-devices'>
-                  <MenuItem>
-                    <><ImportantDevicesIcon />&nbsp;My Devices</>
-                  </MenuItem>
-                </Link>
               </DropDown>
             }
           />

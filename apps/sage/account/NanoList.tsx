@@ -38,7 +38,8 @@ export default function NanoList() {
         a.href = window.URL.createObjectURL(data)
         a.download = 'registration.zip'
         a.click()
-      }).catch(err => console.log(err.message))
+        console.log('Registration key successfully generated!')
+      }).catch(err => {if (err.message) console.log(err.message)})
 
   }
 

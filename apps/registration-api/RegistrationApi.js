@@ -61,6 +61,8 @@ app.get('/register', regAuthCheck, (req, res) => {
       // });
     }
   )
+
+  console.log('Registration keys successfully generated!')
 })
 
 app.listen(PORT, () => {

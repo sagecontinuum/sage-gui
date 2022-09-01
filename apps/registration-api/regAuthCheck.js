@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-const authURL = process.env.authURL
+const authURL = process.env.authURL || 'https://auth.sagecontinuum.org'
 const tokenInfoPassword = process.env.tokenInfoPassword
 
 export default function regAuthCheck(req, res, next) {
@@ -7,15 +7,17 @@ export default function regAuthCheck(req, res, next) {
   const authHeader = req.get('Authorization')
 
   if (!authHeader) {
-    res.status(401).send({message: 'no authorization header provided'})
-    return
+    let detail = 'no authorization header provided'
+    console.log(detail)
+    return res.status(401).send({detail})
   }
 
   const token = authHeader.split(' ')[1]
 
   if (!token) {
-    res.status(401).send({message: 'Authorization string format not valid'})
-    return
+    let detail = 'Authorization string format not valid'
+    console.log(detail)
+    return res.status(401).send({detail})
   }
 
   fetch(`${authURL}/token_info/`, {
