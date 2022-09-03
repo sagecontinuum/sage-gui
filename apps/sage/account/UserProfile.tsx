@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import {
   Button, Alert, FormHelperText,
-  FormControl, useFormControl, OutlinedInput, InputLabel, Typography
+  FormControl, useFormControl, OutlinedInput
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
 import CancelIcon from '@mui/icons-material/UndoRounded'
@@ -93,8 +93,7 @@ export default function UserProfile() {
         <div className="flex column user-info">
           {fields.map(obj => {
             const {key, label, edit, type, maxLength} = obj
-            const value = data[key],
-              newVal = state[key]
+            const value = data[key]
 
             return (
               <div key={key}>
@@ -106,14 +105,15 @@ export default function UserProfile() {
                       aria-label={label}
                       name={key}
                       onChange={handleChange}
-                      value={newVal}
+                      value={state[key]}
                       multiline={type == 'textarea'}
                       minRows={type == 'textarea' ? 4 : 0}
                       style={type == 'textarea' ? {width: 500} : {width: 300}}
                       inputProps={{maxLength}}
                     />
                     <FocusedHelperText
-                      text={newVal?.length > 20 && `${maxLength - newVal?.length} characters left`}
+                      text={state[key]?.length > 20 &&
+                        `${maxLength - state[key]?.length} characters left`}
                     />
                   </FormControl> :
                   <p>{value ? value : <i className="muted">Not available</i>}</p>
