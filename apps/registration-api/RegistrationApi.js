@@ -51,14 +51,14 @@ app.post('/register', regAuthCheck, (req, res) => {
       })
 
       // todo(SH): Delete the temp folder
-      // fs.readdir(tmpDir, (err, files) => {
-      //   if (err) throw err;
-      //   for (const file of files) {
-      //     fs.unlink(tmpDir + "/" + file, err => {
-      //       if (err) throw err;
-      //     });
-      //   }
-      // });
+      fs.rm(tmpDir, { recursive: true }, err => {
+        if (err) {
+          console.log(err)
+          throw err
+        }
+
+        console.log(`${tmpDir} is deleted!`)
+      })
     }
   )
 
