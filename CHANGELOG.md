@@ -3,6 +3,28 @@
 The following are some notable changes to the UI
 
 
+## [2.2.0](https://github.com/sagecontinuum/sage-gui/compare/v2.1.0...v2.2.0) (2022-09-06)
+
+
+### Features
+
+* **user-profile:** initial user profile ([e7e5eb5](https://github.com/sagecontinuum/sage-gui/commit/e7e5eb5740f9e2e75639cce93b0b4dcc2e1b998a))
+
+
+### Bug Fixes
+
+* add ENV authURL in reg-api Dockerfile ([c9fa13f](https://github.com/sagecontinuum/sage-gui/commit/c9fa13fb303aae13d6b0e80c5cab1fbcbd109a98))
+* **admin:** consider no recent metrics "offline" ([1b6eb85](https://github.com/sagecontinuum/sage-gui/commit/1b6eb85457b01b70a496b34b80b1b5afadce7c52))
+* **data:** fix ontology link ([91a8987](https://github.com/sagecontinuum/sage-gui/commit/91a89870b8a84932110a1f31ae07daff088c7209))
+* **data:** use a better default app filter (for now) ([ad40020](https://github.com/sagecontinuum/sage-gui/commit/ad40020dfa94edeedc9bef216a325288aa2c2ebb))
+* linter + trailing slash for token url ([4ed4863](https://github.com/sagecontinuum/sage-gui/commit/4ed4863a33e07648148edcdb237c10dd4a111658))
+* my waggle devices icon + dropdown menu display ([f14ad82](https://github.com/sagecontinuum/sage-gui/commit/f14ad820e6dcc3969e9fed97161282d6aee1fa2f))
+* NanoList UI + regAuthCheck message ([e156c9b](https://github.com/sagecontinuum/sage-gui/commit/e156c9bd22a01fe891db3e8b8edbe74d164356ad))
+* reg-api modify authURL + tmp dependency ([d773723](https://github.com/sagecontinuum/sage-gui/commit/d773723fff5fd527a348d3cc4f8909ba9bbfd7af))
+* **reg-api:** fix response code ([50f0d92](https://github.com/sagecontinuum/sage-gui/commit/50f0d92fc8d1c5288c6cbded9a8519eb72bd3af1))
+* **reg-api:** fix status code comparison, add username to request, formatting, ([c2c6483](https://github.com/sagecontinuum/sage-gui/commit/c2c6483ff13587208f7cd4b0384dc18e0df30dc7))
+* use docs.waggle-edge.ai for doc links ([5b03f9c](https://github.com/sagecontinuum/sage-gui/commit/5b03f9c5a03d9eb04885061f65b821fecf754c01))
+
 ## [2.1.0](https://github.com/sagecontinuum/sage-gui/compare/v1.8.1...v2.1.0) (2022-07-25)
 
 
