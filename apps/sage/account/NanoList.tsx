@@ -2,6 +2,8 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Alert } from '@mui/material'
 import * as REGAPI from '/components/apis/regApi'
+import { text } from 'd3'
+import { values } from 'lodash'
 
 
 const Root = styled.div`
@@ -33,6 +35,15 @@ export default function NanoList() {
 
 
   }
+  const inputProps = {
+    pattern: text,
+    minlength: 13,
+    maxlength: 13,
+    placeholder: 'Nano ID',
+    required: true,
+
+  }
+
 
   return (
 
@@ -43,26 +54,40 @@ export default function NanoList() {
       <h3 style={{ marginTop: 40 }}>Enter Waggle Device ID</h3>
       <TextField
         id="nano-id"
-        label="Nano ID"
         variant="outlined"
         style={{ width: 500 }}
+        inputProps={inputProps}
+        error={false}
       />
 
       <br/><br/>
 
-      <Button
-        variant="contained"
-        type="submit"
-        id="publish-waggle"
-        style={{ width: 120 }}
-        onClick={handlePublish}
-      >
-        Get Keys
-      </Button>
-
+      {regKey ?
+        <Button
+          variant="contained"
+          type="submit"
+          id="publish-waggle"
+          disabled
+          style={{ width: 120 }}
+          onClick={handlePublish}
+        >
+          Got Keys!
+        </Button>
+        :
+        <Button
+          variant="contained"
+          type="submit"
+          id="publish-waggle"
+          style={{ width: 120 }}
+          onClick={handlePublish}
+        >
+          Get Keys
+        </Button>
+      }
       <br/><br/>
 
       {regKey && <Alert severity="success" style={{ width: 500 }}>Check your download folder for registration keys!</Alert>}
+
       {errMsg && <Alert severity="error" style={{ width: 500 }}>{errMsg}</Alert>}
 
     </Root>

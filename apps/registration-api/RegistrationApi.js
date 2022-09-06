@@ -16,7 +16,7 @@ app.use(cors())
 app.use(morgan('combined'))
 
 
-app.get('/register', regAuthCheck, (req, res) => {
+app.post('/register', regAuthCheck, (req, res) => {
 
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
