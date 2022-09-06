@@ -50,7 +50,7 @@ app.post('/register', regAuthCheck, (req, res) => {
         }
       })
 
-      // todo(SH): Delete the temp folder
+      // Delete the temp folder
       fs.rm(tmpDir, { recursive: true }, err => {
         if (err) {
           console.log(err)
@@ -62,7 +62,6 @@ app.post('/register', regAuthCheck, (req, res) => {
     }
   )
 
-  console.log('Registration keys successfully generated!')
 })
 
 app.listen(PORT, () => {
