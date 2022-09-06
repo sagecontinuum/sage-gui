@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import styled from 'styled-components'
 
-import { TextField, Button, Alert } from '@mui/material'
+import {
+  Button, Alert, FormHelperText,
+  FormControl, useFormControl, OutlinedInput
+} from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
 import CancelIcon from '@mui/icons-material/UndoRounded'
 
@@ -10,20 +13,25 @@ import * as User from '/components/apis/user'
 
 
 
+
 const fields = [
   {key: 'sage_username', label: 'Username', edit: false},
-  {key: 'organization', label: 'Organization'},
-  {key: 'department', label: 'Department'},
-  {key: 'bio', label: 'Biography', type: 'textarea'}
+  {key: 'organization', label: 'Organization', maxLength: 30},
+  {key: 'department', label: 'Department', maxLength: 30},
+  {key: 'bio', label: 'Biography', type: 'textarea', maxLength: 500}
 ]
 
 
 export default function UserProfile() {
-  const {loading, setLoading} = useProgress()
-  const [isEditing, setIsEditing] = useState(false)
+  const {setLoading} = useProgress()
   const [data, setData] = useState<User.Info>()
-  const [state, setState] = useState<User.Info>({})
   const [error, setError] = useState()
+
+  // form
+  const [isSaving, setIsSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [state, setState] = useState<User.Info>()
+
 
   useEffect(() => {
     setLoading(true)
@@ -32,7 +40,7 @@ export default function UserProfile() {
         setData(data)
         setState(data)
       })
-      .catch(err => setError(err))
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [setLoading])
 
@@ -48,14 +56,14 @@ export default function UserProfile() {
   }
 
   const handleSave = () => {
-    setLoading(true)
+    setIsSaving(true)
     User.saveUserInfo(state)
       .then(data => {
         setIsEditing(false)
         setData(data)
       })
       .catch(err => setError(err))
-      .finally(() => setLoading(false))
+      .finally(() => setIsSaving(false))
   }
 
 
@@ -84,23 +92,31 @@ export default function UserProfile() {
       {data &&
         <div className="flex column user-info">
           {fields.map(obj => {
-            const {key, label, edit, type} = obj
+            const {key, label, edit, type, maxLength} = obj
             const value = data[key]
 
             return (
               <div key={key}>
                 <h2>{label}</h2>
                 {isEditing && edit != false ?
-                  <TextField
-                    name={key}
-                    label={`My ${label}`}
-                    onChange={handleChange}
-                    value={state[key]}
-                    multiline={type == 'textarea'}
-                    minRows={type == 'textarea' ? 4 : 0}
-                    style={type == 'textarea' ? {width: 500} : {}}
-                  /> :
-                  <p>{value ? value : <i className="muted">Not specified</i>}</p>
+                  <FormControl>
+                    <OutlinedInput
+                      placeholder={`My ${label}`}
+                      aria-label={label}
+                      name={key}
+                      onChange={handleChange}
+                      value={state[key]}
+                      multiline={type == 'textarea'}
+                      minRows={type == 'textarea' ? 4 : 0}
+                      style={type == 'textarea' ? {width: 500} : {width: 300}}
+                      inputProps={{maxLength}}
+                    />
+                    <FocusedHelperText
+                      text={state[key]?.length > 20 &&
+                        `${maxLength - state[key]?.length} characters left`}
+                    />
+                  </FormControl> :
+                  <p>{value ? value : <i className="muted">Not available</i>}</p>
                 }
               </div>
             )
@@ -115,15 +131,15 @@ export default function UserProfile() {
             variant="contained"
             type="submit"
             onClick={handleSave}
-            disabled={loading}
+            disabled={isSaving}
           >
-            {loading ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         }
       </div>
 
       {error &&
-        <Alert severity="error">{error.message}</Alert>
+        <Alert severity="error">{error}</Alert>
       }
 
     </Root>
@@ -131,7 +147,7 @@ export default function UserProfile() {
 }
 
 const Root = styled.div`
-  margin: 2em 2em 5em 2em;
+  margin: 50px 100px;
   width: 500px;
 
   .user-info {
@@ -143,4 +159,14 @@ const Root = styled.div`
   }
 `
 
+
+function FocusedHelperText({text}) {
+  const { focused } = useFormControl()
+
+  const helperText = useMemo(() => {
+    return focused ? text : ''
+  }, [focused, text])
+
+  return <FormHelperText>{helperText}</FormHelperText>
+}
 

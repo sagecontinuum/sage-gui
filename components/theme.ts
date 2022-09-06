@@ -75,10 +75,20 @@ const theme = createTheme({
         variant: 'outlined'
       }
     },
+    MuiOutlinedInput: {
+      defaultProps: {
+        size: 'small',
+      }
+    },
     MuiChip: {
       defaultProps: {
         size: 'small',
         variant: 'outlined'
+      }
+    },
+    MuiMenu: {
+      defaultProps: {
+        transitionDuration: 50
       }
     },
     MuiIcon: {

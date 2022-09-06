@@ -6,11 +6,11 @@ env:
 on:
   push:
     branches: [ 'dev' ]
-    paths: 
+    paths:
       - ${{ APP_PATH }}
-  pull_request: 
+  pull_request:
     branches: [ 'dev' ]
-    paths: 
+    paths:
       - ${{ APP_PATH }}
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build registration api
-      working-directory: APP_PATH
+      working-directory: ${{ APP_PATH }}
       run: |
         docker build -t test-device-reg-api .
         docker run -d -t test-device-reg-api
-      
+
