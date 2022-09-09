@@ -29,14 +29,6 @@ export default function NanoList() {
 
 
   }
-  const inputProps = {
-    minlength: 13,
-    maxlength: 13,
-    placeholder: 'Nano ID',
-    required: true,
-
-  }
-
 
   return (
 
@@ -49,8 +41,12 @@ export default function NanoList() {
         id="nano-id"
         variant="outlined"
         style={{ width: 500 }}
-        inputProps={inputProps}
-        error={false}
+        inputProps={{
+          minlength: 13,
+          maxlength: 13,
+          placeholder: 'Nano ID',
+          required: true
+        }}
       />
 
       <br /><br />
