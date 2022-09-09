@@ -26,9 +26,8 @@ app.get('/register', regAuthCheck, (req, res) => {
     `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
     (err) => {
       if (err) {
-        let error = 'could not run script'
-        console.log(error)
-        return res.status(500).send({ error })
+        console.log('error: ' + err.message)
+        return res.status(500).send({ error: 'could not run script' })
       }
 
       res.writeHead(200, {
