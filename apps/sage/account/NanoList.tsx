@@ -2,8 +2,6 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Alert } from '@mui/material'
 import * as REGAPI from '/components/apis/regApi'
-import { text } from 'd3'
-import { values } from 'lodash'
 
 
 const Root = styled.div`
@@ -25,17 +23,13 @@ export default function NanoList() {
         a.download = 'registration.zip'
         a.click()
       }).catch(err => {
-        if (err.message) {
-          setRegKey(false)
-          setErrMsg(err.message)
-          console.log(err.message)
-        }
+        setRegKey(false)
+        setErrMsg(err.message)
       })
 
 
   }
   const inputProps = {
-    pattern: text,
     minlength: 13,
     maxlength: 13,
     placeholder: 'Nano ID',
@@ -59,7 +53,7 @@ export default function NanoList() {
         error={false}
       />
 
-      <br/><br/>
+      <br /><br />
 
       {regKey ?
         <Button
@@ -83,7 +77,7 @@ export default function NanoList() {
           Get Keys
         </Button>
       }
-      <br/><br/>
+      <br /><br />
 
       {regKey && <Alert severity="success" style={{ width: 500 }}>Check your download folder for registration keys!</Alert>}
 

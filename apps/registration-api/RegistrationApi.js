@@ -16,9 +16,9 @@ app.use(cors())
 app.use(morgan('combined'))
 
 
-app.get('/register', regAuthCheck, (req, res) => {
+app.post('/register', regAuthCheck, (req, res) => {
 
-  const userName = req.get('User')
+  const userName = req.username
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
 
@@ -50,10 +50,10 @@ app.get('/register', regAuthCheck, (req, res) => {
 
           console.log(`${tmpDir} is deleted!`)
         })
-
+        console.log(`${userName} created registration keys`)
       })
 
-      console.log(`${userName} created registration keys`)
+
     }
   )
 

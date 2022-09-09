@@ -31,7 +31,7 @@ export default function regAuthCheck(req, res, next) {
   }).then(async data => {
     const {status} = data
     const obj = await data.json()
-    if (status === 200) {
+    if (status === 200 && obj.active) {
       req.username = obj.username
       next()
     } else {
