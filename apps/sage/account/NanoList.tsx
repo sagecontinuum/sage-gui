@@ -24,7 +24,6 @@ export default function NanoList() {
         a.href = window.URL.createObjectURL(data)
         a.download = 'registration.zip'
         a.click()
-        console.log('Registration key successfully generated!')
       }).catch(err => {
         if (err.message) {
           setRegKey(false)

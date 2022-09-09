@@ -7,7 +7,8 @@ const __token = Auth.getToken()
 
 const options = {
   headers: __token ? {
-    Authorization: `sage ${__token}`
+    Authorization: `sage ${__token}`,
+    User: Auth.getUser()
   } : {}
 }
 

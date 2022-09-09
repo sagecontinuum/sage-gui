@@ -18,6 +18,7 @@ app.use(morgan('combined'))
 
 app.get('/register', regAuthCheck, (req, res) => {
 
+  const userName = req.get('User')
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
 
@@ -52,6 +53,8 @@ app.get('/register', regAuthCheck, (req, res) => {
         })
 
       })
+
+      console.log(`${userName} created registration keys`)
     }
   )
 
