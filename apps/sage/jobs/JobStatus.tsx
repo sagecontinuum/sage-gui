@@ -28,12 +28,12 @@ type TaskEvent = {
     k3s_pod_name: string                // "cloud-cover-top-1645746942-ckwds"
     k3s_pod_node_name: string           // "000048b02d15bc7c.ws-nxcore"
     k3s_pod_status: string
-    plugin_args: string                 //  "-stream left -model-path deeplabv2_resnet101_msc-cocostuff164k-100000.pth -config-path configs/cocostuff164k.yaml",
-    plugin_image: string                // "registry.sagecontinuum.org/seonghapark/surface-water-detection:0.0.4",
+    plugin_args: string                 //  "-stream left -config-path configs/cocostuff164k.yaml",
+    plugin_image: string                // "registry.sagecontinuum.org/namespace/name:0.0.4",
     plugin_name: string                 // "surface-water-detection-left",
     plugin_selector: string             // "map[resource.gpu:true]",
     plugin_status_by_scheduler: string  //  "Queued|"Running"|"Completed"|... todo(nc): get types.
-    plugin_task: string                 // "surface-water-detection-left-1645641900"
+    plugin_task: string                 // "surface-water-detection-left
   }
 }
 
@@ -48,7 +48,7 @@ const columns = [{
 }, {
   id: 'appCount',
   label: 'Apps',
-}, /*{
+}, /* {
   id: 'timestamp',
   label: 'Submitted',
   format: (val) => new Date(val).toLocaleString()
@@ -75,7 +75,7 @@ const columns = [{
 
 
 
-const startedSignal = "sys.scheduler.status.plugin.launched"
+const startedSignal = 'sys.scheduler.status.plugin.launched'
 
 const endedSignals = [
   'sys.scheduler.status.plugin.complete',
@@ -95,21 +95,36 @@ export type GroupedApps = {
 }
 
 
+
+const filterEvents = (o) =>
+  startedSignal == o.name || endedSignals.includes(o.name)
+
+
+
 function aggregateEvents(data: TaskEvent[]) {
-  // we only care about start / end signals (for now, anyway)
-  data = data.filter(o => startedSignal == o.name || endedSignals.includes(o.name))
 
-  let byTaskIDs = groupBy(data, 'value.plugin_task')
+  // we only care about start / end signals (for now)
+  const filtered = data.filter(filterEvents)
 
-  // note: app is an overloaded term here.  it's really more like a task name
+  if (process.env.NODE_ENV == 'development' && data.length != filtered.length) {
+    const otherEvents = data.filter(o => !filterEvents(o))
+    console.warn(
+      `SES events were filtered from ${data.length} to ${filtered.length}\n`,
+      'Other events:', otherEvents
+    )
+  }
+
+  const byPod = groupBy(filtered, 'value.k3s_pod_name')
+
+  // create lookup by task name
   const byTaskName = {}
-  for (const [taskID, events] of Object.entries(byTaskIDs)) {
-    const taskName = taskID.slice(0, taskID.lastIndexOf('-'))
+  for (const [podName, events] of Object.entries(byPod)) {
+    const taskName = podName.slice(0, podName.lastIndexOf('-'))
     events.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
 
     let hasStart, hasEnd = false
 
-    // assume at most two events (for now, anyway)
+    // assume at most two events (for now)
     if (events.length == 2) {
       hasStart = hasEnd = true
     } else if (events.length == 1) {
@@ -117,7 +132,10 @@ function aggregateEvents(data: TaskEvent[]) {
       hasStart = name == startedSignal
       hasEnd = endedSignals.includes(name)
     } else {
-      console.warn(`parseEvents: wrong number of events for ${taskID}.  found ${events.length} events.  expecting at most 2`)
+      console.warn(
+        `parseEvents: wrong number of events for ${podName}.`,
+        `found ${events.length} events.  was expecting at most 2`
+      )
       continue
     }
 
@@ -145,7 +163,7 @@ function aggregateEvents(data: TaskEvent[]) {
         runtime: new Date().getTime() - new Date(start).getTime()
       }
 
-      console.warn(`Note: No end signal found for taskID=${taskID}, timestamp=${start}`)
+      console.warn(`Note: No end signal found for taskName=${taskName}, timestamp=${start}`)
     }
 
     if (taskName in byTaskName)
@@ -159,9 +177,12 @@ function aggregateEvents(data: TaskEvent[]) {
 
 
 function reduceByNode(taskEvents: TaskEvent[]) {
-  let groupedByNode = groupBy(taskEvents, 'meta.vsn')
 
-  let byNode = {}
+  // first group by vsn
+  const groupedByNode = groupBy(taskEvents, 'meta.vsn')
+
+  // then
+  const byNode = {}
   for (const [vsn, events] of Object.entries(groupedByNode)) {
     byNode[vsn] = aggregateEvents(events)
   }
@@ -184,7 +205,7 @@ function reduceByNode(taskEvents: TaskEvent[]) {
 function mockGoalMetrics(taskEvents: TaskEvent[]) {
   const byGoal = groupBy(taskEvents, 'value.goal_id')
 
-  let rows = []
+  const rows = []
   for (const [goalID, events] of Object.entries(byGoal)) {
     const byApp = aggregateEvents(events)
 
@@ -242,10 +263,10 @@ function getGoals() {
       name: 'sys.scheduler.status.goal.*',
     }
   }).then(data => parseSESValue(data))
-  .then(data => {
-    data.sort((a,b) => b.timestamp.localeCompare(a.timestamp))
-    return data
-  })
+    .then(data => {
+      data.sort((a,b) => b.timestamp.localeCompare(a.timestamp))
+      return data
+    })
 }
 
 
@@ -300,10 +321,8 @@ export default function JobStatus() {
 
   return (
     <Root>
-
       <div className="flex">
-
-        <Sidebar width="240px" style={{padding: '0 10px'}}>
+        <CustomSidebar width="240px">
           <h2>Science Goals</h2>
           <TableContainer>
             {goals &&
@@ -317,7 +336,7 @@ export default function JobStatus() {
               />
             }
           </TableContainer>
-        </Sidebar>
+        </CustomSidebar>
 
         <Main className="flex column">
           <MapContainer>
@@ -344,8 +363,14 @@ export default function JobStatus() {
   )
 }
 
+
+
 const Root = styled.div`
 
+`
+
+const CustomSidebar = styled(Sidebar)`
+  padding: 0 10px;
 `
 
 const Main = styled.div`
