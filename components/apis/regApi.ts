@@ -1,4 +1,3 @@
-import { handleErrors } from '../fetch-utils'
 import * as Auth from '../auth/auth'
 import config from '/config'
 
@@ -12,10 +11,21 @@ const options = {
   } : {}
 }
 
+function handleRegErrors(res) {
+
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(errorObj => {
+    throw Error(errorObj.message)
+  })
+}
+
 
 export function register() {
   return fetch(`${url}/register`, options)
-    .then(handleErrors)
+    .then(handleRegErrors)
     .then(res => res.blob())
 
 
