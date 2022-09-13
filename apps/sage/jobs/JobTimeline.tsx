@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import TimelineChart, {color} from '/components/viz/TimelineChart'
-import {GroupedApps} from './JobStatus'
+
+import * as BH from '/components/apis/beehive'
 
 
 const formatJSON = (data) =>
@@ -13,6 +14,18 @@ const colorMap = {
   'running': 'rgb(235, 172, 101)',
   undefined: color.noValue
 }
+
+
+type GroupedApps = {
+  [app: string]: (
+    BH.Record &
+    {
+      status: 'launched' | 'running' | 'complete' | 'failed'
+      runtime: string
+    }
+  )[]
+}
+
 
 type Props = {
   data: GroupedApps
@@ -35,7 +48,8 @@ export default function JobTimeLine(props: Props) {
             return colorMap[obj.status]
           }}
           tooltip={(obj) => `
-            ${new Date(obj.timestamp).toLocaleString()} - ${new Date(obj.end).toLocaleTimeString()}<br>
+            ${new Date(obj.timestamp).toLocaleString()}
+            - ${new Date(obj.end).toLocaleTimeString()}<br>
 
             goal id: ${obj.value.goal_id}<br>
             image: ${obj.value.plugin_image}<br>

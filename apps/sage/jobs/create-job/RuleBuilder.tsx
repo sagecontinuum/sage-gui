@@ -179,9 +179,6 @@ function Rules(props: RulesProps) {
     onChange(rules, logics)
   }, [rules, logics])
 
-  useEffect(() => console.log('Rules:', rules), [rules])
-  useEffect(() => console.log('Logics:', logics), [logics])
-
 
   const handleAddRule = (type: RuleType) => {
     if (rules.length >= 1) {
