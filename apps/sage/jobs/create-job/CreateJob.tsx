@@ -68,19 +68,19 @@ function reducer(state, action) {
   const {type, name, value} = action
 
   switch (type) {
-    case 'SET':
-      return {
-        ...state,
-        [name]: value
-      }
-    case 'SET_RULES':
-      const {app, rules, logics} = value
-      return {
-        ...state,
-        rules: {...state.rules, [app]: {rules, logics}}
-      }
-    default:
-      throw new Error(`formReducer: type "${type}" not valid`)
+  case 'SET':
+    return {
+      ...state,
+      [name]: value
+    }
+  case 'SET_RULES':
+    const {app, rules, logics} = value
+    return {
+      ...state,
+      rules: {...state.rules, [app]: {rules, logics}}
+    }
+  default:
+    throw new Error(`formReducer: type "${type}" not valid`)
   }
 }
 
@@ -212,7 +212,7 @@ export default function CreateJob() {
         */}
 
         <div>
-          <h2>Use following spec with the Sage Edge Scheduler (SES)</h2>
+          <h2>Use following spec with the Edge Scheduler (ES)</h2>
           <Clipboard content={getYaml()} />
         </div>
       </main>

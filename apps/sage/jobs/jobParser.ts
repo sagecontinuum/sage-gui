@@ -141,7 +141,8 @@ export function reduceData(taskEvents: PluginEvent[], goals: Goal[]) : ReducedDa
   for (const [vsn, byApp] of Object.entries(byNode)) {
     for (const [app, objs] of Object.entries(byApp)) {
       byNode[vsn][app] = [
-        ...objs.filter(obj => obj.status != 'complete'),
+        ...objs.filter(obj => obj.status == 'failed'),
+        ...objs.filter(obj => ['launched', 'running'].includes(obj.status)),
         ...objs.filter(obj => obj.status == 'complete')
       ]
     }

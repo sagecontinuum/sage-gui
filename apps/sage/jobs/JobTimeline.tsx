@@ -11,9 +11,9 @@ const formatJSON = (data) =>
   JSON.stringify(data, null, 4).replace(/,/g, '<br>').replace(/\{|\}|Meta"/g, '')
 
 const colorMap = {
-  'complete': color.green4,
-  'failed': 'rgb(180, 0, 0, 0.5)',
-  'running': 'rgb(235, 172, 101)',
+  complete: color.green4,
+  failed: color.red4,
+  running: 'rgb(235, 172, 101, .6)',
   undefined: color.noValue
 }
 
@@ -71,7 +71,7 @@ export default function JobTimeLine(props: Props) {
             const node = meta.vsn
             const app = image.slice(image.lastIndexOf('/') + 1)
 
-            navigate(`/data-browser/?apps=${app.replace('/', '.*')}&nodes=${node}&window=d`)
+            navigate(`/data-browser/?apps=${app}&nodes=${node}&window=d`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{left: 175, right: 0, bottom: 0}}
