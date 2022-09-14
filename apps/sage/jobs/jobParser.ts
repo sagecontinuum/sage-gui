@@ -174,7 +174,7 @@ const goalSignals = [
 
 export function getGoals() : Promise<Goal[]> {
   return BH.getData({
-    start: '-48h',
+    start: '-24h',
     filter: {
       name: 'sys.scheduler.status.goal.*',
     }
@@ -206,7 +206,7 @@ const goalsToLookup = (goals: Goal[]) =>
 // fetch tasks state event changes, and parse SES JSON Messages
 export function getPluginEvents() : Promise<PluginEvent[]> {
   return BH.getData({
-    start: '-48h',
+    start: '-24h',
     filter: {
       name: 'sys.scheduler.status.plugin.*'
     }

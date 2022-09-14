@@ -366,7 +366,7 @@ export default function Data(props: Props) {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
                         const win = opts.time == 'daily' ? 'd' : 'h'
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin.replace('/', '.*')}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />
@@ -407,7 +407,7 @@ export default function Data(props: Props) {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
                         const win = opts.time == 'daily' ? 'd' : 'h'
-                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                        window.open(`${window.location.origin}/data-browser?nodes=${vsn}&apps=${plugin.replace('/', '.*')}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
                       margin={TIMELINE_MARGIN}
                     />

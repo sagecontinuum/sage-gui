@@ -66,6 +66,7 @@ export default function JobStatus() {
             setGeo(geo)
           })
       })
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [setLoading])
 
@@ -77,7 +78,7 @@ export default function JobStatus() {
   return (
     <Root>
       <div className="flex">
-        <CustomSidebar width="240px">
+        <CustomSidebar width="275px">
           <h2>Science Goals</h2>
           <TableContainer>
             {goals &&

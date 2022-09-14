@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import { subHours } from 'date-fns'
+
 import TimelineChart, {color} from '/components/viz/TimelineChart'
 
 import * as BH from '/components/apis/beehive'
@@ -41,6 +43,7 @@ export default function JobTimeLine(props: Props) {
       {data &&
         <TimelineChart
           data={data}
+          startTime={subHours(new Date(), 24)}
           endTime={new Date()}
           scaleExtent={[.2, 1000]}
           colorCell={(val, obj) => {
@@ -68,7 +71,7 @@ export default function JobTimeLine(props: Props) {
             const node = meta.vsn
             const app = image.slice(image.lastIndexOf('/') + 1)
 
-            navigate(`/data-browser/?apps=${app}&nodes=${node}&window=d`)
+            navigate(`/data-browser/?apps=${app.replace('/', '.*')}&nodes=${node}&window=d`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{left: 175, right: 0, bottom: 0}}
