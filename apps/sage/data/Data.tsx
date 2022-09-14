@@ -293,9 +293,10 @@ export default function Data(props: Props) {
               type="text"
               data={items}
             />
-          );
+          )
         })}
       </Sidebar>
+
       <Main>
         <Top>
           <Controls className="flex items-center">
@@ -313,7 +314,11 @@ export default function Data(props: Props) {
 
             <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
 
-            <DataOptions onChange={handleOptionChange} onDateChange={handleDateChange} opts={opts} />
+            <DataOptions
+              onChange={handleOptionChange}
+              onDateChange={handleDateChange}
+              opts={opts}
+            />
           </Controls>
         </Top>
 
@@ -467,7 +472,7 @@ const TimelineContainer = styled.div`
   margin-bottom: 100px;
 
   .title-row {
-    margin 0 20px;
+    margin: 0 20px;
     h2 {
       margin: 0;
     }

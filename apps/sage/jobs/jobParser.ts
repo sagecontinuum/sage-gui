@@ -1,17 +1,9 @@
 import * as BH from '/components/apis/beehive'
 import { groupBy } from 'lodash'
 
-import {ESRecord, PluginEvent} from './jobTypes'
+import {ESRecord, PluginEvent, Goal} from './jobTypes'
 
 
-type Goal = {
-  id: string
-  name: string
-  appCount?: number
-  metrics?: {
-    [appName: string]: number
-  }
-}
 
 const startedSignal = 'sys.scheduler.status.plugin.launched'
 

@@ -668,7 +668,7 @@ export default function DataPreview() {
               pagination
               page={page}
               rowsPerPage={isAudioApp(app) ? 10 : (isMediaApp(app) ? 20 : 100)}
-              limit={data.length} //todo(nc): "limit" is fairly confusing
+              limit={data.length} // todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
                   <span>No records found from</span>&nbsp;<RangeIndicator data={data} unit={unit}/>

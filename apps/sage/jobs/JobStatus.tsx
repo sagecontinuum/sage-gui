@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
@@ -11,7 +12,7 @@ import Sidebar from '../data-commons/DataSidebar'
 import { getGoals, getPluginEvents, reduceData } from './jobParser'
 
 import * as BK from '/components/apis/beekeeper'
-import * as BH from '/components/apis/beehive'
+import * as ES from './jobTypes'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 
@@ -34,8 +35,9 @@ type GeoData = {id: string, lng: number, lat: number}[]
 export default function JobStatus() {
   const {setLoading} = useProgress()
 
-  const [goals, setGoals] = useState<BH.Record[]>()
-  const [byNode, setByNode] = useState()
+  const [goals, setGoals] = useState<ES.Goal[]>()
+  const [byNode, setByNode] = useState<{[vsn: string]: ES.PluginEvent[]}>()
+  const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
   const [geo, setGeo] = useState<GeoData>()
 
   const [error, setError] = useState()
@@ -53,6 +55,8 @@ export default function JobStatus() {
         // also fetch gps for map
         BK.getManifest({by: 'vsn'})
           .then(data => {
+            setManifestByVSN(data)
+
             const vsns = Object.keys(byNode)
 
             const geo = vsns.map(vsn => {
@@ -101,14 +105,24 @@ export default function JobStatus() {
             }
           </MapContainer>
 
-          <TimelineContainer>
-            {byNode && Object.keys(byNode).map((node, i) =>
-              <div key={i}>
-                <h4>{node}</h4>
-                <JobTimeLine data={byNode[node]} />
-              </div>
-            )}
-          </TimelineContainer>
+          {byNode && manifestByVSN &&
+            <TimelineContainer>
+              {Object.keys(byNode).map((node, i) => {
+                const {location, node_id} = manifestByVSN[node]
+                return (
+                  <div key={i} className="title-row">
+                    <div className="flex column">
+                      <div>
+                        <h2><Link to={`/node/${node_id}`}>{node}</Link></h2>
+                      </div>
+                      <div>{location}</div>
+                    </div>
+                    <JobTimeLine data={byNode[node]} />
+                  </div>
+                )
+              })}
+            </TimelineContainer>
+          }
 
           {error &&
             <Alert severity="error">{error.message}</Alert>
@@ -141,9 +155,11 @@ const MapContainer = styled.div`
 const TimelineContainer = styled.div`
   padding: 0 1.2em;
 
-  h4 {
-    float: left;
-    margin: 5px;
+  .title-row {
+    margin: 20px;
+    h2 {
+      margin: 0;
+    }
   }
 `
 

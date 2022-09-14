@@ -59,3 +59,13 @@ export type GoalEvent = Event & {
 }
 
 export type ESRecord = PluginEvent | GoalEvent
+
+// derived data, by computing metrics on PluginEvents
+export type Goal = {
+  id: string
+  name: string
+  appCount?: number
+  metrics?: {
+    [appName: string]: number
+  }
+}
