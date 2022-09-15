@@ -41,7 +41,6 @@ export type Info = {
 
 export function getUserInfo() : Promise<Info> {
   return get(`${url}/user_profile/${username}`)
-    .then(data => data.data[0])
 }
 
 
@@ -51,8 +50,7 @@ export function saveUserInfo(state: Info) : Promise<Info> {
       ...options.headers,
       'Content-Type': 'application/json'
     },
-    'method': 'POST',
+    'method': 'PUT',
     'body': JSON.stringify(state),
   }).then(res => res.json())
-    .then(data => data[0])
 }
