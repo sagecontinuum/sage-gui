@@ -18,6 +18,7 @@ export default function NanoList() {
     REGAPI.register()
       .then((data) => {
         setRegKey(true)
+        setErrMsg('')
         const a = document.createElement('a')
         a.href = window.URL.createObjectURL(data)
         a.download = 'registration.zip'

@@ -6,6 +6,7 @@ const __token = Auth.getToken()
 
 
 const options = {
+  method: 'POST',
   headers: __token ? {
     Authorization: `sage ${__token}`
   } : {}
