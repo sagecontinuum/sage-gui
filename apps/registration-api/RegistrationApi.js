@@ -16,8 +16,9 @@ app.use(cors())
 app.use(morgan('combined'))
 
 
-app.get('/register', regAuthCheck, (req, res) => {
+app.post('/register', regAuthCheck, (req, res) => {
 
+  const userName = req.username
   const tmpObj = tmp.dirSync()
   const tmpDir = tmpObj.name
 
@@ -25,6 +26,7 @@ app.get('/register', regAuthCheck, (req, res) => {
     `/usr/bin/create-key-cert.sh -b beehive-dev -e +1d -o ${tmpDir} -c ${CA_KEY}`,
     (err) => {
       if (err) {
+        console.log(err)
         return res.status(500).send({ error: 'could not run script' })
       }
 
@@ -33,34 +35,28 @@ app.get('/register', regAuthCheck, (req, res) => {
         'Content-disposition': 'attachment; filename=registration.zip',
       })
 
-      fs.readdir(tmpDir, (err, files) => {
-        if (err) {
-          console.error(err)
-        } else {
-          const zipArchiver = archiver('zip')
-          zipArchiver.pipe(res)
+      const zipArchiver = archiver('zip')
+      zipArchiver.pipe(res)
+      zipArchiver.directory(tmpDir, false)
+      zipArchiver.finalize()
 
-          files.forEach((file) => {
-            zipArchiver.append(fs.createReadStream(tmpDir + '/' + file), {
-              name: file,
-            })
-          })
+      res.on('finish', () => {
+        // Delete the temp folder
+        fs.rm(tmpDir, { recursive: true }, err => {
+          if (err) {
+            console.log(err)
+            throw err
+          }
 
-          zipArchiver.finalize()
-        }
+          console.log(`${tmpDir} is deleted!`)
+        })
+        console.log(`${userName} created registration keys`)
       })
 
-      // todo(SH): Delete the temp folder
-      // fs.readdir(tmpDir, (err, files) => {
-      //   if (err) throw err;
-      //   for (const file of files) {
-      //     fs.unlink(tmpDir + "/" + file, err => {
-      //       if (err) throw err;
-      //     });
-      //   }
-      // });
+
     }
   )
+
 })
 
 app.listen(PORT, () => {
