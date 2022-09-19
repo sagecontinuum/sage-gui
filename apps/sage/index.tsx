@@ -22,7 +22,7 @@ import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
-import NanoList from './account/NanoList'
+import Devices from './account/Devices'
 import UserProfile from './account/UserProfile'
 
 
@@ -39,7 +39,7 @@ import '/assets/styles.scss'
 const NavMenu = () =>
   <NavItems>
     <li><NavLink to="/apps/explore">App Catalog</NavLink></li>
-    {/*<li><NavLink to="/job-status">Job Status</NavLink></li>*/}
+    <li><NavLink to="/job-status">Job Status</NavLink></li>
     <li><NavLink to="/data">Data</NavLink></li>
   </NavItems>
 
@@ -89,7 +89,7 @@ export default function Sage() {
 
                   <Route path="node/:node" element={<Node />} />
 
-                  <Route path="my-devices" element={<RequireAuth><NanoList /></RequireAuth>} />
+                  <Route path="my-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                   <Route path="my-profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
 
                   <Route path="login" element={<TestSignIn />} />

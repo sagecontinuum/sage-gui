@@ -6,14 +6,12 @@ const __token = Auth.getToken()
 
 
 const options = {
-  method: 'POST',
   headers: __token ? {
     Authorization: `sage ${__token}`
   } : {}
 }
 
 function handleRegErrors(res) {
-
   if (res.ok) {
     return res
   }
@@ -25,9 +23,9 @@ function handleRegErrors(res) {
 
 
 export function register() {
-  return fetch(`${url}/register`, options)
-    .then(handleRegErrors)
+  return fetch(`${url}/register`, {
+    method: 'POST',
+    ...options
+  }).then(handleRegErrors)
     .then(res => res.blob())
-
-
 }

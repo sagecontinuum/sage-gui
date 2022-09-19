@@ -70,9 +70,7 @@ export default function UserProfile() {
   return (
     <Root>
       <div className="flex align-center gap">
-        <h1 className="no-margin">
-          My Profile
-        </h1>
+        <h1>My Profile</h1>
         {isEditing ?
           <Button
             variant="outlined"
@@ -147,7 +145,7 @@ export default function UserProfile() {
 }
 
 const Root = styled.div`
-  margin: 50px 100px;
+  margin: 40px 100px;
   width: 500px;
 
   .user-info {
