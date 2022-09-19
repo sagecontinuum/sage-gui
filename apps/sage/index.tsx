@@ -77,7 +77,10 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
-                  <Route path="job-status" element={<JobStatus />} />
+                  <Route path="job-status" element={<JobStatus />}>
+                    <Route path=":tab" element={<JobStatus />} />
+                  </Route>
+
                   <Route path="create-job" element={<CreateJob />} />
 
                   <Route path="data" element={<Data />} />

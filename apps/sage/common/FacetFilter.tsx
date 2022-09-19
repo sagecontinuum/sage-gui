@@ -12,7 +12,7 @@ import Checkbox from '/components/input/Checkbox'
 
 
 // number of rows shown by default for each facet
-const MAX_FILTERS = 10
+const DEFAULT_SHOWN = 10
 
 
 const sortOptions = (options, checked) =>
@@ -30,6 +30,7 @@ type Props = {
   checked: string[]
   hideSearch?: boolean
   hideSelectAll?: boolean
+  defaultShown: number
   onCheck: (evt: ChangeEvent<HTMLInputElement>, val: string) => void
   onSelectAll: (evt: ChangeEvent<HTMLInputElement>, val: string[]) => void
 }
@@ -40,10 +41,10 @@ export default function Filter(props: Props) {
     type,
     hideSearch,
     hideSelectAll,
+    defaultShown,
     onCheck,
     onSelectAll
   } = props
-
 
   const [allData, setAllData] = useState(props.data)
   const [data, setData] = useState([])    // filtered data
@@ -56,6 +57,8 @@ export default function Filter(props: Props) {
 
   // query in search field
   const [query, setQuery] = useState('')
+
+  const shownCount = defaultShown || DEFAULT_SHOWN
 
   // update facets
   useEffect(() => {
@@ -72,7 +75,7 @@ export default function Filter(props: Props) {
     if (!allData) return
 
     const filteredData = allData.filter(obj =>
-      obj.name.toLowerCase().includes(query.toLowerCase())
+      obj.name?.toLowerCase().includes(query.toLowerCase())
     )
 
     // sort checked to the top, and sort rest
@@ -194,7 +197,7 @@ export default function Filter(props: Props) {
       */}
 
       <Filters>
-        {data.slice(0, showAll ? data.length : MAX_FILTERS)
+        {data.slice(0, showAll ? data.length : shownCount)
           .map(({name, count}) =>
             <div key={name}>
               <CBContainer
@@ -224,9 +227,9 @@ export default function Filter(props: Props) {
         }
       </Filters>
 
-      {allData && data.length > MAX_FILTERS &&
+      {allData && data.length > shownCount &&
         <MoreBtn onClick={handleShowAll}>
-          {!showAll && `${data.length - MAX_FILTERS} more…`}
+          {!showAll && `${data.length - shownCount} more…`}
           {showAll && 'less…'}
         </MoreBtn>
       }

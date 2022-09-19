@@ -48,7 +48,7 @@ export default function DataOptions(props: Props) {
           value={opts.time}
           onChange={(evt) => onChange(evt, 'time')}
           aria-label="change time (windows)"
-            exclusive
+          exclusive
         >
           <ToggleButton value="hourly" aria-label="hourly">
             hourly

@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import MuiDivider from '@mui/material/Divider'
 
 export const Item = styled.div`
   position: relative;
@@ -35,4 +36,33 @@ export const Top = styled.div<{top?: string}>`
   position: sticky;
   top: ${props => props.top || '60px'};
   z-index: 100;
+`
+
+export const Controls = styled.div`
+  background-color: #fff;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+
+  .checkboxes {
+    margin-top: 17px;
+  }
+`
+
+export const Divider = () =>
+  <MuiDivider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
+
+export const Sidebar = styled.div<{width?: string}>`
+  position: sticky;
+  top: 60px;
+  height: calc(100vh);
+  padding-top: 10px;
+  width: ${props => props.width || '250px'};
+  min-width: ${props => props.width || '250px'};
+  border-right: 1px solid #f1f1f1;
+  background: #f8f8f8;
+  overflow-y: scroll;
+`
+
+export const FilterTitle = styled.h2`
+  margin-left: 20px;
 `
