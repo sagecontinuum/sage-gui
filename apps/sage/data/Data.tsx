@@ -2,14 +2,12 @@ import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Divider from '@mui/material/Divider'
 import Button from '@mui/material/Button'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
 import DataOptions from './DataOptions'
 
-import {Top} from '../common/Layout'
-import Sidebar, {FilterTitle} from '../data-commons/DataSidebar'
+import { Sidebar, Top, Controls, Divider, FilterTitle } from '../common/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
@@ -312,7 +310,7 @@ export default function Data(props: Props) {
               </h5>
             </div>
 
-            <Divider orientation="vertical" flexItem style={{margin: '0px 20px'}} />
+            <Divider />
 
             <DataOptions
               onChange={handleOptionChange}
@@ -456,16 +454,6 @@ const Main = styled.div`
   margin: 0px 20px 30px 0;
   padding: 0 0 0 20px;
   width: 100%;
-`
-
-const Controls = styled.div`
-  background-color: #fff;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-
-  .checkboxes {
-    margin-top: 17px;
-  }
 `
 
 const TimelineContainer = styled.div`

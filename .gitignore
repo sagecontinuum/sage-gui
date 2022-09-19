@@ -9,3 +9,4 @@ coverage/
 .DS_Store
 beekeeper-keys/
 *.log
+apps/sage/jobs/job-data

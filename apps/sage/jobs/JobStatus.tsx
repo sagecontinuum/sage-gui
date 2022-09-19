@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
@@ -7,16 +7,40 @@ import Alert from '@mui/material/Alert'
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import JobTimeLine from './JobTimeline'
-import Sidebar from '../data-commons/DataSidebar'
 
-import { getGoals, getPluginEvents, reduceData } from './jobParser'
+import { Sidebar, Top, Controls, Divider } from '../common/Layout'
+import {Tabs, Tab} from '/components/tabs/Tabs'
+import Filter from '../common/FacetFilter'
 
 import * as BK from '/components/apis/beekeeper'
-import * as ES from './jobTypes'
+import * as ES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
+import JobOptions from './JobOptions'
 
 
-const columns = [{
+
+export type Options = {
+  showErrors: boolean
+}
+
+
+const jobCols = [{
+  id: 'name',
+  label: 'Name',
+  format: (val) => <Link to={`/job-status/jobs/${val}`}>{val}</Link>
+}, {
+  id: 'id',
+  label: 'ID'
+}, {
+  id: 'status',
+  label: 'Status'
+}, {
+  id: 'nodeInfo',
+  label: 'Nodes',
+}]
+
+
+const goalCols = [{
   id: 'name',
   label: 'Name'
 }, {
@@ -33,24 +57,39 @@ const columns = [{
 type GeoData = {id: string, lng: number, lat: number}[]
 
 export default function JobStatus() {
+  const {tab} = useParams()
   const {setLoading} = useProgress()
 
-  const [goals, setGoals] = useState<ES.Goal[]>()
-  const [byNode, setByNode] = useState<{[vsn: string]: ES.PluginEvent[]}>()
+  const [{jobs, goals, byNode}, setData] = useState<{
+    jobs: ES.Job[],
+    goals: ES.Goal[],
+    byNode: {[vsn: string]: ES.PluginEvent[]}
+  }>({})
+
+  // additional meta
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
   const [geo, setGeo] = useState<GeoData>()
 
   const [error, setError] = useState()
 
+  const [tabID, setTabID] = useState(tab || 'jobs')
+
+  // options
+  const [opts, setOpts] = useState<Options>({
+    showErrors: true
+  })
+
+  const [filters, setFilters] = useState({
+    goals: []
+  })
+
+
   useEffect(() => {
     setLoading(true)
 
-    Promise.all([getPluginEvents(), getGoals()])
-      .then(([taskEvents, goalEvents]) => {
-        const {byNode, goals} = reduceData(taskEvents, goalEvents)
-
-        setByNode(byNode)
-        setGoals(goals)
+    ES.getAllData()
+      .then(({jobs, goals, byNode}) => {
+        setData({jobs, goals, byNode})
 
         // also fetch gps for map
         BK.getManifest({by: 'vsn'})
@@ -75,37 +114,126 @@ export default function JobStatus() {
   }, [setLoading])
 
 
-  const handleSelect = () => {
+  const handleJobSelect = (objs) => {
+    console.log('objs', objs)
+  }
+
+  const handleGoalSelect = (objs) => {
     // todo
+  }
+
+  const handleOptionChange = () => {
+
   }
 
   return (
     <Root>
       <div className="flex">
+        {/* todo: project filtering
         <CustomSidebar width="275px">
           <h2>Science Goals</h2>
-          <TableContainer>
-            {goals &&
-              <Table
-                primaryKey="goalID"
-                rows={goals}
-                columns={columns}
-                enableSorting
-                onSearch={() => {}}
-                onSelect={handleSelect}
-              />
-            }
-          </TableContainer>
+          {/*goals &&
+            <Filter
+              title="Jobs"
+              key="name"
+              checked={filters.goals}
+              show={50}
+              // onCheck={(evt, val) => handleFilter(evt, facet, val)}
+              // onSelectAll={(evt, vals) => handleSelectAll(evt, facet, vals)}
+              type="text"
+              data={goals.map(({name, appCount}) => ({name, count: appCount}))}
+            />
         </CustomSidebar>
+        */}
 
         <Main className="flex column">
+          {/*
+          <Top>
+            <Controls className="flex items-center">
+              <div className="flex column">
+                <h2 className="title no-margin">Job Status</h2>
+                <h5 className="subtitle no-margin muted">
+                  {byNode ? Object.keys(byNode).length : '...'} nodes with jobs
+                </h5>
+              </div>
+
+              <Divider  />
+
+              <JobOptions
+                onChange={handleOptionChange}
+                opts={opts}
+              />
+            </Controls>
+          </Top>
+          */}
+
           <MapContainer>
             {geo &&
               <Map data={geo} selected={null} resize={false} updateID={null} />
             }
           </MapContainer>
 
-          {byNode && manifestByVSN &&
+          <Tabs
+            value={tabID}
+            onChange={(_, idx) => setTabID(idx)}
+            aria-label="tabs of data links"
+          >
+            <Tab
+              label={
+                <div className="flex items-center">
+                  Job List
+                </div>
+              }
+              value="jobs"
+              component={Link}
+              to="/job-status/jobs"
+              replace
+            />
+            <Tab
+              label={
+                <div className="flex items-center">
+                  Sub Goals
+                </div>
+              }
+              value="goals"
+              component={Link}
+              to="/job-status/goals"
+              replace
+            />
+            <Tab
+              label={<div className="flex items-center">Timelines</div>}
+              value="timeline"
+              component={Link}
+              to="/job-status/timeline"
+              replace
+            />
+          </Tabs>
+
+          {tabID == 'jobs' && jobs &&
+            <TableContainer>
+              <Table
+                primaryKey="id"
+                rows={jobs}
+                columns={jobCols}
+                enableSorting
+                onSelect={handleJobSelect}
+              />
+            </TableContainer>
+          }
+
+          {tabID == 'goals' && goals &&
+            <TableContainer>
+              <Table
+                primaryKey="id"
+                rows={goals}
+                columns={goalCols}
+                enableSorting
+                onSelect={handleGoalSelect}
+              />
+            </TableContainer>
+          }
+
+          {tabID == 'timeline' && byNode && manifestByVSN &&
             <TimelineContainer>
               {Object.keys(byNode).map((node, i) => {
                 const {location, node_id} = manifestByVSN[node]
@@ -136,11 +264,12 @@ export default function JobStatus() {
 
 
 const Root = styled.div`
-
+  margin: 20px;
 `
 
 const CustomSidebar = styled(Sidebar)`
   padding: 0 10px;
+  //padding: 20px 10px;
 `
 
 const Main = styled.div`
@@ -150,6 +279,7 @@ const Main = styled.div`
 
 const MapContainer = styled.div`
   width: 100%;
+  height: 350px;
 `
 
 const TimelineContainer = styled.div`
