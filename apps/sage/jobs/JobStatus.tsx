@@ -25,8 +25,6 @@ import * as ES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
 import JobOptions from './JobOptions'
 
-import JobOptions from './JobOptions'
-
 
 export type Options = {
   showErrors: boolean
