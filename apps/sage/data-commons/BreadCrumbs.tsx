@@ -1,14 +1,10 @@
-import React, {MouseEvent} from 'react'
-import {Link} from 'react-router-dom'
-
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-
 
 type BreadcrumbProps = {
   path: string
-  // onNavigate?: (evt: MouseEvent, path: string) => void
+  onNavigate?: (evt: MouseEvent, path: string) => void
 }
-
 
 export default function Breadcrumbs(props: BreadcrumbProps) {
   const {path, onNavigate} = props
@@ -24,7 +20,7 @@ export default function Breadcrumbs(props: BreadcrumbProps) {
       {' / '}
       <Link
         to={`/${topLevel}`}
-        //onClick={(evt) => onNavigate(evt, `/${topLevel}`)}
+        onClick={(evt) => onNavigate(evt, `/${topLevel}`)}
       >
         {topLevel.split('@')[0]}
       </Link>

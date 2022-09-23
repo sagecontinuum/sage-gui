@@ -145,6 +145,11 @@ table.striped tbody tr:nth-of-type(odd) {
 .warning { color: hsl(41, 83%, 35%); }
 .failed, .fatal, .severe { color: hsl(0, 83%, 35%); }
 .inactive { color: #888; }
+.queued, .removed { color: #777; }
+.running, .in-progress { color: #de9300; }
+.completed, .success { color: #286329; }
+.failed { color: #b90501; }
+
 .muted { color: #888; }
 
 button.delete {color: #912341; }

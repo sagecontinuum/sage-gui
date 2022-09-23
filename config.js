@@ -7,7 +7,8 @@ const config = {
   beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
-  ses: 'https://portal.sagecontinuum.org/ses-plugin-data',
+  ses: 'https://portal.sagecontinuum.org/ses-plugin-data', // deprecated
+  es: 'https://es.sagecontinuum.org',
   auth: 'https://auth.sagecontinuum.org',
   deviceRegistration:'https://registration.sagecontinuum.org',
 

@@ -20,9 +20,9 @@ if (!tokenInfoPassword) {
 // required to run all tests
 const USER_TOKEN = process.env.USER_TOKEN
 if (USER_TOKEN) {
-  console.log('Running tests with provided "USER_TOKEN" env variable')
+  console.warn('Running tests with provided "USER_TOKEN" env variable')
 } else {
-  console.log('Running tests WITHOUT any "USER_TOKEN" env variable')
+  console.warn('Running tests WITHOUT any "USER_TOKEN" env variable')
 }
 
 

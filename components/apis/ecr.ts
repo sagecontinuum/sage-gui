@@ -20,8 +20,6 @@ function get(endpoint: string) {
   return fetch(endpoint, options)
     .then(handleErrors)
     .then(res => res.json())
-
-
 }
 
 function post(endpoint: string, data = '') {

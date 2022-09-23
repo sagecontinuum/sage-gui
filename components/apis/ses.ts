@@ -1,7 +1,9 @@
 import * as BH from './beehive'
 import { groupBy, uniqBy } from 'lodash'
+import { handleErrors } from '../fetch-utils'
 
-import jobs from '/apps/sage/jobs/jobs.json'
+import config from '/config'
+const url = config.es
 
 const jobEventTypes = [
   'sys.scheduler.status.job.suspended',
@@ -84,6 +86,23 @@ export type GoalLookup = {
 export type Job = Record<string, object>
 
 
+function get(endpoint: string) {
+  return fetch(endpoint)
+    .then(handleErrors)
+    .then(res => res.json())
+}
+
+export async function getJobs() {
+  let data = await get(`${url}/jobs/list`)
+
+  // hashed by job_id; convert to array list
+  data = Object.values(data)
+
+  return data
+}
+
+
+
 const startedSignal = 'sys.scheduler.status.plugin.launched'
 
 const endedSignals = [
@@ -116,6 +135,9 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
   }
 
   const byPod = groupBy(filtered, 'value.k3s_pod_name')
+
+  // delete any runs with no k3s_pod_name?  todo(nc): check with YK
+  delete byPod.undefined
 
   // create lookup by task name
   const byTaskName = {}
@@ -181,10 +203,11 @@ type ByApp = {
   [name: string]: PluginEvent[]
 }
 
-function computeAppMetrics(byApp: ByApp) {
+function computeGoalMetrics(byApp: ByApp) {
   let goalID
   const metrics = Object.keys(byApp).reduce((acc, appName) => {
     const appEvents = byApp[appName]
+
     const meanTime = appEvents.reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
 
     if (!goalID) {
@@ -217,20 +240,22 @@ export function reduceData(taskEvents: PluginEvent[], goals: Goal[]) : ReducedJo
   const goalLookup = goalsToLookup(goals)
 
   // aggregate start/stops by vsn
-  let goalStats = []
+  let goalStats = [], i = 1
   const byNode = {}
   for (const [vsn, events] of Object.entries(groupedByNode)) {
     const byApp = aggregateEvents(events)
     byNode[vsn] = byApp
 
-    const {metrics, goalID} = computeAppMetrics(byApp)
+    const {metrics, goalID} = computeGoalMetrics(byApp)
 
     goalStats.push({
       id: goalID,
+      rowID: i,
       name: goalLookup[goalID],
       appCount: Object.keys(byApp).length,
       metrics
     })
+    i += 1
   }
 
   // we'll need to eventually use set of goal ids since a goal can have many different apps
@@ -241,9 +266,9 @@ export function reduceData(taskEvents: PluginEvent[], goals: Goal[]) : ReducedJo
   for (const [vsn, byApp] of Object.entries(byNode)) {
     for (const [app, objs] of Object.entries(byApp)) {
       byNode[vsn][app] = [
-        ...objs.filter(obj => obj.status == 'failed'),
         ...objs.filter(obj => ['launched', 'running'].includes(obj.status)),
-        ...objs.filter(obj => obj.status == 'complete')
+        ...objs.filter(obj => obj.status == 'complete'),
+        ...objs.filter(obj => obj.status == 'failed')
       ]
     }
   }
@@ -309,21 +334,25 @@ function getPluginEvents() : Promise<PluginEvent[]> {
 
 
 export async function getAllData() : Promise<ReducedJobData> {
-  const [taskEvents, goalEvents] = await Promise.all([getPluginEvents(), getGoals()])
+  const [jobs, goalEvents, taskEvents] = await Promise.all([
+    getJobs(), getGoals(), getPluginEvents()
+  ])
 
   const {goals, byNode} = reduceData(taskEvents, goalEvents)
 
   let jobData
   try {
-    jobData = Object.keys(jobs).map((name, i) => {
-      const {nodes, nodeTags} = jobs[name]
+    jobData = jobs.map((obj) => {
+      const {name, job_id, nodes, plugins,nodeTags, status} = obj
+
       return {
-        id: i + 1, // fake id
+        id: job_id,
         name,
-        nodeInfo: nodes ?
-          Object.keys(nodes).length :
-          (nodeTags ? nodeTags.join(', ') : '?'),
-        status: 'running'
+        nodes: nodes ?
+          Object.keys(nodes) :
+          (nodeTags ? nodeTags : '?'),
+        apps: plugins,
+        status
       }
     })
   } catch(error) {
@@ -331,7 +360,7 @@ export async function getAllData() : Promise<ReducedJobData> {
   }
 
   if (warnings.length) {
-    console.warn(warnings.join('\n'))
+    // console.warn(warnings.join('\n'))
   }
 
   return {jobs: jobData, goals, byNode}

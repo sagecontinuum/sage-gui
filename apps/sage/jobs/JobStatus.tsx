@@ -4,8 +4,16 @@ import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
 
+import Breadcrumbs from '@mui/material/Breadcrumbs'
+import Typography from '@mui/material/Typography'
+import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import ListIcon from '@mui/icons-material/ListRounded'
+import ScienceIcon from '@mui/icons-material/ScienceRounded'
+import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
+
 import Map from '/components/Map'
 import Table from '/components/table/Table'
+
 import JobTimeLine from './JobTimeline'
 
 import { Sidebar, Top, Controls, Divider } from '../common/Layout'
@@ -15,8 +23,8 @@ import Filter from '../common/FacetFilter'
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
-import JobOptions from './JobOptions'
 
+import JobOptions from './JobOptions'
 
 
 export type Options = {
@@ -27,16 +35,63 @@ export type Options = {
 const jobCols = [{
   id: 'name',
   label: 'Name',
-  format: (val) => <Link to={`/job-status/jobs/${val}`}>{val}</Link>
+  format: (val) => {
+    return <Link to={`/job-status/goals/${val}`}>{val}</Link>
+  }
 }, {
   id: 'id',
   label: 'ID'
 }, {
   id: 'status',
-  label: 'Status'
+  label: 'Status',
+  format: (status, val) => {
+    status = status == 'Submitted' ? 'in-progress' : status.toLowerCase()
+    return <b className={status}>{status}</b>
+  },
+  width: '100px'
 }, {
-  id: 'nodeInfo',
+  id: 'nodes',
   label: 'Nodes',
+  format: (vsns) => <>
+    {vsns.map((vsn, i) => {
+      const l = vsns.length - 1
+      return <span key={vsn}>
+        <Link to={`/nodes/${vsn}`} target="_blank">
+          {vsn}
+        </Link>{i < l ? ', '  : ''}
+      </span>
+    })}
+  </>
+}, {
+  id: 'nodeCount',
+  label: 'Node count',
+  format: (_, obj) =>
+    <b className="muted">{obj.nodes.length}</b>
+}, {
+  id: 'apps',
+  label: 'Apps',
+  format: (objs) => <>
+
+    {objs.map((obj, i) => {
+      const {name, plugin_spec} = obj
+      const {image} = plugin_spec
+
+      // todo(nc): ignore dockerhub component for now?
+      const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
+
+      const l = objs.length - 1
+      return <span key={name}>
+        <Link to={`/apps/app/${app}`} target="_blank">
+          {name}
+        </Link>{i < l ? ', '  : ''}
+      </span>
+    })}
+  </>
+}, {
+  id: 'appCount',
+  label: 'App count',
+  format: (_, obj) =>
+    <b className="muted">{obj.apps.length}</b>
 }]
 
 
@@ -57,7 +112,7 @@ const goalCols = [{
 type GeoData = {id: string, lng: number, lat: number}[]
 
 export default function JobStatus() {
-  const {tab} = useParams()
+  let {tab = 'jobs', jobName} = useParams()
   const {setLoading} = useProgress()
 
   const [{jobs, goals, byNode}, setData] = useState<{
@@ -71,8 +126,6 @@ export default function JobStatus() {
   const [geo, setGeo] = useState<GeoData>()
 
   const [error, setError] = useState()
-
-  const [tabID, setTabID] = useState(tab || 'jobs')
 
   // options
   const [opts, setOpts] = useState<Options>({
@@ -109,7 +162,10 @@ export default function JobStatus() {
             setGeo(geo)
           })
       })
-      .catch(err => setError(err.message))
+      .catch(err => {
+        console.error(err)
+        setError(err.message)
+      })
       .finally(() => setLoading(false))
   }, [setLoading])
 
@@ -173,26 +229,45 @@ export default function JobStatus() {
             }
           </MapContainer>
 
+          <div>
+            <br/>
+            <Breadcrumbs
+              separator={<NavigateNextIcon fontSize="small" />}
+              aria-label="breadcrumb"
+            >
+              <Link key="1" to="/job-status/jobs" color={jobName ? 'text.primary' : 'inherit'}>
+                All Jobs
+              </Link>
+              {jobName &&
+                <Typography key="3" color="text.primary">
+                  {jobName}
+                </Typography>
+              }
+            </Breadcrumbs>
+          </div>
+
+
           <Tabs
-            value={tabID}
-            onChange={(_, idx) => setTabID(idx)}
+            value={tab}
             aria-label="tabs of data links"
           >
+            {!jobName &&
+              <Tab
+                label={
+                  <div className="flex items-center">
+                    <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : ''})
+                  </div>
+                }
+                value="jobs"
+                component={Link}
+                to="/job-status/jobs"
+                replace
+              />
+            }
             <Tab
               label={
                 <div className="flex items-center">
-                  Job List
-                </div>
-              }
-              value="jobs"
-              component={Link}
-              to="/job-status/jobs"
-              replace
-            />
-            <Tab
-              label={
-                <div className="flex items-center">
-                  Sub Goals
+                  <ScienceIcon/>&nbsp;Goals ({goals ? goals.length : ''})
                 </div>
               }
               value="goals"
@@ -201,7 +276,9 @@ export default function JobStatus() {
               replace
             />
             <Tab
-              label={<div className="flex items-center">Timelines</div>}
+              label={<div className="flex items-center">
+                <TimelineIcon />&nbsp;Timelines
+              </div>}
               value="timeline"
               component={Link}
               to="/job-status/timeline"
@@ -209,23 +286,24 @@ export default function JobStatus() {
             />
           </Tabs>
 
-          {tabID == 'jobs' && jobs &&
+          {tab == 'jobs' && jobs &&
             <TableContainer>
               <Table
                 primaryKey="id"
                 rows={jobs}
                 columns={jobCols}
                 enableSorting
+                sort="-status"
                 onSelect={handleJobSelect}
               />
             </TableContainer>
           }
 
-          {tabID == 'goals' && goals &&
+          {tab == 'goals' && goals &&
             <TableContainer>
               <Table
-                primaryKey="id"
-                rows={goals}
+                primaryKey="rowID"
+                rows={jobName ? goals.filter(o => o.name == jobName) : goals}
                 columns={goalCols}
                 enableSorting
                 onSelect={handleGoalSelect}
@@ -233,7 +311,7 @@ export default function JobStatus() {
             </TableContainer>
           }
 
-          {tabID == 'timeline' && byNode && manifestByVSN &&
+          {tab == 'timeline' && byNode && manifestByVSN &&
             <TimelineContainer>
               {Object.keys(byNode).map((node, i) => {
                 const {location, node_id} = manifestByVSN[node]
@@ -303,13 +381,6 @@ const TableContainer = styled.div`
 
   table {
     background: #fff;
-
-    tr:nth-child(odd) {
-      background: none;
-    }
-    tr.MuiTableRow-root:hover {
-      background-color: initial;
-    }
   }
 
   .MuiInputBase-root {

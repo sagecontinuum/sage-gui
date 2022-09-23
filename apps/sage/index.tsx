@@ -78,6 +78,7 @@ export default function Sage() {
                   </Route>
 
                   <Route path="job-status" element={<JobStatus />}>
+                    <Route path=":tab/:jobName" element={<JobStatus />} />
                     <Route path=":tab" element={<JobStatus />} />
                   </Route>
 

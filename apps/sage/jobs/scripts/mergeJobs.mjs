@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import YAML from 'yaml'
 
-const dirPath = './apps/sage/jobs/job-data/'
+const dirPath = './apps/sage/jobs/test-job-data/'
 
 const files = await fs.readdir(dirPath)
 
