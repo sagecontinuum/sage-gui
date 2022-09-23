@@ -23,6 +23,7 @@ import Filter from '../common/FacetFilter'
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
 import { useProgress } from '/components/progress/ProgressProvider'
+import JobOptions from './JobOptions'
 
 import JobOptions from './JobOptions'
 

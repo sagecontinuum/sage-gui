@@ -86,10 +86,16 @@ export type GoalLookup = {
 export type Job = Record<string, object>
 
 
-function get(endpoint: string) {
-  return fetch(endpoint)
-    .then(handleErrors)
-    .then(res => res.json())
+export type ESRecord = PluginEvent | GoalEvent
+
+// derived data, by computing metrics on PluginEvents
+export type Goal = {
+  id: string
+  name: string
+  appCount?: number
+  metrics?: {
+    [appName: string]: number
+  }
 }
 
 export async function getJobs() {
