@@ -46,7 +46,7 @@ const exts = {
   video: ['.mp4']
 }
 
-const defaultPlugin = 'plugin-iio.*'
+const defaultPlugin = 'waggle/plugin-iio.*'
 
 const relTime = val =>
   msToTime(new Date().getTime() - (new Date(val).getTime()))
@@ -533,8 +533,8 @@ export default function DataPreview() {
           <h2 className="filter-title">Filters</h2>
 
           <div className="shortcuts">
-            <a onClick={() => goToApp('plugin-image-sampler.*')}>Images</a> |{' '}
-            <a onClick={() => goToApp('plugin-audio-sampler.*')}>Audio</a>
+            <a onClick={() => goToApp('.*plugin-image-sampler.*')}>Images</a> |{' '}
+            <a onClick={() => goToApp('.*plugin-audio-sampler.*')}>Audio</a>
           </div>
 
           {menus && facetList.map(facet => {
