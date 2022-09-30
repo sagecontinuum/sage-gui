@@ -6,9 +6,9 @@ const config = {
   beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
+  es: 'https://es.sagecontinuum.org/api/v1',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   ses: 'https://portal.sagecontinuum.org/ses-plugin-data', // deprecated
-  es: 'https://es.sagecontinuum.org',
   auth: 'https://auth.sagecontinuum.org',
   deviceRegistration:'https://registration.sagecontinuum.org',
 

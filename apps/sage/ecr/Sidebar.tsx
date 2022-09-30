@@ -1,11 +1,8 @@
-import React from 'react'
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 
-import UserIcon from '@mui/icons-material/AccountCircleRounded'
-import SharedIcon from '@mui/icons-material/SupervisedUserCircle'
 import PublicIcon from '@mui/icons-material/PublicRounded'
-import FlagCircleIcon from '@mui/icons-material/FlagCircle'
+import UserIcon from '@mui/icons-material/AccountCircleRounded'
 
 
 export default function Sidebar() {
@@ -32,7 +29,6 @@ const Root = styled.div`
 
 
 const primaryColor = 'rgb(28, 140, 201)'
-const secondaryColor = '#8166a0'
 
 
 const Item = styled(NavLink)`

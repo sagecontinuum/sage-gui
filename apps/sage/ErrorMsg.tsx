@@ -1,4 +1,4 @@
-import React from 'react'
+import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
 
 type Props = {
@@ -7,9 +7,15 @@ type Props = {
 
 export default function ErrorMsg(props: Props) {
   return (
-    <Alert severity="error">
-      {props.children}
-    </Alert>
+    <Root>
+      <Alert severity="error">
+        {props.children}
+      </Alert>
+    </Root>
   )
 }
 
+
+const Root = styled.div`
+  margin-top: 20px;
+`

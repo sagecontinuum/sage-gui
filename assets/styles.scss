@@ -32,13 +32,9 @@ a {
   cursor: pointer;
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-a.no-style:hover {
-  text-decoration: none;
-}
+a:hover { text-decoration: underline; }
+a.no-style { color: inherit; }
+a.no-style:hover { text-decoration: none; }
 
 
 

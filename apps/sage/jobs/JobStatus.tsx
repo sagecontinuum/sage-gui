@@ -4,8 +4,8 @@ import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
 
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Typography from '@mui/material/Typography'
+import { Breadcrumbs, Typography, Chip } from '@mui/material'
+
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import ListIcon from '@mui/icons-material/ListRounded'
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
@@ -13,6 +13,7 @@ import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 
 import Map from '/components/Map'
 import Table from '/components/table/Table'
+import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import JobTimeLine from './JobTimeline'
 
@@ -49,6 +50,9 @@ const jobCols = [{
   },
   width: '100px'
 }, {
+  id: 'user',
+  label: 'User'
+}, {
   id: 'nodes',
   label: 'Nodes',
   format: (vsns) => <>
@@ -64,6 +68,7 @@ const jobCols = [{
 }, {
   id: 'nodeCount',
   label: 'Node count',
+  hide: true,
   format: (_, obj) =>
     <b className="muted">{obj.nodes.length}</b>
 }, {
@@ -89,6 +94,7 @@ const jobCols = [{
 }, {
   id: 'appCount',
   label: 'App count',
+  hide: true,
   format: (_, obj) =>
     <b className="muted">{obj.apps.length}</b>
 }]
@@ -104,6 +110,9 @@ const goalCols = [{
 }, {
   id: 'appCount',
   label: 'Apps',
+}, {
+  id: 'last_updated',
+  label: 'Updated'
 }]
 
 
@@ -123,6 +132,11 @@ export default function JobStatus() {
   // additional meta
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
   const [geo, setGeo] = useState<GeoData>()
+  const [selected, setSelected] = useState()
+  const [updateID, setUpdateID] = useState(0)
+
+  const [lastUpdate, setLastUpdate] = useState(null)
+
 
   const [error, setError] = useState()
 
@@ -169,8 +183,22 @@ export default function JobStatus() {
   }, [setLoading])
 
 
-  const handleJobSelect = (objs) => {
-    console.log('objs', objs)
+  const handleJobSelect = (sel) => {
+    let objs = sel.objs.length ? sel.objs : null
+    const nodes = (objs || [])
+      .map(o => o.nodes)
+      .flat()
+      .map(vsn => ({
+        id: vsn,
+        vsn,
+        lng: manifestByVSN[vsn].gps_lon,
+        lat: manifestByVSN[vsn].gps_lat,
+        status: geo.find(o => o.vsn == vsn) ? 'reporting' : 'dot'
+      }))
+
+
+    setSelected(nodes.length ? nodes : null)
+    setUpdateID(prev => prev + 1)
   }
 
   const handleGoalSelect = (objs) => {
@@ -178,7 +206,11 @@ export default function JobStatus() {
   }
 
   const handleOptionChange = () => {
+    // todo
+  }
 
+  const handleQuery = () => {
+    // todo
   }
 
   return (
@@ -224,18 +256,18 @@ export default function JobStatus() {
 
           <MapContainer>
             {geo &&
-              <Map data={geo} selected={null} resize={false} updateID={null} />
+              <Map data={geo} selected={selected} resize={false} updateID={updateID} />
             }
           </MapContainer>
 
-          <div>
+          <div style={{marginBottom: 5}}>
             <br/>
             <Breadcrumbs
               separator={<NavigateNextIcon fontSize="small" />}
               aria-label="breadcrumb"
             >
               <Link key="1" to="/job-status/jobs" color={jobName ? 'text.primary' : 'inherit'}>
-                All Jobs
+                <Chip label="All Jobs"/>
               </Link>
               {jobName &&
                 <Typography key="3" color="text.primary">
@@ -245,7 +277,6 @@ export default function JobStatus() {
             </Breadcrumbs>
           </div>
 
-
           <Tabs
             value={tab}
             aria-label="tabs of data links"
@@ -254,7 +285,7 @@ export default function JobStatus() {
               <Tab
                 label={
                   <div className="flex items-center">
-                    <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : ''})
+                    <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : '...'})
                   </div>
                 }
                 value="jobs"
@@ -266,7 +297,7 @@ export default function JobStatus() {
             <Tab
               label={
                 <div className="flex items-center">
-                  <ScienceIcon/>&nbsp;Goals ({goals ? goals.length : ''})
+                  <ScienceIcon/>&nbsp;Goals ({goals ? goals.length : '...'})
                 </div>
               }
               value="goals"
@@ -294,6 +325,9 @@ export default function JobStatus() {
                 enableSorting
                 sort="-status"
                 onSelect={handleJobSelect}
+                onSearch={handleQuery}
+                onColumnMenuChange={() => {}}
+                onColumnMenuChange
               />
             </TableContainer>
           }
@@ -330,7 +364,7 @@ export default function JobStatus() {
           }
 
           {error &&
-            <Alert severity="error">{error.message}</Alert>
+            <ErrorMsg>{error}</ErrorMsg>
           }
         </Main>
       </div>
@@ -380,15 +414,5 @@ const TableContainer = styled.div`
 
   table {
     background: #fff;
-  }
-
-  .MuiInputBase-root {
-    color: #aaa;
-    pointer-events: none;
-    background: #f2f2f2;
-  }
-
-  .MuiFormControl-root:hover {
-    cursor: not-allowed;
   }
 `

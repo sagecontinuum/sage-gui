@@ -5,6 +5,23 @@ import { handleErrors } from '../fetch-utils'
 import config from '/config'
 const url = config.es
 
+import * as Auth from '/components/auth/auth'
+const __token = Auth.getToken()
+
+
+const options = {
+  headers: __token ? {
+    Authorization: `Sage ${__token}`
+  } : {}
+}
+
+function get(endpoint: string) {
+  return fetch(endpoint, options)
+    .then(handleErrors)
+    .then(res => res.json())
+}
+
+
 const jobEventTypes = [
   'sys.scheduler.status.job.suspended',
   'sys.scheduler.status.job.removed'
@@ -86,11 +103,6 @@ export type Goal = {
   }
 }
 
-function get(endpoint: string) {
-  return fetch(endpoint)
-    .then(handleErrors)
-    .then(res => res.json())
-}
 
 export async function getJobs() {
   let data = await get(`${url}/jobs/list`)
@@ -343,16 +355,17 @@ export async function getAllData() : Promise<ReducedJobData> {
   let jobData
   try {
     jobData = jobs.map((obj) => {
-      const {name, job_id, nodes, plugins,nodeTags, status} = obj
+      const {name, job_id, nodes, plugins, nodeTags} = obj
+
 
       return {
+        ...obj,
         id: job_id,
         name,
         nodes: nodes ?
           Object.keys(nodes) :
           (nodeTags ? nodeTags : '?'),
         apps: plugins,
-        status
       }
     })
   } catch(error) {
@@ -364,5 +377,13 @@ export async function getAllData() : Promise<ReducedJobData> {
   }
 
   return {jobs: jobData, goals, byNode}
+}
+
+
+export async function getGPUUtil({vsn}) {
+  return BH.getData({start: '-1d', tail: 1, filter: {vsn}})
+    .then(d => {
+      return d
+    })
 }
 

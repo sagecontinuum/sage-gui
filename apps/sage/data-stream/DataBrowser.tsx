@@ -533,8 +533,8 @@ export default function DataPreview() {
           <h2 className="filter-title">Filters</h2>
 
           <div className="shortcuts">
-            <a onClick={() => goToApp('.*plugin-image-sampler.*')}>Images</a> |{' '}
-            <a onClick={() => goToApp('.*plugin-audio-sampler.*')}>Audio</a>
+            <a onClick={() => goToApp('waggle/plugin-image-sampler.*')}>Images</a> |{' '}
+            <a onClick={() => goToApp('waggle/plugin-audio-sampler.*')}>Audio</a>
           </div>
 
           {menus && facetList.map(facet => {
