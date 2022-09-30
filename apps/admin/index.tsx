@@ -1,11 +1,11 @@
 import ReactDom from 'react-dom'
-import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
-import NavBar, {NavItems} from '../../components/NavBar'
+import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
 import NodeView from './views/node/Node'
@@ -15,7 +15,6 @@ import AudioView from './views/audio/LatestAudio'
 import Stress from './fiddle/Stress'
 import Timeline from './fiddle/Timeline'
 
-import Divider from '@mui/material/Divider'
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
@@ -26,9 +25,9 @@ import '/assets/styles.scss'
 
 const NavMenu = () =>
   <NavItems>
-    <li><NavLink to="/status">Status</NavLink></li>
-    <li><NavLink to="/tests">Tests</NavLink></li>
-    <li><NavLink to="/surya">Factory</NavLink></li>
+    <NavItem label="Status" to="/status" />
+    <NavItem label="Tests" to="/tests" />
+    <NavItem label="Factory" to="/surya" />
   </NavItems>
 
 

@@ -11,13 +11,14 @@ import useClickOutside from '/components/hooks/useClickOutside'
 
 
 type Props = {
-  label: string
-  root: string
-  menu: JSX.Element
+  label: string | JSX.Element
+  menu?: JSX.Element
+  to?: string
+  root?: string
 }
 
 export default function NavItem(props: Props) {
-  const {label, root, menu} = props
+  const {label, menu, to, root} = props
 
   const ref = useRef()
   const path = useMatch('*').pathname
@@ -34,9 +35,15 @@ export default function NavItem(props: Props) {
 
   return (
     <Root ref={ref} className="flex items-center">
-      <a onClick={handleClick} className={`flex ${isActive ? 'active' : ''}`}>
-        {label} {menu && <CaretIcon />}
-      </a>
+      {to ?
+        <NavLink to={to}>
+          {label}
+        </NavLink>
+        :
+        <a onClick={handleClick} className={`flex ${isActive ? 'active' : ''}`}>
+          {label} {menu && <CaretIcon />}
+        </a>
+      }
       {open && menu &&
         <MenuContainer onClick={handleClick}>
           {menu}
@@ -48,7 +55,7 @@ export default function NavItem(props: Props) {
 
 const Root = styled.div`
   position: relative;
-  margin: 0 0 0 20px;
+  margin: 0 0 0 30px;
 
   > a {
     padding: 20px 0;
@@ -68,7 +75,6 @@ const Root = styled.div`
 
   > a.active {
     opacity: 1.0;
-    height: 100%;
   }
 
   /* active item dot effect */
@@ -80,12 +86,11 @@ const Root = styled.div`
 
   > a.active:after {
     transition: height .2s ease;
-    content: '';
-    position: absolute;
+
     width: 16px;
     height: 8px;
     bottom: 0;
-    left: calc(50% - 20px);
+    left: 35%;
     background: rgb(28, 140, 201);
     border-radius: 15px 15px 0 0;
   }
@@ -94,16 +99,26 @@ const Root = styled.div`
   .MuiMenuItem-root svg {
     color: #444;
   }
-  .MuiMenuItem-root.active,
-  .MuiMenuItem-root.active svg {
-    color: rgb(28, 140, 201);
+
+  .MuiMenuItem-root:after {
+    content: '';
+    position: absolute;
+    height: 0;
+  }
+
+  .MuiMenuItem-root.active:after {
+    width: 8px;
+    height: 16px;
+    left: 0;
+    background: rgb(28, 140, 201);
+    border-radius: 0px 15px 15px 0;
   }
 `
 
 const MenuContainer = styled.div`
   position: absolute;
   top: 59px;
-  left: -40px;
+  left: -45px;
   background: #fff;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, .05);
   border: solid #ccc;
@@ -115,15 +130,15 @@ type ItemProps = {
   label: string
   icon: JSX.Element
   to: string
+  onClick?: MouseEvent
 }
 
 export function Item(props: ItemProps) {
-  const {label, icon, to} = props
 
   return (
-    <MenuItem component={NavLink} to={to}>
-      <ListItemIcon>{icon}</ListItemIcon>
-      {label}
+    <MenuItem component={NavLink} {...props}>
+      <ListItemIcon>{props.icon}</ListItemIcon>
+      {props.label}
     </MenuItem>
   )
 }

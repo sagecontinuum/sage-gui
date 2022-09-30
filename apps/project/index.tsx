@@ -1,18 +1,17 @@
 import ReactDom from 'react-dom'
-import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
-import NavBar, {NavItems} from '/components/NavBar'
+import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import Node from '../common/node/Node'
 import Nodes from './views/nodes/Nodes'
 import Data from '/apps/sage/data/Data'
 import DataBrowser from '/apps/sage/data-stream/DataBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
 import DataProduct from '/apps/sage/data-commons/DataProduct'
-// import Links from '../common/DataLinks'
 
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
@@ -24,8 +23,8 @@ import settings from './settings'
 
 const NavMenu = () =>
   <NavItems>
-    <li><NavLink to="nodes">Nodes</NavLink></li>
-    <li><NavLink to="data">Data</NavLink></li>
+    <NavItem label="Nodes" to="nodes" />
+    <NavItem label="Data" to="data" />
   </NavItems>
 
 

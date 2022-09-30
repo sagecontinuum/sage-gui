@@ -1,12 +1,20 @@
 import ReactDom from 'react-dom'
-import {BrowserRouter, Routes, Route, Navigate, NavLink} from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
-import theme from '/components/theme'
 import CssBaseline from '@mui/material/CssBaseline'
 
-import NavBar, {NavItems} from '/components/NavBar'
+import PublicIcon from '@mui/icons-material/PublicRounded'
+import UserIcon from '@mui/icons-material/AccountCircleRounded'
+import JobsIcon from '@mui/icons-material/ListRounded'
+import ScienceIcon from '@mui/icons-material/ScienceRounded'
+import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
+import ChartIcon from '@mui/icons-material/TimelineRounded'
+import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
+
+import NavBar, { NavItems } from '../../components/nav-bar/NavBar'
+import NavItem, { Item } from '../../components/nav-bar/NavItem'
 
 import AppList from './ecr/apps/AppList'
 import App from './ecr/app/App'
@@ -25,23 +33,82 @@ import DataProduct from './data-commons/DataProduct'
 import Devices from './account/Devices'
 import UserProfile from './account/UserProfile'
 
-
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
 
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 import { SnackbarProvider } from 'notistack'
 
+import theme from '/components/theme'
 import '/assets/styles.scss'
 
 
 
-const NavMenu = () =>
-  <NavItems>
-    <li><NavLink to="/apps/explore">App Catalog</NavLink></li>
-    <li><NavLink to="/job-status">Job Status</NavLink></li>
-    <li><NavLink to="/data">Data</NavLink></li>
-  </NavItems>
+const NavMenu = () => {
+  return (
+    <NavItems>
+      <NavItem
+        label="App Catalog"
+        root="/apps"
+        menu={
+          <>
+            <Item
+              icon={<PublicIcon/>}
+              to='/apps/explore'
+              label="Explore apps"
+            />
+            <Item
+              icon={<UserIcon/>}
+              to='/apps/my-apps'
+              label=" My Apps"
+            />
+          </>
+        }
+      />
+      <NavItem
+        label="Job Status"
+        root="/job-status"
+        menu={
+          <>
+            <Item
+              icon={<JobsIcon/>}
+              to='/job-status/jobs'
+              label="Job status"
+            />
+            <Item
+              icon={<ScienceIcon/>}
+              to='/job-status/goals'
+              label="Science goals"
+            />
+            <Item
+              icon={<TimelineIcon/>}
+              to="/job-status/timeline"
+              label="Status Timelines"
+            />
+          </>
+        }
+      />
+      <NavItem
+        label="Data"
+        root="/data"
+        menu={
+          <>
+            <Item
+              icon={<ChartIcon/>}
+              to='/data'
+              label="Explore data"
+            />
+            <Item
+              icon={<ChartBrowserIcon/>}
+              to='/data-browser'
+              label="Query data"
+            />
+          </>
+        }
+      />
+    </NavItems>
+  )
+}
 
 
 /*
@@ -112,7 +179,6 @@ const Container = styled.div`
   margin: 60px 0 0 0;
   width: 100%;
 `
-
 
 
 ReactDom.render(<Sage />, document.getElementById('app'))
