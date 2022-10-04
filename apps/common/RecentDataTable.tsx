@@ -6,7 +6,7 @@ import Tooltip from '@mui/material/Tooltip'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 import ErrorMsg from '../sage/ErrorMsg'
-import { relTime, isOldData} from '/components/utils/units'
+import { relativeTime, isOldData} from '/components/utils/units'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'

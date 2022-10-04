@@ -7,7 +7,7 @@ import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import WarningIcon from '@mui/icons-material/WarningRounded'
 import Alert from '@mui/material/Alert'
 
-import {bytesToSizeSI, relTime, isOldData} from '/components/utils/units'
+import { bytesToSizeSI, relativeTime, isOldData } from '/components/utils/units'
 import * as BH from '/components/apis/beehive'
 
 

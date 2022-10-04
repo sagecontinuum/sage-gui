@@ -5,18 +5,27 @@ import styled from 'styled-components'
 
 import * as BH from '/components/apis/beehive'
 
+import Sidebar from '../data-commons/DataSidebar'
 import Table from '/components/table/Table'
 import { useProgress } from '/components/progress/ProgressProvider'
 import Checkbox from '/components/input/Checkbox'
+import Clipboard from '/components/utils/Clipboard'
+import Audio from '/components/viz/Audio'
+import QueryViewer from '/components/QueryViewer'
+import TimeSeries from './TimeSeries'
+import ErrorMsg from '../ErrorMsg'
 
 import {
   FormControlLabel, Button, Divider, Select,
   MenuItem, FormControl, InputLabel, Alert,
-  Autocomplete, TextField, Popper
+  Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton
 } from '@mui/material'
 
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import AppsIcon from '@mui/icons-material/Apps'
+import ImageIcon from '@mui/icons-material/ImageOutlined'
+import AudioIcon from '@mui/icons-material/Headphones'
 
 import DatePicker from '@mui/lab/DatePicker'
 import TimePicker from '@mui/lab/TimePicker'
@@ -25,25 +34,20 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns'
 
 import { capitalize } from 'lodash'
 
-import Clipboard from '/components/utils/Clipboard'
-import Sidebar from '../data-commons/DataSidebar'
-import Audio from '/components/viz/Audio'
-import QueryViewer from '/components/QueryViewer'
-import TimeSeries from './TimeSeries'
+
 
 import { relativeTime } from '/components/utils/units'
 
 import config from '/config'
 const registry = config.dockerRegistry
 
-
+// default app for initial view of data
+const defaultPlugin = 'waggle/plugin-iio.*'
 
 const exts = {
   image: ['.jpg', '.jpeg', '.png', '.gif'],
   video: ['.mp4']
 }
-
-const defaultPlugin = 'waggle/plugin-iio.*'
 
 
 const columns = [{
@@ -159,7 +163,6 @@ function RangeIndicator(props: RangeIndicatorProps) : JSX.Element {
   const start = data[0].timestamp
   const end = data[data.length - 1].timestamp
 
-
   return (
     <span>
       {new Date(end).toLocaleString()} to {' '}
@@ -212,7 +215,7 @@ async function getFilterMenus(plugin) {
     start: `-1d`,
     tail: 1,
     filter: {
-      plugin
+      ...(plugin ? {plugin} : {})
     }
   })
 
@@ -274,8 +277,17 @@ const isSmokeApp = (app) =>
   (app || '').match(/smoke/g)
 
 
+const initMenuState = {
+  apps: [],
+  tasks: [],
+  nodes: [],
+  names: [],
+  sensors: []
+}
+
 const initFilterState = {
   apps: [defaultPlugin],
+  tasks: [],
   nodes: [],
   names: [],
   sensors: []
@@ -283,14 +295,18 @@ const initFilterState = {
 
 const facetList = Object.keys(initFilterState)
 
+type FacetList = keyof typeof initFilterState
+
 type FilterState = {
-  [name in keyof typeof initFilterState]: string[]
+  [name in FacetList]: string[]
 }
 
+type DataTypes = 'apps' | 'images' | 'audio'
 
 
-export function getFilterState(params) {
-  let init = {...initFilterState}
+
+export function getFilterState(params, includeDefault=true) {
+  let init = includeDefault ? {...initFilterState} : {}
   for (const [key, val] of params) {
     if (key == 'start')
       continue
@@ -309,6 +325,8 @@ export default function DataPreview() {
   const name = params.get('names')
   const node = params.get('nodes')
   const sensor = params.get('sensors')
+  const task = params.get('tasks')
+  const type = params.get('type') || 'apps'
 
   const unit: Unit = params.get('window') as Unit || 'h'
   const start = params.get('start')
@@ -329,26 +347,17 @@ export default function DataPreview() {
   const [chart, setChart] = useState<BH.Record[]>()
 
   // contents of dropdowns
-  const [menus, setMenus] = useState<{[name: string]: string[]}>({
-    apps: [],
-    nodes: [],
-    names: [],
-    sensors: []
-  })
+  const [menus, setMenus] = useState<{[name: string]: string[]}>(initMenuState)
 
   // selected filters
-  const [filters, setFilters] = useState<FilterState>({
-    apps: [defaultPlugin],
-    nodes: [],
-    names: [],
-    sensors: []
-  })
+  const [filters, setFilters] = useState<FilterState>(initFilterState)
 
   // update selected filters whenever url param changes
   useEffect(() => {
-    const filterState = getFilterState(params)
+    const includeDefault = ['apps'].includes(type)
+    const filterState = getFilterState(params, includeDefault)
     setFilters(filterState)
-  }, [app, name, node, sensor])
+  }, [app, name, node, sensor, task, type])
 
 
   // update filter menus whenever app changes
@@ -380,7 +389,7 @@ export default function DataPreview() {
 
   // initial loading of everything
   useEffect(() => {
-    const plugin = app || defaultPlugin
+    const plugin = app || (type == 'apps' ? defaultPlugin : null)
 
     function fetchAppMenu() {
       getAppMenus()
@@ -404,10 +413,11 @@ export default function DataPreview() {
         start: s,
         end: end,
         filter: {
-          plugin: plugin,
+          ...(plugin ? {plugin} : {}),
           ...(node ? {vsn: node} : {}),
           ...(name ? {name} : {}),
           ...(sensor ? {sensor} : {}),
+          ...(task ? {task} : {})
         }
       }
 
@@ -457,7 +467,7 @@ export default function DataPreview() {
     fetchAppMenu()
     fetchData()
     fetchFilterMenus()
-  }, [app, node, name, sensor, unit, start, setLoading])
+  }, [app, node, name, sensor, task, type, unit, start, setLoading])
 
 
   // relative time and show meta checkbox events
@@ -486,8 +496,10 @@ export default function DataPreview() {
     params.delete('names')
     params.delete('sensors')
     params.delete('apps')
+    params.delete('tasks')
     params.delete('start')
     params.delete('window')
+    params.delete('type')
   }
 
 
@@ -521,11 +533,21 @@ export default function DataPreview() {
     navigate({search: params.toString()}, {replace: true})
   }
 
-  const goToApp = (appQuery: string) => {
-    params.delete('names')
-    params.set('apps', appQuery)
+  const goToTasks = (val: DataTypes, taskQuery: string) => {
+    clearParams()
+    params.set('type', val)
+    params.set('tasks', taskQuery)
     params.set('window', 'h')
     navigate({search: params.toString()}, {replace: true})
+  }
+
+  const handleTypeChange = (_, val: DataTypes) => {
+    if (val == 'images')
+      goToTasks(val, 'imagesampler-.*')
+    else if (val == 'audio')
+      goToTasks(val, 'audiosampler')
+    else
+      handleRemoveFilters()
   }
 
 
@@ -536,17 +558,44 @@ export default function DataPreview() {
           <h2 className="filter-title">Filters</h2>
 
           <div className="shortcuts">
-            <a onClick={() => goToApp('waggle/plugin-image-sampler.*')}>Images</a> |{' '}
-            <a onClick={() => goToApp('waggle/plugin-audio-sampler.*')}>Audio</a>
+            <ToggleButtonGroup
+              color="primary"
+              exclusive
+              value={type}
+              onChange={handleTypeChange}
+              aria-label="data type"
+              fullWidth
+            >
+              <ToggleButton value="apps"><AppsIcon fontSize="small"/>&nbsp;Apps</ToggleButton>
+              <ToggleButton value="images"><ImageIcon fontSize="small"/>&nbsp;Images</ToggleButton>
+              <ToggleButton value="audio"><AudioIcon fontSize="small"/>&nbsp;Audio</ToggleButton>
+            </ToggleButtonGroup>
           </div>
 
           {menus && facetList.map(facet => {
-            const label = capitalize(facet)
-            const value = (filters[facet][0] || '').replace(`${registry}/`, '')
-
             // if no sensors are associated with the data, don't show sensor input
             if (facet == 'sensors' && !menus[facet].length) {
               return <></>
+            }
+
+            // if apps view, ignore tasks
+            if (['apps'].includes(type) && ['tasks'].includes(facet)) {
+              return <></>
+            }
+
+            // if media, ignore names
+            if (
+              ['images', 'audio'].includes(type) &&
+              ['apps', 'sensors', 'names'].includes(facet)
+            ) {
+              return <></>
+            }
+
+            const label = capitalize(facet)
+
+            let value = ''
+            if (filters[facet]?.length) {
+              value = (filters[facet][0] || '').replace(`${registry}/`, '')
             }
 
             return (
@@ -629,7 +678,7 @@ export default function DataPreview() {
                 <QueryViewer
                   filterState={
                     Object.keys(filters)
-                      .filter(k => !['window'].includes(k))
+                      .filter(k => !['window', 'type'].includes(k))
                       .reduce((acc, k) => ({
                         ...acc,
                         [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
@@ -641,23 +690,20 @@ export default function DataPreview() {
           </div>
 
           <br />
-          {chart && !isSmokeApp(app) &&
+
+          {chart &&
             <TimeSeries data={chart} />
           }
-
-          {/*chart && isSmokeApp(app) &&
-            <SmokeMap data={chart} />
-          */}
 
           {lastN &&
             <Alert severity="info">
               There are {lastN.total.toLocaleString()} records for this query.
-              Listing the most recent {lastN.limit.toLocaleString()}.
+              Listing the most recent {lastN.limit.toLocaleString()} below.
             </Alert>
           }
 
           {error &&
-            <Alert severity="error">{error.message}</Alert>
+            <ErrorMsg>{error}</ErrorMsg>
           }
 
           {data?.length == 0 &&
@@ -732,8 +778,13 @@ const Root = styled.div<{isMedia: boolean}>`
     margin-bottom: 30px;
   }
 
-  .MuiInputBase-root {
+  .MuiInputBase-root,
+  .MuiButtonBase-root:not(.Mui-selected) {
     background: #fff;
+  }
+
+  .MuiToggleButtonGroup-grouped:not(:first-of-type) {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
   }
 
   /* remove some styles when displaying media */

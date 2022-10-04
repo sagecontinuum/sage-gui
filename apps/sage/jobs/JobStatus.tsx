@@ -18,7 +18,8 @@ import ErrorMsg from '/apps/sage/ErrorMsg'
 import JobTimeLine from './JobTimeline'
 
 import { Sidebar, Top, Controls, Divider } from '../common/Layout'
-import {Tabs, Tab} from '/components/tabs/Tabs'
+import { Tabs, Tab } from '/components/tabs/Tabs'
+import { relativeTime } from '/components/utils/units'
 import Filter from '../common/FacetFilter'
 
 import * as BK from '/components/apis/beekeeper'
