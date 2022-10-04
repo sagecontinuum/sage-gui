@@ -135,7 +135,6 @@ const findColumn = (cols, name) =>
   cols.findIndex(o => o.id == name)
 
 
-type Unit = 'm' | 'h' | 'd'
 
 const units = {
   'm': 'minute',
@@ -148,12 +147,14 @@ const units = {
   '90d': '90 days [very slow]'
 }
 
+type Unit = keyof typeof units
+
 type RangeIndicatorProps = {
   data: BH.Record[]
   unit: Unit
 }
 
-function RangeIndicator(props: RangeIndicatorProps) {
+function RangeIndicator(props: RangeIndicatorProps) : JSX.Element {
   const {data, unit} = props
   const start = data[0].timestamp
   const end = data[data.length - 1].timestamp
@@ -223,7 +224,7 @@ async function getFilterMenus(plugin) {
 }
 
 
-const getStartTime = (win: Unit) => {
+const getStartTime = (win: Unit) : string => {
   const amount = Number(win.slice(0, -1)) || 1
   const unit = win.charAt(win.length - 1)
 
@@ -242,7 +243,7 @@ const getStartTime = (win: Unit) => {
   return new Date(datetime).toISOString()
 }
 
-const getEndTime = (start: string, win: Unit) => {
+const getEndTime = (start: string, win: Unit) : string => {
   const amount = Number(win.slice(0, -1)) || 1
   const unit = win.charAt(win.length - 1)
 
@@ -282,6 +283,10 @@ const initFilterState = {
 
 const facetList = Object.keys(initFilterState)
 
+type FilterState = {
+  [name in keyof typeof initFilterState]: string[]
+}
+
 
 
 export function getFilterState(params) {
@@ -305,7 +310,7 @@ export default function DataPreview() {
   const node = params.get('nodes')
   const sensor = params.get('sensors')
 
-  const unit: Unit = params.get('window') || 'h'
+  const unit: Unit = params.get('window') as Unit || 'h'
   const start = params.get('start')
 
   const {setLoading} = useProgress()
@@ -332,7 +337,7 @@ export default function DataPreview() {
   })
 
   // selected filters
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterState>({
     apps: [defaultPlugin],
     nodes: [],
     names: [],
@@ -516,7 +521,6 @@ export default function DataPreview() {
     navigate({search: params.toString()}, {replace: true})
   }
 
-
   const goToApp = (appQuery: string) => {
     params.delete('names')
     params.set('apps', appQuery)
@@ -540,7 +544,7 @@ export default function DataPreview() {
             const label = capitalize(facet)
             const value = (filters[facet][0] || '').replace(`${registry}/`, '')
 
-            // if sensor filter, and no options, don't show
+            // if no sensors are associated with the data, don't show sensor input
             if (facet == 'sensors' && !menus[facet].length) {
               return <></>
             }
