@@ -175,10 +175,16 @@ export function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data.length)
     return null
 
-  let byNode = {}
+  const byNode = {}
   data.forEach(obj => {
     const {timestamp, name, value, meta} = obj
-    const {node, host} = meta
+    const {node} = meta
+    let {host} = meta
+
+    // todo(nc): temp solution since IPs don't have a host?
+    if (name == 'sys.net.ip') {
+      host = `${node}.ws-nxcore`
+    }
 
     // if no node or host, don't include in aggregation
     if (!node || !host) {
@@ -193,7 +199,7 @@ export function aggregateMetrics(data: Record[]) : AggMetrics {
       byNode[node][host] = {}
 
 
-    let nodeData = byNode[node][host]
+    const nodeData = byNode[node][host]
 
     // append data
     const record = {timestamp, value, meta}
