@@ -549,10 +549,10 @@ export default function DataPreview() {
               <Menu
                 key={facet}
                 options={menus[facet]}
-                renderInput={(props) => <TextField {...props} label={label} />}
-                PopperComponent={
-                  (props) => <Popper {...props} style={{width: 300, zIndex: 9999}}/>
-                }
+                renderInput={(props) =>
+                  <TextField {...props} label={label} />}
+                PopperComponent={(props) =>
+                  <Popper {...props} style={{width: label == 'Apps' ? 350 : 300, zIndex: 9999}} />}
                 value={value}
                 onChange={(evt, val) => handleFilterChange(facet, val)}
               />
