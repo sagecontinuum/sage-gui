@@ -7,22 +7,16 @@ import * as BH from '/components/apis/beehive'
 
 import Table from '/components/table/Table'
 import { useProgress } from '/components/progress/ProgressProvider'
-import { msToTime } from '/components/utils/units'
 import Checkbox from '/components/input/Checkbox'
 
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Alert from '@mui/material/Alert'
+import {
+  FormControlLabel, Button, Divider, Select,
+  MenuItem, FormControl, InputLabel, Alert,
+  Autocomplete, TextField, Popper
+} from '@mui/material'
+
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
-import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
-import Popper from '@mui/material/Popper'
 
 import DatePicker from '@mui/lab/DatePicker'
 import TimePicker from '@mui/lab/TimePicker'
@@ -37,8 +31,11 @@ import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 
-// support custom viewers?
-// import SmokeMap from './viewers/SmokeMap'
+import { relativeTime } from '/components/utils/units'
+
+import config from '/config'
+const registry = config.dockerRegistry
+
 
 
 const exts = {
@@ -47,9 +44,6 @@ const exts = {
 }
 
 const defaultPlugin = 'waggle/plugin-iio.*'
-
-const relTime = val =>
-  msToTime(new Date().getTime() - (new Date(val).getTime()))
 
 
 const columns = [{
@@ -183,11 +177,16 @@ const VertDivider = () =>
 
 
 
-const getUniqueOpts = (data) =>
+const getUniqueOpts = (data: string[]) =>
   data.sort()
     .filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: v}))
 
+
+const getUniqueAppOpts = (data: string[]) =>
+  data.sort()
+    .filter((v, i, self) => v && self.indexOf(v) == i)
+    .map(v => ({id: v, label: v.replace(`${registry}/`, '')}))
 
 
 const getCurlCmd = (query: object) =>
@@ -202,7 +201,7 @@ function getAppMenus() {
       plugin: `.*`
     }
   }).then((data) =>
-    getUniqueOpts(data.map(o => o.meta.plugin).filter(n => n))
+    getUniqueAppOpts(data.map(o => o.meta.plugin))
   )
 }
 
@@ -453,7 +452,7 @@ export default function DataPreview() {
     fetchAppMenu()
     fetchData()
     fetchFilterMenus()
-  }, [app, node, name, sensor, unit, start])
+  }, [app, node, name, sensor, unit, start, setLoading])
 
 
   // relative time and show meta checkbox events
@@ -462,7 +461,7 @@ export default function DataPreview() {
       let idx
       if (checked.relativeTime) {
         idx = findColumn(prev, 'timestamp')
-        prev[idx] = {...prev[idx], format: (val) => relTime(val)}
+        prev[idx] = {...prev[idx], format: (val) => relativeTime(val)}
       } else {
         idx = findColumn(prev, 'timestamp')
         prev[idx] = {...prev[idx], format: (val) => val}
@@ -539,7 +538,7 @@ export default function DataPreview() {
 
           {menus && facetList.map(facet => {
             const label = capitalize(facet)
-            const value = filters[facet][0] || ''
+            const value = (filters[facet][0] || '').replace(`${registry}/`, '')
 
             // if sensor filter, and no options, don't show
             if (facet == 'sensors' && !menus[facet].length) {
@@ -627,7 +626,10 @@ export default function DataPreview() {
                   filterState={
                     Object.keys(filters)
                       .filter(k => !['window'].includes(k))
-                      .reduce((acc, k) => ({...acc, [k]: filters[k] }), {})
+                      .reduce((acc, k) => ({
+                        ...acc,
+                        [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
+                      }), {})
                   }
                 />
               </div>
