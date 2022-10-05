@@ -7,13 +7,14 @@ import * as BH from '/components/apis/beehive'
 
 import Sidebar from '../data-commons/DataSidebar'
 import Table from '/components/table/Table'
-import { useProgress } from '/components/progress/ProgressProvider'
 import Checkbox from '/components/input/Checkbox'
 import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 import ErrorMsg from '../ErrorMsg'
+import { relativeTime } from '/components/utils/units'
+import { useProgress } from '/components/progress/ProgressProvider'
 
 import {
   FormControlLabel, Button, Divider, Select,
@@ -35,9 +36,6 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns'
 import { capitalize } from 'lodash'
 
 
-
-import { relativeTime } from '/components/utils/units'
-
 import config from '/config'
 const registry = config.dockerRegistry
 
@@ -46,8 +44,11 @@ const defaultPlugin = 'waggle/plugin-iio.*'
 
 const exts = {
   image: ['.jpg', '.jpeg', '.png', '.gif'],
+  audio: ['.flac'],
   video: ['.mp4']
 }
+
+type MimeType = keyof typeof exts
 
 
 const columns = [{
@@ -266,14 +267,16 @@ const getEndTime = (start: string, win: Unit) : string => {
   return new Date(endTime).toISOString()
 }
 
+const isMedia = (type: DataTypes) =>
+  ['images', 'audio'].includes(type)
 
-const isMediaApp = (app) =>
+const isMediaApp = (app: string) =>
   (app || '').match(/image|audio|video|mobotix/g)
 
-const isAudioApp = (app) =>
+const isAudioApp = (app: string) =>
   (app || '').match(/audio/g)
 
-const isSmokeApp = (app) =>
+const isSmokeApp = (app: string) =>
   (app || '').match(/smoke/g)
 
 
@@ -305,8 +308,8 @@ type DataTypes = 'apps' | 'images' | 'audio'
 
 
 
-export function getFilterState(params, includeDefault=true) {
-  let init = includeDefault ? {...initFilterState} : {}
+export function getFilterState(params, includeDefault=true) : FilterState {
+  const init = includeDefault ? initFilterState : {...initFilterState, apps: []}
   for (const [key, val] of params) {
     if (key == 'start')
       continue
@@ -319,16 +322,17 @@ export function getFilterState(params, includeDefault=true) {
 
 
 export default function DataPreview() {
-  const params = new URLSearchParams(useLocation().search)
   const navigate = useNavigate()
+
+  const params = new URLSearchParams(useLocation().search)
   const app = params.get('apps')
   const name = params.get('names')
   const node = params.get('nodes')
   const sensor = params.get('sensors')
   const task = params.get('tasks')
-  const type = params.get('type') || 'apps'
-
-  const unit: Unit = params.get('window') as Unit || 'h'
+  const type = params.get('type') as DataTypes || 'apps'                      // for tabs
+  const mimeType = isMedia(type) ? params.get('mimeType') as MimeType : null  // for filtering on ext
+  const unit = params.get('window') as Unit || 'h'
   const start = params.get('start')
 
   const {setLoading} = useProgress()
@@ -448,6 +452,14 @@ export default function DataPreview() {
             setLastN(null)
           }
 
+          if (mimeType) {
+            data = data.filter(o => {
+              const val = o.value as string
+              const ext = val.slice(val.lastIndexOf('.'))
+              return exts[mimeType].includes(ext)
+            })
+          }
+
           data = data
             .map((o, i) => ({...o, ...o.meta, rowID: i}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -467,7 +479,10 @@ export default function DataPreview() {
     fetchAppMenu()
     fetchData()
     fetchFilterMenus()
-  }, [app, node, name, sensor, task, type, unit, start, setLoading])
+  }, [
+    app, node, name, sensor, task, type, mimeType,
+    unit, start, setLoading
+  ])
 
 
   // relative time and show meta checkbox events
@@ -492,19 +507,20 @@ export default function DataPreview() {
 
   const clearParams = () => {
     setPage(0)
-    params.delete('nodes')
-    params.delete('names')
-    params.delete('sensors')
-    params.delete('apps')
-    params.delete('tasks')
-    params.delete('start')
-    params.delete('window')
-    params.delete('type')
+    Array.from(params.keys())
+      .forEach(key => params.delete(key))
   }
 
-
-  const handleCheck = (evt, name) => {
+  const handleOptionCheck = (evt, name) => {
     setChecked(prev => ({...prev, [name]: evt.target.checked}))
+  }
+
+  const handleMimeCheck = (evt, name) => {
+    if (evt.target.checked)
+      params.set('mimeType', name)
+    else
+      params.delete('mimeType')
+    navigate({search: params.toString()}, {replace: true})
   }
 
   const handleFilterChange = (field: string, val: {id: string, label: string}) => {
@@ -538,6 +554,7 @@ export default function DataPreview() {
     params.set('type', val)
     params.set('tasks', taskQuery)
     params.set('window', 'h')
+    if (val == 'images') params.set('mimeType', 'image')
     navigate({search: params.toString()}, {replace: true})
   }
 
@@ -584,10 +601,7 @@ export default function DataPreview() {
             }
 
             // if media, ignore names
-            if (
-              ['images', 'audio'].includes(type) &&
-              ['apps', 'sensors', 'names'].includes(facet)
-            ) {
+            if (isMedia(type) && ['apps', 'sensors', 'names'].includes(facet)) {
               return <></>
             }
 
@@ -612,6 +626,17 @@ export default function DataPreview() {
             )
           })}
 
+          {type == 'images' &&
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={mimeType == 'image'}
+                  onChange={(evt) => handleMimeCheck(evt, 'image')}
+                />
+              }
+              label="only images"
+            />
+          }
 
           <TimeOpts>
             <h3>Time Range</h3>
@@ -710,7 +735,8 @@ export default function DataPreview() {
             <Alert severity="info">No recent data found <b>for the last {units[unit]}</b></Alert>
           }
 
-          {/* todo(nc): here we have to check data.length because of bug in table component when pagination is used */}
+          {/* todo(nc): here we have to check data.length because of bug
+           in table component when pagination is used */}
           {data && data?.length > 0 &&
             <Table
               primaryKey="rowID"
@@ -734,15 +760,20 @@ export default function DataPreview() {
                       control={
                         <Checkbox
                           checked={checked.relativeTime}
-                          onChange={(evt) => handleCheck(evt, 'relativeTime')}
+                          onChange={(evt) => handleOptionCheck(evt, 'relativeTime')}
                         />
                       }
                       label="relative time"
                     />
 
                     <FormControlLabel
-                      control={<Checkbox checked={checked.showMeta} onChange={(evt) => handleCheck(evt, 'showMeta')} />}
                       label="meta"
+                      control={
+                        <Checkbox
+                          checked={checked.showMeta}
+                          onChange={(evt) => handleOptionCheck(evt, 'showMeta')}
+                        />
+                      }
                     />
                   </div>
                 </div>
