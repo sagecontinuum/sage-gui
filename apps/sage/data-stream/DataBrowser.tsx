@@ -452,7 +452,7 @@ export default function DataPreview() {
             setLastN(null)
           }
 
-          if (mimeType) {
+          if (task && mimeType) {
             data = data.filter(o => {
               const val = o.value as string
               const ext = val.slice(val.lastIndexOf('.'))
@@ -471,7 +471,7 @@ export default function DataPreview() {
           setLoading(false)
         }).catch(error => {
           if (error.name == 'AbortError') return
-          setError(error)
+          setError(error.message)
           setLoading(false)
         })
     }
