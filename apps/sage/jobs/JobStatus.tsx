@@ -155,8 +155,8 @@ export default function JobStatus() {
     setLoading(true)
 
     ES.getAllData()
-      .then(({jobs, goals, byNode}) => {
-        setData({jobs, goals, byNode})
+      .then(({jobs, byNode}) => {
+        setData({jobs, byNode})
 
         // also fetch gps for map
         BK.getManifest({by: 'vsn'})

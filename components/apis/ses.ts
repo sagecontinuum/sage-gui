@@ -14,8 +14,8 @@ const options = {
     Authorization: `Sage ${__token}`
   } : {}
 }
-
 function get(endpoint: string) {
+
   return fetch(endpoint, options)
     .then(handleErrors)
     .then(res => res.json())
@@ -238,40 +238,21 @@ type ReducedJobData = {
   byNode: {
     [vsn: string]: PluginEvent[]
   }
-  goals: Goal[]
   jobs?: {
     [jobName: string]: Job
   }
 }
 
-export function reduceData(taskEvents: PluginEvent[], goals: Goal[]) : ReducedJobData {
+export function reduceData(taskEvents: PluginEvent[]) : ReducedJobData {
   // first group by vsn
   const groupedByNode = groupBy(taskEvents, 'meta.vsn')
 
-  // get hash with names
-  const goalLookup = goalsToLookup(goals)
-
   // aggregate start/stops by vsn
-  let goalStats = [], i = 1
   const byNode = {}
   for (const [vsn, events] of Object.entries(groupedByNode)) {
     const byApp = aggregateEvents(events)
     byNode[vsn] = byApp
-
-    const {metrics, goalID} = computeGoalMetrics(byApp)
-
-    goalStats.push({
-      id: goalID,
-      rowID: i,
-      name: goalLookup[goalID],
-      appCount: Object.keys(byApp).length,
-      metrics
-    })
-    i += 1
   }
-
-  // we'll need to eventually use set of goal ids since a goal can have many different apps
-  // goalStats = uniqBy(goalStats, 'id')
 
   // organize by orange/red statuses below 'complete'
   // High-level metrics could make this make this clear, in lieu of better design
@@ -285,7 +266,7 @@ export function reduceData(taskEvents: PluginEvent[], goals: Goal[]) : ReducedJo
     }
   }
 
-  return {byNode, goals: goalStats}
+  return {byNode}
 }
 
 
@@ -330,8 +311,8 @@ function getGoals() : Promise<Goal[]> {
 }
 
 
-const goalsToLookup = (goals: Goal[]) =>
-  goals.reduce((acc, o) => ({...acc, [o.id]: o.name}), {})
+// const goalsToLookup = (goals: Goal[]) =>
+//  goals.reduce((acc, o) => ({...acc, [o.id]: o.name}), {})
 
 
 // fetch tasks state event changes, and parse SES JSON Messages
@@ -346,11 +327,11 @@ function getPluginEvents() : Promise<PluginEvent[]> {
 
 
 export async function getAllData() : Promise<ReducedJobData> {
-  const [jobs, goalEvents, taskEvents] = await Promise.all([
-    getJobs(), getGoals(), getPluginEvents()
+  const [jobs, taskEvents] = await Promise.all([
+    getJobs(), getPluginEvents()
   ])
 
-  const {goals, byNode} = reduceData(taskEvents, goalEvents)
+  const {byNode} = reduceData(taskEvents)
 
   let jobData
   try {
@@ -376,7 +357,7 @@ export async function getAllData() : Promise<ReducedJobData> {
     // console.warn(warnings.join('\n'))
   }
 
-  return {jobs: jobData, goals, byNode}
+  return {jobs: jobData, byNode}
 }
 
 
