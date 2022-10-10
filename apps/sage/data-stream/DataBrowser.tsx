@@ -213,19 +213,23 @@ function getAppMenus() {
 }
 
 
-async function getFilterMenus(plugin) {
+async function getFilterMenus({plugin, task}) {
   const data = await BH.getData({
     start: `-1d`,
     tail: 1,
     filter: {
-      ...(plugin ? {plugin} : {})
+      ...(plugin ? {plugin} : {}),
+      ...(task ? {task} : {})
     }
   })
 
   return {
     nodes: getUniqueOpts(data.map(o => o.meta.vsn)),
     names: getUniqueOpts(data.map(o => o.name)),
-    sensors: getUniqueOpts(data.map(o => o.meta.sensor))
+    sensors: getUniqueOpts(data.map(o => o.meta.sensor)),
+    ...(plugin ? {} : {
+      tasks: getUniqueOpts(data.map(o => o.meta.task))
+    })
   }
 }
 
@@ -273,13 +277,19 @@ const isMedia = (type: DataTypes) =>
   ['images', 'audio'].includes(type)
 
 const isMediaApp = (app: string) =>
-  (app || '').match(/image|audio|video|mobotix/g)
+  /image|audio|video|mobotix/g.test(app || '')
 
 const isAudioApp = (app: string) =>
-  (app || '').match(/audio/g)
+  /audio/g.test(app || '')
 
-const isSmokeApp = (app: string) =>
-  (app || '').match(/smoke/g)
+const getRowsPerPage = (app: string, type: DataTypes) => {
+  if (isAudioApp(app))
+    return 10
+  else if (isMediaApp(app) || isMedia(type))
+    return 20
+  else
+    return 100
+}
 
 
 const initMenuState = {
@@ -332,8 +342,9 @@ export default function DataPreview() {
   const node = params.get('nodes')
   const sensor = params.get('sensors')
   const task = params.get('tasks')
-  const type = params.get('type') as DataTypes || 'apps'                      // for tabs
-  const mimeType = isMedia(type) ? params.get('mimeType') as MimeType : null  // for filtering on ext
+  const type = params.get('type') as DataTypes || 'apps'  // for tabs
+  const mimeType = isMedia(type) ?
+    params.get('mimeType') as MimeType : null             // for filtering on ext
   const unit = params.get('window') as Unit || 'h'
   const start = params.get('start')
 
@@ -363,16 +374,16 @@ export default function DataPreview() {
     const includeDefault = ['apps'].includes(type)
     const filterState = getFilterState(params, includeDefault)
     setFilters(filterState)
-  }, [app, name, node, sensor, task, type])
+  }, [app, name, node, sensor, task, type, mimeType])
 
 
-  // update filter menus whenever app changes
+  // update filter menus whenever app or task changes
   useEffect(() => {
     if (!app) return
 
-    getFilterMenus(app)
+    getFilterMenus({plugin: app, task})
       .then((menuItems) => setMenus(prev => ({...prev, ...menuItems})))
-  }, [app])
+  }, [app, task])
 
 
   // show/hide sensor column if needed
@@ -405,7 +416,7 @@ export default function DataPreview() {
     }
 
     function fetchFilterMenus() {
-      getFilterMenus(plugin)
+      getFilterMenus({plugin, task})
         .then((menuItems) => {
           setMenus(prev => ({...prev, ...menuItems}))
         })
@@ -571,10 +582,12 @@ export default function DataPreview() {
 
 
   return (
-    <Root isMedia={isMediaApp(app)}>
+    <Root isMedia={isMediaApp(app) || isMedia(type)}>
       <div className="flex">
         <Sidebar width="240px" style={{padding: '0 10px'}}>
-          <h2 className="filter-title">Filters</h2>
+          <h5 className="subtitle muted">
+            Query type
+          </h5>
 
           <div className="shortcuts">
             <ToggleButtonGroup
@@ -601,6 +614,8 @@ export default function DataPreview() {
               </TooltipToggleButton>
             </ToggleButtonGroup>
           </div>
+
+          <h3>Filters</h3>
 
           {menus && facetList.map(facet => {
             // if no sensors are associated with the data, don't show sensor input
@@ -647,7 +662,7 @@ export default function DataPreview() {
                   onChange={(evt) => handleMimeCheck(evt, 'image')}
                 />
               }
-              label="only images"
+              label=".jpg, .png, etc."
             />
           }
 
@@ -754,11 +769,12 @@ export default function DataPreview() {
             <Table
               primaryKey="rowID"
               enableSorting
+              sort="-timestamp"
               columns={cols}
               rows={data}
               pagination
               page={page}
-              rowsPerPage={isAudioApp(app) ? 10 : (isMediaApp(app) ? 20 : 100)}
+              rowsPerPage={getRowsPerPage(app, type)}
               limit={data.length} // todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
