@@ -15,11 +15,12 @@ import TimeSeries from './TimeSeries'
 import ErrorMsg from '../ErrorMsg'
 import { relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
+import TooltipToggleButton from '/components/input/TooltipToggleButton'
 
 import {
   FormControlLabel, Button, Divider, Select,
   MenuItem, FormControl, InputLabel, Alert,
-  Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton
+  Autocomplete, TextField, Popper, ToggleButtonGroup
 } from '@mui/material'
 
 import UndoIcon from '@mui/icons-material/UndoRounded'
@@ -27,6 +28,7 @@ import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import AppsIcon from '@mui/icons-material/Apps'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
 import AudioIcon from '@mui/icons-material/Headphones'
+// import NamesIcon from '@mui/icons-material/Inventory2Outlined'
 
 import DatePicker from '@mui/lab/DatePicker'
 import TimePicker from '@mui/lab/TimePicker'
@@ -583,9 +585,20 @@ export default function DataPreview() {
               aria-label="data type"
               fullWidth
             >
-              <ToggleButton value="apps"><AppsIcon fontSize="small"/>&nbsp;Apps</ToggleButton>
-              <ToggleButton value="images"><ImageIcon fontSize="small"/>&nbsp;Images</ToggleButton>
-              <ToggleButton value="audio"><AudioIcon fontSize="small"/>&nbsp;Audio</ToggleButton>
+              <TooltipToggleButton TooltipProps={{title: 'Apps', placement: 'top'}} value="apps">
+                <AppsIcon fontSize="small"/>
+              </TooltipToggleButton>
+              {/*
+              <TooltipToggleButton TooltipProps={{title: 'Names', placement: 'top'}} value="names">
+                <NamesIcon fontSize="small"/>
+              </TooltipToggleButton>
+              */}
+              <TooltipToggleButton TooltipProps={{title: 'Images', placement: 'top'}} value="images">
+                <ImageIcon fontSize="small"/>
+              </TooltipToggleButton>
+              <TooltipToggleButton TooltipProps={{title: 'Audio', placement: 'top'}} value="audio">
+                <AudioIcon fontSize="small"/>
+              </TooltipToggleButton>
             </ToggleButtonGroup>
           </div>
 
