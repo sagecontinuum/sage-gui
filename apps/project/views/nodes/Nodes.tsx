@@ -9,13 +9,14 @@ import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
 import columns from './columns'
+import { filterData, getFilterState, mergeMetrics} from '/apps/common/statusDataUtils'
+
 import Table from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
 import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
-
-import {queryData, filterData, getFilterState, mergeMetrics} from '/apps/common/statusDataUtils'
+import { queryData } from '/components/data/queryData'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
@@ -48,10 +49,10 @@ function getProjectNodes() {
         data = filterOn(data, 'focus')
 
       data = data.map(o => ({
-          ...o,
-          lat: o.gps_lat,
-          lng: o.gps_lon
-        })) // todo(nc): remove once blades are reporting
+        ...o,
+        lat: o.gps_lat,
+        lng: o.gps_lon
+      })) // todo(nc): remove once blades are reporting
       return data
     })
 }
@@ -80,8 +81,8 @@ export default function Nodes() {
   const [filterState, setFilterState] = useState(null)
 
   // filter options
-  const [statuses, setStatuses] = useState<Option[]>()
-  const [projects, setProjects] = useState<Option[]>()
+  // const [statuses, setStatuses] = useState<Option[]>()
+  // const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
 
@@ -164,8 +165,8 @@ export default function Nodes() {
     setFiltered(filteredData)
     setFilterState(filterState)
 
-    setStatuses(getOptions(data, 'status'))
-    setProjects(getOptions(data, 'project'))
+    // setStatuses(getOptions(data, 'status'))
+    // setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
   }
@@ -241,7 +242,7 @@ export default function Nodes() {
             onSelect={handleSelect}
             middleComponent={
               <FilterControls className="flex items-center">
-                {/*statuses ?
+                {/* statuses ?
                   <FilterMenu
                     label="Status"
                     options={statuses}
@@ -250,7 +251,7 @@ export default function Nodes() {
                     noSelectedSort
                   /> : <></>
                 */}
-                {/*projects &&
+                {/* projects &&
                   <FilterMenu
                     label="Project"
                     options={projects}
