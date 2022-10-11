@@ -1,10 +1,9 @@
-import React from 'react'
 import styled from 'styled-components'
 
 
 
 type Props = {
- filterState: {[filed: string]: string[]}
+ filterState: {[field: string]: string[]}
 }
 
 export default function QueryViewer(props: Props) {

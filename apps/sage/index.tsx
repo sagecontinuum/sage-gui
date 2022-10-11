@@ -12,6 +12,7 @@ import ScienceIcon from '@mui/icons-material/ScienceRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
+import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import NavBar, { NavItems } from '../../components/nav-bar/NavBar'
 import NavItem, { Item } from '../../components/nav-bar/NavItem'
@@ -41,6 +42,10 @@ import { SnackbarProvider } from 'notistack'
 
 import theme from '/components/theme'
 import '/assets/styles.scss'
+
+import { isSignedIn } from '/components/auth/auth'
+import { Divider } from '@mui/material'
+
 
 
 
@@ -76,15 +81,21 @@ const NavMenu = () => {
               label="Job status"
             />
             <Item
-              icon={<ScienceIcon/>}
-              to='/job-status/goals'
-              label="Science goals"
-            />
-            <Item
               icon={<TimelineIcon/>}
               to="/job-status/timeline"
-              label="Status Timelines"
+              label="Job timelines"
             />
+
+            {/* isSignedIn() &&
+              <>
+                <Divider />
+                <Item
+                  icon={<MyJobsIcon/>}
+                  to="/job-status/my-jobs"
+                  label="My Jobs"
+                />
+              </>
+            */}
           </>
         }
       />
@@ -144,7 +155,12 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
+                  <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />
+
+                  <Route path="job-status" element={<Navigate to="jobs" replace />} />
+
                   <Route path="job-status" element={<JobStatus />}>
+                    <Route path=":tab/:nodes" element={<JobStatus />} />
                     <Route path=":tab/:jobName" element={<JobStatus />} />
                     <Route path=":tab" element={<JobStatus />} />
                   </Route>

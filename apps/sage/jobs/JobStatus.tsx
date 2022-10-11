@@ -1,32 +1,34 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useLocation, NavLink, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Alert from '@mui/material/Alert'
+import { Button } from '@mui/material'
 
-import { Breadcrumbs, Typography, Chip } from '@mui/material'
-
-import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import ListIcon from '@mui/icons-material/ListRounded'
-import ScienceIcon from '@mui/icons-material/ScienceRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
+import PublicIcon from '@mui/icons-material/PieChart'
+import AddIcon from '@mui/icons-material/AddRounded'
 
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import ErrorMsg from '/apps/sage/ErrorMsg'
+import { queryData } from '/components/data/queryData'
 
 import JobTimeLine from './JobTimeline'
 
-import { Sidebar, Top, Controls, Divider } from '../common/Layout'
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { relativeTime } from '/components/utils/units'
-import Filter from '../common/FacetFilter'
+import { useProgress } from '/components/progress/ProgressProvider'
+// import { Sidebar, Top, Controls, Divider } from '../common/Layout'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
-import { useProgress } from '/components/progress/ProgressProvider'
-import JobOptions from './JobOptions'
 
+// todo(nc): options
+// import JobOptions from './JobOptions'
+
+// todo(nc): my jobs
+// import { isSignedIn } from '/components/auth/auth'
 
 export type Options = {
   showErrors: boolean
@@ -36,8 +38,9 @@ export type Options = {
 const jobCols = [{
   id: 'name',
   label: 'Name',
-  format: (val) => {
-    return <Link to={`/job-status/goals/${val}`}>{val}</Link>
+  format: (val, row) => {
+    const nodes = row.nodes
+    return <Link to={`/job-status/timeline?nodes=${nodes.join(',')}`}>{val}</Link>
   }
 }, {
   id: 'id',
@@ -56,11 +59,11 @@ const jobCols = [{
 }, {
   id: 'nodes',
   label: 'Nodes',
-  format: (vsns) => <>
+  format: (vsns, obj) => <>
     {vsns.map((vsn, i) => {
       const l = vsns.length - 1
       return <span key={vsn}>
-        <Link to={`/nodes/${vsn}`} target="_blank">
+        <Link to={`/node/${obj.node_ids[i]}`}>
           {vsn}
         </Link>{i < l ? ', '  : ''}
       </span>
@@ -86,7 +89,7 @@ const jobCols = [{
 
       const l = objs.length - 1
       return <span key={name}>
-        <Link to={`/apps/app/${app}`} target="_blank">
+        <Link to={`/apps/app/${app}`}>
           {name}
         </Link>{i < l ? ', '  : ''}
       </span>
@@ -98,6 +101,11 @@ const jobCols = [{
   hide: true,
   format: (_, obj) =>
     <b className="muted">{obj.apps.length}</b>
+}, {
+  id: 'last_updated',
+  label: 'Submitted',
+  width: '100px',
+  format: (val) => relativeTime(val)
 }]
 
 
@@ -111,37 +119,66 @@ const goalCols = [{
 }, {
   id: 'appCount',
   label: 'Apps',
-}, {
-  id: 'last_updated',
-  label: 'Updated'
 }]
 
 
+function jobsToGeos(
+  jobs: ES.Job[],
+  manifestByVSN: ManifestByVSN
+) : GeoData {
+  return (jobs || [])
+    .flatMap(o => o.nodes)
+    .map(vsn => ({
+      id: vsn,
+      vsn,
+      lng: manifestByVSN[vsn].gps_lon,
+      lat: manifestByVSN[vsn].gps_lat,
+      status: 'reporting'
+    }))
+  }
 
-type GeoData = {id: string, lng: number, lat: number}[]
+
+type State = {
+  jobs: ES.Job[]
+  byNode: {[vsn: string]: ES.PluginEvent[]}
+  isFiltered: boolean
+  qJobs: ES.Job[]
+  qNodes: string[]
+  selected: GeoData
+  selectedVSNs: string[]
+}
+
+
+type ManifestByVSN = {[vsn: string]: BK.Manifest}
+
+type GeoData = {id: string, vsn: string, lng: number, lat: number, status: string}[]
 
 export default function JobStatus() {
-  let {tab = 'jobs', jobName} = useParams()
+  const navigate = useNavigate()
+  const path = useMatch('*').pathname
+
+  const {tab = 'jobs', jobName} = useParams()
+  const params = new URLSearchParams(useLocation().search)
+  const query = params.get('query') || ''
+  const nodes = params.get('nodes') || ''
+
   const {setLoading} = useProgress()
 
-  const [{jobs, goals, byNode}, setData] = useState<{
-    jobs: ES.Job[],
-    goals: ES.Goal[],
-    byNode: {[vsn: string]: ES.PluginEvent[]}
-  }>({})
+  const [{
+    jobs, byNode, isFiltered, qJobs, qNodes, selected
+  }, setData] = useState<State>({})
 
   // additional meta
-  const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
+  const [manifestByVSN, setManifestByVSN] = useState<ManifestByVSN>()
   const [geo, setGeo] = useState<GeoData>()
-  const [selected, setSelected] = useState()
+
   const [updateID, setUpdateID] = useState(0)
 
   const [lastUpdate, setLastUpdate] = useState(null)
 
-
   const [error, setError] = useState()
 
-  // options
+  /* todo(nc): options
   const [opts, setOpts] = useState<Options>({
     showErrors: true
   })
@@ -149,6 +186,22 @@ export default function JobStatus() {
   const [filters, setFilters] = useState({
     goals: []
   })
+  */
+
+  useEffect(() => {
+    if (!jobs || !manifestByVSN) return
+
+    const qJobs = queryData<ES.Job>(jobs, query)
+    const qNodes = qJobs.flatMap(o => o.nodes)
+
+    setData(prev => ({
+      ...prev,
+      isFiltered: query.length > 0 || selected?.length > 0,
+      qJobs,
+      qNodes
+    }))
+
+  }, [query, jobs, manifestByVSN, selected])
 
 
   useEffect(() => {
@@ -156,12 +209,16 @@ export default function JobStatus() {
 
     ES.getAllData()
       .then(({jobs, byNode}) => {
-        setData({jobs, byNode})
 
         // also fetch gps for map
         BK.getManifest({by: 'vsn'})
           .then(data => {
             setManifestByVSN(data)
+
+            // todo(nc): remove when VSNs are used for urls
+            jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => data[vsn].node_id)}))
+
+            setData({jobs, byNode})
 
             const vsns = Object.keys(byNode)
 
@@ -185,20 +242,10 @@ export default function JobStatus() {
 
 
   const handleJobSelect = (sel) => {
-    let objs = sel.objs.length ? sel.objs : null
-    const nodes = (objs || [])
-      .map(o => o.nodes)
-      .flat()
-      .map(vsn => ({
-        id: vsn,
-        vsn,
-        lng: manifestByVSN[vsn].gps_lon,
-        lat: manifestByVSN[vsn].gps_lat,
-        status: geo.find(o => o.vsn == vsn) ? 'reporting' : 'dot'
-      }))
+    const objs = sel.objs.length ? sel.objs : null
+    const nodes = jobsToGeos(objs, manifestByVSN)
 
-
-    setSelected(nodes.length ? nodes : null)
+    setData(prev => ({...prev, selected: nodes.length ? nodes : null}))
     setUpdateID(prev => prev + 1)
   }
 
@@ -210,30 +257,15 @@ export default function JobStatus() {
     // todo
   }
 
-  const handleQuery = () => {
-    // todo
+  const handleQuery = ({query}) => {
+    if (query) params.set('query', query)
+    else params.delete('query')
+    navigate({search: params.toString()}, {replace: true})
   }
 
   return (
     <Root>
       <div className="flex">
-        {/* todo: project filtering
-        <CustomSidebar width="275px">
-          <h2>Science Goals</h2>
-          {/*goals &&
-            <Filter
-              title="Jobs"
-              key="name"
-              checked={filters.goals}
-              show={50}
-              // onCheck={(evt, val) => handleFilter(evt, facet, val)}
-              // onSelectAll={(evt, vals) => handleSelectAll(evt, facet, vals)}
-              type="text"
-              data={goals.map(({name, appCount}) => ({name, count: appCount}))}
-            />
-        </CustomSidebar>
-        */}
-
         <Main className="flex column">
           {/*
           <Top>
@@ -254,113 +286,156 @@ export default function JobStatus() {
             </Controls>
           </Top>
           */}
-
-          <MapContainer>
-            {geo &&
-              <Map data={geo} selected={selected} resize={false} updateID={updateID} />
-            }
-          </MapContainer>
-
-          <div style={{marginBottom: 5}}>
-            <br/>
-            <Breadcrumbs
-              separator={<NavigateNextIcon fontSize="small" />}
-              aria-label="breadcrumb"
-            >
-              <Link key="1" to="/job-status/jobs" color={jobName ? 'text.primary' : 'inherit'}>
-                <Chip label="All Jobs"/>
-              </Link>
-              {jobName &&
-                <Typography key="3" color="text.primary">
-                  {jobName}
-                </Typography>
-              }
-            </Breadcrumbs>
-          </div>
-
           <Tabs
             value={tab}
             aria-label="tabs of data links"
+            sx={{marginBottom: '10px'}}
           >
-            {!jobName &&
+            <Tab
+              label={<div className="flex items-center">
+                <PublicIcon />&nbsp;Job Status
+              </div>}
+              component={NavLink}
+              className="Mui-Selected"
+              to="jobs"
+              classes="Mui-Selected"
+              replace
+            />
+            {/* isSignedIn() &&
               <Tab
                 label={
                   <div className="flex items-center">
-                    <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : '...'})
+                    <MyJobsIcon/>&nbsp;My Jobs
                   </div>
                 }
-                value="jobs"
-                component={Link}
-                to="/job-status/jobs"
+                value="my-jobs"
+                component={NavLink}
+                to="/my-jobs"
                 replace
               />
+            */}
+
+            {tab == 'my-jobs' &&
+              <Button
+                component={Link}
+                to="/create-job"
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon/>}
+                size="small"
+                className="create-job-btn"
+              >
+                Create job
+              </Button>
             }
-            <Tab
-              label={
-                <div className="flex items-center">
-                  <ScienceIcon/>&nbsp;Goals ({goals ? goals.length : '...'})
-                </div>
-              }
-              value="goals"
-              component={Link}
-              to="/job-status/goals"
-              replace
-            />
-            <Tab
-              label={<div className="flex items-center">
-                <TimelineIcon />&nbsp;Timelines
-              </div>}
-              value="timeline"
-              component={Link}
-              to="/job-status/timeline"
-              replace
-            />
           </Tabs>
 
-          {tab == 'jobs' && jobs &&
+
+          {tab != 'my-jobs' &&
+            <MapContainer>
+              {geo &&
+                <Map data={geo} selected={selected} resize={false} updateID={updateID} />
+              }
+            </MapContainer>
+          }
+
+
+          {/* tab != 'my-jobs' &&
+            <BreadContainer>
+              <Breadcrumbs
+                separator={<NavigateNextIcon fontSize="small" />}
+                aria-label="breadcrumb"
+              >
+                <Link key="1" to="/job-status/jobs" color={jobName ? 'text.primary' : 'inherit'}>
+                  <Chip label="All Jobs"/>
+                </Link>
+                {jobName &&
+                <Typography key="3" color="text.primary">
+                  {jobName}
+                </Typography>
+                }
+              </Breadcrumbs>
+            </BreadContainer>
+          */}
+
+          {tab != 'my-jobs' &&
+            <Tabs
+              value={tab}
+              aria-label="job status tabs"
+            >
+              {!jobName &&
+                <Tab
+                  label={
+                    <div className="flex items-center">
+                      <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : '...'})
+                    </div>
+                  }
+                  value="jobs"
+                  component={Link}
+                  to="/job-status/jobs"
+                  replace
+                />
+              }
+
+              <Tab
+                label={<div className="flex items-center">
+                  <TimelineIcon />&nbsp;Timelines
+                </div>}
+                value="timeline"
+                component={Link}
+                to="/job-status/timeline"
+                replace
+              />
+            </Tabs>
+          }
+
+          {['jobs', 'my-jobs'].includes(tab) && qJobs &&
             <TableContainer>
               <Table
                 primaryKey="id"
-                rows={jobs}
+                rows={qJobs}
                 columns={jobCols}
                 enableSorting
-                sort="-status"
-                onSelect={handleJobSelect}
+                sort="-last_updated"
                 onSearch={handleQuery}
-                onColumnMenuChange={() => {}}
-                onColumnMenuChange
-              />
-            </TableContainer>
-          }
-
-          {tab == 'goals' && goals &&
-            <TableContainer>
-              <Table
-                primaryKey="rowID"
-                rows={jobName ? goals.filter(o => o.name == jobName) : goals}
-                columns={goalCols}
-                enableSorting
-                onSelect={handleGoalSelect}
+                onSelect={handleJobSelect}
+                onColumnMenuChange={() => { /* do nothing special */ }}
+                middleComponent={
+                  <TableOptions>
+                    {isFiltered &&
+                      <Button
+                        variant="contained"
+                        component={Link}
+                        to={`timeline?nodes=${selected?.map(o => o.vsn).join(',')}`}
+                      >
+                        View timeline{selected?.length > 1 ? 's' : ''}
+                      </Button>
+                    }
+                  </TableOptions>
+                }
               />
             </TableContainer>
           }
 
           {tab == 'timeline' && byNode && manifestByVSN &&
             <TimelineContainer>
-              {Object.keys(byNode).map((node, i) => {
-                const {location, node_id} = manifestByVSN[node]
-                return (
-                  <div key={i} className="title-row">
-                    <div className="flex column">
-                      <div>
-                        <h2><Link to={`/node/${node_id}`}>{node}</Link></h2>
+              {Object.keys(byNode)
+                .filter(vsn => nodes ? nodes.includes(vsn) : true)
+                .map((vsn, i) => {
+                  const {location, node_id} = manifestByVSN[vsn]
+                  return (
+                    <div key={i} className="title-row">
+                      <div className="flex column">
+                        <div>
+                          <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                        </div>
+                        <div>{location}</div>
                       </div>
-                      <div>{location}</div>
+                      <JobTimeLine data={byNode[vsn]} />
                     </div>
-                    <JobTimeLine data={byNode[node]} />
-                  </div>
-                )
-              })}
+                  )
+                })
+              }
             </TimelineContainer>
           }
 
@@ -376,22 +451,27 @@ export default function JobStatus() {
 
 
 const Root = styled.div`
-  margin: 20px;
-`
+  margin: 10px 20px;
 
-const CustomSidebar = styled(Sidebar)`
-  padding: 0 10px;
-  //padding: 20px 10px;
+  .create-job-btn {
+    margin-left: auto;
+    height: 34px;
+    margin-top: 4px;
+  }
 `
 
 const Main = styled.div`
   width: 100%;
-  margin-bottom: 1400px;
+  margin-bottom: 100px;
 `
 
 const MapContainer = styled.div`
   width: 100%;
   height: 350px;
+`
+
+const BreadContainer = styled.div`
+  margin: 15px 0 5px 0;
 `
 
 const TimelineContainer = styled.div`
@@ -416,4 +496,8 @@ const TableContainer = styled.div`
   table {
     background: #fff;
   }
+`
+
+const TableOptions = styled.div`
+  margin-left: 20px;
 `

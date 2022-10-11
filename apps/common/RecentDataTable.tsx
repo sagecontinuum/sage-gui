@@ -116,7 +116,7 @@ export default memo(function RecentDataTable(props: Props) {
                     {data &&
                       <Tooltip title={new Date(timestamp).toLocaleString()} placement="right">
                         <span>
-                          {relTime(timestamp)}
+                          {relativeTime(timestamp)}
                         </span>
                       </Tooltip>
                     }

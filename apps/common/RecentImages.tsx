@@ -75,7 +75,7 @@ export default function RecentImages(props: Props) {
 
                   <Tooltip title={new Date(timestamp).toLocaleString()} placement="top">
                     <b className={isOldData(timestamp) ? 'failed' : 'muted'}>
-                      {relTime(timestamp)}
+                      {relativeTime(timestamp)}
                     </b>
                   </Tooltip>
                 </div>

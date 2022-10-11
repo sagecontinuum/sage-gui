@@ -95,8 +95,9 @@ export default function NavBar(props: Props) {
                 <AccountIcon />&nbsp;{username}
               </div>
             }
+            style={{left: '-30px'}}
             menu={
-              <div style={{left: '-100px'}}>
+              <div>
                 <Item
                   icon={<AccountIcon />}
                   to='/my-profile'
@@ -105,7 +106,7 @@ export default function NavBar(props: Props) {
                 <Item
                   icon={<DevicesIcon/>}
                   to='/my-devices'
-                  label="My devices goals"
+                  label="My devices"
                 />
                 <Divider />
                 <Item
@@ -127,6 +128,7 @@ export default function NavBar(props: Props) {
             }
             variant="outlined"
             color="primary"
+            sx={{marginLeft: '20px'}}
           >
             Sign In
           </Button>
@@ -180,19 +182,11 @@ const Spacer = styled.div`
   flex-grow: 1;
 `
 
-const DropDown = styled.div`
-  align-items: stretch;
-
-  .MuiListItem-root {
-    padding: 5px 10px;
-  }
-`
-
 export const NavItems = styled.div`
   display: flex;
   height: 100%;
   font-size: 1.1em;
-  padding: 0;
+  margin-left: 20px;
 `
 
 export {NavItem, Item}

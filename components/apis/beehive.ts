@@ -135,7 +135,7 @@ export function getAdminData() : Promise<Record[]> {
 export function getFactoryData() : Promise<Record[]> {
   const proms = [
     getData({start: '-4d', filter: {name: 'sys.uptime'}, tail: 1}),
-    getData({start: '-4d', filter: {name: 'sys.net.ip'}, tail: 1}),
+    getData({start: '-4d', filter: {name: 'sys.net.ip', device: 'wan0'}, tail: 1}),
     getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
   ]
 

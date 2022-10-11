@@ -1,5 +1,5 @@
 import * as BH from './beehive'
-import { groupBy, uniqBy } from 'lodash'
+import { groupBy } from 'lodash'
 import { handleErrors } from '../fetch-utils'
 
 import config from '/config'
@@ -11,7 +11,7 @@ const __token = Auth.getToken()
 
 const options = {
   headers: __token ? {
-    Authorization: `Sage ${__token}`
+    // Authorization: `Sage ${__token}`
   } : {}
 }
 function get(endpoint: string) {
@@ -282,7 +282,7 @@ const goalSignals = [
   'sys.scheduler.status.goal.updated'
 ]
 
-
+// currently unused beehive goal parser
 function getGoals() : Promise<Goal[]> {
   return BH.getData({
     start: '-365d',
@@ -337,7 +337,6 @@ export async function getAllData() : Promise<ReducedJobData> {
   try {
     jobData = jobs.map((obj) => {
       const {name, job_id, nodes, plugins, nodeTags} = obj
-
 
       return {
         ...obj,

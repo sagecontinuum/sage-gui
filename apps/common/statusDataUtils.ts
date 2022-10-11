@@ -10,15 +10,6 @@ const HOST_SUFFIX_MAPPING = settings.hostSuffixMapping
 
 
 
-export function queryData(data: object[], query: string) {
-  return data.filter(row =>
-    Object.values(row)
-      .join('').toLowerCase()
-      .includes(query.toLowerCase())
-  )
-}
-
-
 export function filterData(data: object[], state: object) {
   const filteredRows = data.filter(row => {
 

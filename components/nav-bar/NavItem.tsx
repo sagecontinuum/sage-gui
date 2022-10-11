@@ -8,6 +8,7 @@ import MenuItem from '@mui/material/MenuItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 
 import useClickOutside from '/components/hooks/useClickOutside'
+import { Badge } from '@mui/material'
 
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
   menu?: JSX.Element
   to?: string
   root?: string
+  style?: object // menu styling
 }
 
 export default function NavItem(props: Props) {
@@ -45,7 +47,7 @@ export default function NavItem(props: Props) {
         </a>
       }
       {open && menu &&
-        <MenuContainer onClick={handleClick}>
+        <MenuContainer onClick={handleClick} style={props.style}>
           {menu}
         </MenuContainer>
       }
@@ -55,7 +57,7 @@ export default function NavItem(props: Props) {
 
 const Root = styled.div`
   position: relative;
-  margin: 0 0 0 30px;
+  margin: 0 15px;
 
   > a {
     padding: 20px 0;

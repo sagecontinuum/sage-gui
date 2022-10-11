@@ -135,6 +135,7 @@ export default function SelectedTable(props: SelectedTableProps) {
                               />
                             }
                           </td>
+                          <td></td>
                         </tr>
                       )}
                     )}

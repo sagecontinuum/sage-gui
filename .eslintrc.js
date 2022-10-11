@@ -44,6 +44,9 @@ module.exports = {
     'ResizeObserver': true,
     'process': true,
     'console': true,
+    'setTimeout': true,
+    'clearTimeout': true,
+    'args': true,
 
     'Document': true,
     'HTMLElement': true,
