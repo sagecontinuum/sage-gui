@@ -1,7 +1,6 @@
 import config from '../../config'
-export const url = config.sageCommons
-export const downloadUrl = config.dataDownload
-
+const url = config.sageCommons
+const wifireUrl = config.wifireData
 
 
 function handleErrors(res) {
@@ -82,6 +81,10 @@ export function getPackage(name: string) : Promise<PackageRes> {
   return get(req)
 }
 
+export function getWifirePackage(name: string) : Promise<PackageRes> {
+  const req = `${wifireUrl}/action/package_show?id=${name}`
+  return get(req)
+}
 
 
 /**

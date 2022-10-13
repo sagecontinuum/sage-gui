@@ -16,7 +16,8 @@ const config = {
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',
   dataBrowserURL: 'https://portal.sagecontinuum.org/query-browser',
   adminURL: 'https://admin.sagecontinuum.org',
-  sageCommons: 'https://wifire-data.sdsc.edu/api',
+  wifireData: 'https://wifire-data.sdsc.edu/api',
+  sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://docs.waggle-edge.ai/docs',
 
