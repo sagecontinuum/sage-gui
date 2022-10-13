@@ -14,7 +14,7 @@ const config = {
 
   dockerRegistry: 'registry.sagecontinuum.org',
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',
-  dataBrowserURL: 'https://portal.sagecontinuum.org/data-browser',
+  dataBrowserURL: 'https://portal.sagecontinuum.org/query-browser',
   adminURL: 'https://admin.sagecontinuum.org',
   sageCommons: 'https://wifire-data.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',

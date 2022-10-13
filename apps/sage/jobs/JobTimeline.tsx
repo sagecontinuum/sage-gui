@@ -71,7 +71,7 @@ export default function JobTimeLine(props: Props) {
             const node = meta.vsn
             const app = image.slice(image.lastIndexOf('/') + 1)
 
-            navigate(`/data-browser/?apps=${app}&nodes=${node}&window=d`)
+            navigate(`/query-browser/?apps=${app}&nodes=${node}&window=d`)
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{left: 175, right: 0, bottom: 0}}

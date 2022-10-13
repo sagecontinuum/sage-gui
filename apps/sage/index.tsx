@@ -111,8 +111,8 @@ const NavMenu = () => {
             />
             <Item
               icon={<ChartBrowserIcon/>}
-              to='/data-browser'
-              label="Query data"
+              to="/query-browser"
+              label="Query Browser"
             />
           </>
         }
