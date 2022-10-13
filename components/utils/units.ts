@@ -57,6 +57,7 @@ export function msToTimeApprox(ms: number) {
 
 
 export function relativeTime(val: string) {
+  if (!val) return
   return msToTime(new Date().getTime() - (new Date(val).getTime()))
 }
 

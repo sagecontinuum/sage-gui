@@ -48,8 +48,9 @@ const jobCols = [{
 }, {
   id: 'status',
   label: 'Status',
-  format: (status, val) => {
-    status = status == 'Submitted' ? 'in-progress' : status.toLowerCase()
+  format: (_, obj) => {
+    let status = obj.state.last_state || '-'
+    status = status.toLowerCase()
     return <b className={status}>{status}</b>
   },
   width: '100px'
@@ -102,10 +103,26 @@ const jobCols = [{
   format: (_, obj) =>
     <b className="muted">{obj.apps.length}</b>
 }, {
-  id: 'last_updated',
+  id: 'submitted',
   label: 'Submitted',
   width: '100px',
-  format: (val) => relativeTime(val)
+  format: (_, {state}) => {
+    return relativeTime(state.last_submitted) || '-'
+  }
+}, {
+  id: 'updated',
+  label: 'Updated',
+  width: '100px',
+  format: (_, {state}) => {
+    return relativeTime(state.last_updated) || '-'
+  }
+}, {
+  id: 'last_completed',
+  label: 'Completed',
+  width: '100px',
+  format: (_, {state}) => {
+    return relativeTime(state.last_completed) || '-'
+  }
 }]
 
 
@@ -396,7 +413,7 @@ export default function JobStatus() {
                 rows={qJobs}
                 columns={jobCols}
                 enableSorting
-                sort="-last_updated"
+                sort="-submitted"
                 onSearch={handleQuery}
                 onSelect={handleJobSelect}
                 onColumnMenuChange={() => { /* do nothing special */ }}
