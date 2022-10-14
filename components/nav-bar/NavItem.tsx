@@ -1,15 +1,16 @@
 
-import { useState, useRef } from 'react'
+import { useState, useRef, FC } from 'react'
 import { NavLink, useMatch } from 'react-router-dom'
 import styled from 'styled-components'
 
 import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
+import ListSubheader from '@mui/material/ListSubheader'
 
 import useClickOutside from '/components/hooks/useClickOutside'
-import { Badge } from '@mui/material'
 
+export { ListSubheader }
 
 type Props = {
   label: string | JSX.Element
@@ -130,17 +131,19 @@ const MenuContainer = styled.div`
 
 type ItemProps = {
   label: string
-  icon: JSX.Element
   to: string
+  icon?: JSX.Element
   onClick?: MouseEvent
+  component?: FC
 }
 
 export function Item(props: ItemProps) {
 
   return (
-    <MenuItem component={NavLink} {...props}>
+    <MenuItem component={props.component || NavLink} {...props}>
       <ListItemIcon>{props.icon}</ListItemIcon>
       {props.label}
     </MenuItem>
   )
 }
+

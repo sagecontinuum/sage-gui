@@ -148,8 +148,9 @@ export default function Search() {
   return (
     <Root>
       <Alert severity="info" style={{borderBottom: '1px solid #f2f2f2' }}>
-        The data explorer is currently under development and available here for <b>early preview</b>.
-        Pease check back later when more data is available.
+        <b>Note:</b> The Data Commons (the view below)
+        is made available solely for <b>demonstration purposes</b>.  You might consider
+        checking out the <Link to="/data">Data Browser</Link>.
       </Alert>
 
       <div className="flex">

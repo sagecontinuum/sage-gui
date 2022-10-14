@@ -56,7 +56,7 @@ export default function App() {
                 <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
                 <Route path="data/ontology/:name" element={<Ontology />} />
                 <Route path="data/product/:name" element={<DataProduct />} />
-                <Route path="data-browser" element={<DataBrowser />} />
+                <Route path="query-browser" element={<DataBrowser />} />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>

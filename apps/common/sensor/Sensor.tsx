@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Chip from '@mui/material/Chip'
 import DownloadIcon from '@mui/icons-material/FileDownloadRounded'
 import wifireLogo from 'url:/assets/wifire-commons-logo.png'
+import ErrorMsg from '/apps/sage/ErrorMsg'
 import { useProgress } from '/components/progress/ProgressProvider'
-import ErrorMsg from '../ErrorMsg'
 
-import Breadcrumbs from './BreadCrumbs'
-import { formatter } from './DataProductSearch'
-import { FileFormatDot } from './FileFormatDot'
-import {Top} from '../common/Layout'
+// import Breadcrumbs from './BreadCrumbs'
+import { formatter } from '/apps/sage/data-commons/DataProductSearch'
+import { FileFormatDot } from '/apps/sage/data-commons/FileFormatDot'
+// import { Top } from '/apps/sage/common/Layout'
 
 import * as Data from '/components/apis/dataCommons'
 import Table from '/components/table/Table'
@@ -45,7 +45,7 @@ const columns = [{
 }]
 
 
-export default function Product() {
+export default function Sensor() {
   const {name} = useParams()
 
   const {setLoading} = useProgress()
@@ -58,18 +58,14 @@ export default function Product() {
   useEffect(() => {
     setLoading(true)
 
-    Data.getWifirePackage(name)
+    Data.getPackage(name.toLowerCase())
       .then(({result}) => {
-        const doi = result.extras.find(obj => obj.key == 'doi').value
-        setDoi(doi)
-
+        console.log('result', result)
         setData(result)
       })
       .catch(error => setError(error))
       .finally(() => setLoading(false))
   }, [name, setLoading])
-
-
 
   return (
     <Root>
@@ -88,10 +84,10 @@ export default function Product() {
           </Keywords>
 
           <h4>Last Updated</h4>
-          <div>Updated {data && formatter.time(data.metadata_modified+'Z')}</div>
+          <div>{new Date(data?.metadata_modified).toLocaleString()}</div>
 
           <h4>Created</h4>
-          <div>{data?.metadata_modified+'Z'}</div>
+          <div>{new Date(data?.metadata_modified).toLocaleString()}</div>
 
           <h4>Resource Type</h4>
           <div>{data && formatter.resources(data.resources)}</div>
@@ -102,9 +98,9 @@ export default function Product() {
 
 
         <Details>
-          <Top>
+          {/*<Top>
             <Breadcrumbs path={`/data/${name}`} />
-          </Top>
+          </Top>*/}
 
           <div className="flex items-center justify-between">
             <h1>{data?.title}</h1>

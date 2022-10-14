@@ -16,6 +16,7 @@ import config from '/config'
 
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning
+const SAGE_UI_PROJECT = settings.SAGE_UI_PROJECT
 
 const {additional_sensors} = config
 
@@ -91,7 +92,7 @@ const columns = [{
         <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
           {obj.hasStaticGPS ?
             <MapIcon fontSize="small"/> :
-            <MapIcon fontSize="small" style={{color: "#36b8ff"}}/>
+            <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
           }
         </LiveGPSDot>
       }
@@ -104,7 +105,12 @@ const columns = [{
     obj.node_type != 'Blade' ?
       <Link to={`/node/${val}`}>{val}</Link> : val,
   hide: true
-}, {
+},
+{...(SAGE_UI_PROJECT == 'sage' ? {
+  id: 'project',
+  label: 'Project'
+} : {})},
+{
   id: 'focus',
   label: 'Focus'
 }, {
@@ -116,7 +122,9 @@ const columns = [{
     return Object.keys(val)
       .map(host =>
         <div key={host}>
-          {host}: <b className={getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')}>
+          {host}: <b className={
+            getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')
+          }>
             {utils.msToTime(val[host])}
           </b>
         </div>
@@ -131,12 +139,13 @@ const columns = [{
 
     return Object.keys(val).map(host =>
       <div key={host}>{utils.prettyTime(val[host])}</div>
-      )
-    },
-    hide: true
+    )
+  },
+  hide: true
 }, {
   id: 'location',
   label: 'Location',
+  hide: SAGE_UI_PROJECT == 'sage'
 }, {
   id: 'gps',
   label: 'GPS',
@@ -151,11 +160,17 @@ const columns = [{
     if (obj.node_type != 'WSN')
       return '-'
 
-    const {top_camera: cam, shield} = obj
+    const {top_camera: cam} = obj
+    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
 
     return <SensorList>
-      {cam != 'none' ? <li><TT title="Top camera">{cam}</TT></li> : ''}
-      <li><TT title="Rainfall sensor">RG-15</TT></li>
+      {cam != 'none' &&
+        <li>
+          <TT title="Top camera">
+            <Link to={`/sensors/${id}`}>{cam}</Link>
+          </TT>
+        </li>}
+      <li><TT title="Rainfall sensor"><Link to="/sensors/rg-15">RG-15</Link></TT></li>
     </SensorList>
   }
 }, {
@@ -165,10 +180,14 @@ const columns = [{
     if (obj.node_type != 'WSN')
       return '-'
 
-    const {bottom_camera: cam, shield} = obj
+    const {bottom_camera: cam} = obj
+    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
 
     return <SensorList>
-      {cam != 'none' ? <li><TT title="Bottom camera">{cam}</TT></li> : '-'}
+      {cam != 'none' ?
+        <li><TT title="Bottom camera">
+          <Link to={`/sensors/${id}`}>{cam}</Link>
+        </TT></li> : '-'}
     </SensorList>
   }
 }, {
@@ -178,10 +197,17 @@ const columns = [{
     if (obj.node_type != 'WSN')
       return '-'
 
-    const {left_camera: cam, shield} = obj
+    const {left_camera: cam} = obj
+    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
 
     return <SensorList>
-      {cam != 'none' ? <li><TT title="Left camera">{cam}</TT></li> : '-'}
+      {cam != 'none' ?
+        <li><TT title="Left camera">
+          {cam.includes('mobotix') ?
+            cam : <Link to={`/sensors/${id}`}>{cam}</Link>}
+        </TT></li>
+        : '-'
+      }
     </SensorList>
   }
 }, {
@@ -193,10 +219,23 @@ const columns = [{
     if (cam == 'none' && !shield)
       return '-'
 
+    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
+
     return <SensorList>
-      {cam != 'none' ? <li><TT title="Right camera">{cam}</TT></li> : ''}
-      {shield ? <li><TT title="Microphone">ETS ML1-WS</TT></li> : ''}
-      {shield ? <li><TT title="temp, humidity, pressure, and gas sensor">BME680</TT></li> : ''}
+      {cam != 'none' ? <li>
+        <TT title="Right camera">
+          <Link to={`/sensors/${id}`}>{cam}</Link>
+        </TT></li>
+        : ''
+      }
+      {shield ?
+        <li><TT title="Microphone">ETS ML1-WS</TT></li> : ''}
+      {shield ?
+        <li><TT title="temp, humidity, pressure, and gas sensor">
+          <Link to={`/sensors/bme680`}>BME680</Link>
+        </TT></li>
+        : ''
+      }
     </SensorList>
   }
 }, {
@@ -264,6 +303,7 @@ const NodeCell = styled.div`
 const SensorList = styled.ul`
   padding: 0;
   font-size: 9pt;
+  list-style: none;
   li {
     white-space: nowrap;
   }

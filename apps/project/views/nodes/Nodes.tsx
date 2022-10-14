@@ -82,7 +82,7 @@ export default function Nodes() {
 
   // filter options
   // const [statuses, setStatuses] = useState<Option[]>()
-  // const [projects, setProjects] = useState<Option[]>()
+  const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
 
@@ -166,7 +166,7 @@ export default function Nodes() {
     setFilterState(filterState)
 
     // setStatuses(getOptions(data, 'status'))
-    // setProjects(getOptions(data, 'project'))
+    setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
   }
@@ -251,7 +251,7 @@ export default function Nodes() {
                     noSelectedSort
                   /> : <></>
                 */}
-                {/* projects &&
+                {projects &&
                   <FilterMenu
                     label="Project"
                     options={projects}
@@ -259,7 +259,7 @@ export default function Nodes() {
                     onChange={vals => handleFilterChange('project', vals)}
                     noSelectedSort
                   />
-                */}
+                }
                 {focuses &&
                   <FilterMenu
                     label="Focus"

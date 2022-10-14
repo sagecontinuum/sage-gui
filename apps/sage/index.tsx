@@ -1,5 +1,5 @@
 import ReactDom from 'react-dom'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -8,14 +8,13 @@ import CssBaseline from '@mui/material/CssBaseline'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 import UserIcon from '@mui/icons-material/AccountCircleRounded'
 import JobsIcon from '@mui/icons-material/ListRounded'
-import ScienceIcon from '@mui/icons-material/ScienceRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 
-import NavBar, { NavItems } from '../../components/nav-bar/NavBar'
-import NavItem, { Item } from '../../components/nav-bar/NavItem'
+import NavBar, { NavItems } from '/components/nav-bar/NavBar'
+import NavItem, { Item, ListSubheader } from '/components/nav-bar/NavItem'
 
 import AppList from './ecr/apps/AppList'
 import App from './ecr/app/App'
@@ -23,7 +22,9 @@ import CreateApp from './ecr/create-app/CreateApp'
 import RequireAuth from '/components/auth/RequireAuth'
 
 import Apps from './ecr/apps/Apps'
-import Node from '../common/node/Node'
+import Nodes from '/apps/project/views/nodes/Nodes'
+import Node from '/apps/common/node/Node'
+import Sensor from '/apps/common/sensor/Sensor'
 import JobStatus from './jobs/JobStatus'
 import CreateJob from './jobs/create-job/CreateJob'
 import DataBrowser from './data-stream/DataBrowser'
@@ -53,19 +54,61 @@ const NavMenu = () => {
   return (
     <NavItems>
       <NavItem
+        label="Nodes"
+        root="/nodes"
+        menu={
+          <>
+            <Item
+              icon={<PublicIcon/>}
+              component={Link}
+              to="/nodes"
+              label="All nodes"
+            />
+            <ListSubheader>
+              By Project:
+            </ListSubheader>
+            <Item
+              component={Link}
+              to='/nodes/?project="SAGE"'
+              label="Sage"
+            />
+            <Item
+              component={Link}
+              to='/nodes/?project="DEV"'
+              label="Dev"
+            />
+            <Item
+              component={Link}
+              to='/nodes/?project="VTO"'
+              label="VTO"
+            />
+            <Item
+              component={Link}
+              to='/nodes/?project="DAWN"'
+              label="DAWN"
+            />
+            <Item
+              component={Link}
+              to='/nodes/?project="WFO"'
+              label="WFO"
+            />
+          </>
+        }
+      />
+      <NavItem
         label="App Catalog"
         root="/apps"
         menu={
           <>
             <Item
               icon={<PublicIcon/>}
-              to='/apps/explore'
-              label="Explore apps"
+              to="/apps/explore"
+              label="Public Apps"
             />
             <Item
               icon={<UserIcon/>}
-              to='/apps/my-apps'
-              label=" My Apps"
+              to="/apps/my-apps"
+              label="My Apps"
             />
           </>
         }
@@ -77,13 +120,13 @@ const NavMenu = () => {
           <>
             <Item
               icon={<JobsIcon/>}
-              to='/job-status/jobs'
-              label="Job status"
+              to="/job-status/jobs"
+              label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
               to="/job-status/timeline"
-              label="Job timelines"
+              label="Timelines"
             />
 
             {/* isSignedIn() &&
@@ -106,8 +149,8 @@ const NavMenu = () => {
           <>
             <Item
               icon={<ChartIcon/>}
-              to='/data'
-              label="Explore data"
+              to="/data"
+              label="Data Browser"
             />
             <Item
               icon={<ChartBrowserIcon/>}
@@ -144,9 +187,13 @@ export default function Sage() {
             <Container>
               <ProgressProvider>
                 <Routes>
-                  <Route path="/" element={<Navigate to="apps/explore" replace />} />
-                  <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
+                  <Route path="/" element={<Navigate to="nodes" replace />} />
 
+                  <Route path="nodes" element={<NodeList><Nodes /></NodeList>} />
+                  <Route path="node/:node" element={<Node />} />
+                  <Route path="sensors/:name" element={<Sensor />} />
+
+                  <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
                   <Route path="apps" element={<Apps />}>
                     <Route path="explore" element={<AppList />} />
                     <Route path="app/*" element={<App />} />
@@ -156,9 +203,7 @@ export default function Sage() {
                   </Route>
 
                   <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />
-
                   <Route path="job-status" element={<Navigate to="jobs" replace />} />
-
                   <Route path="job-status" element={<JobStatus />}>
                     <Route path=":tab/:nodes" element={<JobStatus />} />
                     <Route path=":tab/:jobName" element={<JobStatus />} />
@@ -170,11 +215,9 @@ export default function Sage() {
                   <Route path="data" element={<Data />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
-                  <Route path="data-browser" element={<DataBrowser />} />
+                  <Route path="query-browser" element={<DataBrowser />} />
 
                   <Route path="data-commons-demo" element={<DataProductSearch />} />
-
-                  <Route path="node/:node" element={<Node />} />
 
                   <Route path="my-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                   <Route path="my-profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
@@ -194,6 +237,10 @@ export default function Sage() {
 const Container = styled.div`
   margin: 60px 0 0 0;
   width: 100%;
+`
+
+const NodeList = styled.div`
+  margin: 0 10px 10px 10px;
 `
 
 
