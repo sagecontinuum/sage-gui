@@ -120,12 +120,12 @@ const NavMenu = () => {
           <>
             <Item
               icon={<JobsIcon/>}
-              to="/job-status/jobs"
+              to="/jobs/job-status"
               label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
-              to="/job-status/timeline"
+              to="/jobs/timeline"
               label="Timelines"
             />
 
@@ -134,7 +134,7 @@ const NavMenu = () => {
                 <Divider />
                 <Item
                   icon={<MyJobsIcon/>}
-                  to="/job-status/my-jobs"
+                  to="/jobs/my-jobs"
                   label="My Jobs"
                 />
               </>
@@ -203,8 +203,8 @@ export default function Sage() {
                   </Route>
 
                   <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />
-                  <Route path="job-status" element={<Navigate to="jobs" replace />} />
-                  <Route path="job-status" element={<JobStatus />}>
+                  <Route path="jobs-status" element={<Navigate to="jobs" replace />} />
+                  <Route path="jobs" element={<JobStatus />}>
                     <Route path=":tab/:nodes" element={<JobStatus />} />
                     <Route path=":tab/:jobName" element={<JobStatus />} />
                     <Route path=":tab" element={<JobStatus />} />

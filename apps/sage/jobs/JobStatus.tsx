@@ -40,7 +40,7 @@ const jobCols = [{
   label: 'Name',
   format: (val, row) => {
     const nodes = row.nodes
-    return <Link to={`/job-status/timeline?nodes=${nodes.join(',')}`}>{val}</Link>
+    return <Link to={`/jobs/timeline?nodes=${nodes.join(',')}`}>{val}</Link>
   }
 }, {
   id: 'id',
@@ -174,7 +174,7 @@ export default function JobStatus() {
   const navigate = useNavigate()
   const path = useMatch('*').pathname
 
-  const {tab = 'jobs', jobName} = useParams()
+  const {tab = 'jobs-status', jobName} = useParams()
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || ''
   const nodes = params.get('nodes') || ''
@@ -363,7 +363,7 @@ export default function JobStatus() {
                 separator={<NavigateNextIcon fontSize="small" />}
                 aria-label="breadcrumb"
               >
-                <Link key="1" to="/job-status/jobs" color={jobName ? 'text.primary' : 'inherit'}>
+                <Link key="1" to="/jobs/job-status" color={jobName ? 'text.primary' : 'inherit'}>
                   <Chip label="All Jobs"/>
                 </Link>
                 {jobName &&
@@ -387,9 +387,9 @@ export default function JobStatus() {
                       <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : '...'})
                     </div>
                   }
-                  value="jobs"
+                  value="job-status"
                   component={Link}
-                  to="/job-status/jobs"
+                  to="/jobs/job-status"
                   replace
                 />
               }
@@ -400,13 +400,13 @@ export default function JobStatus() {
                 </div>}
                 value="timeline"
                 component={Link}
-                to="/job-status/timeline"
+                to="/jobs/timeline"
                 replace
               />
             </Tabs>
           }
 
-          {['jobs', 'my-jobs'].includes(tab) && qJobs &&
+          {['job-status', 'my-jobs'].includes(tab) && qJobs &&
             <TableContainer>
               <Table
                 primaryKey="id"

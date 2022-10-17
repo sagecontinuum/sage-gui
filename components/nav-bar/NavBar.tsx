@@ -112,7 +112,7 @@ export default function NavBar(props: Props) {
                 <Item
                   onClick={handleSignOut}
                   icon={signingOut ?  <Progress size={20} /> : <ExitIcon />}
-                  to="/job-status/timeline"
+                  to="/jobs/timeline"
                   label={signingOut ? 'Signing out...' : 'Sign out'}
                 />
               </div>
