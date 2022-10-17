@@ -51,6 +51,10 @@ const exampleColumns = [
 */
 
 
+type Row = { rowID: number }
+type Rows = Row[]
+
+
 const Cell = props =>
   <TableCell {...props}>
     {props.children}
@@ -78,12 +82,11 @@ const RowCells = ({columns, row}) =>
   </>
 
 type RowProps = {
-  rows: object[]
   columns: object[]
-  row: object,
+  row: Row,
   id: number,
   emptyCell: boolean,
-  selected: any, //todo: type
+  selected: any, // todo: type
   checkboxes: boolean,
   onSelect?: (
     evt: MouseEvent<HTMLElement> | ChangeEvent<HTMLInputElement>,
@@ -109,7 +112,6 @@ const Row = (props: RowProps) => {
     greyRow
   } = props
 
-  // @ts-ignore
   const {rowID} = row
 
   return (
@@ -276,8 +278,10 @@ const clientSideSort = (data, id, direction) => {
   } else if (isNumeric) {
     data.sort((a, b) =>
       direction == 'asc' ?
-        (a[id] || -Infinity).toString().localeCompare((b[id] || -Infinity).toString(), undefined, {numeric: true}) :
-        (b[id] || -Infinity).toString().localeCompare((a[id] || -Infinity).toString(), undefined, {numeric: true})
+        (a[id] || -Infinity).toString()
+          .localeCompare((b[id] || -Infinity).toString(), undefined, {numeric: true}) :
+        (b[id] || -Infinity).toString()
+          .localeCompare((a[id] || -Infinity).toString(), undefined, {numeric: true})
     )
   } else {
     data.sort((a, b) =>
@@ -329,7 +333,7 @@ type Props = {
   sort?: `+${string}` | `-${string}`
   emptyNotice?: string | JSX.Element
   pagination?: boolean
-  offsetHeight?: string | boolean
+  offsetHeight?: string
   checkboxes?: boolean
   searchPlaceholder?: string
   stripes?: boolean
@@ -355,9 +359,6 @@ type Props = {
   rightComponent?: JSX.Element
 }
 
-
-type Row = { rowID: number }
-type Rows = Row[]
 
 
 
@@ -394,7 +395,8 @@ export default function TableComponent(props: Props) {
     data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
   }
 
-  const [rows, setRows] = useState<Rows>(data) // may contain subset of rows via pagination, filtering, etc
+  // may contain subset of rows via pagination, filtering, etc
+  const [rows, setRows] = useState<Rows>(data)
 
   // keep state on shown/hidden columns
   // initial columns are defined in `columns` spec.
@@ -526,7 +528,7 @@ export default function TableComponent(props: Props) {
       let allRows = indexData(props.rows, primaryKey)
       allRows = clientSideSort(allRows, id, direction)
 
-      let newRows = pagination ?
+      const newRows = pagination ?
         allRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : allRows
 
       setRows(newRows)
@@ -612,9 +614,9 @@ export default function TableComponent(props: Props) {
       </CtrlContainer>
 
       <Container
-        offset={offsetHeight ? offsetHeight : 0}
-        stripes={stripes ? 1 : 0}
-        userselect={userSelect ? 1 : 0}
+        offset={offsetHeight ? offsetHeight : '0px'}
+        stripes={stripes}
+        userselect={userSelect}
       >
         <Table stickyHeader aria-label="table" size="small" ref={tableRef}>
           <TableHead>
@@ -679,7 +681,13 @@ const Pagination = styled(TablePagination)`
   }
 `
 
-const Container = styled(TableContainer)`
+type StylingProps = {
+  offset?: string | boolean
+  stripes?: boolean
+  userselect?: boolean
+}
+
+const Container = styled(TableContainer)<StylingProps>`
   /* remove height of control panel */
   max-height: ${props => `calc(100% - ${props.offset || '60px'})`};
   height: 100%;

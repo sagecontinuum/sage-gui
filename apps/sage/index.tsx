@@ -11,7 +11,14 @@ import JobsIcon from '@mui/icons-material/ListRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
-import MyJobsIcon from '@mui/icons-material/Engineering'
+import SageIcon from '@mui/icons-material/YardOutlined'
+import DevIcon from '@mui/icons-material/DataObject'
+import VTOIcon from '@mui/icons-material/FlightRounded'
+import DAWNIcon from '@mui/icons-material/ScienceRounded'
+
+
+
+// import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
 import NavItem, { Item, ListSubheader } from '/components/nav-bar/NavItem'
@@ -64,25 +71,27 @@ const NavMenu = () => {
               to="/nodes"
               label="All nodes"
             />
-            <ListSubheader>
-              By Project:
-            </ListSubheader>
+            <Divider sx={{width: '170px'}} />
             <Item
+              icon={<SageIcon />}
               component={Link}
               to='/nodes/?project="SAGE"'
               label="Sage"
             />
             <Item
+              icon={<DevIcon />}
               component={Link}
               to='/nodes/?project="DEV"'
               label="Dev"
             />
             <Item
+              icon={<VTOIcon />}
               component={Link}
               to='/nodes/?project="VTO"'
               label="VTO"
             />
             <Item
+              icon={<DAWNIcon />}
               component={Link}
               to='/nodes/?project="DAWN"'
               label="DAWN"

@@ -314,7 +314,7 @@ export default function JobStatus() {
               </div>}
               component={NavLink}
               className="Mui-Selected"
-              to="jobs"
+              to="job-status"
               classes="Mui-Selected"
               replace
             />
@@ -384,7 +384,7 @@ export default function JobStatus() {
                 <Tab
                   label={
                     <div className="flex items-center">
-                      <ListIcon/>&nbsp;Job List ({jobs ? jobs.length : '...'})
+                      <ListIcon/>&nbsp;Jobs ({jobs ? jobs.length : '...'})
                     </div>
                   }
                   value="job-status"
