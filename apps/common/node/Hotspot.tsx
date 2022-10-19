@@ -16,12 +16,14 @@ export default function Hotspot(props) {
   }
 
   return (
-    <HotspotRoot {...props}>
+    <HotspotRoot
+      {...props}
+      onMouseOver={handleOver}
+      onMouseOut={handleOut}
+    >
       <Tooltip
         title={title}
         placement="top"
-        onMouseOver={handleOver}
-        onMouseOut={handleOut}
       >
         <div>
           <div className="label">{label}</div>
