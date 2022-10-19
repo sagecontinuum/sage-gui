@@ -6,7 +6,7 @@ import PublicIcon from '@mui/icons-material/PublicRounded'
 import SharedIcon from '@mui/icons-material/PeopleAltRounded'
 import GithubIcon from '@mui/icons-material/GitHub'
 
-import { Item, Title } from '../../common/Layout'
+import { Item, Title } from '/components/layout/Layout'
 import BuildIndicator from '../BuildIndicator'
 import RepoActions from '../RepoActions'
 import { formatters, Thumb, Dot } from '../formatters'

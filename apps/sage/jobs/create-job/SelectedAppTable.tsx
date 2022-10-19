@@ -6,7 +6,7 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import TextField from '@mui/material/TextField'
 
-import { Item } from '../../common/Layout'
+import { Item } from '/components/layout/Layout'
 import { Accordion, useAccordionStyles } from '../../ecr/app/TagList'
 import Checkbox from '/components/input/Checkbox'
 

@@ -444,7 +444,7 @@ export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> 
   if (!lat || !lon)
     return null
 
-  return {lat, lon}
+  return {vsn, lat, lon}
 }
 
 

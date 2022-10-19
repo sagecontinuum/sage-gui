@@ -170,6 +170,7 @@ type Props = {
   data: Data
   selected: Data
   updateID: number
+  vsn: `W${string}` | `V${string}`
   resize?: boolean
 }
 

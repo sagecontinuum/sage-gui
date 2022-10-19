@@ -7,7 +7,7 @@ import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
 import DataOptions from './DataOptions'
 
-import { Sidebar, Top, Controls, Divider, FilterTitle } from '../common/Layout'
+import { Sidebar, Top, Controls, Divider, FilterTitle } from '/components/layout/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 

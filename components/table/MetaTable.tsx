@@ -28,7 +28,7 @@ export default function MetaTable(props:Props) {
                 format ?
                   format(data[id], data) :
                   ((data[id] || '-').toString() || '-')
-                }
+              }
               </td>
             </tr>
           )
@@ -41,10 +41,8 @@ export default function MetaTable(props:Props) {
 
 const Table = styled.table`
   thead th {
-    border-bottom: 2px solid #888888;
-    color: #222;
-    /* border-top: 2px solid #888; */
-    background: #ededed;
+    color: #fff;
+    background: #4e2a84;
   }
 
   tbody td:first-child {
@@ -54,3 +52,4 @@ const Table = styled.table`
 `
 
 /* see global style.scss for rest of class styling */
+

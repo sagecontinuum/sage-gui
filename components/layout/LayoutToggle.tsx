@@ -1,8 +1,6 @@
-import React from 'react'
 import IconButton from '@mui/material/IconButton'
 import SpaciousIcon from '@mui/icons-material/ViewStream'
 import ViewComfyIcom from '@mui/icons-material/ViewComfy'
-
 
 
 type Layout = 'compact' | 'spacious'

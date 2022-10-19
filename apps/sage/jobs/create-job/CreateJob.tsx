@@ -2,7 +2,7 @@ import { useReducer, useState } from 'react'
 import styled from 'styled-components'
 
 import TextField from '@mui/material/TextField'
-import { Step, StepTitle } from '../../common/FormLayout'
+import { Step, StepTitle } from '/components/layout/FormLayout'
 
 import Clipboard from '/components/utils/Clipboard'
 import AppSelector from './AppSelector'

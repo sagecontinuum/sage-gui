@@ -1,6 +1,10 @@
 import styled from 'styled-components'
 import MuiDivider from '@mui/material/Divider'
+import { Card as MuiCard, CardContent } from '@mui/material'
 
+import { createGlobalStyle } from 'styled-components'
+
+// first version of card design (WIP; see ECR views)
 export const Item = styled.div`
   position: relative;
   margin: 20px 1px; // 1px left/right for sticky header
@@ -66,3 +70,23 @@ export const Sidebar = styled.div<{width?: string}>`
 export const FilterTitle = styled.h2`
   margin-left: 20px;
 `
+
+
+// second incarnation of card design (WIP; currently only used on the node view)
+export const CardViewStyle = createGlobalStyle`
+  body {
+    background: rgb(231, 235, 240);
+  }
+`
+
+export const Card = (props) => {
+  const {children, noPad, ...rest} = props
+
+  return (
+    <MuiCard {...rest}>
+      <CardContent style={noPad ? {padding: 0} : {paddingBottom: 20}}>
+        {children}
+      </CardContent>
+    </MuiCard>
+  )
+}

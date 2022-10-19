@@ -18,11 +18,11 @@ import TableSearch from '/components/table/TableSearch'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as ECR from '/components/apis/ecr'
 
-import {Top} from '../../common/Layout'
+import {Top} from '/components/layout/Layout'
 import SpaciousLayout from './SpaciousAppList'
 import FeaturedApps from './FeaturedApps'
 import { formatters } from '../formatters'
-import LayoutToggle from '../../common/LayoutToggle'
+import LayoutToggle from '/components/layout/LayoutToggle'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 

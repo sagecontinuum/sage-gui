@@ -26,6 +26,11 @@ const theme = createTheme({
     }
   },
   components: {
+    MuiCard: {
+      defaultProps: {
+        variant: 'outlined'
+      }
+    },
     MuiTabs: {
       styleOverrides: {
         root: {

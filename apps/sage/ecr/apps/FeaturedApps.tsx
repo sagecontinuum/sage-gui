@@ -6,7 +6,7 @@ import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 import GithubIcon from '@mui/icons-material/GitHub'
 
-import { Item, Title } from '../../common/Layout'
+import { Item, Title } from '/components/layout/Layout'
 import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:/assets/bee.svg'
 

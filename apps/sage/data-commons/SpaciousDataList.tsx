@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { formatter } from './DataProductSearch'
-import { Item, Title } from '../common/Layout'
+import { Item, Title } from '/components/layout/Layout'
 import { Link } from 'react-router-dom'
 import highlightText from '/components/utils/text'
 

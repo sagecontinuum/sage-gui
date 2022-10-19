@@ -11,7 +11,7 @@ import ErrorMsg from '../ErrorMsg'
 import Breadcrumbs from './BreadCrumbs'
 import { formatter } from './DataProductSearch'
 import { FileFormatDot } from './FileFormatDot'
-import {Top} from '../common/Layout'
+import {Top} from '/components/layout/Layout'
 
 import * as Data from '/components/apis/dataCommons'
 import Table from '/components/table/Table'

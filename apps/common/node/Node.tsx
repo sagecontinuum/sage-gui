@@ -1,32 +1,32 @@
+/* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
 import { useParams, useLocation } from 'react-router-dom'
 
-import Alert from '@mui/material/Alert'
-import Button from '@mui/material/Button'
-import Tooltip from '@mui/material/Tooltip'
+import { Alert, Button, Tooltip } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 import wsnode from 'url:/assets/wsn-closed.png'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
-import { useProgress } from '/components/progress/ProgressProvider'
 
 import RecentDataTable from '/apps/common/RecentDataTable'
 import RecentImages from '/apps/common/RecentImages'
+import { useProgress } from '/components/progress/ProgressProvider'
 import Audio from '/components/viz/Audio'
-import Map from '/components/LeafletMap'
+import Map from '/components/Map'
 import MetaTable from '/components/table/MetaTable'
+import Clipboard from '/components/utils/Clipboard'
+import format from '/components/data/dataFormatter'
+import Timeline from '/components/viz/TimelineChart'
+import TimelineSkeleton from '/components/viz/TimelineSkeleton'
+import { CardViewStyle, Card } from '/components/layout/Layout'
 import Hotspot from './Hotspot'
 
 import adminSettings from '/apps/admin/settings' // todo(nc): organize, maybe?
 import config from '/config'
-import Clipboard from '/components/utils/Clipboard'
-import format from '/components/data/dataFormatter'
 
-import Timeline from '/components/viz/TimelineChart'
-import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 
 // todo(nc): promote/refactor into component/ lib
 import DataOptions from '/apps/sage/data/DataOptions'
@@ -59,13 +59,13 @@ const noneFormatter = (val) =>
 
 const metaRows1 = [{
   id: 'project',
-  format: (val) => <a href={`${config.adminURL}/status?project="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+  format: (val) => <a href={`${config.adminURL}/status?project="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'focus',
-  format: (val) => <a href={`${config.adminURL}/status?focus="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+  format: (val) => <a href={`${config.adminURL}/status?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'location',
-  format: (val) => <a href={`${config.adminURL}/status?location="${encodeURIComponent(val)}"`} target="_blank">{val}</a>
+  format: (val) => <a href={`${config.adminURL}/status?location="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'build_date',
   label: 'Built'
@@ -92,6 +92,12 @@ const cameraMetaRows = [
   {id: 'right_camera', label: 'Right', format: noneFormatter}
 ]
 
+// todo(nc): temp solution until we have references!
+// use the most recent app with same substring, ignoring "plugin-" and version
+const findApp = (apps, name) =>
+  apps.find(o => o.id.includes(name.replace('plugin-', '')))
+
+
 export default function NodeView() {
   const {node} = useParams()
   const params = new URLSearchParams(useLocation().search)
@@ -104,7 +110,7 @@ export default function NodeView() {
   const [vsn, setVsn] = useState<string>(null)
   const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
-  const [liveGPS, setLiveGPS] = useState<{lat: Number, lon: Number}>()
+  const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
 
   const [error, setError] = useState(null)
 
@@ -170,12 +176,18 @@ export default function NodeView() {
 
   const onOver = (id) => {
     const cls = `.hover-${id}`
-    document.querySelector(cls).style.outline = '3px solid #1a779c'
+    const ele = document.querySelector(cls)
+    if (!ele) return
+
+    ele.style.outline = '3px solid #1a779c'
     setHover(cls)
   }
 
   const onOut = (id) => {
-    document.querySelector(hover).style.outline = 'none'
+    if (!hover) return
+
+    const ele = document.querySelector(hover)
+    ele.style.outline = 'none'
   }
 
   const mouse = {onMouseOver: onOver, onMouseOut: onOut}
@@ -211,25 +223,30 @@ export default function NodeView() {
 
   return (
     <Root>
+      <CardViewStyle />
 
       {error &&
         <Alert severity="error">{error.message}</Alert>
       }
 
       <div className="flex">
-        <LeftSide>
-          <div className="flex items-center justify-between">
-            <h1>Node {vsn} | <small className="muted">{node}</small></h1>
-            <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
-              <Button href={manifest ? `${config.adminURL}/node/${manifest.node_id}` : ''} target="_blank">
-                <span className={`flex items-center status ${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
-                  {status}
-                </span>
-              </Button>
-            </Tooltip>
-          </div>
+        <LeftSide className="flex column gap">
+          <Card>
+            <div className="flex items-center justify-between">
+              <h1 className="no-margin">Node {vsn} <small className="muted">{node}</small></h1>
+
+              <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
+                <Button href={manifest ? `${config.adminURL}/node/${manifest.node_id}` : ''} target="_blank">
+                  <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
+                    {status}
+                  </span>
+                </Button>
+              </Tooltip>
+            </div>
+          </Card>
+
           <div className="flex items-start meta-tables">
-            <div className="meta-left">
+            <Card noPad className="meta-left">
               <MetaTable
                 title="Overview"
                 rows={[
@@ -253,8 +270,9 @@ export default function NodeView() {
                 ]}
                 data={{...manifest, ...meta}}
               />
-            </div>
-            <div className="meta-right">
+            </Card>
+
+            <Card noPad className="meta-right">
               <MetaTable
                 title="Hardware"
                 rows={metaRows2}
@@ -266,28 +284,28 @@ export default function NodeView() {
                 rows={cameraMetaRows}
                 data={{...manifest, ...meta}}
               />
-            </div>
+            </Card>
           </div>
-          <br/>
 
-          <div className="timeline-title flex items-center">
-            <h2>Last {TAIL_DAYS} days of data</h2>
-            {Object.keys(data || {}).length > 0 &&
+          <Card>
+            <div className="timeline-title flex items-center">
+              <h2>Last {TAIL_DAYS} days of data</h2>
+              {Object.keys(data || {}).length > 0 &&
               <DataOptions onChange={handleOptionChange} opts={opts} condensed />
-            }
-          </div>
-
-          {loadingTL && !tlError &&
-            <div className="clearfix w-full">
-              <TimelineSkeleton />
+              }
             </div>
-          }
 
-          {!Object.keys(data || {}).length &&
-            <div className="clearfix muted">No data available</div>
-          }
+            {loadingTL && !tlError &&
+              <div className="clearfix w-full">
+                <TimelineSkeleton />
+              </div>
+            }
 
-          {Object.keys(data || {}).length > 0 && vsn &&
+            {!Object.keys(data || {}).length &&
+              <div className="clearfix muted">No data available</div>
+            }
+
+            {Object.keys(data || {}).length > 0 && vsn &&
             <Timeline
               data={data[vsn]}
               cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -313,47 +331,58 @@ export default function NodeView() {
               }}
               margin={TIMELINE_MARGIN}
             />
-          }
-          <br/>
+            }
+          </Card>
 
-          <h2>Sensors</h2>
-          {vsn &&
-            <div className="flex data-tables">
-              <RecentDataTable
-                items={format(['temp', 'humidity', 'pressure'], vsn)}
-                className="hover-bme"
-              />
-
-              <div>
+          <Card>
+            <h2>Sensors</h2>
+            {vsn &&
+              <div className="flex data-tables">
                 <RecentDataTable
-                  items={format(['raingauge'], vsn)}
-                  className="hover-rain"
+                  items={format(['temp', 'humidity', 'pressure'], vsn)}
+                  className="hover-bme"
                 />
-                {hasMetOne(vsn) &&
+
+                <div>
                   <RecentDataTable
-                    items={format(['es642AirQuality'], vsn)}
+                    items={format(['raingauge'], vsn)}
+                    className="hover-rain"
                   />
-                }
+                  {hasMetOne(vsn) &&
+                    <RecentDataTable
+                      items={format(['es642AirQuality'], vsn)}
+                    />
+                  }
+                </div>
               </div>
-            </div>
-          }
+            }
+          </Card>
 
-          <h2>Images</h2>
-          <Imgs>
-            <RecentImages node={node} horizontal />
-          </Imgs>
+          <Card>
+            <h2>Images</h2>
+            <Imgs>
+              <RecentImages node={node} horizontal />
+            </Imgs>
+          </Card>
 
-          <h2>Audio</h2>
-          <Audio node={node} className="hover-audio"/>
+          <Card>
+            <h2>Audio</h2>
+            <Audio node={node} className="hover-audio"/>
+          </Card>
         </LeftSide>
 
         <RightSide className="justify-end">
-          {hasStaticGPS(manifest) &&
-            <Map data={{lat: manifest.gps_lat, lon: manifest.gps_lon}} />
-          }
-          {!hasStaticGPS(manifest) && liveGPS &&
-            <Map data={liveGPS} />
-          }
+          <Card noPad>
+            {hasStaticGPS(manifest) && status && vsn &&
+              <Map data={[{id: vsn, vsn, lat: manifest.gps_lat, lng: manifest.gps_lon, status}]} resize={null} />
+            }
+            {!hasStaticGPS(manifest) && liveGPS && status &&
+              <Map data={[{id: vsn, vsn, lat: liveGPS.lat, lng: liveGPS.lon, status}]} resize={null} />
+            }
+            {!hasStaticGPS(manifest) && !liveGPS &&
+              <div className="muted" style={{margin: 18}}>(Map not available)</div>
+            }
+          </Card>
 
           {vsn?.charAt(0) == 'W' &&
             <WSNView>
@@ -383,6 +412,7 @@ const Root = styled.div`
   .meta-left {
     flex: 1;
     margin-right: 2em;
+    height: 100%;
   }
 
   .meta-right {
@@ -430,7 +460,6 @@ const WSN_VIEW_WIDTH = 400
 const WSNView = styled.div`
   position: sticky;
   top: 60px;
-
 
   img {
     padding: 50px;

@@ -17,7 +17,7 @@ import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import * as YAML from 'yaml'
 import { useSnackbar } from 'notistack'
 
-import { StepTitle, Step, StepForm } from '../../common/FormLayout'
+import { StepTitle, Step, StepForm } from '/components/layout/FormLayout'
 import ConfigForm from './ConfigForm'
 import FilterMenu from '/components/FilterMenu'
 import CheckBox from '/components/input/Checkbox'

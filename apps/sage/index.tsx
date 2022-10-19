@@ -13,15 +13,14 @@ import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
 import SageIcon from '@mui/icons-material/YardOutlined'
 import DevIcon from '@mui/icons-material/DataObject'
-import VTOIcon from '@mui/icons-material/FlightRounded'
-import DAWNIcon from '@mui/icons-material/ScienceRounded'
-
-
+import VTOIcon from '@mui/icons-material/FlightTakeoff'
+import DAWNIcon from '@mui/icons-material/ScienceOutlined'
+import WFOIcon from '@mui/icons-material/WorkspacesOutlined'
 
 // import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
-import NavItem, { Item, ListSubheader } from '/components/nav-bar/NavItem'
+import NavItem, { Item } from '/components/nav-bar/NavItem'
 
 import AppList from './ecr/apps/AppList'
 import App from './ecr/app/App'
@@ -97,6 +96,7 @@ const NavMenu = () => {
               label="DAWN"
             />
             <Item
+              icon={<WFOIcon />}
               component={Link}
               to='/nodes/?project="WFO"'
               label="WFO"

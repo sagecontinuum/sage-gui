@@ -19,7 +19,7 @@ import JobTimeLine from './JobTimeline'
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
-// import { Sidebar, Top, Controls, Divider } from '../common/Layout'
+// import { Sidebar, Top, Controls, Divider } from '/components/layout/Layout'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
