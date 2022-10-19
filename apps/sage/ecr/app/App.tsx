@@ -60,7 +60,7 @@ export default function App() {
           setTabIndex(1)
         }
       })
-      .catch(err => setError(err))
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
   }, [path, setLoading])
@@ -108,7 +108,7 @@ export default function App() {
       <HR />
 
       {error &&
-        <ErrorMsg>{error || {}}</ErrorMsg>
+        <ErrorMsg>{error}</ErrorMsg>
       }
 
       <Details className="flex">
