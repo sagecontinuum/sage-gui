@@ -245,7 +245,7 @@ export default function NodeView() {
             </div>
           </Card>
 
-          <div className="flex items-start meta-tables">
+          <div className="flex items-start meta-tables gap">
             <Card noPad className="meta-left">
               <MetaTable
                 title="Overview"
@@ -409,9 +409,12 @@ export default function NodeView() {
 
 
 const Root = styled.div`
+  h2 {
+    margin-top: 0;
+  }
+
   .meta-left {
     flex: 1;
-    margin-right: 2em;
     height: 100%;
   }
 
@@ -441,8 +444,8 @@ const Root = styled.div`
 
 const Imgs = styled.div`
   img {
-    height: 300px;
-    width: auto;
+    max-width: 380px;
+    object-fit: contain;
   }
 `
 
@@ -452,7 +455,7 @@ const LeftSide = styled.div`
 `
 
 const RightSide = styled.div`
-  margin: 20px;
+  margin: 20px 20px 20px 15px;
 `
 
 const WSN_VIEW_WIDTH = 400

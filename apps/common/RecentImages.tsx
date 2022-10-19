@@ -65,7 +65,6 @@ export default function RecentImages(props: Props) {
               <img
                 className={`hover-${pos}-camera`}
                 src={value}
-                // style={isOldData(timestamp) ? {border: '10px solid red'} : {}}
               />
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
