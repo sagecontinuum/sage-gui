@@ -32,6 +32,11 @@ export type State = {
   status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 
+
+export const Buckets = [
+  '1 Production', '2 Development', '3 Hacker', '4 Not Deployed'
+] as const
+
 export type Manifest = {
   vsn: string
   commission_date: string
@@ -54,11 +59,12 @@ export type Manifest = {
   shield: boolean
   build_date: string
   shipping_address: string
+  bucket?: typeof Buckets[number]
 }
 
 
 
- export type OntologyObj = {
+export type OntologyObj = {
   description: string
   ontology: string // xxy.yyy.zzz
   source: string   // url

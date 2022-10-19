@@ -6,6 +6,7 @@ import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
 import Tooltip from '@mui/material/Tooltip'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
+import FilterMenu from '/components/FilterMenu'
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
@@ -69,6 +70,8 @@ export default function TestView() {
   const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
+  const [bucket, setBucket] = useState<'All' | BK.Manifest['bucket']>('1 Production')
+
   const [error, setError]= useState(null)
 
   useEffect(() => {
@@ -80,7 +83,6 @@ export default function TestView() {
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
-
         // sort sanity by node vsn
         sanity = Object.keys(sanity)
           .sort()
@@ -88,30 +90,26 @@ export default function TestView() {
 
         // only consider WSN nodes with node_id
         const includeList = Object.values(meta)
-          .filter(o => o.node_id.length && o.node_type !== 'Blade')
+          .filter(o => o.node_id.length)
 
-        const prodVSNs = includeList
-          .filter(o => o.commission_date.length)
+        const vsns = includeList
+          .filter(o => bucket == 'All' || o.bucket == bucket)
           .map(o => o.vsn)
 
-        const devVSNs = includeList
-          .filter(o => !o.commission_date.length)
-          .map(o => o.vsn)
+        let d = reduceByVSNs(health, vsns)
+        setHealth(d)
 
-        let prod = reduceByVSNs(health, prodVSNs)
-        let dev = reduceByVSNs(health, devVSNs)
-        setHealth({dev, prod})
+        d = reduceByVSNs(sanity, vsns)
 
-        prod = reduceByVSNs(sanity, prodVSNs)
-        dev = reduceByVSNs(sanity, devVSNs)
-        setSanity({dev, prod})
+        console.log('d', d)
+        setSanity(d)
 
         setManifest(meta)
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
-  }, [setLoading])
+  }, [setLoading, bucket])
 
 
   const handleCellClick = (item) => {
@@ -125,23 +123,30 @@ export default function TestView() {
     navigate(`/node/${nodeId}`)
   }
 
+  const allNodesItem = {id: 'All', label: 'All'}
 
   return (
     <Root>
-      <h1>
-        Production
-        <sup>
-          <Tooltip title={`Nodes with commission dates`} placement="right">
-            <HelpIcon style={{fontSize: '.75em'}}/>
-          </Tooltip>
-        </sup>
-      </h1>
+      <div className="flex items-center">
+        <b>Nodes:</b>
+        <FilterMenu
+          multiple={false}
+          disableCloseOnSelect={false}
+          label={bucket.slice(bucket.indexOf(' ') + 1) || bucket}
+          options={[allNodesItem, ...BK.Buckets.map(v => ({id: v, label: v}))] }
+          value={{id: bucket, label: bucket}}
+          onChange={val => setBucket(val.id)}
+          noSelectedSort
+        />
+      </div>
+
+      <br/>
 
       {health &&
         <>
           <h2>Health</h2>
           <TimelineChart
-            data={health.prod}
+            data={health}
             startTime={subDays(new Date(), 3)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
@@ -154,51 +159,11 @@ export default function TestView() {
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
-      {sanity &&
+      {sanity && Object.keys(sanity).find(vsn => sanity[vsn].length) &&
         <>
           <h2>Sanity Tests</h2>
           <TimelineChart
-            data={sanity.prod}
-            startTime={subDays(new Date(), 3)}
-            endTime={endOfHour(new Date())}
-            onRowClick={handleLabelClick}
-            onCellClick={handleCellClick}
-            tooltip={sanityTooltip}
-          />
-        </>
-      }
-      {error && <ErrorMsg>{error}</ErrorMsg>}
-
-      <h1>
-        Development
-        <sup>
-          <Tooltip title={`Nodes without commission dates`} placement="right">
-            <HelpIcon style={{fontSize: '.75em'}}/>
-          </Tooltip>
-        </sup>
-      </h1>
-
-      {health &&
-        <>
-          <h2>Health</h2>
-          <TimelineChart
-            data={health.dev}
-            startTime={subDays(new Date(), 3)}
-            endTime={endOfHour(new Date())}
-            onRowClick={handleLabelClick}
-            onCellClick={handleCellClick}
-            colorCell={getHealthColor}
-            tooltip={healthTooltip}
-          />
-        </>
-      }
-      {error && <ErrorMsg>{error}</ErrorMsg>}
-
-      {sanity &&
-        <>
-          <h2>Sanity Tests</h2>
-          <TimelineChart
-            data={sanity.dev}
+            data={sanity}
             startTime={subDays(new Date(), 3)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
