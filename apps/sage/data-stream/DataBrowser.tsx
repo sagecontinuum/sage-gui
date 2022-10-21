@@ -28,7 +28,7 @@ import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import AppsIcon from '@mui/icons-material/Apps'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
 import AudioIcon from '@mui/icons-material/Headphones'
-// import NamesIcon from '@mui/icons-material/Inventory2Outlined'
+import NamesIcon from '@mui/icons-material/CategoryRounded'
 
 import DatePicker from '@mui/lab/DatePicker'
 import TimePicker from '@mui/lab/TimePicker'
@@ -308,16 +308,25 @@ const initFilterState = {
   sensors: []
 }
 
-const facetList = Object.keys(initFilterState)
 
-type FacetList = keyof typeof initFilterState
+type Facet = keyof typeof initFilterState
 
 type FilterState = {
-  [name in FacetList]: string[]
+  [name in Facet]: string[]
 }
 
-type DataTypes = 'apps' | 'images' | 'audio'
+type DataTypes = 'apps' | 'names' | 'images' | 'audio'
 
+type Facets = {
+  [name in DataTypes]: Facet[]
+}
+
+const facetInputs: Facets = {
+  'apps': ['apps', 'nodes', 'names', 'sensors'],
+  'names': ['names', 'nodes'],
+  'images': ['tasks', 'nodes'],
+  'audio': ['tasks', 'nodes']
+}
 
 
 export function getFilterState(params, includeDefault=true) : FilterState {
@@ -448,7 +457,7 @@ export default function DataPreview() {
         .then((data) => {
           data = (data || [])
 
-          // experimental charts
+          // simple charts
           if (plugin && node && !isMediaApp(app) && data.length > 0) {
             setChart(data)
           } else {
@@ -571,8 +580,19 @@ export default function DataPreview() {
     navigate({search: params.toString()}, {replace: true})
   }
 
+
+  const goToNames = (val: DataTypes, nameQuery: string) => {
+    clearParams()
+    params.set('type', val)
+    params.set('names', nameQuery)
+    params.set('window', 'h')
+    navigate({search: params.toString()}, {replace: true})
+  }
+
   const handleTypeChange = (_, val: DataTypes) => {
-    if (val == 'images')
+    if (val == 'names') {
+      goToNames(val, 'env.temperature')
+    } else if (val == 'images')
       goToTasks(val, 'imagesampler-.*')
     else if (val == 'audio')
       goToTasks(val, 'audiosampler')
@@ -601,11 +621,9 @@ export default function DataPreview() {
               <TooltipToggleButton TooltipProps={{title: 'Apps', placement: 'top'}} value="apps">
                 <AppsIcon fontSize="small"/>
               </TooltipToggleButton>
-              {/*
               <TooltipToggleButton TooltipProps={{title: 'Names', placement: 'top'}} value="names">
                 <NamesIcon fontSize="small"/>
               </TooltipToggleButton>
-              */}
               <TooltipToggleButton TooltipProps={{title: 'Images', placement: 'top'}} value="images">
                 <ImageIcon fontSize="small"/>
               </TooltipToggleButton>
@@ -617,19 +635,9 @@ export default function DataPreview() {
 
           <h3>Filters</h3>
 
-          {menus && facetList.map(facet => {
+          {menus && facetInputs[type].map(facet => {
             // if no sensors are associated with the data, don't show sensor input
             if (facet == 'sensors' && !menus[facet].length) {
-              return <></>
-            }
-
-            // if apps view, ignore tasks
-            if (['apps'].includes(type) && ['tasks'].includes(facet)) {
-              return <></>
-            }
-
-            // if media, ignore names
-            if (isMedia(type) && ['apps', 'sensors', 'names'].includes(facet)) {
               return <></>
             }
 
