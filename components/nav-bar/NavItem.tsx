@@ -1,6 +1,6 @@
 
 import { useState, useRef, FC } from 'react'
-import { NavLink, useMatch } from 'react-router-dom'
+import { NavLink, useMatch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
@@ -138,9 +138,18 @@ type ItemProps = {
 }
 
 export function Item(props: ItemProps) {
+  const { pathname, search } = useLocation()
+
+  const isActive = search.length ? (
+    props.to.includes(pathname) &&
+    props.to.includes(decodeURIComponent(search))
+  ) : props.to == pathname
 
   return (
-    <MenuItem component={props.component || NavLink} {...props}>
+    <MenuItem
+      component={props.component || NavLink} {...props}
+      className={`flex ${isActive ? 'active' : ''}`}
+    >
       <ListItemIcon>{props.icon}</ListItemIcon>
       {props.label}
     </MenuItem>
