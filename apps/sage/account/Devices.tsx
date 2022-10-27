@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import styled from 'styled-components'
-import { TextField, Button, Alert} from '@mui/material'
+import { TextField, Button, Alert } from '@mui/material'
 import * as Devices from '/components/apis/devices'
 
-
+const idLength = 16
 
 export default function DeviceRegistration() {
+  const [form, setForm] = useState({deviceID: ''})
   const [gotKey, setGotKey] = useState(false)
   const [errMsg, setErrMsg] = useState('')
 
@@ -24,7 +25,6 @@ export default function DeviceRegistration() {
       })
   }
 
-
   return (
     <Root className="flex column">
       <h1>Get Development Beehive Keys for Your Waggle Device</h1>
@@ -34,9 +34,9 @@ export default function DeviceRegistration() {
         id="nano-id"
         placeholder="Nano ID"
         style={{ width: 500 }}
-        inputProps={{
-          maxlength: 13
-        }}
+        inputProps={{ maxlength: idLength }}
+        value={form.deviceID}
+        onChange={evt => setForm(prev => ({...prev, deviceID: evt.target.value}))}
         required={true}
         disabled={gotKey}
       />
@@ -47,7 +47,7 @@ export default function DeviceRegistration() {
         id="publish-waggle"
         style={{ width: 120 }}
         onClick={handleRegister}
-        disabled={gotKey}
+        disabled={form.deviceID.length != idLength || gotKey}
       >
         {!gotKey ? 'Get Keys' :  'Got Keys!'}
       </Button>

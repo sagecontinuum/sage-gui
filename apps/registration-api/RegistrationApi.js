@@ -52,11 +52,8 @@ app.post('/register', regAuthCheck, (req, res) => {
         })
         console.log(`${userName} created registration keys`)
       })
-
-
     }
   )
-
 })
 
 app.listen(PORT, () => {

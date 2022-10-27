@@ -23,8 +23,8 @@ export default function regAuthCheck(req, res, next) {
   fetch(`${authURL}/token_info/`, {
     body: `token=${token}`,
     headers: {
-      Accept: 'application/json',
-      Authorization: `Basic ${tokenInfoPassword}`,
+      'Accept': 'application/json',
+      'Authorization': `Basic ${tokenInfoPassword}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     method: 'POST',
@@ -40,5 +40,4 @@ export default function regAuthCheck(req, res, next) {
   }).catch(err => {
     res.status(err.status).send(err.message)
   })
-
 }
