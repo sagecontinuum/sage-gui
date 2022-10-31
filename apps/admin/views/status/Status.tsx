@@ -13,7 +13,7 @@ import columns from './columns'
 import Table from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
 import Map from '/components/Map'
-import Charts from './charts/Charts'
+// import Charts from './charts/Charts'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { queryData } from '/components/data/queryData'
@@ -84,7 +84,7 @@ export default function StatusView() {
   const [updateID, setUpdateID] = useState(0)
   const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState([])
   const [lastUpdate, setLastUpdate] = useState(null)
 
   const dataRef = useRef(null)
@@ -199,15 +199,37 @@ export default function StatusView() {
 
 
   const handleSelect = (sel) => {
-    setSelected(sel.objs.length ? sel.objs : null)
+    setSelected(sel.objs.length ? sel.objs : [])
     setUpdateID(prev => prev + 1)
+  }
+
+
+  const getSubset = (selected, nodes) => {
+    const ids = selected.map(o => o.id)
+    const subset = nodes.filter(obj => ids.includes(obj.id))
+    return subset
   }
 
 
   return (
     <Root>
       <Overview className="flex">
-        <ChartsContainer className="flex column" >
+        {filtered && !selected?.length &&
+          <Title>
+            {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
+          </Title>
+        }
+
+        {filtered &&
+          <Map
+            data={selected.length ? getSubset(selected, filtered) : filtered}
+            updateID={updateID}
+          />
+        }
+      </Overview>
+
+      {/*
+              <ChartsContainer className="flex column" >
           {filtered && !selected?.length &&
             <ChartsTitle>
               {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
@@ -231,19 +253,11 @@ export default function StatusView() {
               data={filtered}
               selected={selected}
               column
-              //lastUpdate={lastUpdate}
             />
           }
         </ChartsContainer>
+        */}
 
-        {filtered &&
-          <Map
-            data={filtered}
-            selected={selected}
-            updateID={updateID}
-          />
-        }
-      </Overview>
 
       {error &&
         <Alert severity="error">{error.message}</Alert>
@@ -332,7 +346,6 @@ const Root = styled.div`
 `
 
 const Overview = styled.div`
-  position: sticky;
   top: 60px;
   z-index: 100;
   padding: 20px 0 10px 0;
@@ -340,16 +353,11 @@ const Overview = styled.div`
   border-bottom: 1px solid #f2f2f2;
 `
 
-const ChartsContainer = styled.div`
-  margin: 0px 20px;
-  min-width: 400px;
+const Title = styled.h2`
+  margin: .5em;
+  position: absolute;
+  z-index: 1000;
 `
-
-const ChartsTitle = styled.h2`
-  margin-top: 0;
-  margin-bottom: 36px;
-`
-
 
 const TableContainer = styled.div`
   margin-top: .5em;

@@ -8,10 +8,10 @@ import wifireLogo from 'url:/assets/wifire-commons-logo.png'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-// import Breadcrumbs from './BreadCrumbs'
+import Breadcrumbs from '/apps/sage/data-commons/BreadCrumbs'
 import { formatter } from '/apps/sage/data-commons/DataProductSearch'
 import { FileFormatDot } from '/apps/sage/data-commons/FileFormatDot'
-// import { Top } from '/apps/sage/common/Layout'
+import { Card, CardViewStyle } from '/components/layout/Layout'
 
 import * as Data from '/components/apis/dataCommons'
 import Table from '/components/table/Table'
@@ -60,7 +60,6 @@ export default function Sensor() {
 
     Data.getPackage(name.toLowerCase())
       .then(({result}) => {
-        console.log('result', result)
         setData(result)
       })
       .catch(error => setError(error))
@@ -69,6 +68,8 @@ export default function Sensor() {
 
   return (
     <Root>
+      <CardViewStyle />
+
       <Main>
         <Sidebar>
           <h2>About</h2>
@@ -97,42 +98,46 @@ export default function Sensor() {
         </Sidebar>
 
 
-        <Details>
-          {/*<Top>
-            <Breadcrumbs path={`/data/${name}`} />
-          </Top>*/}
+        <Details className="flex column gap">
+          <Card>
+            <Breadcrumbs path={`/sensors/${name}`} />
+          </Card>
 
-          <div className="flex items-center justify-between">
-            <h1>{data?.title}</h1>
-          </div>
-
-          {data &&
-            <span dangerouslySetInnerHTML={{__html: formatNotes(data.notes)}}></span>
-          }
-
-          {error &&
-            <ErrorMsg>{error.message}</ErrorMsg>
-          }
-
-          <div className="flex items-end justify-between">
-            <h2>Downloads</h2>
-            <div className="flex column items-end">
-              {doi &&
-                <>
-                  <a href={doi} target="_blank"><img src={wifireLogo} height="50" /></a>
-                  <a href={doi} target="_blank"><b>{doi}</b></a>
-                </>
-              }
+          <Card>
+            <div className="flex items-center justify-between">
+              <h1>{data?.title}</h1>
             </div>
-          </div>
-          {data &&
-            <Table
-              primaryKey="name"
-              enableSorting
-              columns={columns}
-              rows={data.resources}
-            />
-          }
+
+            {data &&
+              <span dangerouslySetInnerHTML={{__html: formatNotes(data.notes)}}></span>
+            }
+
+            {error &&
+              <ErrorMsg>{error.message}</ErrorMsg>
+            }
+          </Card>
+
+          <Card>
+            <div className="flex items-end justify-between">
+              <h2>Downloads</h2>
+              <div className="flex column items-end">
+                {doi &&
+                  <>
+                    <a href={doi} target="_blank"><img src={wifireLogo} height="50" /></a>
+                    <a href={doi} target="_blank"><b>{doi}</b></a>
+                  </>
+                }
+              </div>
+            </div>
+            {data &&
+              <Table
+                primaryKey="name"
+                enableSorting
+                columns={columns}
+                rows={data.resources}
+              />
+            }
+          </Card>
         </Details>
       </Main>
     </Root>

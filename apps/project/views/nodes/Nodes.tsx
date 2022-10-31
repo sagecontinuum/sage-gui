@@ -9,7 +9,7 @@ import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
 import columns from './columns'
-import { filterData, getFilterState, mergeMetrics} from '/apps/common/statusDataUtils'
+import { filterData, getFilterState, mergeMetrics } from '/apps/common/statusDataUtils'
 
 import Table from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
@@ -72,6 +72,7 @@ export default function Nodes() {
   const project = params.get('project')
   const focus = params.get('focus')
   const location = params.get('location')
+  const sensor = params.get('sensor')
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
@@ -85,12 +86,13 @@ export default function Nodes() {
   const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
+  const [sensors, setSensors] = useState<Option[]>()
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
   const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState([])
   const [lastUpdate, setLastUpdate] = useState(null)
 
   const dataRef = useRef(null)
@@ -146,7 +148,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, focus, location, nodeType])
+  }, [query, status, project, focus, location, sensor, nodeType])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -169,6 +171,11 @@ export default function Nodes() {
     setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
+
+    const sensorOptions = [...new Set(data.flatMap(({sensor}) => sensor))]
+      .map(name => ({id: name, label: name }))
+
+    setSensors(sensorOptions)
   }
 
 
@@ -201,10 +208,16 @@ export default function Nodes() {
 
 
   const handleSelect = (sel) => {
-    setSelected(sel.objs.length ? sel.objs : null)
+    setSelected(sel.objs.length ? sel.objs : [])
     setUpdateID(prev => prev + 1)
   }
 
+
+  const getSubset = (selected, nodes) => {
+    const ids = selected.map(o => o.id)
+    const subset = nodes.filter(obj => ids.includes(obj.id))
+    return subset
+  }
 
   return (
     <Root>
@@ -217,10 +230,8 @@ export default function Nodes() {
 
         {filtered &&
           <Map
-            data={filtered}
-            selected={selected}
+            data={selected.length ? getSubset(selected, filtered) : filtered}
             updateID={updateID}
-            resize={false}
           />
         }
       </Overview>
@@ -277,6 +288,14 @@ export default function Nodes() {
                     onChange={vals => handleFilterChange('location', vals)}
                   />
                 }
+                {sensors &&
+                  <FilterMenu
+                    label="Sensors"
+                    options={sensors}
+                    value={filterState.sensor}
+                    onChange={vals => handleFilterChange('sensor', vals)}
+                  />
+                }
 
                 {filtered.length != data.length &&
                   <>
@@ -325,7 +344,6 @@ const Title = styled.h2`
   position: absolute;
   z-index: 1000;
 `
-
 
 const TableContainer = styled.div`
   margin-top: .5em;
