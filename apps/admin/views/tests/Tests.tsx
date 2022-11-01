@@ -101,9 +101,7 @@ export default function TestView() {
 
         d = reduceByVSNs(sanity, vsns)
 
-        console.log('d', d)
         setSanity(d)
-
         setManifest(meta)
       })
       .catch(err => setError(err.message))

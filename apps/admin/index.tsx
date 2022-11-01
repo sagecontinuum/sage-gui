@@ -45,7 +45,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="status" replace />} />
 
-                <Route path="status" element={<StatusView/>} />
+                <Route path="status" element={<NodeList><StatusView /></NodeList>} />
                 <Route path="tests" element={<TestView />} />
                 <Route path="audio" element={<AudioView />} />
                 <Route path="node/:node" element={<NodeView />} />
@@ -68,6 +68,10 @@ export default function App() {
 const Container = styled.div`
   margin: 60px 10px 10px 10px;
   width: 100%;
+`
+
+const NodeList = styled.div`
+  margin: 0 10px 10px 10px;
 `
 
 

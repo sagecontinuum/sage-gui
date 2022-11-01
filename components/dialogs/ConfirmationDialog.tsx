@@ -14,6 +14,7 @@ type Props = {
   loadingText?: string
   confirmBtnText?: string
   confirmBtnStyle?: object
+  fullScreen?: boolean
   onClose: () => void
   onConfirm: () => void | Promise<any>
 }
@@ -27,6 +28,7 @@ export default function CreateDialog(props: Props) {
     loadingText = 'loading...',
     confirmBtnText = 'OK',
     confirmBtnStyle = {},
+    fullScreen,
     onClose,
     onConfirm
   } = props
@@ -57,7 +59,13 @@ export default function CreateDialog(props: Props) {
   }
 
   return (
-    <Dialog open={true} onClose={handleClose} aria-labelledby="form-dialog-title">
+    <Dialog
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="form-dialog-title"
+      fullScreen={fullScreen}
+      style={fullScreen ? {marginTop: 60} : {}}
+    >
       <form onSubmit={handleSubmit}>
         <DialogTitle id="form-dialog-title">{title}</DialogTitle>
         <DialogContent>

@@ -17,6 +17,11 @@ export function filterData(data: object[], state: object) {
     for (const [field, filters] of Object.entries(state)) {
       if (!filters.length) continue
 
+      if (Array.isArray(row[field])) {
+        keep = new Set([...filters].filter((x) => new Set(row[field]).has(x))).size > 0
+        if (keep) break
+      }
+
       if (!filters.includes(row[field])) {
         keep = false
         break
@@ -198,7 +203,8 @@ const initialState = {
   status: [],
   project: [],
   location: [],
-  focus: []
+  focus: [],
+  sensor: []
 }
 
 

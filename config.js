@@ -50,7 +50,11 @@ const config = {
     'V008': [
       'Mobotix M16'
     ]
-  }
+  },
+  // another temp solution for missing sensor meta
+  unavaiable_sensor_details: [
+    'XNP-6400RW', 'mobotix', 'ETS ML1-WS'
+  ]
 }
 
 export default config

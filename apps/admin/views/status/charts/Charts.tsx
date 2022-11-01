@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import SummaryBar from './SummaryBar'
@@ -53,7 +53,6 @@ function getStatus(data: BK.State[]) : Status {
 
 type Props = {
   data: {id: string}[]
-  selected?: {id: string}[]
   column?: boolean
   charts?: ('tests' | 'plugins' | 'temps' | 'fsutil')[]
 }
@@ -62,12 +61,10 @@ type Props = {
 export default function Charts(props: Props) {
   const {
     data,
-    selected,
     column,
     charts
   } = props
 
-  const [selectedIDs, setSelectedIDs] = useState(selected ? selected.map(o => o.id) : null)
   const [statuses, setStatuses] = useState<Status>({})
 
   // highlevel stats
@@ -76,26 +73,19 @@ export default function Charts(props: Props) {
     temps: null
   })
 
-
   useEffect(() => {
-    setSelectedIDs(selected ? selected.map(o => o.id) : null)
-  }, [selected])
+    if (!data) return
 
-
-  useEffect(() => {
-    if (!data && !selectedIDs) return
-
-    const d = selectedIDs ? data.filter(o => selectedIDs.includes(o.id)) : data
-    const status = getStatus(d)
+    const status = getStatus(data)
     setStatuses({
       'reporting': status['reporting'],
       'not reporting': status['not reporting'],
       'offline': status['offline']
     })
 
-    const issues = getIssues(d)
+    const issues = getIssues(data)
     setIssues(issues)
-  }, [data, selectedIDs])
+  }, [data])
 
 
   const showChart = (name) =>
@@ -112,10 +102,12 @@ export default function Charts(props: Props) {
         />
       </div>
 
-      <div className="flex gap summary-boxes">
-        {showChart('tests') && <SummaryBox label="Sanity" value={issues.tests}/>}
-        {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
-      </div>
+      {/*
+        <div className="flex gap summary-boxes">
+          {showChart('tests') && <SummaryBox label="Sanity" value={issues.tests}/>}
+          {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
+        </div>
+      */}
     </Root>
   )
 }

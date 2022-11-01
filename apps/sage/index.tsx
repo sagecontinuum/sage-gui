@@ -16,6 +16,7 @@ import DevIcon from '@mui/icons-material/DataObject'
 import VTOIcon from '@mui/icons-material/FlightTakeoff'
 import DAWNIcon from '@mui/icons-material/ScienceOutlined'
 import WFOIcon from '@mui/icons-material/WorkspacesOutlined'
+import SensorIcon from '@mui/icons-material/SensorsRounded'
 
 // import MyJobsIcon from '@mui/icons-material/Engineering'
 
@@ -31,6 +32,7 @@ import Apps from './ecr/apps/Apps'
 import Nodes from '/apps/project/views/nodes/Nodes'
 import Node from '/apps/common/node/Node'
 import Sensor from '/apps/common/sensor/Sensor'
+import SensorList from '/apps/common/sensor/SensorList'
 import JobStatus from './jobs/JobStatus'
 import CreateJob from './jobs/create-job/CreateJob'
 import DataBrowser from './data-stream/DataBrowser'
@@ -50,7 +52,7 @@ import { SnackbarProvider } from 'notistack'
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
-import { isSignedIn } from '/components/auth/auth'
+// import { isSignedIn } from '/components/auth/auth'
 import { Divider } from '@mui/material'
 
 
@@ -100,6 +102,13 @@ const NavMenu = () => {
               component={Link}
               to='/nodes/?project="WFO"'
               label="WFO"
+            />
+            <Divider />
+            <Item
+              icon={<SensorIcon />}
+              component={Link}
+              to='/sensors'
+              label="Sensors"
             />
           </>
         }
@@ -200,6 +209,7 @@ export default function Sage() {
 
                   <Route path="nodes" element={<NodeList><Nodes /></NodeList>} />
                   <Route path="node/:node" element={<Node />} />
+                  <Route path="sensors" element={<SensorList />} />
                   <Route path="sensors/:name" element={<Sensor />} />
 
                   <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
@@ -212,7 +222,7 @@ export default function Sage() {
                   </Route>
 
                   <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />
-                  <Route path="jobs-status" element={<Navigate to="jobs" replace />} />
+                  {/* <Route path="/jobs" element={<Navigate to="/jobs/job-status" replace />} />*/}
                   <Route path="jobs" element={<JobStatus />}>
                     <Route path=":tab/:nodes" element={<JobStatus />} />
                     <Route path=":tab/:jobName" element={<JobStatus />} />

@@ -105,12 +105,11 @@ const columns = [{
     obj.node_type != 'Blade' ?
       <Link to={`/node/${val}`}>{val}</Link> : val,
   hide: true
-},
-{...(SAGE_UI_PROJECT == 'sage' ? {
+}, {
   id: 'project',
-  label: 'Project'
-} : {})},
-{
+  label: 'Project',
+  hide: SAGE_UI_PROJECT != 'sage'
+}, {
   id: 'focus',
   label: 'Focus'
 }, {

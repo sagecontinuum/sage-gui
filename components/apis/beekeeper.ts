@@ -44,6 +44,8 @@ export type Manifest = {
   focus: string
   gps_lat: number
   gps_lon: number
+  lng?: number // live longitude (if avail)
+  lat?: number // live latitude (if avail)
   left_camera: string
   location: string
   modem_sim: string
@@ -60,6 +62,7 @@ export type Manifest = {
   build_date: string
   shipping_address: string
   bucket?: typeof Buckets[number]
+  sensor: string[]    // added client-side for joining data
 }
 
 
@@ -100,10 +103,17 @@ export async function getManifest(params?: MetaParams) : Promise<ManifestMap> {
   let data = await get(`${url}/production`)
 
   // special handling of gps since they are of type 'string'; todo(nc): remove
+  // also special "sensor" list for tables and convenience
   data = data.map(o => ({
     ...o,
     gps_lat: o.gps_lat?.length ? parseFloat(o.gps_lat) : null,
     gps_lon: o.gps_lon?.length ? parseFloat(o.gps_lon) : null,
+    ...(o.node_type == 'WSN' ? {
+      sensor: [
+        o.top_camera, o.bottom_camera, o.left_camera, o.right_camera, 'RG-15',
+        ...(o.shield ? ['ETS ML1-WS', 'BME680'] : [])
+      ].filter(name => name != 'none')
+    } : {sensor: []})
   }))
 
   let mapping

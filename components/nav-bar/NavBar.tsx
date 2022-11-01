@@ -5,7 +5,6 @@ import sage from 'url:/assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
-import ListItemIcon from '@mui/material/ListItemIcon'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -13,7 +12,6 @@ import DevicesIcon from '@mui/icons-material/Devices'
 import Progress from '@mui/material/CircularProgress'
 
 import NavItem, { Item } from './NavItem'
-// import Menu, {MenuItem} from '../menus/MenuButton'
 import * as Auth from '/components/auth/auth'
 
 const username = Auth.username
@@ -78,7 +76,7 @@ export default function NavBar(props: Props) {
           <NavItems>
             <a
               href={`${config.docs}/about/overview`}
-              className="no-style"
+              className="no-style docs-link"
               target="_blank"
               rel="noreferrer"
             >
@@ -155,6 +153,10 @@ const Root = styled.div`
     0px 2px 4px -1px rgb(0 0 0 / 0%),
     0px 4px 5px 0px rgb(0 0 0 / 0%),
     0px 1px 10px 0px rgb(0 0 0 / 12%);
+
+  .docs-link {
+    margin-right: 15px;
+  }
 `
 
 const LogoImg = styled.img`
