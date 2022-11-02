@@ -159,8 +159,8 @@ export default function NodeSelector(props: Props) {
           </TableWrap>
         }
         <MapWrap>
-          {data &&
-            <Map resize={false} data={filtered} selected={null}/>
+          {filtered &&
+            <Map data={filtered} />
           }
         </MapWrap>
       </div>

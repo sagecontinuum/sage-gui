@@ -12,7 +12,9 @@ import AddIcon from '@mui/icons-material/AddRounded'
 import Map from '/components/Map'
 import Table from '/components/table/Table'
 import ErrorMsg from '/apps/sage/ErrorMsg'
+
 import { queryData } from '/components/data/queryData'
+import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 
 import JobTimeLine from './JobTimeline'
 
@@ -23,6 +25,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
+import MetaTable from '/components/table/MetaTable'
 
 // todo(nc): options
 // import JobOptions from './JobOptions'
@@ -35,12 +38,41 @@ export type Options = {
 }
 
 
+export const formatters = {
+  apps: (objs) => <>
+    {objs.map((obj, i) => {
+      const {name, plugin_spec} = obj
+      const {image} = plugin_spec
+
+      // todo(nc): ignore dockerhub component for now?
+      const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
+
+      const l = objs.length - 1
+      return <span key={name}>
+        <Link to={`/apps/app/${app}`}>
+          {name}
+        </Link>{i < l ? ', '  : ''}
+      </span>
+    })}
+  </>,
+  nodes: (vsns, obj) => <>
+    {vsns.map((vsn, i) => {
+      const l = vsns.length - 1
+      return <span key={vsn}>
+        <Link to={`/node/${obj.node_ids[i]}`}>
+          {vsn}
+        </Link>{i < l ? ', '  : ''}
+      </span>
+    })}
+  </>
+}
+
 const jobCols = [{
   id: 'name',
   label: 'Name',
   format: (val, row) => {
     const nodes = row.nodes
-    return <Link to={`/jobs/timeline?nodes=${nodes.join(',')}`}>{val}</Link>
+    return <Link to={`/jobs?job=${row.id}`}>{val}</Link>
   }
 }, {
   id: 'id',
@@ -60,16 +92,7 @@ const jobCols = [{
 }, {
   id: 'nodes',
   label: 'Nodes',
-  format: (vsns, obj) => <>
-    {vsns.map((vsn, i) => {
-      const l = vsns.length - 1
-      return <span key={vsn}>
-        <Link to={`/node/${obj.node_ids[i]}`}>
-          {vsn}
-        </Link>{i < l ? ', '  : ''}
-      </span>
-    })}
-  </>
+  format: formatters.nodes
 }, {
   id: 'nodeCount',
   label: 'Node count',
@@ -79,23 +102,7 @@ const jobCols = [{
 }, {
   id: 'apps',
   label: 'Apps',
-  format: (objs) => <>
-
-    {objs.map((obj, i) => {
-      const {name, plugin_spec} = obj
-      const {image} = plugin_spec
-
-      // todo(nc): ignore dockerhub component for now?
-      const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
-
-      const l = objs.length - 1
-      return <span key={name}>
-        <Link to={`/apps/app/${app}`}>
-          {name}
-        </Link>{i < l ? ', '  : ''}
-      </span>
-    })}
-  </>
+  format: formatters.apps
 }, {
   id: 'appCount',
   label: 'App count',
@@ -162,7 +169,14 @@ type State = {
   qJobs: ES.Job[]
   qNodes: string[]
   selected: GeoData
-  selectedVSNs: string[]
+}
+
+const initState = {
+  jobs: [],
+  byNode: {},
+  isFiltered: false,
+  qJobs: null,
+  selected: [],
 }
 
 
@@ -178,12 +192,13 @@ export default function JobStatus() {
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || ''
   const nodes = params.get('nodes') || ''
+  const job = params.get('job') || ''
 
   const {setLoading} = useProgress()
 
   const [{
     jobs, byNode, isFiltered, qJobs, qNodes, selected
-  }, setData] = useState<State>({})
+  }, setData] = useState<State>(initState)
 
   // additional meta
   const [manifestByVSN, setManifestByVSN] = useState<ManifestByVSN>()
@@ -244,7 +259,7 @@ export default function JobStatus() {
               const lng = d.gps_lon
               const lat = d.gps_lat
 
-              return {id: vsn, vsn, lng, lat, status: 'reporting'}
+              return {...data[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
             })
 
             setGeo(geo)
@@ -262,7 +277,7 @@ export default function JobStatus() {
     const objs = sel.objs.length ? sel.objs : null
     const nodes = jobsToGeos(objs, manifestByVSN)
 
-    setData(prev => ({...prev, selected: nodes.length ? nodes : null}))
+    setData(prev => ({...prev, selected: nodes.length ? nodes : []}))
     setUpdateID(prev => prev + 1)
   }
 
@@ -280,11 +295,27 @@ export default function JobStatus() {
     navigate({search: params.toString()}, {replace: true})
   }
 
+  const handleCloseDialog = () => {
+    params.delete('job')
+    navigate('/jobs/job-status', {search: params.toString()}, {replace: true})
+  }
+
+  const getSubset = (selected, nodes) => {
+    const ids = selected.map(o => o.id)
+    const subset = nodes.filter(obj => ids.includes(obj.id))
+    return subset
+  }
+
+
+  const jobMeta = job ?
+    (jobs || []).find(o => o.job_id == job) : null
+
+
   return (
     <Root>
       <div className="flex">
         <Main className="flex column">
-          {/*
+          {/* todo?: some controls
           <Top>
             <Controls className="flex items-center">
               <div className="flex column">
@@ -351,7 +382,9 @@ export default function JobStatus() {
           {tab != 'my-jobs' &&
             <MapContainer>
               {geo &&
-                <Map data={geo} selected={selected} resize={false} updateID={updateID} />
+                <Map
+                  data={selected?.length ? getSubset(selected, geo) : geo}
+                  updateID={updateID} />
               }
             </MapContainer>
           }
@@ -545,10 +578,6 @@ const MapContainer = styled.div`
   height: 350px;
 `
 
-const BreadContainer = styled.div`
-  margin: 15px 0 5px 0;
-`
-
 const TimelineContainer = styled.div`
   padding: 0 1.2em;
 
@@ -575,7 +604,7 @@ const TableContainer = styled.div`
 
 const TableOptions = styled.div`
   margin-left: 20px;
-` 
+`
 
 const JobMetaContainer = styled.div`
   tbody td:first-child {

@@ -104,10 +104,10 @@ export default function NodeView() {
   const hours = params.get('hours')
   const days = params.get('days')
 
-  const { setLoading } = useProgress()
+  const { loading, setLoading } = useProgress()
 
   const [manifest, setManifest] = useState<BK.Manifest>(null)
-  const [vsn, setVsn] = useState<string>(null)
+  const [vsn, setVsn] = useState<BK.Manifest['vsn']>(null)
   const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
@@ -138,7 +138,7 @@ export default function NodeView() {
 
   useEffect(() => {
     BK.getManifest({node: node.toUpperCase()})
-      .then(data => {noneFormatter
+      .then(data => {
         setManifest(data)
 
         // if no manifest, we can not get the vsn for node health
@@ -374,12 +374,27 @@ export default function NodeView() {
         <RightSide className="justify-end">
           <Card noPad>
             {hasStaticGPS(manifest) && status && vsn &&
-              <Map data={[{id: vsn, vsn, lat: manifest.gps_lat, lng: manifest.gps_lon, status}]} resize={null} />
+              <Map
+                data={[{
+                  id: vsn,
+                  vsn,
+                  lat: manifest.gps_lat,
+                  lng: manifest.gps_lon,
+                  status,
+                  ...manifest
+                }]} />
             }
             {!hasStaticGPS(manifest) && liveGPS && status &&
-              <Map data={[{id: vsn, vsn, lat: liveGPS.lat, lng: liveGPS.lon, status}]} resize={null} />
+              <Map data={[{
+                id: vsn,
+                vsn,
+                lat: liveGPS.lat,
+                lng: liveGPS.lon,
+                status,
+                ...manifest
+              }]} />
             }
-            {!hasStaticGPS(manifest) && !liveGPS &&
+            {!hasStaticGPS(manifest) && !liveGPS && !loading &&
               <div className="muted" style={{margin: 18}}>(Map not available)</div>
             }
           </Card>

@@ -38,7 +38,7 @@ export const Buckets = [
 ] as const
 
 export type Manifest = {
-  vsn: string
+  vsn: `W${string}` | `V${string}`
   commission_date: string
   project: string
   focus: string
@@ -50,7 +50,7 @@ export type Manifest = {
   location: string
   modem_sim: string
   node_id: string
-  node_type: 'Blade' | 'WSN'
+  node_type: 'WSN' | 'Blade'
   notes: string
   modem: boolean
   nx_agent: boolean
@@ -70,7 +70,7 @@ export type Manifest = {
 export type OntologyObj = {
   description: string
   ontology: string // xxy.yyy.zzz
-  source: string   // url
+  source: `https://${string}`
   unit: string
 }
 

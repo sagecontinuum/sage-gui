@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
+import 'mapbox-gl/dist/mapbox-gl.css'
 import Map, {
   Marker, Popup, Source, Layer,
   FullscreenControl, NavigationControl
@@ -97,11 +98,75 @@ const layerStyle = {
 }
 
 
-type VSN = `W${string}` | `V${string}`
+type PopupProps = {
+  data: Manifest
+  onClose: () => void
+}
+
+function PopupInfo(props: PopupProps) {
+  const {onClose, data} = props
+
+  // tooltip info deconstruction
+  const {
+    vsn, node_id, project, focus, location, lng, lat, node_type
+  } = data || {}
+
+  return (
+    <Popup
+      longitude={lng}
+      latitude={lat}
+      onClose={onClose}
+    >
+      <ClickAwayListener onClickAway={onClose}>
+        <div>
+          <h2>
+            {node_type == 'WSN' ?
+              'Wild Sage Node' : node_type
+            } <Link to={`/node/${node_id}`}>
+              {vsn}
+            </Link>
+          </h2>
+          <table className="key-value simple">
+            <tbody>
+              <tr>
+                <td>Project</td>
+                <td>
+                  <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
+                    {project}
+                  </Link>&nbsp;
+                  {focus &&
+                    <>(<Link to={
+                      `/nodes/?project="${encodeURIComponent(project)}"` +
+                      `&focus="${encodeURIComponent(focus)}"`
+                    }>
+                      {focus}
+                    </Link>)</>
+                  }
+                </td>
+              </tr>
+              <tr>
+                <td>Location</td>
+                <td>
+                  <Link to={`/nodes/?location="${encodeURIComponent(location)}"`}>
+                    {location}
+                  </Link>
+                </td>
+              </tr>
+              <tr>
+                <td>Coordinates</td>
+                <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ClickAwayListener>
+    </Popup>
+  )
+}
+
 
 type Data = {
-  id: string,
-  vsn: VSN ,
+  vsn: Manifest['vsn'],
   lng: number,
   lat: number,
   status?: string
@@ -109,9 +174,7 @@ type Data = {
 
 type Props = {
   data: Data
-  updateID: number
-  vsn?: VSN
-  resize?: boolean
+  updateID?: number
 }
 
 
@@ -160,13 +223,6 @@ export default function MapGL(props: Props) {
     setPopup(obj)
   }
 
-
-  // tooltip info deconstruction
-  const {
-    vsn, project, focus, location, lng, lat, node_type
-  }: Manifest = popup || {}
-
-
   return (
     <Root>
       <Map ref={mapRef} {...mapSettings}>
@@ -179,74 +235,26 @@ export default function MapGL(props: Props) {
           </Source>
         }
 
-        {markers.map(obj => {
-          const {vsn, lng, lat, status} = obj
+        {markers
+          .filter(o => o.lng && o.lat)
+          .map(obj => {
+            const {vsn, lng, lat, status} = obj
 
-          if (!lng || !lat)
-            return <></>
+            return (
+              <Marker key={vsn}
+                longitude={lng}
+                latitude={lat}
+                onClick={(evt) => handleClick(evt, obj)}
+              >
+                <div className={`marker-dot marker-${status}`}></div>
+              </Marker>
+            )
+          })}
 
-          return (
-            <Marker key={vsn}
-              longitude={lng}
-              latitude={lat}
-              onClick={(evt) => handleClick(evt, obj)}
-            >
-              <div className={`marker-dot marker-${status}`}></div>
-            </Marker>
-          )
-        })}
-
-        {vsn &&
-          <Popup
-            longitude={lng}
-            latitude={lat}
-            onClose={() => setPopup(null)}
-          >
-            <ClickAwayListener onClickAway={() => setPopup(null)}>
-              <div>
-
-                <h2>
-                  {node_type == 'WSN' ?
-                    'Wild Sage Node' : node_type
-                  } <Link to={`/node/${popup.node_id}`}>
-                    {popup.vsn}
-                  </Link>
-                </h2>
-                <table className="key-value simple">
-                  <tbody>
-                    <tr>
-                      <td>Project</td>
-                      <td>
-                        <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
-                          {project}
-                        </Link>&nbsp;
-                      (<Link to={
-                          `/nodes/?project="${encodeURIComponent(project)}"` +
-                        `&focus="${encodeURIComponent(focus)}"`
-                        }>
-                          {focus}
-                        </Link>)
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Location</td>
-                      <td>
-                        <Link to={`/nodes/?location="${encodeURIComponent(location)}"`}>
-                          {location}
-                        </Link>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Coordinates</td>
-                      <td><Clipboard content={`${lat},\n${lng}`} /></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </ClickAwayListener>
-          </Popup>}
+        {popup &&
+          <PopupInfo data={popup} onClose={() => setPopup(null)} />
+        }
       </Map>
-
     </Root>
   )
 }
@@ -254,7 +262,6 @@ export default function MapGL(props: Props) {
 
 const Root = styled.div`
   width: 100%;
-  flex-grow: 4;
 
   .popup-title {
     margin-top: 0;
@@ -285,10 +292,5 @@ const Root = styled.div`
   .marker-not-reporting {
      background: #d72020;
      border: 1px solid #992727;
-  }
-
-  table td:first-child {
-    width: 100px;
-    text-align: right;
   }
 `
