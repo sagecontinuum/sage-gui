@@ -75,6 +75,7 @@ export default function JobTimeLine(props: Props) {
           }}
           onCellClick={(data) => console.log('cell click', data)}
           margin={{left: 175, right: 0, bottom: 0}}
+          tooltipPos="top"
         />
       }
     </Root>

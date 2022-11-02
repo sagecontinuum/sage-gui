@@ -1,10 +1,12 @@
-import React, {useState} from 'react'
+import { useState } from 'react'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import CloseIcon from '@mui/icons-material/Close'
+import IconButton from '@mui/icons-material/Close'
 
 
 type Props = {
@@ -15,6 +17,7 @@ type Props = {
   confirmBtnText?: string
   confirmBtnStyle?: object
   fullScreen?: boolean
+  cancelBtn?: boolean
   onClose: () => void
   onConfirm: () => void | Promise<any>
 }
@@ -29,6 +32,7 @@ export default function CreateDialog(props: Props) {
     confirmBtnText = 'OK',
     confirmBtnStyle = {},
     fullScreen,
+    cancelBtn,
     onClose,
     onConfirm
   } = props
@@ -62,41 +66,53 @@ export default function CreateDialog(props: Props) {
     <Dialog
       open={true}
       onClose={handleClose}
-      aria-labelledby="form-dialog-title"
+      aria-labelledby="dialog-title"
       fullScreen={fullScreen}
       style={fullScreen ? {marginTop: 60} : {}}
     >
-      <form onSubmit={handleSubmit}>
-        <DialogTitle id="form-dialog-title">{title}</DialogTitle>
-        <DialogContent>
-          {contentTitle &&
-            <DialogContentText>
-              {contentTitle}
-            </DialogContentText>
-          }
+      <DialogTitle id="dialog-title">
+        {title}
+        <IconButton
+          aria-label="close"
+          onClick={handleClose}
+          sx={{
+            position: 'absolute',
+            right: 20,
+            top: 20,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-          {content}
-        </DialogContent>
+      <DialogContent>
+        {contentTitle &&
+          <DialogContentText>
+            {contentTitle}
+          </DialogContentText>
+        }
+        {content}
+      </DialogContent>
 
-        <DialogActions>
+      <DialogActions sx={{borderTop: '1px solid #f2f2f2' }}>
+        {cancelBtn &&
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
+        }
 
-          <Button
-            type="submit"
-            color="primary"
-            variant="contained"
-            disabled={loading}
-            style={!loading ? confirmBtnStyle : {}}
-            onClick={handleSubmit}
-          >
-            {(loading && loadingText) ? loadingText : confirmBtnText}
-          </Button>
-        </DialogActions>
-      </form>
-
+        <Button
+          type="submit"
+          color="primary"
+          variant="contained"
+          disabled={loading}
+          style={!loading ? confirmBtnStyle : {}}
+          onClick={handleSubmit}
+        >
+          {(loading && loadingText) ? loadingText : confirmBtnText}
+        </Button>
+      </DialogActions>
     </Dialog>
-
   )
 }

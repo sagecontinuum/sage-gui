@@ -140,6 +140,7 @@ function drawChart(
     yLabels,
     yFormat,
     tooltip,
+    tooltipPos = 'bottom',
     colorCell,
     onCellClick,
     onRowClick
@@ -278,7 +279,7 @@ function drawChart(
        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
        value: ${data.value}`
     )
-      .style('top', `${evt.pageY + 15}px`)
+      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 350}px`)
       .style('left', `${evt.pageX - 80}px`)
       .style('z-index', 999)
 
@@ -303,7 +304,7 @@ function drawChart(
   function computeWidth(d, scale) {
     const x = scale
 
-    let w = d.end ?
+    const w = d.end ?
       x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :  // use end time
       x(new Date(d.timestamp).getTime() + cellUnit) - x(new Date(d.timestamp)) // note: cellUnit is an hour unless user provided
 
@@ -312,11 +313,11 @@ function drawChart(
 
   // add events for button controls
   const ctrls = d3.select(domEle).select(function() { return this.parentNode })
-  ctrls.select('.pan-left').on('click', () => pan('left'))
-  ctrls.select('.pan-right').on('click', () => pan('right'))
-  ctrls.select('.zoom-in').on('click', () => zoomTo('in'))
-  ctrls.select('.zoom-out').on('click', () => zoomTo('out'))
-  ctrls.select('.reset').on('click', () => reset())
+  ctrls.select('.pan-left').on('click', (evt) => { evt.preventDefault(); pan('left') })
+  ctrls.select('.pan-right').on('click', (evt) => { evt.preventDefault(); pan('right') })
+  ctrls.select('.zoom-in').on('click', (evt) => { evt.preventDefault(); zoomTo('in') } )
+  ctrls.select('.zoom-out').on('click', (evt) => { evt.preventDefault(); zoomTo('out') })
+  ctrls.select('.reset').on('click', (evt) => { evt.preventDefault(); reset() })
 
   function pan(dir) {
     const amount = dir == 'right' ? panAmount : -panAmount
@@ -331,40 +332,40 @@ function drawChart(
     const zoomTransform = d3.zoomTransform(svg.node())
 
     let scale = zoomTransform.k,
-        extent = zoom.scaleExtent(),
-        x = zoomTransform.x,
-        factor = dir == 'in' ? 1.5 : 1 / 1.5,
-        targetScale = scale * factor;
+      extent = zoom.scaleExtent(),
+      x = zoomTransform.x,
+      factor = dir == 'in' ? 1.5 : 1 / 1.5,
+      targetScale = scale * factor
 
     // Don't pass scaling extent in either direction
     if (targetScale < extent[0] || targetScale > extent[1]) {
-        return false;
+      return false
     }
 
     // If the factor is too much, scale it down to reach the extent exactly
-    let clampedTargetScale = Math.max(extent[0], Math.min(extent[1], targetScale));
+    const clampedTargetScale = Math.max(extent[0], Math.min(extent[1], targetScale))
 
     if (clampedTargetScale != targetScale) {
-        targetScale = clampedTargetScale;
-        factor = targetScale / scale;
+      targetScale = clampedTargetScale
+      factor = targetScale / scale
     }
 
     // Center each vector, stretch, then put back
-    x = (x - center) * factor + center;
+    x = (x - center) * factor + center
 
     const transform = d3.zoomIdentity.translate(x, zoomTransform.y).scale(targetScale)
-    zoom.transform(svg.transition().duration(200).ease(d3.easeLinear), transform);
+    zoom.transform(svg.transition().duration(200).ease(d3.easeLinear), transform)
   }
 
   function reset() {
-    svg.transition().duration(500).ease(d3.easeLinear).call(zoom.transform, d3.zoomIdentity);
+    svg.transition().duration(500).ease(d3.easeLinear).call(zoom.transform, d3.zoomIdentity)
   }
 }
 
 
 
 function appendLegend(ele, chartData) {
-  const [_, max] = getMinMax(chartData) //todo(nc): optimze; only needs to be computed once
+  const [_, max] = getMinMax(chartData) // todo(nc): optimze; only needs to be computed once
 
   const legend = Legend(
     d3.scaleOrdinal(
@@ -404,6 +405,8 @@ type TimelineProps = {
   onCellClick?: (label: string) => void
   colorCell?: (val: number, item: Record) => string
   tooltip?: (item: Record) => string  // update to use React.FC?
+  tooltipPos?: 'top' | 'bottom'       // todo(nc): there is surely a better general
+                                      // solution for tooltip placement as well
 }
 
 
@@ -427,7 +430,7 @@ function Chart(props: TimelineProps) {
   const legendRef = useRef(null)
 
   useEffect(() => {
-    let node = ref.current
+    const node = ref.current
 
     let yLabels, chartData, size
     if (typeof data == 'object') {
@@ -484,19 +487,24 @@ function Chart(props: TimelineProps) {
       <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
 
       {showButtons &&
-        <Ctrls style={{marginRight: margin.right}}> {/* note: controls are assumed to be a direct child node for events */}
-          <button className="reset" title="reset zoom/panning"><HomeIcon /></button>
-          <button className="pan-left" title="pan left"><ArrowLeft /></button>
-          <button className="zoom-in" title="zoom in"><ZoomInIcon /></button>
-          <button className="zoom-out" title="zoom out"><ZoomOutIcon /></button>
-          <button className="pan-right" title="pan right"><ArrowRight /></button>
+        <Ctrls style={{marginRight: margin.right}}>
+          {/* note: controls are assumed to be a direct child node for events */}
+          <button className="btn reset" title="reset zoom/panning"><HomeIcon /></button>
+          <button className="btn pan-left" title="pan left"><ArrowLeft /></button>
+          <button className="btn zoom-in" title="zoom in"><ZoomInIcon /></button>
+          <button className="btn zoom-out" title="zoom out"><ZoomOutIcon /></button>
+          <button className="btn pan-right" title="pan right"><ArrowRight /></button>
         </Ctrls>
       }
 
       <div ref={ref}></div>
 
       {limitRowCount && totalRows > limitRowCount &&
-        <button onClick={() => setShowAllRows(prev => !prev)} className="more-btn" style={{marginLeft: margin.left}}>
+        <button
+          onClick={() => setShowAllRows(prev => !prev)}
+          className="more-btn"
+          style={{marginLeft: margin.left}}
+        >
           {showAllRows ?
             <>hide rows <ExpandLessIcon /></> :
             <>show {totalRows - limitRowCount} more rows <ExpandMoreIcon /></>
