@@ -17,7 +17,7 @@ import * as utils from '/components/utils/units'
 import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
 import cols, { getColorClass, GoodChip } from '../status/columns'
 
-import { mergeMetrics } from '/apps/common/statusDataUtils'
+import { mergeMetrics } from '/components/views/statusDataUtils'
 
 import settings from '/apps/admin/settings'
 const FAIL_THRES = settings.elapsedThresholds.fail

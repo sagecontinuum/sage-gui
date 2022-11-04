@@ -9,7 +9,7 @@ import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
 import columns from './columns'
-import { filterData, getFilterState, mergeMetrics } from '/apps/common/statusDataUtils'
+import { filterData, getFilterState, mergeMetrics } from '/components/views/statusDataUtils'
 
 import Table from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'

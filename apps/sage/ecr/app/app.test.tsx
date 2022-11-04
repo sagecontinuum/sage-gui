@@ -6,7 +6,7 @@ import MockTheme from '../../../__mocks__/MockTheme'
 
 import App from './App'
 
-import {data, url} from '../../../components/apis/ecr.mocks'
+import {data, url} from '/components/apis/ecr.mocks'
 import {server} from '../../../__mocks__/server'
 
 beforeAll(() => server.listen())

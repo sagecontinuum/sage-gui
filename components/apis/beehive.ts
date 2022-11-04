@@ -5,7 +5,7 @@ import { handleErrors } from '../fetch-utils'
 import { groupBy, mapValues, flatten } from 'lodash'
 
 
-import * as BK from '../../components/apis/beekeeper'
+import * as BK from '/components/apis/beekeeper'
 
 let _controller
 

@@ -11,8 +11,8 @@ import wsnode from 'url:/assets/wsn-closed.png'
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
-import RecentDataTable from '/apps/common/RecentDataTable'
-import RecentImages from '/apps/common/RecentImages'
+import RecentDataTable from '../RecentDataTable'
+import RecentImages from '../RecentImages'
 import { useProgress } from '/components/progress/ProgressProvider'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
@@ -376,7 +376,6 @@ export default function NodeView() {
             {hasStaticGPS(manifest) && status && vsn &&
               <Map
                 data={[{
-                  id: vsn,
                   vsn,
                   lat: manifest.gps_lat,
                   lng: manifest.gps_lon,
@@ -386,7 +385,6 @@ export default function NodeView() {
             }
             {!hasStaticGPS(manifest) && liveGPS && status &&
               <Map data={[{
-                id: vsn,
                 vsn,
                 lat: liveGPS.lat,
                 lng: liveGPS.lon,

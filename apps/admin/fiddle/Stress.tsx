@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import * as BK from '../../../components/apis/beekeeper'
-import * as BH from '../../../components/apis/beehive'
+import * as BK from '/components/apis/beekeeper'
+import * as BH from '/components/apis/beehive'
 
 
 

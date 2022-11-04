@@ -16,7 +16,7 @@ const NODES = settings.mdpNodes
 import * as BK from '/components/apis/beekeeper'
 
 import RecentDataTable from './RecentDataTable'
-import RecentData from '/apps/common/AllRecentData'
+import RecentData from './AllRecentData'
 import Audio from '/components/viz/Audio'
 import format from '/components/data/dataFormatter'
 

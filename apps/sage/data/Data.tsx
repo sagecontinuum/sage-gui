@@ -22,7 +22,7 @@ import { addDays, endOfHour, subDays } from 'date-fns'
 import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
-import settings from '/apps/common/settings'
+import settings from '/components/views/settings'
 const MDP_NODES = settings.mdpNodes
 
 

@@ -10,7 +10,7 @@ import * as BK from '/components/apis/beekeeper'
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, { color } from '/components/viz/TimelineChart'
 
-import AllRecentData from '/apps/common/AllRecentData'
+import AllRecentData from '/components/views/AllRecentData'
 import { startCase } from 'lodash'
 import { endOfHour, subDays } from 'date-fns'
 

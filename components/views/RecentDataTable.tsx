@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import Tooltip from '@mui/material/Tooltip'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
-import ErrorMsg from '../sage/ErrorMsg'
+import ErrorMsg from '../../apps/sage/ErrorMsg'
 import { relativeTime, isOldData} from '/components/utils/units'
 
 import { useProgress } from '/components/progress/ProgressProvider'
