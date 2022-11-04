@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import Audio from '/components/viz/Audio'
 
-import {getManifest} from '/components/apis/beekeeper'
+import * as BK from '/components/apis/beekeeper'
 
 
 function AllAudios() {
@@ -35,7 +35,7 @@ function AllAudios() {
       }, 0)
     }
 
-    getManifest()
+    BK.getManifest()
       .then(meta => {
         const nodeList = Object.keys(meta)
         addChart(nodeList)

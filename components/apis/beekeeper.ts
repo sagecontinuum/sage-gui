@@ -97,8 +97,8 @@ export async function getNode(id: string) : Promise<State> {
 type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 export type ManifestMap = {[id_or_vsn: string]: Manifest}
 
-export async function getManifest(params?: MetaParams) : Promise<ManifestMap> {
-  let {node, by = 'id'} = params || {}
+export async function getManifest(params?: MetaParams) : Promise<ManifestMap | Manifest> {
+  const {node, by = 'id'} = params || {}
 
   let data = await get(`${url}/production`)
 
@@ -130,7 +130,7 @@ export async function getManifest(params?: MetaParams) : Promise<ManifestMap> {
   } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
     if (node in mapping) {
       return getFactory({node})
-        .then(factory => ({...mapping[node], factory}))
+        .then(factory => ({...mapping[node], factory})) as Promise<Manifest>
     }
     return null
   } else {
@@ -251,7 +251,7 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 
 
 export async function getNodeDetails() {
-  const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'id'})])
+  const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'vsn'})])
   const nodeDetails = bkData
     .map(obj => ({...obj, ...details[obj.id]}))
     .filter(o => o.commission_date?.length)

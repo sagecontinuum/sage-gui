@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { Alert, Button, Tooltip } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -138,7 +138,7 @@ export default function NodeView() {
 
   useEffect(() => {
     BK.getManifest({node: node.toUpperCase()})
-      .then(data => {
+      .then((data: BK.Manifest) => {
         setManifest(data)
 
         // if no manifest, we can not get the vsn for node health
@@ -217,7 +217,7 @@ export default function NodeView() {
 
 
   const {
-    shield, top_camera, bottom_camera,
+    node_type, shield, node_id, top_camera, bottom_camera,
     left_camera, right_camera
   } = manifest || {}
 
@@ -233,7 +233,11 @@ export default function NodeView() {
         <LeftSide className="flex column gap">
           <Card>
             <div className="flex items-center justify-between">
-              <h1 className="no-margin">Node {vsn} <small className="muted">{node}</small></h1>
+              <h1 className="no-margin">
+                {node_type == 'WSN' ?
+                  'Wild Sage Node' : node_type
+                } {vsn} <small className="muted">{node}</small>
+              </h1>
 
               <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
                 <Button href={manifest ? `${config.adminURL}/node/${manifest.node_id}` : ''} target="_blank">
@@ -334,29 +338,31 @@ export default function NodeView() {
             }
           </Card>
 
-          <Card>
-            <h2>Sensors</h2>
-            {vsn &&
-              <div className="flex data-tables">
-                <RecentDataTable
-                  items={format(['temp', 'humidity', 'pressure'], vsn)}
-                  className="hover-bme"
-                />
-
-                <div>
+          {shield &&
+            <Card>
+              <h2>Sensors</h2>
+              {vsn &&
+                <div className="flex data-tables">
                   <RecentDataTable
-                    items={format(['raingauge'], vsn)}
-                    className="hover-rain"
+                    items={format(['temp', 'humidity', 'pressure'], vsn)}
+                    className="hover-bme"
                   />
-                  {hasMetOne(vsn) &&
+
+                  <div>
                     <RecentDataTable
-                      items={format(['es642AirQuality'], vsn)}
+                      items={format(['raingauge'], vsn)}
+                      className="hover-rain"
                     />
-                  }
+                    {hasMetOne(vsn) &&
+                      <RecentDataTable
+                        items={format(['es642AirQuality'], vsn)}
+                      />
+                    }
+                  </div>
                 </div>
-              </div>
-            }
-          </Card>
+              }
+            </Card>
+          }
 
           <Card>
             <h2>Images</h2>
@@ -365,10 +371,12 @@ export default function NodeView() {
             </Imgs>
           </Card>
 
-          <Card>
-            <h2>Audio</h2>
-            <Audio node={node} className="hover-audio"/>
-          </Card>
+          {shield &&
+            <Card>
+              <h2>Audio</h2>
+              <Audio node={node} className="hover-audio"/>
+            </Card>
+          }
         </LeftSide>
 
         <RightSide className="justify-end">
@@ -397,7 +405,7 @@ export default function NodeView() {
             }
           </Card>
 
-          {vsn?.charAt(0) == 'W' &&
+          {vsn?.charAt(0) == 'W' ?
             <WSNView>
               <img src={wsnode} width={WSN_VIEW_WIDTH} />
               <VSN>{vsn}</VSN>
@@ -413,6 +421,8 @@ export default function NodeView() {
                 </>
               }
             </WSNView>
+            :
+            <div style={{width: WSN_VIEW_WIDTH}} />
           }
         </RightSide>
       </div>

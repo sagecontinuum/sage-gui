@@ -275,7 +275,8 @@ function drawChart(
 
   const showTooltip = (evt, data) => {
     tt.html(tooltip ? tooltip(data) :
-      `${new Date(data.timestamp).toDateString()} ${new Date(data.timestamp).toLocaleTimeString()}<br>
+      `${new Date(data.timestamp).toDateString()} ` +
+      `${new Date(data.timestamp).toLocaleTimeString()}<br>
        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
        value: ${data.value}`
     )
@@ -304,9 +305,10 @@ function drawChart(
   function computeWidth(d, scale) {
     const x = scale
 
+    // use end time if provided, cellUnit is an hour unless user provided
     const w = d.end ?
-      x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :  // use end time
-      x(new Date(d.timestamp).getTime() + cellUnit) - x(new Date(d.timestamp)) // note: cellUnit is an hour unless user provided
+      x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :
+      x(new Date(d.timestamp).getTime() + cellUnit) - x(new Date(d.timestamp))
 
     return w > cellPad ? w - cellPad : cellPad
   }
@@ -402,7 +404,7 @@ type TimelineProps = {
   cellUnit?: 'hour' | 'day'
   yFormat?: (label) => string
   onRowClick?: (label: string, items: Record[]) => void
-  onCellClick?: (label: string) => void
+  onCellClick?: (Record) => void
   colorCell?: (val: number, item: Record) => string
   tooltip?: (item: Record) => string  // update to use React.FC?
   tooltipPos?: 'top' | 'bottom'       // todo(nc): there is surely a better general
