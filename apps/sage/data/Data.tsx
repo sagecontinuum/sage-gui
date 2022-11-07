@@ -13,7 +13,7 @@ import ErrorMsg from '../ErrorMsg'
 
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import { useProgress } from '/components/progress/ProgressProvider'
-import TimelineChart, {colors} from '/components/viz/TimelineChart'
+import TimelineChart, {colors} from '/components/viz/Timeline'
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 

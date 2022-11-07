@@ -13,7 +13,7 @@ import SuryaStatus from './views/surya/SuryaStatus'
 import AudioView from './views/audio/LatestAudio'
 
 import Stress from './fiddle/Stress'
-import Timeline from './fiddle/Timeline'
+import Timeline from './fiddle/TimelineFiddle'
 
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'

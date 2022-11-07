@@ -11,7 +11,7 @@ import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
 import { useProgress } from '/components/progress/ProgressProvider'
-import TimelineChart, { color } from '/components/viz/TimelineChart'
+import TimelineChart, { color } from '/components/viz/Timeline'
 import { endOfHour, subDays } from 'date-fns'
 
 const timeOpts = { hour: '2-digit', minute:'2-digit' }

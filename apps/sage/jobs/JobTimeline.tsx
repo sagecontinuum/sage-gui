@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { subHours } from 'date-fns'
 
-import TimelineChart, {color} from '/components/viz/TimelineChart'
+import TimelineChart, {color} from '/components/viz/Timeline'
 
 import * as BH from '/components/apis/beehive'
 

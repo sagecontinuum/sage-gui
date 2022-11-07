@@ -1,5 +1,5 @@
 import Tooltip from '@mui/material/Tooltip'
-import {color} from './TimelineChart'
+import {color} from './Timeline'
 
 
 
