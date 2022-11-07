@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import * as d3 from 'd3'
 import Legend from './d3-color-legend'
 
+import TimelineLabels from './TimelineLabels'
+
 import ArrowLeft from '@mui/icons-material/ArrowBackIosNew'
 import ArrowRight from '@mui/icons-material/ArrowForwardIos'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
@@ -126,7 +128,7 @@ function drawChart(
   params: TimelineProps & {
     width: number,
     yLabels: string[],
-    size: {m: number, n: number},
+    size: {m: number, n: number}
   }
 ) {
 
@@ -141,6 +143,7 @@ function drawChart(
     yFormat,
     tooltip,
     tooltipPos = 'bottom',
+    useD3YAxis,
     colorCell,
     onCellClick,
     onRowClick
@@ -176,7 +179,7 @@ function drawChart(
   const yAxis = d3.axisLeft(y)
 
   // format y axis labels if needed
-  if (yFormat) {
+  if (yFormat && useD3YAxis) {
     yAxis.tickFormat(yFormat)
   }
 
@@ -238,7 +241,7 @@ function drawChart(
     })
 
 
-  // add y axis (with overlay)
+  // add y axis overlay
   svg.append('g')
     .append('rect')
     .attr('fill', '#fff')
@@ -247,17 +250,20 @@ function drawChart(
     .attr('width', margin.left)
     .attr('height', height)
 
-  svg.append('g')
-    .attr('class', `y-axis`)
-    .attr('transform', `translate(${margin.left}, ${margin.top})`)
-    .call(yAxis)
-    .on('click', (evt) => {
-      if (!onRowClick) return
+  // optionally render y axis with d3
+  if (useD3YAxis) {
+    svg.append('g')
+      .attr('class', `y-axis`)
+      .attr('transform', `translate(${margin.left}, ${margin.top})`)
+      .call(yAxis)
+      .on('click', (evt) => {
+        if (!onRowClick) return
 
-      const label = d3.select(evt.target).data()[0]
-      const row = data.filter(o => o.row == label)
-      onRowClick(label, row)
-    })
+        const label = d3.select(evt.target).data()[0]
+        const row = data.filter(o => o.row == label)
+        onRowClick(label, row)
+      })
+  }
 
   /**
    * tooltip
@@ -392,7 +398,7 @@ type Record = {
 
 type Data = { [key: string]: Record[] }
 
-type TimelineProps = {
+export type TimelineProps = {
   data: Data
   startTime?: Date
   endTime?: Date
@@ -402,7 +408,8 @@ type TimelineProps = {
   showButtons?: boolean
   limitRowCount?: number
   cellUnit?: 'hour' | 'day'
-  yFormat?: (label) => string
+  yFormat?: (label: string) => string | JSX.Element
+  useD3YAxis?: boolean
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (Record) => void
   colorCell?: (val: number, item: Record) => string
@@ -419,6 +426,7 @@ function Chart(props: TimelineProps) {
     showLegend,
     showButtons = true,
     limitRowCount,
+    useD3YAxis = false,
     ...rest
   } = props
 
@@ -427,6 +435,7 @@ function Chart(props: TimelineProps) {
 
   const [showAllRows, setShowAllRows] = useState(false)
   const [totalRows, setTotalRows] = useState(0)
+  const [labels, setLabels] = useState(null)
 
   const ref = useRef(null)
   const legendRef = useRef(null)
@@ -460,12 +469,16 @@ function Chart(props: TimelineProps) {
         chartData = chartData.filter(o => yLabels.includes(o.row) )
       }
 
+      if (!labels)
+        setLabels(yLabels)
+
       drawChart(node, {
         data: chartData,
         yLabels,
         width,
         size,
         margin,
+        useD3YAxis,
         ...rest
       })
     })
@@ -481,13 +494,15 @@ function Chart(props: TimelineProps) {
     return () => {
       ro.unobserve(node)
     }
-  }, [data, rest, margin, showLegend, limitRowCount])
+  }, [data, rest, margin, showLegend, limitRowCount, labels])
 
 
   return (
     <div>
+      {/* legend; todo finish implementing? */}
       <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
 
+      {/* controls */}
       {showButtons &&
         <Ctrls style={{marginRight: margin.right}}>
           {/* note: controls are assumed to be a direct child node for events */}
@@ -499,8 +514,15 @@ function Chart(props: TimelineProps) {
         </Ctrls>
       }
 
+      {/* y axis labels */}
+      {labels &&
+        <TimelineLabels labels={labels} formatter={props.yFormat} margin={margin} />
+      }
+
+      {/* d3.js timeline chart */}
       <div ref={ref}></div>
 
+      {/* collapse chart if limitRowCount is provided */}
       {limitRowCount && totalRows > limitRowCount &&
         <button
           onClick={() => setShowAllRows(prev => !prev)}
@@ -567,8 +589,7 @@ const Root = styled.div<{colorLinks: boolean}>`
         cursor: pointer;
         text-decoration: underline;
       }
-    }`
-  }
+    }`}
 `
 
 const Ctrls = styled.div`
