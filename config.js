@@ -47,13 +47,21 @@ const config = {
     'W038': [
       'Met One ES-642'
     ],
+    'W06F': [
+      'Met One ES-642'
+    ],
     'V008': [
       'Mobotix M16'
     ]
   },
   // another temp solution for missing sensor meta
-  unavaiable_sensor_details: [
-    'XNP-6400RW', 'mobotix', 'ETS ML1-WS'
+  missing_sensor_details: [
+    'XNP-6400RW',
+    'mobotix',
+    'ETS ML1-WS',
+    'Met One ES-642',
+    'OS0-64-GEN2.0 Gen2 64 Below Horizon',
+    'ORTEC digiBASE PMT with NaI detector'
   ]
 }
 

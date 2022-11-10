@@ -7,7 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import Node from '/components/views/node/Node'
-import Nodes from './views/nodes/Nodes'
+import Nodes from '/components/views/nodes/Nodes'
 import Data from '/apps/sage/data/Data'
 import DataBrowser from '/apps/sage/data-stream/DataBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'

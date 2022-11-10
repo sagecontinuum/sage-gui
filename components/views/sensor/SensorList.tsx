@@ -13,7 +13,7 @@ import ErrorMsg from '/apps/sage/ErrorMsg'
 import config from '/config'
 const {
   sageCommons,
-  unavaiable_sensor_details
+  missing_sensor_details
 } = config
 
 const url = `${sageCommons}/action/package_search` +
@@ -25,14 +25,14 @@ const columns = [{
   id: 'name',
   label: 'Name',
   format: (name, obj) =>
-    unavaiable_sensor_details.includes(obj.id) ?
+    missing_sensor_details.includes(obj.id) ?
       name :
       <Link to={`/sensors/${obj.id}`}>{name}</Link>,
-  width: '170px'
+  width: '250px'
 }, {
   id: 'id',
   label: 'ID',
-  width: '100px'
+  width: '250px'
 }, {
   id: 'title',
   label: 'Description',
@@ -137,7 +137,7 @@ export default function SensorList() {
             columns={columns}
             rows={data}
             enableSorting
-            sort="+id"
+            sort="-description"
             onColumnMenuChange={() => {}}
             onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.id}`)}
           />

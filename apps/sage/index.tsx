@@ -29,7 +29,7 @@ import CreateApp from './ecr/create-app/CreateApp'
 import RequireAuth from '/components/auth/RequireAuth'
 
 import Apps from './ecr/apps/Apps'
-import Nodes from '/apps/project/views/nodes/Nodes'
+import Nodes from '/components/views/nodes/Nodes'
 import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'

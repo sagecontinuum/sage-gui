@@ -59,13 +59,13 @@ const noneFormatter = (val) =>
 
 const metaRows1 = [{
   id: 'project',
-  format: (val) => <a href={`${config.adminURL}/status?project="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
+  format: (val) => <a href={`/nodes?project="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'focus',
-  format: (val) => <a href={`${config.adminURL}/status?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
+  format: (val) => <a href={`/nodes?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'location',
-  format: (val) => <a href={`${config.adminURL}/status?location="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
+  format: (val) => <a href={`/nodes?location="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'build_date',
   label: 'Built'
