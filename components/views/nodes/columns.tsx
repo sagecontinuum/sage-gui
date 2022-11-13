@@ -10,7 +10,7 @@ import MapIcon from '@mui/icons-material/RoomOutlined'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '/components/utils/units'
-import settings from '../../../apps/project/settings'
+import settings from '/apps/project/settings'
 import config from '/config'
 
 

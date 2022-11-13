@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useParams, useLocation } from 'react-router-dom'
 
 import { Alert, Button, Tooltip } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -10,25 +10,28 @@ import wsnode from 'url:/assets/wsn-closed.png'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
+import * as ECR from '/components/apis/ecr'
 
-import RecentDataTable from '../RecentDataTable'
-import RecentImages from '../RecentImages'
 import { useProgress } from '/components/progress/ProgressProvider'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
 import MetaTable from '/components/table/MetaTable'
 import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
-import Timeline from '../../viz/Timeline'
+import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
+import timelineAppLabel from '/components/viz/timelineAppLabel'
 import { CardViewStyle, Card } from '/components/layout/Layout'
+
+import RecentDataTable from '../RecentDataTable'
+import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 
-import adminSettings from '/apps/admin/settings' // todo(nc): organize, maybe?
+import adminSettings from '/apps/admin/settings' // todo(nc): organize config
 import config from '/config'
 
 
-// todo(nc): promote/refactor into component/ lib
+// todo(nc): promote/refactor into component lib
 import DataOptions from '/apps/sage/data/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
@@ -48,13 +51,28 @@ const TAIL_DAYS = 45
 import {hasMetOne} from '/config'
 
 
-const hasStaticGPS = manifest =>
-  manifest && manifest.gps_lat && manifest.gps_lat
+const hasStaticGPS = (manifest: BK.Manifest) =>
+  manifest?.gps_lat && manifest?.gps_lat
 
-const noneFormatter = (val) =>
+const noneFormatter = (val: boolean | 'yes' | 'no' | 'none') : string =>
   typeof val == 'boolean' ?
     (val ? 'yes' : 'no') :
     ((!val || val == 'none' || '') ? '-' : val)
+
+const camFormatter = (name: string) => {
+  const id = name?.slice( name.indexOf('(') + 1, name.indexOf(')') )
+
+  if (name == 'none')
+    return '-'
+  else if (config.missing_sensor_details.includes(id))
+    return name
+  else
+    return (
+      <Link to={`/sensors/${id}`}>
+        {name}
+      </Link>
+    )
+}
 
 
 const metaRows1 = [{
@@ -85,17 +103,13 @@ const metaRows2 = [
   {id: 'nx_agent', format: noneFormatter}
 ]
 
-const cameraMetaRows = [
-  {id: 'top_camera', label: 'Top', format: noneFormatter},
-  {id: 'bottom_camera',  label: 'Bottom', format: noneFormatter},
-  {id: 'left_camera', label: 'Left', format: noneFormatter},
-  {id: 'right_camera', label: 'Right', format: noneFormatter}
-]
 
-// todo(nc): temp solution until we have references!
-// use the most recent app with same substring, ignoring "plugin-" and version
-const findApp = (apps, name) =>
-  apps.find(o => o.id.includes(name.replace('plugin-', '')))
+const cameraMetaRows = [
+  {id: 'top_camera', label: 'Top', format: camFormatter},
+  {id: 'bottom_camera',  label: 'Bottom', format: camFormatter},
+  {id: 'left_camera', label: 'Left', format: camFormatter},
+  {id: 'right_camera', label: 'Right', format: camFormatter}
+]
 
 
 export default function NodeView() {
@@ -111,6 +125,7 @@ export default function NodeView() {
   const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
+  const [ecr, setECR] = useState<ECR.App[]>()
 
   const [error, setError] = useState(null)
 
@@ -172,6 +187,13 @@ export default function NodeView() {
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
   }, [vsn, manifest])
+
+
+  // fetch public ECR apps to determine if apps are indeed public
+  useEffect(() => {
+    ECR.listApps('public')
+      .then(ecr => setECR(ecr))
+  }, [])
 
 
   const onOver = (id) => {
@@ -295,7 +317,7 @@ export default function NodeView() {
             <div className="timeline-title flex items-center">
               <h2>Last {TAIL_DAYS} days of data</h2>
               {Object.keys(data || {}).length > 0 &&
-              <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+                <DataOptions onChange={handleOptionChange} opts={opts} condensed />
               }
             </div>
 
@@ -309,32 +331,29 @@ export default function NodeView() {
               <div className="clearfix muted">No data available</div>
             }
 
-            {Object.keys(data || {}).length > 0 && vsn &&
-            <Timeline
-              data={data[vsn]}
-              cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-              colorCell={opts.density ? colorDensity : stdColor}
-              startTime={opts.start}
-              endTime={end}
-              tooltip={(item) => `
-                <div style="margin-bottom: 5px;">
-                  ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
-                </div>
-                ${item.meta.plugin}<br>
-                ${item.value.toLocaleString()} records`
-              }
-              onRowClick={(name) => {
-                const app = findApp(ecr, name)
-                navigate(`/apps/app/${app.id.split(':')[0]}`)
-              }}
-              onCellClick={(data) => {
-                const {timestamp, meta} = data
-                const {vsn, plugin} = meta
-                const win = opts.time == 'daily' ? 'd' : 'h'
-                window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
-              }}
-              margin={TIMELINE_MARGIN}
-            />
+            {Object.keys(data || {}).length > 0 && vsn && ecr &&
+              <Timeline
+                data={data[vsn]}
+                cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
+                colorCell={opts.density ? colorDensity : stdColor}
+                startTime={opts.start}
+                endTime={end}
+                tooltip={(item) => `
+                  <div style="margin-bottom: 5px;">
+                    ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
+                  </div>
+                  ${item.meta.plugin}<br>
+                  ${item.value.toLocaleString()} records`
+                }
+                onCellClick={(data) => {
+                  const {timestamp, meta} = data
+                  const {vsn, plugin} = meta
+                  const win = opts.time == 'daily' ? 'd' : 'h'
+                  window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                }}
+                yFormat={(label) => timelineAppLabel(label, ecr)}
+                margin={TIMELINE_MARGIN}
+              />
             }
           </Card>
 
