@@ -5,7 +5,7 @@ import styled from 'styled-components'
 
 import * as BH from '/components/apis/beehive'
 
-import Sidebar from '../data-commons/DataSidebar'
+import { Sidebar } from '/components/layout/Layout'
 import Table from '/components/table/Table'
 import Checkbox from '/components/input/Checkbox'
 import Clipboard from '/components/utils/Clipboard'
@@ -849,11 +849,6 @@ const Root = styled.div<{isMedia: boolean}>`
 
   .shortcuts {
     margin-bottom: 30px;
-  }
-
-  .MuiInputBase-root,
-  .MuiButtonBase-root:not(.Mui-selected) {
-    background: #fff;
   }
 
   .MuiToggleButtonGroup-grouped:not(:first-of-type) {

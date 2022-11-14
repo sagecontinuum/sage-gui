@@ -29,7 +29,7 @@ import { Chart as ChartJS,
   Decimation,
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
-import zoomPlugin from 'chartjs-plugin-zoom';
+import zoomPlugin from 'chartjs-plugin-zoom'
 
 ChartJS.register(
   Tooltip, Legend, LineController, BarController, LineElement, PointElement,
@@ -91,7 +91,7 @@ const barConfig = {
 
 
 function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
-  let datasets = []
+  const datasets = []
 
   const byName = groupBy(records, 'name')
 
@@ -252,7 +252,7 @@ export default function TimeSeries(props) {
   return (
     <Root>
       <ChartContainer>
-      <canvas ref={chartRef}></canvas>
+        <canvas ref={chartRef}></canvas>
       </ChartContainer>
 
 
@@ -271,7 +271,10 @@ export default function TimeSeries(props) {
 
               {!disableDownsampling &&
                 <span>
-                  Note: data in this chart has been downsampled using <a href="http://hdl.handle.net/1946/15343" target="_blank">LTTB</a>.
+                  Note: data in this chart has been downsampled
+                  using <a href="http://hdl.handle.net/1946/15343"
+                    target="_blank" rel="noreferrer">LTTB
+                  </a>.
                 </span>
               }
             </DownsampleOpts>
@@ -337,7 +340,6 @@ const ChartContainer = styled.div`
 
 const DownsampleOpts = styled.div`
   button {
-
     margin: 0 5px 2px 0;
   }
 `

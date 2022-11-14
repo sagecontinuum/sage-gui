@@ -65,6 +65,11 @@ export const Sidebar = styled.div<{width?: string}>`
   border-right: 1px solid #f1f1f1;
   background: #f8f8f8;
   overflow-y: scroll;
+
+  .MuiInputBase-root,
+  .MuiButtonBase-root:not(.Mui-selected, .MuiCheckbox-root) {
+    background: #fff;
+  }
 `
 
 export const FilterTitle = styled.h2`
