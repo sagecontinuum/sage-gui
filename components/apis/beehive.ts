@@ -372,6 +372,7 @@ export async function getRecentImages(
 
       const proms = data.map((d, i) => {
         const position = cameraOrientations[i]
+        d = d.filter(o => /\.jpg$/g.test(o.value as string)) // need to only consider images
         return _findLatestAvail(d, position, onProgress)
       })
       const dataList = await Promise.all(proms)
