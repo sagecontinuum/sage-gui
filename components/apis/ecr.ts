@@ -371,6 +371,9 @@ const timeCompare = (a, b) =>
 
 
 
+export const repoIsPublic = (apps, name) =>
+  apps.find(o => o.id.includes(name))
+
 
 /**
  * the following functions are for testing only

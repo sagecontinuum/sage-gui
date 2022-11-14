@@ -42,7 +42,7 @@ import config from '/config'
 const registry = config.dockerRegistry
 
 // default app for initial view of data
-const defaultPlugin = 'waggle/plugin-iio.*'
+const defaultPlugin = '.*plugin-iio.*'
 
 const exts = {
   image: ['.jpg', '.jpeg', '.png', '.gif'],
@@ -193,7 +193,12 @@ const getUniqueOpts = (data: string[]) =>
 const getUniqueAppOpts = (data: string[]) =>
   data.sort()
     .filter((v, i, self) => v && self.indexOf(v) == i)
-    .map(v => ({id: v, label: v.replace(`${registry}/`, '')}))
+    .map(v => {
+      const path = v.replace(`${registry}`, '')
+      const label = path.slice(path.lastIndexOf('/') + 1)
+      return {id: v, label}
+    })
+
 
 
 const getCurlCmd = (query: object) =>
@@ -864,8 +869,7 @@ const Root = styled.div<{isMedia: boolean}>`
     tr.MuiTableRow-root:hover {
       background-color: initial;
     }
-    `
-  }
+    `}
 `
 
 const Main = styled.div`

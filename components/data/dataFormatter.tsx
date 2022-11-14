@@ -8,7 +8,8 @@ const formatters = {
       sensor: 'bme680'
     },
     format: v => `${v}°C`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   humidity: {
     label: 'Humidity',
@@ -17,7 +18,8 @@ const formatters = {
       sensor: 'bme680'
     },
     format: v => `${v}%`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   pressure: {
     label: 'Pressure',
@@ -25,8 +27,9 @@ const formatters = {
       name: 'env.pressure',
       sensor: 'bme680'
     },
-    format: v => `${v} Pa`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
+    format: v => `${v}Pa`,
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   gas: {
     label: 'Gas',
@@ -35,7 +38,8 @@ const formatters = {
       sensor: 'bme680'
     },
     format: v => `${v}`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&sensors=${data.meta.sensor}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   raingauge: {
     label: 'Raingauge',
@@ -43,7 +47,8 @@ const formatters = {
       name: 'env.raingauge.event_acc'
     },
     format: v => `${v}mm`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
   },
   es642Temp: {
     label: 'Temp (Met One)',
@@ -52,7 +57,8 @@ const formatters = {
       sensor: 'es642'
     },
     format: v => `${v}°C`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
   },
   es642AirQuality: {
     label: 'Air Quality',
@@ -60,7 +66,8 @@ const formatters = {
       name: 'env.air_quality.conc'
     },
     format: v => `${v}mg/m3`,
-    linkParams: (data) => `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=d`
+    linkParams: ({name, meta}) =>
+      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
   },
 }
 
