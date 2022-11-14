@@ -4,6 +4,7 @@ import styled from 'styled-components'
 
 import Tooltip from '@mui/material/Tooltip'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
+import ZoomInIcon from '@mui/icons-material/ZoomInRounded'
 
 import ErrorMsg from '../../apps/sage/ErrorMsg'
 import { relativeTime, isOldData} from '/components/utils/units'
@@ -33,7 +34,7 @@ type Props = {
 }
 
 const getStartTime = () => {
-  let datetime = new Date()
+  const datetime = new Date()
   datetime.setDate(datetime.getDate() - 1)
 
   return new Date(datetime).toISOString()
@@ -57,7 +58,7 @@ export default memo(function RecentDataTable(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    let proms = []
+    const proms = []
     for (const item of items) {
       const {label, query} = item
 
@@ -94,7 +95,7 @@ export default memo(function RecentDataTable(props: Props) {
               <th></th>
               <th>Latest Time</th>
               <th>Value</th>
-              <th>Last Hour</th>
+              <th>Last 24 Hours</th>
             </tr>
           </thead>
           <tbody>
@@ -108,8 +109,17 @@ export default memo(function RecentDataTable(props: Props) {
                 <tr key={label}>
                   <td>
                     {label}
-                    <Tooltip title={<>{item.query.name}<br/>{item.query.sensor ? <div>{item.query.sensor}</div> : ''}<small>(click for description)</small></>} placement="left">
-                      <a href={`/data/ontology/${item.query.name}`} target="_blank"><HelpIcon /></a>
+                    <Tooltip
+                      title={<>{item.query.name}<br/>
+                        {item.query.sensor ?
+                          <div>{item.query.sensor}</div> : ''}
+                        <small>(click for description)</small></>}
+                      placement="left"
+                    >
+                      <a  href={`/data/ontology/${item.query.name}`}
+                        target="_blank" rel="noreferrer">
+                        <HelpIcon />
+                      </a>
                     </Tooltip>
                   </td>
                   <td className={isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap'}>
@@ -126,7 +136,9 @@ export default memo(function RecentDataTable(props: Props) {
                     {value == 'loading' &&
                       <span className="muted">loading...</span>
                     }
-                    {(value && value != 'loading' && format) ? format(value) : (value != 'loading' && value)}
+                    {(value && value != 'loading' && format)
+                      ? format(value) : (value != 'loading' && value)
+                    }
                     {value == null &&
                       <span className="muted">Not available</span>
                     }
@@ -142,9 +154,10 @@ export default memo(function RecentDataTable(props: Props) {
                   {showSparkline &&
                     <td>
                       {data && linkParams && data.value != 'loading' &&
-                        <a href={`${dataBrowser}?${linkParams(data)}`} target="_blank">
+                        <SparkLineLink href={`${dataBrowser}?${linkParams(data)}`} target="_blank">
                           <SparkLine data={sLines[label]}/>
-                        </a>
+                          <ZoomInIcon />
+                        </SparkLineLink>
                       }
                     </td>
                   }
@@ -171,5 +184,26 @@ const HelpIcon = styled(QuestionMark)`
   width: 12px;
   top: 0;
   color: #1c8cc9;
+`
+
+const SparkLineLink = styled.a`
+  &:hover canvas {
+    background-color: rgba(0, 0, 0, .3);
+  }
+
+  .MuiSvgIcon-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    color: #f2f2f2;
+    display: none;
+  }
+
+  &:hover .MuiSvgIcon-root {
+    display: block;
+  }
 `
 
