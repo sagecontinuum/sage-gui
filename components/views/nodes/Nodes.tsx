@@ -21,7 +21,7 @@ import { queryData } from '/components/data/queryData'
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
-import settings from '../../../apps/project/settings'
+import settings from '/apps/project/settings'
 
 const TIME_OUT = 5000
 
@@ -82,7 +82,7 @@ export default function Nodes() {
   const [filterState, setFilterState] = useState(null)
 
   // filter options
-  // const [statuses, setStatuses] = useState<Option[]>()
+  const [statuses, setStatuses] = useState<Option[]>()
   const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
@@ -167,7 +167,7 @@ export default function Nodes() {
     setFiltered(filteredData)
     setFilterState(filterState)
 
-    // setStatuses(getOptions(data, 'status'))
+    setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
@@ -253,7 +253,7 @@ export default function Nodes() {
             onSelect={handleSelect}
             middleComponent={
               <FilterControls className="flex items-center">
-                {/* statuses ?
+                {statuses ?
                   <FilterMenu
                     label="Status"
                     options={statuses}
@@ -261,7 +261,7 @@ export default function Nodes() {
                     onChange={vals => handleFilterChange('status', vals)}
                     noSelectedSort
                   /> : <></>
-                */}
+                }
                 {projects &&
                   <FilterMenu
                     label="Project"
