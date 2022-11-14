@@ -37,12 +37,16 @@ export function parseData(props: ParseDataProps) {
 
   if (!versions) {
     d = d.map(o => {
-      const { plugin } = o.meta
+      const { plugin: p } = o.meta
+
+      const isIP = /\d+\.\d+\.\d+\.\d+/.test(p)
+      const plugin = isIP ? p.slice(p.indexOf('/') + 1).split(':')[0] : p.split(':')[0]
+
       return {
         ...o,
         meta: {
           ...o.meta,
-          plugin: plugin.split(':')[0]
+          plugin
         }
       }
     })
