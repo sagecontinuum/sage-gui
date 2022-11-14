@@ -137,7 +137,7 @@ export default function SensorList() {
             columns={columns}
             rows={data}
             enableSorting
-            sort="-description"
+            sort="-title"
             onColumnMenuChange={() => {}}
             onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.id}`)}
           />
