@@ -334,8 +334,9 @@ const facetInputs: Facets = {
 }
 
 
-export function getFilterState(params, includeDefault=true) : FilterState {
-  const init = includeDefault ? initFilterState : {...initFilterState, apps: []}
+export function getFilterState(params, includeDefaultApp=true) : FilterState {
+  const init = includeDefaultApp ?
+    {...initFilterState} : {...initFilterState, apps: []}
   for (const [key, val] of params) {
     if (key == 'start')
       continue
@@ -385,8 +386,8 @@ export default function DataPreview() {
 
   // update selected filters whenever url param changes
   useEffect(() => {
-    const includeDefault = ['apps'].includes(type)
-    const filterState = getFilterState(params, includeDefault)
+    const includeDefaultApp = ['apps'].includes(type)
+    const filterState = getFilterState(params, includeDefaultApp)
     setFilters(filterState)
   }, [app, name, node, sensor, task, type, mimeType])
 
@@ -556,6 +557,7 @@ export default function DataPreview() {
     } else {
       params.set(field, val.id)
     }
+
     navigate({search: params.toString()}, {replace: true})
   }
 

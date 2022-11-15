@@ -7,7 +7,7 @@ import Map, {
   Marker, Popup, Source, Layer,
   FullscreenControl, NavigationControl
 } from 'react-map-gl'
-import type { MapRef } from 'react-map-gl'
+import type { MapRef, MapProps } from 'react-map-gl'
 
 import { ClickAwayListener } from '@mui/material'
 
@@ -30,8 +30,12 @@ const mapSettings = {
   mapboxAccessToken: MAPBOX_TOKEN,
   style: {height: '350px'},
   mapStyle: 'mapbox://styles/mapbox/light-v9',
-  cooperativeGestures: true
-}
+  cooperativeGestures: true,
+  /* 3d view
+  projection: 'globe',
+  fog: {}
+  */
+} as MapProps
 
 const fitBoundsPadding = {top: 35, bottom: 35, left: 35, right: 35}
 
@@ -175,6 +179,7 @@ type Data = {
 type Props = {
   data: Data
   updateID?: number
+  projection?: 'globe'
 }
 
 
@@ -187,6 +192,7 @@ export default function MapGL(props: Props) {
   const mapRef = useRef<MapRef>(null)
   const [popup, setPopup] = useState(null)
 
+  const [settings] = useState(mapSettings)
   const [geoData, setGeoData] = useState(null)
   const [markers, setMarkers] = useState([])
 
@@ -225,7 +231,7 @@ export default function MapGL(props: Props) {
 
   return (
     <Root>
-      <Map ref={mapRef} {...mapSettings}>
+      <Map ref={mapRef} {...settings}>
         <FullscreenControl />
         <NavigationControl position="bottom-right" showCompass={false} />
 
