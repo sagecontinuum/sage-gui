@@ -59,6 +59,30 @@ export default function DataOptions(props: Props) {
         </ToggleButtonGroup>
       </div>
 
+      {condensed &&
+        <div>
+          <ToggleButtonGroup
+            value={opts.window}
+            onChange={(evt) => onChange(evt, 'window')}
+            aria-label="change last x days"
+            exclusive
+          >
+            <ToggleButton value="-60d" aria-label="last 60 days">
+              -60d
+            </ToggleButton>
+            <ToggleButton value="-30d" aria-label="last 30 days">
+              -30d
+            </ToggleButton>
+            <ToggleButton value="-7d" aria-label="last 7 days">
+              -7d
+            </ToggleButton>
+            <ToggleButton value="-2d" aria-label="last 2 days">
+              -2d
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      }
+
       {onDateChange &&
         <div>
           <h5 className="subtitle no-margin muted">Start Date</h5>

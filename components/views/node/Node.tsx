@@ -43,8 +43,7 @@ import { endOfHour, subDays } from 'date-fns'
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
-const TIME_WINDOW = 'hour'
-const TAIL_DAYS = 45
+const TAIL_DAYS = '-2d'
 
 
 // todo(nc): remove hardcoded additional sensors
@@ -73,6 +72,9 @@ const camFormatter = (name: string) => {
       </Link>
     )
 }
+
+const getStartTime = (str) =>
+  subDays(new Date(), str.replace(/-|d/g, ''))
 
 
 const metaRows1 = [{
@@ -144,7 +146,8 @@ export default function NodeView() {
     density: true,
     versions: false,
     time: 'hourly',
-    start: subDays(new Date(), TAIL_DAYS)
+    start: getStartTime(TAIL_DAYS),
+    window: TAIL_DAYS
   })
 
   // note: endtime is not currently an option
@@ -186,7 +189,7 @@ export default function NodeView() {
       .then(data => dispatch({type: 'INIT_DATA', data, manifests: [manifest]}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [vsn, manifest])
+  }, [vsn, manifest, opts])
 
 
   // fetch public ECR apps to determine if apps are indeed public
@@ -232,6 +235,13 @@ export default function NodeView() {
       return
     } else if (name == 'density') {
       setOpts(prev => ({...prev, [name]: evt.target.checked}))
+    } else if (name == 'window') {
+      const window = evt.target.value
+      setOpts(prev => ({
+        ...prev,
+        start: getStartTime(window),
+        window
+      }))
     } else {
       throw `unhandled option state change name=${name}`
     }
@@ -315,7 +325,7 @@ export default function NodeView() {
 
           <Card>
             <div className="timeline-title flex items-center">
-              <h2>Last {TAIL_DAYS} days of data</h2>
+              <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
               {Object.keys(data || {}).length > 0 &&
                 <DataOptions onChange={handleOptionChange} opts={opts} condensed />
               }
@@ -331,7 +341,7 @@ export default function NodeView() {
               <div className="clearfix muted">No data available</div>
             }
 
-            {Object.keys(data || {}).length > 0 && vsn && ecr &&
+            {Object.keys(data || {}).length > 0 && vsn && ecr && !loadingTL &&
               <Timeline
                 data={data[vsn]}
                 cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -340,7 +350,7 @@ export default function NodeView() {
                 endTime={end}
                 tooltip={(item) => `
                   <div style="margin-bottom: 5px;">
-                    ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
+                    ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
                   </div>
                   ${item.meta.plugin}<br>
                   ${item.value.toLocaleString()} records`
