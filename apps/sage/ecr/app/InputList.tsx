@@ -10,7 +10,8 @@ import * as ECR from '/components/apis/ecr'
 const columns = [
   {id: 'id', label: 'Argument'},
   {id: 'type', label: 'Type'},
-  {id: 'description', label: 'Description'}
+  {id: 'description', label: 'Description'},
+  {id: 'default', label: 'Default'}
 ]
 
 
@@ -46,6 +47,7 @@ export default function InputList(props: Props) {
       {inputs &&
         <Table
           primaryKey="id"
+          enableSorting
           columns={columns}
           rows={inputs}
           emptyNotice="No input arguments were provided"
