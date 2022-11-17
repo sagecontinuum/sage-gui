@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
 import InputIcon from '@mui/icons-material/InputRounded'
 import TagIcon from '@mui/icons-material/LocalOfferRounded'
+import ChartIcon from '@mui/icons-material/TimelineRounded'
 import Divider from '@mui/material/Divider'
 import BeeIcon from 'url:/assets/bee.svg'
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
 
-import {Tabs, Tab} from '/components/tabs/Tabs'
-import {useProgress} from '/components/progress/ProgressProvider'
+import { Tabs, Tab } from '/components/tabs/Tabs'
+import { useProgress } from '/components/progress/ProgressProvider'
 import TagList from './TagList'
 import InputsList from './InputList'
 import { Thumb } from '../formatters'
@@ -20,14 +21,17 @@ import { Thumb } from '../formatters'
 import * as ECR from '/components/apis/ecr'
 import * as Auth from '/components/auth/auth'
 
-
-import { marked } from 'marked'
 import AppMeta from './AppMeta'
 
+import { marked } from 'marked'
 
+type Tab = 'science' | 'inputs' | 'tags' | 'data'
 
 export default function App() {
+  const navigate = useNavigate()
   const path = useParams()['*']
+  const params = new URLSearchParams(useLocation().search)
+  const tab = params.get('tab') || 'science'
 
   const { loading, setLoading } = useProgress()
   const [repo, setRepo] = useState<ECR.Repo>(null)
@@ -35,9 +39,6 @@ export default function App() {
   const [sciHtml, setSciHtml] = useState(null)
 
   const [error, setError] = useState(null)
-
-  const [tabIndex, setTabIndex] = useState(0)
-
 
   useEffect(() => {
     const [namespace, name] = path.split('/')
@@ -56,8 +57,9 @@ export default function App() {
           return ECR.getSciMarkdown(mdPath)
             .then(text => setSciHtml(marked(text)))
         } else {
-          // if no description, just go to the tagged versions tab
-          setTabIndex(1)
+          // if no description, just go to tags
+          params.set('tab', 'tags')
+          navigate({search: params.toString()}, {replace: true})
         }
       })
       .catch(err => setError(err.message))
@@ -114,37 +116,75 @@ export default function App() {
       <Details className="flex">
         <Main>
           <Tabs
-            value={tabIndex}
-            onChange={(_, idx) => setTabIndex(idx)}
+            value={tab}
             aria-label="App details tabs"
           >
-            <Tab label={<div className="flex items-center"><ScienceIcon fontSize="small" />&nbsp;Science Overview</div>} />
-            <Tab label={<div className="flex items-center"><InputIcon fontSize="small" />&nbsp;Input Arguments</div>} />
-            <Tab label={<div className="flex items-center"><TagIcon fontSize="small" />&nbsp;Tagged Versions ({versions.length})</div>} />
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <ScienceIcon fontSize="small" />&nbsp;Science Overview
+                </div>
+              }
+              value="science"
+              component={Link}
+              to="?tab=science"
+              replace
+            />
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <InputIcon fontSize="small" />&nbsp;Input Arguments
+                </div>
+              }
+              value="inputs"
+              component={Link}
+              to="?tab=inputs"
+              replace
+            />
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <TagIcon fontSize="small" />&nbsp;Tagged Versions ({versions.length})
+                </div>
+              }
+              value="tags"
+              component={Link}
+              to="?tab=tags"
+              replace
+            />
+            <Tab label={
+              <div className="flex items-center">
+                <ChartIcon fontSize="small" />&nbsp;Data
+              </div>
+            }
+            value="data"
+            component={Link}
+            to="?tab=data"
+            replace
+            />
           </Tabs>
           <br/>
 
 
-          {tabIndex == 0 &&
+          {tab == 'science' &&
             <Science>
               <div dangerouslySetInnerHTML={{__html: sciHtml}} />
             </Science>
           }
 
-          {tabIndex == 0 && sciHtml == null && !loading &&
+          {tab == 'science' && sciHtml == null && !loading &&
             <div className="muted">
               No science description available for this app.
             </div>
           }
 
-          {tabIndex == 1 && versions.length &&
+          {tab == 'inputs' && versions.length &&
             <InputsList versions={versions} />
           }
 
-          {tabIndex == 2 && versions.length &&
+          {tab == 'tags' && versions.length &&
             <TagList versions={versions} />
           }
-
         </Main>
 
         {latestTag &&
