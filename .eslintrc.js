@@ -17,7 +17,7 @@ module.exports = {
     'spaced-comment': ['error', 'always'],
     'react/prop-types': 0,
     'no-unused-vars': 'off',
-    'max-len': ['error', {'code': 100}],
+    'max-len': ['error', {'code': 120}],
     '@typescript-eslint/no-unused-vars': 'error',
     'react/no-unescaped-entities': [
       'error',
