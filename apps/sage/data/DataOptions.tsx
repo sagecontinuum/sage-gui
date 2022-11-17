@@ -67,8 +67,8 @@ export default function DataOptions(props: Props) {
             aria-label="change last x days"
             exclusive
           >
-            <ToggleButton value="-60d" aria-label="last 60 days">
-              -60d
+            <ToggleButton value="-90d" aria-label="last 90 days">
+              -90d
             </ToggleButton>
             <ToggleButton value="-30d" aria-label="last 30 days">
               -30d

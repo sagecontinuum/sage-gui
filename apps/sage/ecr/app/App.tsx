@@ -22,6 +22,7 @@ import * as ECR from '/components/apis/ecr'
 import * as Auth from '/components/auth/auth'
 
 import AppMeta from './AppMeta'
+import AppData from './AppData'
 
 import { marked } from 'marked'
 
@@ -184,6 +185,10 @@ export default function App() {
 
           {tab == 'tags' && versions.length &&
             <TagList versions={versions} />
+          }
+
+          {tab == 'data' &&
+            <AppData plugin={path} />
           }
         </Main>
 
