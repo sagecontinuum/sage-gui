@@ -73,7 +73,7 @@ const useQueryParams = () =>
 
 export default function AppList() {
   const params = useQueryParams()
-  let path = useMatch('*').pathname
+  const path = useMatch('*').pathname
   const view = path.split('/')[2]
 
   const navigate = useNavigate()

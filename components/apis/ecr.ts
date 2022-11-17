@@ -1,4 +1,4 @@
-import config from '../../config'
+import config from '/config'
 export const url = config.ecr
 export const docs = config.docs
 
@@ -244,7 +244,7 @@ export function listVersions(repo: Repo) : Promise<AppDetails[]> {
 }
 
 type FilterType = 'mine' | 'public'
-export async function listApps(filter: FilterType) {
+export async function listApps(filter: FilterType) : Promise<AppDetails[]> {
   const repoFilters = [
     __token ? `view=permissions` : '',
     filter == 'mine' ? `nopublic=true` : ''
@@ -261,7 +261,7 @@ export async function listApps(filter: FilterType) {
   return Promise.all([repoPerm, appProm])
     .then(([repoRes, appRes]) => {
 
-      let repos = repoRes.data
+      const repos = repoRes.data
 
       // create lookup; todo?: could do merging on repos instead
       const repoMap = repos.reduce((acc, r) =>
@@ -274,7 +274,7 @@ export async function listApps(filter: FilterType) {
         appRes.data.sort(timeCompare)
 
       // reduce to last updated (and get versions)
-      let versions = {}
+      const versions = {}
       let apps = allApps.reduce((acc, app) => {
         const [repo, ver] = app.id.split(':')
 
@@ -326,7 +326,6 @@ export function listBuildStatus(apps: App[]) {
  * retrieval
  */
 
-
 export function getRepo(repo) : Promise<Repo> {
   const {namespace, name} : {namespace: string, name: string} = repo
   return get(`${url}/repositories/${namespace}/${name}`)
@@ -371,22 +370,8 @@ const timeCompare = (a, b) =>
 
 
 
-export const repoIsPublic = (apps, name) =>
-  apps.find(o => o.id.includes(name))
-
-
-/**
- * the following functions are for testing only
- */
-
-function __deleteEverything() {
-  const repoPerm = get(`${url}/repositories?view=permissions`)
-  repoPerm.then((res) =>
-    res.data.forEach(repo =>
-      deleteRepo(repo)
-    )
-  )
-}
+export const repoIsPublic = (publicApps: AppDetails[], name: string) =>
+  publicApps.find(o => o.id.includes(name))
 
 
 

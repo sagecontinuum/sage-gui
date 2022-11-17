@@ -134,7 +134,8 @@ export default function FeaturedApps(props: Props) {
 const Root = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  column-gap: 20px;
+
   content: "";
   flex: auto;
 
