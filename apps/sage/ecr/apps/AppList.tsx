@@ -57,7 +57,7 @@ const columns = [
 ]
 
 
-const queryData = (data: any[], query: string) => {
+const queryData = (data: object[], query: string) => {
   return data.filter(row =>
     Object.values(row)
       .join('').toLowerCase()
@@ -83,7 +83,7 @@ export default function AppList() {
   const ref = useRef<boolean>()
   const {loading, setLoading} = useProgress()
 
-  let [data, setData] = useWithBuildStatus<ECR.AppDetails[]>()
+  const [data, setData] = useWithBuildStatus<ECR.AppDetails[]>()
   const [rows, setRows] = useState<ECR.AppDetails[]>()
   const [error, setError] = useState(null)
 

@@ -1,15 +1,24 @@
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
+
 import { TimelineProps } from './Timeline'
 
 
 type Props = {
   labels: string[]
   formatter: TimelineProps['yFormat']
-  margin: {left: number}
+  margin: {left?: number}
 }
 
 export default function TimelineLabels(props: Props) {
-  const {labels, formatter} = props
+  const {formatter} = props
+
+  const [labels, setLabels] = useState(props.labels)
+
+  useEffect(() => {
+    setLabels(props.labels)
+  }, [props.labels])
+
 
   return (
     <Root>

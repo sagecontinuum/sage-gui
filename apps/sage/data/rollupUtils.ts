@@ -10,12 +10,13 @@ export type FetchRollupProps = {
   time?: 'hourly' | 'daily'
   start?: Date
   end?: Date
-  vsn?: string  // for single node views
+  vsn?: string    // for single node views
+  plugin?: string // for single app views
 }
 
 export function fetchRollup(props: FetchRollupProps) {
-  const {start, end, vsn} = props
-  return BH.getPluginCounts({start, end, vsn})
+  const {start, end, vsn, plugin} = props
+  return BH.getPluginCounts({start, end, vsn, plugin})
     .then(d => {
       const data = parseData({data: d, ...props})
       return {rawData: d, data}
@@ -35,6 +36,7 @@ export function parseData(props: ParseDataProps) {
 
   let d = data
 
+  // remove versions if needed
   if (!versions) {
     d = d.map(o => {
       const { plugin: p } = o.meta
@@ -84,7 +86,7 @@ type ByVSNDailyMap = {
 
 // todo(nc): write test and refactor
 function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
-  let daily = {}
+  const daily = {}
 
   // for each vsn
   for (const vsn of Object.keys(hourlyByVSN)) {
@@ -101,7 +103,7 @@ function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
     }, {})
 
     // convert byPluginHoursly to byDay (summing up each hour count)
-    let byDay = {}
+    const byDay = {}
     for (const [plugin, hourlyObjs] of Object.entries(byPluginHourly)) {
       const daily = Object.entries(hourlyObjs).map(([day, objs]) => {
         // here we just take the first object since all objects have the same meta

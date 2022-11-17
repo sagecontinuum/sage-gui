@@ -24,105 +24,105 @@ export const initDataState = {
 export function dataReducer(state, action) {
   // todo(nc): note: we likely won't need both ADD_FILTER and RM_FILTER?
   switch (action.type) {
-    case 'INIT_DATA': {
-      const {filters} = state
-      const {manifests} = action
-      const {rawData, data} = action.data
+  case 'INIT_DATA': {
+    const {filters} = state
+    const {manifests} = action
+    const {rawData, data} = action.data
 
-      let filtered = sortVSNs(Object.keys(data))
-      filtered = getFilteredVSNs(manifests, data, filters)
+    let filtered = sortVSNs(Object.keys(data))
+    filtered = getFilteredVSNs(manifests, data, filters)
 
-      return {
-        ...state,
-        rawData,
-        data,
-        filtered,
-        byApp: groupByApp(rawData, filtered)
-      }
+    return {
+      ...state,
+      rawData,
+      data,
+      filtered,
+      byApp: groupByApp(rawData, filtered)
     }
-    case 'SET_DATA': {
-      return {
-        ...state,
-        data: action.data,
-      }
+  }
+  case 'SET_DATA': {
+    return {
+      ...state,
+      data: action.data
     }
-    case 'ADD_FILTER': {
-      const {data, filters} = state
-      const {manifests, facet, val} = action
+  }
+  case 'ADD_FILTER': {
+    const {data, filters} = state
+    const {manifests, facet, val} = action
 
-      // new filter state
-      const newFilters = {
-        ...filters,
-        [facet]: [...filters[facet], val]
-      }
-
-      // new filtered data, using "manifest" data
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
+    // new filter state
+    const newFilters = {
+      ...filters,
+      [facet]: [...filters[facet], val]
     }
-    case 'RM_FILTER': {
-      const {data, filters} = state
-      const {manifests, facet, val} = action
 
-      // new filter state
-      const newFilters = {
-        ...filters,
-        [facet]: filters[facet].filter(v => v != val)
-      }
+    // new filtered data, using "manifest" data
+    const filtered = getFilteredVSNs(manifests, data, newFilters)
 
-      // new filtered data, using "manifest" data
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
-
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
+    return {
+      ...state,
+      filtered,
+      filters: newFilters,
+      byApp: groupByApp(state.rawData, filtered)
     }
-    case 'SELECT_ALL': {
-      const {data, filters} = state
-      const {manifests, facet, vals} = action
+  }
+  case 'RM_FILTER': {
+    const {data, filters} = state
+    const {manifests, facet, val} = action
 
-      const newFilters = {...filters, [facet]: vals}
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
+    // new filter state
+    const newFilters = {
+      ...filters,
+      [facet]: filters[facet].filter(v => v != val)
+    }
 
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
-    }
-    case 'CLEAR_CATEGORY': {
-      const {data, filters} = state
-      const {manifests, facet} = action
+    // new filtered data, using "manifest" data
+    const filtered = getFilteredVSNs(manifests, data, newFilters)
 
-      const newFilters = {...filters, [facet]: []}
-      const filtered = getFilteredVSNs(manifests, data, newFilters)
+    return {
+      ...state,
+      filtered,
+      filters: newFilters,
+      byApp: groupByApp(state.rawData, filtered)
+    }
+  }
+  case 'SELECT_ALL': {
+    const {data, filters} = state
+    const {manifests, facet, vals} = action
 
-      return {
-        ...state,
-        filtered,
-        filters: newFilters,
-        byApp: groupByApp(state.rawData, filtered)
-      }
+    const newFilters = {...filters, [facet]: vals}
+    const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+    return {
+      ...state,
+      filtered,
+      filters: newFilters,
+      byApp: groupByApp(state.rawData, filtered)
     }
-    case 'ERROR': {
-      return ({
-        ...state,
-        error: action.error
-      })
+  }
+  case 'CLEAR_CATEGORY': {
+    const {data, filters} = state
+    const {manifests, facet} = action
+
+    const newFilters = {...filters, [facet]: []}
+    const filtered = getFilteredVSNs(manifests, data, newFilters)
+
+    return {
+      ...state,
+      filtered,
+      filters: newFilters,
+      byApp: groupByApp(state.rawData, filtered)
     }
-    default: {
-      return state
-    }
+  }
+  case 'ERROR': {
+    return ({
+      ...state,
+      error: action.error
+    })
+  }
+  default: {
+    return state
+  }
   }
 }
 
@@ -144,7 +144,7 @@ const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
 
   const count = sum(Object.values(vsnsByField).map(vals => vals.length))
 
-  let vsns = count ?
+  const vsns = count ?
     intersection(...Object.values(vsnsByField)) : manifests.map(m => m.vsn)
 
   // find intersection of vsns and data vsns
@@ -167,9 +167,9 @@ const sortVSNs = (vsns: string[]) => ([
 
 
 
-function groupByApp(data: BH.Record[], vsns: string[] ) {
+export function groupByApp(data: BH.Record[], vsns: string[] ) {
   const byApp = groupBy(data, 'meta.plugin')
-  let byAppByNode = Object.keys(byApp)
+  const byAppByNode = Object.keys(byApp)
     .reduce((acc, app) => {
       let grouped = groupBy(byApp[app], 'meta.vsn')
       grouped = pick(grouped, vsns)

@@ -6,14 +6,14 @@ import Button from '@mui/material/Button'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
 import DataOptions from './DataOptions'
-
 import { Sidebar, Top, Controls, Divider, FilterTitle } from '/components/layout/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
-import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, {colors} from '/components/viz/Timeline'
+import TimelineSkeleton from '/components/viz/TimelineSkeleton'
+import timelineAppLabel from '/components/viz/timelineAppLabel'
+import { useProgress } from '/components/progress/ProgressProvider'
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
@@ -112,6 +112,7 @@ export type Options = {
   density: boolean
   versions: boolean
   start: Date
+  window: `-${number}d`
 }
 
 
@@ -131,7 +132,7 @@ export default function Data(props: Props) {
 
   const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
   const [manifests, setManifests] = useState<BK.Manifest[]>()
-  const [ecr, setECR] = useState<BK.Manifest[]>()
+  const [ecr, setECR] = useState<ECR.App[]>()
 
   // infinite scroll
   const [page, setPage] = useState(1)
@@ -198,8 +199,8 @@ export default function Data(props: Props) {
   }, [opts.start])
 
 
+  // fetch public ECR apps to determine if apps are indeed public
   useEffect(() => {
-    // temp solution for ECR app links
     ECR.listApps('public')
       .then(ecr => setECR(ecr))
   }, [])
@@ -271,6 +272,9 @@ export default function Data(props: Props) {
     setEnd(addDays(start, 30))
   }
 
+  const getNodeID = (vsn) => {
+    return manifests.find(o => o.vsn == vsn).node_id
+  }
 
   return (
     <Root className="flex">
@@ -369,8 +373,13 @@ export default function Data(props: Props) {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
                         const win = opts.time == 'daily' ? 'd' : 'h'
-                        window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                        window.open(
+                          `${window.location.origin}/query-browser` +
+                          `?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`,
+                          '_blank'
+                        )
                       }}
+                      yFormat={(label) => timelineAppLabel(label, ecr)}
                       margin={TIMELINE_MARGIN}
                     />
                   </TimelineContainer>
@@ -401,11 +410,7 @@ export default function Data(props: Props) {
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
                       }
-                      onRowClick={(val, data) => {
-                        const {meta} = data[0]
-                        const {node} = meta
-                        navigate(`/node/${node.toUpperCase()}`)
-                      }}
+                      yFormat={vsn => <Link to={`/node/${getNodeID(vsn)}`} target="_blank">{vsn}</Link>}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta

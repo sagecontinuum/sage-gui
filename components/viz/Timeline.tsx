@@ -14,6 +14,7 @@ import HomeIcon from '@mui/icons-material/HomeOutlined'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded'
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded'
 
+
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR
 
@@ -82,8 +83,8 @@ function getMinMax(data) {
   return [sorted[0].value, sorted.pop().value]
 }
 
-function computeCanvasHeight(yLabels: string[], cellHeight: number) : number {
-  return yLabels.length * cellHeight
+function computeCanvasHeight(m: number, cellHeight: number) : number {
+  return m * cellHeight
 }
 
 function computeSize(data: Data) : {m: number, n: number} {
@@ -152,7 +153,7 @@ function drawChart(
   const cellUnit = params.cellUnit ? CELL_UNITS[params.cellUnit] : CELL_UNITS.hour
 
   const [start, end] = getDomain(data, cellUnit)
-  const height = computeCanvasHeight(yLabels, cellHeight)
+  const height = computeCanvasHeight(yLabels.length, cellHeight)
 
   const zoom = d3.zoom()
     .filter((evt) => evt.type === 'wheel' ? evt.ctrlKey : true)
@@ -469,7 +470,7 @@ function Chart(props: TimelineProps) {
         chartData = chartData.filter(o => yLabels.includes(o.row) )
       }
 
-      if (!labels)
+      if (JSON.stringify(labels) !== JSON.stringify(yLabels) )
         setLabels(yLabels)
 
       drawChart(node, {
@@ -494,7 +495,7 @@ function Chart(props: TimelineProps) {
     return () => {
       ro.unobserve(node)
     }
-  }, [data, rest, margin, showLegend, limitRowCount, labels])
+  }, [data, rest, margin, showLegend, limitRowCount])
 
 
   return (

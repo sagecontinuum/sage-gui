@@ -94,6 +94,7 @@ export default function DataOptions(props: Props) {
       }
 
       <div className="checkboxes">
+        {/*
         <FormControlLabel
           control={
             <Checkbox
@@ -103,6 +104,7 @@ export default function DataOptions(props: Props) {
           }
           label="versions"
         />
+        */}
         <FormControlLabel
           control={
             <Checkbox
