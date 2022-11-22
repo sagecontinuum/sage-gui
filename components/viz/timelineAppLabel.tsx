@@ -4,7 +4,7 @@ import { Tooltip } from '@mui/material'
 import * as ECR from '/components/apis/ecr'
 
 
-export default function appLabel(label: string, ecrAppList: ECR.App[]) : JSX.Element {
+export default function appLabel(label: string, ecrAppList: ECR.AppDetails[]) : JSX.Element {
   const path = label.replace('registry.sagecontinuum.org/', '')
   const shortened = label.slice(label.lastIndexOf('/') + 1 )
 

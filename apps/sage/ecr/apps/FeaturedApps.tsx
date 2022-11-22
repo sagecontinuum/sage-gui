@@ -1,10 +1,13 @@
-import React from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Tooltip from '@mui/material/Tooltip'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 import GithubIcon from '@mui/icons-material/GitHub'
+import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
+
+import Button from '@mui/material/Button'
 
 import { Item, Title } from '/components/layout/Layout'
 import { formatters, Thumb, Dot } from '../formatters'
@@ -25,7 +28,8 @@ function AppBox(props) {
     isPublic,
     description,
     time_last_updated,
-    thumbnail
+    thumbnail,
+    hasRecentData
   } = data
 
 
@@ -86,26 +90,40 @@ function AppBox(props) {
       </div>
 
 
-      <div className="flex muted">
-        {view == 'explore' &&
-          <>
-            {namespace}
-            <Dot />
-          </>
-        }
-        {view != 'explore' && isPublic &&
-          <>
-            <div className="flex items-center">
-              <PublicIcon fontSize="small" />&nbsp;<span>public</span>
-            </div>
-            <Dot />
-          </>
-        }
-        <div>{verCount} tag{verCount > 1 ? 's' : ''}</div>
-        <Dot />
-        <div>Updated {formatters.time(time_last_updated)}</div>
-      </div>
+      <div className="flex muted items-center justify-between">
+        <div className="flex">
+          {view == 'explore' &&
+            <>
+              {namespace}
+              <Dot />
+            </>
+          }
+          {view != 'explore' && isPublic &&
+            <>
+              <div className="flex items-center">
+                <PublicIcon fontSize="small" />&nbsp;<span>public</span>
+              </div>
+              <Dot />
+            </>
+          }
+          <div>{verCount} tag{verCount > 1 ? 's' : ''}</div>
+          <Dot />
+          <div>Updated {formatters.time(time_last_updated)}</div>
+        </div>
 
+        {hasRecentData &&
+          <Tooltip title="Recent data (from within the last year) is avaiable">
+            <Button
+              component={Link}
+              to={`/apps/app/${namespace}/${name}?tab=data`}
+              className="nowrap pull-right"
+              startIcon={<TimelineIcon/>}
+            >
+              data
+            </Button>
+          </Tooltip>
+        }
+      </div>
     </Item>
   )
 }

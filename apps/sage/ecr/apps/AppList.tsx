@@ -17,6 +17,7 @@ import Table from '/components/table/Table'
 import TableSearch from '/components/table/TableSearch'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as ECR from '/components/apis/ecr'
+import * as BH from '/components/apis/beehive'
 
 import {Top} from '/components/layout/Layout'
 import SpaciousLayout from './SpaciousAppList'
@@ -28,6 +29,8 @@ import useWithBuildStatus from '../hooks/useWithBuildStatus'
 
 import settings from '../../settings'
 const {featuredApps, samplers} = settings
+
+import { getPluginStats } from '/apps/sage/data/rollupUtils'
 
 
 const columns = [
@@ -87,20 +90,38 @@ export default function AppList() {
   const [rows, setRows] = useState<ECR.AppDetails[]>()
   const [error, setError] = useState(null)
 
+  const [pluginData, setPluginData] = useState()
+
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
 
 
   const listApps = useCallback(() => {
     const opts = view == 'explore' ? 'public' : 'mine'
-    ECR.listApps(opts)
+    const p1 = ECR.listApps(opts)
       .then(data => {
         if (!ref.current) return
         setData(data)
+        return data
       }).catch(error => setError(error.message))
       .finally(() => {
         if (!ref.current) return
         setLoading(false)
       })
+
+    const p2 = getPluginStats()
+
+    Promise.all([p1, p2])
+      .then(([ecr, pluginData]) => {
+        const names = Object.keys(pluginData)
+
+        ecr = ecr.map(obj => ({
+          ...obj,
+          hasRecentData: !!names.find(name => name.includes(`${obj.namespace}/${obj.name}`))
+        }))
+
+        setData(ecr)
+      })
+
   }, [setLoading, view])
 
 

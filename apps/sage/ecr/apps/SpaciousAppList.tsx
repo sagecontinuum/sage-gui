@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 
 import Tooltip from '@mui/material/Tooltip'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -72,7 +73,8 @@ function Row(props) {
     isBuilding,
     buildResult,
     buildUrl,
-    thumbnail
+    thumbnail,
+    hasRecentData
   } = data
 
 
@@ -137,6 +139,13 @@ function Row(props) {
             <Dot />
 
             <div>Updated {formatters.time(time_last_updated)}</div>
+
+            {hasRecentData &&
+              <>
+                <Dot />
+                <Link to={`/apps/app/${namespace}/${name}?tab=data`}>view data</Link>
+              </>
+            }
 
             {isShared &&
               <>

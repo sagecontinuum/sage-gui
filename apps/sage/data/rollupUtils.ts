@@ -85,7 +85,7 @@ type ByVSNDailyMap = {
 }
 
 // todo(nc): write test and refactor
-function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
+export function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
   const daily = {}
 
   // for each vsn
@@ -125,6 +125,12 @@ function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
   return daily
 }
 
-export {
-  hourlyToDailyRollup
-}
+export const getPluginStats = () =>
+  BH.getPluginCounts({start: '-1y', tail: 1})
+    .then(d => {
+      const byPlugin = groupBy(d, 'meta.plugin')
+      return byPlugin
+    })
+
+
+
