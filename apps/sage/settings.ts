@@ -5,7 +5,7 @@ export default {
     'seonghapark/solar-irradiance',
     'seonghapark/motion-analysis',
     'seonghapark/surface-water-detection',
-    'seonghapark/motion-detection',
+    'seonghapark/motion-detector',
     'seonghapark/water-depth-estimator',
     'seonghapark/surface-water-classifier',
     'yonghokim/object-counter',
