@@ -77,11 +77,6 @@ export default function AppData(props: Props) {
   }, [plugin, manifests, opts])
 
 
-  useEffect(() => {
-    console.log('data', data)
-
-  }, [data])
-
   const handleOptionChange = (evt, name) => {
     if (name == 'time') {
       const time = evt.target.value

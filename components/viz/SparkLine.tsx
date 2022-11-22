@@ -75,7 +75,7 @@ const config = {
 
 
 type Props = {
-  //data: number[]
+  data: {timestamp: string, value: number }[]
 }
 
 export default function SparkLine(props: Props) {
