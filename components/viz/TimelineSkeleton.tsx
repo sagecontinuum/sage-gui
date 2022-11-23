@@ -17,7 +17,7 @@ export default function TimeLineSkeleton() {
         <div className="flex gap">
           <Skeleton width={100} /> <Skeleton width="100%" animation="wave" />
         </div>
-        <div className="fle gapx">
+        <div className="flex gap">
           <Skeleton width={100} /> <Skeleton width="100%" animation="wave" />
         </div>
         <div className="flex gap">
