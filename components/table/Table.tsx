@@ -27,8 +27,9 @@ import Checkbox from '/components/input/Checkbox'
 
 import selectedReducer, { SelectedState, initialSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
+import TableSkeleton from './TableSkeleton'
 
-export { SelectedState }
+export { SelectedState, TableSkeleton }
 
 /*
 const exampleColumns = [
