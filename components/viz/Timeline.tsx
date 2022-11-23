@@ -409,7 +409,7 @@ export type TimelineProps = {
   showButtons?: boolean
   limitRowCount?: number
   cellUnit?: 'hour' | 'day'
-  yFormat?: (label: string) => string | JSX.Element
+  yFormat?: (label: string, data: Data) => string | JSX.Element
   useD3YAxis?: boolean
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (Record) => void
@@ -517,7 +517,12 @@ function Chart(props: TimelineProps) {
 
       {/* y axis labels */}
       {labels &&
-        <TimelineLabels labels={labels} formatter={props.yFormat} margin={margin} />
+        <TimelineLabels
+          labels={labels}
+          data={data}
+          formatter={props.yFormat}
+          margin={margin}
+        />
       }
 
       {/* d3.js timeline chart */}

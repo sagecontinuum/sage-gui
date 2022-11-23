@@ -1,10 +1,12 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { subHours } from 'date-fns'
 
 import TimelineChart, {color} from '/components/viz/Timeline'
 
 import * as BH from '/components/apis/beehive'
+import Tooltip from '@mui/material/Tooltip'
+
 
 
 const formatJSON = (data) =>
@@ -64,16 +66,26 @@ export default function JobTimeLine(props: Props) {
             <br>
             <code>${formatJSON(obj.meta)}</code>
           `}
-          onRowClick={(val, data) => {
-            const d = data[0]
-            const {value, meta} = d
+          yFormat={(label: string, data) => {
+            // just form label from first entry
+            const l = data[label][0].value.plugin_image
+            const path = l.replace('registry.sagecontinuum.org/', '').split(':')[0]
+
+            return (
+              <Tooltip title={<>{path}<br/>(click for details)</>} placement="right">
+                <Link to={`/apps/app/${path}`} key={label}>
+                  {label}
+                </Link>
+              </Tooltip>
+            )
+          }}
+          onCellClick={(data) => {
+            const {value, meta} = data
             const image = value.plugin_image
             const node = meta.vsn
             const app = image.slice(image.lastIndexOf('/') + 1)
-
-            navigate(`/query-browser/?apps=${app}&nodes=${node}&window=d`)
+            navigate(`/query-browser/?apps=.*${app}&nodes=${node}&window=d`)
           }}
-          onCellClick={(data) => console.log('cell click', data)}
           margin={{left: 175, right: 0, bottom: 0}}
           tooltipPos="top"
         />
