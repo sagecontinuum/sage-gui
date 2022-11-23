@@ -11,13 +11,22 @@ const __token = Auth.getToken()
 
 const options = {
   headers: __token ? {
-    // Authorization: `Sage ${__token}`
+    Authorization: `Sage ${__token}`
   } : {}
 }
-function get(endpoint: string) {
 
-  return fetch(endpoint, options)
+function get(endpoint: string, opts = options) {
+  return fetch(endpoint, opts)
     .then(handleErrors)
+    .then(res => res.json())
+}
+
+function post(endpoint: string, data = '') {
+  return fetch(endpoint, {
+    method: 'POST',
+    body: data,
+    ...options
+  }).then(handleErrors)
     .then(res => res.json())
 }
 
@@ -87,8 +96,52 @@ export type GoalLookup = {
   [id: string]: [name: string]
 }
 
-// todo(nc): define
-export type Job = Record<string, object>
+
+type State = 'Waiting' | 'Running' | 'Submitted'
+
+type Plugin = {
+  name: string
+  plugin_spec: {
+      image: string     // image ref
+  }
+  status: {
+      scheduling: State
+      since: Date       // 2022-11-22T20:35:27.373353828Z
+  }
+  goal_id: string       // hash
+}
+
+
+
+type ScienceGoal = {
+  id: string
+  job_id: string
+  name: string
+  sub_goals: object     // todo(nc): define(?)
+}
+
+export type Job = {
+  name: string
+  job_id: string        // string number
+  user: string
+  email: string
+  notification_on: null // todo(nc): define
+  plugins: Plugin[]
+  node_tags: null,
+  nodes: {
+      [vsn: string]: true
+  },
+  science_rules: string[],
+  success_criteria: string[]
+  science_goal: ScienceGoal[]
+  state: {
+      last_state: State
+      last_updated: Date
+      last_submitted: Date
+      last_started: Date
+      last_completed: null
+  }
+}
 
 
 export type ESRecord = PluginEvent | GoalEvent
@@ -104,11 +157,22 @@ export type Goal = {
 }
 
 
-export async function getJobs() {
-  let data = await get(`${url}/jobs/list`)
+type ListJobsParams = {
+  user?: string
+}
+
+// todo(nc): handle user filtering in service
+async function listJobs(params?: ListJobsParams) : Promise<Job[]> {
+  const {user} = params || {}
+
+  let data = user ?
+    await get(`${url}/jobs/list`, options) :
+    await get(`${url}/jobs/list`, {})
 
   // hashed by job_id; convert to array list
   data = Object.values(data)
+
+  data = user ? data.filter(o => o.user == user) : data
 
   return data
 }
@@ -326,9 +390,11 @@ function getPluginEvents() : Promise<PluginEvent[]> {
 }
 
 
-export async function getAllData() : Promise<ReducedJobData> {
+export async function getAllData(params?: ListJobsParams) : Promise<ReducedJobData> {
+  const {user} = params || {}
+
   const [jobs, taskEvents] = await Promise.all([
-    getJobs(), getPluginEvents()
+    listJobs({user}), getPluginEvents()
   ])
 
   const {byNode} = reduceData(taskEvents)
@@ -365,5 +431,11 @@ export async function getGPUUtil({vsn}) {
     .then(d => {
       return d
     })
+}
+
+
+export async function submitJob(spec: string) {
+  const res = await post(`${url}/submit`, spec)
+  return res
 }
 

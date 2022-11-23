@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField'
 import { Step, StepTitle } from '/components/layout/FormLayout'
 
 import Clipboard from '/components/utils/Clipboard'
+import { Card, CardViewStyle } from '/components/layout/Layout'
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
 import NodeSelector from './NodeSelector'
@@ -16,10 +17,13 @@ import * as YAML from 'yaml'
 import { type App } from '/components/apis/ecr'
 import { type Manifest } from '/components/apis/beekeeper'
 
+import * as SES from '/components/apis/ses'
 import * as Auth from '/components/auth/auth'
 const user = Auth.username
 
 import config from '/config'
+import Button from '@mui/material/Button'
+import ErrorMsg from '../../ErrorMsg'
 const docker = config.dockerRegistry
 
 
@@ -98,6 +102,8 @@ export default function CreateJob() {
   const [appParams, setAppParams] = useState({})
   const [successCriteria, setSuccessCriteria] = useState({amount: 1, unit: 'day'})
 
+  const [submitting, setSubmitting] = useState<boolean>(false)
+  const [error, setError] = useState(null)
 
   const handleAppSelection = (value: App[]) => {
     dispatch({type: 'SET', name: 'apps', value})
@@ -132,8 +138,8 @@ export default function CreateJob() {
             Object.entries(appParams[o.id]).map(([k, v]) => [`-${k}`, v]).flat() : []
         }
       })),
-      nodes: nodes.map(o => o.vsn),
-      rules: Object.keys(rules).map(appName => {
+      nodes: nodes.reduce((acc, obj) => ({...acc, [obj.vsn]: true}), {}) ,
+      scienceRules: Object.keys(rules).map(appName => {
         const obj = rules[appName],
           ruleList = obj.rules
 
@@ -142,77 +148,100 @@ export default function CreateJob() {
 
         return `${appName}: ${createRuleStrings(appName, ruleList, obj.logics)}`
       }).filter(s => !!s),
-      successCriteria: `Walltime(${successCriteria.amount}${successCriteria.unit})`
+      successCriteria: [`Walltime(${successCriteria.amount}${successCriteria.unit})`]
     })
   }
 
+
+  const handleSubmit = () => {
+    setSubmitting(true)
+    SES.submitJob(getYaml())
+      .then((res) => {
+        // todo(nc): add notification
+      })
+      .catch(err => setError(err))
+      .finally(() => setSubmitting(false))
+  }
+
+  const disableSubmit = () =>
+    !(user && name && apps.length && nodes.length)
+
+
   return (
     <Root>
-      <main>
+      <CardViewStyle/>
+      <main className="flex column gap">
         <h1>Create Job (Science Goal)</h1>
 
-        <Step icon="1" label="Your science goal name">
-          <TextField
-            label="Name"
-            placeholder="my science goal"
-            value={name}
-            onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
-            style={{width: 500}}
-          />
-        </Step>
-
-
-        <Step icon="2a" label="Select apps to use">
-          <AppSelector onSelected={handleAppSelection}/>
-        </Step>
-
-        {apps?.length > 0 && <>
-          <Step icon="2b" label="Selected apps / specify params">
-            <SelectedAppTable selected={apps} onChange={handleAppParamUpdate} />
-          </Step>
-        </>}
-
-
-        <StepTitle icon="3" label="Select nodes"/>
-        <Step>
-          <NodeSelector onSelected={handleNodeSelection} />
-        </Step>
-
-
-        <StepTitle icon="4" label="Create rules" />
-        <Step>
-          {apps.length == 0 &&
-            <span className="muted">First select apps and node(s)</span>
-          }
-          {apps.length > 0 &&
-            <RuleBuilder apps={apps}
-              onChange={handleRuleSelection}
+        <Card>
+          <Step icon="1" label="Your science goal name">
+            <TextField
+              label="Name"
+              placeholder="my science goal"
+              value={name}
+              onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
+              style={{width: 500}}
             />
-          }
-        </Step>
+          </Step>
+        </Card>
 
+        <Card>
+          <Step icon="2a" label="Select apps to use">
+            <AppSelector onSelected={handleAppSelection}/>
+          </Step>
 
-        <StepTitle icon="5" label="Success criteria" />
-        <Step>
-          <SuccessBuilder apps={apps} {...successCriteria} onChange={handleSuccessUpdate}/>
-        </Step>
+          {apps?.length > 0 && <>
+            <Step icon="2b" label="Selected apps / specify params">
+              <SelectedAppTable selected={apps} onChange={handleAppParamUpdate} />
+            </Step>
+          </>}
+        </Card>
 
+        <Card>
+          <StepTitle icon="3" label="Select nodes"/>
+          <Step>
+            <NodeSelector onSelected={handleNodeSelection} />
+          </Step>
+        </Card>
 
-        {/*
-        <Step>
-          <Button
-            onClick={onSubmit}
-            variant="outlined"
-            color="primary"
-            // disabled={disableSubmit()}
+        <Card>
+          <StepTitle icon="4" label="Create rules" />
+          <Step>
+            {apps.length == 0 &&
+              <span className="muted">First select apps and node(s)</span>
+            }
+            {apps.length > 0 &&
+              <RuleBuilder apps={apps}
+                onChange={handleRuleSelection}
+              />
+            }
+          </Step>
+        </Card>
+
+        <Card>
+          <StepTitle icon="5" label="Success criteria" />
+          <Step>
+            <SuccessBuilder apps={apps} {...successCriteria} onChange={handleSuccessUpdate}/>
+          </Step>
+          <br/>
+          <Step>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              disabled={disableSubmit()}
             >
-            Create Spec
-          </Button>
-        </Step>
-        */}
+              Submit Job
+            </Button>
+          </Step>
+        </Card>
+
+        {error && !submitting &&
+          <ErrorMsg>{error.message}</ErrorMsg>
+        }
 
         <div>
-          <h2>Use following spec with the Edge Scheduler (ES)</h2>
+          <h2>Or, use following spec with the Edge Scheduler (ES)</h2>
           <Clipboard content={getYaml()} />
         </div>
       </main>
@@ -228,5 +257,10 @@ const Root = styled.div`
 
   main {
     margin: 0 20px;
+  }
+
+  // override for card styling
+  .step-content {
+    margin-bottom: 0;
   }
 `
