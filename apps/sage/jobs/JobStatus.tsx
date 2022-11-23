@@ -8,31 +8,30 @@ import ListIcon from '@mui/icons-material/ListRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import PublicIcon from '@mui/icons-material/PieChart'
 import AddIcon from '@mui/icons-material/AddRounded'
+import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import Map from '/components/Map'
-import Table from '/components/table/Table'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
+import Table, { TableSkeleton } from '/components/table/Table'
 import { queryData } from '/components/data/queryData'
-import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
+import { relativeTime } from '/components/utils/units'
 
 import JobTimeLine from './JobTimeline'
 import JobDetails from './JobDetails'
 
 import { Tabs, Tab } from '/components/tabs/Tabs'
-import { relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
-// import { Sidebar, Top, Controls, Divider } from '/components/layout/Layout'
+import { Card } from '/components/layout/Layout'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
-import MetaTable from '/components/table/MetaTable'
+import { username } from '/components/auth/auth'
+
 
 // todo(nc): options
 // import JobOptions from './JobOptions'
 
-// todo(nc): my jobs
-// import { isSignedIn } from '/components/auth/auth'
 
 export type Options = {
   showErrors: boolean
@@ -163,9 +162,11 @@ function jobsToGeos(
   }
 
 
+export type ByNode = {[vsn: string]: ES.PluginEvent[]}
+
 type State = {
   jobs: ES.Job[]
-  byNode: {[vsn: string]: ES.PluginEvent[]}
+  byNode: ByNode
   isFiltered: boolean
   qJobs: ES.Job[]
   qNodes: string[]
@@ -187,15 +188,16 @@ type GeoData = {id: string, vsn: string, lng: number, lat: number, status: strin
 
 export default function JobStatus() {
   const navigate = useNavigate()
-  const path = useMatch('*').pathname
 
-  const {tab = 'jobs-status', jobName} = useParams()
+  const {view = 'jobs-status', jobName} = useParams()
+
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || ''
   const nodes = params.get('nodes') || ''
   const job = params.get('job') || ''
+  const tab = params.get('tab') || 'jobs'
 
-  const {setLoading} = useProgress()
+  const {loading, setLoading} = useProgress()
 
   const [{
     jobs, byNode, isFiltered, qJobs, qNodes, selected
@@ -240,38 +242,44 @@ export default function JobStatus() {
   useEffect(() => {
     setLoading(true)
 
-    ES.getAllData()
+    const filterUser = view == 'my-jobs' && username
+    const params = filterUser ? {user: username} : null
+
+    const p1 = ES.getAllData(params)
       .then(({jobs, byNode}) => {
-
-        // also fetch gps for map
-        BK.getManifest({by: 'vsn'})
-          .then(data => {
-            setManifestByVSN(data)
-
-            // todo(nc): remove when VSNs are used for urls
-            jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => data[vsn].node_id)}))
-
-            setData({jobs, byNode})
-
-            const vsns = Object.keys(byNode)
-
-            const geo = vsns.map(vsn => {
-              const d = data[vsn]
-              const lng = d.gps_lon
-              const lat = d.gps_lat
-
-              return {...data[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
-            })
-
-            setGeo(geo)
-          })
+        return {jobs, byNode}
       })
-      .catch(err => {
+
+    // also fetch gps for map
+    const p2 = BK.getManifest({by: 'vsn'})
+
+    Promise.all([p1, p2])
+      .then(([{jobs, byNode}, data]) => {
+        setManifestByVSN(data)
+
+        // todo(nc): remove when VSNs are used for urls
+        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => data[vsn].node_id)}))
+
+        setData({jobs, byNode})
+
+        const vsns = Object.keys(byNode)
+
+        const geo = vsns.map(vsn => {
+          const d = data[vsn]
+          const lng = d.gps_lon
+          const lat = d.gps_lat
+
+          return {...data[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
+        })
+
+        setGeo(geo)
+      }).catch(err => {
         console.error(err)
         setError(err.message)
       })
       .finally(() => setLoading(false))
-  }, [setLoading])
+
+  }, [setLoading, view])
 
 
   const handleJobSelect = (sel) => {
@@ -298,7 +306,7 @@ export default function JobStatus() {
 
   const handleCloseDialog = () => {
     params.delete('job')
-    navigate('/jobs/job-status', {search: params.toString()}, {replace: true})
+    navigate(`/jobs/${view}?tab=${tab}`, {search: params.toString(), replace: true})
   }
 
   const getSubset = (selected, nodes) => {
@@ -307,9 +315,6 @@ export default function JobStatus() {
     return subset
   }
 
-
-  const jobMeta = job ?
-    (jobs || []).find(o => o.job_id == job) : null
 
 
   return (
@@ -336,21 +341,20 @@ export default function JobStatus() {
           </Top>
           */}
           <Tabs
-            value={tab}
+            value={view}
             aria-label="tabs of data links"
             sx={{marginBottom: '10px'}}
           >
             <Tab
               label={<div className="flex items-center">
-                <PublicIcon />&nbsp;Job Status
+                <PublicIcon />&nbsp;System Status
               </div>}
               component={NavLink}
-              className="Mui-Selected"
-              to="job-status"
-              classes="Mui-Selected"
+              value="system-status"
+              to="/jobs/system-status"
               replace
             />
-            {/* isSignedIn() &&
+            {username &&
               <Tab
                 label={
                   <div className="flex items-center">
@@ -359,12 +363,12 @@ export default function JobStatus() {
                 }
                 value="my-jobs"
                 component={NavLink}
-                to="/my-jobs"
+                to="/jobs/my-jobs?tab=jobs"
                 replace
               />
-            */}
+            }
 
-            {tab == 'my-jobs' &&
+            {view == 'my-jobs' &&
               <Button
                 component={Link}
                 to="/create-job"
@@ -379,68 +383,48 @@ export default function JobStatus() {
             }
           </Tabs>
 
+          <MapContainer>
+            {geo &&
+              <Map
+                data={selected?.length ? getSubset(selected, geo) : geo}
+                updateID={updateID} />
+            }
+          </MapContainer>
 
-          {tab != 'my-jobs' &&
-            <MapContainer>
-              {geo &&
-                <Map
-                  data={selected?.length ? getSubset(selected, geo) : geo}
-                  updateID={updateID} />
-              }
-            </MapContainer>
-          }
-
-
-          {/* tab != 'my-jobs' &&
-            <BreadContainer>
-              <Breadcrumbs
-                separator={<NavigateNextIcon fontSize="small" />}
-                aria-label="breadcrumb"
-              >
-                <Link key="1" to="/jobs/job-status" color={jobName ? 'text.primary' : 'inherit'}>
-                  <Chip label="All Jobs"/>
-                </Link>
-                {jobName &&
-                <Typography key="3" color="text.primary">
-                  {jobName}
-                </Typography>
-                }
-              </Breadcrumbs>
-            </BreadContainer>
-          */}
-
-          {tab != 'my-jobs' &&
-            <Tabs
-              value={tab}
-              aria-label="job status tabs"
-            >
-              {!jobName &&
-                <Tab
-                  label={
-                    <div className="flex items-center">
-                      <ListIcon/>&nbsp;Jobs ({jobs ? jobs.length : '...'})
-                    </div>
-                  }
-                  value="job-status"
-                  component={Link}
-                  to="/jobs/job-status"
-                  replace
-                />
-              }
-
+          <Tabs
+            value={tab}
+            aria-label="job status tabs"
+          >
+            {!jobName &&
               <Tab
-                label={<div className="flex items-center">
-                  <TimelineIcon />&nbsp;Timelines
-                </div>}
-                value="timeline"
+                label={
+                  <div className="flex items-center">
+                    <ListIcon/>&nbsp;Jobs ({jobs ? jobs.length : '...'})
+                  </div>
+                }
+                value="jobs"
                 component={Link}
-                to="/jobs/timeline"
+                to={`/jobs/${view}?tab=jobs`}
                 replace
               />
-            </Tabs>
+            }
+
+            <Tab
+              label={<div className="flex items-center">
+                <TimelineIcon />&nbsp;Timelines
+              </div>}
+              value="timeline"
+              component={Link}
+              to={`/jobs/${view}?tab=timeline`}
+              replace
+            />
+          </Tabs>
+
+          {loading &&
+            <TableSkeleton />
           }
 
-          {['job-status', 'my-jobs'].includes(tab) && qJobs &&
+          {tab == 'jobs' && qJobs && !loading &&
             <TableContainer>
               <Table
                 primaryKey="id"
@@ -457,7 +441,7 @@ export default function JobStatus() {
                       <Button
                         variant="contained"
                         component={Link}
-                        to={`timeline?nodes=${selected?.map(o => o.vsn).join(',')}`}
+                        to={`?tab=timeline&nodes=${selected?.map(o => o.vsn).join(',')}`}
                       >
                         View timeline{selected?.length > 1 ? 's' : ''}
                       </Button>
@@ -475,7 +459,7 @@ export default function JobStatus() {
                 .map((vsn, i) => {
                   const {location, node_id} = manifestByVSN[vsn]
                   return (
-                    <div key={i} className="title-row">
+                    <Card key={i} className="title-row">
                       <div className="flex column">
                         <div>
                           <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
@@ -483,7 +467,7 @@ export default function JobStatus() {
                         <div>{location}</div>
                       </div>
                       <JobTimeLine data={byNode[vsn]} />
-                    </div>
+                    </Card>
                   )
                 })
               }
@@ -531,9 +515,8 @@ const MapContainer = styled.div`
   height: 350px;
 `
 
-const TimelineContainer = styled.div`
-  padding: 0 1.2em;
-
+export const TimelineContainer = styled.div`
+  margin-bottom: 50px;
   .title-row {
     margin: 20px;
     h2 {
@@ -559,9 +542,3 @@ const TableOptions = styled.div`
   margin-left: 20px;
 `
 
-const JobMetaContainer = styled.div`
-  tbody td:first-child {
-    width: 120px;
-    text-align: right;
-  }
-`

@@ -17,8 +17,7 @@ import VTOIcon from '@mui/icons-material/FlightTakeoff'
 import DAWNIcon from '@mui/icons-material/ScienceOutlined'
 import WFOIcon from '@mui/icons-material/WorkspacesOutlined'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
-
-// import MyJobsIcon from '@mui/icons-material/Engineering'
+import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
 import NavItem, { Item } from '/components/nav-bar/NavItem'
@@ -52,7 +51,7 @@ import { SnackbarProvider } from 'notistack'
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
-// import { isSignedIn } from '/components/auth/auth'
+import { isSignedIn } from '/components/auth/auth'
 import { Divider } from '@mui/material'
 
 
@@ -133,21 +132,21 @@ const NavMenu = () => {
       />
       <NavItem
         label="Job Status"
-        root="/job-status"
+        root="/jobs"
         menu={
           <>
             <Item
               icon={<JobsIcon/>}
-              to="/jobs/job-status"
+              to="/jobs/system-status"
               label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
-              to="/jobs/timeline"
+              to="/jobs/system-status?tab=timeline"
               label="Timelines"
             />
 
-            {/* isSignedIn() &&
+            {isSignedIn() &&
               <>
                 <Divider />
                 <Item
@@ -156,7 +155,7 @@ const NavMenu = () => {
                   label="My Jobs"
                 />
               </>
-            */}
+            }
           </>
         }
       />
@@ -221,12 +220,12 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
-                  <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />
+                  {/* <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />*/}
                   {/* <Route path="/jobs" element={<Navigate to="/jobs/job-status" replace />} />*/}
                   <Route path="jobs" element={<JobStatus />}>
-                    <Route path=":tab/:nodes" element={<JobStatus />} />
-                    <Route path=":tab/:jobName" element={<JobStatus />} />
-                    <Route path=":tab" element={<JobStatus />} />
+                    {/*<Route path=":tab/:nodes" element={<JobStatus />} />
+                    <Route path=":tab/:jobName" element={<JobStatus />} />*/}
+                    <Route path=":view" element={<JobStatus />} />
                   </Route>
 
                   <Route path="create-job" element={<CreateJob />} />

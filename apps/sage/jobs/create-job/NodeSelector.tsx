@@ -13,6 +13,8 @@ import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
 import { pick } from 'lodash'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import ToggleButton from '@mui/material/ToggleButton'
 
 const cameraTags =  BH.cameraOrientations.map(pos =>
   ({id: `camera_${pos}`, tag: `camera_${pos}`})
@@ -26,7 +28,7 @@ const tags = [{
   id: 'raingauge',
   tag: 'raingauge'
 },
-  ...cameraTags
+...cameraTags
 ]
 
 
@@ -87,18 +89,20 @@ export default function NodeSelector(props: Props) {
   const [query, setQuery] = useState<string>('')
   const [filtered, setFiltered] = useState<object[]>()
   const [page, setPage] = useState(0)
+  const [updateID, setUpdateID] = useState(0)
 
   const [tagState, setTagState] = useState<string[]>([])
 
+  const [bucket, setBucket] = useState<BK.Manifest['bucket']>(BK.Buckets[0])
 
   useEffect(() => {
-    BK.getNodeDetails()
+    BK.getNodeDetails(bucket)
       .then(objs => {
         objs = parseManifest(objs)
         setData(objs)
         setFiltered(objs)
       })
-  }, [])
+  }, [bucket])
 
 
   useEffect(() => {
@@ -107,9 +111,11 @@ export default function NodeSelector(props: Props) {
 
     let subset = queryData(data, query, cols)
     subset = queryByTag(subset, tagState)
-
     setFiltered(subset)
-  }, [query, tagState])
+
+    // force update map
+    setUpdateID(prev => prev + 1)
+  }, [query, tagState, data])
 
 
 
@@ -123,20 +129,43 @@ export default function NodeSelector(props: Props) {
     )
   }
 
+  const handleBucketChange = (_, val) => {
+    setBucket(val)
+  }
+
 
   return (
     <Root className="flex column">
-      <TagFilters>
-        {tags.map(({id, tag}) =>
-          <TagFilter
-            key={tag}
-            label={tag}
-            onClick={() => handleTagFilter(tag)}
-            color={tagState.includes(tag) ? 'primary' : 'default'}
-            variant={tagState.includes(tag) ? 'filled' : 'outlined'}
-          />
-        )}
-      </TagFilters>
+      <div className="flex justify-between items-end">
+        <TagFilters>
+          {tags.map(({id, tag}) =>
+            <TagFilter
+              key={tag}
+              label={tag}
+              onClick={() => handleTagFilter(tag)}
+              color={tagState.includes(tag) ? 'primary' : 'default'}
+              variant={tagState.includes(tag) ? 'filled' : 'outlined'}
+            />
+          )}
+        </TagFilters>
+
+        <ToggleButtonGroup
+          value={bucket}
+          onChange={(evt, val) => handleBucketChange(evt, val)}
+          aria-label="node type"
+          exclusive
+          size="small"
+        >
+          {BK.Buckets.slice(0, 3).map(bucket => {
+            const name = bucket.split(' ')[1]
+            return (
+              <ToggleButton value={bucket} aria-label={`${name} nodes`} key={bucket}>
+                {name}
+              </ToggleButton>
+            )
+          })}
+        </ToggleButtonGroup>
+      </div>
 
       <div className="flex">
         {filtered &&
@@ -160,7 +189,7 @@ export default function NodeSelector(props: Props) {
         }
         <MapWrap>
           {filtered &&
-            <Map data={filtered} />
+            <Map data={filtered} updateID={updateID} />
           }
         </MapWrap>
       </div>

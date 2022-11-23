@@ -25,7 +25,7 @@ export function Step(props: StepProps) {
   return (
     <div className={className}>
       {props.label && <StepTitle {...rest} />}
-      <StepContent>
+      <StepContent className="step-content">
         {props.children}
       </StepContent>
     </div>

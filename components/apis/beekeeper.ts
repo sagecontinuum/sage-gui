@@ -250,12 +250,14 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 }
 
 
-
-export async function getNodeDetails() {
+export async function getNodeDetails(bucket: Manifest['bucket']) {
   const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'vsn'})])
-  const nodeDetails = bkData
-    .map(obj => ({...obj, ...details[obj.id]}))
-    .filter(o => o.commission_date?.length)
+  let nodeDetails = bkData
+    .map(obj => ({...obj, ...details[obj.vsn]}))
+
+  if (bucket) {
+    nodeDetails = nodeDetails.filter(o => o.bucket == bucket)
+  }
 
   return nodeDetails
 }
