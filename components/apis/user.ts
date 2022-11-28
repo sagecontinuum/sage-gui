@@ -1,9 +1,9 @@
-import config from '../../config'
-export const url = config.auth
-export const docs = config.docs
+import config from '/config'
+const url = config.auth
+
 
 import Auth from '../auth/auth'
-const username = Auth.user
+const user = Auth.user
 
 const __token = Auth.token
 
@@ -32,20 +32,31 @@ function get(endpoint: string) {
 }
 
 
+type User = {
+  username: string
+  email: string
+  name: string
+}
 
-export type Info = {
+type Profile = {
   organization: string
   department: string
   bio: string
 }
 
-export function getUserInfo() : Promise<Info> {
-  return get(`${url}/user_profile/${username}`)
+export type UserInfo = User & Profile
+
+
+export function getUserInfo() : Promise<UserInfo> {
+  return Promise.all([
+    get(`${url}/users/${user}`),
+    get(`${url}/user_profile/${user}`)
+  ]).then(([user, profile]) => ({...user, ...profile}))
 }
 
 
-export function saveUserInfo(state: Info) : Promise<Info> {
-  return fetch(`${url}/user_profile/${username}`, {
+export function saveUserInfo(state: Profile) : Promise<Profile> {
+  return fetch(`${url}/user_profile/${user}`, {
     'headers': {
       ...options.headers,
       'Content-Type': 'application/json'

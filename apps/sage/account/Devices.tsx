@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Alert } from '@mui/material'
+import { Card, CardViewStyle } from '/components/layout/Layout'
+
 import * as Devices from '/components/apis/devices'
 
 const idLength = 16
@@ -26,39 +28,44 @@ export default function DeviceRegistration() {
   }
 
   return (
-    <Root className="flex column">
-      <h1>Get Development Beehive Keys for Your Waggle Device</h1>
+    <Root>
+      <CardViewStyle />
+      <Card className="flex column gap">
+        <h1>Get Development Beehive Keys for Your Waggle Device</h1>
 
-      <h2>Enter Waggle Device ID</h2>
-      <TextField
-        id="nano-id"
-        placeholder="Nano ID"
-        style={{ width: 500 }}
-        inputProps={{ maxlength: idLength }}
-        value={form.deviceID}
-        onChange={evt => setForm(prev => ({...prev, deviceID: evt.target.value}))}
-        required={true}
-        disabled={gotKey}
-      />
+        <h2>Enter Waggle Device ID</h2>
+        <TextField
+          id="nano-id"
+          placeholder="Nano ID"
+          style={{ width: 500 }}
+          inputProps={{ maxlength: idLength }}
+          value={form.deviceID}
+          onChange={evt => setForm(prev => ({...prev, deviceID: evt.target.value}))}
+          required={true}
+          disabled={gotKey}
+        />
 
-      <Button
-        variant="contained"
-        type="submit"
-        id="publish-waggle"
-        style={{ width: 120 }}
-        onClick={handleRegister}
-        disabled={form.deviceID.length != idLength || gotKey}
-      >
-        {!gotKey ? 'Get Keys' :  'Got Keys!'}
-      </Button>
+        <div>
+          <Button
+            variant="contained"
+            type="submit"
+            id="publish-waggle"
+            style={{ width: 120 }}
+            onClick={handleRegister}
+            disabled={form.deviceID.length != idLength || gotKey}
+          >
+            {!gotKey ? 'Get Keys' :  'Got Keys!'}
+          </Button>
+        </div>
 
-      {gotKey &&
-        <Alert severity="success">Check your download folder for registration keys!</Alert>
-      }
+        {gotKey &&
+          <Alert severity="success">Check your download folder for registration keys!</Alert>
+        }
 
-      {errMsg &&
-        <Alert severity="error">{errMsg}</Alert>
-      }
+        {errMsg &&
+          <Alert severity="error">{errMsg}</Alert>
+        }
+      </Card>
     </Root>
   )
 }
@@ -67,7 +74,11 @@ export default function DeviceRegistration() {
 const Root = styled.div`
   margin: 40px 100px;
 
-  > div, button {
+  > div {
     margin-bottom: 2em;
+  }
+
+  [type=submit] {
+    margin-top: 2em;
   }
 `

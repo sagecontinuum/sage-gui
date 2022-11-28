@@ -77,7 +77,7 @@ export const FilterTitle = styled.h2`
 `
 
 
-// second incarnation of card design (WIP; currently only used on the node view)
+// second incarnation of card design (WIP)
 export const CardViewStyle = createGlobalStyle`
   body {
     background: rgb(231, 235, 240);
