@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useMatch } from 'react-router-dom'
 import config from '/config'
 import * as ECR from '/components/apis/ecr'
-import { isSignedIn } from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
 
 
@@ -17,7 +17,7 @@ export default function useWithBuildStatus<T>() {
   useEffect(() => {
 
     // must be signed in to fetch build status
-    if (!isSignedIn()) return
+    if (!Auth.isSignedIn) return
 
     if (!data || isDone || view =='explore') return
 

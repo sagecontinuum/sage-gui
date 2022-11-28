@@ -2,10 +2,10 @@ import config from '../../config'
 export const url = config.auth
 export const docs = config.docs
 
-import * as Auth from '../auth/auth'
-const username = Auth.username
+import Auth from '../auth/auth'
+const username = Auth.user
 
-const __token = Auth.getToken()
+const __token = Auth.token
 
 const options = {
   headers: __token ? {

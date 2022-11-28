@@ -8,10 +8,10 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
 import { AppMeta } from '/components/apis/ecr'
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
 import isDevUser from './ConfigForm'
-const user = Auth.getUser()
+const user = Auth.user
 
 
 type Props = {

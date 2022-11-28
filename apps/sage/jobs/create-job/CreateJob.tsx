@@ -18,8 +18,8 @@ import { type App } from '/components/apis/ecr'
 import { type Manifest } from '/components/apis/beekeeper'
 
 import * as SES from '/components/apis/ses'
-import * as Auth from '/components/auth/auth'
-const user = Auth.username
+import Auth from '/components/auth/auth'
+const user = Auth.user
 
 import config from '/config'
 import Button from '@mui/material/Button'

@@ -12,12 +12,10 @@ import DevicesIcon from '@mui/icons-material/Devices'
 import Progress from '@mui/material/CircularProgress'
 
 import NavItem, { Item } from './NavItem'
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
-const username = Auth.username
+const username = Auth.user
 const webOrigin = window.location.origin
-
-const signOutUrl = `${Auth.url}/portal-logout`
 
 import config from '../../config'
 import { version } from '../../package.json'
@@ -44,8 +42,6 @@ export default function NavBar(props: Props) {
     // display progress while signing out
     setSigningOut(true)
     Auth.signOut()
-
-    window.location.href = `${signOutUrl}/?callback=${webOrigin}`
   }
 
 

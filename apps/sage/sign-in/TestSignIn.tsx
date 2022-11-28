@@ -5,7 +5,7 @@ import { useLocation } from 'react-router-dom'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
 
 export default function TestSignIn() {
@@ -48,7 +48,7 @@ export default function TestSignIn() {
         <p>
           <b>This is a sign-in page for testing and debugging</b>.<br/>
 
-          {!Auth.isSignedIn() &&
+          {!Auth.isSignedIn &&
             <>
               Go <b><a href={`${Auth.url}/login`} target="__target" rel="noreferrer">here</a></b> to get
               a token and paste it below.
@@ -56,13 +56,13 @@ export default function TestSignIn() {
           }
         </p>
 
-        {Auth.isSignedIn() &&
+        {Auth.isSignedIn &&
           <p>You are already signed in.</p>
         }
 
 
         <div className="flex column">
-          {!Auth.isSignedIn() ?
+          {!Auth.isSignedIn ?
             <>
               <TextField
                 id="sage-debug-username"

@@ -51,7 +51,7 @@ import { SnackbarProvider } from 'notistack'
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
-import { isSignedIn } from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 import { Divider } from '@mui/material'
 
 
@@ -148,7 +148,7 @@ const NavMenu = () => {
               label="Timelines"
             />
 
-            {isSignedIn() &&
+            {Auth.isSignedIn &&
               <>
                 <Divider />
                 <Item

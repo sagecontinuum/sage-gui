@@ -26,7 +26,9 @@ import { Card } from '/components/layout/Layout'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
-import { username } from '/components/auth/auth'
+import Auth from '/components/auth/auth'
+
+const user = Auth.user
 
 
 // todo(nc): options
@@ -242,8 +244,8 @@ export default function JobStatus() {
   useEffect(() => {
     setLoading(true)
 
-    const filterUser = view == 'my-jobs' && username
-    const params = filterUser ? {user: username} : null
+    const filterUser = view == 'my-jobs' && user
+    const params = filterUser ? {user} : null
 
     const p1 = ES.getAllData(params)
       .then(({jobs, byNode}) => {
@@ -354,7 +356,7 @@ export default function JobStatus() {
               to="/jobs/system-status"
               replace
             />
-            {username &&
+            {user &&
               <Tab
                 label={
                   <div className="flex items-center">

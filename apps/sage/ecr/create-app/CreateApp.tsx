@@ -22,10 +22,10 @@ import ConfigForm from './ConfigForm'
 import FilterMenu from '/components/FilterMenu'
 import CheckBox from '/components/input/Checkbox'
 
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 import * as ECR from '/components/apis/ecr'
 
-const user = Auth.getUser()
+const user = Auth.user
 
 const devList = [
   'nconrad',

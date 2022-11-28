@@ -5,8 +5,8 @@ import { handleErrors } from '../fetch-utils'
 import config from '/config'
 const url = config.es
 
-import * as Auth from '/components/auth/auth'
-const __token = Auth.getToken()
+import Auth from '/components/auth/auth'
+const __token = Auth.token
 
 
 const options = {

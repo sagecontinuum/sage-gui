@@ -13,12 +13,12 @@ import RepoActions from '../RepoActions'
 import { formatters, Thumb, Dot } from '../formatters'
 import BeeIcon from 'url:/assets/bee.svg'
 
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 import config from '/config'
 import settings from '../../settings'
 const {featuredApps, samplers} = settings
 
-const isSignedIn = Auth.isSignedIn()
+const isSignedIn = Auth.isSignedIn
 
 
 

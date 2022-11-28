@@ -1,8 +1,8 @@
-import * as Auth from '../auth/auth'
+import Auth from '../auth/auth'
 import config from '/config'
 
 const url = config.deviceRegistration
-const __token = Auth.getToken()
+const __token = Auth.token
 
 
 const options = {

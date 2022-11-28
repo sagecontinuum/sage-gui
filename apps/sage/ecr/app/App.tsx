@@ -19,7 +19,7 @@ import InputsList from './InputList'
 import { Thumb } from '../formatters'
 
 import * as ECR from '/components/apis/ecr'
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
 import AppMeta from './AppMeta'
 import AppData from './AppData'
@@ -94,7 +94,7 @@ export default function App() {
         </div>
 
 
-        {Auth.isSignedIn() &&
+        {Auth.isSignedIn &&
           <div className="actions">
             <RepoActions
               namespace={namespace}

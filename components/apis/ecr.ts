@@ -4,9 +4,9 @@ export const docs = config.docs
 
 import { handleErrors } from '../fetch-utils'
 
-import * as Auth from '../auth/auth'
+import Auth from '../auth/auth'
 
-const __token = Auth.getToken()
+const __token = Auth.token
 
 const options = {
   headers: __token ? {

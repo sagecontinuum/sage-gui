@@ -35,7 +35,7 @@ import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import Clipboard from '/components/utils/Clipboard'
 
 import * as ECR from '/components/apis/ecr'
-import * as Auth from '/components/auth/auth'
+import Auth from '/components/auth/auth'
 
 import config from '/config'
 const docker = config.dockerRegistry
@@ -194,7 +194,7 @@ export default function TagList(props: Props) {
 
                 <div className="tag-actions flex" >
                   {/* todo(nc): allow actions on write or appropriate access */}
-                  {namespace == Auth.username &&
+                  {namespace == Auth.user &&
                     <div className="flex gap">
                       <Tooltip title="Rebuild this tagged version">
                         <Button
