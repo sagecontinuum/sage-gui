@@ -132,16 +132,18 @@ const NavMenu = () => {
       />
       <NavItem
         label="Job Status"
-        root="/jobs"
+        root="/jobs/system-status"
         menu={
           <>
             <Item
               icon={<JobsIcon/>}
-              to="/jobs/system-status"
+              component={Link}
+              to="/jobs/system-status?tab=jobs"
               label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
+              component={Link}
               to="/jobs/system-status?tab=timeline"
               label="Timelines"
             />
@@ -220,11 +222,9 @@ export default function Sage() {
                     <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
                   </Route>
 
-                  {/* <Route path="/my-jobs" element={<RequireAuth><JobStatus /></RequireAuth>} />*/}
-                  {/* <Route path="/jobs" element={<Navigate to="/jobs/job-status" replace />} />*/}
+
+                  <Route path="/jobs" element={<Navigate to="/jobs/system-status?tab=jobs" replace />} />
                   <Route path="jobs" element={<JobStatus />}>
-                    {/*<Route path=":tab/:nodes" element={<JobStatus />} />
-                    <Route path=":tab/:jobName" element={<JobStatus />} />*/}
                     <Route path=":view" element={<JobStatus />} />
                   </Route>
 
