@@ -569,31 +569,28 @@ export default function TableComponent(props: Props) {
         }
 
         {props.middleComponent &&
-          props.middleComponent
+          <MiddleComponent>
+            {props.middleComponent}
+          </MiddleComponent>
         }
 
 
         {pagination &&
-          <>
-            <Pagination
-              rowsPerPageOptions={[rowsPerPage]}
-              count={props.total || props.limit || rows?.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handlePageChange}
-              component="div"
-            />
-          </>
+          <Pagination
+            rowsPerPageOptions={[rowsPerPage]}
+            count={props.total || props.limit || rows?.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handlePageChange}
+            component="div"
+          />
         }
 
         {onColumnMenuChange &&
-          <div style={{marginLeft: 'auto'}}>
-            <ColumnMenu
-              options={props.columns} // all columns
-              onChange={onColumnChange}
-            />
-          </div>
-
+          <ColumnMenu
+            options={props.columns} // all columns
+            onChange={onColumnChange}
+          />
         }
 
         {props.rightComponent &&
@@ -675,6 +672,9 @@ const CtrlContainer = styled.div`
   }
 `
 
+const MiddleComponent = styled.div`
+  flex: 1;
+`
 
 const Pagination = styled(TablePagination)`
   .MuiToolbar-root {
