@@ -391,23 +391,20 @@ export default function JobStatus(props) {
             value={tab}
             aria-label="job status tabs"
           >
-            {!jobName &&
-              <Tab
-                label={
-                  <div className="flex items-center">
-                    <ListIcon/>&nbsp;Jobs ({jobs ? jobs.length : '...'})
-                  </div>
-                }
-                value="jobs"
-                component={Link}
-                to={`/jobs/${view}?tab=jobs`}
-                replace
-              />
-            }
-
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <ListIcon/>&nbsp;{view == 'my-jobs' ? 'My Jobs' : 'Jobs'} ({loading ? '...' : jobs.length})
+                </div>
+              }
+              value="jobs"
+              component={Link}
+              to={`/jobs/${view}?tab=jobs`}
+              replace
+            />
             <Tab
               label={<div className="flex items-center">
-                <TimelineIcon />&nbsp;Timelines
+                <TimelineIcon />&nbsp;{view == 'my-jobs' ? 'My Timelines' : 'Timelines'}
               </div>}
               value="timeline"
               component={Link}
