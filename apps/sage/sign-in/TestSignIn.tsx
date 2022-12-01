@@ -50,7 +50,7 @@ export default function TestSignIn() {
 
           {!Auth.isSignedIn &&
             <>
-              Go <b><a href={`${Auth.url}/login`} target="__target" rel="noreferrer">here</a></b> to get
+              Go <b><a href={`${Auth.url}/token`} target="__target" rel="noreferrer">here</a></b> to get
               a token and paste it below.
             </>
           }
