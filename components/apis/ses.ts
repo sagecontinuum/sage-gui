@@ -426,16 +426,25 @@ export async function getAllData(params?: ListJobsParams) : Promise<ReducedJobDa
 }
 
 
-export async function getGPUUtil({vsn}) {
-  return BH.getData({start: '-1d', tail: 1, filter: {vsn}})
-    .then(d => {
-      return d
-    })
-}
-
 
 export async function submitJob(spec: string) {
   const res = await post(`${url}/submit`, spec)
   return res
 }
+
+
+type RemovedJob = {
+  job_id: string
+  state: 'Removed' | string  // todo(nc): other states?
+}
+
+async function removeJob(id: string) : Promise<RemovedJob> {
+  return await get(`${url}/jobs/${id}/rm?id=${id}&force=true`)
+}
+
+
+export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
+  return Promise.all(ids.map(id => removeJob(id)))
+}
+
 

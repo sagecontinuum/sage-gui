@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams, useLocation, NavLink, useMatch } from 'react-router-dom'
+import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { Button } from '@mui/material'
@@ -9,20 +9,23 @@ import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import PublicIcon from '@mui/icons-material/PieChart'
 import AddIcon from '@mui/icons-material/AddRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
+import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
 
-import Map from '/components/Map'
+import { useSnackbar } from 'notistack'
+
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
+import Map from '/components/Map'
+import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import Table, { TableSkeleton } from '/components/table/Table'
 import { queryData } from '/components/data/queryData'
 import { relativeTime } from '/components/utils/units'
-
-import JobTimeLine from './JobTimeline'
-import JobDetails from './JobDetails'
-
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { Card } from '/components/layout/Layout'
+
+import JobTimeLine from './JobTimeline'
+import JobDetails from './JobDetails'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
@@ -30,14 +33,6 @@ import Auth from '/components/auth/auth'
 
 const user = Auth.user
 
-
-// todo(nc): options
-// import JobOptions from './JobOptions'
-
-
-export type Options = {
-  showErrors: boolean
-}
 
 
 export const formatters = {
@@ -73,8 +68,7 @@ const jobCols = [{
   id: 'name',
   label: 'Name',
   format: (val, row) => {
-    const nodes = row.nodes
-    return <Link to={`/jobs?job=${row.id}`}>{val}</Link>
+    return <Link to={`/jobs/all-jobs?job=${row.id}`}>{val}</Link>
   }
 }, {
   id: 'id',
@@ -135,6 +129,18 @@ const jobCols = [{
 }]
 
 
+// "my jobs" columns are the same as "all jobs", except job details link
+const myJobCols = [{
+  id: 'name',
+  label: 'Name',
+  format: (val, row) => {
+    return <Link to={`/jobs/my-jobs?job=${row.id}`}>{val}</Link>
+  }
+},
+...jobCols.slice(1)
+]
+
+
 const goalCols = [{
   id: 'name',
   label: 'Name'
@@ -157,22 +163,23 @@ function jobsToGeos(
     .map(vsn => ({
       id: vsn,
       vsn,
-      lng: manifestByVSN[vsn].gps_lon,
-      lat: manifestByVSN[vsn].gps_lat,
+      lng: Number(manifestByVSN[vsn].gps_lon),
+      lat: Number(manifestByVSN[vsn].gps_lat),
       status: 'reporting'
     }))
-  }
+}
 
 
 export type ByNode = {[vsn: string]: ES.PluginEvent[]}
 
 type State = {
   jobs: ES.Job[]
-  byNode: ByNode
+  byNode: ByNode | {}
   isFiltered: boolean
   qJobs: ES.Job[]
   qNodes: string[]
-  selected: GeoData
+  selectedNodes: GeoData
+  selectedJobs: ES.Job[]
 }
 
 const initState = {
@@ -180,7 +187,9 @@ const initState = {
   byNode: {},
   isFiltered: false,
   qJobs: null,
-  selected: [],
+  qNodes: [],
+  selectedNodes: [],
+  selectedJobs: []
 }
 
 
@@ -188,10 +197,11 @@ type ManifestByVSN = {[vsn: string]: BK.Manifest}
 
 type GeoData = {id: string, vsn: string, lng: number, lat: number, status: string}[]
 
-export default function JobStatus() {
+export default function JobStatus(props) {
   const navigate = useNavigate()
+  const { enqueueSnackbar } = useSnackbar()
 
-  const {view = 'jobs-status', jobName} = useParams()
+  const {view = 'all-jobs', jobName} = useParams()
 
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || ''
@@ -202,28 +212,26 @@ export default function JobStatus() {
   const {loading, setLoading} = useProgress()
 
   const [{
-    jobs, byNode, isFiltered, qJobs, qNodes, selected
+    jobs, byNode, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
   }, setData] = useState<State>(initState)
 
   // additional meta
   const [manifestByVSN, setManifestByVSN] = useState<ManifestByVSN>()
   const [geo, setGeo] = useState<GeoData>()
 
-  const [updateID, setUpdateID] = useState(0)
+  // we'll update table columns for each tab
+  const [cols, setCols] = useState(jobCols)
 
+  // hack for refreshing map/table
+  const [updateMap, setUpdateMap] = useState<number>(0)
+  const [updateTable, setUpdateTable] = useState<number>(0)
+
+  // todo(nc): poll data; some optimization is needed
   const [lastUpdate, setLastUpdate] = useState(null)
 
+  const [confirm, setConfirm] = useState(false)
   const [error, setError] = useState()
 
-  /* todo(nc): options
-  const [opts, setOpts] = useState<Options>({
-    showErrors: true
-  })
-
-  const [filters, setFilters] = useState({
-    goals: []
-  })
-  */
 
   useEffect(() => {
     if (!jobs || !manifestByVSN) return
@@ -233,12 +241,12 @@ export default function JobStatus() {
 
     setData(prev => ({
       ...prev,
-      isFiltered: query.length > 0 || selected?.length > 0,
+      isFiltered: query.length > 0 || selectedNodes?.length > 0,
       qJobs,
       qNodes
     }))
 
-  }, [query, jobs, manifestByVSN, selected])
+  }, [query, jobs, manifestByVSN, selectedNodes])
 
 
   useEffect(() => {
@@ -247,10 +255,8 @@ export default function JobStatus() {
     const filterUser = view == 'my-jobs' && user
     const params = filterUser ? {user} : null
 
+    // fetch scheduler data
     const p1 = ES.getAllData(params)
-      .then(({jobs, byNode}) => {
-        return {jobs, byNode}
-      })
 
     // also fetch gps for map
     const p2 = BK.getManifest({by: 'vsn'})
@@ -280,25 +286,28 @@ export default function JobStatus() {
         setError(err.message)
       })
       .finally(() => setLoading(false))
+  }, [setLoading, view, updateTable])
 
-  }, [setLoading, view])
+
+  // simply update table columns for job lists (for now?)
+  useEffect(() => {
+    setCols(view == 'all-jobs' ? jobCols : myJobCols)
+  }, [view])
 
 
   const handleJobSelect = (sel) => {
-    const objs = sel.objs.length ? sel.objs : null
+    const objs = sel.objs.length ? sel.objs : []
     const nodes = jobsToGeos(objs, manifestByVSN)
 
-    setData(prev => ({...prev, selected: nodes.length ? nodes : []}))
-    setUpdateID(prev => prev + 1)
+
+    setData(prev => ({
+      ...prev,
+      selectedNodes: nodes.length ? nodes : [],
+      selectedJobs: objs
+    }))
+    setUpdateMap(prev => prev + 1)
   }
 
-  const handleGoalSelect = (objs) => {
-    // todo
-  }
-
-  const handleOptionChange = () => {
-    // todo
-  }
 
   const handleQuery = ({query}) => {
     if (query) params.set('query', query)
@@ -306,13 +315,31 @@ export default function JobStatus() {
     navigate({search: params.toString()}, {replace: true})
   }
 
+
   const handleCloseDialog = () => {
     params.delete('job')
     navigate(`/jobs/${view}?tab=${tab}`, {search: params.toString(), replace: true})
   }
 
-  const getSubset = (selected, nodes) => {
-    const ids = selected.map(o => o.id)
+
+  const handleRemoveJob = () => {
+    setLoading(true)
+    return ES.removeJobs(selectedJobs.map(o => o.job_id))
+      .then(resList => {
+        const rmCount = resList.filter(o => o.state == 'Removed').length
+        enqueueSnackbar(`${rmCount} jobs removed`, {variant: 'success'})
+        setUpdateTable(prev => prev + 1)
+      })
+      .catch(() => {
+        enqueueSnackbar('Failed to remove at least one job', {variant: 'error'})
+        setUpdateTable(prev => prev + 1)
+      })
+      .finally(() => setLoading(false))
+  }
+
+
+  const getSubset = (selectedNodes, nodes) => {
+    const ids = selectedNodes.map(o => o.id)
     const subset = nodes.filter(obj => ids.includes(obj.id))
     return subset
   }
@@ -323,25 +350,6 @@ export default function JobStatus() {
     <Root>
       <div className="flex">
         <Main className="flex column">
-          {/* todo?: some controls
-          <Top>
-            <Controls className="flex items-center">
-              <div className="flex column">
-                <h2 className="title no-margin">Job Status</h2>
-                <h5 className="subtitle no-margin muted">
-                  {byNode ? Object.keys(byNode).length : '...'} nodes with jobs
-                </h5>
-              </div>
-
-              <Divider  />
-
-              <JobOptions
-                onChange={handleOptionChange}
-                opts={opts}
-              />
-            </Controls>
-          </Top>
-          */}
           <Tabs
             value={view}
             aria-label="tabs of data links"
@@ -349,11 +357,11 @@ export default function JobStatus() {
           >
             <Tab
               label={<div className="flex items-center">
-                <PublicIcon />&nbsp;System Status
+                <PublicIcon />&nbsp;All Jobs
               </div>}
               component={NavLink}
-              value="system-status"
-              to="/jobs/system-status"
+              value="all-jobs"
+              to="/jobs/all-jobs"
               replace
             />
             {user &&
@@ -369,27 +377,13 @@ export default function JobStatus() {
                 replace
               />
             }
-
-            {view == 'my-jobs' &&
-              <Button
-                component={Link}
-                to="/create-job"
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon/>}
-                size="small"
-                className="create-job-btn"
-              >
-                Create job
-              </Button>
-            }
           </Tabs>
 
           <MapContainer>
             {geo &&
               <Map
-                data={selected?.length ? getSubset(selected, geo) : geo}
-                updateID={updateID} />
+                data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
+                updateID={updateMap} />
             }
           </MapContainer>
 
@@ -431,23 +425,51 @@ export default function JobStatus() {
               <Table
                 primaryKey="id"
                 rows={qJobs}
-                columns={jobCols}
+                columns={cols}
                 enableSorting
                 sort="-submitted"
                 onSearch={handleQuery}
                 onSelect={handleJobSelect}
                 onColumnMenuChange={() => { /* do nothing special */ }}
                 middleComponent={
-                  <TableOptions>
-                    {isFiltered &&
-                      <Button
-                        variant="contained"
-                        component={Link}
-                        to={`?tab=timeline&nodes=${selected?.map(o => o.vsn).join(',')}`}
-                      >
-                        View timeline{selected?.length > 1 ? 's' : ''}
-                      </Button>
-                    }
+                  <TableOptions className="flex justify-between">
+                    <div>
+                      {view == 'my-jobs' && isFiltered &&
+                        <Button
+                          variant="contained"
+                          style={{background: '#c70000'}}
+                          onClick={() => setConfirm(true)}
+                          startIcon={<RemoveIcon/>}
+                        >
+                          Remove Job{selectedJobs.length > 1 ? 's' : ''}
+                        </Button>
+                      }
+                    </div>
+
+                    <div className="flex gap">
+                      {isFiltered &&
+                        <Button
+                          variant="contained"
+                          component={Link}
+                          to={`?tab=timeline&nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
+                          startIcon={<TimelineIcon/>}
+                        >
+                          View timeline{selectedNodes.length > 1 ? 's' : ''}
+                        </Button>
+                      }
+                      {view == 'my-jobs' &&
+                        <Button
+                          component={Link}
+                          to="/create-job"
+                          variant="contained"
+                          color="primary"
+                          startIcon={<AddIcon/>}
+                          size="small"
+                        >
+                          Create job
+                        </Button>
+                      }
+                    </div>
                   </TableOptions>
                 }
               />
@@ -482,13 +504,28 @@ export default function JobStatus() {
         </Main>
       </div>
 
-      {(job ? (jobs || []).find(o => o.job_id == job) : null) && jobs && byNode &&
+      {(job ? (jobs || []).find(o => o.job_id == job) : null) && byNode &&
         <JobDetails
           job={job ? (jobs || []).find(o => o.job_id == job) : null}
           jobs={jobs}
           byNode={byNode}
           manifestByVSN={manifestByVSN}
           handleCloseDialog={handleCloseDialog}
+        />
+      }
+
+      {confirm &&
+        <ConfirmationDialog
+          title={`Are you sure you want to remove ${selectedJobs.length > 1 ? 'these jobs' : 'this job'}?`}
+          content={<p>
+            Job{selectedJobs.length > 1 ? 's' : ''} <b>
+              {selectedJobs.map(o => o.job_id).join(', ')}
+            </b> will be removed!
+          </p>}
+          confirmBtnText="Remove"
+          confirmBtnStyle={{background: '#c70000'}}
+          onConfirm={handleRemoveJob}
+          onClose={() => setConfirm(false)}
         />
       }
     </Root>
@@ -499,12 +536,6 @@ export default function JobStatus() {
 
 const Root = styled.div`
   margin: 10px 20px;
-
-  .create-job-btn {
-    margin-left: auto;
-    height: 34px;
-    margin-top: 4px;
-  }
 `
 
 const Main = styled.div`
@@ -541,6 +572,6 @@ const TableContainer = styled.div`
 `
 
 const TableOptions = styled.div`
-  margin-left: 20px;
+  margin: 0 20px;
 `
 
