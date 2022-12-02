@@ -380,7 +380,7 @@ function getGoals() : Promise<Goal[]> {
 
 
 // fetch tasks state event changes, and parse SES JSON Messages
-function getPluginEvents() : Promise<PluginEvent[]> {
+function getEvents() : Promise<PluginEvent[]> {
   return BH.getData({
     start: '-24h',
     filter: {
@@ -394,7 +394,7 @@ export async function getAllData(params?: ListJobsParams) : Promise<ReducedJobDa
   const {user} = params || {}
 
   const [jobs, taskEvents] = await Promise.all([
-    listJobs({user}), getPluginEvents()
+    listJobs({user}), getEvents()
   ])
 
   const {byNode} = reduceData(taskEvents)

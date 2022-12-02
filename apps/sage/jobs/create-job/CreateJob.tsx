@@ -1,4 +1,6 @@
 import { useReducer, useState } from 'react'
+import { Link } from 'react-router-dom'
+
 import styled from 'styled-components'
 
 import TextField from '@mui/material/TextField'
@@ -12,6 +14,7 @@ import NodeSelector from './NodeSelector'
 import RuleBuilder, { Rule, BooleanLogic } from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
 
+import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
 
 import { type App } from '/components/apis/ecr'
@@ -38,7 +41,7 @@ const getCronString = ({amount, unit}) => `'${[
 const getRuleString = (appName: string, rule: Rule) =>
   'name' in rule ?
     `v('${rule.name}') ${rule.op} ${rule.value}` :
-    `cronjob(${appName}, ${getCronString(rule)})`
+    `schedule('${appName}'): cronjob('${appName}', ${getCronString(rule)})`
 
 
 // todo: here we assume we only have conditions and cronjobs;
@@ -97,6 +100,8 @@ const initState = {
 
 
 export default function CreateJob() {
+  const { enqueueSnackbar } = useSnackbar()
+
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState({})
@@ -146,7 +151,7 @@ export default function CreateJob() {
         if (!ruleList.length)
           return null
 
-        return `${appName}: ${createRuleStrings(appName, ruleList, obj.logics)}`
+        return `${createRuleStrings(appName, ruleList, obj.logics)}`
       }).filter(s => !!s),
       successCriteria: [`Walltime(${successCriteria.amount}${successCriteria.unit})`]
     })
@@ -154,10 +159,20 @@ export default function CreateJob() {
 
 
   const handleSubmit = () => {
+    setError(null)
+
     setSubmitting(true)
     SES.submitJob(getYaml())
-      .then((res) => {
-        // todo(nc): add notification
+      .then(() => {
+        enqueueSnackbar(
+          <>
+            Job created!
+            <Button component={Link} to="/jobs/my-jobs" variant="contained" sx={{marginLeft: '50px'}}>
+              view job
+            </Button>
+          </>
+          , {variant: 'success'}
+        )
       })
       .catch(err => setError(err))
       .finally(() => setSubmitting(false))
@@ -229,9 +244,9 @@ export default function CreateJob() {
               onClick={handleSubmit}
               variant="contained"
               color="primary"
-              disabled={disableSubmit()}
+              disabled={disableSubmit() || submitting}
             >
-              Submit Job
+              {submitting ? 'Submitting...' : 'Submit Job'}
             </Button>
           </Step>
         </Card>
