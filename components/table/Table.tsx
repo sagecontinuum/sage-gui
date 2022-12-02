@@ -340,7 +340,7 @@ type Props = {
   stripes?: boolean
   enableSorting?: boolean
   disableClickOutside?: boolean
-  onSearch?: ({query: string}) => void
+  onSearch?: ({query} : {query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
   onSelect?: (state: SelectedState) => void        // todo: define
@@ -613,7 +613,7 @@ export default function TableComponent(props: Props) {
 
       <Container
         offset={offsetHeight ? offsetHeight : '0px'}
-        stripes={stripes}
+        $stripes={stripes}
         userselect={userSelect}
       >
         <Table stickyHeader aria-label="table" size="small" ref={tableRef}>
@@ -684,7 +684,7 @@ const Pagination = styled(TablePagination)`
 
 type StylingProps = {
   offset?: string | boolean
-  stripes?: boolean
+  $stripes?: boolean
   userselect?: boolean
 }
 
@@ -706,20 +706,13 @@ const Container = styled(TableContainer)<StylingProps>`
 
 
   td {
-    /* if using ellipsis
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 0;
-    */
-
     font-size: 13px;
   }
 
-  ${props => props.stripes ?
+  ${props => props.$stripes &&
     `& tr:nth-child(odd) {
       background: #fafafa;
-    }` : ''}
+    }`}
 
   td.MuiTableCell-sizeSmall {
     padding: 6px 12px 6px 6px;
