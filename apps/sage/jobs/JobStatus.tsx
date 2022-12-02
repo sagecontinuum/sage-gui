@@ -270,7 +270,13 @@ export default function JobStatus(props) {
 
         setData({jobs, byNode})
 
-        const vsns = Object.keys(byNode)
+        let vsns = Object.keys(byNode)
+
+        // if 'my jobs', filter vsns to the user's nodes
+        if (filterUser) {
+          const nodes = jobs.flatMap(o => o.nodes)
+          vsns = vsns.filter(vsn => nodes.includes(vsn))
+        }
 
         const geo = vsns.map(vsn => {
           const d = data[vsn]
@@ -344,6 +350,10 @@ export default function JobStatus(props) {
     return subset
   }
 
+  // if query param ?job=<job_id> is provided
+  const jobDetails = job ?
+    (jobs || []).find(o => o.job_id == job) :
+    null
 
 
   return (
@@ -501,9 +511,9 @@ export default function JobStatus(props) {
         </Main>
       </div>
 
-      {(job ? (jobs || []).find(o => o.job_id == job) : null) && byNode &&
+      {jobDetails && byNode &&
         <JobDetails
-          job={job ? (jobs || []).find(o => o.job_id == job) : null}
+          job={jobDetails}
           jobs={jobs}
           byNode={byNode}
           manifestByVSN={manifestByVSN}
