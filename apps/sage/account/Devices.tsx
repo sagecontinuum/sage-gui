@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import { TextField, Button, Alert } from '@mui/material'
-import { Card, CardViewStyle } from '/components/layout/Layout'
 
 import * as Devices from '/components/apis/devices'
 
@@ -29,8 +28,7 @@ export default function DeviceRegistration() {
 
   return (
     <Root>
-      <CardViewStyle />
-      <Card className="flex column gap">
+      <div className="flex column gap">
         <h1>Get Development Beehive Keys for Your Waggle Device</h1>
 
         <h2>Enter Waggle Device ID</h2>
@@ -65,14 +63,13 @@ export default function DeviceRegistration() {
         {errMsg &&
           <Alert severity="error">{errMsg}</Alert>
         }
-      </Card>
+      </div>
     </Root>
   )
 }
 
 
 const Root = styled.div`
-  margin: 40px 100px;
 
   > div {
     margin-bottom: 2em;

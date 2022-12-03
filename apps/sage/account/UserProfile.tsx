@@ -8,7 +8,6 @@ import {
 import EditIcon from '@mui/icons-material/EditRounded'
 import CancelIcon from '@mui/icons-material/UndoRounded'
 
-import { Card, CardViewStyle } from '/components/layout/Layout'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as User from '/components/apis/user'
@@ -73,86 +72,82 @@ export default function UserProfile() {
 
   return (
     <Root>
-      <CardViewStyle />
-      <Card>
-        <div className="flex items-center gap">
-          <h1 className="no-margin">My Profile</h1>
-          {isEditing ?
-            <Button
-              variant="outlined"
-              type="submit"
-              className="delete"
-              onClick={handleCancel}
-              startIcon={<CancelIcon/>}
-            >
-              Cancel
-            </Button> :
-            <Button startIcon={<EditIcon/>} onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
-          }
-        </div>
-
-        {data &&
-          <div className="flex column user-info">
-            {fields.map(obj => {
-              const {key, label, edit, type, maxLength} = obj
-              const value = data[key]
-
-              return (
-                <div key={key}>
-                  <h2>{label}</h2>
-                  {isEditing && edit != false ?
-                    <FormControl>
-                      <OutlinedInput
-                        placeholder={`My ${label}`}
-                        aria-label={label}
-                        name={key}
-                        onChange={handleChange}
-                        value={state[key]}
-                        multiline={type == 'textarea'}
-                        minRows={type == 'textarea' ? 4 : 0}
-                        style={type == 'textarea' ? {width: 500} : {width: 300}}
-                        inputProps={{maxLength}}
-                      />
-                      <FocusedHelperText
-                        text={state[key]?.length > 20 &&
-                          `${maxLength - state[key]?.length} characters left`}
-                      />
-                    </FormControl> :
-                    <p>{value ? value : <i className="muted">Not available</i>}</p>
-                  }
-                </div>
-              )
-            })}
-          </div>
+      <div className="flex items-center justify-between">
+        <h1 className="no-margin">My Profile</h1>
+        {isEditing ?
+          <Button
+            variant="outlined"
+            type="submit"
+            className="delete"
+            onClick={handleCancel}
+            startIcon={<CancelIcon/>}
+          >
+            Cancel
+          </Button> :
+          <Button startIcon={<EditIcon/>} onClick={() => setIsEditing(true)}>
+            Edit
+          </Button>
         }
+      </div>
 
-        <div className="flex justify-between">
-          {isEditing &&
-            <Button
-              className="save"
-              variant="contained"
-              type="submit"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </Button>
-          }
+      {data &&
+        <div className="flex column user-info">
+          {fields.map(obj => {
+            const {key, label, edit, type, maxLength} = obj
+            const value = data[key]
+
+            return (
+              <div key={key}>
+                <h2>{label}</h2>
+                {isEditing && edit != false ?
+                  <FormControl>
+                    <OutlinedInput
+                      placeholder={`My ${label}`}
+                      aria-label={label}
+                      name={key}
+                      onChange={handleChange}
+                      value={state[key]}
+                      multiline={type == 'textarea'}
+                      minRows={type == 'textarea' ? 4 : 0}
+                      style={type == 'textarea' ? {width: 500} : {width: 300}}
+                      inputProps={{maxLength}}
+                    />
+                    <FocusedHelperText
+                      text={state[key]?.length > 20 &&
+                        `${maxLength - state[key]?.length} characters left`}
+                    />
+                  </FormControl> :
+                  <p>{value ? value : <i className="muted">Not available</i>}</p>
+                }
+              </div>
+            )
+          })}
         </div>
+      }
 
-        {error &&
-          <Alert severity="error">{error}</Alert>
+      <div className="flex justify-between">
+        {isEditing &&
+          <Button
+            className="save"
+            variant="contained"
+            type="submit"
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
         }
-      </Card>
+      </div>
+
+      {error &&
+        <Alert severity="error">{error}</Alert>
+      }
+
     </Root>
   )
 }
 
 const Root = styled.div`
-  margin: 40px 100px;
-
   .user-info {
     margin-top: 2em;
   }

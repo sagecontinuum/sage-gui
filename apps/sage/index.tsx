@@ -39,8 +39,11 @@ import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
-import Devices from './account/Devices'
+
+import Account from './account/Account'
 import UserProfile from './account/UserProfile'
+import MyNodes from './account/MyNodes'
+import Devices from './account/Devices'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -238,8 +241,11 @@ export default function Sage() {
 
                   <Route path="data-commons-demo" element={<DataProductSearch />} />
 
-                  <Route path="my-devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                  <Route path="my-profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                  <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                    <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                    <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                    <Route path="devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                  </Route>
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
