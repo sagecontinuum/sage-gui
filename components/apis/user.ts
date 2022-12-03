@@ -65,3 +65,29 @@ export function saveUserInfo(state: Profile) : Promise<Profile> {
     'body': JSON.stringify(state),
   }).then(res => res.json())
 }
+
+
+type AccessPerm = 'schedule' | 'develop'
+
+export type MyNodes = {
+  vsn: string
+  access: AccessPerm[]
+
+  // for convenience
+  schedule: boolean
+  develop: boolean
+}
+
+export async function listMyNodes() : Promise<MyNodes> {
+  let data = await get(`${url}/users/${user}/access`)
+
+  data = data.map(obj => ({
+    ...obj,
+    schedule: obj.access.includes('schedule'),
+    develop: obj.access.includes('develop')
+  }))
+
+  return data
+}
+
+
