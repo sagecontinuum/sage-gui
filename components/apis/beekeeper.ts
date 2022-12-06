@@ -9,26 +9,22 @@ const FILTER_NODES = true  // if true, filter to "node monitoring" list
 const API_URL = `${url}/api`
 
 
+export type VSN = `W${string}` | `V${string}`
+
+
 export type State = {
   address: string
-  altitude: number
   beehive: string
   id: string
   internet_connection: string
   mode: string
   name: string
   project_id: null
-  registration_event: string // todo: fix format
+  registration_event: string
   server_node: string
-  timestamp: string   // todo: fix format ("Sun, 14 Mar 2021 16:58:57 GMT")
+  timestamp: string
 
-  /* new, proposed fields? */
-  vsn: string
-  gps_lat: number
-  gps_lon: number
-  node_type?: string
-  project?: string
-  location?: string
+  /* dynamically computed */
   status?: NodeStatus  // may be replaced with 'mode' or such?
 }
 
@@ -38,14 +34,14 @@ export const Buckets = [
 ] as const
 
 export type Manifest = {
-  vsn: `W${string}` | `V${string}`
+  vsn: VSN
   commission_date: string
   project: string
   focus: string
-  gps_lat: number
-  gps_lon: number
-  lng?: number // live longitude (if avail)
-  lat?: number // live latitude (if avail)
+  gps_lat: number // static gps
+  gps_lon: number // static gps
+  lng?: number    // live longitude (if avail)
+  lat?: number    // live latitude (if avail)
   left_camera: string
   location: string
   modem_sim: string
@@ -250,7 +246,9 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 }
 
 
-export async function getNodeDetails(bucket: Manifest['bucket']) {
+export type NodeDetails = (State & Manifest)[]
+
+export async function getNodeDetails(bucket: Manifest['bucket']) : Promise<NodeDetails> {
   const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'vsn'})])
   let nodeDetails = bkData
     .map(obj => ({...obj, ...details[obj.vsn]}))

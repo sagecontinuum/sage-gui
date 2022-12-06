@@ -614,7 +614,7 @@ export default function TableComponent(props: Props) {
       <Container
         offset={offsetHeight ? offsetHeight : '0px'}
         $stripes={stripes}
-        userselect={userSelect}
+        $userselect={userSelect}
       >
         <Table stickyHeader aria-label="table" size="small" ref={tableRef}>
           <TableHead>
@@ -685,7 +685,7 @@ const Pagination = styled(TablePagination)`
 type StylingProps = {
   offset?: string | boolean
   $stripes?: boolean
-  userselect?: boolean
+  $userselect?: boolean
 }
 
 const Container = styled(TableContainer)<StylingProps>`
@@ -730,8 +730,9 @@ const Container = styled(TableContainer)<StylingProps>`
     background-color: #ecf4fb;
   }
 
-  ${props => !props.userselect ?
-    'user-select: none;' : ''}
+  ${props => !props.$userselect &&
+    `& tr { user-select: none;
+     background#b7b7b7fa; }`}
 
   /* todo(nc): workaround for production build styling issue.
     similar to: https://github.com/gregnb/mui-datatables/issues/1074 */

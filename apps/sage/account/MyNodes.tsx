@@ -29,7 +29,7 @@ const columns = [{
 export default function MyNodes() {
   const {setLoading} = useProgress()
 
-  const [data, setData] = useState<User.MyNodes>()
+  const [data, setData] = useState<User.MyNode[]>()
   const [error, setError] = useState(null)
 
   useEffect(() => {

@@ -11,8 +11,8 @@ export function abortableFetch(request, opts) {
   }
 }
 
-export function handleErrors(res) {
 
+export function handleErrors(res) {
   if (res.ok) {
     return res
   }

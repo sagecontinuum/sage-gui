@@ -1,8 +1,11 @@
 import config from '/config'
 const url = config.auth
 
+import { handleErrors } from '../fetch-utils'
+import type { VSN } from './beekeeper'
 
 import Auth from '../auth/auth'
+
 const user = Auth.user
 
 const __token = Auth.token
@@ -13,16 +16,6 @@ const options = {
   } : {}
 }
 
-
-function handleErrors(res) {
-  if (res.ok) {
-    return res
-  }
-
-  return res.json().then(error => {
-    throw Error(error.detail)
-  })
-}
 
 
 function get(endpoint: string) {
@@ -69,8 +62,8 @@ export function saveUserInfo(state: Profile) : Promise<Profile> {
 
 type AccessPerm = 'schedule' | 'develop'
 
-export type MyNodes = {
-  vsn: string
+export type MyNode = {
+  vsn: VSN
   access: AccessPerm[]
 
   // for convenience
@@ -78,8 +71,18 @@ export type MyNodes = {
   develop: boolean
 }
 
-export async function listMyNodes() : Promise<MyNodes> {
-  let data = await get(`${url}/users/${user}/access`)
+export async function listMyNodes() : Promise<MyNode[]> {
+  // just return nothing if not actually logged in
+  if (!user)
+    return []
+
+  // return empty list if request can't be made
+  let data
+  try {
+    data = await get(`${url}/users/${user}/access`)
+  } catch (e) {
+    return []
+  }
 
   data = data.map(obj => ({
     ...obj,
@@ -88,6 +91,14 @@ export async function listMyNodes() : Promise<MyNodes> {
   }))
 
   return data
+}
+
+
+export async function listHasPerm(perm: AccessPerm) : Promise<VSN[]> {
+  const nodes = await listMyNodes()
+  return nodes
+    .filter(obj => obj[perm])
+    .map(obj => obj.vsn)
 }
 
 

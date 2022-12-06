@@ -256,7 +256,7 @@ export default function CreateJob() {
         }
 
         <div>
-          <h2>Or, use following spec with the Edge Scheduler (ES)</h2>
+          <h2>Or, use the following spec with the Edge Scheduler (ES)</h2>
           <Clipboard content={getYaml()} />
         </div>
       </main>

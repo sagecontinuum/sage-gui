@@ -11,10 +11,15 @@ import { queryData } from './createJobUtils'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
+import * as User from '/components/apis/user'
 
 import { pick } from 'lodash'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import ToggleButton from '@mui/material/ToggleButton'
+
+import { FormControlLabel, ToggleButtonGroup, ToggleButton } from '@mui/material'
+import Checkbox from '/components/input/Checkbox'
+
+import Auth from '/components/auth/auth'
+
 
 const cameraTags =  BH.cameraOrientations.map(pos =>
   ({id: `camera_${pos}`, tag: `camera_${pos}`})
@@ -85,7 +90,7 @@ type Props = {
 export default function NodeSelector(props: Props) {
   const { onSelected } = props
 
-  const [data, setData] = useState<object[]>()
+  const [data, setData] = useState<BK.NodeDetails>()
   const [query, setQuery] = useState<string>('')
   const [filtered, setFiltered] = useState<object[]>()
   const [page, setPage] = useState(0)
@@ -95,14 +100,27 @@ export default function NodeSelector(props: Props) {
 
   const [bucket, setBucket] = useState<BK.Manifest['bucket']>(BK.Buckets[0])
 
+  const [schedulable, setSchedulable] = useState<BK.VSN[]>()
+  const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
+
   useEffect(() => {
-    BK.getNodeDetails(bucket)
-      .then(objs => {
+    const p1 = BK.getNodeDetails(bucket)
+    const p2 = User.listHasPerm('schedule')
+
+    Promise.all(([p1, p2]))
+      .then(([objs, schedulable]) => {
         objs = parseManifest(objs)
+
+        if (isSchedulable) {
+          objs = objs.filter(o => schedulable.includes(o.vsn))
+        }
+
+        setSchedulable(schedulable)
         setData(objs)
         setFiltered(objs)
       })
-  }, [bucket])
+
+  }, [bucket, isSchedulable])
 
 
   useEffect(() => {
@@ -133,10 +151,16 @@ export default function NodeSelector(props: Props) {
     setBucket(val)
   }
 
+  const tableProps = Auth.user ? {
+    disableRowSelect: (row) => !schedulable.includes(row.vsn),
+    greyRow: (row) => !schedulable.includes(row.vsn),
+    stripe: false
+  } : {}
+
 
   return (
     <Root className="flex column">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-center">
         <TagFilters>
           {tags.map(({id, tag}) =>
             <TagFilter
@@ -149,22 +173,36 @@ export default function NodeSelector(props: Props) {
           )}
         </TagFilters>
 
-        <ToggleButtonGroup
-          value={bucket}
-          onChange={(evt, val) => handleBucketChange(evt, val)}
-          aria-label="node type"
-          exclusive
-          size="small"
-        >
-          {BK.Buckets.slice(0, 3).map(bucket => {
-            const name = bucket.split(' ')[1]
-            return (
-              <ToggleButton value={bucket} aria-label={`${name} nodes`} key={bucket}>
-                {name}
-              </ToggleButton>
-            )
-          })}
-        </ToggleButtonGroup>
+        <div>
+          {Auth.user &&
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isSchedulable}
+                  onChange={(evt) => setIsSchedulable(evt.target.checked)}
+                />
+              }
+              label="Schedulable"
+            />
+          }
+
+          <ToggleButtonGroup
+            value={bucket}
+            onChange={(evt, val) => handleBucketChange(evt, val)}
+            aria-label="node type"
+            exclusive
+            size="small"
+          >
+            {BK.Buckets.slice(0, 3).map(bucket => {
+              const name = bucket.split(' ')[1]
+              return (
+                <ToggleButton value={bucket} aria-label={`${name} nodes`} key={bucket}>
+                  {name}
+                </ToggleButton>
+              )
+            })}
+          </ToggleButtonGroup>
+        </div>
       </div>
 
       <div className="flex">
@@ -184,6 +222,7 @@ export default function NodeSelector(props: Props) {
               onSearch={({query}) => setQuery(query || '')}
               middleComponent={<div className="flex-grow"></div>}
               onSelect={handleSelection}
+              {...tableProps}
             />
           </TableWrap>
         }
@@ -201,14 +240,11 @@ const Root = styled.div`
 
 `
 
-const TagFilters = styled.div`
-  margin-bottom: 10px;
-`
+const TagFilters = styled.div``
 
 const TagFilter = styled(Chip)`
   margin-right: 10px;
 `
-
 
 const TableWrap = styled.div`
   width: 50%;
