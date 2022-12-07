@@ -1,16 +1,14 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import {
-  Button, Alert, FormHelperText,
-  FormControl, useFormControl, OutlinedInput
-} from '@mui/material'
+import { Button, Alert } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
 import CancelIcon from '@mui/icons-material/UndoRounded'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as User from '/components/apis/user'
+import SimpleForm from '/components/input/SimpleForm'
 
 
 
@@ -27,6 +25,8 @@ const fields = [
 
 export default function UserProfile() {
   const {setLoading} = useProgress()
+
+  // presentation
   const [data, setData] = useState<User.UserInfo>()
   const [error, setError] = useState()
 
@@ -69,16 +69,18 @@ export default function UserProfile() {
       .finally(() => setIsSaving(false))
   }
 
+  const formData = {
+    fields, data, state, isEditing
+  }
 
   return (
     <Root>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap">
         <h1 className="no-margin">My Profile</h1>
         {isEditing ?
           <Button
             variant="outlined"
-            type="submit"
-            className="delete"
+            className="cancel"
             onClick={handleCancel}
             startIcon={<CancelIcon/>}
           >
@@ -92,52 +94,21 @@ export default function UserProfile() {
 
       {data &&
         <div className="flex column user-info">
-          {fields.map(obj => {
-            const {key, label, edit, type, maxLength} = obj
-            const value = data[key]
-
-            return (
-              <div key={key}>
-                <h2>{label}</h2>
-                {isEditing && edit != false ?
-                  <FormControl>
-                    <OutlinedInput
-                      placeholder={`My ${label}`}
-                      aria-label={label}
-                      name={key}
-                      onChange={handleChange}
-                      value={state[key]}
-                      multiline={type == 'textarea'}
-                      minRows={type == 'textarea' ? 4 : 0}
-                      style={type == 'textarea' ? {width: 500} : {width: 300}}
-                      inputProps={{maxLength}}
-                    />
-                    <FocusedHelperText
-                      text={state[key]?.length > 20 &&
-                        `${maxLength - state[key]?.length} characters left`}
-                    />
-                  </FormControl> :
-                  <p>{value ? value : <i className="muted">Not available</i>}</p>
-                }
-              </div>
-            )
-          })}
+          <SimpleForm {...formData} onChange={handleChange} />
         </div>
       }
 
-      <div className="flex justify-between">
-        {isEditing &&
-          <Button
-            className="save"
-            variant="contained"
-            type="submit"
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? 'Saving...' : 'Save'}
-          </Button>
-        }
-      </div>
+      {isEditing &&
+        <Button
+          className="save"
+          variant="contained"
+          type="submit"
+          onClick={handleSave}
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Save'}
+        </Button>
+      }
 
       {error &&
         <Alert severity="error">{error}</Alert>
@@ -161,14 +132,4 @@ const Root = styled.div`
   }
 `
 
-
-function FocusedHelperText({text}) {
-  const { focused } = useFormControl()
-
-  const helperText = useMemo(() => {
-    return focused ? text : ''
-  }, [focused, text])
-
-  return <FormHelperText>{helperText}</FormHelperText>
-}
 
