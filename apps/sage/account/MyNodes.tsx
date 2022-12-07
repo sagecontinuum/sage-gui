@@ -7,13 +7,14 @@ import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 
 import Table from '/components/table/Table'
 import * as User from '/components/apis/user'
+import * as BK from '/components/apis/beekeeper'
 import ErrorMsg from '../ErrorMsg'
 
 
 const columns = [{
   id: 'vsn',
   label: 'VSN',
-  format: vsn => <Link to={`/nodes/${vsn}`}>{vsn}</Link>
+  format: (vsn, obj) => <Link to={`/node/${obj.node_id}`}>{vsn}</Link>
 }, {
   id: 'schedule',
   label: 'Can schedule?',
@@ -34,10 +35,12 @@ export default function MyNodes() {
 
   useEffect(() => {
     setLoading(true)
-    User.listMyNodes()
-      .then(data => setData(data))
+
+    Promise.all([User.listMyNodes(), BK.getManifest({by: 'vsn'})])
+      .then(([nodes, manifests]) => setData(nodes.map(o => ({...o, ...manifests[o.vsn]}))))
       .catch(error => setError(error))
       .finally(() => setLoading(false))
+
   }, [setLoading])
 
   return (
