@@ -1,7 +1,7 @@
 import config from '/config'
 const url = config.auth
 
-import { handleErrors } from '../fetch-utils'
+// import { handleErrors } from '../fetch-utils'
 import type { VSN } from './beekeeper'
 
 import Auth from '../auth/auth'
@@ -18,11 +18,40 @@ const options = {
 
 
 
+function handleErrors(res) {
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(errorObj => {
+    // todo(nc): suggest a generic error handling on api
+    throw Error(errorObj.ssh_public_keys)
+  })
+}
+
+
 function get(endpoint: string) {
   return fetch(endpoint, options)
     .then(handleErrors)
     .then(res => res.json())
 }
+
+
+function put(endpoint: string, data) {
+  const putOptions = {
+    'headers': {
+      ...options.headers,
+      'Content-Type': 'application/json'
+    },
+    'method': 'PUT',
+    'body': JSON.stringify(data)
+  }
+
+  return fetch(endpoint, putOptions)
+    .then(handleErrors)
+    .then(res => res.json())
+}
+
 
 
 type User = {
@@ -35,6 +64,7 @@ type Profile = {
   organization: string
   department: string
   bio: string
+  ssh_public_keys: string
 }
 
 export type UserInfo = User & Profile
@@ -49,14 +79,12 @@ export function getUserInfo() : Promise<UserInfo> {
 
 
 export function saveUserInfo(state: Profile) : Promise<Profile> {
-  return fetch(`${url}/user_profile/${user}`, {
-    'headers': {
-      ...options.headers,
-      'Content-Type': 'application/json'
-    },
-    'method': 'PUT',
-    'body': JSON.stringify(state),
-  }).then(res => res.json())
+  return put(`${url}/user_profile/${user}`, state)
+}
+
+
+export function saveSSHKey(state: Profile['ssh_public_keys']) : Promise<Profile> {
+  return put(`${url}/user_profile/${user}`, state)
 }
 
 
@@ -94,11 +122,17 @@ export async function listMyNodes() : Promise<MyNode[]> {
 }
 
 
-export async function listHasPerm(perm: AccessPerm) : Promise<VSN[]> {
+export async function listNodesWithPerm(perm: AccessPerm) : Promise<VSN[]> {
   const nodes = await listMyNodes()
   return nodes
     .filter(obj => obj[perm])
     .map(obj => obj.vsn)
+}
+
+
+export async function hasCapability(perm: AccessPerm) : Promise<boolean> {
+  const nodes = await listNodesWithPerm(perm)
+  return nodes.length > 0
 }
 
 

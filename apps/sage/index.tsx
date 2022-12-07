@@ -44,6 +44,7 @@ import Account from './account/Account'
 import UserProfile from './account/UserProfile'
 import MyNodes from './account/MyNodes'
 import Devices from './account/Devices'
+import DevAccess from './account/DevAccess'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -245,6 +246,7 @@ export default function Sage() {
                     <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
                     <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
                     <Route path="devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                    <Route path="dev-access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                   </Route>
 
                   <Route path="login" element={<TestSignIn />} />

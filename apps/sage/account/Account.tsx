@@ -1,25 +1,30 @@
 import styled from 'styled-components'
-import { Outlet, NavLink, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 
 import Tabber from '/components/tabs/Tabber'
 import { Card, CardViewStyle } from '/components/layout/Layout'
 
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import NodesIcon from '@mui/icons-material/HubOutlined'
+import AccessIcon from '@mui/icons-material/LockOutlined'
 import DevicesIcon from '@mui/icons-material/Devices'
 
 
 const tabs = [{
   label: 'Account',
-  icon: <AccountIcon fontSize="small" />,
+  icon: <AccountIcon />,
   to: '/account/profile'
 }, {
   label: 'Nodes',
-  icon: <NodesIcon fontSize="small" />,
+  icon: <NodesIcon />,
   to: '/account/nodes'
 }, {
-  label: 'Devices',
-  icon: <DevicesIcon fontSize="small" />,
+  label: 'Dev Access',
+  icon: <AccessIcon />,
+  to: '/account/dev-access'
+}, {
+  label: 'My Devices',
+  icon: <DevicesIcon />,
   to: '/account/devices'
 }]
 
@@ -33,7 +38,7 @@ export default function Account() {
       <Card>
         <Tabber
           defaultValue={'/accounts/profile'}
-          aria-label="my account tabs"
+          ariaLabel="my account tabs"
           tabs={tabs}
         />
         <br/>

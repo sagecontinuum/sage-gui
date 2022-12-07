@@ -105,7 +105,7 @@ export default function NodeSelector(props: Props) {
 
   useEffect(() => {
     const p1 = BK.getNodeDetails(bucket)
-    const p2 = User.listHasPerm('schedule')
+    const p2 = User.listNodesWithPerm('schedule')
 
     Promise.all(([p1, p2]))
       .then(([objs, schedulable]) => {
