@@ -78,7 +78,7 @@ export default function DevAccess() {
         </CopyToken>
       }
 
-      <h1 className="no-margin">Update SSH Public Keys</h1>
+      <h1 className="no-margin">Update SSH public keys</h1>
 
       <p>Please update and submit your SSH public keys below.</p>
 
@@ -129,9 +129,10 @@ export default function DevAccess() {
       <p>Once you've updated your SSH public key above, you'll need to do the following steps:</p>
 
       <h3>1. Request dev key</h3>
-      First, <b><a href={`${docs}/contact-us`}>email us</a></b> us with subject "Dev Key Request" so
-      that we can provide you with an SSH key you should
-      save it to <code>~/.ssh/ecdsa_waggle_dev</code>.
+
+      First, <b><a href={`${docs}/contact-us`}>email us</a></b> us with subject "Dev Key Request",
+      along with your name and organization so that we can provide you with an SSH key.
+      You should save the key to <code>~/.ssh/ecdsa_waggle_dev</code>.
 
       This is a legacy step which will no longer be required in the future.
 
