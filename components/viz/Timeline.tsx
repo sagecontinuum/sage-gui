@@ -450,6 +450,10 @@ function Chart(props: TimelineProps) {
       yLabels = Object.keys(data)
       chartData = parseData(data)
       size = computeSize(data)
+
+      // ignore data with no rows for now
+      if (size.m == 0)
+        return
     } else {
       throw `data format should be an object in form { [key: string]: {}[] }, was: ${data}`
     }
@@ -469,6 +473,7 @@ function Chart(props: TimelineProps) {
         yLabels = (limitRowCount && !showAllRows) ? yLabels.slice(0, limitRowCount) : yLabels
         chartData = chartData.filter(o => yLabels.includes(o.row) )
       }
+
 
       if (JSON.stringify(labels) !== JSON.stringify(yLabels) )
         setLabels(yLabels)

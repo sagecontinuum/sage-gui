@@ -201,7 +201,7 @@ export default function JobStatus(props) {
   const navigate = useNavigate()
   const { enqueueSnackbar } = useSnackbar()
 
-  const {view = 'all-jobs', jobName} = useParams()
+  const {view = 'all-jobs'} = useParams()
 
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || ''

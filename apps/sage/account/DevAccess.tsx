@@ -37,20 +37,16 @@ export default function DevAccess() {
 
         // set keys
         User.getUserInfo()
-          .then(({ssh_public_keys}) => {
-            setState({ssh_public_keys})
-          })
+          .then(({ssh_public_keys}) => setState({ssh_public_keys}))
+          .catch(err => setError(err.message))
       })
-      .catch(err => {
-        setError(err.message)
-      })
+      .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [setLoading])
 
 
   const handleChange = (evt) => {
     const {name, value} = evt.target
-
     setState(prev => ({...prev, [name]: value}))
   }
 
@@ -130,7 +126,7 @@ export default function DevAccess() {
         </Alert>
       }
 
-      Once you've updated your SSH public key above, you'll need to do the following steps:
+      <p>Once you've updated your SSH public key above, you'll need to do the following steps:</p>
 
       <h3>1. Request dev key</h3>
       First, <b><a href={`${docs}/contact-us`}>email us</a></b> us with subject "Dev Key Request" so
@@ -143,29 +139,30 @@ export default function DevAccess() {
       Next, you'll need to update your <code>~/.ssh/config</code> file to include the following lines:
 
 
-      <pre>
-        Host waggle-dev-sshd<br/>
-        {'    ' }HostName 192.5.86.5<br/>
-        {'    '}Port 49190<br/>
-        {'    '}User waggle<br/>
-        {'    '}IdentityFile ~/.ssh/id_ed25519 # &lt;---- your personal key<br/>
-        {'    '}IdentitiesOnly yes<br/>
-        <br/>
-        Host waggle-dev-node-*<br/>
-        {'    '}ProxyCommand ssh waggle-dev-sshd connect-to-node $(echo %h | sed "s/waggle-dev-node-//" )<br/>
-        {'    '}User waggle<br/>
-        {'    '}IdentityFile ~/.ssh/ecdsa_waggle_dev # &lt;---- dev key from previous step<br/>
-        {'    '}IdentitiesOnly yes<br/>
-        {'    '}StrictHostKeyChecking no<br/>
-      </pre>
+      <Clipboard content={
+        <div>
+          Host waggle-dev-sshd<br/>
+          {'    ' }HostName 192.5.86.5<br/>
+          {'    '}Port 49190<br/>
+          {'    '}User waggle<br/>
+          {'    '}IdentityFile ~/.ssh/id_ed25519 # &lt;---- your personal key<br/>
+          {'    '}IdentitiesOnly yes<br/>
+          <br/>
+          Host waggle-dev-node-*<br/>
+          {'    '}ProxyCommand ssh waggle-dev-sshd connect-to-node $(echo %h | sed "s/waggle-dev-node-//" )<br/>
+          {'    '}User waggle<br/>
+          {'    '}IdentityFile ~/.ssh/ecdsa_waggle_dev # &lt;---- dev key from previous step<br/>
+          {'    '}IdentitiesOnly yes<br/>
+          {'    '}StrictHostKeyChecking no<br/>
+        </div>
+      } />
 
 
       <h3>3. SSH to node</h3>
+
       You can access a specific node by its VSN, if you have permissions. For example, you can SSH to node V030 using:
 
-      <pre>
-        ssh waggle-dev-node-V030
-      </pre>
+      <Clipboard content={'ssh waggle-dev-node-V030'} />
 
       Note that upon first connecting to a node, please check that the fingerprint matches:
 
