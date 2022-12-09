@@ -8,7 +8,7 @@ import Divider from '@mui/material/Divider'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import NodesIcon from '@mui/icons-material/HubOutlined'
 import AccessIcon from '@mui/icons-material/LockOutlined'
-import DevicesIcon from '@mui/icons-material/Devices'
+import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Progress from '@mui/material/CircularProgress'
@@ -102,17 +102,17 @@ export default function NavBar(props: Props) {
                 <Item
                   icon={<NodesIcon />}
                   to='/account/nodes'
-                  label="My nodes"
+                  label="Shared Nodes"
                 />
                 <Item
                   icon={<AccessIcon />}
-                  to='/account/dev-access'
-                  label="Dev Access"
+                  to='/account/access'
+                  label="Access Creds"
                 />
                 <Item
                   icon={<DevicesIcon />}
-                  to='/account/devices'
-                  label="My devices"
+                  to='/account/my-nodes'
+                  label="My Nodes"
                 />
                 <Divider />
                 <Item

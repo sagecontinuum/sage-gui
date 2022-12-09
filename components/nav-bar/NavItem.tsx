@@ -121,7 +121,7 @@ const Root = styled.div`
 const MenuContainer = styled.div`
   position: absolute;
   top: 59px;
-  left: -45px;
+  left: -50px;
   background: #fff;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, .05);
   border: solid #ccc;

@@ -62,6 +62,7 @@ import { Divider } from '@mui/material'
 
 
 const NavMenu = () => {
+  console.log('here')
   return (
     <NavItems>
       <NavItem
@@ -157,7 +158,6 @@ const NavMenu = () => {
                 <Divider />
                 <Item
                   icon={<MyJobsIcon/>}
-                  component={Link}
                   to="/jobs/my-jobs"
                   label="My Jobs"
                 />
@@ -245,8 +245,8 @@ export default function Sage() {
                   <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
                     <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
                     <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                    <Route path="devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                    <Route path="dev-access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                    <Route path="my-nodes" element={<RequireAuth><Devices /></RequireAuth>} />
+                    <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                   </Route>
 
                   <Route path="login" element={<TestSignIn />} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 
 import { Button, Alert } from '@mui/material'
@@ -36,8 +36,7 @@ export default function UserProfile() {
   const [state, setState] = useState<User.UserInfo>()
 
 
-  useEffect(() => {
-    setLoading(true)
+  const getData = useCallback(() => {
     User.getUserInfo()
       .then(data => {
         setData(data)
@@ -46,6 +45,12 @@ export default function UserProfile() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
   }, [setLoading])
+
+
+  useEffect(() => {
+    setLoading(true)
+    getData()
+  }, [setLoading, getData])
 
 
   const handleChange = (evt) => {
@@ -61,9 +66,9 @@ export default function UserProfile() {
   const handleSave = () => {
     setIsSaving(true)
     User.saveUserInfo(state)
-      .then(data => {
+      .then(() => {
         setIsEditing(false)
-        setData(data)
+        getData()
       })
       .catch(err => setError(err))
       .finally(() => setIsSaving(false))

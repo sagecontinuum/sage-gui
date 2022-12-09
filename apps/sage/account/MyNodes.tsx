@@ -22,7 +22,7 @@ const columns = [{
 
 }, {
   id: 'develop',
-  label: 'Can develop?',
+  label: 'Shell access?',
   format: (yes) => yes ? <CheckCircleRounded className="success" /> : 'no'
 }]
 
@@ -45,7 +45,8 @@ export default function MyNodes() {
 
   return (
     <Root>
-      <h1 className="no-margin">My Nodes</h1>
+      <h1 className="no-margin">My privileges on shared nodes</h1>
+      <br/>
       {data &&
         <Table
           primaryKey="vsn"

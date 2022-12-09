@@ -438,6 +438,7 @@ export default function JobStatus(props) {
                 onSearch={handleQuery}
                 onSelect={handleJobSelect}
                 onColumnMenuChange={() => { /* do nothing special */ }}
+                checkboxes={view == 'my-jobs'}
                 middleComponent={
                   <TableOptions className="flex justify-between">
                     <div>

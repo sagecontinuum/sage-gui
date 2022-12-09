@@ -84,7 +84,7 @@ export default function DevAccess() {
 
       {state &&
         <FormControl className="flex column">
-          <FormLabel id="ssk-keys">SSH Publicv Keys:</FormLabel>
+          <FormLabel id="ssk-keys">SSH Public Keys:</FormLabel>
           <OutlinedInput
             placeholder={
               `sh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK0LT3jNyfUtkJwxiv/7YfPU4PIOsQzeCVKlLCAfwlg3\\n` +
@@ -122,7 +122,7 @@ export default function DevAccess() {
       {!canDev &&
         <Alert severity="info">
           Note you do not have dev access on any nodes.
-          Please <b><a href={`${docs}/contact-us`}>contact us</a></b>
+          Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a node.
         </Alert>
       }
 

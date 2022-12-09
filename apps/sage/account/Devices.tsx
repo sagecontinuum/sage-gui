@@ -29,9 +29,9 @@ export default function DeviceRegistration() {
   return (
     <Root>
       <div className="flex column gap">
-        <h1>Get Development Beehive Keys for Your Waggle Device</h1>
+        <h1 className="no-margin">Get development beehive keys for your Waggle device</h1>
 
-        <h2>Enter Waggle Device ID</h2>
+        <h2>Enter your Waggle device ID</h2>
         <TextField
           id="nano-id"
           placeholder="Nano ID"
