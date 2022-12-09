@@ -62,7 +62,6 @@ import { Divider } from '@mui/material'
 
 
 const NavMenu = () => {
-  console.log('here')
   return (
     <NavItems>
       <NavItem
