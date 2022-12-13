@@ -102,11 +102,11 @@ type State = 'Waiting' | 'Running' | 'Submitted'
 type Plugin = {
   name: string
   plugin_spec: {
-      image: string     // image ref
+    image: string     // image ref
   }
   status: {
-      scheduling: State
-      since: Date       // 2022-11-22T20:35:27.373353828Z
+    scheduling: State
+    since: Date       // 2022-11-22T20:35:27.373353828Z
   }
   goal_id: string       // hash
 }
@@ -120,7 +120,9 @@ type ScienceGoal = {
   sub_goals: object     // todo(nc): define(?)
 }
 
-export type Job = {
+
+// official SES job type
+type JobRecord = {
   name: string
   job_id: string        // string number
   user: string
@@ -129,18 +131,23 @@ export type Job = {
   plugins: Plugin[]
   node_tags: null,
   nodes: {
-      [vsn: string]: true
+    [vsn: string]: true
   },
   science_rules: string[],
   success_criteria: string[]
   science_goal: ScienceGoal[]
   state: {
-      last_state: State
-      last_updated: Date
-      last_submitted: Date
-      last_started: Date
-      last_completed: null
+    last_state: State
+    last_updated: Date
+    last_submitted: Date
+    last_started: Date
+    last_completed: null
   }
+}
+
+// Job type for UI
+export type Job = JobRecord & {
+  nodes: BK.VSN[]
 }
 
 
@@ -298,16 +305,15 @@ function computeGoalMetrics(byApp: ByApp) {
 
 
 
-type ReducedJobData = {
-  byNode: {
+type EventsByNode = {
     [vsn: string]: PluginEvent[]
-  }
-  jobs?: {
-    [jobName: string]: Job
-  }
 }
 
-export function reduceData(taskEvents: PluginEvent[]) : ReducedJobData {
+type JobByJobName = {
+  [jobName: string]: Job
+}
+
+export function reduceData(taskEvents: PluginEvent[]) : EventsByNode {
   // first group by vsn
   const groupedByNode = groupBy(taskEvents, 'meta.vsn')
 
@@ -330,7 +336,7 @@ export function reduceData(taskEvents: PluginEvent[]) : ReducedJobData {
     }
   }
 
-  return {byNode}
+  return byNode
 }
 
 
@@ -375,29 +381,22 @@ function getGoals() : Promise<Goal[]> {
 }
 
 
-// const goalsToLookup = (goals: Goal[]) =>
-//  goals.reduce((acc, o) => ({...acc, [o.id]: o.name}), {})
-
-
 // fetch tasks state event changes, and parse SES JSON Messages
-function getEvents() : Promise<PluginEvent[]> {
+export function getEvents() : Promise<EventsByNode> {
   return BH.getData({
     start: '-24h',
     filter: {
       name: 'sys.scheduler.status.plugin.*'
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
+    .then(pluginEvents => reduceData(pluginEvents))
 }
 
 
-export async function getAllData(params?: ListJobsParams) : Promise<ReducedJobData> {
+export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
   const {user} = params || {}
 
-  const [jobs, taskEvents] = await Promise.all([
-    listJobs({user}), getEvents()
-  ])
-
-  const {byNode} = reduceData(taskEvents)
+  const jobs = await listJobs({user})
 
   let jobData
   try {
@@ -410,19 +409,14 @@ export async function getAllData(params?: ListJobsParams) : Promise<ReducedJobDa
         name,
         nodes: nodes ?
           Object.keys(nodes) :
-          (nodeTags ? nodeTags : '?'),
-        apps: plugins,
+          (nodeTags ? nodeTags : '?')
       }
     })
   } catch(error) {
     console.error('error', error)
   }
 
-  if (warnings.length) {
-    // console.warn(warnings.join('\n'))
-  }
-
-  return {jobs: jobData, byNode}
+  return jobData
 }
 
 

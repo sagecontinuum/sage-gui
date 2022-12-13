@@ -96,7 +96,7 @@ const jobCols = [{
   format: (_, obj) =>
     <b className="muted">{obj.nodes.length}</b>
 }, {
-  id: 'apps',
+  id: 'plugins',
   label: 'Apps',
   format: formatters.apps
 }, {
@@ -156,35 +156,34 @@ const goalCols = [{
 
 function jobsToGeos(
   jobs: ES.Job[],
-  manifestByVSN: ManifestByVSN
+  manifests: BK.ManifestMap
 ) : GeoData {
   return (jobs || [])
     .flatMap(o => o.nodes)
     .map(vsn => ({
       id: vsn,
       vsn,
-      lng: Number(manifestByVSN[vsn].gps_lon),
-      lat: Number(manifestByVSN[vsn].gps_lat),
+      lng: Number(manifests[vsn].gps_lon),
+      lat: Number(manifests[vsn].gps_lat),
       status: 'reporting'
     }))
 }
 
 
-export type ByNode = {[vsn: string]: ES.PluginEvent[]}
 
 type State = {
   jobs: ES.Job[]
-  byNode: ByNode | {}
-  isFiltered: boolean
-  qJobs: ES.Job[]
-  qNodes: string[]
-  selectedNodes: GeoData
-  selectedJobs: ES.Job[]
+  pluginEvents?: ES.PluginEvent
+  isFiltered?: boolean
+  qJobs?: ES.Job[]
+  qNodes?: string[]
+  selectedNodes?: GeoData
+  selectedJobs?: ES.Job[]
 }
 
 const initState = {
   jobs: [],
-  byNode: {},
+  pluginEvents: null,
   isFiltered: false,
   qJobs: null,
   qNodes: [],
@@ -193,31 +192,32 @@ const initState = {
 }
 
 
-type ManifestByVSN = {[vsn: string]: BK.Manifest}
+type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: string}[]
 
-type GeoData = {id: string, vsn: string, lng: number, lat: number, status: string}[]
+type Counts = {public: number, mine: number}
 
-export default function JobStatus(props) {
+
+export default function JobStatus() {
   const navigate = useNavigate()
   const { enqueueSnackbar } = useSnackbar()
 
   const {view = 'all-jobs'} = useParams()
 
   const params = new URLSearchParams(useLocation().search)
-  const query = params.get('query') || ''
-  const nodes = params.get('nodes') || ''
-  const job = params.get('job') || ''
-  const tab = params.get('tab') || 'jobs'
+  const query = params.get('query') || '' // query string
+  const nodes = params.get('nodes') || '' // vsns
+  const job = params.get('job') || ''     // job id
 
   const {loading, setLoading} = useProgress()
 
   const [{
-    jobs, byNode, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
+    jobs, pluginEvents, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
   }, setData] = useState<State>(initState)
 
   // additional meta
-  const [manifestByVSN, setManifestByVSN] = useState<ManifestByVSN>()
+  const [manifests, setManifests] = useState<BK.ManifestMap>(null)
   const [geo, setGeo] = useState<GeoData>()
+  const [counts, setCounts] = useState<Counts>({public: null, mine: null})
 
   // we'll update table columns for each tab
   const [cols, setCols] = useState(jobCols)
@@ -234,7 +234,7 @@ export default function JobStatus(props) {
 
 
   useEffect(() => {
-    if (!jobs || !manifestByVSN) return
+    if (!jobs || !manifests) return
 
     const qJobs = queryData<ES.Job>(jobs, query)
     const qNodes = qJobs.flatMap(o => o.nodes)
@@ -246,7 +246,7 @@ export default function JobStatus(props) {
       qNodes
     }))
 
-  }, [query, jobs, manifestByVSN, selectedNodes])
+  }, [query, jobs, manifests, selectedNodes])
 
 
   useEffect(() => {
@@ -255,37 +255,42 @@ export default function JobStatus(props) {
     const filterUser = view == 'my-jobs' && user
     const params = filterUser ? {user} : null
 
-    // fetch scheduler data
-    const p1 = ES.getAllData(params)
+    // fetch aggregated scheduler data
+    const p1 = ES.getJobs()
 
     // also fetch gps for map
     const p2 = BK.getManifest({by: 'vsn'})
 
     Promise.all([p1, p2])
-      .then(([{jobs, byNode}, data]) => {
-        setManifestByVSN(data)
+      .then(([jobs, manifests]) => {
+        setManifests(manifests as BK.ManifestMap)
 
         // todo(nc): remove when VSNs are used for urls
-        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => data[vsn].node_id)}))
+        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn].node_id)}))
+        setCounts({
+          public: jobs.length,
+          mine: jobs.filter(o => o.user == user).length
+        })
 
-        setData({jobs, byNode})
-
-        let vsns = Object.keys(byNode)
+        let vsns = [...new Set(jobs.flatMap(o => o.nodes))] as BK.VSN[]
 
         // if 'my jobs', filter vsns to the user's nodes
         if (filterUser) {
           const nodes = jobs.flatMap(o => o.nodes)
           vsns = vsns.filter(vsn => nodes.includes(vsn))
+          jobs = jobs.filter(o => o.user == user)
         }
 
+        // create some geo data
         const geo = vsns.map(vsn => {
-          const d = data[vsn]
+          const d = manifests[vsn]
           const lng = d.gps_lon
           const lat = d.gps_lat
 
-          return {...data[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
+          return {...manifests[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
         })
 
+        setData({jobs})
         setGeo(geo)
       }).catch(err => {
         console.error(err)
@@ -293,6 +298,16 @@ export default function JobStatus(props) {
       })
       .finally(() => setLoading(false))
   }, [setLoading, view, updateTable])
+
+
+
+  // fetch aggreted task event data for timeline (and other stuff later?)
+  useEffect(() => {
+    if (view != 'timeline') return
+
+    ES.getEvents()
+      .then(pluginEvents => setData(prev => ({...prev, pluginEvents})) )
+  }, [view])
 
 
   // simply update table columns for job lists (for now?)
@@ -303,8 +318,7 @@ export default function JobStatus(props) {
 
   const handleJobSelect = (sel) => {
     const objs = sel.objs.length ? sel.objs : []
-    const nodes = jobsToGeos(objs, manifestByVSN)
-
+    const nodes = jobsToGeos(objs, manifests)
 
     setData(prev => ({
       ...prev,
@@ -324,7 +338,7 @@ export default function JobStatus(props) {
 
   const handleCloseDialog = () => {
     params.delete('job')
-    navigate(`/jobs/${view}?tab=${tab}`, {search: params.toString(), replace: true})
+    navigate(`/jobs/${view}`, {search: params.toString(), replace: true})
   }
 
 
@@ -360,35 +374,6 @@ export default function JobStatus(props) {
     <Root>
       <div className="flex">
         <Main className="flex column">
-          <Tabs
-            value={view}
-            aria-label="tabs of data links"
-            sx={{marginBottom: '10px'}}
-          >
-            <Tab
-              label={<div className="flex items-center">
-                <PublicIcon />&nbsp;All Jobs
-              </div>}
-              component={NavLink}
-              value="all-jobs"
-              to="/jobs/all-jobs"
-              replace
-            />
-            {user &&
-              <Tab
-                label={
-                  <div className="flex items-center">
-                    <MyJobsIcon/>&nbsp;My Jobs
-                  </div>
-                }
-                value="my-jobs"
-                component={NavLink}
-                to="/jobs/my-jobs?tab=jobs"
-                replace
-              />
-            }
-          </Tabs>
-
           <MapContainer>
             {geo &&
               <Map
@@ -398,27 +383,41 @@ export default function JobStatus(props) {
           </MapContainer>
 
           <Tabs
-            value={tab}
+            value={view}
             aria-label="job status tabs"
           >
             <Tab
               label={
                 <div className="flex items-center">
-                  <ListIcon/>&nbsp;{view == 'my-jobs' ? 'My Jobs' : 'Jobs'} ({loading ? '...' : jobs.length})
+                  <ListIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
                 </div>
               }
-              value="jobs"
+              value="all-jobs"
               component={Link}
-              to={`/jobs/${view}?tab=jobs`}
+              to={`/jobs/all-jobs`}
               replace
             />
+            {user &&
+              <Tab
+                label={
+                  <div className="flex items-center">
+                    <MyJobsIcon/>&nbsp;My Jobs ({loading ? '...' : counts.mine})
+                  </div>
+                }
+                value="my-jobs"
+                component={NavLink}
+                to="/jobs/my-jobs"
+                replace
+              />
+            }
+
             <Tab
               label={<div className="flex items-center">
-                <TimelineIcon />&nbsp;{view == 'my-jobs' ? 'My Timelines' : 'Timelines'}
+                <TimelineIcon />&nbsp;Timelines
               </div>}
               value="timeline"
               component={Link}
-              to={`/jobs/${view}?tab=timeline`}
+              to={`/jobs/timeline`}
               replace
             />
           </Tabs>
@@ -427,7 +426,7 @@ export default function JobStatus(props) {
             <TableSkeleton />
           }
 
-          {tab == 'jobs' && qJobs && !loading &&
+          {['all-jobs', 'my-jobs'].includes(view) && qJobs && !loading &&
             <TableContainer>
               <Table
                 primaryKey="id"
@@ -459,7 +458,7 @@ export default function JobStatus(props) {
                         <Button
                           variant="contained"
                           component={Link}
-                          to={`?tab=timeline&nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
+                          to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
                           startIcon={<TimelineIcon/>}
                         >
                           View timeline{selectedNodes.length > 1 ? 's' : ''}
@@ -484,12 +483,12 @@ export default function JobStatus(props) {
             </TableContainer>
           }
 
-          {tab == 'timeline' && byNode && manifestByVSN &&
+          {view == 'timeline' && pluginEvents && manifests &&
             <TimelineContainer>
-              {Object.keys(byNode)
+              {Object.keys(pluginEvents)
                 .filter(vsn => nodes ? nodes.includes(vsn) : true)
                 .map((vsn, i) => {
-                  const {location, node_id} = manifestByVSN[vsn]
+                  const {location, node_id} = manifests[vsn]
                   return (
                     <Card key={i} className="title-row">
                       <div className="flex column">
@@ -498,7 +497,7 @@ export default function JobStatus(props) {
                         </div>
                         <div>{location}</div>
                       </div>
-                      <JobTimeLine data={byNode[vsn]} />
+                      <JobTimeLine data={pluginEvents[vsn]} />
                     </Card>
                   )
                 })
@@ -512,12 +511,12 @@ export default function JobStatus(props) {
         </Main>
       </div>
 
-      {jobDetails && byNode &&
+      {jobDetails && pluginEvents &&
         <JobDetails
           job={jobDetails}
           jobs={jobs}
-          byNode={byNode}
-          manifestByVSN={manifestByVSN}
+          byNode={pluginEvents}
+          manifestByVSN={manifests}
           handleCloseDialog={handleCloseDialog}
         />
       }

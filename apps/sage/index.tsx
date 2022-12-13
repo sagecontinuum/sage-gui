@@ -142,13 +142,13 @@ const NavMenu = () => {
             <Item
               icon={<JobsIcon/>}
               component={Link}
-              to="/jobs/all-jobs?tab=jobs"
+              to="/jobs/all-jobs"
               label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
               component={Link}
-              to="/jobs/all-jobs?tab=timeline"
+              to="/jobs/timeline"
               label="Timelines"
             />
 
@@ -227,7 +227,7 @@ export default function Sage() {
                   </Route>
 
 
-                  <Route path="/jobs" element={<Navigate to="/jobs/all-jobs?tab=jobs" replace />} />
+                  <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
                   <Route path="jobs" element={<JobStatus />}>
                     <Route path=":view" element={<JobStatus />} />
                   </Route>
