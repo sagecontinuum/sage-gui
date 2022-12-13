@@ -200,9 +200,34 @@ const getUniqueAppOpts = (data: string[]) =>
     })
 
 
-
 const getCurlCmd = (query: object) =>
   `curl ${BH.url}/query -d '${JSON.stringify(query)}'`
+
+
+
+const indent = 4
+const pad = ' '.repeat(indent)
+
+const getArgsStr = (obj: object) : string =>
+  Object.entries(obj).map(([k, v]) => `${k}="${v}"`)
+    .join(',\n' + pad) + ', '
+
+
+const getPythonSnippet = (query: BH.Params) : string => {
+  const {filter = {}, ...rest} = query || {}
+
+  const params = `\n${pad}${getArgsStr(rest)}`
+  const filterParams = JSON.stringify(filter, null, indent).replace(/(.+):/g, pad + '$1:')
+
+  const str =
+    `${params}\n` +
+    `${pad}filter={${filterParams.slice(1, -1)}${pad}}`
+
+  return (
+    `import sage_data_client\n\n` +
+    `df = sage_data_client.query(${str}\n)`
+  )
+}
 
 
 function getAppMenus() {
@@ -263,7 +288,7 @@ const getEndTime = (start: string, win: Unit) : string => {
   const unit = win.charAt(win.length - 1)
 
   const startTime = new Date(start)
-  let endTime = new Date(start)
+  const endTime = new Date(start)
   if (unit == 'm')
     endTime.setMinutes(startTime.getMinutes() + amount)
   else if (unit == 'h')
@@ -405,13 +430,13 @@ export default function DataPreview() {
   useEffect(() => {
     if (menus.sensors.length) {
       setCols(prev => {
-        let idx = findColumn(prev, 'sensor')
+        const idx = findColumn(prev, 'sensor')
         prev[idx] = {...prev[idx], hide: false}
         return prev.slice(0)
       })
     } else {
       setCols(prev => {
-        let idx = findColumn(prev, 'sensor')
+        const idx = findColumn(prev, 'sensor')
         prev[idx] = {...prev[idx], hide: true}
         return prev.slice(0)
       })
@@ -720,13 +745,29 @@ export default function DataPreview() {
             </FormControl>
           </TimeOpts>
 
-          <h4>Download/CLI</h4>
-          <CurlContainer>
-            <Clipboard
-              content={getCurlCmd(query)}
-              tooltip="Copy curl CMD"
-            />
-          </CurlContainer>
+          <Snippets>
+            <div>
+              <h4>cURL download</h4>
+              <Clipboard
+                content={getCurlCmd(query)}
+                tooltip="Copy curl CMD"
+              />
+            </div>
+
+            <div>
+              <h4>Python snippet</h4>
+              <Clipboard
+                content={getPythonSnippet(query)}
+                tooltip="Copy python snippet"
+              />
+              <div className="flex justify-between text-xs">
+                <a href="https://pypi.org/project/sage-data-client/"
+                  target="_blank" rel="noreferrer">install client</a>
+                <a href={`${config.docs}/tutorials/accessing-data`}
+                  target="_blank" rel="noreferrer">docs</a>
+              </div>
+            </div>
+          </Snippets>
         </Sidebar>
 
         <Main>
@@ -898,8 +939,14 @@ const TimeOpts = styled.div`
   }
 `
 
-const CurlContainer = styled.div`
+const Snippets = styled.div`
+  margin-bottom: 100px;
+
+  > div { margin: 0 0 30px 0; }
+  h4 { margin: 2px 0; }
+
   pre {
+    margin: 0;
     border: none;
     background: #fff !important;
   }
