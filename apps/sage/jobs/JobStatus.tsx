@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { Button } from '@mui/material'
+import { Button, ToggleButton, ToggleButtonGroup } from '@mui/material'
 
 import ListIcon from '@mui/icons-material/ListRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
@@ -10,6 +10,11 @@ import PublicIcon from '@mui/icons-material/PieChart'
 import AddIcon from '@mui/icons-material/AddRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
+import QueuedIcon from '@mui/icons-material/List'
+import InProgressIcon from '@mui/icons-material/PlayCircleOutlineRounded'
+import CompletedIcon from '@mui/icons-material/CheckOutlined'
+import WarningIcon from '@mui/icons-material/WarningOutlined'
+import HideIcon from '@mui/icons-material/HideSourceRounded'
 
 import { useSnackbar } from 'notistack'
 
@@ -173,7 +178,7 @@ function jobsToGeos(
 
 type State = {
   jobs: ES.Job[]
-  pluginEvents?: ES.PluginEvent
+  pluginEvents?: ES.EventsByNode
   isFiltered?: boolean
   qJobs?: ES.Job[]
   qNodes?: string[]
@@ -217,7 +222,14 @@ export default function JobStatus() {
   // additional meta
   const [manifests, setManifests] = useState<BK.ManifestMap>(null)
   const [geo, setGeo] = useState<GeoData>()
-  const [counts, setCounts] = useState<Counts>({public: null, mine: null})
+  const [counts, setCounts] = useState<Counts>({
+    public: null,
+    mine: null,
+    queued: 0,
+    running: 0,
+    completed: 0,
+    failed: 0
+  })
 
   // we'll update table columns for each tab
   const [cols, setCols] = useState(jobCols)
@@ -267,10 +279,6 @@ export default function JobStatus() {
 
         // todo(nc): remove when VSNs are used for urls
         jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn].node_id)}))
-        setCounts({
-          public: jobs.length,
-          mine: jobs.filter(o => o.user == user).length
-        })
 
         let vsns = [...new Set(jobs.flatMap(o => o.nodes))] as BK.VSN[]
 
@@ -364,6 +372,7 @@ export default function JobStatus() {
     return subset
   }
 
+
   // if query param ?job=<job_id> is provided
   const jobDetails = job ?
     (jobs || []).find(o => o.job_id == job) :
@@ -389,7 +398,7 @@ export default function JobStatus() {
             <Tab
               label={
                 <div className="flex items-center">
-                  <ListIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
+                  <PublicIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
                 </div>
               }
               value="all-jobs"
@@ -511,11 +520,10 @@ export default function JobStatus() {
         </Main>
       </div>
 
-      {jobDetails && pluginEvents &&
+      {jobs.length && jobDetails &&
         <JobDetails
           job={jobDetails}
           jobs={jobs}
-          byNode={pluginEvents}
           manifestByVSN={manifests}
           handleCloseDialog={handleCloseDialog}
         />

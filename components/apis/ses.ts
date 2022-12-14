@@ -1,4 +1,5 @@
 import * as BH from './beehive'
+import type { VSN } from './beekeeper'
 import { groupBy } from 'lodash'
 import { handleErrors } from '../fetch-utils'
 
@@ -305,7 +306,7 @@ function computeGoalMetrics(byApp: ByApp) {
 
 
 
-type EventsByNode = {
+export type EventsByNode = {
     [vsn: string]: PluginEvent[]
 }
 
@@ -382,11 +383,12 @@ function getGoals() : Promise<Goal[]> {
 
 
 // fetch tasks state event changes, and parse SES JSON Messages
-export function getEvents() : Promise<EventsByNode> {
+export function getEvents(nodes?: VSN[]) : Promise<EventsByNode> {
   return BH.getData({
     start: '-24h',
     filter: {
-      name: 'sys.scheduler.status.plugin.*'
+      name: 'sys.scheduler.status.plugin.*',
+      ...(nodes && {vsn: nodes.join('|')})
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
     .then(pluginEvents => reduceData(pluginEvents))

@@ -1,28 +1,46 @@
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import MetaTable from '/components/table/MetaTable'
+import { useProgress } from '/components/progress/ProgressProvider'
 
 
 import { formatters, TimelineContainer } from './JobStatus'
 
-import type {  ByNode, ManifestByVSN } from './JobStatus'
+import type { ManifestByVSN } from './JobStatus'
 import type { Job } from '/components/apis/ses'
 
 import JobTimeLine from './JobTimeline'
 
 
+import * as ES from '/components/apis/ses'
+
+
 type Props = {
   job: Job
   jobs: Job[]
-  byNode: ByNode
   manifestByVSN: ManifestByVSN
   handleCloseDialog: () => void
 }
 
 export default function JobDetails(props: Props) {
-  const {job, jobs, byNode, manifestByVSN, handleCloseDialog} = props
+  const {job, jobs, manifestByVSN, handleCloseDialog} = props
+
+
+  const {setLoading} = useProgress()
+  const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
+
+  useEffect(() => {
+    if (!job) return
+
+    setLoading(true)
+    ES.getEvents(job.nodes)
+      .then(data => setEventsByNode(data))
+      .finally(() => setLoading(false))
+  }, [])
+
 
   return (
     <ConfirmationDialog
@@ -38,7 +56,7 @@ export default function JobDetails(props: Props) {
               rows={[
                 {id: 'job_id', label: 'Job ID'},
                 {id: 'user', label: 'User'},
-                {id: 'apps', label: `Apps (${job.apps.length})`, format: formatters.apps},
+                {id: 'plugins', label: `Apps (${job.plugins.length})`, format: formatters.apps},
                 {id: 'nodes', label: `Nodes (${job.nodes.length})`,
                   format: formatters.nodes},
                 {id: 'node_tags', label: `Node Tags` , format: (v) => (v || []).join(', ')},
@@ -54,9 +72,9 @@ export default function JobDetails(props: Props) {
           </JobMetaContainer>
 
           <h2>Timelines</h2>
-          {byNode &&
+          {eventsByNode &&
             <TimelineContainer>
-              {Object.keys(byNode)
+              {Object.keys(eventsByNode)
                 .filter(vsn =>
                   jobs.filter(o => o.id == job.job_id).flatMap(o => o.nodes).includes(vsn)
                 )
@@ -70,7 +88,7 @@ export default function JobDetails(props: Props) {
                         </div>
                         <div>{location}</div>
                       </div>
-                      <JobTimeLine data={byNode[vsn]} />
+                      <JobTimeLine data={eventsByNode[vsn]} />
                     </div>
                   )
                 })
