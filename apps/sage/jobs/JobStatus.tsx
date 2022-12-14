@@ -2,20 +2,13 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { Button, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Button } from '@mui/material'
 
-import ListIcon from '@mui/icons-material/ListRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
-import PublicIcon from '@mui/icons-material/PieChart'
+import PublicIcon from '@mui/icons-material/Public'
 import AddIcon from '@mui/icons-material/AddRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
-import QueuedIcon from '@mui/icons-material/List'
-import InProgressIcon from '@mui/icons-material/PlayCircleOutlineRounded'
-import CompletedIcon from '@mui/icons-material/CheckOutlined'
-import WarningIcon from '@mui/icons-material/WarningOutlined'
-import HideIcon from '@mui/icons-material/HideSourceRounded'
-
 import { useSnackbar } from 'notistack'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
@@ -31,6 +24,7 @@ import { Card } from '/components/layout/Layout'
 
 import JobTimeLine from './JobTimeline'
 import JobDetails from './JobDetails'
+import StateFilters from './StateFilters'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
@@ -159,12 +153,14 @@ const goalCols = [{
 }]
 
 
+
+type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: string}[]
+
 function jobsToGeos(
   jobs: ES.Job[],
   manifests: BK.ManifestMap
 ) : GeoData {
-  return (jobs || [])
-    .flatMap(o => o.nodes)
+  return [...new Set(jobs.flatMap(o => o.nodes))]
     .map(vsn => ({
       id: vsn,
       vsn,
@@ -173,7 +169,6 @@ function jobsToGeos(
       status: 'reporting'
     }))
 }
-
 
 
 type State = {
@@ -197,9 +192,37 @@ const initState = {
 }
 
 
-type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: string}[]
+const initCounts = {
+  public: null,
+  mine: null,
+  queued: null,
+  running: null,
+  completed: null,
+  failed: null,
+  suspended: null,
+  removed: null
+} as const
 
-type Counts = {public: number, mine: number}
+export type Counts = {
+  [name in keyof typeof initCounts]: number
+}
+
+function getCounts(jobs: ES.Job[]) : Counts {
+  return ({
+    public: jobs.length,
+    mine: jobs.filter(o => o.user == user).length,
+    queued: filterByState(jobs, ['Created', 'Submitted']).length,
+    running: filterByState(jobs, ['Running']).length,
+    completed: filterByState(jobs, ['Completed']).length,
+    failed: filterByState(jobs, ['Failed']).length,
+    suspended: filterByState(jobs, ['Suspended']).length,
+    removed: filterByState(jobs, ['Removed']).length
+  })
+}
+
+
+const filterByState = (jobs: ES.Job[], states: ES.State[]) : ES.Job[] =>
+  jobs.filter(o => states.includes(o.state.last_state) )
 
 
 export default function JobStatus() {
@@ -219,17 +242,13 @@ export default function JobStatus() {
     jobs, pluginEvents, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
   }, setData] = useState<State>(initState)
 
+  // filter for job's state
+  const [jobState, setJobState] = useState<'Queued' | ES.State>()
+
   // additional meta
   const [manifests, setManifests] = useState<BK.ManifestMap>(null)
   const [geo, setGeo] = useState<GeoData>()
-  const [counts, setCounts] = useState<Counts>({
-    public: null,
-    mine: null,
-    queued: 0,
-    running: 0,
-    completed: 0,
-    failed: 0
-  })
+  const [counts, setCounts] = useState<Counts>(initCounts)
 
   // we'll update table columns for each tab
   const [cols, setCols] = useState(jobCols)
@@ -248,7 +267,19 @@ export default function JobStatus() {
   useEffect(() => {
     if (!jobs || !manifests) return
 
-    const qJobs = queryData<ES.Job>(jobs, query)
+    let qJobs = queryData<ES.Job>(jobs, query)
+
+    if (jobState == 'Queued') {
+      qJobs = filterByState(jobs, ['Created', 'Submitted'])
+    } else if (jobState) {
+      qJobs = filterByState(jobs, [jobState])
+    }
+
+    // ignore removed jobs by default
+    if (jobState !== 'Removed') {
+      qJobs = qJobs.filter(o => o.state.last_state != 'Removed')
+    }
+
     const qNodes = qJobs.flatMap(o => o.nodes)
 
     setData(prev => ({
@@ -258,14 +289,17 @@ export default function JobStatus() {
       qNodes
     }))
 
-  }, [query, jobs, manifests, selectedNodes])
+    // update map again
+    const geo = jobsToGeos(qJobs, manifests)
+    setGeo(geo)
+    setUpdateMap(prev => prev + 1)
+  }, [query, jobs, manifests, selectedNodes, jobState])
 
 
   useEffect(() => {
     setLoading(true)
 
     const filterUser = view == 'my-jobs' && user
-    const params = filterUser ? {user} : null
 
     // fetch aggregated scheduler data
     const p1 = ES.getJobs()
@@ -275,7 +309,8 @@ export default function JobStatus() {
 
     Promise.all([p1, p2])
       .then(([jobs, manifests]) => {
-        setManifests(manifests as BK.ManifestMap)
+        manifests = manifests as BK.ManifestMap
+        setManifests(manifests)
 
         // todo(nc): remove when VSNs are used for urls
         jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn].node_id)}))
@@ -289,14 +324,10 @@ export default function JobStatus() {
           jobs = jobs.filter(o => o.user == user)
         }
 
-        // create some geo data
-        const geo = vsns.map(vsn => {
-          const d = manifests[vsn]
-          const lng = d.gps_lon
-          const lat = d.gps_lat
+        setCounts(getCounts(jobs))
 
-          return {...manifests[vsn], id: vsn, vsn, lng, lat, status: 'reporting'}
-        })
+        // create some geo data
+        const geo = jobsToGeos(jobs, manifests)
 
         setData({jobs})
         setGeo(geo)
@@ -373,6 +404,10 @@ export default function JobStatus() {
   }
 
 
+  const handleStatusFilter = (state: 'Queued' | ES.State) => {
+    setJobState(prev => prev == state ? null : state)
+  }
+
   // if query param ?job=<job_id> is provided
   const jobDetails = job ?
     (jobs || []).find(o => o.job_id == job) :
@@ -381,144 +416,148 @@ export default function JobStatus() {
 
   return (
     <Root>
-      <div className="flex">
-        <Main className="flex column">
-          <MapContainer>
-            {geo &&
-              <Map
-                data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
-                updateID={updateMap} />
-            }
-          </MapContainer>
+      <Main className="flex column">
+        <StateFilters
+          counts={counts}
+          state={jobState}
+          onFilter={handleStatusFilter} />
 
-          <Tabs
-            value={view}
-            aria-label="job status tabs"
-          >
+        <MapContainer>
+          {geo &&
+            <Map
+              data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
+              updateID={updateMap} />
+          }
+        </MapContainer>
+
+        <Tabs
+          value={view}
+          aria-label="job status tabs"
+        >
+          <Tab
+            label={
+              <div className="flex items-center">
+                <PublicIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
+              </div>
+            }
+            value="all-jobs"
+            component={Link}
+            to={`/jobs/all-jobs`}
+            replace
+          />
+          {user &&
             <Tab
               label={
                 <div className="flex items-center">
-                  <PublicIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
+                  <MyJobsIcon/>&nbsp;My Jobs ({loading ? '...' : counts.mine})
                 </div>
               }
-              value="all-jobs"
-              component={Link}
-              to={`/jobs/all-jobs`}
+              value="my-jobs"
+              component={NavLink}
+              to="/jobs/my-jobs"
               replace
             />
-            {user &&
-              <Tab
-                label={
-                  <div className="flex items-center">
-                    <MyJobsIcon/>&nbsp;My Jobs ({loading ? '...' : counts.mine})
+          }
+
+          <Tab
+            label={<div className="flex items-center">
+              <TimelineIcon />&nbsp;Timelines
+            </div>}
+            value="timeline"
+            component={Link}
+            to={`/jobs/timeline`}
+            replace
+          />
+        </Tabs>
+
+        {loading &&
+          <TableSkeleton />
+        }
+
+        {['all-jobs', 'my-jobs'].includes(view) && qJobs && !loading &&
+          <TableContainer>
+            <Table
+              primaryKey="id"
+              rows={qJobs}
+              columns={cols}
+              enableSorting
+              sort="-submitted"
+              onSearch={handleQuery}
+              onSelect={handleJobSelect}
+              onColumnMenuChange={() => { /* do nothing special */ }}
+              checkboxes={view == 'my-jobs'}
+              middleComponent={
+                <TableOptions className="flex justify-between">
+                  <div>
+                    {view == 'my-jobs' && isFiltered &&
+                      <Button
+                        variant="contained"
+                        style={{background: '#c70000'}}
+                        onClick={() => setConfirm(true)}
+                        startIcon={<RemoveIcon/>}
+                      >
+                        Remove Job{selectedJobs.length > 1 ? 's' : ''}
+                      </Button>
+                    }
                   </div>
-                }
-                value="my-jobs"
-                component={NavLink}
-                to="/jobs/my-jobs"
-                replace
-              />
-            }
 
-            <Tab
-              label={<div className="flex items-center">
-                <TimelineIcon />&nbsp;Timelines
-              </div>}
-              value="timeline"
-              component={Link}
-              to={`/jobs/timeline`}
-              replace
-            />
-          </Tabs>
-
-          {loading &&
-            <TableSkeleton />
-          }
-
-          {['all-jobs', 'my-jobs'].includes(view) && qJobs && !loading &&
-            <TableContainer>
-              <Table
-                primaryKey="id"
-                rows={qJobs}
-                columns={cols}
-                enableSorting
-                sort="-submitted"
-                onSearch={handleQuery}
-                onSelect={handleJobSelect}
-                onColumnMenuChange={() => { /* do nothing special */ }}
-                checkboxes={view == 'my-jobs'}
-                middleComponent={
-                  <TableOptions className="flex justify-between">
-                    <div>
-                      {view == 'my-jobs' && isFiltered &&
-                        <Button
-                          variant="contained"
-                          style={{background: '#c70000'}}
-                          onClick={() => setConfirm(true)}
-                          startIcon={<RemoveIcon/>}
-                        >
-                          Remove Job{selectedJobs.length > 1 ? 's' : ''}
-                        </Button>
-                      }
-                    </div>
-
-                    <div className="flex gap">
-                      {isFiltered &&
-                        <Button
-                          variant="contained"
-                          component={Link}
-                          to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
-                          startIcon={<TimelineIcon/>}
-                        >
-                          View timeline{selectedNodes.length > 1 ? 's' : ''}
-                        </Button>
-                      }
-                      {view == 'my-jobs' &&
-                        <Button
-                          component={Link}
-                          to="/create-job"
-                          variant="contained"
-                          color="primary"
-                          startIcon={<AddIcon/>}
-                          size="small"
-                        >
-                          Create job
-                        </Button>
-                      }
-                    </div>
-                  </TableOptions>
-                }
-              />
-            </TableContainer>
-          }
-
-          {view == 'timeline' && pluginEvents && manifests &&
-            <TimelineContainer>
-              {Object.keys(pluginEvents)
-                .filter(vsn => nodes ? nodes.includes(vsn) : true)
-                .map((vsn, i) => {
-                  const {location, node_id} = manifests[vsn]
-                  return (
-                    <Card key={i} className="title-row">
-                      <div className="flex column">
-                        <div>
-                          <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
-                        </div>
-                        <div>{location}</div>
-                      </div>
-                      <JobTimeLine data={pluginEvents[vsn]} />
-                    </Card>
-                  )
-                })
+                  <div className="flex gap">
+                    {isFiltered &&
+                      <Button
+                        variant="contained"
+                        component={Link}
+                        to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
+                        startIcon={<TimelineIcon/>}
+                      >
+                        View timeline{selectedNodes.length > 1 ? 's' : ''}
+                      </Button>
+                    }
+                    {view == 'my-jobs' &&
+                      <Button
+                        component={Link}
+                        to="/create-job"
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon/>}
+                        size="small"
+                      >
+                        Create job
+                      </Button>
+                    }
+                  </div>
+                </TableOptions>
               }
-            </TimelineContainer>
-          }
+            />
+          </TableContainer>
+        }
 
-          {error &&
-            <ErrorMsg>{error}</ErrorMsg>
-          }
-        </Main>
-      </div>
+        {view == 'timeline' && pluginEvents && manifests &&
+          <TimelineContainer>
+            {Object.keys(pluginEvents)
+              .filter(vsn => nodes ? nodes.includes(vsn) : true)
+              .map((vsn, i) => {
+                const {location, node_id} = manifests[vsn]
+                return (
+                  <Card key={i} className="title-row">
+                    <div className="flex column">
+                      <div>
+                        <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                      </div>
+                      <div>{location}</div>
+                    </div>
+                    <JobTimeLine data={pluginEvents[vsn]} />
+                  </Card>
+                )
+              })
+            }
+          </TimelineContainer>
+        }
+
+        {error &&
+          <ErrorMsg>{error}</ErrorMsg>
+        }
+      </Main>
+
 
       {jobs.length && jobDetails &&
         <JobDetails

@@ -97,11 +97,17 @@ export type GoalLookup = {
   [id: string]: [name: string]
 }
 
+// states from services
+export type State =
+  'Created' | 'Submitted' | 'Waiting' | 'Running' | 'Completed' |
+  'Failed' | 'Suspended' | 'Removed'
 
-type State = 'Waiting' | 'Running' | 'Submitted'
+// states in UI which are considered 'Queued"
+export type QueuedState = 'Created' | 'Submitted' | 'Waiting'
+
 
 type Plugin = {
-  name: string
+name: string
   plugin_spec: {
     image: string     // image ref
   }
