@@ -864,7 +864,7 @@ export default function DataPreview() {
                 </div>
               }
               middleComponent={
-                <RangeInfo className="flex">
+                <RangeInfo className="flex justify-end">
                   {data &&
                     <RangeIndicator data={data} unit={unit}/>
                   }
@@ -953,7 +953,5 @@ const Snippets = styled.div`
 `
 
 const RangeInfo = styled.div`
-  margin-left: auto;
-  height: 100%;
 `
 

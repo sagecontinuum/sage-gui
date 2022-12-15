@@ -587,10 +587,12 @@ export default function TableComponent(props: Props) {
         }
 
         {onColumnMenuChange &&
-          <ColumnMenu
-            options={props.columns} // all columns
-            onChange={onColumnChange}
-          />
+          <ColumnMenuContainer>
+            <ColumnMenu
+              options={props.columns} // all columns
+              onChange={onColumnChange}
+            />
+          </ColumnMenuContainer>
         }
 
         {props.rightComponent &&
@@ -746,6 +748,11 @@ const Container = styled(TableContainer)<StylingProps>`
     padding: 6px 12px 6px 2px;
     font-weight: 800;
   }
+`
+
+const ColumnMenuContainer = styled.div`
+  display: flex;
+  margin-left: auto;
 `
 
 const NoneFoundNotice = styled.div`

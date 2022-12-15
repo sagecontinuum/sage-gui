@@ -66,7 +66,7 @@ export default function App() {
 }
 
 const Container = styled.div`
-  margin: 60px 10px 10px 10px;
+  margin: 60px 0;
   width: 100%;
 `
 
