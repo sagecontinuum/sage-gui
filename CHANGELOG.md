@@ -3,6 +3,63 @@
 The following are some notable changes to the UI
 
 
+## [2.3.0](https://github.com/sagecontinuum/sage-gui/compare/v2.2.0...v2.3.0) (2022-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* refactor account view; add tabs; this breaks the existing user profile/devices urls
+* rename urls /job-status/* to /jobs/*
+* change /data-browser url to /query-browser
+
+### Features
+
+* **accounts:** add developer account tab and refactor (somewhat WIP); SAGE-1584 ([86e37c6](https://github.com/sagecontinuum/sage-gui/commit/86e37c60b6185aa5c5a420f39db6d16dd7695c08))
+* add app data timeline component; WIP; SAGE-1541 ([f3e9817](https://github.com/sagecontinuum/sage-gui/commit/f3e98176a26fe31f3a3112c71501fa33bb866924))
+* add some last n days buttons to timeline; minor typo fix ([cd6eed1](https://github.com/sagecontinuum/sage-gui/commit/cd6eed1c7a87c4f6a86ec6f61ea1f9126d8b3cc0))
+* **admin:** add node bucket filter ([38083e4](https://github.com/sagecontinuum/sage-gui/commit/38083e4623e0f2be376e0a0ed9351221c5a93998))
+* change /data-browser url to /query-browser ([caaea1c](https://github.com/sagecontinuum/sage-gui/commit/caaea1ca7bd0dde3cea5f0b083b557dc230c153e))
+* **data:** add basic ontology/name based query ([293c688](https://github.com/sagecontinuum/sage-gui/commit/293c6887275c459dd3a18058f35f05f3ab4b3be2))
+* **data:** add copy python snippet ([c739f15](https://github.com/sagecontinuum/sage-gui/commit/c739f15199842bfe5ee8db3df2c75a81f39d132f))
+* **data:** basic mimetype filter ([4df7b45](https://github.com/sagecontinuum/sage-gui/commit/4df7b453ae2013a471b4f651c43aa92b4788dd2d))
+* **data:** some special image/audio filtering ([602a8e3](https://github.com/sagecontinuum/sage-gui/commit/602a8e3b50603a948e5110ffc918b627c0ce93f8))
+* **ecr:** add app view tab url params ([4f78b81](https://github.com/sagecontinuum/sage-gui/commit/4f78b81a50e1b12d88305dd699871e7eb1f3b4ba))
+* **ecr:** add links to app data tab; SAGE-1541 ([b545d9d](https://github.com/sagecontinuum/sage-gui/commit/b545d9d44026ae89a62151155e5974a4c748ad1f))
+* **jobs:** add "my nodes" table; SAGE-1535 ([eec074a](https://github.com/sagecontinuum/sage-gui/commit/eec074a70a93dbd201ea1c0677d975b76cfadb8a))
+* **jobs:** add basic job details view (and related minor features) ([2948600](https://github.com/sagecontinuum/sage-gui/commit/2948600ac40bb336bd570eaaa2880e3f9b371fc8))
+* **jobs:** add remove job(s); SAGE-1535 ([feb3795](https://github.com/sagecontinuum/sage-gui/commit/feb3795c0c04ef6aa5b523997494b131831a8aa3))
+* **jobs:** add state counts/filters; ignore 'removed' by default; SAGE-1583 ([8b79ec0](https://github.com/sagecontinuum/sage-gui/commit/8b79ec08927ed89d866fef37bb8a9e2010f4f17e))
+* **jobs:** add submit button, node bucket filtering, yaml spec changes; also update job data typing and some minor fixes; SAGE-1535 ([fc7d15a](https://github.com/sagecontinuum/sage-gui/commit/fc7d15acc54a8bea5ee4b23812dd6e98c2d2a968))
+* **jobs:** grey out node if user can't schedule; add schedulable filter; SAGE-1583 ([940a2d2](https://github.com/sagecontinuum/sage-gui/commit/940a2d24607e4b938cc2741357915e3a4e09cdc2))
+* **jobs:** some job to app and job to data query linkage ([b744b1a](https://github.com/sagecontinuum/sage-gui/commit/b744b1a16f7c7218848caf1ec56f3ff8516ae8f8))
+* **portal:** add node list and sensor pages ([fa32c33](https://github.com/sagecontinuum/sage-gui/commit/fa32c33f5dc378080b06a8838928a8a95d1f6238))
+* refactor account view; add tabs; this breaks the existing user profile/devices urls ([d8fe4c0](https://github.com/sagecontinuum/sage-gui/commit/d8fe4c0ba5b8d1a009f2d5b9573345828d44f637))
+* revised map component; add tooltip links ([70ffbf1](https://github.com/sagecontinuum/sage-gui/commit/70ffbf175df6aa611cb99330f6d718daf76b646c))
+* **sage:** add sensor list view and filtering ([f752558](https://github.com/sagecontinuum/sage-gui/commit/f752558693c444f50245b05dd05b7f7114834752))
+* sign-out of all tabs (and optimize/cleanup auth stuff) ([e53a697](https://github.com/sagecontinuum/sage-gui/commit/e53a6970c50ae5c8fe3031dd7884c54e60988ee1))
+* **timeline:** render y axis labels with react; SAGE-1541 ([d26584d](https://github.com/sagecontinuum/sage-gui/commit/d26584df91f72683b845a0ec52b19f828fd114c1))
+
+
+### Bug Fixes
+
+* **accounts:** use node id (for now) ([38238d0](https://github.com/sagecontinuum/sage-gui/commit/38238d0daa996e2e842f22cb6e631120907840ec))
+* **data:** fix clear input in query browser(!)'; add map props typing ([1c918b4](https://github.com/sagecontinuum/sage-gui/commit/1c918b42904c13e7f40d06a5e4d2f5815f855135))
+* **data:** fix table styling for media, add sort caret, fix pagination, fix match type, etc. ([67f7fa8](https://github.com/sagecontinuum/sage-gui/commit/67f7fa88d0fe4b70ea679b56679253f655f7af13))
+* **data:** fix timeline skeleton typo ([9d4c864](https://github.com/sagecontinuum/sage-gui/commit/9d4c864cebd41bf2a80d6c34da0ce2fb8e42bca1))
+* **ecr:** add "default" column to input list; enable sort ([5adcdbc](https://github.com/sagecontinuum/sage-gui/commit/5adcdbcdd55f542c7745be39913a7b8173a6aeda))
+* **ecr:** fix app not found message ([1548dab](https://github.com/sagecontinuum/sage-gui/commit/1548dab70c0349e67a39faa85f05cb6636362a5c))
+* fix options layout in table component ([4a9afed](https://github.com/sagecontinuum/sage-gui/commit/4a9afed87ea8481da931aab66b55364d84f21295))
+* **jobs:** add rest of time cols ([50383ed](https://github.com/sagecontinuum/sage-gui/commit/50383ede14d94662b8b2bfd5e84f8bcd418c56e1))
+* **jobs:** separate job aggregation logic; some cleanup; SAGE-1535 ([8a0efce](https://github.com/sagecontinuum/sage-gui/commit/8a0efce71f56b165142c87e7ab24508ab171e058))
+* only consider .jpg in recent images ([9b51fe8](https://github.com/sagecontinuum/sage-gui/commit/9b51fe8af2348a273dd87d7d397e1ab79488c724))
+* parse local dev IP addresses for timeline labels ([b94d75c](https://github.com/sagecontinuum/sage-gui/commit/b94d75c559b568b02889f409d297bafe33ee01ac))
+* **reg-api:** various device reg improvements ([e6c2628](https://github.com/sagecontinuum/sage-gui/commit/e6c26285862d0a7d468c88ebb687d11305a0369f))
+* rename urls /job-status/* to /jobs/* ([e2a6cc1](https://github.com/sagecontinuum/sage-gui/commit/e2a6cc101ead7c8a1d26b19dda4af3a95bdb7e0f))
+* **sage:** add node view cards/styling; bug fixes ([a124816](https://github.com/sagecontinuum/sage-gui/commit/a12481673a5573cb6cc1e9421df33c2ea6086dca))
+* **sage:** fix hotspot hover events ([fd6f8d7](https://github.com/sagecontinuum/sage-gui/commit/fd6f8d7f29c6b0eab9c7185eb1f280f9dce154b7))
+* **ses:** align timelines; (temp) patch for data linkage ([646fd5e](https://github.com/sagecontinuum/sage-gui/commit/646fd5e6fa9f2c32d5eb2511b73cd202ede8fb56))
+* **ses:** slightly better status color differentiation ([b639eb5](https://github.com/sagecontinuum/sage-gui/commit/b639eb5f0c72e7533b3a35f735bdd2f17cd67667))
+
 ## [2.2.0](https://github.com/sagecontinuum/sage-gui/compare/v2.1.0...v2.2.0) (2022-09-06)
 
 
