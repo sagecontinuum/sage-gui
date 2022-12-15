@@ -488,8 +488,11 @@ export default function DataPreview() {
         .then((data) => {
           data = (data || [])
 
-          // simple charts
-          if (plugin && node && !isMediaApp(app) && data.length > 0) {
+          // simple charts for plugin-based or ontology listing
+          if (
+            ['plugin', 'names'].includes(type)
+            && node && !isMediaApp(app) && data.length > 0
+          ) {
             setChart(data)
           } else {
             setChart(null)

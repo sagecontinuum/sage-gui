@@ -9,7 +9,7 @@ const formatters = {
     },
     format: v => `${v}°C`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   humidity: {
     label: 'Humidity',
@@ -19,7 +19,7 @@ const formatters = {
     },
     format: v => `${v}%`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   pressure: {
     label: 'Pressure',
@@ -29,7 +29,7 @@ const formatters = {
     },
     format: v => `${v}Pa`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   gas: {
     label: 'Gas',
@@ -39,7 +39,7 @@ const formatters = {
     },
     format: v => `${v}`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&sensors=${meta.sensor}&window=d`
   },
   raingauge: {
     label: 'Raingauge',
@@ -48,7 +48,7 @@ const formatters = {
     },
     format: v => `${v}mm`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&window=d`
   },
   es642Temp: {
     label: 'Temp (Met One)',
@@ -58,7 +58,7 @@ const formatters = {
     },
     format: v => `${v}°C`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&window=d`
   },
   es642AirQuality: {
     label: 'Air Quality',
@@ -67,7 +67,7 @@ const formatters = {
     },
     format: v => `${v}mg/m3`,
     linkParams: ({name, meta}) =>
-      `apps=${meta.plugin}&nodes=${meta.vsn}&names=${name}&window=d`
+      `type=names&nodes=${meta.vsn}&names=${name}&window=d`
   },
 }
 
