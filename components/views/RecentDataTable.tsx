@@ -30,7 +30,7 @@ type Props = {
     linkParams?: (data: BH.Record) => string
   }[]
   showSparkline?: boolean
-  className?: string,
+  className?: string
 }
 
 const getStartTime = () => {
@@ -48,7 +48,7 @@ export default memo(function RecentDataTable(props: Props) {
   const [recentData, setRecentData] = useState(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )
-  const [sLines, setSLines] = useState(
+  const [sparkLines, setSparkLines] = useState(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )
   const [error, setError] = useState(null)
@@ -62,10 +62,10 @@ export default memo(function RecentDataTable(props: Props) {
     for (const item of items) {
       const {label, query} = item
 
-
       const q = start ? {...query, start} : query
       const p = BH.getRecentRecord(q)
         .then(data => {
+          // take latest record for latest value
           const d = data.pop()
           if (!d) {
             setRecentData(prev => ({...prev, [label]: null}))
@@ -73,7 +73,7 @@ export default memo(function RecentDataTable(props: Props) {
           }
 
           setRecentData(prev => ({...prev, [label]: d}))
-          setSLines(prev => ({...prev, [label]: data}))
+          setSparkLines(prev => ({...prev, [label]: data}))
         }).catch((err) => {
           setRecentData(prev => ({...prev, [label]: null}))
           setError(err)
@@ -84,6 +84,48 @@ export default memo(function RecentDataTable(props: Props) {
     Promise.allSettled(proms)
       .finally(() => setLoading(false))
   }, [items])
+
+
+  // this is a somewhat crude deaper search for latest data (once other queries are completely finished)
+  useEffect(() => {
+    // if actually all done
+    const stillLoading = (Object.values(recentData) || []).filter(o => o?.value == 'loading').length
+    if (stillLoading) return
+
+    // if no missing data, we are done
+    const noUnavailData = Object.values(recentData).filter(o => o != null).length
+    if (noUnavailData)
+      return
+
+    // kick off tail searching search
+    setLoading(true)
+    const proms = []
+    for (const item of items) {
+      const {label, query} = item
+
+      if (recentData[label] != null)
+        continue
+
+      const q = {...query, tail: 1, start: '-999y'}
+      const p = BH.getRecentRecord(q)
+        .then(data => {
+          const d = data.pop()
+          if (!d) {
+            setRecentData(prev => ({...prev, [label]: null}))
+            return
+          }
+
+          setRecentData(prev => ({...prev, [label]: d}))
+        }).catch((err) => {
+          setRecentData(prev => ({...prev, [label]: null}))
+          setError(err)
+        })
+      proms.push(p)
+    }
+
+    Promise.allSettled(proms)
+      .finally(() => setLoading(false))
+  }, [recentData])
 
 
   return (
@@ -155,7 +197,7 @@ export default memo(function RecentDataTable(props: Props) {
                     <td>
                       {data && linkParams && data.value != 'loading' &&
                         <SparkLineLink href={`${dataBrowser}?${linkParams(data)}`} target="_blank">
-                          <SparkLine data={sLines[label]}/>
+                          <SparkLine data={sparkLines[label]}/>
                           <ZoomInIcon />
                         </SparkLineLink>
                       }
