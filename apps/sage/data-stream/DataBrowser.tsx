@@ -341,6 +341,10 @@ const initFilterState = {
 
 type Facet = keyof typeof initFilterState
 
+type MenuState = {
+  [name in Facet]: string[]
+}
+
 type FilterState = {
   [name in Facet]: string[]
 }
@@ -351,12 +355,17 @@ type Facets = {
   [name in DataTypes]: Facet[]
 }
 
+type Option = {id: string, label: string}
+
 const facetInputs: Facets = {
   'apps': ['apps', 'nodes', 'names', 'sensors'],
   'names': ['names', 'nodes'],
   'images': ['tasks', 'nodes'],
   'audio': ['tasks', 'nodes']
 }
+
+const allowMultiSelect = (field: Facet) =>
+  field == 'nodes'
 
 
 export function getFilterState(params, includeDefaultApp=true) : FilterState {
@@ -365,7 +374,7 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
   for (const [key, val] of params) {
     if (key == 'start')
       continue
-    init[key] = val.split(',')
+    init[key] = val.split('|')
   }
 
   return init
@@ -404,7 +413,7 @@ export default function DataPreview() {
   const [chart, setChart] = useState<BH.Record[]>()
 
   // contents of dropdowns
-  const [menus, setMenus] = useState<{[name: string]: string[]}>(initMenuState)
+  const [menus, setMenus] = useState<MenuState>(initMenuState)
 
   // selected filters
   const [filters, setFilters] = useState<FilterState>(initFilterState)
@@ -489,8 +498,9 @@ export default function DataPreview() {
           data = (data || [])
 
           // simple charts for plugin-based or ontology listing
+
           if (
-            ['plugin', 'names'].includes(type)
+            ['apps', 'names'].includes(type)
             && node && !isMediaApp(app) && data.length > 0
           ) {
             setChart(data)
@@ -508,6 +518,7 @@ export default function DataPreview() {
             setLastN(null)
           }
 
+          // filter image/audio further based on extension if needed
           if (task && mimeType) {
             data = data.filter(o => {
               const val = o.value as string
@@ -516,6 +527,7 @@ export default function DataPreview() {
             })
           }
 
+          // flatten data, add row id, and sort
           data = data
             .map((o, i) => ({...o, ...o.meta, rowID: i}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -579,9 +591,16 @@ export default function DataPreview() {
     navigate({search: params.toString()}, {replace: true})
   }
 
-  const handleFilterChange = (field: string, val: {id: string, label: string}) => {
-    if (!val) {
+  const handleFilterChange = (field: Facet, val: Option | Option[]) => {
+    if (!val || (Array.isArray(val) && !val.length)) {
       params.delete(field)
+    } else if (allowMultiSelect(field)) {
+      // MUI seems to result in vals may be string or option; todo(nc): address this?
+      const newStr = val.map(item =>
+        typeof item == 'string' ? item : item.id
+      ).join('|')
+
+      params.set(field, newStr)
     } else {
       params.set(field, val.id)
     }
@@ -678,10 +697,13 @@ export default function DataPreview() {
 
             const label = capitalize(facet)
 
-            let value = ''
-            if (filters[facet]?.length) {
+            let value = allowMultiSelect(facet) ? [] : ''
+            if (facet == 'nodes' && filters[facet]?.length)
+              value = filters[facet]
+            else if (facet == 'apps' && filters[facet]?.length)
               value = (filters[facet][0] || '').replace(`${registry}/`, '')
-            }
+            else if (filters[facet]?.length)
+              value = filters[facet][0]
 
             return (
               <Menu
@@ -693,6 +715,8 @@ export default function DataPreview() {
                   <Popper {...props} style={{width: label == 'Apps' ? 350 : 300, zIndex: 9999}} />}
                 value={value}
                 onChange={(evt, val) => handleFilterChange(facet, val)}
+                disableCloseOnSelect={allowMultiSelect(facet)}
+                multiple={allowMultiSelect(facet)}
               />
             )
           })}
@@ -867,12 +891,12 @@ export default function DataPreview() {
                 </div>
               }
               middleComponent={
-                <RangeInfo className="flex justify-end">
+                <div className="flex justify-end">
                   {data &&
                     <RangeIndicator data={data} unit={unit}/>
                   }
                   <VertDivider />
-                </RangeInfo>
+                </div>
               }
             />
           }
@@ -955,6 +979,4 @@ const Snippets = styled.div`
   }
 `
 
-const RangeInfo = styled.div`
-`
 

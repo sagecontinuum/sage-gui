@@ -99,8 +99,10 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
   Object.keys(byName).forEach((name) => {
     const namedData = byName[name]
 
-    const grouped = groupBy(namedData, 'meta.sensor')
-    const hasSensors = Object.keys(grouped)[0] != 'undefined'
+    const grouped = groupBy(namedData, o =>
+      o.meta.sensor ? `${o.meta.vsn}; ${o.meta.sensor}` : o.meta.vsn
+    )
+    const hasGroup = Object.keys(grouped)[0] != 'undefined'
 
     Object.keys(grouped)
       .forEach((key, j) => {
@@ -110,7 +112,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
         }))
 
         datasets.push({
-          label: name + (hasSensors ? ` - ${key}` : ''),
+          label: name + (hasGroup ? `; ${key}` : ''),
           data: d,
           pointRadius: opts.showPoints ? 3 : 0,
           showLine: opts.showLines,
