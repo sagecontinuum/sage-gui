@@ -7,7 +7,7 @@ import RmIcon from '@mui/icons-material/DeleteOutlineRounded'
 
 import FilterMenu from '/components/FilterMenu'
 
-import { type App } from '/components/apis/ecr'
+import { type AppDetails } from '/components/apis/ecr'
 
 import * as BH from '/components/apis/beehive'
 
@@ -16,29 +16,29 @@ import * as BH from '/components/apis/beehive'
  * input const lists and rule types
  */
 
- const cronUnits = ['min', 'hour', 'day', 'month'] as const
- const ops = {'<': '<', '>': '>', '=': '=', '<=': '≤', '>=': '≥'} as const
- const booleanLogics = ['and', 'or'] as const
+const cronUnits = ['min', 'hour', 'day', 'month'] as const
+const ops = {'<': '<', '>': '>', '=': '=', '<=': '≤', '>=': '≥'} as const
+const booleanLogics = ['and', 'or'] as const
 
- type CronUnit = typeof cronUnits[number]
- type Op = keyof typeof ops
- type BooleanLogic = typeof booleanLogics[number]
+type CronUnit = typeof cronUnits[number]
+type Op = keyof typeof ops
+type BooleanLogic = typeof booleanLogics[number]
 
- type Rule = ConditionRule | CronRule
- type RuleType = 'condition' | 'cron'
+type Rule = ConditionRule | CronRule
+type RuleType = 'condition' | 'cron'
 
- type ConditionRule = {
-   name: string
-   op: Op
-   value: number
- }
+type ConditionRule = {
+  name: string
+  op: Op
+  value: number
+}
 
- type CronRule = {
-   amount: number
-   unit: CronUnit
- }
+type CronRule = {
+  amount: number
+  unit: CronUnit
+}
 
- export { Rule, BooleanLogic }
+export { Rule, BooleanLogic }
 
 
 
@@ -271,7 +271,7 @@ const RuleInput = styled.div`
 
 
 type Props = {
-  apps: App[]
+  apps: AppDetails[]
   onChange: (app: string, rules: Rule[], logics: BooleanLogic[]) => void
 }
 
@@ -283,6 +283,7 @@ export default function RuleBuilder(props: Props) {
     <Root>
       {apps.map(app => {
         const {id, name} = app
+
         return (
           <div key={id}>
             <p>Rules for: <b>{name}</b></p>

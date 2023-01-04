@@ -4,12 +4,13 @@ import styled from 'styled-components'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import TextField from '@mui/material/TextField'
+import { TextField } from '@mui/material'
 
 import { Item } from '/components/layout/Layout'
 import { Accordion, useAccordionStyles } from '../../ecr/app/TagList'
 import Checkbox from '/components/input/Checkbox'
 
+import { appIDToName } from './CreateJob'
 import { type AppRow } from './AppSelector'
 
 
@@ -73,7 +74,9 @@ export default function SelectedTable(props: SelectedTableProps) {
     if (!f)
       return ''
 
-    return Object.keys(f).map(field => `-${field} ${f[field]}`).join(' ')
+    return Object.keys(f)
+      .filter(key => key != 'pluginName')
+      .map(field => `-${field} ${f[field]}`).join(' ')
   }
 
 
@@ -103,6 +106,16 @@ export default function SelectedTable(props: SelectedTableProps) {
             </AccordionSummary>
 
             <AccordionDetails className="flex column">
+              <TextField
+                label="Name"
+                placeholder="name"
+                name="pluginName"
+                defaultValue={appIDToName(appID)}
+                onChange={(evt) => handleUpdateForm(evt, appName)}
+                sx={{width: '30%'}}
+              />
+              <br/>
+
               {inputs?.length > 0 &&
                 <h3 className="no-margin">Input Arguments</h3>}
 
@@ -127,7 +140,6 @@ export default function SelectedTable(props: SelectedTableProps) {
                             }
                             {type != 'boolean' &&
                               <TextField
-                                size="small"
                                 type={['int', 'float'].includes(type) ? 'number' : 'text'}
                                 placeholder={placeholder[type]}
                                 name={id}

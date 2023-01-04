@@ -74,7 +74,7 @@ const parseManifest = (data) => data.map(o => ({
   lat: o.gps_lat,
   lng: o.gps_lon,
   id: o.vsn,
-  status: 'reporting',
+  status: 'not reporting',
   camera_top: o.top_camera != 'none' ? 'camera_top' : false,
   camera_bottom: o.bottom_camera != 'none' ? 'camera_bottom' : false,
   camera_left: o.left_camera != 'none' ? 'camera_left' : false,

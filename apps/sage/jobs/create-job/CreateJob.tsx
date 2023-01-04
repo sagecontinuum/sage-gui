@@ -52,7 +52,7 @@ const createRuleStrings = (appName: string, rules: Rule[], logics: BooleanLogic[
   ).join('')
 
 
-const appIdToName = (id: string) =>
+export const appIDToName = (id: string) =>
   id.slice(id.indexOf('/') + 1, id.lastIndexOf(':'))
 
 
@@ -136,22 +136,25 @@ export default function CreateJob() {
       name,
       ...(user && {user}),
       plugins: apps.map(o => ({
-        name: appIdToName(o.id),
+        name: appParams[o.id]?.pluginName || appIDToName(o.id),
         pluginSpec: {
           image: `${docker}/${o.id}`,
           args: appParams[o.id] ?
-            Object.entries(appParams[o.id]).map(([k, v]) => [`-${k}`, v]).flat() : []
+            Object.entries(appParams[o.id])
+              .filter(([k, _]) => k != 'pluginName')
+              .map(([k, v]) => [`-${k}`, v]).flat()
+            : []
         }
       })),
       nodes: nodes.reduce((acc, obj) => ({...acc, [obj.vsn]: true}), {}) ,
-      scienceRules: Object.keys(rules).map(appName => {
-        const obj = rules[appName],
+      scienceRules: Object.keys(rules).map(appID => {
+        const obj = rules[appID],
           ruleList = obj.rules
 
         if (!ruleList.length)
           return null
 
-        return `${createRuleStrings(appName, ruleList, obj.logics)}`
+        return `${createRuleStrings(appParams[appID]?.pluginName || appIDToName(appID), ruleList, obj.logics)}`
       }).filter(s => !!s),
       successCriteria: [`Walltime(${successCriteria.amount}${successCriteria.unit})`]
     })
@@ -192,6 +195,7 @@ export default function CreateJob() {
           <Step icon="1" label="Your science goal name">
             <TextField
               label="Name"
+              id="science-goal-name"
               placeholder="my science goal"
               value={name}
               onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
