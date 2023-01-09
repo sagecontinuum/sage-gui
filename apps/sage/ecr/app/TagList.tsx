@@ -1,14 +1,11 @@
 import {useEffect, useState} from 'react'
 import styled from 'styled-components'
-import { Theme } from '@mui/material/styles';
 
-import makeStyles from '@mui/styles/makeStyles';
-import createStyles from '@mui/styles/createStyles';
-import withStyles from '@mui/styles/withStyles';
+import withStyles from '@mui/styles/withStyles'
 
-import MuiAccordion from '@mui/material/Accordion'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
+import Accordion, { useAccordionStyles } from '/components/layout/Accordion'
 
 import Tooltip from '@mui/material/Tooltip'
 import Button from '@mui/material/Button'
@@ -27,7 +24,7 @@ import Divider from '@mui/material/Divider'
 import { useSnackbar } from 'notistack'
 import { stringify } from 'yaml'
 import yamlIcon from 'url:/assets/yaml-logo.svg'
-import { formatters, Dot } from '../formatters'
+import { formatters } from '../formatters'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 import BuildIndicator from '../BuildIndicator'
@@ -41,25 +38,6 @@ import config from '/config'
 const docker = config.dockerRegistry
 
 
-export const useAccordionStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      marginBottom: -1,
-      boxShadow: 'none'
-    },
-    heading: {
-      fontWeight: 'bold',
-      fontSize: theme.typography.pxToRem(15),
-      flexBasis: '33.33%',
-      flexShrink: 0,
-    },
-    secondaryHeading: {
-      marginRight: 'auto',
-      fontSize: theme.typography.pxToRem(14),
-      color: theme.palette.text.secondary,
-    },
-  }),
-)
 
 
 const StyledToggleButtonGroup = withStyles((theme) => ({
@@ -284,7 +262,7 @@ export default function TagList(props: Props) {
                         stringify(versions.filter(ver => ver.version == version)[0]):
                         JSON.stringify(versions.filter(ver => ver.version == version)[0], null, 4)
                       )
-                    }
+                  }
                 />
               }
               <br/>
@@ -315,34 +293,4 @@ export default function TagList(props: Props) {
 
 
 const Root = styled.div`
-
-
-`
-
-export const Accordion = styled(MuiAccordion) `
-  position: relative;
-  border: 1px solid #ddd;
-  border-radius: 0 2px 2px 0 ;
-  border-left: 2px solid #ddd;
-
-  :hover:not(.Mui-expanded) {
-    border-left: 2px solid rgb(28, 140, 201);
-    .caret {
-      color: rgb(28, 140, 201);
-    }
-  }
-
-
-  .MuiAccordionSummary-content {
-    display: block;
-    margin: 10px 0;
-  }
-
-  .tag-actions {
-    visibility: hidden;
-  }
-
-  :hover .tag-actions {
-    visibility: visible;
-  }
 `
