@@ -16,6 +16,7 @@ import JobTimeLine from './JobTimeline'
 
 
 import * as ES from '/components/apis/ses'
+import ParamDetails from './ParamDetails'
 
 
 type Props = {
@@ -27,7 +28,6 @@ type Props = {
 
 export default function JobDetails(props: Props) {
   const {job, jobs, manifestByVSN, handleCloseDialog} = props
-
 
   const {setLoading} = useProgress()
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
@@ -54,21 +54,41 @@ export default function JobDetails(props: Props) {
           <JobMetaContainer>
             <MetaTable
               rows={[
-                {id: 'job_id', label: 'Job ID'},
-                {id: 'user', label: 'User'},
-                {id: 'plugins', label: `Apps (${job.plugins.length})`, format: formatters.apps},
-                {id: 'nodes', label: `Nodes (${job.nodes.length})`,
-                  format: formatters.nodes},
-                {id: 'node_tags', label: `Node Tags` , format: (v) => (v || []).join(', ')},
-                {id: 'science_rules', label: `Science Rules`,
+                {
+                  id: 'job_id',
+                  label: 'Job ID'
+                }, {
+                  id: 'user',
+                  label: 'User'
+                }, {
+                  id: 'plugins',
+                  label: `Apps (${job.plugins.length})`,
+                  format: formatters.apps
+                }, {
+                  id: 'nodes',
+                  label: `Nodes (${job.nodes.length})`,
+                  format: formatters.nodes
+                }, {
+                  id: 'node_tags',
+                  label: `Node Tags`,
+                  format: (v) => (v || []).join(', ')
+                }, {
+                  id: 'plugins',
+                  label: `Params`,
+                  format: (v) => <ParamDetails data={v} />
+                }, {
+                  id: 'science_rules',
+                  label: `Science Rules`,
                   format: (v) => <pre>{(v || []).join('\n')}</pre>
-                },
-                {id: 'success_criteria', label: `Success Criteria`,
+                }, {
+                  id: 'success_criteria',
+                  label: `Success Criteria`,
                   format: (v) => <pre>{(v || []).join('\n')}</pre>
                 }
               ]}
               data={job}
             />
+
           </JobMetaContainer>
 
           <h2>Timelines</h2>
@@ -107,5 +127,10 @@ const JobMetaContainer = styled.div`
   tbody td:first-child {
     width: 120px;
     text-align: right;
+    vertical-align: top;
+  }
+
+  td > pre {
+    margin: 0;
   }
 `
