@@ -2,8 +2,8 @@ import { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 
-
-import { Chart as ChartJS,
+import {
+  Chart as ChartJS,
   Tooltip,
   Legend,
   LineController,
@@ -68,14 +68,12 @@ const config = {
       }
     }
   }
-
-
 }
 
 
 
 type Props = {
-  data: {timestamp: string, value: number }[]
+  data: {timestamp: string, value: number | 'loading' }[]
 }
 
 export default function SparkLine(props: Props) {
@@ -86,7 +84,7 @@ export default function SparkLine(props: Props) {
 
   useEffect(() => {
 
-    if (data.value == 'loading') return
+    if (data['value'] == 'loading') return
     if (chart) {
       chart.destroy()
     }
