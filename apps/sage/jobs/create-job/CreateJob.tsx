@@ -34,14 +34,15 @@ const getCronString = ({amount, unit}) => `'${[
   unit == 'min' ? `*/${amount}` : '*',
   unit == 'hour' ? `*/${amount}` : '*',
   unit == 'day' ? `*/${amount}` : '*',
-  unit == 'month' ? `*/${amount}` : '*'
+  unit == 'month' ? `*/${amount}` : '*',
+  '*'
 ].join(' ')}'`
 
 
 const getRuleString = (appName: string, rule: Rule) =>
   'name' in rule ?
     `v('${rule.name}') ${rule.op} ${rule.value}` :
-    `schedule('${appName}'): cronjob('${appName}', ${getCronString(rule)})`
+    `schedule(${appName}): cronjob('${appName}', ${getCronString(rule)})`
 
 
 // todo: here we assume we only have conditions and cronjobs;
