@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { TextField } from '@mui/material'
 
 import { Item } from '/components/layout/Layout'
-import { Accordion, useAccordionStyles } from '../../ecr/app/TagList'
+import Accordion, { useAccordionStyles } from '/components/layout/Accordion'
 import Checkbox from '/components/input/Checkbox'
 
 import { appIDToName } from './CreateJob'
