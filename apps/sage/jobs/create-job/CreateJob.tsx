@@ -190,7 +190,7 @@ export default function CreateJob() {
     <Root>
       <CardViewStyle/>
       <main className="flex column gap">
-        <h1>Create Job (Science Goal)</h1>
+        <h1><Link to="/jobs/my-jobs">My jobs</Link> / Create job (Science Goal)</h1>
 
         <Card>
           <Step icon="1" label="Your science goal name">

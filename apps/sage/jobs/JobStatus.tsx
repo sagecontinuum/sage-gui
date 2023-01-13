@@ -207,10 +207,15 @@ export type Counts = {
   [name in keyof typeof initCounts]: number
 }
 
-function getCounts(jobs: ES.Job[]) : Counts {
+function getCounts(jobs: ES.Job[], countMine: boolean) : Counts {
+  const publicCount = jobs.length
+  const myJobs = jobs.filter(o => o.user == user)
+
+  jobs = countMine ? myJobs : jobs
+
   return ({
-    public: jobs.length,
-    mine: jobs.filter(o => o.user == user).length,
+    public: publicCount,
+    mine: myJobs.length,
     queued: filterByState(jobs, ['Created', 'Submitted']).length,
     running: filterByState(jobs, ['Running']).length,
     completed: filterByState(jobs, ['Completed']).length,
@@ -317,14 +322,14 @@ export default function JobStatus() {
 
         let vsns = [...new Set(jobs.flatMap(o => o.nodes))] as BK.VSN[]
 
+        setCounts(getCounts(jobs, view == 'my-jobs'))
+
         // if 'my jobs', filter vsns to the user's nodes
         if (filterUser) {
           const nodes = jobs.flatMap(o => o.nodes)
           vsns = vsns.filter(vsn => nodes.includes(vsn))
           jobs = jobs.filter(o => o.user == user)
         }
-
-        setCounts(getCounts(jobs))
 
         // create some geo data
         const geo = jobsToGeos(jobs, manifests)
@@ -417,11 +422,6 @@ export default function JobStatus() {
   return (
     <Root>
       <Main className="flex column">
-        <StateFilters
-          counts={counts}
-          state={jobState}
-          onFilter={handleStatusFilter} />
-
         <MapContainer>
           {geo &&
             <Map
@@ -470,6 +470,11 @@ export default function JobStatus() {
           />
         </Tabs>
 
+        <StateFilters
+          counts={counts}
+          state={jobState}
+          onFilter={handleStatusFilter} />
+
         {loading &&
           <TableSkeleton />
         }
@@ -486,6 +491,11 @@ export default function JobStatus() {
               onSelect={handleJobSelect}
               onColumnMenuChange={() => { /* do nothing special */ }}
               checkboxes={view == 'my-jobs'}
+              emptyNotice={
+                view == 'my-jobs' ?
+                  `No ${jobState || 'active'} jobs with your username were found` :
+                  `No ${jobState || 'active'} jobs found`
+              }
               middleComponent={
                 <TableOptions className="flex justify-between">
                   <div>

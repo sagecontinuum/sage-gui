@@ -23,7 +23,7 @@ export default function StateFilters(props: Props) {
   const {counts, state, onFilter} = props
 
   return (
-    <div className="flex justify-between">
+    <Root className="flex justify-between">
       <StyledToggleButtonGroup aria-label="filter by job state" value={state}>
         <ToggleButton
           value="Queued"
@@ -71,9 +71,12 @@ export default function StateFilters(props: Props) {
           {counts.removed} removed
         </ToggleButton>
       </StyledToggleButtonGroup>
-    </div>
+    </Root>
   )
 }
+
+const Root = styled.div`
+`
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)`
   svg {
@@ -85,15 +88,11 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)`
 
   .MuiToggleButton-root {
     color: #444;
-    border: none;
-    margin-right: 20px;
-    border-top: 2px solid #fff;
-    border-radius: 0;
+    padding-right: 20px;
+    border-radius: 0 0 5px 5px;
   }
 
   & .MuiToggleButton-root.Mui-selected {
-    background-color: #fff;
-    border-top: 2px solid #4e2a84;
   }
 `
 

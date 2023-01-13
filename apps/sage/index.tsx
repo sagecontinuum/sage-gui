@@ -136,7 +136,7 @@ const NavMenu = () => {
       />
       <NavItem
         label="Job Status"
-        root="/jobs/all-jobs"
+        root="/jobs"
         menu={
           <>
             <Item
