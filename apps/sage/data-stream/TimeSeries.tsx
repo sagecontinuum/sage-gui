@@ -109,7 +109,8 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
         const d = grouped[key].map(o => ({
           x: new Date(o.timestamp).getTime(),
           y: o.value
-        }))
+        })).sort((a, b) => a.x - b.x)
+
 
         datasets.push({
           label: name + (hasGroup ? `; ${key}` : ''),

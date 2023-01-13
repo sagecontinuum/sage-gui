@@ -498,7 +498,6 @@ export default function DataPreview() {
           data = (data || [])
 
           // simple charts for plugin-based or ontology listing
-
           if (
             ['apps', 'names'].includes(type)
             && node && !isMediaApp(app) && data.length > 0
