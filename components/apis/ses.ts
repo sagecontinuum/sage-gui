@@ -1,7 +1,11 @@
 import * as BH from './beehive'
 import type { VSN } from './beekeeper'
+
 import { groupBy } from 'lodash'
 import { handleErrors } from '../fetch-utils'
+import { downloadFile } from '/components/utils/downloadFile'
+
+import * as YAML from 'yaml'
 
 import config from '/config'
 const url = config.es
@@ -20,6 +24,12 @@ function get(endpoint: string, opts = options) {
   return fetch(endpoint, opts)
     .then(handleErrors)
     .then(res => res.json())
+}
+
+function getYAML(endpoint: string, opts = options) {
+  return fetch(endpoint, opts)
+    .then(handleErrors)
+    .then(res => res.text())
 }
 
 function post(endpoint: string, data = '') {
@@ -107,15 +117,16 @@ export type QueuedState = 'Created' | 'Submitted' | 'Waiting'
 
 
 type Plugin = {
-name: string
-  plugin_spec: {
+  name: string
+  pluginSpec: {
     image: string     // image ref
+    args: string[]
   }
   status: {
     scheduling: State
     since: Date       // 2022-11-22T20:35:27.373353828Z
   }
-  goal_id: string       // hash
+  goal_id: string     // hash
 }
 
 
@@ -136,11 +147,11 @@ type JobRecord = {
   email: string
   notification_on: null // todo(nc): define
   plugins: Plugin[]
-  node_tags: null,
+  node_tags: null       // note: not currently used
   nodes: {
     [vsn: string]: true
   },
-  science_rules: string[],
+  science_rules: string[]
   success_criteria: string[]
   science_goal: ScienceGoal[]
   state: {
@@ -154,7 +165,18 @@ type JobRecord = {
 
 // Job type for UI
 export type Job = JobRecord & {
-  nodes: BK.VSN[]
+  nodes: VSN[]
+}
+
+export type JobTemplate = {
+  name: string
+  plugins: Plugin[]
+  nodeTags?: null
+  nodes: {
+    [vsn: string]: true
+  }
+  scienceRules: string[]
+  successCriteria: string[]
 }
 
 
@@ -470,5 +492,7 @@ async function removeJob(id: string) : Promise<RemovedJob> {
 export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
   return Promise.all(ids.map(id => removeJob(id)))
 }
+
+
 
 

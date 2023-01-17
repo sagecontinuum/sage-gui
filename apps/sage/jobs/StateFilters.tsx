@@ -89,6 +89,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)`
   .MuiToggleButton-root {
     color: #444;
     padding-right: 20px;
+    border-width: 0 1px 1px 1px;
     border-radius: 0 0 5px 5px;
   }
 

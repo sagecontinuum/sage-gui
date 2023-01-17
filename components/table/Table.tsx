@@ -25,7 +25,7 @@ import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
 import Checkbox from '/components/input/Checkbox'
 
-import selectedReducer, { SelectedState, initialSelectedState } from './selectedReducer'
+import selectedReducer, { SelectedState, getInitSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
 import TableSkeleton from './TableSkeleton'
 
@@ -253,9 +253,7 @@ const TableHeadComponent = (props) => {
 
 
 const indexData = (data, key?: string) =>
-  key ?
-    data.map((row) => ({...row, rowID: row[key]})) :
-    data.map((row, i) => ({...row, rowID: i}))
+  data.map((row, i) => ({...row, rowID: i}))
 
 
 
@@ -340,6 +338,7 @@ type Props = {
   stripes?: boolean
   enableSorting?: boolean
   disableClickOutside?: boolean
+  selected?: string[]             // ids
   onSearch?: ({query} : {query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
@@ -391,7 +390,7 @@ export default function TableComponent(props: Props) {
   const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage || 100)
 
 
-  let data = indexData(props.rows)
+  let data = indexData(props.rows, primaryKey)
   if (pagination) {
     data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
   }
@@ -408,7 +407,9 @@ export default function TableComponent(props: Props) {
 
   // selected/checkbox state
   const [allSelected, setAllSelected] = useState<boolean>(false)
-  const [selected, dispatch] = useReducer(selectedReducer, initialSelectedState)
+  const [selected, dispatch] = useReducer(
+    selectedReducer, getInitSelectedState(props.selected, props.rows, primaryKey)
+  )
 
 
   useEffect(() => {
@@ -453,6 +454,7 @@ export default function TableComponent(props: Props) {
   // listen to selected
   useEffect(() => {
     if (!onSelect) return
+
     onSelect(selected)
 
     // eslint-disable-next-line

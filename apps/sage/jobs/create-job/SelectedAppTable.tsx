@@ -10,12 +10,12 @@ import { Item } from '/components/layout/Layout'
 import Accordion, { useAccordionStyles } from '/components/layout/Accordion'
 import Checkbox from '/components/input/Checkbox'
 
-import { appIDToName } from './CreateJob'
+import { appIDToName, argListToMap, ArgStyles } from './CreateJob'
 import { type AppRow } from './AppSelector'
 
 
 const placeholder = {
-  int: 123,
+  int: '123',
   float: '123.123 (a float)',
   string: 'some string'
 }
@@ -30,53 +30,53 @@ type FormState = {
 
 type SelectedTableProps = {
   selected: AppRow[]
-  onChange: (form: FormState) => void
+  appArgs: FormState
+  argStyles: ArgStyles  // todo(nc): remove
+  onChange: (appID: string, field: string, checkName?: string) => void
 }
 
 export default function SelectedTable(props: SelectedTableProps) {
-  const {selected, onChange} = props
+  const {selected, appArgs: form, argStyles, onChange} = props
 
   const classes = useAccordionStyles()
 
   const [items, setItems] = useState<AppRow[]>(selected)
-  const [form, setForm] = useState<FormState>({})
-  const [focusedID, setFocusedID] = useState<AppRow["id"]>(selected[0].id)
+  const [focusedID, setFocusedID] = useState<AppRow['id']>(selected[0].id)
 
 
+  // controlled input of selected apps and their params
   useEffect(() => {
     setItems(selected)
-    setFocusedID(selected[0].id)
   }, [selected])
 
 
-  useEffect(() => {
-    onChange(form)
-  }, [form])
-
-
-  const handleExpand = (panel: string) => {
-    setFocusedID(panel)
+  const handleExpand = (id: string) => {
+    setFocusedID(id)
   }
 
-  // todo(nc): allow name attr on checkbox input!
-  const handleUpdateForm = (evt, appName: string, checkName?: string) => {
-    const {type, name, value, checked} = evt.target
+  /* allow raw string input?
+  const handleUpdateCLIString = (evt, appID: string) => {
+    const value = evt.target.value
 
-    if (type == 'checkbox') {
-      setForm(prev => ({...prev, [appName]: {...prev[appName], [checkName]: checked}}))
-    } else {
-      setForm(prev => ({...prev, [appName]: {...prev[appName], [name]: value}}))
-    }
+    const {mapping} = argListToMap(value.split(' '))
+    Object.keys(mapping).forEach(key => {
+      if (form[key] != mapping[key]) {
+        onChange(appID, key, mapping[key])
+      }
+    })
   }
+  */
 
-  const getAppParamString = (appName) => {
-    const f = form[appName]
+  const getAppParamString = (appID: string) : string => {
+    const f = form[appID]
     if (!f)
       return ''
 
-    return Object.keys(f)
-      .filter(key => key != 'pluginName')
-      .map(field => `-${field} ${f[field]}`).join(' ')
+    const argStyle = argStyles[appID]
+
+    return Object.entries(f)
+      .filter(([key]) => key != 'appName')
+      .map(([key, val]) => `${argStyle}${key}` + (val != null ? ` ${val}` : '')).join(' ')
   }
 
 
@@ -111,7 +111,7 @@ export default function SelectedTable(props: SelectedTableProps) {
                 placeholder="name"
                 name="pluginName"
                 defaultValue={appIDToName(appID)}
-                onChange={(evt) => handleUpdateForm(evt, appName)}
+                onChange={(evt) => onChange(appName, 'appName', evt.target.value)}
                 sx={{width: '30%'}}
               />
               <br/>
@@ -127,6 +127,7 @@ export default function SelectedTable(props: SelectedTableProps) {
                   <tbody>
                     {inputs.map(obj => {
                       const {id, type} = obj
+
                       return (
                         <tr key={id}>
                           <td>{id}</td>
@@ -134,8 +135,8 @@ export default function SelectedTable(props: SelectedTableProps) {
                           <td>
                             {type == 'boolean' &&
                               <Checkbox
-                                checked={(appName in form && id in form[appName] && form[appName][id]) ? true : false}
-                                onChange={(evt) => handleUpdateForm(evt, appName, id)}
+                                checked={(appID in form && id in form[appID] && form[appID][id] == null) ? true : false}
+                                onChange={(evt) => onChange(appName, id, evt.target.checked)}
                               />
                             }
                             {type != 'boolean' &&
@@ -143,7 +144,8 @@ export default function SelectedTable(props: SelectedTableProps) {
                                 type={['int', 'float'].includes(type) ? 'number' : 'text'}
                                 placeholder={placeholder[type]}
                                 name={id}
-                                onChange={(evt) => handleUpdateForm(evt, appName)}
+                                value={(form[appID] && id in form[appID]) ? form[appID][id] : ''}
+                                onChange={(evt) => onChange(appName, id, evt.target.value)}
                               />
                             }
                           </td>
@@ -156,13 +158,15 @@ export default function SelectedTable(props: SelectedTableProps) {
               }
 
               <h4>{inputs?.length ? 'Input Arguments Preview' : 'Input Arguments'}</h4>
+              <pre>{getAppParamString(appName)}</pre>
+              {/* allow raw string input?
               <TextField
                 label="App params"
                 placeholder={phText || '-some-param <example>'}
                 value={getAppParamString(appName)}
-                onChange={evt => setForm({value: evt.target.value})}
+                onChange={evt => handleUpdateCLIString(evt, appID)}
                 InputLabelProps={{ shrink: true }}
-              />
+              />*/}
             </AccordionDetails>
           </Accordion>
         )

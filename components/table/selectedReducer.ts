@@ -2,25 +2,40 @@ import React from 'react'
 
 export type SelectedState = {
   lastSelected: number
-  ids: number[]
-  objs: any[]
+  ids: string[] | number[]
+  objs: object[]
 }
 
 
 export type Action = {
   type: 'SELECT_ALL' | 'CLEAR' | 'SET' | 'SHIFT_SET' | 'CTRL_SET'
-  event?: React.MouseEvent
+  event?: React.MouseEvent | null
   id?: number
-  rows?: any[]
-  obj?: any
+  rows?: object[]
+  obj?: object
 }
 
 
-export const initialSelectedState = {
+const initialSelectedState = {
   lastSelected: null,
   event: null,
   ids: [],
   objs: [],
+}
+
+export function getInitSelectedState(
+  ids: string[] = [],
+  data: object[],
+  primaryKey: string
+) : SelectedState {
+
+  const objs = data.filter(o => ids.includes(o[primaryKey]))
+
+  return {
+    lastSelected: null,
+    ids,
+    objs
+  }
 }
 
 

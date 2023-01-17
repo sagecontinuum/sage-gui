@@ -55,6 +55,7 @@ export type AppRow = {
 
 
 type Props = {
+  selected: {id: string}[]
   onSelected: (apps: ECR.App[]) => void
 }
 
@@ -67,7 +68,11 @@ export default function AppSelector(props: Props) {
   const [query, setQuery] = useState<string>('')
   const [page, setPage] = useState(0)
 
-  const [selected, setSelected] = useState([])
+  const [selected, setSelected] = useState(props.selected)
+
+  useEffect(() => {
+    setSelected(props.selected)
+  }, [props.selected])
 
   useEffect(() => {
     ECR.listApps('public')
@@ -85,8 +90,8 @@ export default function AppSelector(props: Props) {
   }, [query])
 
 
-  const handleSelection = (selected) => {
-    onSelected(selected.objs)
+  const handleSelection = ({objs}) => {
+    onSelected(objs)
   }
 
   return (
@@ -105,6 +110,7 @@ export default function AppSelector(props: Props) {
           rowsPerPage={10}
           onSearch={({query}) => setQuery(query || '')}
           middleComponent={<div className="flex-grow"></div>}
+          selected={selected.map(o => o.id)}
           onSelect={handleSelection}
         />
       }

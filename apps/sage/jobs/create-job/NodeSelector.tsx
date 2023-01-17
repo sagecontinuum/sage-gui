@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import Chip from '@mui/material/Chip'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 import Table from '/components/table/Table'
@@ -15,7 +14,7 @@ import * as User from '/components/apis/user'
 
 import { pick } from 'lodash'
 
-import { FormControlLabel, ToggleButtonGroup, ToggleButton } from '@mui/material'
+import { Chip, FormControlLabel, ToggleButtonGroup, ToggleButton } from '@mui/material'
 import Checkbox from '/components/input/Checkbox'
 
 import Auth from '/components/auth/auth'
@@ -84,11 +83,12 @@ const parseManifest = (data) => data.map(o => ({
 
 
 type Props = {
-  onSelected: (apps: BK.Manifest[]) => void
+  selected: BK.VSN[]
+  onSelected: (nodes: BK.VSN[]) => void
 }
 
 export default function NodeSelector(props: Props) {
-  const { onSelected } = props
+  const { selected = [], onSelected } = props
 
   const [data, setData] = useState<BK.NodeDetails>()
   const [query, setQuery] = useState<string>('')
@@ -103,8 +103,9 @@ export default function NodeSelector(props: Props) {
   const [schedulable, setSchedulable] = useState<BK.VSN[]>()
   const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
 
+
   useEffect(() => {
-    const p1 = BK.getNodeDetails(bucket)
+    const p1 = BK.getNodeDetails()
     const p2 = User.listNodesWithPerm('schedule')
 
     Promise.all(([p1, p2]))
@@ -138,7 +139,7 @@ export default function NodeSelector(props: Props) {
 
 
   const handleSelection = (selected) => {
-    onSelected(selected.objs)
+    onSelected(selected.objs.map(o => o.vsn))
   }
 
   const handleTagFilter = (tag: string) => {
@@ -149,6 +150,10 @@ export default function NodeSelector(props: Props) {
 
   const handleBucketChange = (_, val) => {
     setBucket(val)
+  }
+
+  const handleRemoveChip = (vsn: BK.VSN) => {
+    onSelected(selected.filter(selVSN => selVSN != vsn))
   }
 
   const tableProps = Auth.user ? {
@@ -186,22 +191,24 @@ export default function NodeSelector(props: Props) {
             />
           }
 
-          <ToggleButtonGroup
-            value={bucket}
-            onChange={(evt, val) => handleBucketChange(evt, val)}
-            aria-label="node type"
-            exclusive
-            size="small"
-          >
-            {BK.Buckets.slice(0, 3).map(bucket => {
-              const name = bucket.split(' ')[1]
-              return (
-                <ToggleButton value={bucket} aria-label={`${name} nodes`} key={bucket}>
-                  {name}
-                </ToggleButton>
-              )
-            })}
-          </ToggleButtonGroup>
+          {/*
+            <ToggleButtonGroup
+              value={bucket}
+              onChange={(evt, val) => handleBucketChange(evt, val)}
+              aria-label="node type"
+              exclusive
+              size="small"
+            >
+              {BK.Buckets.slice(0, 3).map(bucket => {
+                const name = bucket.split(' ')[1]
+                return (
+                  <ToggleButton value={bucket} aria-label={`${name} nodes`} key={bucket}>
+                    {name}
+                  </ToggleButton>
+                )
+              })}
+            </ToggleButtonGroup>
+          */}
         </div>
       </div>
 
@@ -209,7 +216,7 @@ export default function NodeSelector(props: Props) {
         {filtered &&
           <TableWrap>
             <Table
-              primaryKey="id"
+              primaryKey="vsn"
               enableSorting
               checkboxes
               disableClickOutside
@@ -221,6 +228,7 @@ export default function NodeSelector(props: Props) {
               rowsPerPage={10}
               onSearch={({query}) => setQuery(query || '')}
               middleComponent={<div className="flex-grow"></div>}
+              selected={selected}
               onSelect={handleSelection}
               {...tableProps}
             />
@@ -231,6 +239,19 @@ export default function NodeSelector(props: Props) {
             <Map data={filtered} updateID={updateID} />
           }
         </MapWrap>
+      </div>
+
+      <div>
+        <SelectedChips className="flex gap">
+          {selected.map((node) =>
+            <Chip
+              key={node}
+              label={node}
+              variant="filled"
+              color="primary"
+              onDelete={() => handleRemoveChip(node)} />
+          )}
+        </SelectedChips>
       </div>
     </Root>
   )
@@ -250,9 +271,14 @@ const TableWrap = styled.div`
   width: 50%;
   padding-right: 20px;
 `
+
 const MapWrap = styled.div`
   margin-top: 60px;
   width: 50%;
+`
+
+const SelectedChips = styled.div`
+  margin-top: 10px;
 `
 
 

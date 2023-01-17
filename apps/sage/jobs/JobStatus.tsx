@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { Button } from '@mui/material'
+import { Button, Divider, IconButton, Tooltip } from '@mui/material'
 
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
 import AddIcon from '@mui/icons-material/AddRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
+import EditIcon from '@mui/icons-material/EditRounded'
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+
 import { useSnackbar } from 'notistack'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
@@ -208,14 +211,14 @@ export type Counts = {
 }
 
 function getCounts(jobs: ES.Job[], countMine: boolean) : Counts {
-  const publicCount = jobs.length
+  const publicCount = jobs.length - filterByState(jobs, ['Suspended', 'Removed']).length
   const myJobs = jobs.filter(o => o.user == user)
 
   jobs = countMine ? myJobs : jobs
 
   return ({
     public: publicCount,
-    mine: myJobs.length,
+    mine: myJobs.length - filterByState(myJobs, ['Suspended', 'Removed']).length,
     queued: filterByState(jobs, ['Created', 'Submitted']).length,
     running: filterByState(jobs, ['Running']).length,
     completed: filterByState(jobs, ['Completed']).length,
@@ -413,6 +416,13 @@ export default function JobStatus() {
     setJobState(prev => prev == state ? null : state)
   }
 
+
+  const handleDownload = () => {
+    ES.downloadTemplate(selectedJobs[0].job_id)
+  }
+
+
+
   // if query param ?job=<job_id> is provided
   const jobDetails = job ?
     (jobs || []).find(o => o.job_id == job) :
@@ -497,44 +507,56 @@ export default function JobStatus() {
                   `No ${jobState || 'active'} jobs found`
               }
               middleComponent={
-                <TableOptions className="flex justify-between">
-                  <div>
-                    {view == 'my-jobs' && isFiltered &&
-                      <Button
-                        variant="contained"
-                        style={{background: '#c70000'}}
-                        onClick={() => setConfirm(true)}
-                        startIcon={<RemoveIcon/>}
-                      >
-                        Remove Job{selectedJobs.length > 1 ? 's' : ''}
-                      </Button>
-                    }
-                  </div>
+                <TableOptions className="flex">
+                  {view == 'my-jobs' &&
+                    <Button
+                      component={Link}
+                      to="/create-job"
+                      variant="contained"
+                      color="primary"
+                      startIcon={<AddIcon/>}
+                    >
+                      Create job
+                    </Button>
+                  }
 
-                  <div className="flex gap">
-                    {isFiltered &&
-                      <Button
-                        variant="contained"
-                        component={Link}
-                        to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}
-                        startIcon={<TimelineIcon/>}
-                      >
-                        View timeline{selectedNodes.length > 1 ? 's' : ''}
-                      </Button>
-                    }
-                    {view == 'my-jobs' &&
-                      <Button
-                        component={Link}
-                        to="/create-job"
-                        variant="contained"
-                        color="primary"
-                        startIcon={<AddIcon/>}
-                        size="small"
-                      >
-                        Create job
-                      </Button>
-                    }
-                  </div>
+                  {view == 'my-jobs' && isFiltered &&
+                    <>
+                      <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
+                      <Tooltip title={`Remove Job${selectedJobs.length > 1 ? 's' : ''}`}>
+                        <IconButton
+                          style={{color: '#c70000'}}
+                          onClick={() => setConfirm(true)}
+                        >
+                          <RemoveIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
+                    </>
+                  }
+
+                  {selectedJobs?.length == 1 &&
+                    <Tooltip title="Download spec">
+                      <IconButton onClick={handleDownload}>
+                        <DownloadIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
+                  {selectedJobs?.length == 1 &&
+                    <Tooltip title="Recreate job (experimental!)">
+                      <IconButton component={Link} to={`/create-job?start_with_job=${selectedJobs[0].job_id}`}>
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
+
+                  {isFiltered &&
+                    <Tooltip title={`View timeline${selectedNodes.length > 1 ? 's' : ''}`}>
+                      <IconButton component={Link} to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
+                        <TimelineIcon />
+                      </IconButton>
+                    </Tooltip>
+                  }
                 </TableOptions>
               }
             />
@@ -592,6 +614,8 @@ export default function JobStatus() {
           onClose={() => setConfirm(false)}
         />
       }
+
+      <br/>
     </Root>
   )
 }
@@ -604,7 +628,7 @@ const Root = styled.div`
 
 const Main = styled.div`
   width: 100%;
-  margin-bottom: 100px;
+  margin-bottom: 20px;
 `
 
 const MapContainer = styled.div`

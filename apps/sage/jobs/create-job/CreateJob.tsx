@@ -1,9 +1,9 @@
-import { useReducer, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useReducer, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import TextField from '@mui/material/TextField'
+import { TextField, Button, Alert } from '@mui/material'
 import { Step, StepTitle } from '/components/layout/FormLayout'
 
 import Clipboard from '/components/utils/Clipboard'
@@ -11,26 +11,31 @@ import { Card, CardViewStyle } from '/components/layout/Layout'
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
 import NodeSelector from './NodeSelector'
-import RuleBuilder, { Rule, BooleanLogic } from './RuleBuilder'
+import RuleBuilder, { Rule, BooleanLogic, CronRule } from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
 
 import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
 
-import { type App } from '/components/apis/ecr'
-import { type Manifest } from '/components/apis/beekeeper'
+import type { App } from '/components/apis/ecr'
+import type { VSN, Manifest } from '/components/apis/beekeeper'
 
 import * as SES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
 const user = Auth.user
 
 import config from '/config'
-import Button from '@mui/material/Button'
 import ErrorMsg from '../../ErrorMsg'
+
 const docker = config.dockerRegistry
 
 
-const getCronString = ({amount, unit}) => `'${[
+// todo(nc): remove this nonsense
+export type CLIArgStyle = '-' | '--'
+export type ArgStyles = {[app: string]: CLIArgStyle}
+
+
+const createCronString = ({amount, unit}) => `'${[
   unit == 'min' ? `*/${amount}` : '*',
   unit == 'hour' ? `*/${amount}` : '*',
   unit == 'day' ? `*/${amount}` : '*',
@@ -39,18 +44,113 @@ const getCronString = ({amount, unit}) => `'${[
 ].join(' ')}'`
 
 
-const getRuleString = (appName: string, rule: Rule) =>
+
+type ParsedRule = {app: string, rules: Rule[], logics: BooleanLogic[]}
+
+const createRuleString = (appName: string, rule: Rule) : string =>
   'name' in rule ?
     `v('${rule.name}') ${rule.op} ${rule.value}` :
-    `schedule(${appName}): cronjob('${appName}', ${getCronString(rule)})`
+    `schedule(${appName}): cronjob('${appName}', ${createCronString(rule)})`
+
+
+
+const parseRuleString = (str: string) : ParsedRule => {
+  if (str.startsWith('schedule')) {
+    let cronStr = str.split(': ')[1]
+    cronStr = cronStr.replace(/cronjob\(|\)/g, '')
+    const [appName, cronConfig] = cronStr.split(', ')
+    const [min, hour, day, month, dayOfWeek] = cronConfig.split(' ').map(unit => unit.split('/')[1])
+
+    // todo(nc): WIP, finish
+
+    return {
+      app: appName,
+      rules: [],
+      logics: []
+    }
+  } else {
+    throw `can not parse rule: ${str}`
+  }
+}
 
 
 // todo: here we assume we only have conditions and cronjobs;
 // generalize and add rule types
-const createRuleStrings = (appName: string, rules: Rule[], logics: BooleanLogic[]) =>
+const createRuleStrings = (appName: string, rules: Rule[], logics: BooleanLogic[]) : string =>
   rules.map((r, i) =>
-    `${getRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
+    `${createRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
   ).join('')
+
+
+const parseRuleStrings = (strs: string[]) => {
+  return strs.map(str => parseRuleString(str))
+}
+
+
+type ParsedPlugins = {
+  params: {[pluginID: string]: object} // app params as object (instead of list)
+  argStyles: ArgStyles
+}
+
+const parsePlugins = (plugins: SES.JobTemplate['plugins']) : ParsedPlugins => {
+  const argStyles = {}
+  const params = plugins.reduce((acc, obj) => {
+    const {image, args} = obj.pluginSpec
+
+    const mapObj = argListToMap(args)
+    const map = mapObj.mapping
+
+    const id = image.replace(`${docker}/`, '')
+
+    argStyles[id] = mapObj.argStyle
+
+    return {
+      ...acc,
+      [id]: map
+    }
+  }, {})
+
+  return {params, argStyles}
+}
+
+type MappingObj = {
+  mapping: {[key: string]: string | null}
+  argStyle: CLIArgStyle
+}
+
+export const argListToMap = (args: string[] = []) : MappingObj => {
+  // infer param style convention
+  let argStyle
+  if (args.some(arg => arg.startsWith('--'))) {
+    argStyle = '--'
+  } else if (args.some(arg => arg.startsWith('-'))) {
+    argStyle = '-'
+  } else {
+    throw `No CLI arg convention found.\n` +
+      `App param CLI style is currently inferred from inputs provided to the scheduler, ` +
+      `and perhaps no inputs were given to infer on.`
+  }
+
+  const mapping = args.reduce((acc, str, i) => {
+    const nextIdx = i + 1
+
+    // inspect next str, and set as false if none provided
+    let next = null
+    if (nextIdx < args.length) {
+      next = args[nextIdx].startsWith(argStyle) ? false : args[nextIdx]
+    }
+
+    // if is a param key, we'll add it to the mapping
+    if (str.startsWith(argStyle)) {
+      // if no param value, we assume the param is a boolean true, so the value of null
+      return {...acc, [str.slice(argStyle.length)]: next ? next : null}
+    }
+
+    return acc
+  }, {})
+
+  return {mapping, argStyle}
+}
 
 
 export const appIDToName = (id: string) =>
@@ -60,7 +160,7 @@ export const appIDToName = (id: string) =>
 type State = {
   name: ''
   apps: App[]
-  nodes: Manifest[]
+  nodes: VSN[]
   rules: {
     [app: string]: {
       rules: Rule[]
@@ -103,13 +203,45 @@ const initState = {
 export default function CreateJob() {
   const { enqueueSnackbar } = useSnackbar()
 
+  const params = new URLSearchParams(useLocation().search)
+  const jobID = params.get('start_with_job')
+
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
-  const [appParams, setAppParams] = useState({})
+  const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
+
+
+  // note: we can't infer CLI convention unless there were some params provided :()
+  const [argStyles, setArgStyles] = useState<ArgStyles>({})
   const [successCriteria, setSuccessCriteria] = useState({amount: 1, unit: 'day'})
 
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState(null)
+
+  // if needed, initialize form with job spec
+  useEffect(() => {
+    if (!jobID) return
+
+    SES.getTemplate(jobID)
+      .then((spec) => {
+        const {name, plugins, nodes, scienceRules} = spec
+
+        // determine app params and cli arg styles
+        const {params, argStyles} = parsePlugins(plugins)
+        setAppParams(params)
+        setArgStyles(argStyles)
+
+        // init with
+        const initSelected = Object.keys(params).map(id => ({id}))
+        dispatch({type: 'SET', name: 'name', value: name})
+        dispatch({type: 'SET', name: 'apps', value: initSelected})
+        dispatch({type: 'SET', name: 'nodes', value: Object.keys(nodes)})
+        dispatch({type: 'SET_RULES', name: 'rules', value: parseRuleStrings(scienceRules)})
+      })
+      .catch((error) => {
+        alert(`Oh no.  This app couldn not be initialized with previous params:\n\n${error}`)
+      })
+  }, [jobID])
 
   const handleAppSelection = (value: App[]) => {
     dispatch({type: 'SET', name: 'apps', value})
@@ -123,40 +255,57 @@ export default function CreateJob() {
     dispatch({type: 'SET_RULES', value: {app, rules, logics}})
   }
 
-  const handleAppParamUpdate = (form) => {
-    setAppParams(form)
-  }
-
   const handleSuccessUpdate = (name, value) => {
     setSuccessCriteria(prev => ({...prev, [name]: value}))
   }
 
+  const handleAppParamUpdate = (appID: string, name, value: string | boolean) => {
+    if (typeof value == 'boolean') {
+      setAppParams(prev => {
+        let params = prev[appID]
+        if (value == false) {
+          delete params[name]
+        } else {
+          params = {...params, [name]: null}
+        }
+        return {...prev, [appID]: {...params}}
+      })
+    } else {
+      setAppParams(prev => ({...prev, [appID]: {...prev[appID], [name]: value}}))
+    }
+  }
 
   const getYaml = () => {
     return YAML.stringify({
       name,
       ...(user && {user}),
-      plugins: apps.map(o => ({
-        name: appParams[o.id]?.pluginName || appIDToName(o.id),
-        pluginSpec: {
-          image: `${docker}/${o.id}`,
-          args: appParams[o.id] ?
-            Object.entries(appParams[o.id])
-              .filter(([k, _]) => k != 'pluginName')
-              .map(([k, v]) => [`-${k}`, v]).flat()
-            : []
-        }
-      })),
-      nodes: nodes.reduce((acc, obj) => ({...acc, [obj.vsn]: true}), {}) ,
-      scienceRules: Object.keys(rules).map(appID => {
-        const obj = rules[appID],
-          ruleList = obj.rules
+      plugins:
+        apps.map(o => {
+          const argStyle = o.id in argStyles ? argStyles[o.id] : '-'
 
-        if (!ruleList.length)
-          return null
+          return {
+            name: appParams[o.id]?.appName || appIDToName(o.id),
+            pluginSpec: {
+              image: `${docker}/${o.id}`,
+              args: appParams[o.id] ?
+                Object.entries(appParams[o.id])
+                  .filter(([k, _]) => k != 'appName')
+                  .map(([k, v]) => v == null ? `${argStyle}${k}` : [`${argStyle}${k}`, v]).flat()
+                : []
+            }
+          }
+        }),
+      nodes: nodes.reduce((acc, vsn) => ({...acc, [vsn]: true}), {}) ,
+      scienceRules:
+        Object.keys(rules).map(appID => {
+          const obj = rules[appID],
+            ruleList = obj.rules
 
-        return `${createRuleStrings(appParams[appID]?.pluginName || appIDToName(appID), ruleList, obj.logics)}`
-      }).filter(s => !!s),
+          if (!ruleList.length)
+            return null
+
+          return createRuleStrings(appParams[appID]?.appName || appIDToName(appID), ruleList, obj.logics)
+        }).filter(s => !!s),
       successCriteria: [`Walltime(${successCriteria.amount}${successCriteria.unit})`]
     })
   }
@@ -192,6 +341,14 @@ export default function CreateJob() {
       <main className="flex column gap">
         <h1><Link to="/jobs/my-jobs">My jobs</Link> / Create job (Science Goal)</h1>
 
+        <Alert severity="info">
+          <b>Note:</b> the create and recreate job form is currently an
+          <b> experimental feature</b> and in the <b>early stages of development</b>.{' '}
+          <a href="https://docs.waggle-edge.ai/docs/tutorials/schedule-jobs" target="_blank" rel="noreferrer">
+            Read more...
+          </a>
+        </Alert>
+
         <Card>
           <Step icon="1" label="Your science goal name">
             <TextField
@@ -207,12 +364,21 @@ export default function CreateJob() {
 
         <Card>
           <Step icon="2a" label="Select apps to use">
-            <AppSelector onSelected={handleAppSelection}/>
+            <AppSelector
+              selected={apps}
+              onSelected={handleAppSelection}
+            />
           </Step>
 
+          {/* todo(nc): fix apps and appParams data model! */}
           {apps?.length > 0 && <>
             <Step icon="2b" label="Selected apps / specify params">
-              <SelectedAppTable selected={apps} onChange={handleAppParamUpdate} />
+              <SelectedAppTable
+                selected={apps}
+                appArgs={appParams}
+                argStyles={argStyles}
+                onChange={handleAppParamUpdate}
+              />
             </Step>
           </>}
         </Card>
@@ -220,7 +386,7 @@ export default function CreateJob() {
         <Card>
           <StepTitle icon="3" label="Select nodes"/>
           <Step>
-            <NodeSelector onSelected={handleNodeSelection} />
+            <NodeSelector selected={nodes} onSelected={handleNodeSelection} />
           </Step>
         </Card>
 

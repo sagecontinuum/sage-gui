@@ -38,7 +38,7 @@ type CronRule = {
   unit: CronUnit
 }
 
-export { Rule, BooleanLogic }
+export { Rule, BooleanLogic, CronRule}
 
 
 

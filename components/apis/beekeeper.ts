@@ -248,9 +248,10 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 
 export type NodeDetails = (State & Manifest)[]
 
-export async function getNodeDetails(bucket: Manifest['bucket']) : Promise<NodeDetails> {
+export async function getNodeDetails(bucket?: Manifest['bucket']) : Promise<NodeDetails> {
   const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'vsn'})])
   let nodeDetails = bkData
+    .filter(o => !!o.vsn)
     .map(obj => ({...obj, ...details[obj.vsn]}))
 
   if (bucket) {
