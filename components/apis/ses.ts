@@ -429,6 +429,28 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
 
 
 
+export async function getTemplate(
+  jobID: string,
+  type?: 'yaml' | 'json'
+) : Promise<JobTemplate | string> {
+  const yaml = await getYAML(`${url}/jobs/${jobID}/template`, options)
+
+  return type == 'yaml' ?
+    yaml as string :
+    YAML.parse(yaml) as JobTemplate
+}
+
+
+
+export async function downloadTemplate(jobID: string) {
+  getTemplate(jobID, 'yaml')
+    .then((spec) => {
+      downloadFile(spec as string, `sage-job-${jobID}.yaml`)
+    })
+}
+
+
+
 export async function submitJob(spec: string) {
   const res = await post(`${url}/submit`, spec)
   return res
