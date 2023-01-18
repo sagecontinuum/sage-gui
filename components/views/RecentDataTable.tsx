@@ -86,8 +86,13 @@ export default memo(function RecentDataTable(props: Props) {
   }, [items])
 
 
-  // this is a somewhat crude deaper search for latest data (once other queries are completely finished)
+  // this is a somewhat crude deeper search for latest data,
+  // once other queries are completely finished
   useEffect(() => {
+    // stop searching if there's an error
+    if (error)
+      return
+
     // if actually all done
     const stillLoading = (Object.values(recentData) || []).filter(o => o?.value == 'loading').length
     if (stillLoading) return
@@ -125,7 +130,7 @@ export default memo(function RecentDataTable(props: Props) {
 
     Promise.allSettled(proms)
       .finally(() => setLoading(false))
-  }, [recentData])
+  }, [recentData, error])
 
 
   return (

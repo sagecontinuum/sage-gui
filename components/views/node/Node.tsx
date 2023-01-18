@@ -170,9 +170,10 @@ export default function NodeView() {
             const elapsed = records.map(o => new Date().getTime() - new Date(o.timestamp).getTime())
             const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
             setStatus(isReporting ? 'reporting' : 'not reporting')
-          })
+          }).catch(() => setStatus('unknown'))
         BH.getGPS(vsn)
           .then(d => setLiveGPS(d))
+          .catch(d => setLiveGPS({lat: null, lon: null}))
       })
 
     BK.getNode(node)
