@@ -8,6 +8,8 @@
  * Compared to the example above, we make node-fetch available globally
  * to support server-side data fetching.  See ./jest.setup.js global config.
  *
+ * NOTE: THIS EXAMPLE IS IGNORED IN ./jest.setup.js > "testPathIgnorePatterns"
+ *
  */
 
 import {useState, useReducer} from 'react'
@@ -69,7 +71,7 @@ export default function Fetch({url}) {
       .catch((error) => {
         dispatch({type: 'ERROR', error})
       })
-    }
+  }
 
   const buttonText = buttonClicked ? 'Ok' : 'Load Greeting'
 

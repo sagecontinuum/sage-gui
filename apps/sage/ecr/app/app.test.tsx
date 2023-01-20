@@ -2,45 +2,52 @@ import {rest} from 'msw'
 import {render, waitFor, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-import MockTheme from '../../../__mocks__/MockTheme'
+import MockRouter from '/__mocks__/MockRouter'
+import MockTheme from '/__mocks__/MockTheme'
 
 import App from './App'
 
 import {data, url} from '/components/apis/ecr.mocks'
-import {server} from '../../../__mocks__/server'
+import {server} from '/__mocks__/server'
+
 
 beforeAll(() => server.listen())
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
 
 
+// todo(nc): abstract away common router mocks
 jest.mock('react-router-dom', () => {
   const obj = jest.requireActual('react-router-dom')
 
   return ({
     ...obj,
-    useParams: jest.fn().mockReturnValue({ path: 'zelda/avian-diversity' }),
+    useParams: jest.fn().mockReturnValue({ '*': 'zelda/avian-diversity' }),
+    useNavigate: () => jest.fn(),
+    useLocation: () => jest.fn(),
+    useHref: () => jest.fn()
   })
 })
 
-jest.mock('~/components/progress/ProgressProvider', () => ({
-  useProgress: () => ({ loading: false, setLoading: () => true })
-}))
-
-jest.mock('notistack', () => ({
-  useSnackbar: () => ({ enqueueSnackbar: () => 'do nothing' })
-}))
-
+// eslint-disable-next-line react/display-name
 jest.mock('./TagList', () => () => <div>some tag list</div>)
 
 
-
-test('it loads and displays markdown', async () => {
-  const {unmount} = render(
-    <MockTheme>
+const mockRender = () => render(
+  <MockTheme>
+    <MockRouter>
       <App />
-    </MockTheme>
-  )
+    </MockRouter>
+  </MockTheme>
+)
+
+
+/**
+ * the actual tests
+ */
+
+test('it loads and renders markdown as html', async () => {
+  const {unmount} = mockRender()
 
   // not dependant on requests
   await waitFor(() => screen.getByRole('heading'))
@@ -54,11 +61,9 @@ test('it loads and displays markdown', async () => {
   unmount()
 })
 
-
-
-test('it displays tags view if no markdown', async () => {
+test('it displays a notice if no science description ', async () => {
   // mimic no science description
-  let testData = JSON.parse(JSON.stringify(data))
+  const testData = JSON.parse(JSON.stringify(data))
   testData.versions[0].science_description = null
 
   const repoUrl = `${url}/repositories/${data.namespace}/${data.name}`
@@ -68,19 +73,14 @@ test('it displays tags view if no markdown', async () => {
     )
   )
 
-  const {unmount} = render(
-    <MockTheme>
-      <App />
-    </MockTheme>
-  )
+  const {unmount} = mockRender()
 
   await waitFor(() => screen.getByRole('heading'))
   expect(screen.getByText('zelda / avian-diversity'))
-
-  await waitFor(() => screen.getByText('some tag list'))
-  expect(screen.getByText('some tag list'))
+  expect(screen.getByText('No science description available for this app.'))
 
   unmount()
 })
+
 
 

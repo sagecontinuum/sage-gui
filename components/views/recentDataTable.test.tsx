@@ -10,17 +10,17 @@ const url = config.beehive
 
 
 const mockData = {
-  "timestamp": new Date().toISOString(),
-  "name": "env.temperature",
-  "value": 30.76,
-  "meta": {
-    "host": "0000dca63288face.ws-rpi",
-    "job": "sage",
-    "node": "000048b02d07627c",
-    "plugin": "plugin-iio:0.4.5",
-    "sensor": "bme680",
-    "task": "iio-rpi",
-    "vsn": "WTST"
+  'timestamp': new Date().toISOString(),
+  'name': 'env.temperature',
+  'value': 30.76,
+  'meta': {
+    'host': '0000dca63288face.ws-rpi',
+    'job': 'sage',
+    'node': '000048b02d07627c',
+    'plugin': 'plugin-iio:0.4.5',
+    'sensor': 'bme680',
+    'task': 'iio-rpi',
+    'vsn': 'WTST'
   }
 }
 
@@ -80,7 +80,7 @@ test('displays the table', async () => {
 test('highlights old times in red', async () => {
   server.use(
     rest.post(`${url}/query`, (req, res, ctx) => {
-      return res(ctx.json({...mockData, timestamp: "2022-01-19T16:20:21.555Z"}))
+      return res(ctx.json({...mockData, timestamp: '2022-01-19T16:20:21.555Z'}))
     })
   )
 

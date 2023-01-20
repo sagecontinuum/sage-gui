@@ -46,6 +46,6 @@ Mocks:
 
 Example Test Code:
 
-* [/admin-ui/views/node/recentDataTable.test.tsx](/admin-ui/views/node/recentDataTable.test.tsx)
-* [/sage/ecr/app/app.test.tsx](/sage/ecr/app/app.test.tsx)
+* [/components/views/recentDataTable.test.tsx](/components/views/recentDataTable.test.tsx)
+* [/apps/sage/ecr/app/app.test.tsx](/apps/sage/ecr/app/app.test.tsx)
 
