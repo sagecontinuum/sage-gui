@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import { TextField, Button, InputAdornment, IconButton, MenuItem } from '@mui/material'
+import { TextField, Button, InputAdornment, IconButton, MenuItem, Popper, Autocomplete } from '@mui/material'
 import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import RmIcon from '@mui/icons-material/DeleteOutlineRounded'
 
@@ -11,34 +11,10 @@ import { type AppDetails } from '/components/apis/ecr'
 
 import * as BH from '/components/apis/beehive'
 
-
-/**
- * input const lists and rule types
- */
-
-const cronUnits = ['min', 'hour', 'day', 'month'] as const
-const ops = {'<': '<', '>': '>', '=': '=', '<=': '≤', '>=': '≥'} as const
-const booleanLogics = ['and', 'or'] as const
-
-type CronUnit = typeof cronUnits[number]
-type Op = keyof typeof ops
-type BooleanLogic = typeof booleanLogics[number]
-
-type Rule = ConditionRule | CronRule
-type RuleType = 'condition' | 'cron'
-
-type ConditionRule = {
-  name: string
-  op: Op
-  value: number
-}
-
-type CronRule = {
-  amount: number
-  unit: CronUnit
-}
-
-export { Rule, BooleanLogic, CronRule}
+import {
+  ConditionRule, CronRule, Rule, BooleanLogic,
+  booleanLogics, cronUnits, ops, RuleType, aggFuncs
+} from './ses-types.d'
 
 
 
@@ -52,6 +28,7 @@ type ConditionalInputProps =
 function ConditionalInput(props: ConditionalInputProps) {
   const {names, name, onChange} = props
 
+  // support raw text name inputs too
   const [newInput, setNewInput] = useState(false)
 
   return (
@@ -65,26 +42,37 @@ function ConditionalInput(props: ConditionalInputProps) {
         </small>
       </div>
 
+      <TextField select
+        defaultValue={'avg'}
+        onChange={(evt) => onChange('func', evt.target.value)}
+        sx={{maxWidth: '110px'}}
+      >
+        {aggFuncs.map(v =>
+          <MenuItem key={v} value={v}>{v}</MenuItem>
+        )}
+      </TextField>
+
       {newInput ?
         <TextField
           placeholder="env.some.value"
           onChange={(evt) => onChange('name', evt.target.value)}
         /> :
-        <FilterMenu
-          options={(names || []).map(n => ({id: n, label: n}))}
-          multiple={false}
-          disableCloseOnSelect={false}
-          onChange={(val) => onChange('name', val?.id)}
-          value={{id: name, label: name}}
-          ButtonComponent={
-            <Button>{name} <CaretIcon /></Button>
-          }
+        <Autocomplete
+          options={(names || [])}
+          renderInput={(props) =>
+            <TextField {...props}  />}
+          PopperComponent={(props) =>
+            <Popper {...props} sx={{minWidth: '400px'}} />}
+          value={name}
+          onChange={(evt, val) => onChange('name', val)}
+          sx={{width: '300px'}}
         />
       }
 
       <TextField select
         defaultValue={'>'}
         onChange={(evt) => onChange('op', evt.target.value)}
+        sx={{maxWidth: '60px'}}
       >
         {Object.entries(ops).map(([v, l]) =>
           <MenuItem key={v} value={v}>{l}</MenuItem>
@@ -211,8 +199,8 @@ function Rules(props: RulesProps) {
   return (
     <div>
       {!rules.length && <div className="flex gap">
-        <Button onClick={() => handleAddRule('condition')} variant="outlined">Run when...</Button>
         <Button onClick={() => handleAddRule('cron')} variant="outlined">Run every...</Button>
+        <Button onClick={() => handleAddRule('condition')} variant="outlined">Run when...</Button>
       </div>}
 
 
@@ -231,9 +219,6 @@ function Rules(props: RulesProps) {
               />
             }
 
-            {i == rules.length - 1 &&
-              <b>and/or</b>
-            }
 
             {i < rules.length - 1 &&
               <TextField select
@@ -248,6 +233,7 @@ function Rules(props: RulesProps) {
 
             {i == rules.length - 1 &&
               <>
+                <b>and/or</b>
                 <Button onClick={() => handleAddRule('condition')} variant="outlined">Run when...</Button>
                 <Button onClick={() => handleAddRule('cron')} variant="outlined">Run every...</Button>
               </>
@@ -298,4 +284,3 @@ export default function RuleBuilder(props: Props) {
 const Root = styled.div`
 
 `
-
