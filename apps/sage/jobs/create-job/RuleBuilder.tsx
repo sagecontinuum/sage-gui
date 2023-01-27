@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import { TextField, Button, InputAdornment, IconButton, MenuItem, Popper, Autocomplete } from '@mui/material'
-import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
+import { TextField, Button, IconButton, MenuItem, Popper, Autocomplete } from '@mui/material'
 import RmIcon from '@mui/icons-material/DeleteOutlineRounded'
-
-import FilterMenu from '/components/FilterMenu'
 
 import { type AppDetails } from '/components/apis/ecr'
 
 import * as BH from '/components/apis/beehive'
 
+import 'cron-expression-input/lib/cron-expression-input.min.css'
+import 'cron-expression-input'
+
 import {
-  ConditionRule, CronRule, Rule, BooleanLogic,
-  booleanLogics, cronUnits, ops, RuleType, aggFuncs
+  type ConditionRule, type CronRule, type Rule, type RuleType, type BooleanLogic,
+  booleanLogics, ops, aggFuncs
 } from './ses-types.d'
 
 
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'cron-expression-input': HTMLElement
+    }
+  }
+}
 
 type ConditionalInputProps =
   ConditionRule & {
@@ -92,38 +101,20 @@ function ConditionalInput(props: ConditionalInputProps) {
 
 type CronProps =
   CronRule & {
-    onChange(name: 'amount' | 'unit', value: number | string)
+    onChange(value: string)
   }
 
 
 function CronInput(props: CronProps) {
-  const { amount, unit, onChange} = props
+  const {cron, onChange} = props
 
   return (
     <div className="flex items-center gap">
-      <h4>Run on every</h4>
-      <TextField
-        type="number"
-        value={amount}
-        placeholder="5"
-        className="cron-amount"
-        onChange={evt => onChange('amount', evt.target.value)}
-        InputProps={{
-          endAdornment: <InputAdornment position="end">th</InputAdornment>
-        }}
-      />
-
-      <FilterMenu
-        options={
-          cronUnits.map(unit => ({id: unit, label: unit.toUpperCase()}))
-        }
-        multiple={false}
-        onChange={val => onChange('unit', val.id)}
-        value={{id: unit, label: unit}}
-        ButtonComponent={
-          <Button>{unit} <CaretIcon /></Button>
-        }
-      />
+      <h4>Run every</h4>
+      <cron-expression-input
+        value={cron || '* * * * *'}
+        onInput={(evt) => onChange('crontString', evt.nativeEvent.detail.value)}
+        color="1c8cc9" />
     </div>
   )
 }
@@ -282,5 +273,7 @@ export default function RuleBuilder(props: Props) {
 }
 
 const Root = styled.div`
-
+  cron-expression-input .modal-dialog {
+    margin-top: 200px !important; // override lib
+  }
 `

@@ -24,6 +24,7 @@
     "chartjs-adapter-date-fns": "^2.0.0",
     "chartjs-plugin-zoom": "^1.2.1",
     "colormap": "^2.3.2",
+    "cron-expression-input": "^1.2.7",
     "d3": "^7.1.1",
     "date-fns": "^2.28.0",
     "leaflet": "^1.8.0",
