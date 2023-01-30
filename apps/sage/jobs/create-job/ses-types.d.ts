@@ -31,21 +31,33 @@ type BooleanLogic = typeof booleanLogics[number]
 export type RuleAction = typeof actions[number]
 
 // a rule can either be a cronjob or a conditional rule
-export type Rule = CronRule | ConditionRule
-export type RuleType = 'cron' | 'condition'
+export type Rule = CronRule | ConditionRule | Publish | Set
+export type RuleType = 'cron' | 'condition' | 'publish' | 'set'
 
 
 export type CronRule = {
-  cron: string   // example: '* * * * *'
+  cron: string   // example: '* 1,2 * * *'
 }
 
-export const aggFuncs = ['avg', 'rate', 'sum', 'count', 'any'] as const
+export const aggFuncs = ['any', 'avg', 'sum', 'count'] as const
 type AggFunc = typeof aggFuncs[number]
 
-export type ConditionRule = {
+
+type Condition = {
   func: AggFunc
   name: string
   op: Op
   value: number
 }
+
+export type ConditionRule = Condition
+
+export type PublishRule = {
+  publish: string
+} & Condition
+
+export type SetRule = {
+  stateKey: string
+  state: string
+} & Condition
 
