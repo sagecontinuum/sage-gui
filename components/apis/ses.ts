@@ -109,11 +109,11 @@ export type GoalLookup = {
 
 // states from services
 export type State =
-  'Created' | 'Submitted' | 'Waiting' | 'Running' | 'Completed' |
+  'Created' | 'Submitted' | 'Running' | 'Completed' |
   'Failed' | 'Suspended' | 'Removed'
 
 // states in UI which are considered 'Queued"
-export type QueuedState = 'Created' | 'Submitted' | 'Waiting'
+export type QueuedState = 'Created' | 'Submitted'
 
 
 type Plugin = {

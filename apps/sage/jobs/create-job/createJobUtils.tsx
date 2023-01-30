@@ -7,7 +7,7 @@ import {
   aggFuncs,
   type ArgStyles,
   type CLIArgStyle,
-  type RuleAction,
+  type Action,
   type CronRule,
   type ConditionRule,
   type BooleanLogic,
@@ -85,13 +85,19 @@ export const parseCronString = (str) : {amount: number, unit: CronUnit} => {
 }
 
 /**
- * given a conditional object, create a string such as: avg(v('foo.temp')) >= 1
+ * given a conditional object, create a string such as:
+ * avg(v('foo.temp')) >= 1
+ * any(v('foo.temp') >= 1)
  * @param args {func, name, op, value}
  * @returns `${func}(v('${name}')) ${op} ${value}`
  */
 export const createConditionString = (args: ConditionRule) : string => {
   const {func, name, op, value} = args
-  return `${func}(v('${name}')) ${op} ${value}`
+
+  if (func == 'any')
+    return `${func}(v('${name}') ${op} ${value})`
+  else
+    return `${func}(v('${name}')) ${op} ${value}`
 }
 
 
@@ -106,12 +112,15 @@ export const parseCondition = (str: string) : ConditionRule => {
   const re = new RegExp(`(${opList.join('|')})`)
   const parts = str.split(re).map(s => s.trim())
 
-  const [exp, op, value] = parts
+  const [exp, op] = parts
 
   if (!opList.includes(op as Op)) {
     throw `Invalid comparison operator: ${op}\n` +
       `Must be one of: ${opList.join(', ')}`
   }
+
+  // need to remove closing paren if entire if argument to callee is expresssion
+  const value = parts[2].replace(/\)/g, '')
 
   if (parts.length != 3)
     throw `Invalid conditional expression: ${str}\n` +
@@ -177,7 +186,7 @@ type ParsedRule = {app: string, rules: Rule[], logics: BooleanLogic[]}
  * @returns PrasedRule
  */
 export const parseRuleString = (str: string) : ParsedRule => {
-  const action: RuleAction = actions.find(action => str.startsWith(action))
+  const action: Action = actions.find(action => str.startsWith(action))
 
   if (action == 'schedule') {
     const [actionKeyString, ruleStr] = str.split(': ')
@@ -222,13 +231,28 @@ export const parseRuleString = (str: string) : ParsedRule => {
  */
 export const createRules = (
   appName: string,
-  action: RuleAction,
+  action: Action,
   rules: Rule[],
   logics: BooleanLogic[]
-) : string =>
-  `${action ? action : 'schedule'}('${appName}'): ` + rules.map((r, i) =>
-    `${createRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
-  ).join('')
+) : string | string[] => {
+
+  if (action == 'schedule') {
+    return `schedule('${appName}'): ` + rules.map((r, i) =>
+      `${createRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
+    ).join('')
+  } else if (action == 'publish') {
+    return rules.map((r) =>
+      `publish(${r.publish}): ${createRuleString(appName, r)}`
+    )
+  } else if (action == 'set') {
+    return rules.map((r) => {
+      const value = Number.isNaN(Number(r.state)) ? `'${r.state}'` : Number(r.state)
+      return `set(${r.stateKey}, value=${value}): ${createRuleString(appName, r)}`
+    })
+  }
+
+}
+
 
 
 /**

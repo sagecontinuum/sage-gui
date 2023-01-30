@@ -6,11 +6,11 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { TextField } from '@mui/material'
 
-import { Item } from '/components/layout/Layout'
 import Accordion, { useAccordionStyles } from '/components/layout/Accordion'
 import Checkbox from '/components/input/Checkbox'
 
-import { appIDToName, argListToMap, ArgStyles } from './CreateJob'
+import { appIDToName } from './createJobUtils'
+import { type ArgStyles } from './ses-types'
 import { type AppRow } from './AppSelector'
 
 
@@ -72,7 +72,7 @@ export default function SelectedTable(props: SelectedTableProps) {
     if (!f)
       return ''
 
-    const argStyle = argStyles[appID]
+    const argStyle = argStyles[appID] || '-'
 
     return Object.entries(f)
       .filter(([key]) => key != 'appName')
@@ -189,17 +189,5 @@ const SelectedTableRoot = styled.div`
     margin: 0;
   }
 `
-
-const ListItem = styled(Item)`
-  margin: 0;
-  border-left: 2px solid #ddd;
-  border-top-left: 0;
-
-  :hover {
-    border: inherit;
-    border-left: 2px solid rgb(28, 140, 201);
-  }
-`
-
 
 

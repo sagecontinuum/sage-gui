@@ -24,11 +24,10 @@ export const ops = {
 
 export const actions = ['schedule', 'publish', 'set']
 
-
 type CronUnit = typeof cronUnits[number]
 type Op = keyof typeof ops
 type BooleanLogic = typeof booleanLogics[number]
-export type RuleAction = typeof actions[number]
+export type Action = typeof actions[number]
 
 // a rule can either be a cronjob or a conditional rule
 export type Rule = CronRule | ConditionRule | Publish | Set
@@ -36,6 +35,7 @@ export type RuleType = 'cron' | 'condition' | 'publish' | 'set'
 
 
 export type CronRule = {
+  action: 'schedule'
   cron: string   // example: '* 1,2 * * *'
 }
 
@@ -50,13 +50,17 @@ type Condition = {
   value: number
 }
 
-export type ConditionRule = Condition
+export type ConditionRule = {
+  action: 'schedule'
+} & Condition
 
 export type PublishRule = {
+  action: 'publish'
   publish: string
 } & Condition
 
 export type SetRule = {
+  action: 'set'
   stateKey: string
   state: string
 } & Condition

@@ -3,16 +3,22 @@ import { Link, useLocation } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import { TextField, Button, Alert } from '@mui/material'
-import { Step, StepTitle } from '/components/layout/FormLayout'
+import { TextField, Button, Alert, Tooltip } from '@mui/material'
 
 import Clipboard from '/components/utils/Clipboard'
+import { Step, StepTitle } from '/components/layout/FormLayout'
 import { Card, CardViewStyle } from '/components/layout/Layout'
+
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
 import NodeSelector from './NodeSelector'
-import RuleBuilder, { Rule, BooleanLogic, CronRule } from './RuleBuilder'
+import RuleBuilder from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
+
+import {
+  appIDToName, createRules, parsePlugins, parseRules
+} from './createJobUtils'
+import { Rule, BooleanLogic, ArgStyles } from './ses-types'
 
 import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
@@ -26,137 +32,12 @@ const user = Auth.user
 
 import config from '/config'
 import ErrorMsg from '../../ErrorMsg'
+import HelpOutlineRounded from '@mui/icons-material/HelpOutlineRounded'
 
 const docker = config.dockerRegistry
 
 
-// todo(nc): remove this nonsense
-export type CLIArgStyle = '-' | '--'
-export type ArgStyles = {[app: string]: CLIArgStyle}
-
-
-const createCronString = ({amount, unit}) => `'${[
-  unit == 'min' ? `*/${amount}` : '*',
-  unit == 'hour' ? `*/${amount}` : '*',
-  unit == 'day' ? `*/${amount}` : '*',
-  unit == 'month' ? `*/${amount}` : '*',
-  '*'
-].join(' ')}'`
-
-
-
-type ParsedRule = {app: string, rules: Rule[], logics: BooleanLogic[]}
-
-const createRuleString = (appName: string, rule: Rule) : string =>
-  'name' in rule ?
-    `v('${rule.name}') ${rule.op} ${rule.value}` :
-    `schedule(${appName}): cronjob('${appName}', ${createCronString(rule)})`
-
-
-
-const parseRuleString = (str: string) : ParsedRule => {
-  if (str.startsWith('schedule')) {
-    let cronStr = str.split(': ')[1]
-    cronStr = cronStr.replace(/cronjob\(|\)/g, '')
-    const [appName, cronConfig] = cronStr.split(', ')
-    const [min, hour, day, month, dayOfWeek] = cronConfig.split(' ').map(unit => unit.split('/')[1])
-
-    // todo(nc): WIP, finish
-
-    return {
-      app: appName,
-      rules: [],
-      logics: []
-    }
-  } else {
-    throw `can not parse rule: ${str}`
-  }
-}
-
-
-// todo: here we assume we only have conditions and cronjobs;
-// generalize and add rule types
-const createRuleStrings = (appName: string, rules: Rule[], logics: BooleanLogic[]) : string =>
-  rules.map((r, i) =>
-    `${createRuleString(appName, r)}${i < logics?.length ? ` ${logics[i]} ` : ''}`
-  ).join('')
-
-
-const parseRuleStrings = (strs: string[]) => {
-  return strs.map(str => parseRuleString(str))
-}
-
-
-type ParsedPlugins = {
-  params: {[pluginID: string]: object} // app params as object (instead of list)
-  argStyles: ArgStyles
-}
-
-const parsePlugins = (plugins: SES.JobTemplate['plugins']) : ParsedPlugins => {
-  const argStyles = {}
-  const params = plugins.reduce((acc, obj) => {
-    const {image, args} = obj.pluginSpec
-
-    const mapObj = argListToMap(args)
-    const map = mapObj.mapping
-
-    const id = image.replace(`${docker}/`, '')
-
-    argStyles[id] = mapObj.argStyle
-
-    return {
-      ...acc,
-      [id]: map
-    }
-  }, {})
-
-  return {params, argStyles}
-}
-
-type MappingObj = {
-  mapping: {[key: string]: string | null}
-  argStyle: CLIArgStyle
-}
-
-export const argListToMap = (args: string[] = []) : MappingObj => {
-  // infer param style convention
-  let argStyle
-  if (args.some(arg => arg.startsWith('--'))) {
-    argStyle = '--'
-  } else if (args.some(arg => arg.startsWith('-'))) {
-    argStyle = '-'
-  } else {
-    throw `No CLI arg convention found.\n` +
-      `App param CLI style is currently inferred from inputs provided to the scheduler, ` +
-      `and perhaps no inputs were given to infer on.`
-  }
-
-  const mapping = args.reduce((acc, str, i) => {
-    const nextIdx = i + 1
-
-    // inspect next str, and set as false if none provided
-    let next = null
-    if (nextIdx < args.length) {
-      next = args[nextIdx].startsWith(argStyle) ? false : args[nextIdx]
-    }
-
-    // if is a param key, we'll add it to the mapping
-    if (str.startsWith(argStyle)) {
-      // if no param value, we assume the param is a boolean true, so the value of null
-      return {...acc, [str.slice(argStyle.length)]: next ? next : null}
-    }
-
-    return acc
-  }, {})
-
-  return {mapping, argStyle}
-}
-
-
-export const appIDToName = (id: string) =>
-  id.slice(id.indexOf('/') + 1, id.lastIndexOf(':'))
-
-
+// todo(nc): actually use State/Action types
 type State = {
   name: ''
   apps: App[]
@@ -236,7 +117,7 @@ export default function CreateJob() {
         dispatch({type: 'SET', name: 'name', value: name})
         dispatch({type: 'SET', name: 'apps', value: initSelected})
         dispatch({type: 'SET', name: 'nodes', value: Object.keys(nodes)})
-        dispatch({type: 'SET_RULES', name: 'rules', value: parseRuleStrings(scienceRules)})
+        dispatch({type: 'SET_RULES', name: 'rules', value: parseRules(scienceRules)})
       })
       .catch((error) => {
         alert(`Oh no.  This app couldn not be initialized with previous params:\n\n${error}`)
@@ -296,17 +177,41 @@ export default function CreateJob() {
           }
         }),
       nodes: nodes.reduce((acc, vsn) => ({...acc, [vsn]: true}), {}) ,
-      scienceRules:
-        Object.keys(rules).map(appID => {
-          const obj = rules[appID],
-            ruleList = obj.rules
+      scienceRules: // todo(nc): refactor the distinction between actions
+        [...Object.keys(rules)
+          .filter(id => id != 'publishOrSet')
+          .map(appID => {
+            const obj = rules[appID],
+              ruleList = obj.rules
 
-          if (!ruleList.length)
-            return null
+            if (!ruleList.length)
+              return null
 
-          return createRuleStrings(appParams[appID]?.appName || appIDToName(appID), ruleList, obj.logics)
-        }).filter(s => !!s),
-      successCriteria: [`Walltime(${successCriteria.amount}${successCriteria.unit})`]
+            return createRules(appParams[appID]?.appName || appIDToName(appID), 'schedule', ruleList, obj.logics)
+          }).filter(s => !!s),
+        ...Object.keys(rules)
+          .flatMap(appID => {
+            const obj = rules[appID],
+              ruleList = obj.rules.filter(obj => 'publish' in obj)
+
+            if (!ruleList.length)
+              return []
+
+            return createRules(appParams[appID]?.appName || appIDToName(appID), 'publish', ruleList, obj.logics)
+          }),
+        ...Object.keys(rules)
+          .flatMap(appID => {
+            const obj = rules[appID],
+              ruleList = obj.rules.filter(obj => 'stateKey' in obj)
+
+            if (!ruleList.length)
+              return []
+
+
+            return createRules(appParams[appID]?.appName || appIDToName(appID), 'set', ruleList, obj.logics)
+          })
+        ],
+      successCriteria: [`walltime(${successCriteria.amount}${successCriteria.unit})`]
     })
   }
 
@@ -332,7 +237,7 @@ export default function CreateJob() {
   }
 
   const disableSubmit = () =>
-    !(user && name && apps.length && nodes.length)
+    !(user && name && apps.length && nodes.length && rules.length)
 
 
   return (
@@ -391,7 +296,21 @@ export default function CreateJob() {
         </Card>
 
         <Card>
-          <StepTitle icon="4" label="Create rules" />
+          <StepTitle icon="4"
+            label={<div>
+              Create rules
+              <Tooltip
+                title="Read docs..."
+              >
+                <sup>
+                  <a href="https://github.com/waggle-sensor/edge-scheduler/tree/main/docs/sciencerules"
+                    target="_blank" rel="noreferrer">
+                    <HelpOutlineRounded fontSize="small"/>
+                  </a>
+                </sup>
+              </Tooltip>
+            </div>}
+          />
           <Step>
             {apps.length == 0 &&
               <span className="muted">First select apps and node(s)</span>
@@ -405,7 +324,7 @@ export default function CreateJob() {
         </Card>
 
         <Card>
-          <StepTitle icon="5" label="Success criteria" />
+          <StepTitle icon="5" label="Provide success criteria" />
           <Step>
             <SuccessBuilder apps={apps} {...successCriteria} onChange={handleSuccessUpdate}/>
           </Step>
