@@ -16,7 +16,7 @@ import {
 
 
 test('can create a cron string from object', async () => {
-  expect(createCronString({cron: `*/1 2 * * *`})).toBe(`*/1 2 * * *`)
+  expect(createCronString({action: 'schedule', cron: `*/1 2 * * *`})).toBe(`*/1 2 * * *`)
 
   // every min default
   expect(createCronString()).toBe(`* * * * *`)
@@ -81,32 +81,21 @@ test('can create complete rules', async () => {
  * rule parsing
  */
 
- // todo(nc): use advanced parser
 test('can parse cron string', async () => {
 
-  let obj = parseCronString('*/4 * * * *')
-  expect(obj.amount).toBe(4)
-  expect(obj.unit).toBe('min')
+  let obj = parseCronString('1,2,3 23 * * *')
+  expect(obj.action).toBe('schedule')
+  expect(obj.cron).toBe('1,2,3 23 * * *')
 
-  obj = parseCronString('* */5 * * *')
-  expect(obj.amount).toBe(5)
-  expect(obj.unit).toBe('hour')
+  obj = parseCronString('*/5 * * * *')
+  expect(obj.cron).toBe('*/5 * * * *')
 
-  obj = parseCronString('* * */10 * *')
-  expect(obj.amount).toBe(10)
-  expect(obj.unit).toBe('dayOfMonth')
-
-  obj = parseCronString('* * * */15 *')
-  expect(obj.amount).toBe(15)
-  expect(obj.unit).toBe('month')
-
-  obj = parseCronString('* * * * */5')
-  expect(obj.amount).toBe(5)
-  expect(obj.unit).toBe('dayOfWeek')
+  expect(() => parseCronString('f o o * *')).toThrow('Could not parse cron string')
+  expect(() => parseCronString('* * * * * *')).toThrow('Could not parse cron string')
 })
 
 
-// todo(nc): use AST parser
+
 test('can parse a condition', async () => {
   let str = `any(v('env.car.count') >= 1)`
   expect(parseCondition(str)).toMatchObject({
@@ -183,8 +172,8 @@ test('can parse complete rule strings', async () => {
   expect(app).toBe('image-sampler')
 
   expect(rules).toMatchObject([{
-    unit: 'min',
-    amount: 1
+    action: 'schedule',
+    cron: `'*/1 * * * *'`
   }])
 
   expect(logics).toMatchObject([])

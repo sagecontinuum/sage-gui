@@ -45,44 +45,21 @@ export const createCronString = (rule?: CronRule) : string => {
 
 
 /**
- * given an object, creates a cron string
- * @param args {amount, unit}
- * @returns basic crontab string expression
- *
+ * given a cron string, return CronRule Object
+ * @param str
+ * @returns object of form {action: 'schedule', cron: 'min hour dayOfMonth month dayOfWeek'}
  */
-export const createCronStringDeprecated = (args: {amount: string, unit: CronUnit}) : string => {
-  const {amount, unit} = args
-  return `'${[
-    unit == 'min' ? `*/${amount}` : '*',
-    unit == 'hour' ? `*/${amount}` : '*',
-    unit == 'dayOfMonth' ? `*/${amount}` : '*',
-    unit == 'month' ? `*/${amount}` : '*',
-    unit == 'dayOfWeek' ? `*/${amount}` : '*',
-  ].join(' ')}'`
+export const parseCronString = (str) : CronRule => {
+  const re = new RegExp(/((\*|\?|\d+((\/|-){0,1}(\d+))*)\s*){5}/)
+  if (!re.test(str) || str.split(' ').length != 5) {
+    throw `Could not parse cron string: ${str}\n` +
+    `Cron strings should be of form: '<min> <hour> <day_of_month> <month> <day_of_week>\n` +
+    `Extended cron syntax is not currently supported.`
+  }
+
+  return {action: 'schedule', cron: str}
 }
 
-
-/**
- * given a cron string, return object
- * @param str simple cron string using step value
- * @returns {amount, unit}
- *
- * todo(nc): use an advanced parser
- */
-export const parseCronString = (str) : {amount: number, unit: CronUnit} => {
-  const vals = str.split(' ').map(unit => unit.split('/')[1])
-
-  let amount, unit
-  ['min', 'hour', 'dayOfMonth', 'month', 'dayOfWeek'].forEach((u, i)=> {
-    const entry = vals[i]
-    if (entry) {
-      unit = u
-      amount = parseInt(entry)
-    }
-  })
-
-  return {amount, unit}
-}
 
 /**
  * given a conditional object, create a string such as:
@@ -265,7 +242,7 @@ export const parseRules = (strs: string[]) : ParsedRule[] => {
 }
 
 
-type ParsedPlugins = {
+export type ParsedPlugins = {
   params: {[pluginID: string]: object} // app params as object (instead of list)
   argStyles: ArgStyles
 }
