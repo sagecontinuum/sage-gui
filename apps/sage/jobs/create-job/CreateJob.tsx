@@ -4,10 +4,14 @@ import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { TextField, Button, Alert, Tooltip } from '@mui/material'
+import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
+import EditorIcon from '@mui/icons-material/DataObjectRounded'
 
 import Clipboard from '/components/utils/Clipboard'
 import { Step, StepTitle } from '/components/layout/FormLayout'
 import { Card, CardViewStyle } from '/components/layout/Layout'
+import { Tabs, Tab } from '/components/tabs/Tabs'
+import CopyBtn from '/components/utils/CopyBtn'
 
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
@@ -16,10 +20,15 @@ import RuleBuilder from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
 
 import {
-  appIDToName, createRules, parsePlugins, parseRules
+  type ParsedPlugins,
+  appIDToName,
+  createRules,
+  parsePlugins,
+  parseRules,
 } from './createJobUtils'
 import { Rule, BooleanLogic, ArgStyles } from './ses-types'
 
+import Editor from '@monaco-editor/react'
 import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
 
@@ -90,7 +99,8 @@ export default function CreateJob() {
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
-
+  const [view, setView] = useState<'form' |'editor'>('form')
+  const [editorContent, setEditorContent] = useState<string>('')
 
   // note: we can't infer CLI convention unless there were some params provided :()
   const [argStyles, setArgStyles] = useState<ArgStyles>({})
@@ -123,6 +133,11 @@ export default function CreateJob() {
         alert(`Oh no.  This app couldn not be initialized with previous params:\n\n${error}`)
       })
   }, [jobID])
+
+  useEffect(() => {
+    // initialize editor with current state
+    setEditorContent(getYaml())
+  }, [view])
 
   const handleAppSelection = (value: App[]) => {
     dispatch({type: 'SET', name: 'apps', value})
@@ -184,7 +199,7 @@ export default function CreateJob() {
             const obj = rules[appID],
               ruleList = obj.rules
 
-            if (!ruleList.length)
+            if (!ruleList?.length)
               return null
 
             return createRules(appParams[appID]?.appName || appIDToName(appID), 'schedule', ruleList, obj.logics)
@@ -192,9 +207,9 @@ export default function CreateJob() {
         ...Object.keys(rules)
           .flatMap(appID => {
             const obj = rules[appID],
-              ruleList = obj.rules.filter(obj => 'publish' in obj)
+              ruleList = obj.rules?.filter(obj => 'publish' in obj)
 
-            if (!ruleList.length)
+            if (!ruleList?.length)
               return []
 
             return createRules(appParams[appID]?.appName || appIDToName(appID), 'publish', ruleList, obj.logics)
@@ -202,25 +217,28 @@ export default function CreateJob() {
         ...Object.keys(rules)
           .flatMap(appID => {
             const obj = rules[appID],
-              ruleList = obj.rules.filter(obj => 'stateKey' in obj)
+              ruleList = obj.rules?.filter(obj => 'stateKey' in obj)
 
-            if (!ruleList.length)
+            if (!ruleList?.length)
               return []
 
 
             return createRules(appParams[appID]?.appName || appIDToName(appID), 'set', ruleList, obj.logics)
           })
         ],
-      successCriteria: [`walltime(${successCriteria.amount}${successCriteria.unit})`]
+      successCriteria: [`walltime('${successCriteria.amount}${successCriteria.unit}')`]
     })
   }
 
+  const handleCopyEditor = () => {
+    navigator.clipboard.writeText(getYaml())
+  }
 
   const handleSubmit = () => {
     setError(null)
-
     setSubmitting(true)
-    SES.submitJob(getYaml())
+    const spec = view == 'form' ? getYaml() : editorContent
+    SES.submitJob(spec)
       .then(() => {
         enqueueSnackbar(
           <>
@@ -236,119 +254,186 @@ export default function CreateJob() {
       .finally(() => setSubmitting(false))
   }
 
-  const disableSubmit = () =>
+  const disableFormSubmit = () =>
     !(user && name && apps.length && nodes.length && rules.length)
 
+  const disableEditorSubmit = () => {
+    let spec
+
+    // disable submit if yaml can't be parsed
+    try {
+      spec = YAML.parse(editorContent)
+    } catch {
+      return true
+    }
+
+    const {user, name, plugins, nodes, scienceRules} = spec || {}
+
+    // basic check on node strings
+    if ((nodes ? Object.keys(nodes) : []).filter(vsn => vsn.length != 4).length > 0)
+      return true
+
+    return !(user && name && plugins?.length && nodes?.length && scienceRules?.length)
+  }
 
   return (
     <Root>
       <CardViewStyle/>
       <main className="flex column gap">
-        <h1><Link to="/jobs/my-jobs">My jobs</Link> / Create job (Science Goal)</h1>
+        <div className="flex space-between gap">
+          <h1>
+            <Link to="/jobs/my-jobs">My jobs</Link> / Create job (Science Goal)
+          </h1>
+          <Notice className="flex ">
+            {view == 'form' &&
+              <Alert severity="info">
+                <b>Note:</b> the create and recreate job form is currently an
+                <b> experimental feature</b> and in the <b>early stages of development</b>.{' '}
+                <a href="https://docs.waggle-edge.ai/docs/tutorials/schedule-jobs" target="_blank" rel="noreferrer">
+                  Read more...
+                </a>
+              </Alert>
+            }
+          </Notice>
+        </div>
 
-        <Alert severity="info">
-          <b>Note:</b> the create and recreate job form is currently an
-          <b> experimental feature</b> and in the <b>early stages of development</b>.{' '}
-          <a href="https://docs.waggle-edge.ai/docs/tutorials/schedule-jobs" target="_blank" rel="noreferrer">
-            Read more...
-          </a>
-        </Alert>
-
-        <Card>
-          <Step icon="1" label="Your science goal name">
-            <TextField
-              label="Name"
-              id="science-goal-name"
-              placeholder="my science goal"
-              value={name}
-              onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
-              style={{width: 500}}
-            />
-          </Step>
-        </Card>
-
-        <Card>
-          <Step icon="2a" label="Select apps to use">
-            <AppSelector
-              selected={apps}
-              onSelected={handleAppSelection}
-            />
-          </Step>
-
-          {/* todo(nc): fix apps and appParams data model! */}
-          {apps?.length > 0 && <>
-            <Step icon="2b" label="Selected apps / specify params">
-              <SelectedAppTable
-                selected={apps}
-                appArgs={appParams}
-                argStyles={argStyles}
-                onChange={handleAppParamUpdate}
-              />
-            </Step>
-          </>}
-        </Card>
-
-        <Card>
-          <StepTitle icon="3" label="Select nodes"/>
-          <Step>
-            <NodeSelector selected={nodes} onSelected={handleNodeSelection} />
-          </Step>
-        </Card>
-
-        <Card>
-          <StepTitle icon="4"
-            label={<div>
-              Create rules
-              <Tooltip
-                title="Read docs..."
-              >
-                <sup>
-                  <a href="https://github.com/waggle-sensor/edge-scheduler/tree/main/docs/sciencerules"
-                    target="_blank" rel="noreferrer">
-                    <HelpOutlineRounded fontSize="small"/>
-                  </a>
-                </sup>
-              </Tooltip>
-            </div>}
+        <Tabs
+          value={view}
+          aria-label="job status tabs"
+          onChange={(_, val) => setView(val)}
+          sx={{borderBottom: '1px solid #cfcfcf'}}
+        >
+          <Tab
+            label={<div className="flex items-center"><FormEditorIcon/>&nbsp;Form</div>}
+            value="form"
           />
-          <Step>
-            {apps.length == 0 &&
-              <span className="muted">First select apps and node(s)</span>
-            }
-            {apps.length > 0 &&
-              <RuleBuilder apps={apps}
-                onChange={handleRuleSelection}
-              />
-            }
-          </Step>
-        </Card>
+          <Tab
+            label={<div className="flex items-center"><EditorIcon />&nbsp;Editor</div>}
+            value="editor"
+          />
+        </Tabs>
 
-        <Card>
-          <StepTitle icon="5" label="Provide success criteria" />
-          <Step>
-            <SuccessBuilder apps={apps} {...successCriteria} onChange={handleSuccessUpdate}/>
-          </Step>
-          <br/>
-          <Step>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              color="primary"
-              disabled={disableSubmit() || submitting}
-            >
-              {submitting ? 'Submitting...' : 'Submit Job'}
-            </Button>
-          </Step>
-        </Card>
+        {view == 'editor' &&
+          <EditorContainer className="flex">
+            <Editor
+              defaultLanguage="yaml"
+              defaultValue={editorContent}
+              theme="vs-dark"
+              options={{
+                scrollBeyondLastLine: false
+              }}
+              onChange={(val) => setEditorContent(val)}
+            />
+            <EditorOpts>
+              <CopyBtn tooltip="Copy YAML" onClick={handleCopyEditor} />
+            </EditorOpts>
+          </EditorContainer>
+        }
+
+        {view == 'form' &&
+          <div className="flex column gap">
+            <Card>
+              <Step icon="1" label="Your science goal name">
+                <TextField
+                  label="Name"
+                  id="science-goal-name"
+                  placeholder="my science goal"
+                  value={name}
+                  onChange={evt => dispatch({type: 'SET', name: 'name', value: evt.target.value})}
+                  style={{width: 500}}
+                />
+              </Step>
+            </Card>
+
+            <Card>
+              <Step icon="2a" label="Select apps to use">
+                <AppSelector
+                  selected={apps}
+                  onSelected={handleAppSelection}
+                />
+              </Step>
+
+              {/* todo(nc): fix apps and appParams data model! */}
+              {apps?.length > 0 && <>
+                <Step icon="2b" label="Selected apps / specify params">
+                  <SelectedAppTable
+                    selected={apps}
+                    appArgs={appParams}
+                    argStyles={argStyles}
+                    onChange={handleAppParamUpdate}
+                  />
+                </Step>
+              </>}
+            </Card>
+
+            <Card>
+              <StepTitle icon="3" label="Select nodes"/>
+              <Step>
+                <NodeSelector selected={nodes} onSelected={handleNodeSelection} />
+              </Step>
+            </Card>
+
+            <Card>
+              <StepTitle icon="4"
+                label={<div>
+                Create rules
+                  <Tooltip
+                    title="Read docs..."
+                  >
+                    <sup>
+                      <a href="https://github.com/waggle-sensor/edge-scheduler/tree/main/docs/sciencerules"
+                        target="_blank" rel="noreferrer">
+                        <HelpOutlineRounded fontSize="small"/>
+                      </a>
+                    </sup>
+                  </Tooltip>
+                </div>}
+              />
+              <Step>
+                {apps.length == 0 &&
+                <span className="muted">First select apps and node(s)</span>
+                }
+                {apps.length > 0 &&
+                <RuleBuilder apps={apps}
+                  onChange={handleRuleSelection}
+                />
+                }
+              </Step>
+            </Card>
+
+            <Card>
+              <StepTitle icon="5" label="Provide success criteria" />
+              <Step>
+                <SuccessBuilder apps={apps} {...successCriteria} onChange={handleSuccessUpdate}/>
+              </Step>
+            </Card>
+          </div>
+        }
+
+        <div>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            color="primary"
+            disabled={
+              (view == 'form' ? disableFormSubmit() : disableEditorSubmit()) || submitting
+            }
+          >
+            {submitting ? 'Submitting...' : 'Submit Job'}
+          </Button>
+        </div>
+
 
         {error && !submitting &&
           <ErrorMsg>{error.message}</ErrorMsg>
         }
 
-        <div>
-          <h2>Or, use the following spec with the Edge Scheduler (ES)</h2>
-          <Clipboard content={getYaml()} />
-        </div>
+        {view == 'form' &&
+          <div>
+            <h2>Or, use the following spec with the Edge Scheduler (ES)</h2>
+            <Clipboard content={getYaml()} />
+          </div>
+        }
       </main>
     </Root>
   )
@@ -362,10 +447,31 @@ const Root = styled.div`
 
   main {
     margin: 0 20px;
+
+    h1 {
+      width: 50%;
+      white-space: nowrap;
+      margin-bottom: 0;
+    }
   }
 
   // override for card styling
   .step-content {
     margin-bottom: 0;
   }
+`
+
+const Notice = styled.div`
+  margin: 10px 0 0 200px;
+`
+
+const EditorContainer = styled.div`
+  position: relative;
+  height: 50vh;
+  width: 70vw;
+`
+
+const EditorOpts = styled.div`
+  position: absolute;
+  right: -40px;
 `
