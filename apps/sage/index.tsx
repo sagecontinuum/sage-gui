@@ -18,6 +18,7 @@ import DAWNIcon from '@mui/icons-material/ScienceOutlined'
 import WFOIcon from '@mui/icons-material/WorkspacesOutlined'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
+import AddIcon from '@mui/icons-material/AddRounded'
 
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
 import NavItem, { Item } from '/components/nav-bar/NavItem'
@@ -126,11 +127,20 @@ const NavMenu = () => {
               to="/apps/explore"
               label="Public Apps"
             />
+            {Auth.isSignedIn &&
+              <Divider />}
             <Item
               icon={<UserIcon/>}
               to="/apps/my-apps"
               label="My Apps"
             />
+            {Auth.isSignedIn &&
+              <Item
+                icon={<AddIcon/>}
+                to="/apps/create-app"
+                label="Create App"
+              />
+            }
           </>
         }
       />
@@ -141,13 +151,11 @@ const NavMenu = () => {
           <>
             <Item
               icon={<JobsIcon/>}
-              component={Link}
               to="/jobs/all-jobs"
               label="Job Status"
             />
             <Item
               icon={<TimelineIcon/>}
-              component={Link}
               to="/jobs/timeline"
               label="Timelines"
             />
@@ -159,6 +167,11 @@ const NavMenu = () => {
                   icon={<MyJobsIcon/>}
                   to="/jobs/my-jobs"
                   label="My Jobs"
+                />
+                <Item
+                  icon={<AddIcon/>}
+                  to="/create-job"
+                  label="Create Job"
                 />
               </>
             }
