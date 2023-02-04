@@ -306,10 +306,22 @@ export default function CreateJob() {
           <Tab
             label={<div className="flex items-center"><FormEditorIcon/>&nbsp;Form</div>}
             value="form"
+            component={Link}
+            to={`/create-job?view=form${jobID ? `&start_with_job=${jobID}` : ''}`}
+            replace
           />
           <Tab
-            label={<div className="flex items-center"><EditorIcon />&nbsp;Editor</div>}
+            label={
+              <div className="flex items-center">
+                <EditorIcon />&nbsp;<span>Editor
+                  <sup>(<span className="new-badge success">new</span>)</sup>
+                </span>
+              </div>
+            }
             value="editor"
+            component={Link}
+            to={`/create-job?view=editor${jobID ? `&start_with_job=${jobID}` : ''}`}
+            replace
           />
         </Tabs>
 
