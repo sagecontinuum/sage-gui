@@ -1,14 +1,12 @@
 
-// no trailing slashes in endpoints, please
+// no trailing slashes in API endpoints, please
 
-const config = {
-  // api endpoints
+const prod = {
   beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
   es: 'https://es.sagecontinuum.org/api/v1',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
-  ses: 'https://portal.sagecontinuum.org/ses-plugin-data', // deprecated
   auth: 'https://auth.sagecontinuum.org',
   deviceRegistration:'https://registration.sagecontinuum.org',
 
@@ -20,6 +18,18 @@ const config = {
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://docs.waggle-edge.ai/docs',
+}
+
+
+const dev = {
+  ...prod,
+  ecr: 'https://sage-ecr-dev.sagecontinuum.org/api',
+  jenkins: 'https://jenkins-dev.sagecontinuum.org'
+}
+
+
+const config = {
+  ...(process.env.SAGE_UI_SERVICE_CONFIG == 'dev' ? dev : prod),
 
   disableMaps: false,
 
@@ -65,7 +75,9 @@ const config = {
   ]
 }
 
+
 export default config
+
 
 export const hasMetOne = (vsn) => {
   const sensors = config.additional_sensors
