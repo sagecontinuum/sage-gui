@@ -7,7 +7,7 @@ import Auth from '/components/auth/auth'
 
 
 export default function useWithBuildStatus<T>() {
-  let path = useMatch('*').pathname
+  const path = useMatch('*').pathname
   const view = path.split('/')[2]
 
   const [isDone, setIsDone] = useState(false)
@@ -37,7 +37,9 @@ export default function useWithBuildStatus<T>() {
               ...newRows[idx],
               isBuilding: status.building,
               buildResult: status.result,
-              buildUrl: config.jenkins + status.url.split('/jenkins')[1] + 'console'
+              buildUrl: status.url.startsWith('https://jenkins-dev') ?
+                `${status.url}console` :
+                `${config.jenkins}${status.url.split('/jenkins')[1]}console`
             }
 
             return newRows
