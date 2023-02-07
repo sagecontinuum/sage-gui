@@ -18,6 +18,7 @@ const {
 
 const url = `${sageCommons}/action/package_search` +
   `?facet.field=[%22organization%22,%22tags%22,%22res_format%22]` +
+  `&rows=200` +
   `&fq=tags:(%22sensor%22)`
 
 
@@ -27,7 +28,7 @@ const columns = [{
   format: (name, obj) =>
     missing_sensor_details.includes(obj.id) ?
       name :
-      <Link to={`/sensors/${obj.id}`}>{name}</Link>,
+      <Link to={`/sensors/${obj.id.replace(/ /g, '-')}`}>{name}</Link>,
   width: '250px'
 }, {
   id: 'id',
@@ -41,13 +42,15 @@ const columns = [{
     const len = 250
     const shortend = description.slice(0, len)
 
+    const linkID = obj.id.replace(/ /g, '-')
+
     return (
       <div>
         {title ?
-          <h3><Link to={`/sensors/${obj.id}`}>{title}</Link></h3> :
+          <h3><Link to={`/sensors/${linkID}`}>{title}</Link></h3> :
           '-'}
         {description.length > len ?
-          <>{shortend}... <Link to={`/sensors/${obj.id}`}>read more</Link></>
+          <>{shortend}... <Link to={`/sensors/${linkID}`}>read more</Link></>
           : description}
       </div>
     )
@@ -100,7 +103,9 @@ export default function SensorList() {
           const id = name.includes('(') ?
             name.slice( name.indexOf('(') + 1, name.indexOf(')') ) : name
 
-          const meta = details.find(o => o.name == id.toLowerCase())
+          const meta = details.find(o => {
+            return o.name.toLowerCase().replace(/ /g, '-') == id.toLowerCase().replace(/ /g, '-')
+          })
 
           const nodes = manifests
             .filter(o => o.sensor.includes(name))

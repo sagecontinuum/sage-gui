@@ -52,24 +52,20 @@ const config = {
       'ORTEC digiBASE PMT with NaI detector'
     ],
     'W027': [
-      'Met One ES-642'
+      'Metone ES-642'
     ],
     'W038': [
-      'Met One ES-642'
+      'Metone ES-642'
     ],
     'W06F': [
-      'Met One ES-642'
+      'Metone ES-642'
     ],
     'V008': [
-      'Mobotix M16'
+      'MOBOTIX MX-M16TB-R079IP'
     ]
   },
   // another temp solution for missing sensor meta
   missing_sensor_details: [
-    'XNP-6400RW',
-    'mobotix',
-    'ETS ML1-WS',
-    'Met One ES-642',
     'OS0-64-GEN2.0 Gen2 64 Below Horizon',
     'ORTEC digiBASE PMT with NaI detector'
   ]
@@ -81,6 +77,6 @@ export default config
 
 export const hasMetOne = (vsn) => {
   const sensors = config.additional_sensors
-  const nodes = Object.keys(sensors).filter(k => sensors[k].includes('Met One ES-642'))
+  const nodes = Object.keys(sensors).filter(k => sensors[k].includes('Metone ES-642'))
   return nodes.includes(vsn)
 }
