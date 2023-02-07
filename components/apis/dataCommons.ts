@@ -9,7 +9,7 @@ function handleErrors(res) {
   }
 
   return res.json().then(errorObj => {
-    throw Error(errorObj.error)
+    throw Error(errorObj.error.message)
   })
 }
 
