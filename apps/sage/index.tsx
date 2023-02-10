@@ -127,8 +127,6 @@ const NavMenu = () => {
               to="/apps/explore"
               label="Public Apps"
             />
-            {Auth.isSignedIn &&
-              <Divider />}
             <Item
               icon={<UserIcon/>}
               to="/apps/my-apps"
@@ -162,7 +160,6 @@ const NavMenu = () => {
 
             {Auth.isSignedIn &&
               <>
-                <Divider />
                 <Item
                   icon={<MyJobsIcon/>}
                   to="/jobs/my-jobs"

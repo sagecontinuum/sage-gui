@@ -172,7 +172,7 @@ const columns = [{
   }
 }, {
   id: 'b_sensors',
-  label: 'Botttom Sensors',
+  label: 'Bottom Sensors',
   format: (v, obj) => {
     if (obj.node_type != 'WSN')
       return '-'
@@ -226,7 +226,7 @@ const columns = [{
         : ''
       }
       {shield ?
-        <li><TT title="Microphone">ETS ML1-WS</TT></li> : ''}
+        <li><TT title="Microphone">ML1-WS IP54</TT></li> : ''}
       {shield ?
         <li><TT title="temp, humidity, pressure, and gas sensor">
           <Link to={`/sensors/bme680`}>BME680</Link>

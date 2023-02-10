@@ -1,9 +1,9 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useCallback, useEffect, useReducer, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import { TextField, Button, Alert, Tooltip } from '@mui/material'
+import { TextField, Button, Alert, Tooltip, Badge } from '@mui/material'
 import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
 import EditorIcon from '@mui/icons-material/DataObjectRounded'
 
@@ -12,10 +12,11 @@ import { Step, StepTitle } from '/components/layout/FormLayout'
 import { Card, CardViewStyle } from '/components/layout/Layout'
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import CopyBtn from '/components/utils/CopyBtn'
+import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
-import NodeSelector from './NodeSelector'
+import NodeSelector, { parseManifest } from './NodeSelector'
 import RuleBuilder from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
 
@@ -26,9 +27,13 @@ import {
   parsePlugins,
   parseRules,
 } from './createJobUtils'
-import { Rule, BooleanLogic, ArgStyles } from './ses-types'
+import {
+  type Rule,
+  type BooleanLogic,
+  type ArgStyles,
+  aggFuncs
+} from './ses-types.d'
 
-import Editor from '@monaco-editor/react'
 import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
 
@@ -43,8 +48,14 @@ import config from '/config'
 import ErrorMsg from '../../ErrorMsg'
 import HelpOutlineRounded from '@mui/icons-material/HelpOutlineRounded'
 
+import * as ECR from '/components/apis/ecr'
+import * as BK from '/components/apis/beekeeper'
+import * as User from '/components/apis/user'
+import TextEditor, { registerAutoComplete } from './TextEditor'
+
 const docker = config.dockerRegistry
 
+type View = 'form' |'editor'
 
 // todo(nc): actually use State/Action types
 type State = {
@@ -95,12 +106,12 @@ export default function CreateJob() {
 
   const params = new URLSearchParams(useLocation().search)
   const jobID = params.get('start_with_job')
+  const tab = params.get('tab') as View
 
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
-  const [view, setView] = useState<'form' |'editor'>('form')
-  const [editorContent, setEditorContent] = useState<string>('')
+  const [view, setView] = useState<View>(tab || 'form')
 
   // note: we can't infer CLI convention unless there were some params provided :()
   const [argStyles, setArgStyles] = useState<ArgStyles>({})
@@ -108,6 +119,53 @@ export default function CreateJob() {
 
   const [submitting, setSubmitting] = useState<boolean>(false)
   const [error, setError] = useState(null)
+  const [initError, setInitError] = useState(null)
+
+  const [editorState, setEditorState] = useState<{content: string, json: SES.JobTemplate}>({})
+  const [editorMsg, setEditorMsg] = useState('')
+
+
+  useEffect(() => {
+
+    // how to register for custom language support (if actually needed)
+    // monaco.languages.register({ id: 'SageYamlSpec' })
+    // monaco.languages.setMonarchTokensProvider('SageYamlSpec', monacoYaml)
+
+    /* todo(nc): json schema config
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      schemas: [{
+        uri: '',
+        schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' }
+          }
+        }
+      }]
+    })*/
+
+    const keywords = [
+      'name', 'plugins', 'nodes', 'scienceRules', 'successCriteria',
+      ...aggFuncs, 'rate', 'v'
+    ]
+
+    const p1 = ECR.listApps('public')
+    const p2 = BK.getNodeDetails()
+    const p3 = User.listNodesWithPerm('schedule')
+
+    Promise.allSettled([p1, p2, p3])
+      .then(([apps, objs, schedulable]) => {
+        objs = parseManifest(objs.value)
+        if (schedulable.status == 'fullfilled') {
+          objs = objs.filter(o => schedulable.value.includes(o.vsn))
+        }
+
+        registerAutoComplete( keywords, apps.value, objs)
+      })
+
+  }, [])
+
 
   // if needed, initialize form with job spec
   useEffect(() => {
@@ -130,48 +188,12 @@ export default function CreateJob() {
         dispatch({type: 'SET_RULES', name: 'rules', value: parseRules(scienceRules)})
       })
       .catch((error) => {
-        alert(`Oh no.  This app couldn not be initialized with previous params:\n\n${error}`)
+        setInitError(error)
       })
   }, [jobID])
 
-  useEffect(() => {
-    // initialize editor with current state
-    setEditorContent(getYaml())
-  }, [view])
 
-  const handleAppSelection = (value: App[]) => {
-    dispatch({type: 'SET', name: 'apps', value})
-  }
-
-  const handleNodeSelection = (value: string[]) => {
-    dispatch({type: 'SET', name: 'nodes', value})
-  }
-
-  const handleRuleSelection = (app, rules, logics) => {
-    dispatch({type: 'SET_RULES', value: {app, rules, logics}})
-  }
-
-  const handleSuccessUpdate = (name, value) => {
-    setSuccessCriteria(prev => ({...prev, [name]: value}))
-  }
-
-  const handleAppParamUpdate = (appID: string, name, value: string | boolean) => {
-    if (typeof value == 'boolean') {
-      setAppParams(prev => {
-        let params = prev[appID]
-        if (value == false) {
-          delete params[name]
-        } else {
-          params = {...params, [name]: null}
-        }
-        return {...prev, [appID]: {...params}}
-      })
-    } else {
-      setAppParams(prev => ({...prev, [appID]: {...prev[appID], [name]: value}}))
-    }
-  }
-
-  const getYaml = () => {
+  const getYaml = useCallback(() => {
     return YAML.stringify({
       name,
       ...(user && {user}),
@@ -226,8 +248,45 @@ export default function CreateJob() {
             return createRules(appParams[appID]?.appName || appIDToName(appID), 'set', ruleList, obj.logics)
           })
         ],
-      successCriteria: [`walltime('${successCriteria.amount}${successCriteria.unit}')`]
+      successCriteria: [`WallClock('${successCriteria.amount}${successCriteria.unit}')`]
     })
+  }, [appParams, apps, argStyles, name, nodes, rules, successCriteria.amount, successCriteria.unit])
+
+  useEffect(() => {
+    handleUpdateEditor(getYaml())
+  }, [view, getYaml])
+
+
+  const handleAppSelection = (value: App[]) => {
+    dispatch({type: 'SET', name: 'apps', value})
+  }
+
+  const handleNodeSelection = (value: string[]) => {
+    dispatch({type: 'SET', name: 'nodes', value})
+  }
+
+  const handleRuleSelection = (app, rules, logics) => {
+    dispatch({type: 'SET_RULES', value: {app, rules, logics}})
+  }
+
+  const handleSuccessUpdate = (name, value) => {
+    setSuccessCriteria(prev => ({...prev, [name]: value}))
+  }
+
+  const handleAppParamUpdate = (appID: string, name, value: string | boolean) => {
+    if (typeof value == 'boolean') {
+      setAppParams(prev => {
+        let params = prev[appID]
+        if (value == false) {
+          delete params[name]
+        } else {
+          params = {...params, [name]: null}
+        }
+        return {...prev, [appID]: {...params}}
+      })
+    } else {
+      setAppParams(prev => ({...prev, [appID]: {...prev[appID], [name]: value}}))
+    }
   }
 
   const handleCopyEditor = () => {
@@ -237,7 +296,7 @@ export default function CreateJob() {
   const handleSubmit = () => {
     setError(null)
     setSubmitting(true)
-    const spec = view == 'form' ? getYaml() : editorContent
+    const spec = view == 'form' ? getYaml() : editorState.content
     SES.submitJob(spec)
       .then(() => {
         enqueueSnackbar(
@@ -254,26 +313,30 @@ export default function CreateJob() {
       .finally(() => setSubmitting(false))
   }
 
+  const handleUpdateEditor = (val: string) => {
+    let json
+    // disable submit if yaml can't be parsed
+    try {
+      json = YAML.parse(val)
+      setEditorMsg('')
+    } catch {
+      setEditorMsg('Not valid YAML')
+    }
+
+    setEditorState({content: val, json})
+  }
+
   const disableFormSubmit = () =>
     !(user && name && apps.length && nodes.length && rules.length)
 
   const disableEditorSubmit = () => {
-    let spec
-
-    // disable submit if yaml can't be parsed
-    try {
-      spec = YAML.parse(editorContent)
-    } catch {
-      return true
-    }
-
-    const {user, name, plugins, nodes, scienceRules} = spec || {}
+    const {name, plugins, nodes, scienceRules} = editorState.json || {}
 
     // basic check on node strings
-    if ((nodes ? Object.keys(nodes) : []).filter(vsn => vsn.length != 4).length > 0)
-      return true
+    const validVSNs = nodes && typeof nodes === 'object' &&
+      Object.keys(nodes).filter(vsn => vsn.length == 4).length > 0
 
-    return !(user && name && plugins?.length && nodes?.length && scienceRules?.length)
+    return !validVSNs || !(name && plugins?.length && scienceRules?.length)
   }
 
   return (
@@ -307,39 +370,35 @@ export default function CreateJob() {
             label={<div className="flex items-center"><FormEditorIcon/>&nbsp;Form</div>}
             value="form"
             component={Link}
-            to={`/create-job?view=form${jobID ? `&start_with_job=${jobID}` : ''}`}
+            to={`/create-job?tab=form${jobID ? `&start_with_job=${jobID}` : ''}`}
             replace
           />
           <Tab
             label={
               <div className="flex items-center">
-                <EditorIcon />&nbsp;<span>Editor
-                  <sup>(<span className="new-badge success">new</span>)</sup>
-                </span>
+                <EditorIcon />&nbsp;Editor
               </div>
             }
             value="editor"
             component={Link}
-            to={`/create-job?view=editor${jobID ? `&start_with_job=${jobID}` : ''}`}
+            to={`/create-job?tab=editor${jobID ? `&start_with_job=${jobID}` : ''}`}
             replace
           />
         </Tabs>
 
         {view == 'editor' &&
-          <EditorContainer className="flex">
-            <Editor
-              defaultLanguage="yaml"
-              defaultValue={editorContent}
-              theme="vs-dark"
-              options={{
-                scrollBeyondLastLine: false
-              }}
-              onChange={(val) => setEditorContent(val)}
-            />
-            <EditorOpts>
-              <CopyBtn tooltip="Copy YAML" onClick={handleCopyEditor} />
-            </EditorOpts>
-          </EditorContainer>
+          <>
+            <EditorContainer className="flex">
+              <TextEditor
+                value={editorState.content}
+                onChange={handleUpdateEditor}
+              />
+              <EditorOpts>
+                <CopyBtn tooltip="Copy YAML" onClick={handleCopyEditor} />
+              </EditorOpts>
+            </EditorContainer>
+            {editorMsg}
+          </>
         }
 
         {view == 'form' &&
@@ -447,6 +506,22 @@ export default function CreateJob() {
           </div>
         }
       </main>
+
+
+      {initError &&
+        <ConfirmationDialog
+          title=""
+          content={
+            <div>
+              <h2>The job form could not be fully initialized with all previously supplied params</h2>
+
+              <h3>Reason:</h3>
+              {initError}
+            </div>
+          }
+          onConfirm={() => setInitError(null)}
+          onClose={() => setInitError(null)} />
+      }
     </Root>
   )
 }
@@ -470,6 +545,9 @@ const Root = styled.div`
   // override for card styling
   .step-content {
     margin-bottom: 0;
+  }
+
+  .new-badge {
   }
 `
 

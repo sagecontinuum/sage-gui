@@ -350,10 +350,10 @@ function Rules(props: RulesProps) {
 
   return (
     <RulesRoot>
+      <ActionTitle>Schedule <b>{appName}</b></ActionTitle>
       {!rules.length &&
         <div className="flex gap">
           <div className="flex column">
-            <ActionTitle>Schedule <b>{appName}</b></ActionTitle>
             <div className="flex gap">
               <Button onClick={() => handleAddRule('cron')} variant="outlined">Every...</Button>
               <Button onClick={() => handleAddRule('condition')} variant="outlined">Run when...</Button>

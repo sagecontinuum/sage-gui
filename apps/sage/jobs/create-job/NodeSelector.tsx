@@ -68,7 +68,7 @@ const columns = [{
 }]
 
 
-const parseManifest = (data) => data.map(o => ({
+export const parseManifest = (data) => data.map(o => ({
   ...o,
   lat: o.gps_lat,
   lng: o.gps_lon,

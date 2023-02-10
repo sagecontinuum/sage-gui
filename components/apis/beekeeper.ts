@@ -107,7 +107,7 @@ export async function getManifest(params?: MetaParams) : Promise<ManifestMap | M
     ...(o.node_type == 'WSN' ? {
       sensor: [
         o.top_camera, o.bottom_camera, o.left_camera, o.right_camera, 'RG-15',
-        ...(o.shield ? ['ETS ML1-WS', 'BME680'] : []),
+        ...(o.shield ? ['ML1-WS IP54', 'BME680'] : []),
         ...(config.additional_sensors[o.vsn] || [])
       ].filter(name => name != 'none')
     } : {sensor: []})
@@ -259,4 +259,9 @@ export async function getNodeDetails(bucket?: Manifest['bucket']) : Promise<Node
   }
 
   return nodeDetails
+}
+
+
+export async function getSensors() {
+
 }

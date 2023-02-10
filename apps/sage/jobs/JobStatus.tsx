@@ -127,7 +127,7 @@ const jobCols = [{
   width: '100px',
   format: (_, {state}) => {
     return relativeTime(state.last_completed) || '-'
-  }
+  },
 }]
 
 
@@ -167,8 +167,8 @@ function jobsToGeos(
     .map(vsn => ({
       id: vsn,
       vsn,
-      lng: Number(manifests[vsn].gps_lon),
-      lat: Number(manifests[vsn].gps_lat),
+      lng: Number(manifests[vsn]?.gps_lon),
+      lat: Number(manifests[vsn]?.gps_lat),
       status: 'reporting'
     }))
 }
@@ -321,7 +321,7 @@ export default function JobStatus() {
         setManifests(manifests)
 
         // todo(nc): remove when VSNs are used for urls
-        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn].node_id)}))
+        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn]?.node_id)}))
 
         let vsns = [...new Set(jobs.flatMap(o => o.nodes))] as BK.VSN[]
 
@@ -544,7 +544,9 @@ export default function JobStatus() {
                   }
                   {selectedJobs?.length == 1 &&
                     <Tooltip title="Recreate job (experimental!)">
-                      <IconButton component={Link} to={`/create-job?start_with_job=${selectedJobs[0].job_id}`}>
+                      <IconButton
+                        component={Link}
+                        to={`/create-job?tab=editor&start_with_job=${selectedJobs[0].job_id}`}>
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
@@ -552,7 +554,9 @@ export default function JobStatus() {
 
                   {isFiltered &&
                     <Tooltip title={`View timeline${selectedNodes.length > 1 ? 's' : ''}`}>
-                      <IconButton component={Link} to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
+                      <IconButton
+                        component={Link}
+                        to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
                         <TimelineIcon />
                       </IconButton>
                     </Tooltip>

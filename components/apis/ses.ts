@@ -116,12 +116,26 @@ export type State =
 export type QueuedState = 'Created' | 'Submitted'
 
 
-type Plugin = {
+type PluginSpec = {
   name: string
   pluginSpec: {
     image: string     // image ref
     args: string[]
   }
+}
+
+export type JobTemplate = {
+  name: string
+  plugins: PluginSpec[]
+  nodeTags?: null
+  nodes: {
+    [vsn: string]: true
+  }
+  scienceRules: string[]
+  successCriteria: string[]
+}
+
+type Plugin = PluginSpec & {
   status: {
     scheduling: State
     since: Date       // 2022-11-22T20:35:27.373353828Z
@@ -166,17 +180,6 @@ type JobRecord = {
 // Job type for UI
 export type Job = JobRecord & {
   nodes: VSN[]
-}
-
-export type JobTemplate = {
-  name: string
-  plugins: Plugin[]
-  nodeTags?: null
-  nodes: {
-    [vsn: string]: true
-  }
-  scienceRules: string[]
-  successCriteria: string[]
 }
 
 
