@@ -51,6 +51,7 @@
     "@parcel/transformer-sass": "^2.7.0",
     "@parcel/transformer-svg-react": "^2.5.0",
     "@parcel/transformer-svgo": "^2.0.0-nightly.1739",
+    "@parcel/transformer-yaml": "^2.8.3",
     "@testing-library/dom": "^8.11.1",
     "@testing-library/jest-dom": "^5.15.1",
     "@testing-library/react": "^12.1.2",
