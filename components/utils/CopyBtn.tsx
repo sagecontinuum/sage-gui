@@ -1,4 +1,4 @@
-import { useState, memo, useRef } from 'react'
+import { useState } from 'react'
 import styled from 'styled-components'
 
 import Tooltip from '@mui/material/Tooltip'
@@ -34,9 +34,6 @@ export default function CopyBtn(props: Props) {
 
 
 const CopyButton = styled(IconButton)`
-  position: absolute;
-  right: 0;
-  top: 0;
   background: inherit;
 
   :hover {

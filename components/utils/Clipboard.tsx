@@ -24,7 +24,9 @@ export default function Clipboard(props: Props) {
         {content}
       </div>
 
-      <CopyBtn tooltip={tooltip} onClick={() => handleCopy()} />
+      <BtnContainer>
+        <CopyBtn tooltip={tooltip} onClick={() => handleCopy()} />
+      </BtnContainer>
     </Root>
   )
 }
@@ -37,6 +39,12 @@ const Root = styled.pre`
     overflow-x: scroll;
     padding-bottom: 15px;
   }
+`
+
+const BtnContainer = styled.div`
+  position: absolute;
+  right: 0;
+  top: 0;
 `
 
 
