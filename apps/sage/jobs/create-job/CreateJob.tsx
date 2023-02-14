@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import styled from 'styled-components'
 
-import { TextField, Button, Alert, Tooltip, Badge } from '@mui/material'
+import { TextField, Button, Alert, Tooltip, Autocomplete, Popper, Box } from '@mui/material'
 import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
 import EditorIcon from '@mui/icons-material/DataObjectRounded'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import HelpOutlineRounded from '@mui/icons-material/HelpOutlineRounded'
 
 import Clipboard from '/components/utils/Clipboard'
 import { Step, StepTitle } from '/components/layout/FormLayout'
@@ -19,6 +21,9 @@ import SelectedAppTable from './SelectedAppTable'
 import NodeSelector, { parseManifest } from './NodeSelector'
 import RuleBuilder from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
+import TextEditor, { registerAutoComplete } from './TextEditor'
+import sampleYaml from './sample-job'
+import { FileFormatDot } from '/apps/sage/data-commons/FileFormatDot'
 
 import {
   type ParsedPlugins,
@@ -27,6 +32,7 @@ import {
   parsePlugins,
   parseRules,
 } from './createJobUtils'
+
 import {
   type Rule,
   type BooleanLogic,
@@ -37,21 +43,18 @@ import {
 import { useSnackbar } from 'notistack'
 import * as YAML from 'yaml'
 
-import type { App } from '/components/apis/ecr'
-import type { VSN, Manifest } from '/components/apis/beekeeper'
-
+import * as ECR from '/components/apis/ecr'
+import * as BK from '/components/apis/beekeeper'
+import * as User from '/components/apis/user'
 import * as SES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
 const user = Auth.user
 
 import config from '/config'
 import ErrorMsg from '../../ErrorMsg'
-import HelpOutlineRounded from '@mui/icons-material/HelpOutlineRounded'
 
-import * as ECR from '/components/apis/ecr'
-import * as BK from '/components/apis/beekeeper'
-import * as User from '/components/apis/user'
-import TextEditor, { registerAutoComplete } from './TextEditor'
+import pluginGif from 'url:./gifs/plugin.gif'
+
 
 const docker = config.dockerRegistry
 
@@ -60,8 +63,8 @@ type View = 'form' |'editor'
 // todo(nc): actually use State/Action types
 type State = {
   name: ''
-  apps: App[]
-  nodes: VSN[]
+  apps: ECR.App[]
+  nodes: BK.VSN[]
   rules: {
     [app: string]: {
       rules: Rule[]
@@ -70,7 +73,7 @@ type State = {
   }
 }
 
-type Action = {type: 'SET', name: string, value: string | App[] | Manifest[] }
+type Action = {type: 'SET', name: string, value: string | ECR.App[] | BK.Manifest[] }
 
 
 function reducer(state, action) {
@@ -104,6 +107,7 @@ const initState = {
 export default function CreateJob() {
   const { enqueueSnackbar } = useSnackbar()
 
+  const navigate = useNavigate()
   const params = new URLSearchParams(useLocation().search)
   const jobID = params.get('start_with_job')
   const tab = params.get('tab') as View
@@ -123,53 +127,46 @@ export default function CreateJob() {
 
   const [editorState, setEditorState] = useState<{content: string, json: SES.JobTemplate}>({})
   const [editorMsg, setEditorMsg] = useState('')
+  const [jobs, setJobs] = useState<SES.Job[]>()
+  const [viewTips, setViewTips] = useState<boolean>(false)
 
 
+  // load additional data for editor
   useEffect(() => {
+    if (tab !== 'editor')
+      return
 
-    // how to register for custom language support (if actually needed)
-    // monaco.languages.register({ id: 'SageYamlSpec' })
-    // monaco.languages.setMonarchTokensProvider('SageYamlSpec', monacoYaml)
+    const keywords = [...aggFuncs, 'rate', 'v']
 
-    /* todo(nc): json schema config
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      schemas: [{
-        uri: '',
-        schema: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' }
-          }
-        }
-      }]
-    })*/
-
-    const keywords = [
-      'name', 'plugins', 'nodes', 'scienceRules', 'successCriteria',
-      ...aggFuncs, 'rate', 'v'
-    ]
-
+    // meta for auto complete
     const p1 = ECR.listApps('public')
     const p2 = BK.getNodeDetails()
     const p3 = User.listNodesWithPerm('schedule')
 
     Promise.allSettled([p1, p2, p3])
-      .then(([apps, objs, schedulable]) => {
-        objs = parseManifest(objs.value)
+      .then(([apps, nodes, schedulable]) => {
+        nodes = parseManifest(nodes.value)
         if (schedulable.status == 'fullfilled') {
-          objs = objs.filter(o => schedulable.value.includes(o.vsn))
+          nodes = nodes.filter(o => schedulable.value.includes(o.vsn))
         }
 
-        registerAutoComplete( keywords, apps.value, objs)
+        registerAutoComplete(keywords, apps.value, nodes)
       })
 
-  }, [])
+    // jobs for job selector
+    SES.getJobs()
+      .then(jobs => {
+        setJobs(jobs)
+      })
+
+  }, [tab])
 
 
   // if needed, initialize form with job spec
   useEffect(() => {
-    if (!jobID) return
+    if (!jobID || tab == 'editor') return
+
+    if (jobID == 'sample') return
 
     SES.getTemplate(jobID)
       .then((spec) => {
@@ -190,9 +187,26 @@ export default function CreateJob() {
       .catch((error) => {
         setInitError(error)
       })
-  }, [jobID])
+  }, [jobID, tab])
+
+  // if needed, initialize editor with job spec
+  useEffect(() => {
+    if (!jobID || tab != 'editor') return
+
+    if (jobID == 'sample') {
+      setTimeout(() => handleUpdateEditor(sampleYaml))
+      return
+    }
+
+    SES.getTemplate(jobID, 'yaml')
+      .then((yaml) => handleUpdateEditor(yaml))
+      .catch((error) => {
+        setInitError(error)
+      })
+  }, [jobID, tab])
 
 
+  // todo(nc): this clean this up. namely the science rules
   const getYaml = useCallback(() => {
     return YAML.stringify({
       name,
@@ -214,7 +228,7 @@ export default function CreateJob() {
           }
         }),
       nodes: nodes.reduce((acc, vsn) => ({...acc, [vsn]: true}), {}) ,
-      scienceRules: // todo(nc): refactor the distinction between actions
+      scienceRules:
         [...Object.keys(rules)
           .filter(id => id != 'publishOrSet')
           .map(appID => {
@@ -252,9 +266,10 @@ export default function CreateJob() {
     })
   }, [appParams, apps, argStyles, name, nodes, rules, successCriteria.amount, successCriteria.unit])
 
+
   useEffect(() => {
     handleUpdateEditor(getYaml())
-  }, [view, getYaml])
+  }, [view, getYaml, jobID])
 
 
   const handleAppSelection = (value: App[]) => {
@@ -290,7 +305,7 @@ export default function CreateJob() {
   }
 
   const handleCopyEditor = () => {
-    navigator.clipboard.writeText(getYaml())
+    navigator.clipboard.writeText(editorState.content)
   }
 
   const handleSubmit = () => {
@@ -313,7 +328,7 @@ export default function CreateJob() {
       .finally(() => setSubmitting(false))
   }
 
-  const handleUpdateEditor = (val: string) => {
+  const handleUpdateEditor = (val: string /* yaml */) => {
     let json
     // disable submit if yaml can't be parsed
     try {
@@ -325,6 +340,18 @@ export default function CreateJob() {
 
     setEditorState({content: val, json})
   }
+
+  const handleSelectJob = (job) => {
+    if (!job) return
+    params.set('start_with_job', job.job_id)
+    navigate({search: params.toString()}, {replace: true})
+  }
+
+  const handleUseSample = () => {
+    params.set('start_with_job', 'sample')
+    navigate({search: params.toString()}, {replace: true})
+  }
+
 
   const disableFormSubmit = () =>
     !(user && name && apps.length && nodes.length && rules.length)
@@ -388,13 +415,88 @@ export default function CreateJob() {
 
         {view == 'editor' &&
           <>
-            <EditorContainer className="flex">
-              <TextEditor
-                value={editorState.content}
-                onChange={handleUpdateEditor}
-              />
-              <EditorOpts>
-                <CopyBtn tooltip="Copy YAML" onClick={handleCopyEditor} />
+            <EditorContainer className="flex gap">
+              <div className="flex" style={{width: '100%'}}>
+                <TextEditor
+                  value={editorState.content}
+                  onChange={handleUpdateEditor}
+                />
+              </div>
+              <EditorOpts className="flex column gap">
+                <div className="flex items-center gap">
+                  <Autocomplete
+                    options={
+                      (jobs || []).map(o => o)
+                    }
+                    getOptionLabel={(opt) =>  {
+                      return `${opt.name} (${opt.job_id})`
+                    }}
+                    renderInput={(props) =>
+                      <TextField {...props}
+                        label="Start with job"
+                        placeholder="Search jobs..."
+                        InputLabelProps={{ shrink: true }}
+                        inputProps={{
+                          ...props.inputProps
+                        }}
+                      />
+                    }
+                    renderOption={(props, opt) => {
+                      const status = (opt.state.last_state.toLowerCase() || '-')
+
+                      return (
+                        <Box component="li" {...props}>
+                          <div className="flex column">
+                            <b>{opt.name}</b>
+                            <div className="flex muted">
+                              job {opt.job_id}&nbsp;|&nbsp;{opt.user}&nbsp;&nbsp;&nbsp;
+                              {status == 'running' ?
+                                <FileFormatDot format={status} /> : `(${status})`}
+                            </div>
+                          </div>
+                        </Box>
+                      )
+                    }}
+                    PopperComponent={(props) => <Popper {...props} sx={{minWidth: 300}} />}
+                    value={jobs ? jobs.find(o => o.job_id == jobID) : null}
+                    onChange={(evt, val) => handleSelectJob(val)}
+                    sx={{width: '200px'}}
+                  />
+                  <span className="nowrap">
+                    or, <a onClick={handleUseSample}>use sample</a>
+                  </span>
+                </div>
+                <div>
+                  <h3>Docs</h3>
+                  <hr/>
+                  <ul className="no-padding list-none">
+                    <li>
+                      <a href={`${ECR.docs}/tutorials/schedule-jobs`} target="_blank" rel="noreferrer" >
+                        Submit your job
+                        <LaunchIcon className="external-link"/>
+                      </a>
+                    </li>
+                    <li>
+                      <a href={`${ECR.docs}/contact-us`} target="_blank" rel="noreferrer" >
+                        Contact us
+                        <LaunchIcon className="external-link"/>
+                      </a>
+                    </li>
+                  </ul>
+                  <h3>Help</h3>
+                  <hr/>
+                  <ul className="no-padding list-none">
+                    <li>
+                      <a onClick={() => setViewTips(true)}>
+                        View tips...
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <CopyContainer>
+                  <CopyBtn tooltip="Copy YAML" onClick={handleCopyEditor} />
+                </CopyContainer>
               </EditorOpts>
             </EditorContainer>
             {editorMsg}
@@ -522,6 +624,30 @@ export default function CreateJob() {
           onConfirm={() => setInitError(null)}
           onClose={() => setInitError(null)} />
       }
+
+      {viewTips &&
+        <ConfirmationDialog
+          title="Tips for using the editor"
+          maxWidth='lg'
+          content={
+            <div>
+              Every job must have a <b>name</b> and <b>at least one of each of the following</b>:
+              <ul>
+                <li>plugin</li>
+                <li>node</li>
+                <li>science rule</li>
+              </ul>
+
+              <p>
+                Use keywords such as <b>plugin</b>, <b>node</b>, and <b>scienceRule</b> to
+                create jobs faster
+              </p>
+              <img src={pluginGif} />
+            </div>
+          }
+          onConfirm={() => setViewTips(false)}
+          onClose={() => setViewTips(false)} />
+      }
     </Root>
   )
 }
@@ -556,12 +682,15 @@ const Notice = styled.div`
 `
 
 const EditorContainer = styled.div`
-  position: relative;
-  height: 50vh;
-  width: 70vw;
+  height: 60vh;
+  width: 80vw;
 `
 
 const EditorOpts = styled.div`
+  position: relative;
+`
+
+const CopyContainer = styled.div`
   position: absolute;
-  right: -40px;
+  bottom: 0;
 `

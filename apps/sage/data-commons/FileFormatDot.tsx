@@ -6,6 +6,7 @@ const typeColorMap = {
   ndjson: '#efdb50',
   PDF: '#ac3535',
   TAR: '#4e4e4e',
+  running: '#de9300'
 }
 
 type FileFormatProps = {

@@ -34,7 +34,8 @@ export default function CreateDialog(props: Props) {
     fullScreen,
     cancelBtn,
     onClose,
-    onConfirm
+    onConfirm,
+    ...rest
   } = props
 
   const [loading, setLoading] = useState(false)
@@ -69,6 +70,7 @@ export default function CreateDialog(props: Props) {
       aria-labelledby="dialog-title"
       fullScreen={fullScreen}
       style={fullScreen ? {marginTop: 60} : {}}
+      {...rest}
     >
       <DialogTitle id="dialog-title">
         {title}

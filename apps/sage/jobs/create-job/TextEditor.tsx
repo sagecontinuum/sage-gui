@@ -60,10 +60,10 @@ export default function TextEditor(props: Props) {
   const editorRef = useRef(null)
   const [loaded, setLoaded] = useState(false)
 
-  // todo(nc): list validation errors from sage-yaml
+  /* todo(nc): list validation errors from sage-yaml
   const handleEditorValidation = (markers) => {
     markers.forEach((marker) => console.log('onValidate:', marker.message))
-  }
+  } */
 
   useEffect(() => {
     const model = editor.createModel('', 'yaml', Uri.parse('foo://bar/baz.yaml'))
@@ -73,6 +73,7 @@ export default function TextEditor(props: Props) {
       scrollBeyondLastLine: false,
       automaticLayout: true,
       theme: 'vs-dark',
+      tabSize: 2,
       quickSuggestions: { other: true, strings: true } // critical for autocomplete (when using yaml)
     })
 
@@ -136,25 +137,27 @@ export function registerAutoComplete(keywords, apps, nodes) {
           ...keywordConfig
         },  {
           label: 'node',
-          insertText: '${1|' + nodes.map(o => o.vsn).join(',') + '|}: True',
+          insertText: nodes.length ?
+            '${1|' + nodes.map(o => o.vsn).join(',') + '|}: True'
+            : 'it seems you can not schedule on any nodes.  please contact us if interested.',
           ...keywordConfig
         }, {
-          label: 'schedule when',
+          label: 'science rule > schedule when',
           insertText: '"schedule(\'${1:appName}\'): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic schedule rule\n  ex: "schedule('my-app'): any(v('env.some.var') >= 1"` ,
           ...snippetConfig
         }, {
-          label: 'schedule every (cron)',
+          label: 'science rule > schedule every (cron)',
           insertText: '"schedule(\'${1:appName}\'): cronjob(\'${1:appName}\', \'* * * * *\')"',
           documentation: `Basic cron rule:\n  ex: "schedule('my-app-name'): cronjob('my-app-name', '* * * * *')"`,
           ...snippetConfig
         }, {
-          label: 'publish',
+          label: 'science rule > publish',
           insertText: '"publish(${1:appName}): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic action rule\n  ex: "publish('my-app-name'): any(v('env.temperature') >= 1"`,
           ...snippetConfig
         }, {
-          label: 'set',
+          label: 'science rule > set',
           insertText: '"set($1, value="$2"): any(v(\'env.some.var\') >= 1"',
           documentation: 'Basic set rule\n   ex: "set($1, value="$2"): any(v(\'env.temperature\') >= 1"',
           ...snippetConfig
