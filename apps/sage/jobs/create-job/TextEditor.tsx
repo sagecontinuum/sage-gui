@@ -153,12 +153,12 @@ export function registerAutoComplete(keywords, apps, nodes) {
           ...snippetConfig
         }, {
           label: 'science rule > publish',
-          insertText: '"publish(${1:appName}): any(v(\'env.some.var\') >= 1"',
+          insertText: '"publish(\'${1:appName\'}): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic action rule\n  ex: "publish('my-app-name'): any(v('env.temperature') >= 1"`,
           ...snippetConfig
         }, {
           label: 'science rule > set',
-          insertText: '"set($1, value="$2"): any(v(\'env.some.var\') >= 1"',
+          insertText: '"set($1, value=\'$2\'): any(v(\'env.some.var\') >= 1"',
           documentation: 'Basic set rule\n   ex: "set($1, value="$2"): any(v(\'env.temperature\') >= 1"',
           ...snippetConfig
         }, {
