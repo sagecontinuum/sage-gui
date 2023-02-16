@@ -212,7 +212,6 @@ export default function CreateJob() {
   const getYaml = useCallback(() => {
     return YAML.stringify({
       name,
-      ...(user && {user}),
       plugins:
         apps.map(o => {
           const argStyle = o.id in argStyles ? argStyles[o.id] : '-'
@@ -356,7 +355,7 @@ export default function CreateJob() {
 
 
   const disableFormSubmit = () =>
-    !(user && name && apps.length && nodes.length && rules.length)
+    !(name && apps.length && nodes.length && rules.length)
 
   const disableEditorSubmit = () => {
     const {name, plugins, nodes, scienceRules} = editorState.json || {}
