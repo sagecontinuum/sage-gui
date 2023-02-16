@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 
 import { editor, languages, Uri } from 'monaco-editor'
-
 import EditorWorker from 'url:monaco-editor/esm/vs/editor/editor.worker.js'
+
+import * as ECR from '/components/apis/ecr'
+import * as BK from '/components/apis/beekeeper'
 
 /* todo(nc): enable (see notes below) */
 // import YamlWorker from 'url:monaco-yaml/yaml.worker.js'
@@ -18,7 +20,7 @@ declare global {
 
 
 self.MonacoEnvironment = {
-  getWorkerUrl: function (moduleId, label) {
+  getWorkerUrl: function (moduleId, label: String) {
     /* todo(nc): enable (see notes below)
     if (label === 'yaml') {
       return YamlWorker
@@ -112,7 +114,11 @@ export default function TextEditor(props: Props) {
 }
 
 
-export function registerAutoComplete(keywords, apps, nodes) {
+export function registerAutoComplete(
+  keywords: string[],
+  apps: ECR.App[],
+  nodes: BK.Manifest[]
+) {
   languages.registerCompletionItemProvider('yaml', {
     provideCompletionItems: () => {
       const snippetConfig = {

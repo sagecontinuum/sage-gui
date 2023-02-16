@@ -48,7 +48,6 @@ import * as BK from '/components/apis/beekeeper'
 import * as User from '/components/apis/user'
 import * as SES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
-const user = Auth.user
 
 import config from '/config'
 import ErrorMsg from '../../ErrorMsg'
@@ -134,7 +133,7 @@ export default function CreateJob() {
 
   // load additional data for editor
   useEffect(() => {
-    if (tab !== 'editor')
+    if (view !== 'editor')
       return
 
     // jobs for job selector
@@ -160,8 +159,7 @@ export default function CreateJob() {
         registerAutoComplete(keywords, apps.value, nodes)
         setIsEditorConfigured(true)
       })
-
-  }, [tab, isEditorConfigured])
+  }, [view, isEditorConfigured])
 
 
   // if needed, initialize form with job spec
@@ -355,7 +353,7 @@ export default function CreateJob() {
 
 
   const disableFormSubmit = () =>
-    !(name && apps.length && nodes.length && rules.length)
+    !Auth.user || !(name && apps.length && nodes.length && rules.length)
 
   const disableEditorSubmit = () => {
     const {name, plugins, nodes, scienceRules} = editorState.json || {}
@@ -364,7 +362,7 @@ export default function CreateJob() {
     const validVSNs = nodes && typeof nodes === 'object' &&
       Object.keys(nodes).filter(vsn => vsn.length == 4).length > 0
 
-    return !validVSNs || !(name && plugins?.length && scienceRules?.length)
+    return !Auth.user || !validVSNs || !(name && plugins?.length && scienceRules?.length)
   }
 
   return (
@@ -584,7 +582,7 @@ export default function CreateJob() {
           </div>
         }
 
-        <div>
+        <div className="flex items-center gap">
           <Button
             onClick={handleSubmit}
             variant="contained"
@@ -595,6 +593,10 @@ export default function CreateJob() {
           >
             {submitting ? 'Submitting...' : 'Submit Job'}
           </Button>
+
+          {!Auth.user &&
+            <div><b>Note:</b> Sign in is required to to use this service.</div>
+          }
         </div>
 
 
