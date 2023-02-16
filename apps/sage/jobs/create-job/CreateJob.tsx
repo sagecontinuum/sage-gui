@@ -115,7 +115,7 @@ export default function CreateJob() {
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
-  const [view, setView] = useState<View>(tab || 'form')
+  const [view, setView] = useState<View>(tab || 'editor')
 
   // note: we can't infer CLI convention unless there were some params provided :()
   const [argStyles, setArgStyles] = useState<ArgStyles>({})
