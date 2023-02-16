@@ -95,7 +95,7 @@ export function saveSSHKey(state: Profile['ssh_public_keys']) : Promise<Profile>
 }
 
 
-type AccessPerm = 'schedule' | 'develop'
+export type AccessPerm = 'schedule' | 'develop'
 
 export type MyNode = {
   vsn: VSN

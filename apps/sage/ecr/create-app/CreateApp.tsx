@@ -24,7 +24,7 @@ import CheckBox from '/components/input/Checkbox'
 
 import Auth from '/components/auth/auth'
 import * as ECR from '/components/apis/ecr'
-import * as User from '/components/apis/user'
+import useIsApproved from '/components/hooks/useIsApproved'
 
 const user = Auth.user
 
@@ -95,23 +95,13 @@ export default function CreateApp() {
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
-  const [isApproved, setIsApproved] = useState<boolean>()
+  const {isApproved} = useIsApproved()
   const [isRegistering, setIsRegistering] = useState(false)
   const [isBuilding, setIsBuilding] = useState(false)
   const [error, setError] = useState(null)
 
   // debug settings
   const [devMode, setDevMode] = useState(false)
-
-  // disable submit button, if needed
-  useEffect(() => {
-    User.getUserDetails()
-      .then(user => setIsApproved(user.is_approved))
-      .catch(error => {
-        setError(error.message)
-        setIsApproved(false)
-      })
-  }, [])
 
   const fetchSageConfig = useCallback((branch) => {
     if (!repoURL || !branch) return
