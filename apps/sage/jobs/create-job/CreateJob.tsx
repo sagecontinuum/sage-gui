@@ -152,7 +152,7 @@ export default function CreateJob() {
     Promise.allSettled([p1, p2, p3])
       .then(([apps, nodes, schedulable]) => {
         nodes = parseManifest(nodes.value)
-        if (schedulable.status == 'fullfilled') {
+        if (schedulable.status == 'fulfilled') {
           nodes = nodes.filter(o => schedulable.value.includes(o.vsn))
         }
 
