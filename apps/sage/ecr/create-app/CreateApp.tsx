@@ -24,6 +24,7 @@ import CheckBox from '/components/input/Checkbox'
 
 import Auth from '/components/auth/auth'
 import * as ECR from '/components/apis/ecr'
+import * as User from '/components/apis/user'
 
 const user = Auth.user
 
@@ -39,6 +40,9 @@ export const isDevUser = devList.includes(user)
 
 const GITHUB_API = 'https://api.github.com'
 const GITHUB_STATIC_URL = 'https://raw.githubusercontent.com'
+const SAGE_YAML_DOCS_URL =
+  `https://github.com/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md` +
+  `#adding-hello-world-plugin-packaging-info`
 
 const EXAMPLES = {
   'hello': 'https://github.com/waggle-sensor/plugin-helloworld-ml',
@@ -55,8 +59,8 @@ const getRepoPath = (url: string) =>
 
 const initialState = {
   namespace: user,
-  // name: '',
-  // version: '',
+  // name: '',     // populated automatically
+  // version: '',  // populated automatically
   description: '',
   source: {
     architectures: [],
@@ -75,7 +79,7 @@ const initialState = {
 
 
 export default function CreateApp() {
-  let navigate = useNavigate()
+  const navigate = useNavigate()
   const { enqueueSnackbar } = useSnackbar()
 
   // app repo
@@ -91,14 +95,23 @@ export default function CreateApp() {
   const [validating, setValidating] = useState(false)
   const [isValid, setIsValid] = useState(null)
 
+  const [isApproved, setIsApproved] = useState<boolean>()
   const [isRegistering, setIsRegistering] = useState(false)
   const [isBuilding, setIsBuilding] = useState(false)
   const [error, setError] = useState(null)
 
-
   // debug settings
   const [devMode, setDevMode] = useState(false)
 
+  // disable submit button, if needed
+  useEffect(() => {
+    User.getUserDetails()
+      .then(user => setIsApproved(user.is_approved))
+      .catch(error => {
+        setError(error.message)
+        setIsApproved(false)
+      })
+  }, [])
 
   const fetchSageConfig = useCallback((branch) => {
     if (!repoURL || !branch) return
@@ -218,16 +231,20 @@ export default function CreateApp() {
   const onUpdateForm = (event) => {
     const {name, value} = event.target
 
-    let f = {...form, [name]: value}
+    const f = {...form, [name]: value}
 
     setForm(f)
     setConfig(YAML.stringify(f))
   }
 
 
-  const disableSubmit = () =>
+  const disableRegister = () =>
     !form.namespace || !form.name || !isValid ||
     configType == 'none' || isRegistering || isBuilding || error
+
+
+  const disableBuild = () =>
+    !isApproved || disableRegister()
 
 
   return (
@@ -296,8 +313,8 @@ export default function CreateApp() {
             {configType == 'none' &&
               <p>
                 No <span className="mono-term">sage.yaml</span> configuration file found.
-                Before registering or building your app, please create a sage.yaml following the
-                directions <a href="https://github.com/waggle-sensor/pywaggle/blob/main/docs/writing-a-plugin.md#adding-hello-world-plugin-packaging-info" target="_blank" rel="noreferrer"><b>here</b></a>.
+                Before registering or building your app, please create a sage.yaml
+                following the directions <a href={SAGE_YAML_DOCS_URL} target="_blank" rel="noreferrer"><b>here</b></a>.
               </p>
             }
 
@@ -317,20 +334,30 @@ export default function CreateApp() {
             onClick={onRegister}
             variant="outlined"
             color="primary"
-            disabled={disableSubmit()}
+            disabled={disableRegister()}
             className="register-app"
           >
             {isRegistering ? 'Registering...' : 'Register App'}
           </Button>
-
           <Button
             onClick={onBuild}
             variant="contained"
             color="primary"
-            disabled={disableSubmit()}
+            disabled={disableBuild()}
           >
             {isBuilding ? 'Submitting...' : 'Register & Build App'}
           </Button>
+
+          {isApproved === false &&
+            <p>
+              <br/>
+              <b>Note:</b> You may register an application, but to enable builds of apps on
+              our infrastructure, please <a href={`${ECR.docs}/contact-us`} target="_blank" rel="noreferrer" >
+                contact us
+                <LaunchIcon className="external-link"/>
+              </a>.
+            </p>
+          }
         </Step>
       </Main>
 
@@ -358,7 +385,9 @@ export default function CreateApp() {
             <h3 className="no-margin">
               Debugging
               <sup>
-                <Tooltip title={`These special debug mode options are only available to: ${devList.join(', ')}`} placement="top">
+                <Tooltip title={
+                  `These special debug mode options are only available to: ${devList.join(', ')}`
+                } placement="top">
                   <HelpIcon fontSize="small" />
                 </Tooltip>
               </sup>

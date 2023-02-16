@@ -117,7 +117,7 @@ export default function TagList(props: Props) {
         enqueueSnackbar('Build started')
         setVersions(prev => prev)
       }).catch(error => {
-        // todo(nc): implement submission (re)build error handling
+        enqueueSnackbar(`${error.message}  Please contact us for help.`, {variant: 'error'})
       }).finally(() => setBuildSubmitted(false))
   }
 

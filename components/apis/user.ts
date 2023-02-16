@@ -58,6 +58,8 @@ type User = {
   username: string
   email: string
   name: string
+  is_staff: boolean
+  is_approved: boolean
 }
 
 type Profile = {
@@ -70,9 +72,14 @@ type Profile = {
 export type UserInfo = User & Profile
 
 
+export function getUserDetails() : Promise<User> {
+  return get(`${url}/users/${user}`)
+}
+
+
 export function getUserInfo() : Promise<UserInfo> {
   return Promise.all([
-    get(`${url}/users/${user}`),
+    getUserDetails(),
     get(`${url}/user_profile/${user}`)
   ]).then(([user, profile]) => ({...user, ...profile}))
 }
