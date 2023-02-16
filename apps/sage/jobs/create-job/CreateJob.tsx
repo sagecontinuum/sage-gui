@@ -125,6 +125,7 @@ export default function CreateJob() {
   const [error, setError] = useState(null)
   const [initError, setInitError] = useState(null)
 
+  const [isEditorConfigured, setIsEditorConfigured] = useState(false)
   const [editorState, setEditorState] = useState<{content: string, json: SES.JobTemplate}>({})
   const [editorMsg, setEditorMsg] = useState('')
   const [jobs, setJobs] = useState<SES.Job[]>()
@@ -136,7 +137,12 @@ export default function CreateJob() {
     if (tab !== 'editor')
       return
 
-    const keywords = [...aggFuncs, 'rate', 'v']
+    // jobs for job selector
+    SES.getJobs()
+      .then(jobs => setJobs(jobs))
+
+    if (isEditorConfigured)
+      return
 
     // meta for auto complete
     const p1 = ECR.listApps('public')
@@ -150,16 +156,12 @@ export default function CreateJob() {
           nodes = nodes.filter(o => schedulable.value.includes(o.vsn))
         }
 
+        const keywords = [...aggFuncs, 'rate', 'v']
         registerAutoComplete(keywords, apps.value, nodes)
+        setIsEditorConfigured(true)
       })
 
-    // jobs for job selector
-    SES.getJobs()
-      .then(jobs => {
-        setJobs(jobs)
-      })
-
-  }, [tab])
+  }, [tab, isEditorConfigured])
 
 
   // if needed, initialize form with job spec
