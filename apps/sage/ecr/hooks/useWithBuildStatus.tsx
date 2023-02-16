@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMatch } from 'react-router-dom'
-import config from '/config'
+
 import * as ECR from '/components/apis/ecr'
 import Auth from '/components/auth/auth'
 
@@ -37,9 +37,7 @@ export default function useWithBuildStatus<T>() {
               ...newRows[idx],
               isBuilding: status.building,
               buildResult: status.result,
-              buildUrl: status.url.startsWith('https://jenkins-dev') ?
-                `${status.url}console` :
-                `${config.jenkins}${status.url.split('/jenkins')[1]}console`
+              buildUrl: `${status.url}console`
             }
 
             return newRows
