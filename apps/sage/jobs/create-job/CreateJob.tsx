@@ -109,12 +109,12 @@ export default function CreateJob() {
   const navigate = useNavigate()
   const params = new URLSearchParams(useLocation().search)
   const jobID = params.get('start_with_job')
-  const tab = params.get('tab') as View
+  const tab = params.get('tab') as View || 'editor'
 
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
-  const [view, setView] = useState<View>(tab || 'editor')
+  const [view, setView] = useState<View>(tab)
 
   // note: we can't infer CLI convention unless there were some params provided :()
   const [argStyles, setArgStyles] = useState<ArgStyles>({})

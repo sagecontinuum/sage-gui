@@ -39,7 +39,7 @@ const user = Auth.user
 
 export const formatters = {
   apps: (objs) => <>
-    {objs.map((obj, i) => {
+    {objs?.map((obj, i) => {
       const {name, plugin_spec} = obj
       const {image} = plugin_spec
 
@@ -108,25 +108,26 @@ const jobCols = [{
   format: (_, obj) =>
     <b className="muted">{obj.apps.length}</b>
 }, {
-  id: 'submitted',
+  id: 'last_submitted',
   label: 'Submitted',
   width: '100px',
-  format: (_, {state}) => {
-    return relativeTime(state.last_submitted) || '-'
+  format: (val) => {
+    console.log('state', val)
+    return relativeTime(val) || '-'
   }
 }, {
-  id: 'updated',
+  id: 'last_updated',
   label: 'Updated',
   width: '100px',
-  format: (_, {state}) => {
-    return relativeTime(state.last_updated) || '-'
+  format: (val) => {
+    return relativeTime(val) || '-'
   }
 }, {
   id: 'last_completed',
   label: 'Completed',
   width: '100px',
-  format: (_, {state}) => {
-    return relativeTime(state.last_completed) || '-'
+  format: (val) => {
+    return relativeTime(val) || '-'
   },
 }]
 
@@ -496,7 +497,7 @@ export default function JobStatus() {
               rows={qJobs}
               columns={cols}
               enableSorting
-              sort="-submitted"
+              sort="-last_submitted"
               onSearch={handleQuery}
               onSelect={handleJobSelect}
               onColumnMenuChange={() => { /* do nothing special */ }}

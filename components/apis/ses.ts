@@ -161,7 +161,7 @@ type JobRecord = {
   email: string
   notification_on: null // todo(nc): define
   plugins: Plugin[]
-  node_tags: null       // note: not currently used
+  nodeTags: null        // note: not currently used
   nodes: {
     [vsn: string]: true
   },
@@ -434,15 +434,16 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
   let jobData
   try {
     jobData = jobs.map((obj) => {
-      const {name, job_id, nodes, plugins, nodeTags} = obj
+      const {name, job_id, nodes, nodeTags} = obj
 
       return {
         ...obj,
-        id: job_id,
+        ...obj.state,
+        id: Number(job_id),
         name,
         nodes: nodes ?
           Object.keys(nodes) :
-          (nodeTags ? nodeTags : '?')
+          (nodeTags ? nodeTags : [])
       }
     })
   } catch(error) {
