@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import styled from 'styled-components'
-import {Item} from '../common/Layout'
-import Arrow from '@material-ui/icons/PlayCircleOutlineRounded'
+import {Item} from '/components/layout/Layout'
+import Arrow from '@mui/icons-material/PlayCircleOutlineRounded'
 
 
 import createAppImg from 'url:./create-app.png'
 
 
+const edURL = 'https://sagecontinuum.org/wp-content/uploads/2019/11/LofT-Wrigley-Jose-Osorio-Chicago-Tribune-.jpg'
+
 const scienceTexts = [
   'Climate Research',
   'Wildfire Detection',
   'Urban Health & Saftey',
-  'Water Segmentation',
   'Weather Prediction',
   'Science',
   'Discovery'
@@ -42,13 +43,13 @@ export default function Home() {
 
       <Overview>
         <Subtext>
-          Designing and building a new kind of national-scale reusable cyberinfrastructure
+          A new kind of national-scale cyberinfrastructure
           to enable AI at the edge.
         </Subtext>
 
         <Cards>
           <Card>
-            <img src="https://sagecontinuum.org/wp-content/uploads/2019/11/LofT-Wrigley-Jose-Osorio-Chicago-Tribune-.jpg" />
+            <img src={edURL} />
             <h3>Learn</h3>
             <p>[Sage's goal on Education].  Read more the Sage project</p>
           </Card>
@@ -62,7 +63,6 @@ export default function Home() {
             <h3>Run</h3>
             <p>
               Schedule jobs to run on nodes.<br/>
-              <span className="muted">(Expected later 2021)</span>
             </p>
           </Card>
           <Card>

@@ -46,6 +46,7 @@ import UserProfile from './account/UserProfile'
 import MyNodes from './account/MyNodes'
 import Devices from './account/Devices'
 import DevAccess from './account/DevAccess'
+import Home from './home/home.tsx'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -257,6 +258,10 @@ export default function Sage() {
                     <Route path="my-nodes" element={<RequireAuth><Devices /></RequireAuth>} />
                     <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                   </Route>
+
+                  {/* prototyping
+                    <Route path="home-demo" element={<Home />} />
+                  */}
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
