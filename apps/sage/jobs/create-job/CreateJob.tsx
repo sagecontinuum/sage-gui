@@ -343,8 +343,8 @@ export default function CreateJob() {
   }
 
   const handleSelectJob = (job) => {
-    if (!job) return
-    params.set('start_with_job', job.job_id)
+    if (!job) params.delete('start_with_job')
+    else params.set('start_with_job', job.job_id)
     navigate({search: params.toString()}, {replace: true})
   }
 
