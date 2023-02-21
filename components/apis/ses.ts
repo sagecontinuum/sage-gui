@@ -483,9 +483,26 @@ export async function submitJob(spec: string) {
 }
 
 
+
+type SuspendedJob = {
+  job_id: string
+  state: 'Suspended'
+}
+
+async function suspendJob(id: string) : Promise<SuspendedJob> {
+  return await get(`${url}/jobs/${id}/rm?id=${id}&suspend=true`)
+}
+
+
+export async function suspendJobs(ids: string[]) : Promise<SuspendedJob[]> {
+  return Promise.all(ids.map(id => suspendJob(id)))
+}
+
+
+
 type RemovedJob = {
   job_id: string
-  state: 'Removed' | string  // todo(nc): other states?
+  state: 'Removed'
 }
 
 async function removeJob(id: string) : Promise<RemovedJob> {

@@ -2,22 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { Button, Divider, IconButton, Tooltip } from '@mui/material'
+import { Button, IconButton, Tooltip } from '@mui/material'
 
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
 import AddIcon from '@mui/icons-material/AddRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
-import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
-import EditIcon from '@mui/icons-material/EditRounded'
-import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
-
-import { useSnackbar } from 'notistack'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import Map from '/components/Map'
-import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import Table, { TableSkeleton } from '/components/table/Table'
 import { queryData } from '/components/data/queryData'
 import { relativeTime } from '/components/utils/units'
@@ -27,6 +21,7 @@ import { Card } from '/components/layout/Layout'
 
 import JobTimeLine from './JobTimeline'
 import JobDetails from './JobDetails'
+import JobActions from './JobActions'
 import StateFilters from './StateFilters'
 
 import * as BK from '/components/apis/beekeeper'
@@ -112,7 +107,6 @@ const jobCols = [{
   label: 'Submitted',
   width: '100px',
   format: (val) => {
-    console.log('state', val)
     return relativeTime(val) || '-'
   }
 }, {
@@ -234,11 +228,12 @@ const filterByState = (jobs: ES.Job[], states: ES.State[]) : ES.Job[] =>
   jobs.filter(o => states.includes(o.state.last_state) )
 
 
+export type Views = 'all-jobs' | 'my-jobs' | 'timeline'
+
 export default function JobStatus() {
   const navigate = useNavigate()
-  const { enqueueSnackbar } = useSnackbar()
 
-  const {view = 'all-jobs'} = useParams()
+  const {view = 'all-jobs'} = useParams() as {view: Views}
 
   const params = new URLSearchParams(useLocation().search)
   const query = params.get('query') || '' // query string
@@ -269,7 +264,6 @@ export default function JobStatus() {
   // todo(nc): poll data; some optimization is needed
   const [lastUpdate, setLastUpdate] = useState(null)
 
-  const [confirm, setConfirm] = useState(false)
   const [error, setError] = useState()
 
 
@@ -323,15 +317,11 @@ export default function JobStatus() {
 
         // todo(nc): remove when VSNs are used for urls
         jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn]?.node_id)}))
-
-        let vsns = [...new Set(jobs.flatMap(o => o.nodes))] as BK.VSN[]
-
         setCounts(getCounts(jobs, view == 'my-jobs'))
 
         // if 'my jobs', filter vsns to the user's nodes
         if (filterUser) {
           const nodes = jobs.flatMap(o => o.nodes)
-          vsns = vsns.filter(vsn => nodes.includes(vsn))
           jobs = jobs.filter(o => o.user == user)
         }
 
@@ -389,23 +379,6 @@ export default function JobStatus() {
     navigate(`/jobs/${view}`, {search: params.toString(), replace: true})
   }
 
-
-  const handleRemoveJob = () => {
-    setLoading(true)
-    return ES.removeJobs(selectedJobs.map(o => o.job_id))
-      .then(resList => {
-        const rmCount = resList.filter(o => o.state == 'Removed').length
-        enqueueSnackbar(`${rmCount} jobs removed`, {variant: 'success'})
-        setUpdateTable(prev => prev + 1)
-      })
-      .catch(() => {
-        enqueueSnackbar('Failed to remove at least one job', {variant: 'error'})
-        setUpdateTable(prev => prev + 1)
-      })
-      .finally(() => setLoading(false))
-  }
-
-
   const getSubset = (selectedNodes, nodes) => {
     const ids = selectedNodes.map(o => o.id)
     const subset = nodes.filter(obj => ids.includes(obj.id))
@@ -417,11 +390,9 @@ export default function JobStatus() {
     setJobState(prev => prev == state ? null : state)
   }
 
-
-  const handleDownload = () => {
-    ES.downloadTemplate(selectedJobs[0].job_id)
+  const handleActionComplete = () => {
+    setUpdateTable(prev => prev + 1) // force re-request
   }
-
 
 
   // if query param ?job=<job_id> is provided
@@ -509,7 +480,7 @@ export default function JobStatus() {
               }
               middleComponent={
                 <TableOptions className="flex">
-                  {view == 'my-jobs' &&
+                  {view == 'my-jobs' && !selectedJobs?.length &&
                     <Button
                       component={Link}
                       to="/create-job"
@@ -521,37 +492,11 @@ export default function JobStatus() {
                     </Button>
                   }
 
-                  {view == 'my-jobs' && isFiltered &&
-                    <>
-                      <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
-                      <Tooltip title={`Remove Job${selectedJobs.length > 1 ? 's' : ''}`}>
-                        <IconButton
-                          style={{color: '#c70000'}}
-                          onClick={() => setConfirm(true)}
-                        >
-                          <RemoveIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
-                    </>
-                  }
-
-                  {selectedJobs?.length == 1 &&
-                    <Tooltip title="Download spec">
-                      <IconButton onClick={handleDownload}>
-                        <DownloadIcon />
-                      </IconButton>
-                    </Tooltip>
-                  }
-                  {selectedJobs?.length == 1 &&
-                    <Tooltip title="Recreate job (experimental!)">
-                      <IconButton
-                        component={Link}
-                        to={`/create-job?tab=editor&start_with_job=${selectedJobs[0].job_id}`}>
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                  }
+                  <JobActions
+                    view={view}
+                    jobs={selectedJobs}
+                    onDone={handleActionComplete}
+                  />
 
                   {isFiltered &&
                     <Tooltip title={`View timeline${selectedNodes.length > 1 ? 's' : ''}`}>
@@ -602,21 +547,6 @@ export default function JobStatus() {
           jobs={jobs}
           manifestByVSN={manifests}
           handleCloseDialog={handleCloseDialog}
-        />
-      }
-
-      {confirm &&
-        <ConfirmationDialog
-          title={`Are you sure you want to remove ${selectedJobs.length > 1 ? 'these jobs' : 'this job'}?`}
-          content={<p>
-            Job{selectedJobs.length > 1 ? 's' : ''} <b>
-              {selectedJobs.map(o => o.job_id).join(', ')}
-            </b> will be removed!
-          </p>}
-          confirmBtnText="Remove"
-          confirmBtnStyle={{background: '#c70000'}}
-          onConfirm={handleRemoveJob}
-          onClose={() => setConfirm(false)}
         />
       }
 

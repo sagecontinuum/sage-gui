@@ -85,7 +85,7 @@ export default function JobDetails(props: Props) {
               <CloudDownloadOutlined />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Recreate job (experimental!)">
+          <Tooltip title="Recreate job">
             <IconButton component={Link} to={`/create-job?tab=editor&start_with_job=${job.job_id}`}>
               <EditRounded fontSize="small"/>
             </IconButton>
