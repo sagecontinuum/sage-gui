@@ -95,7 +95,7 @@ export default function JobActions(props: Props) {
           </Tooltip>
           <Tooltip title={`Remove Job${jobs.length > 1 ? 's' : ''}`}>
             <IconButton
-              style={{color: '#c70000'}}
+              className="danger"
               onClick={() => setConfirmRm(true)}
             >
               <RemoveIcon />
@@ -138,7 +138,7 @@ export default function JobActions(props: Props) {
             </b> will be suspended!
           </p>}
           confirmBtnText="Suspend"
-          confirmBtnStyle={{background: '#c70000'}}
+          confirmBtnStyle={{background: '#3c2525'}}
           onConfirm={handleSuspendJob}
           onClose={() => setConfirmSuspend(false)}
         />

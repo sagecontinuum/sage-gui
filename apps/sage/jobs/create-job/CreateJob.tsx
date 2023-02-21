@@ -114,13 +114,13 @@ export default function CreateJob() {
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
 
   const [appParams, setAppParams] = useState<ParsedPlugins['params']>({})
-  const [view, setView] = useState<View>(tab)
 
   // note: we can't infer CLI convention unless there were some params provided :()
   const [argStyles, setArgStyles] = useState<ArgStyles>({})
   const [successCriteria, setSuccessCriteria] = useState({amount: 1, unit: 'day'})
 
   const [submitting, setSubmitting] = useState<boolean>(false)
+  const [confirmOverwrite, setConfirmOverwrite] = useState<boolean>(false)
   const [error, setError] = useState(null)
   const [initError, setInitError] = useState(null)
 
@@ -131,9 +131,10 @@ export default function CreateJob() {
   const [viewTips, setViewTips] = useState<boolean>(false)
 
 
+
   // load additional data for editor
   useEffect(() => {
-    if (view !== 'editor')
+    if (tab !== 'editor')
       return
 
     // jobs for job selector
@@ -161,7 +162,7 @@ export default function CreateJob() {
         registerAutoComplete(keywords, apps.value, nodes, availNodes)
         setIsEditorConfigured(true)
       })
-  }, [view, isEditorConfigured])
+  }, [tab, isEditorConfigured])
 
 
   // if needed, initialize form with job spec
@@ -270,7 +271,7 @@ export default function CreateJob() {
 
   useEffect(() => {
     handleUpdateEditor(getYaml())
-  }, [view, getYaml, jobID])
+  }, [tab, getYaml, jobID])
 
 
   const handleAppSelection = (value: App[]) => {
@@ -312,12 +313,32 @@ export default function CreateJob() {
   const handleSubmit = () => {
     setError(null)
     setSubmitting(true)
-    const spec = view == 'form' ? getYaml() : editorState.content
+    const spec = tab == 'form' ? getYaml() : editorState.content
     SES.submitJob(spec)
       .then(() => {
         enqueueSnackbar(
           <>
             Job created!
+            <Button component={Link} to="/jobs/my-jobs" variant="contained" sx={{marginLeft: '50px'}}>
+              view job
+            </Button>
+          </>
+          , {variant: 'success'}
+        )
+      })
+      .catch(err => setError(err))
+      .finally(() => setSubmitting(false))
+  }
+
+  const handleOverwrite = () => {
+    setError(null)
+    setSubmitting(true)
+    const spec = editorState.content
+    SES.editJob(jobID, spec)
+      .then(() => {
+        enqueueSnackbar(
+          <>
+            Job successfully overwritten!
             <Button component={Link} to="/jobs/my-jobs" variant="contained" sx={{marginLeft: '50px'}}>
               view job
             </Button>
@@ -353,6 +374,19 @@ export default function CreateJob() {
     navigate({search: params.toString()}, {replace: true})
   }
 
+  const handleTabChange = (tab: View) => {
+    params.set('tab', tab)
+    navigate({search: params.toString()}, {replace: true})
+  }
+
+  const handleReviewSpec = () => {
+    params.set('tab', 'editor')
+    navigate({search: params.toString()}, {replace: true})
+  }
+
+  const getJobName = (id: ES.Job['job_id']) =>
+    jobs?.find(o => o.job_id == id).name
+
 
   const disableFormSubmit = () =>
     !Auth.user || !(name && apps.length && nodes.length && rules.length)
@@ -367,6 +401,7 @@ export default function CreateJob() {
     return !Auth.user || !validVSNs || !(name && plugins?.length && scienceRules?.length)
   }
 
+
   return (
     <Root>
       <CardViewStyle/>
@@ -376,7 +411,7 @@ export default function CreateJob() {
             <Link to="/jobs/my-jobs">My jobs</Link> / Create job (Science Goal)
           </h1>
           <Notice className="flex ">
-            {view == 'form' &&
+            {tab == 'form' &&
               <Alert severity="info">
                 <b>Note:</b> the create and recreate job form is currently an
                 <b> experimental feature</b> and in the <b>early stages of development</b>.{' '}
@@ -389,9 +424,9 @@ export default function CreateJob() {
         </div>
 
         <Tabs
-          value={view}
+          value={tab}
           aria-label="job status tabs"
-          onChange={(_, val) => setView(val)}
+          onChange={(_, val) => handleTabChange(val)}
           sx={{borderBottom: '1px solid #cfcfcf'}}
         >
           <Tab
@@ -414,7 +449,7 @@ export default function CreateJob() {
           />
         </Tabs>
 
-        {view == 'editor' &&
+        {tab == 'editor' &&
           <>
             <EditorContainer className="flex gap">
               <div className="flex" style={{width: '100%'}}>
@@ -426,9 +461,7 @@ export default function CreateJob() {
               <EditorOpts className="flex column gap">
                 <div className="flex items-center gap">
                   <Autocomplete
-                    options={
-                      (jobs || []).map(o => o)
-                    }
+                    options={jobs || []}
                     getOptionLabel={(opt) =>  {
                       return `${opt.name} (${opt.job_id})`
                     }}
@@ -504,7 +537,7 @@ export default function CreateJob() {
           </>
         }
 
-        {view == 'form' &&
+        {tab == 'form' &&
           <div className="flex column gap">
             <Card>
               <Step icon="1" label="Your science goal name">
@@ -585,16 +618,49 @@ export default function CreateJob() {
         }
 
         <div className="flex items-center gap">
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            color="primary"
-            disabled={
-              (view == 'form' ? disableFormSubmit() : disableEditorSubmit()) || submitting
-            }
-          >
-            {submitting ? 'Submitting...' : 'Submit Job'}
-          </Button>
+          {tab == 'form' &&
+            <Button
+              onClick={handleReviewSpec}
+              variant="contained"
+              color="primary"
+              disabled={disableFormSubmit() || submitting
+              }
+            >
+              {submitting ? 'Submitting...' : 'Review job submission'}
+            </Button>
+          }
+
+          {tab == 'editor' && !jobID &&
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              disabled={disableEditorSubmit() || submitting}
+            >
+              {submitting ? 'Submitting...' : 'Submit Job'}
+            </Button>
+          }
+
+          {tab == 'editor' && jobID &&
+            <>
+              <Button
+                onClick={handleSubmit}
+                variant="contained"
+                color="primary"
+                disabled={disableEditorSubmit() || submitting}
+              >
+                {submitting ? 'Submitting...' : 'Submit as New Job'}
+              </Button>
+              <Button
+                onClick={() => setConfirmOverwrite(true)}
+                variant="outlined"
+                disabled={disableEditorSubmit() || submitting}
+                className="danger"
+              >
+                {submitting ? 'Submitting...' : `Overwrite Existing Job: ${getJobName(jobID)}`}
+              </Button>
+            </>
+          }
 
           {!Auth.user &&
             <div><b>Note:</b> Sign in is required to to use this service.</div>
@@ -606,7 +672,7 @@ export default function CreateJob() {
           <ErrorMsg>{error.message}</ErrorMsg>
         }
 
-        {view == 'form' &&
+        {tab == 'form' &&
           <div>
             <h2>Or, use the following spec with the Edge Scheduler (ES)</h2>
             <Clipboard content={getYaml()} />
@@ -652,6 +718,22 @@ export default function CreateJob() {
           }
           onConfirm={() => setViewTips(false)}
           onClose={() => setViewTips(false)} />
+      }
+
+      {confirmOverwrite &&
+        <ConfirmationDialog
+          title={<div>Overwrite job "{getJobName(jobID)}"?</div>}
+          content={
+            <Alert severity="warning">
+              The job <b>{getJobName(jobID)}</b> (job id {jobID}) will be <b>overwritten</b>.<br/>
+              The previous job sumbmission specification <b>will be lost!</b>
+            </Alert>
+          }
+          confirmBtnText="OK, Overwrite It!"
+          confirmBtnStyle={{background: '#c70000'}}
+          onConfirm={handleOverwrite}
+          onClose={() => setConfirmOverwrite(false)}
+        />
       }
     </Root>
   )

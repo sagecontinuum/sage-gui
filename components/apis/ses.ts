@@ -483,6 +483,11 @@ export async function submitJob(spec: string) {
 }
 
 
+export async function editJob(id: Job['job_id'], spec: string) {
+  const res = await post(`${url}/edit?id=${id}`, spec)
+  return res
+}
+
 
 type SuspendedJob = {
   job_id: string
