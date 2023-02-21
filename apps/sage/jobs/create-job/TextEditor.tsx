@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
+import { groupBy, pickBy, concat } from 'lodash'
 import { editor, languages, Uri } from 'monaco-editor'
 import EditorWorker from 'url:monaco-editor/esm/vs/editor/editor.worker.js'
 
@@ -116,11 +117,31 @@ export default function TextEditor(props: Props) {
 
 export function registerAutoComplete(
   keywords: string[],
-  apps: ECR.App[],
-  nodes: BK.Manifest[]
+  apps: ECR.AppDetails[],
+  nodes: BK.Manifest[],
+  availNodes: BK.Manifest[]
 ) {
+  const isLegit = (_, key) => !['none', 'undefined'].includes(key)
+
+  const byProject = pickBy(groupBy(availNodes, 'project'), isLegit)
+
+  const byCameraType = {
+    'top_camera':  pickBy(groupBy(availNodes, 'top_camera'), isLegit),
+    'bottom_camera': pickBy(groupBy(availNodes, 'bottom_camera'), isLegit),
+    'right_camera': pickBy(groupBy(availNodes, 'right_camera'), isLegit),
+    'left_camera': pickBy(groupBy(availNodes, 'left_camera'), isLegit)
+  }
+
+  const anyCamera = {
+    'top_camera': [].concat(...Object.values(byCameraType.top_camera)),
+    'bottom_camera': [].concat(...Object.values(byCameraType.bottom_camera)),
+    'right_camera': [].concat(...Object.values(byCameraType.right_camera)),
+    'left_camera': [].concat(...Object.values(byCameraType.left_camera))
+  }
+
   languages.registerCompletionItemProvider('yaml', {
     provideCompletionItems: () => {
+
       const snippetConfig = {
         kind: languages.CompletionItemKind.Snippet,
         insertTextRules: languages.CompletionItemInsertTextRule.InsertAsSnippet
@@ -131,6 +152,7 @@ export function registerAutoComplete(
         insertTextRules: languages.CompletionItemInsertTextRule.InsertAsSnippet
       }
 
+
       const suggestions = [
         ...keywords.map(word => ({
           label: word,
@@ -139,18 +161,44 @@ export function registerAutoComplete(
         })),
         {
           label: 'image',
-          insertText: 'image: ${1|' + apps.map(o => `registry.sagecontinuum.org/${o.id}`).join(',') + '|}',
+          insertText: 'image: ${1|' + apps.map(o => `${ECR.dockerRegistry}/${o.id}`).join(',') + '|}',
           ...keywordConfig
         },  {
           label: 'node',
-          insertText: nodes.length ?
-            '${1|' + nodes.map(o => o.vsn).join(',') + '|}: True'
-            : 'it seems you can not schedule on any nodes.  please contact us if interested.',
+          insertText: availNodes.length ?
+            '${1|' + availNodes.map(o => o.vsn).join(',') + '|}: True' :
+            'it seems you can not schedule on any nodes.  please contact us if interested.',
           ...keywordConfig
-        }, {
+        },
+        ...Object.keys(byProject).map(project => ({
+          label: `node > all nodes in project ${project}`,
+          insertText: availNodes.length ?
+            byProject[project].map(node => `${node.vsn}: True`).join('\n') :
+            'it seems you can not schedule on any nodes.  please contact us if interested.',
+          ...keywordConfig
+        })),
+        ...Object.keys(anyCamera).map(camDirection => ({
+          label: `node > all nodes with a ${camDirection}`,
+          insertText: anyCamera[camDirection].map(node => `${node.vsn}: True`).join('\n'),
+          ...keywordConfig
+        })),
+        ...Object.keys(byCameraType).flatMap(camDirection =>
+          Object.keys(byCameraType[camDirection]).map(camType =>
+            ({
+              label: `node > all nodes with ${camType} as ${camDirection}`,
+              insertText: byCameraType[camDirection][camType].map(node => `${node.vsn}: True`).join('\n'),
+              ...keywordConfig
+            }))
+        ),
+        {
           label: 'science rule > schedule when',
           insertText: '"schedule(\'${1:appName}\'): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic schedule rule\n  ex: "schedule('my-app'): any(v('env.some.var') >= 1"` ,
+          ...snippetConfig
+        }, {
+          label: 'science rule > schedule/run whenever possible',
+          insertText: '"schedule(\'${1:appName}\'): True',
+          documentation: `The simplest schedule rule possible\n  ex: "schedule('my-app'): True"` ,
           ...snippetConfig
         }, {
           label: 'science rule > schedule every (cron)',

@@ -151,12 +151,14 @@ export default function CreateJob() {
     Promise.allSettled([p1, p2, p3])
       .then(([apps, nodes, schedulable]) => {
         nodes = parseManifest(nodes.value)
+
+        let availNodes
         if (schedulable.status == 'fulfilled') {
-          nodes = nodes.filter(o => schedulable.value.includes(o.vsn))
+          availNodes = nodes.filter(o => schedulable.value.includes(o.vsn))
         }
 
         const keywords = [...aggFuncs, 'rate', 'v']
-        registerAutoComplete(keywords, apps.value, nodes)
+        registerAutoComplete(keywords, apps.value, nodes, availNodes)
         setIsEditorConfigured(true)
       })
   }, [view, isEditorConfigured])

@@ -1,6 +1,8 @@
 import config from '/config'
 export const url = config.ecr
 export const docs = config.docs
+export const dockerRegistry = config.dockerRegistry
+
 
 import { handleErrors } from '../fetch-utils'
 
