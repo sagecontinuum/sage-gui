@@ -5,6 +5,7 @@ import { Button, Alert, FormControl, OutlinedInput, FormLabel } from '@mui/mater
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import Clipboard from '/components/utils/Clipboard'
+import CopyBtn from '/components/utils/CopyBtn'
 import * as User from '/components/apis/user'
 import Auth from '/components/auth/auth'
 
@@ -58,6 +59,10 @@ export default function DevAccess() {
       .finally(() => setIsSaving(false))
   }
 
+  const handleCopyToken = () => {
+    navigator.clipboard.writeText(Auth.token)
+  }
+
 
   return (
     <Root>
@@ -66,7 +71,10 @@ export default function DevAccess() {
           <h1 className="no-margin">Your access token</h1>
           <div className="flex items-center justify-between gap">
             <div className="flex-grow">
-              <Clipboard content={Auth.token} />
+              <pre style={{width: 375}}>
+                **************************************
+                <CopyBtn tooltip="Copy token" onClick={handleCopyToken} />
+              </pre>
             </div>
             <div>
               <Alert severity="warning">
