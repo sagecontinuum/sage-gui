@@ -3,6 +3,48 @@
 The following are some notable changes to the UI
 
 
+## [2.4.0](https://github.com/sagecontinuum/sage-gui/compare/v2.3.0...v2.4.0) (2023-02-23)
+
+
+### Features
+
+* **data:** add multi-node query; SAGE-1568 ([d38c2de](https://github.com/sagecontinuum/sage-gui/commit/d38c2de32600b7a039407fa32cba257017c0eb3f))
+* **data:** enable charts on names query; use names based query for "recent data" links; SAGE-1590 ([e8e13ad](https://github.com/sagecontinuum/sage-gui/commit/e8e13ad949f1636dad91949758b4332a133cf731))
+* **data:** show last available time (with simple link to query browser); SAGE-1590 ([c062916](https://github.com/sagecontinuum/sage-gui/commit/c0629160c0effe679dce240358c191c164beea2d))
+* **jobs:** add aggregation functions to jobs form; refactor/update job related types; SAGE-1583 ([df43464](https://github.com/sagecontinuum/sage-gui/commit/df43464309682065355d4570beaf53161e59d982))
+* **jobs:** add cron string input form; update spec utils; update types; SAGE-1583 ([6e6b116](https://github.com/sagecontinuum/sage-gui/commit/6e6b1166a7ac1c5ad6478a3eda79cd1a4994760b))
+* **jobs:** add job spec text editing support; SAGE-1583 ([20be6f2](https://github.com/sagecontinuum/sage-gui/commit/20be6f2e0a797a20099e43d237fdefe78acd2376))
+* **jobs:** add overwrite job button; also use "review job" button on form; SAGE-1660 ([f00321b](https://github.com/sagecontinuum/sage-gui/commit/f00321baef57d446ff5dcc9abc8086688cfb97ee))
+* **jobs:** add resubmit button; minor bugfixes and cleanup; SAGE-1660 ([e93083f](https://github.com/sagecontinuum/sage-gui/commit/e93083f2f0f86551b48694f7e558a621ca022dea))
+* **jobs:** add show and download yaml buttons; SAGE-1583 ([9fffb55](https://github.com/sagecontinuum/sage-gui/commit/9fffb5509a01cd1ca47146587f0a4a87d70f3f8d))
+* **jobs:** add suspend button (and refactor actions); SAGE-1660 ([96f9844](https://github.com/sagecontinuum/sage-gui/commit/96f984419cb92bba063f70dbac1d8c0e073e942e))
+* **jobs:** improvements and refactorings for text editing; add "start with job" options; autocompletion improvements; remove initial validation on the editor view; SAGE-1632; SAGE-1641 ([45f00a1](https://github.com/sagecontinuum/sage-gui/commit/45f00a139606df7222f88377dfb46d01b5f66987))
+* **jobs:** job editor refactoring (part 1 of 2); SAGE-1583 ([a1f2a03](https://github.com/sagecontinuum/sage-gui/commit/a1f2a03c96172eaed223a8aa049fd9b48645f12b))
+* **jobs:** list plugin params in job details; SAGE-1583 ([9c0ad8f](https://github.com/sagecontinuum/sage-gui/commit/9c0ad8fb6815ca963121cff2f4ef9587f867b3ca))
+* **jobs:** prototype publish/set action forms; some cleanup; SAGE-1627 ([22650e4](https://github.com/sagecontinuum/sage-gui/commit/22650e49df499649b8e7f89d3236de8be8416bfe))
+* **jobs:** some additional editor snippets; SAGE-1660 ([8313fdd](https://github.com/sagecontinuum/sage-gui/commit/8313fdd6c38fb3893bd8fa77bf70aed863052044))
+
+
+### Bug Fixes
+
+* **data:** fix error handling in commons request ([6caf8fc](https://github.com/sagecontinuum/sage-gui/commit/6caf8fcdeb0409b57402ad407a94c52b49e62230))
+* **data:** fix infinite data searching bug on node pages ([11de004](https://github.com/sagecontinuum/sage-gui/commit/11de004dcb8211cffa2adc42435497b37b88021e))
+* **data:** fix infinite data searching bug on node pages ([60a03f8](https://github.com/sagecontinuum/sage-gui/commit/60a03f84485c2d34af9fbc631e53a472a8824a2c))
+* **data:** sort query by time for charts as well, fixing the issue when zone meta is not present for all data) ([649c6f1](https://github.com/sagecontinuum/sage-gui/commit/649c6f12addb9f299b5c5394cf8396fd6b658bb2))
+* **ecr:** improve build error handling; disable builds if not approved; some minor cleanup ([93b13f4](https://github.com/sagecontinuum/sage-gui/commit/93b13f456b0e62d25ef8e68eb28031a583887c20))
+* **jobs:** add note to create-job when signed out ([3ba7692](https://github.com/sagecontinuum/sage-gui/commit/3ba76927ce124abb0bee7054388a2eed85726595))
+* **jobs:** don't reregister text editor snippets when changing tabs ([a76699c](https://github.com/sagecontinuum/sage-gui/commit/a76699c1eec6caaac3d294906313c6b598aae1bb))
+* **jobs:** fix a couple string quotes in snippets ([0b79ce5](https://github.com/sagecontinuum/sage-gui/commit/0b79ce5f4d22e45cb3206a0949c9040531736483))
+* **jobs:** fix bug in editor where all nodes are being listed ([458e5f7](https://github.com/sagecontinuum/sage-gui/commit/458e5f77a6dda68cf4460ac52ce4daf4ecf64dce))
+* **jobs:** fix deselection of job in editor ([20bdb3a](https://github.com/sagecontinuum/sage-gui/commit/20bdb3ac3e49e91cd212f5ca44a6eeece8a409e8))
+* **jobs:** fix public job count; minor job status/creation design changes; SAGE-1583 ([057fe8c](https://github.com/sagecontinuum/sage-gui/commit/057fe8c0117d854987e510e238356681c77d7ea8))
+* **jobs:** fix sorting on times and ids; (temp) fix for listing when nodetags is used; SAGE-1660 ([9a7e487](https://github.com/sagecontinuum/sage-gui/commit/9a7e4879bcd51ed99cd74f0b3f5b7beeadcc3ae3))
+* **jobs:** remove unnecessary user field from submitted job spec ([e77dc14](https://github.com/sagecontinuum/sage-gui/commit/e77dc144bad646211f0fa5022c01e0cc9bca1384))
+* **jobs:** replace urls for tab routing ([84cd1d8](https://github.com/sagecontinuum/sage-gui/commit/84cd1d8db1d8cb3cdf37e4ec06265f04344b1318))
+* **jobs:** rule syntax cleanup; SAGE-1583 ([c3a1a67](https://github.com/sagecontinuum/sage-gui/commit/c3a1a677d4236bcf54aa049788fa99f7baa71bad))
+* **jobs:** support plugin name inputs; type/linting fixes; SAGE-1583 ([75275c1](https://github.com/sagecontinuum/sage-gui/commit/75275c13a5274c0b0667c14ddca8e31c71f37849))
+* **portal:** improve IP regex in timeline data parsing ([143c401](https://github.com/sagecontinuum/sage-gui/commit/143c4016be8ef67e9aa97f79568dacbc8780c335))
+
 ## [2.3.0](https://github.com/sagecontinuum/sage-gui/compare/v2.2.0...v2.3.0) (2022-12-15)
 
 
