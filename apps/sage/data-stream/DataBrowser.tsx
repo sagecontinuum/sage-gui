@@ -633,7 +633,6 @@ export default function DataPreview() {
     navigate({search: params.toString()}, {replace: true})
   }
 
-
   const goToNames = (val: DataTypes, nameQuery: string) => {
     clearParams()
     params.set('type', val)
@@ -651,6 +650,12 @@ export default function DataPreview() {
       goToTasks(val, 'audiosampler')
     else
       handleRemoveFilters()
+  }
+
+  const handleQueryViewerChange = (field: string, next: string[]) => {
+    if (!next.length) params.delete(field)
+    else params.set(field, next.join('|'))
+    navigate({search: params.toString()}, {replace: true})
   }
 
 
@@ -819,6 +824,8 @@ export default function DataPreview() {
                         [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
                       }), {})
                   }
+                  onDelete={handleQueryViewerChange}
+                  disableDelete={{field: 'apps', filter: defaultPlugin}}
                 />
               </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-import { groupBy, pickBy, concat } from 'lodash'
+import { groupBy, pickBy } from 'lodash'
 import { editor, languages, Uri } from 'monaco-editor'
 import EditorWorker from 'url:monaco-editor/esm/vs/editor/editor.worker.js'
 

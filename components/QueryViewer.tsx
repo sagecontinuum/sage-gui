@@ -1,13 +1,24 @@
 import styled from 'styled-components'
 
+import Chip from '@mui/material/Chip'
 
 
 type Props = {
- filterState: {[field: string]: string[]}
+  filterState: {[field: string]: string[]}
+  onDelete?: (field: string, newState: string[]) => void
+  disableDelete?: {field: string, filter: string}
 }
 
 export default function QueryViewer(props: Props) {
-  const {filterState} = props
+  const {filterState, onDelete, disableDelete} = props
+
+  const handleDelete = (field: string, filters: string[], toRemove: string) => {
+    filters.splice(filters.indexOf(toRemove), 1)
+    onDelete(field, filters)
+  }
+
+  const shouldDisableDelete = (field: string, filter: string) =>
+    onDelete && disableDelete?.field == field && disableDelete?.filter == filter
 
   const fields =
     Object.keys(filterState)
@@ -24,7 +35,20 @@ export default function QueryViewer(props: Props) {
               <FilterSet>
                 <b>{field}</b>
                 <span> is </span>
-                <Badge>{filters.join(', ')}</Badge>
+                {filters.map((filter, i) =>
+                  <span key={filter}>
+                    <Chip
+                      color="primary"
+                      variant="filled"
+                      size="small"
+                      onDelete={shouldDisableDelete(field, filter) ?
+                        null : () => handleDelete(field, filters, filter)
+                      }
+                      label={filter}
+                    />
+                    {i !== filters.length - 1 && ' '}
+                  </span>
+                )}
               </FilterSet>
               {i !== fields.length - 1  && <span> and </span>}
             </span>
@@ -40,12 +64,4 @@ const Root = styled.div`
 `
 
 const FilterSet = styled.span`
-`
-
-const Badge = styled.span`
-  padding: 2px 5px;
-  font-weight: 800;
-  color: #fff;
-  border-radius: 5px;
-  background-color: #1a8cc9;
 `
