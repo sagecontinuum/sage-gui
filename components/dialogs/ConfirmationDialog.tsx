@@ -20,6 +20,7 @@ type Props = {
   cancelBtn?: boolean
   onClose: () => void
   onConfirm: () => void | Promise<any>
+  maxWidth?: string
 }
 
 

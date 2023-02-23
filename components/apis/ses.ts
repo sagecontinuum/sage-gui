@@ -156,7 +156,7 @@ type ScienceGoal = {
 // official SES job type
 type JobRecord = {
   name: string
-  job_id: string        // string number
+  job_id: number        // converted from string to number
   user: string
   email: string
   notification_on: null // todo(nc): define
@@ -456,7 +456,7 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
 
 
 export async function getTemplate(
-  jobID: string,
+  jobID: Job['job_id'],
   type?: 'yaml' | 'json'
 ) : Promise<JobTemplate | string> {
   const yaml = await getYAML(`${url}/jobs/${jobID}/template`, options)
@@ -476,10 +476,16 @@ export async function downloadTemplate(jobID: string) {
 }
 
 
-
+// submit new job
 export async function submitJob(spec: string) {
   const res = await post(`${url}/submit`, spec)
   return res
+}
+
+
+// resubmit for multiple existing jobs
+export async function submitJobs(ids: number[]) {
+  return Promise.all(ids.map(id => get(`${url}/submit?id=${id}`)))
 }
 
 

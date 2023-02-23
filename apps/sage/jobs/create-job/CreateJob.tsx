@@ -108,7 +108,8 @@ export default function CreateJob() {
 
   const navigate = useNavigate()
   const params = new URLSearchParams(useLocation().search)
-  const jobID = params.get('start_with_job')
+  const jobID = Number(params.get('start_with_job'))
+  const startWithSample = params.get('start_with_sample')
   const tab = params.get('tab') as View || 'editor'
 
   const [{name, apps, nodes, rules}, dispatch] = useReducer(reducer, initState)
@@ -124,7 +125,6 @@ export default function CreateJob() {
   const [error, setError] = useState(null)
   const [initError, setInitError] = useState(null)
 
-  const [isEditorConfigured, setIsEditorConfigured] = useState(false)
   const [editorState, setEditorState] = useState<{content: string, json: SES.JobTemplate}>({})
   const [editorMsg, setEditorMsg] = useState('')
   const [jobs, setJobs] = useState<SES.Job[]>()
@@ -140,9 +140,6 @@ export default function CreateJob() {
     // jobs for job selector
     SES.getJobs()
       .then(jobs => setJobs(jobs))
-
-    if (isEditorConfigured)
-      return
 
     // meta for auto complete
     const p1 = ECR.listApps('public')
@@ -160,16 +157,13 @@ export default function CreateJob() {
 
         const keywords = [...aggFuncs, 'rate', 'v']
         registerAutoComplete(keywords, apps.value, nodes, availNodes)
-        setIsEditorConfigured(true)
       })
-  }, [tab, isEditorConfigured])
+  }, [tab])
 
 
   // if needed, initialize form with job spec
   useEffect(() => {
     if (!jobID || tab == 'editor') return
-
-    if (jobID == 'sample') return
 
     SES.getTemplate(jobID)
       .then((spec) => {
@@ -192,20 +186,22 @@ export default function CreateJob() {
       })
   }, [jobID, tab])
 
+
+  // if needed, initialize editor with sample
+  useEffect(() => {
+    if (tab != 'editor' || !startWithSample) return
+
+    setTimeout(() => handleUpdateEditor(sampleYaml))
+  }, [startWithSample, tab])
+
+
   // if needed, initialize editor with job spec
   useEffect(() => {
     if (!jobID || tab != 'editor') return
 
-    if (jobID == 'sample') {
-      setTimeout(() => handleUpdateEditor(sampleYaml))
-      return
-    }
-
     SES.getTemplate(jobID, 'yaml')
       .then((yaml) => handleUpdateEditor(yaml))
-      .catch((error) => {
-        setInitError(error)
-      })
+      .catch((error) => setInitError(error))
   }, [jobID, tab])
 
 
@@ -271,10 +267,10 @@ export default function CreateJob() {
 
   useEffect(() => {
     handleUpdateEditor(getYaml())
-  }, [tab, getYaml, jobID])
+  }, [tab, getYaml, jobID, startWithSample])
 
 
-  const handleAppSelection = (value: App[]) => {
+  const handleAppSelection = (value: ECR.App[]) => {
     dispatch({type: 'SET', name: 'apps', value})
   }
 
@@ -334,7 +330,7 @@ export default function CreateJob() {
     setError(null)
     setSubmitting(true)
     const spec = editorState.content
-    SES.editJob(jobID, spec)
+    return SES.editJob(jobID, spec)
       .then(() => {
         enqueueSnackbar(
           <>
@@ -366,11 +362,14 @@ export default function CreateJob() {
   const handleSelectJob = (job) => {
     if (!job) params.delete('start_with_job')
     else params.set('start_with_job', job.job_id)
+
+    params.delete('start_with_sample')
     navigate({search: params.toString()}, {replace: true})
   }
 
   const handleUseSample = () => {
-    params.set('start_with_job', 'sample')
+    params.delete('start_with_job')
+    params.set('start_with_sample', 'true')
     navigate({search: params.toString()}, {replace: true})
   }
 
@@ -384,8 +383,8 @@ export default function CreateJob() {
     navigate({search: params.toString()}, {replace: true})
   }
 
-  const getJobName = (id: ES.Job['job_id']) =>
-    jobs?.find(o => o.job_id == id).name
+  const getJobName = (id: SES.Job['job_id']) =>
+    jobs?.find(o => o.job_id == id)?.name
 
 
   const disableFormSubmit = () =>
@@ -630,7 +629,7 @@ export default function CreateJob() {
             </Button>
           }
 
-          {tab == 'editor' && !jobID &&
+          {tab == 'editor' && !jobID ?
             <Button
               onClick={handleSubmit}
               variant="contained"
@@ -639,9 +638,7 @@ export default function CreateJob() {
             >
               {submitting ? 'Submitting...' : 'Submit Job'}
             </Button>
-          }
-
-          {tab == 'editor' && jobID &&
+            :
             <>
               <Button
                 onClick={handleSubmit}

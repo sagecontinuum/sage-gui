@@ -457,7 +457,7 @@ export default function JobStatus() {
           state={jobState}
           onFilter={handleStatusFilter} />
 
-        {loading &&
+        {view == 'all-jobs' && loading &&
           <TableSkeleton />
         }
 

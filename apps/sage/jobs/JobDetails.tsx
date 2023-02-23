@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { Divider, IconButton, Tooltip } from '@mui/material'
-import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
+import { Button, Divider, IconButton, Tooltip } from '@mui/material'
+import EditIcon from '@mui/icons-material/EditRounded'
 import TerminalRounded from '@mui/icons-material/TerminalRounded'
 import TableView from '@mui/icons-material/TableViewRounded'
-import EditRounded from '@mui/icons-material/EditRounded'
 import CloudDownloadOutlined from '@mui/icons-material/CloudDownloadOutlined'
 
 import ParamDetails from './ParamDetails'
@@ -17,20 +16,17 @@ import Clipboard from '/components/utils/Clipboard'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import { formatters, TimelineContainer } from './JobStatus'
-
-import type { ManifestByVSN } from './JobStatus'
-import type { Job } from '/components/apis/ses'
-
 import JobTimeLine from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
+import { type Manifest } from '/components/apis/beekeeper'
 
 
 
 type Props = {
-  job: Job
-  jobs: Job[]
-  manifestByVSN: ManifestByVSN
+  job: ES.Job
+  jobs: ES.Job[]
+  manifestByVSN: {[vsn: string]: Manifest}
   handleCloseDialog: () => void
 }
 
@@ -70,10 +66,19 @@ export default function JobDetails(props: Props) {
   return (
     <ConfirmationDialog
       title={
-        <div className="flex">
+        <div className="flex items-center">
           <div>
             Job Overview
           </div>
+          <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
+          <Button
+            component={Link}
+            variant="contained"
+            startIcon={<EditIcon/>}
+            size="small"
+            to={`/create-job?tab=editor&start_with_job=${job.job_id}`}>
+            Recreate or edit job
+          </Button>
           <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
           <Tooltip title={yaml ? 'Show table' : 'Show YAML'}>
             <IconButton onClick={handleViewYaml}>
@@ -83,11 +88,6 @@ export default function JobDetails(props: Props) {
           <Tooltip title="Download spec">
             <IconButton onClick={handleDownload}>
               <CloudDownloadOutlined />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Recreate job">
-            <IconButton component={Link} to={`/create-job?tab=editor&start_with_job=${job.job_id}`}>
-              <EditRounded fontSize="small"/>
             </IconButton>
           </Tooltip>
         </div>

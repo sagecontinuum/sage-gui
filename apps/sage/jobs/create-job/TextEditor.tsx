@@ -19,6 +19,8 @@ declare global {
   }
 }
 
+let yamlLanguage
+
 
 self.MonacoEnvironment = {
   getWorkerUrl: function (moduleId, label: String) {
@@ -89,6 +91,7 @@ export default function TextEditor(props: Props) {
 
     return () => {
       editorRef.current.getModel()?.dispose()
+      yamlLanguage?.dispose()
     }
   }, [])
 
@@ -139,7 +142,7 @@ export function registerAutoComplete(
     'left_camera': [].concat(...Object.values(byCameraType.left_camera))
   }
 
-  languages.registerCompletionItemProvider('yaml', {
+  yamlLanguage = languages.registerCompletionItemProvider('yaml', {
     provideCompletionItems: () => {
 
       const snippetConfig = {
@@ -192,22 +195,22 @@ export function registerAutoComplete(
         ),
         {
           label: 'science rule > schedule when',
-          insertText: '"schedule(\'${1:appName}\'): any(v(\'env.some.var\') >= 1"',
+          insertText: '"schedule(\'${1:myapp}\'): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic schedule rule\n  ex: "schedule('my-app'): any(v('env.some.var') >= 1"` ,
           ...snippetConfig
         }, {
           label: 'science rule > schedule/run whenever possible',
-          insertText: '"schedule(\'${1:appName}\'): True',
+          insertText: '"schedule(\'${1:myapp}\'): True',
           documentation: `The simplest schedule rule possible\n  ex: "schedule('my-app'): True"` ,
           ...snippetConfig
         }, {
           label: 'science rule > schedule every (cron)',
-          insertText: '"schedule(\'${1:appName}\'): cronjob(\'${1:appName}\', \'* * * * *\')"',
+          insertText: '"schedule(\'${1:myapp}\'): cronjob(\'${1:myapp}\', \'* * * * *\')"',
           documentation: `Basic cron rule:\n  ex: "schedule('my-app-name'): cronjob('my-app-name', '* * * * *')"`,
           ...snippetConfig
         }, {
           label: 'science rule > publish',
-          insertText: '"publish(\'${1:appName\'}): any(v(\'env.some.var\') >= 1"',
+          insertText: '"publish(\'${1:myapp\'}): any(v(\'env.some.var\') >= 1"',
           documentation: `Basic action rule\n  ex: "publish('my-app-name'): any(v('env.temperature') >= 1"`,
           ...snippetConfig
         }, {

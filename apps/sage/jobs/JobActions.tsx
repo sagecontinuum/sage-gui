@@ -5,10 +5,11 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { Button, Divider, IconButton, Tooltip } from '@mui/material'
 
-import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
 import EditIcon from '@mui/icons-material/EditRounded'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import PlayIcon from '@mui/icons-material/PlayCircleOutlineRounded'
 import PauseIcon from '@mui/icons-material/PauseCircleOutlineRounded'
+import RemoveIcon from '@mui/icons-material/DeleteOutlineRounded'
 
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import * as ES from '/components/apis/ses'
@@ -35,6 +36,23 @@ export default function JobActions(props: Props) {
 
   const handleDownload = () => {
     ES.downloadTemplate(jobs[0].job_id)
+  }
+
+  const handleRunJob = () => {
+    setLoading(true)
+    const ids = jobs.map(o => o.job_id)
+    return ES.submitJobs(ids)
+      .then(() => {
+        const count = ids.length
+        enqueueSnackbar(`${count} job${count > 1 ? 's' : ''} resubmitted`, {variant: 'success'})
+      })
+      .catch(() => {
+        enqueueSnackbar('Failed to resubmit at least one job', {variant: 'error'})
+      })
+      .finally(() => {
+        setLoading(false)
+        onDone()
+      })
   }
 
   const handleSuspendJob = () => {
@@ -71,21 +89,31 @@ export default function JobActions(props: Props) {
 
 
   return (
-    <Root className="flex">
+    <Root className="flex items-center">
       {jobs.length == 1 &&
-        <Button
-          component={Link}
-          variant="contained"
-          startIcon={<EditIcon/>}
-          size="small"
-          to={`/create-job?tab=editor&start_with_job=${jobs[0].job_id}`}>
-          Recreate or edit job
-        </Button>
+        <>
+          <Button
+            component={Link}
+            variant="contained"
+            startIcon={<EditIcon/>}
+            size="small"
+            to={`/create-job?tab=editor&start_with_job=${jobs[0].job_id}`}>
+            Recreate or edit job
+          </Button>
+          <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
+        </>
       }
 
       {view == 'my-jobs' && jobs.length > 0 &&
         <>
-          <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
+          <Tooltip title={`Resubmit Job${jobs.length > 1 ? 's' : ''}`}>
+            <IconButton
+              onClick={handleRunJob}
+              className="running"
+            >
+              <PlayIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title={`Suspend Job${jobs.length > 1 ? 's' : ''}`}>
             <IconButton
               onClick={() => setConfirmSuspend(true)}
@@ -95,8 +123,8 @@ export default function JobActions(props: Props) {
           </Tooltip>
           <Tooltip title={`Remove Job${jobs.length > 1 ? 's' : ''}`}>
             <IconButton
-              className="danger"
               onClick={() => setConfirmRm(true)}
+              className="danger"
             >
               <RemoveIcon />
             </IconButton>
@@ -138,7 +166,7 @@ export default function JobActions(props: Props) {
             </b> will be suspended!
           </p>}
           confirmBtnText="Suspend"
-          confirmBtnStyle={{background: '#3c2525'}}
+          confirmBtnStyle={{background: '#c70000'}}
           onConfirm={handleSuspendJob}
           onClose={() => setConfirmSuspend(false)}
         />

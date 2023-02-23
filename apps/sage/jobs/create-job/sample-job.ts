@@ -6,7 +6,7 @@ plugins:
       image: registry.sagecontinuum.org/theone/imagesampler:0.3.0
       args:
         - -stream
-        - bottom
+        - bottom_camera
 nodes:
   W023:
 scienceRules:
