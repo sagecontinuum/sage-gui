@@ -219,6 +219,14 @@ export default function Nodes() {
     return subset
   }
 
+
+  const handleQueryViewerChange = (field: string, next: string[]) => {
+    if (!next.length) params.delete(field)
+    else params.set(field, next.join(','))
+    navigate({search: params.toString()}, {replace: true})
+  }
+
+
   return (
     <Root>
       <Overview className="flex">
@@ -312,7 +320,10 @@ export default function Nodes() {
                   </>
                 }
 
-                <QueryViewer filterState={filterState} />
+                <QueryViewer
+                  filterState={filterState}
+                  onDelete={handleQueryViewerChange}
+                />
               </FilterControls>
             }
           />

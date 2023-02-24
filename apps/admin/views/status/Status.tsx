@@ -211,6 +211,13 @@ export default function StatusView() {
   }
 
 
+  const handleQueryViewerChange = (field: string, next: string[]) => {
+    if (!next.length) params.delete(field)
+    else params.set(field, next.join(','))
+    navigate({search: params.toString()}, {replace: true})
+  }
+
+
   return (
     <Root>
       <Overview className="flex">
@@ -326,7 +333,10 @@ export default function StatusView() {
                   </>
                 }
 
-                <QueryViewer filterState={filterState} />
+                <QueryViewer
+                  filterState={filterState}
+                  onDelete={handleQueryViewerChange}
+                />
               </FilterControls>
             }
           />
