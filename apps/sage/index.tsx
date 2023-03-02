@@ -259,10 +259,6 @@ export default function Sage() {
                     <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                   </Route>
 
-                  {/* prototyping
-                    <Route path="home-demo" element={<Home />} />
-                  */}
-
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
