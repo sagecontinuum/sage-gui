@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-import ChartsIcon from '@mui/icons-material/AssessmentOutlined'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
@@ -16,14 +15,12 @@ import Tooltip from '@mui/material/Tooltip'
 import * as utils from '/components/utils/units'
 
 import config from '/config'
-import settings from '../../settings'
 
-import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
+import HealthSparkler, { healthColor, sanityColor } from '/components/viz/HealthSparkler'
+import NodeLastReported, { getColorClass } from '/components/utils/NodeLastReported'
 
-const FAIL_THRES = settings.elapsedThresholds.fail
-const WARNING_THRES = settings.elapsedThresholds.warning
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
-//const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
+// const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 
 
 const dateOpts = {
@@ -49,13 +46,6 @@ const LiveGPSDot = styled(Badge)`
     padding: 0px;
   }
 `
-
-export function getColorClass(val, severe: number, warning: number, defaultClass?: string) {
-  if (!val || val >= severe) return 'severe font-bold'
-  else if (val > warning) return 'warning font-bold'
-  else if (defaultClass) return defaultClass
-  return ''
-}
 
 
 function fsAggregator(data) {
@@ -245,17 +235,10 @@ const columns = [{
 }, {
   id: 'elapsedTimes',
   label: 'Last Updated',
-  format: (val) => {
-    if (!val) return '-'
+  format: (elapsedTimes) => {
+    if (!elapsedTimes) return '-'
 
-    return Object.keys(val)
-      .map(host =>
-        <div key={host}>
-          {host}: <b className={getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')}>
-            {utils.msToTime(val[host])}
-          </b>
-        </div>
-      )
+    return <NodeLastReported elapsedTimes={elapsedTimes} />
   }
 }, {
   id: 'uptimes',

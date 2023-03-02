@@ -15,7 +15,8 @@ import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 import * as utils from '/components/utils/units'
 import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
-import cols, { getColorClass, GoodChip } from '../status/columns'
+import { getColorClass } from '/components/utils/NodeLastReported'
+import cols, { GoodChip } from '../status/columns'
 
 import { mergeMetrics } from '/components/views/statusDataUtils'
 

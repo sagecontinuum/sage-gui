@@ -9,13 +9,13 @@ import Badge from '@mui/material/Badge'
 import MapIcon from '@mui/icons-material/RoomOutlined'
 import Tooltip from '@mui/material/Tooltip'
 
+import NodeLastReported from '/components/utils/NodeLastReported'
 import * as utils from '/components/utils/units'
 import settings from '/apps/project/settings'
 import config from '/config'
 
 
-const FAIL_THRES = settings.elapsedThresholds.fail
-const WARNING_THRES = settings.elapsedThresholds.warning
+
 const SAGE_UI_PROJECT = settings.SAGE_UI_PROJECT
 
 const {additional_sensors} = config
@@ -24,12 +24,6 @@ const dateOpts = {
   month: 'long',
   day: 'numeric',
   year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  second: 'numeric'
-}
-
-const sysTimeOpts = {
   hour: 'numeric',
   minute: 'numeric',
   second: 'numeric'
@@ -44,36 +38,43 @@ const LiveGPSDot = styled(Badge)`
   }
 `
 
-export function getColorClass(val, severe: number, warning: number, defaultClass?: string) {
-  if (!val || val >= severe) return 'severe font-bold'
-  else if (val > warning) return 'warning font-bold'
-  else if (defaultClass) return defaultClass
-  return ''
-}
-
-const shortMntName = name =>
-  name.replace('root-', '')
-    .replace('plugin-data', 'plugins')
-    .replace('core_sdcard_test', 'sdcard')
-
-
-
-const FSItem = styled.div`
-  margin-right: 1em;
-  font-size: .85em;
-  width: 40px;
-`
-
 const columns = [{
   id: 'status',
   label: 'Status',
-  format: (val) => {
+  format: (val, obj) => {
+    let icon
     if (val == 'reporting')
-      return <CheckIcon className="success status-icon" />
+      icon = <CheckIcon className="success status-icon" />
     else if (val == 'not reporting')
-      return <ErrorIcon className="failed status-icon" />
+      icon = <ErrorIcon className="failed status-icon" />
     else
-      return <InactiveIcon className="inactive status-icon" />
+      icon = <InactiveIcon className="inactive status-icon" />
+
+    if (!obj.elapsedTimes) {
+      return (
+        <Tooltip
+          title="Node is marked as offline"
+          componentsProps={{tooltip: {sx: {background: '#000'}}}}
+          placement="top" >
+          {icon}
+        </Tooltip>
+      )
+    }
+
+    return (
+      <Tooltip
+        title={
+          <>
+            Last reported metric<br/>
+            <NodeLastReported elapsedTimes={obj.elapsedTimes} />
+          </>
+        }
+        componentsProps={{tooltip: {sx: {background: '#000'}}}}
+        placement="top"
+      >
+        {icon}
+      </Tooltip>
+    )
   },
   width: '1px'
 }, {
@@ -113,19 +114,10 @@ const columns = [{
 }, {
   id: 'elapsedTimes',
   label: 'Last Updated',
-  format: (val) => {
-    if (!val) return '-'
+  format: (elapsedTimes) => {
+    if (!elapsedTimes) return '-'
 
-    return Object.keys(val)
-      .map(host =>
-        <div key={host}>
-          {host}: <b className={
-            getColorClass(val[host], FAIL_THRES, WARNING_THRES, 'success font-bold')
-          }>
-            {utils.msToTime(val[host])}
-          </b>
-        </div>
-      )
+    return <NodeLastReported elapsedTimes={elapsedTimes} />
   },
   hide: true
 }, {
