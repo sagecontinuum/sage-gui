@@ -125,9 +125,9 @@ export default function JobDetails(props: Props) {
                     label: `Node Tags`,
                     format: (v) => (v || []).join(', ')
                   }, {
-                    id: 'plugins',
+                    id: 'params',
                     label: `Params`,
-                    format: (v) => <ParamDetails data={v} />
+                    format: (v, obj) => <ParamDetails data={obj.plugins} />
                   }, {
                     id: 'science_rules',
                     label: `Science Rules`,
