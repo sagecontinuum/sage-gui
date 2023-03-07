@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import * as User from '../apis/user'
 
 
-export default function useHasCapability(perm: User.AccessPerm) {
+export default function useHasCapability(perm: User.AccessPerm | User.AccessPerm[]) {
   const [hasCapability, setHasCapability] = useState<boolean>()
 
   useEffect(() => {

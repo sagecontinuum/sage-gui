@@ -137,9 +137,16 @@ export async function listNodesWithPerm(perm: AccessPerm) : Promise<VSN[]> {
 }
 
 
-export async function hasCapability(perm: AccessPerm) : Promise<boolean> {
-  const nodes = await listNodesWithPerm(perm)
-  return nodes.length > 0
+export async function hasCapability(perm: AccessPerm | AccessPerm[]) : Promise<boolean> {
+  const perms = Array.isArray(perm) ? perm : [perm]
+
+  const nodes = await listMyNodes()
+  const nodesWithSomePerm = perms.flatMap(perm =>
+    nodes.filter(obj => obj[perm])
+      .map(obj => obj.vsn)
+  )
+
+  return nodesWithSomePerm.length > 0
 }
 
 
