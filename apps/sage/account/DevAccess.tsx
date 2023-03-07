@@ -6,6 +6,7 @@ import { Button, Alert, FormControl, OutlinedInput, FormLabel } from '@mui/mater
 import { useProgress } from '/components/progress/ProgressProvider'
 import Clipboard from '/components/utils/Clipboard'
 import CopyBtn from '/components/utils/CopyBtn'
+import useHasCapability from '/components/hooks/useHasCapability'
 import * as User from '/components/apis/user'
 import Auth from '/components/auth/auth'
 
@@ -22,28 +23,23 @@ export default function DevAccess() {
   const {setLoading} = useProgress()
 
   // presentation
-  const [canDev, setCanDev] = useState<boolean>()
   const [error, setError] = useState(null)
 
   // form
   const [isSaving, setIsSaving] = useState(false)
-  const [state, setState] = useState<Form>()
+  const [state, setState] = useState<Form>({ssh_public_keys: ''})
 
+  const {hasCapability: isPermitted} = useHasCapability(['develop', 'schedule'])
 
   useEffect(() => {
-    setLoading(true)
-    User.hasCapability('develop')
-      .then(canDev => {
-        setCanDev(canDev)
+    if (!isPermitted) return
 
-        // set keys
-        User.getUserInfo()
-          .then(({ssh_public_keys}) => setState({ssh_public_keys}))
-          .catch(err => setError(err.message))
-      })
+    setLoading(true)
+    User.getUserInfo()
+      .then(({ssh_public_keys}) => setState({ssh_public_keys}))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [setLoading])
+  }, [setLoading, isPermitted])
 
 
   const handleChange = (evt) => {
@@ -66,9 +62,11 @@ export default function DevAccess() {
 
   return (
     <Root>
-      {canDev &&
-        <CopyToken>
-          <h1 className="no-margin">Your access token</h1>
+
+      <CopyToken>
+        <h1 className="no-margin">Your access token</h1>
+
+        {isPermitted === true &&
           <div className="flex items-center justify-between gap">
             <div className="flex-grow">
               <pre style={{width: 375}}>
@@ -83,8 +81,18 @@ export default function DevAccess() {
               </Alert>
             </div>
           </div>
-        </CopyToken>
-      }
+        }
+
+        {isPermitted === false &&
+          <div className="flex items-center">
+            <Alert severity="info">
+              <b>Note</b> you do not have scheduling or developer access to any nodes.<br/>
+              Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a
+              node. Once you have some permissions, your dev token will appear here
+            </Alert>
+          </div>
+        }
+      </CopyToken>
 
       <h1 className="no-margin">Update SSH public keys</h1>
 
@@ -127,20 +135,14 @@ export default function DevAccess() {
 
       <h2>Finish setting up node access</h2>
 
-      {!canDev &&
-        <Alert severity="info">
-          Note you do not have dev access on any nodes.
-          Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a node.
-        </Alert>
-      }
-
       <p>Once you've updated your SSH public key above, you'll need to do the following steps:</p>
 
       <h3>1. Request dev key</h3>
 
       First, <b><a href={`${docs}/contact-us`}>email us</a></b> us with subject "Dev Key Request",
-      along with your name and organization so that we can provide you with an SSH key.
-      You should save the key to <code>~/.ssh/ecdsa_waggle_dev</code>.
+      along with your name, organization, and the name of the person sponsoring you
+      so that we can provide you with an SSH key.  You should save the key
+      to <code>~/.ssh/ecdsa_waggle_dev</code>.
 
       This is a legacy step which will no longer be required in the future.
 

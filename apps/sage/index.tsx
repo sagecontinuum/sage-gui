@@ -255,7 +255,7 @@ export default function Sage() {
                   <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
                     <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
                     <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                    <Route path="my-nodes" element={<RequireAuth><Devices /></RequireAuth>} />
+                    <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                     <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                   </Route>
 

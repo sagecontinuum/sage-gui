@@ -7,7 +7,7 @@ import { Card, CardViewStyle } from '/components/layout/Layout'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import NodesIcon from '@mui/icons-material/HubOutlined'
 import AccessIcon from '@mui/icons-material/LockOutlined'
-import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
+// import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
 
 
 const tabs = [{
@@ -22,11 +22,11 @@ const tabs = [{
   label: 'Access Credentials',
   icon: <AccessIcon />,
   to: '/account/access'
-}, {
-  label: 'My Nodes',
+}, /* {
+  label: 'Dev Devices',
   icon: <DevicesIcon />,
-  to: '/account/my-nodes'
-}]
+  to: '/account/dev-devices'
+}*/]
 
 
 export default function Account() {

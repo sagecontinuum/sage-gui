@@ -10,6 +10,9 @@ import * as User from '/components/apis/user'
 import * as BK from '/components/apis/beekeeper'
 import ErrorMsg from '../ErrorMsg'
 
+import config from '/config'
+const { docs } = config
+
 
 const columns = [{
   id: 'vsn',
@@ -53,6 +56,11 @@ export default function MyNodes() {
           enableSorting
           columns={columns}
           rows={data}
+          emptyNotice={<div>
+            Sorry, you do not have access to any nodes.<br/>
+            Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if
+            interested in collaborating with Sage.
+          </div>}
         />
       }
 

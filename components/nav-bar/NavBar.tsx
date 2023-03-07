@@ -109,11 +109,11 @@ export default function NavBar(props: Props) {
                   to='/account/access'
                   label="Access Creds"
                 />
-                <Item
+                {/* hide dev devices for now <Item
                   icon={<DevicesIcon />}
-                  to='/account/my-nodes'
-                  label="My Nodes"
-                />
+                  to='/account/dev-devices'
+                  label="Dev Devices"
+                /> */}
                 <Divider />
                 <Item
                   onClick={handleSignOut}

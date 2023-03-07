@@ -660,7 +660,7 @@ export default function CreateJob() {
           }
 
           {!Auth.user &&
-            <div><b>Note:</b> Sign in is required to to use this service.</div>
+            <div><b>Note:</b> Sign in is required to use this service.</div>
           }
         </div>
 
