@@ -143,7 +143,7 @@ table.striped tbody tr:nth-of-type(odd) {
 .inactive { color: #888; }
 .queued, .removed, .suspended, .submitted, .created { color: #666; }
 .running, .in-progress { color: #de9300; }
-.completed, .success { color: #3ac37e; }
+.completed, .complete, .success { color: #3ac37e; }
 .failed, .danger { color: #b90501; }
 
 .muted { color: #888; }

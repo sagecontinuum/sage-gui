@@ -287,7 +287,7 @@ function drawChart(
        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
        value: ${data.value}`
     )
-      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 350}px`)
+      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 265}px`)
       .style('left', `${evt.pageX - 80}px`)
       .style('z-index', 999)
 

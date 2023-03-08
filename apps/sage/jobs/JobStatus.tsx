@@ -172,6 +172,7 @@ function jobsToGeos(
 type State = {
   jobs: ES.Job[]
   pluginEvents?: ES.EventsByNode
+  pluginErrors?: ES.ErrorsByGoalID
   isFiltered?: boolean
   qJobs?: ES.Job[]
   qNodes?: string[]
@@ -182,6 +183,7 @@ type State = {
 const initState = {
   jobs: [],
   pluginEvents: null,
+  pluginErrors: null,
   isFiltered: false,
   qJobs: null,
   qNodes: [],
@@ -243,7 +245,7 @@ export default function JobStatus() {
   const {loading, setLoading} = useProgress()
 
   const [{
-    jobs, pluginEvents, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
+    jobs, pluginEvents, pluginErrors, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
   }, setData] = useState<State>(initState)
 
   // filter for job's state
@@ -344,7 +346,13 @@ export default function JobStatus() {
     if (view != 'timeline') return
 
     ES.getEvents()
-      .then(pluginEvents => setData(prev => ({...prev, pluginEvents})) )
+      .then(({events, errors}) =>
+        setData(prev => ({
+          ...prev,
+          pluginEvents: events,
+          pluginErrors: errors
+        }))
+      )
   }, [view])
 
 
@@ -499,7 +507,7 @@ export default function JobStatus() {
                   />
 
                   {isFiltered &&
-                    <Tooltip title={`View timeline${selectedNodes.length > 1 ? 's' : ''}`}>
+                    <Tooltip title={`View timeline${selectedNodes?.length > 1 ? 's' : ''}`}>
                       <IconButton
                         component={Link}
                         to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
@@ -527,7 +535,7 @@ export default function JobStatus() {
                       </div>
                       <div>{location}</div>
                     </div>
-                    <JobTimeLine data={pluginEvents[vsn]} />
+                    <JobTimeLine data={pluginEvents[vsn]} errors={pluginErrors} />
                   </Card>
                 )
               })

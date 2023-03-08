@@ -413,8 +413,26 @@ function getGoals() : Promise<Goal[]> {
 }
 
 
+type FailedEvent = Event & {
+  name: typeof pluginEventTypes[number]
+  value: {
+    goal_id: string
+    error_log: string
+    k3s_pod_name: string
+  }
+}
+
+export type ErrorsByGoalID = {
+  [goal_id: string]: FailedEvent[]
+}
+
+type EventData = {
+  events: EventsByNode
+  errors: ErrorsByGoalID
+}
+
 // fetch tasks state event changes, and parse SES JSON Messages
-export function getEvents(nodes?: VSN[]) : Promise<EventsByNode> {
+export function getEvents(nodes?: VSN[]) : Promise<EventData> {
   return BH.getData({
     start: '-24h',
     filter: {
@@ -422,7 +440,16 @@ export function getEvents(nodes?: VSN[]) : Promise<EventsByNode> {
       ...(nodes && {vsn: nodes.join('|')})
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
-    .then(pluginEvents => reduceData(pluginEvents))
+    .then(pluginEvents => {
+      const errors = pluginEvents.filter(obj => obj.value.k3s_job_status == 'Failed')
+
+      const errorsByGoalID = groupBy(errors, 'value.goal_id')
+
+      return {
+        events: reduceData(pluginEvents),
+        errors: errorsByGoalID
+      }
+    })
 }
 
 
@@ -524,7 +551,4 @@ async function removeJob(id: string) : Promise<RemovedJob> {
 export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
   return Promise.all(ids.map(id => removeJob(id)))
 }
-
-
-
 

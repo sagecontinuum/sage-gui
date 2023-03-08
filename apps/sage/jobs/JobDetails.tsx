@@ -35,16 +35,21 @@ export default function JobDetails(props: Props) {
 
   const {setLoading} = useProgress()
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
+  const [errorsByGoalID, setErrorsByGoalID] = useState<ES.ErrorsByGoalID>()
   const [yaml, setYaml] = useState<string>(null)
+
 
   useEffect(() => {
     if (!job) return
 
     setLoading(true)
     ES.getEvents(job.nodes)
-      .then(data => setEventsByNode(data))
+      .then(({events, errors}) => {
+        setEventsByNode(events)
+        setErrorsByGoalID(errors)
+      })
       .finally(() => setLoading(false))
-  }, [])
+  }, [job, setLoading])
 
 
   const handleViewYaml = () => {
@@ -160,7 +165,7 @@ export default function JobDetails(props: Props) {
                         </div>
                         <div>{location}</div>
                       </div>
-                      <JobTimeLine data={eventsByNode[vsn]} />
+                      <JobTimeLine data={eventsByNode[vsn]} errors={errorsByGoalID}/>
                     </div>
                   )
                 })

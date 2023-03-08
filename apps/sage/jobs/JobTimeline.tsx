@@ -1,16 +1,16 @@
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { subHours } from 'date-fns'
+import Tooltip from '@mui/material/Tooltip'
 
+import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import TimelineChart, {color} from '/components/viz/Timeline'
 
 import * as BH from '/components/apis/beehive'
-import Tooltip from '@mui/material/Tooltip'
+import type { PluginEvent, ErrorsByGoalID } from '/components/apis/ses'
 
 
-
-const formatJSON = (data) =>
-  JSON.stringify(data, null, 4).replace(/,/g, '<br>').replace(/\{|\}|Meta"/g, '')
 
 const colorMap = {
   complete: color.green4,
@@ -33,12 +33,25 @@ type GroupedApps = {
 
 type Props = {
   data: GroupedApps
+  errors: ErrorsByGoalID
 }
 
 export default function JobTimeLine(props: Props) {
-  const navigate = useNavigate()
+  const {data, errors} = props
 
-  const {data} = props
+  const navigate = useNavigate()
+  const [selectedEvent, setSelectedEvent] = useState<PluginEvent | false>(false)
+
+
+  const getErrors = (pluginEvent: PluginEvent) => {
+    const {goal_id, k3s_pod_name} = pluginEvent.value
+
+    const text = errors[goal_id]
+      .filter(obj => obj.value.k3s_pod_name == k3s_pod_name)
+      .map(obj => obj.value.error_log)
+
+    return text
+  }
 
   return (
     <Root>
@@ -55,16 +68,14 @@ export default function JobTimeLine(props: Props) {
           tooltip={(obj) => `
             ${new Date(obj.timestamp).toLocaleString()}
             - ${new Date(obj.end).toLocaleTimeString()}<br>
-
-            goal id: ${obj.value.goal_id}<br>
-            image: ${obj.value.plugin_image}<br>
-            task: ${obj.value.plugin_task}<br>
-            args: ${obj.value.plugin_args}<br>
-            selector: ${obj.value.plugin_selector}<br>
-            start status: ${obj.name.split('.').pop()}<br>
-            end status: ${obj.status}<br>
-            <br>
-            <code>${formatJSON(obj.meta)}</code>
+            <br/>
+            <b>goal id:</b> ${obj.value.goal_id}<br>
+            <b>image:</b> ${obj.value.plugin_image}<br>
+            <b>task:</b> ${obj.value.plugin_task}<br>
+            <b>args:</b> ${obj.value.plugin_args}<br>
+            <b>selector:</b> ${obj.value.plugin_selector}<br>
+            <b>${obj.status == 'running' ? 'status': 'end status'}:</b>
+              <b class="${obj.status}">${obj.status}</b><br>
           `}
           yFormat={(label: string, data) => {
             // just form label from first entry
@@ -80,6 +91,12 @@ export default function JobTimeLine(props: Props) {
             )
           }}
           onCellClick={(data) => {
+            // show errors for red boxes
+            if (data.status == 'failed') {
+              setSelectedEvent(data)
+              return
+            }
+
             const {value, meta} = data
             const image = value.plugin_image
             const node = meta.vsn
@@ -88,6 +105,16 @@ export default function JobTimeLine(props: Props) {
           }}
           margin={{left: 175, right: 0, bottom: 0}}
           tooltipPos="top"
+        />
+      }
+
+      {selectedEvent &&
+        <ConfirmationDialog
+          title="Errors"
+          onClose={() => setSelectedEvent(false)}
+          onConfirm={() => setSelectedEvent(false)}
+          content={<pre>{getErrors(selectedEvent)}</pre>}
+          maxWidth="65%"
         />
       }
     </Root>
