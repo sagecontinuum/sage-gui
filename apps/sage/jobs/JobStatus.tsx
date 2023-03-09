@@ -160,6 +160,7 @@ function jobsToGeos(
 ) : GeoData {
   return [...new Set(jobs.flatMap(o => o.nodes))]
     .map(vsn => ({
+      ...manifests[vsn],
       id: vsn,
       vsn,
       lng: Number(manifests[vsn]?.gps_lon),
