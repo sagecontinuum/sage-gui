@@ -90,7 +90,7 @@ export function saveUserInfo(state: Profile) : Promise<Profile> {
 }
 
 
-export function saveSSHKey(state: Profile['ssh_public_keys']) : Promise<Profile> {
+export function saveSSHKey(state: {ssh_public_keys: Profile['ssh_public_keys']}) : Promise<Profile> {
   return put(`${url}/user_profile/${user}`, state)
 }
 

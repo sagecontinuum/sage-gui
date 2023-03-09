@@ -14,6 +14,17 @@ import Auth from '/components/auth/auth'
 import config from '/config'
 const {docs} = config
 
+const requestInfo =
+`Name:
+Organization or affiliation:
+Sponsor:
+Short description of the project:
+Type of access:
+  [Do you need development (shell) access, or only scheduling access?]
+Nodes:
+  [If known, please list the project or nodes you need access to.]
+`
+
 
 type Form = {
   ssh_public_keys: User.UserInfo['ssh_public_keys']
@@ -22,7 +33,6 @@ type Form = {
 export default function DevAccess() {
   const {setLoading} = useProgress()
 
-  // presentation
   const [error, setError] = useState(null)
 
   // form
@@ -30,6 +40,7 @@ export default function DevAccess() {
   const [state, setState] = useState<Form>({ssh_public_keys: ''})
 
   const {hasCapability: isPermitted} = useHasCapability(['develop', 'schedule'])
+  const {hasCapability: canDev} = useHasCapability('develop')
 
   useEffect(() => {
     if (!isPermitted) return
@@ -83,24 +94,37 @@ export default function DevAccess() {
           </div>
         }
 
-        {isPermitted === false &&
-          <div className="flex items-center">
-            <Alert severity="info">
-              <b>Note</b> you do not have scheduling or developer access to any nodes.<br/>
-              Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a
-              node. Once you have some permissions, your dev token will appear here
-            </Alert>
-          </div>
-        }
+        {isPermitted === false && <p>
+          <Alert severity="info">
+            <b>Note</b> you do not have scheduling or developer access to any nodes.<br/>
+            Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a
+            node. Once you have some permissions, your dev token will appear here
+          </Alert>
+        </p>}
       </CopyToken>
 
       <h1 className="no-margin">Update SSH public keys</h1>
 
-      <p>Please update and submit your SSH public keys below.</p>
+      {!canDev && <p>
+        <Alert severity="info">
+          <b>Note</b> you do not have dev access on any nodes.
+        </Alert>
+      </p>}
+
+      <p>
+        To create SSH key pair on your machine, use:
+        <Clipboard content="ssh-keygen -t ed25519 -f ~/.ssh/sage_key" />
+        [Provide a password to secure the key]
+      </p>
+
+      <p>
+        Next, copy the <b>public key</b> portion of the key into the input below.
+        <Clipboard content="cat ~/.ssh/sage_key.pub" />
+      </p>
 
       {state &&
         <FormControl className="flex column">
-          <FormLabel id="ssk-keys">SSH Public Keys:</FormLabel>
+          <FormLabel id="ssk-keys">My SSH Public Keys:</FormLabel>
           <OutlinedInput
             placeholder={
               `sh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK0LT3jNyfUtkJwxiv/7YfPU4PIOsQzeCVKlLCAfwlg3\\n` +
@@ -135,34 +159,36 @@ export default function DevAccess() {
 
       <h2>Finish setting up node access</h2>
 
-      <p>Once you've updated your SSH public key above, you'll need to do the following steps:</p>
+      <p>Once you've updated your SSH public key above, you'll need to do the following steps.</p>
 
-      <h3>1. Request dev key</h3>
+      <h3>1. Request dev access</h3>
 
-      First, <b><a href={`${docs}/contact-us`}>email us</a></b> us with subject "Dev Key Request",
-      along with your name, organization, and the name of the person sponsoring you
-      so that we can provide you with an SSH key.  You should save the key
-      to <code>~/.ssh/ecdsa_waggle_dev</code>.
+      <p>
+        First, <b><a href={`${docs}/contact-us`} target="_blank" rel="noreferrer">email us</a></b> us
+        with subject "Dev Access", along with with the following info about your request:
+      </p>
 
-      This is a legacy step which will no longer be required in the future.
+      <Clipboard content={requestInfo} />
 
       <h3>2. Update SSH config</h3>
-      Next, you'll need to update your <code>~/.ssh/config</code> file to include the following lines:
 
+      <p>
+        Next, you'll need to update your <code>~/.ssh/config</code> file to include the following lines:
+      </p>
 
       <Clipboard content={
         <div>
           Host waggle-dev-sshd<br/>
-          {'    ' }HostName 192.5.86.5<br/>
+          {'    '}HostName 192.5.86.5<br/>
           {'    '}Port 49190<br/>
           {'    '}User waggle<br/>
-          {'    '}IdentityFile ~/.ssh/id_ed25519 # &lt;---- your personal key<br/>
+          {'    '}IdentityFile ~/.ssh/sage_key # &lt;---- your private key<br/>
           {'    '}IdentitiesOnly yes<br/>
           <br/>
           Host waggle-dev-node-*<br/>
           {'    '}ProxyCommand ssh waggle-dev-sshd connect-to-node $(echo %h | sed "s/waggle-dev-node-//" )<br/>
           {'    '}User waggle<br/>
-          {'    '}IdentityFile ~/.ssh/ecdsa_waggle_dev # &lt;---- dev key from previous step<br/>
+          {'    '}IdentityFile ~/.ssh/sage_key<br/>
           {'    '}IdentitiesOnly yes<br/>
           {'    '}StrictHostKeyChecking no<br/>
         </div>
@@ -171,11 +197,15 @@ export default function DevAccess() {
 
       <h3>3. SSH to node</h3>
 
-      You can access a specific node by its VSN, if you have permissions. For example, you can SSH to node V030 using:
+      <p>
+        You can access a specific node by its VSN, if you have permissions. For example, you can SSH to node V030 using:
+      </p>
 
       <Clipboard content={'ssh waggle-dev-node-V030'} />
 
-      Note that upon first connecting to a node, please check that the fingerprint matches:
+      <p>
+        Note that upon first connecting to a node, please check that the fingerprint matches:
+      </p>
 
       <pre>
         ED25519 key fingerprint is SHA256:0EZvahC0dry74dmu7DBjweZwGWMt2zvV7rWZTb3Ao9g.
@@ -192,6 +222,10 @@ const Root = styled.div`
 
   [type=submit] {
     margin: 2em 0;
+  }
+
+  .clipboard-content {
+    overflow-x: auto;
   }
 `
 
