@@ -62,6 +62,24 @@ const config = {
     ],
     'V008': [
       'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'W056': [
+      'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'W057': [
+      'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'W071': [
+      'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'W084': [
+      'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'V030': [
+      'MOBOTIX MX-M16TB-R079IP'
+    ],
+    'V032': [
+      'MOBOTIX MX-M16TB-R079IP'
     ]
   },
   // another temp solution for missing sensor meta

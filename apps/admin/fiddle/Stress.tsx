@@ -30,7 +30,7 @@ export default function Stress() {
 
   useEffect(() => {
     // get node list
-    BK.getManifest()
+    BK.getProdSheet()
       .then(async meta => {
         const nodeIds = Object.keys(meta).slice(0,15)
         setNodeIds(nodeIds)

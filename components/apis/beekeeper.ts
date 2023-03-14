@@ -93,24 +93,24 @@ export async function getNode(id: string) : Promise<State> {
 type MetaParams = {node?: string, by?: 'vsn' | 'id'}
 export type ManifestMap = {[id_or_vsn: string]: Manifest}
 
-export async function getManifest(params?: MetaParams) : Promise<ManifestMap | Manifest> {
+export async function getProdSheet(params?: MetaParams) : Promise<ManifestMap | Manifest> {
   const {node, by = 'id'} = params || {}
 
   let data = await get(`${url}/production`)
 
   // special handling of gps since they are of type 'string'; todo(nc): remove
-  // also special "sensor" list for tables and convenience
+  // also, add special "sensor" list for tables and convenience
   data = data.map(o => ({
     ...o,
     gps_lat: o.gps_lat?.length ? parseFloat(o.gps_lat) : null,
     gps_lon: o.gps_lon?.length ? parseFloat(o.gps_lon) : null,
-    ...(o.node_type == 'WSN' ? {
+    ...({
       sensor: [
         o.top_camera, o.bottom_camera, o.left_camera, o.right_camera, 'RG-15',
         ...(o.shield ? ['ML1-WS IP54', 'BME680'] : []),
         ...(config.additional_sensors[o.vsn] || [])
       ].filter(name => name != 'none')
-    } : {sensor: []})
+    })
   }))
 
   let mapping
@@ -188,7 +188,7 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
 
 
 export async function getState() : Promise<State[]> {
-  const proms = [getNodes(), getManifest(), getMonitorData()]
+  const proms = [getNodes(), getProdSheet(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
   let allMeta = _joinNodeData(nodes, meta, monitorMeta)
@@ -224,7 +224,7 @@ export async function getState() : Promise<State[]> {
 
 
 export async function getSuryaState() : Promise<State[]> {
-  const proms = [getNodes(), getManifest(), getMonitorData(), getFactory({by: 'id'})]
+  const proms = [getNodes(), getProdSheet(), getMonitorData(), getFactory({by: 'id'})]
   const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
 
   const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
@@ -249,7 +249,7 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 export type NodeDetails = (State & Manifest)[]
 
 export async function getNodeDetails(bucket?: Manifest['bucket']) : Promise<NodeDetails> {
-  const [bkData, details] = await Promise.all([getNodes(), getManifest({by: 'vsn'})])
+  const [bkData, details] = await Promise.all([getNodes(), getProdSheet({by: 'vsn'})])
   let nodeDetails = bkData
     .filter(o => !!o.vsn)
     .map(obj => ({...obj, ...details[obj.vsn]}))

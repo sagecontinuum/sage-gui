@@ -79,7 +79,7 @@ export default function TestView() {
 
     const p1 = BH.getNodeHealth(null, '-7d')
     const p2 = BH.getNodeSanity('-7d')
-    const p3 = BK.getManifest({by: 'vsn'})  // temp solution for vsn <-> node id
+    const p3 = BK.getProdSheet({by: 'vsn'})  // temp solution for vsn <-> node id
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {

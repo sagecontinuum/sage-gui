@@ -163,7 +163,7 @@ export default function Data(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    const mProm = BK.getManifest({by: 'vsn'})
+    const mProm = BK.getProdSheet({by: 'vsn'})
       .then(data => {
         setManifestByVSN(data) // todo(nc): remove
 

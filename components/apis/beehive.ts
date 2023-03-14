@@ -232,7 +232,7 @@ export async function getNodeHealth(vsn?: string, start?: string) : Promise<ByMe
     }
   }
 
-  const [data, nodes] = await Promise.all([getData(params), BK.getManifest({by: 'vsn'})])
+  const [data, nodes] = await Promise.all([getData(params), BK.getProdSheet({by: 'vsn'})])
   const byNode = groupBy(data, 'meta.vsn')
 
   // removed unbuilt nodes

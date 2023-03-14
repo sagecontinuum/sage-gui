@@ -59,7 +59,7 @@ export default function AppData(props: Props) {
 
 
   useEffect(() => {
-    BK.getManifest({by: 'vsn'})
+    BK.getProdSheet({by: 'vsn'})
       .then(data => {
         setManifests(Object.values(data))
       }).catch(error => dispatch({type: 'ERROR', error}))

@@ -35,7 +35,7 @@ function AllAudios() {
       }, 0)
     }
 
-    BK.getManifest()
+    BK.getProdSheet()
       .then(meta => {
         const nodeList = Object.keys(meta)
         addChart(nodeList)

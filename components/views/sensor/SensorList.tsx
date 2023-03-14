@@ -81,7 +81,7 @@ export default function SensorList() {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getManifest({by: 'vsn'})
+    const prom1 = BK.getProdSheet({by: 'vsn'})
       .then(data => {
         const d = Object.values(data)
         const sensors = [...new Set(d.flatMap(({sensor}) => sensor))]

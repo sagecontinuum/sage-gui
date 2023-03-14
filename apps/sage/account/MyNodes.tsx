@@ -39,7 +39,7 @@ export default function MyNodes() {
   useEffect(() => {
     setLoading(true)
 
-    Promise.all([User.listMyNodes(), BK.getManifest({by: 'vsn'})])
+    Promise.all([User.listMyNodes(), BK.getProdSheet({by: 'vsn'})])
       .then(([nodes, manifests]) => setData(nodes.map(o => ({...o, ...manifests[o.vsn]}))))
       .catch(error => setError(error))
       .finally(() => setLoading(false))

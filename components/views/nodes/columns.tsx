@@ -38,6 +38,10 @@ const LiveGPSDot = styled(Badge)`
   }
 `
 
+
+const parseID = (cam: string) =>
+  cam.includes('(') ? cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') ) : cam.replace(/ /g, '-')
+
 const columns = [{
   id: 'status',
   label: 'Status',
@@ -150,8 +154,7 @@ const columns = [{
       return '-'
 
     const {top_camera: cam} = obj
-    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
-
+    const id = parseID(cam)
     return <SensorList>
       {cam != 'none' &&
         <li>
@@ -170,8 +173,7 @@ const columns = [{
       return '-'
 
     const {bottom_camera: cam} = obj
-    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
-
+    const id = parseID(cam)
     return <SensorList>
       {cam != 'none' ?
         <li><TT title="Bottom camera">
@@ -187,7 +189,9 @@ const columns = [{
       return '-'
 
     const {left_camera: cam} = obj
-    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
+
+    const id = parseID(cam)
+
 
     return <SensorList>
       {cam != 'none' ?
@@ -208,7 +212,7 @@ const columns = [{
     if (cam == 'none' && !shield)
       return '-'
 
-    const id = cam.slice( cam.indexOf('(') + 1, cam.indexOf(')') )
+    const id = parseID(cam)
 
     return <SensorList>
       {cam != 'none' ? <li>
