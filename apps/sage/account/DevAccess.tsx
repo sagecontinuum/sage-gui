@@ -164,8 +164,8 @@ export default function DevAccess() {
       <h3>1. Request dev access</h3>
 
       <p>
-        First, <b><a href={`${docs}/contact-us`} target="_blank" rel="noreferrer">email us</a></b> us
-        with subject "Dev Access", along with with the following info about your request:
+        First, <b><a href={`${docs}/contact-us`} target="_blank" rel="noreferrer">email us</a></b> with
+        the subject "Dev Access", along with with the following info about your request:
       </p>
 
       <Clipboard content={requestInfo} />
