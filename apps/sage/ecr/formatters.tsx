@@ -68,7 +68,7 @@ export const formatters = {
 export const Thumb = styled.img`
   width: 125px;
   height: 125px;
-  object-fit: contain;
+  object-fit: cover;
   border: 1px solid #ccc;
   border-radius: 5px;
   margin-right: 1em;

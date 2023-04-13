@@ -46,7 +46,6 @@ import UserProfile from './account/UserProfile'
 import MyNodes from './account/MyNodes'
 import Devices from './account/Devices'
 import DevAccess from './account/DevAccess'
-import Home from './home/home.tsx'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'

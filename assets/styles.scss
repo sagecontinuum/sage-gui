@@ -155,7 +155,7 @@ button.delete:hover, button.cancel:hover {
   border-color: $severe-color;
 }
 
-.no-margin { margin: 0; }
+.no-margin { margin: 0 !important; }
 .no-padding { padding: 0; }
 .text-color { color: $text-color; }
 .list-none { list-style-type: none; }
@@ -189,6 +189,7 @@ button.delete:hover, button.cancel:hover {
 .justify-evenly { justify-content: space-evenly; }
 
 .w-full	{ width: 100%; }
+.h-full	{ height: 100%; }
 .w-screen	{ width: 100vw; }
 .w-min { width: min-content; }
 .w-max { width: max-content; }
@@ -228,6 +229,12 @@ button.delete:hover, button.cancel:hover {
   content: "";
   clear: both;
   display: table;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 /**

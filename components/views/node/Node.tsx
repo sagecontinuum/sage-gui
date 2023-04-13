@@ -441,7 +441,7 @@ export default function NodeView() {
               <VSN>{vsn}</VSN>
               {manifest &&
                 <>
-                  {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS IP54" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
+                  {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
                   {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
                   {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
                   {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
