@@ -11,7 +11,7 @@ export default {
     'yonghokim/object-counter',
     'bhupendraraut/cloud-motion',
     'rjackson/weather-classification',
-    'dariodematties1/avian-diversity-monitoring',
+    'dariodematties/avian-diversity-monitoring',
     'dariodematties/sound-event-detection',
     'iperezx/wildfire-smoke-detection'
   ],
@@ -19,7 +19,10 @@ export default {
     'theone/imagesampler',
     'theone/video-sampler',
     'seanshahkarami/audio-sampler',
-    'seanshahkarami/air-quality'
+    'seanshahkarami/air-quality',
+    'bhupendraraut/mobotix-scan',
+    'bhupendraraut/mobotix-sampler'
+
   ],
   plugins: [
     'seanshahkarami/plugin-iio',

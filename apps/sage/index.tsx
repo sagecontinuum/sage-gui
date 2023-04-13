@@ -46,7 +46,6 @@ import UserProfile from './account/UserProfile'
 import MyNodes from './account/MyNodes'
 import Devices from './account/Devices'
 import DevAccess from './account/DevAccess'
-import Home from './home/home.tsx'
 
 import TestSignIn from './sign-in/TestSignIn'
 import NotFound from '/components/404'
@@ -56,6 +55,7 @@ import { SnackbarProvider } from 'notistack'
 
 import theme from '/components/theme'
 import '/assets/styles.scss'
+import '/assets/tailwind.css'
 
 import Auth from '/components/auth/auth'
 import { Divider } from '@mui/material'
