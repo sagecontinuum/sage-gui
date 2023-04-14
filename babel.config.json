@@ -9,7 +9,10 @@
     }]
   ],
   "plugins": [
-    "babel-plugin-styled-components",
+    [
+    "babel-plugin-styled-components", {
+      "displayName": false
+    }],
     "@babel/plugin-proposal-class-properties",
     "@babel/plugin-transform-runtime"
   ]

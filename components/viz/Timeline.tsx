@@ -491,11 +491,13 @@ function Chart(props: TimelineProps) {
 
     ro.observe(node)
 
+    /* todo: legend
     const legendNode = legendRef.current
     const legendSvg = legendNode.querySelector('svg')
     if (showLegend && !legendSvg) {
       appendLegend(legendNode, chartData)
     }
+    */
 
     return () => {
       ro.unobserve(node)
@@ -506,7 +508,7 @@ function Chart(props: TimelineProps) {
   return (
     <div>
       {/* legend; todo finish implementing? */}
-      <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div>
+      {/* <div ref={legendRef} style={{marginLeft: margin.left, marginBottom: '20px'}}></div> */}
 
       {/* controls */}
       {showButtons &&
