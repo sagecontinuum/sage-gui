@@ -325,7 +325,7 @@ export default function NodeView() {
           </div>
 
           <Card>
-            <div className="timeline-title flex items-center">
+            <div className="timeline-title flex items-center gap">
               <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
               {Object.keys(data || {}).length > 0 &&
                 <DataOptions onChange={handleOptionChange} opts={opts} condensed />
@@ -338,7 +338,7 @@ export default function NodeView() {
               </div>
             }
 
-            {!Object.keys(data || {}).length &&
+            {!Object.keys(data || {}).length && !loadingTL &&
               <div className="clearfix muted">No data available</div>
             }
 
@@ -358,9 +358,9 @@ export default function NodeView() {
                 }
                 onCellClick={(data) => {
                   const {timestamp, meta} = data
-                  const {vsn, plugin} = meta
+                  const {vsn, origPluginName} = meta
                   const win = opts.time == 'daily' ? 'd' : 'h'
-                  window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                  window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`, '_blank')
                 }}
                 yFormat={(label) => timelineAppLabel(label, ecr)}
                 margin={TIMELINE_MARGIN}

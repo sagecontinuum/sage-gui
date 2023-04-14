@@ -371,11 +371,11 @@ export default function Data(props: Props) {
                       }}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
-                        const {vsn, plugin} = meta
+                        const {vsn, origPluginName} = meta
                         const win = opts.time == 'daily' ? 'd' : 'h'
                         window.open(
                           `${window.location.origin}/query-browser` +
-                          `?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`,
+                          `?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`,
                           '_blank'
                         )
                       }}

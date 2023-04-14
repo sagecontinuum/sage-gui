@@ -48,7 +48,8 @@ export function parseData(props: ParseDataProps) {
         ...o,
         meta: {
           ...o.meta,
-          plugin
+          plugin,
+          origPluginName: p
         }
       }
     })
