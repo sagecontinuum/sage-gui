@@ -1,6 +1,6 @@
 import { useState, ReactNode } from 'react'
 import styled from 'styled-components'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import sage from 'url:/assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -8,7 +8,7 @@ import Divider from '@mui/material/Divider'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import NodesIcon from '@mui/icons-material/HubOutlined'
 import AccessIcon from '@mui/icons-material/LockOutlined'
-import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
+// import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Progress from '@mui/material/CircularProgress'
@@ -30,6 +30,10 @@ type Props = {
   hasDocsLink?: boolean
 }
 
+const isDev = () : boolean =>
+  process.env.NODE_ENV == 'development'
+
+
 export default function NavBar(props: Props) {
   const { pathname } = useLocation()
   const { menu, hasSignIn, hasDocsLink, logo } = props
@@ -50,17 +54,15 @@ export default function NavBar(props: Props) {
   return (
     <Root>
       <div className="flex items-center">
-        <Link to="/" className="no-style flex items-center">
-          {logo ? logo :
-            <>
-              <LogoImg src={sage} height="35" />
-              <Logo title={`Sage: v${version}`}>
+        {logo ? logo :
+          <a href={isDev() ? '/' : config.home} className="no-style flex items-center">
+            <LogoImg src={sage} height="35" />
+            <Logo title={`Sage: v${version}`}>
                 Sage
-                <sup>(beta)</sup>
-              </Logo>
-            </>
-          }
-        </Link>
+              <sup>(beta)</sup>
+            </Logo>
+          </a>
+        }
         <Divider orientation="vertical" flexItem style={{ margin: '5px 0' }} />
       </div>
 
@@ -128,10 +130,7 @@ export default function NavBar(props: Props) {
 
         {hasSignIn && !username && pathname != '/login' &&
           <Button
-            href={
-              process.env.NODE_ENV == 'development' ?
-                '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`
-            }
+            href={isDev() ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
             variant="outlined"
             color="primary"
             sx={{marginLeft: '20px'}}

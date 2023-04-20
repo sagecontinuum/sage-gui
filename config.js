@@ -2,6 +2,8 @@
 // no trailing slashes in API endpoints, please
 
 const prod = {
+  home: 'https://sagecontinuum.org',
+
   beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
