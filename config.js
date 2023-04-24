@@ -19,7 +19,7 @@ const prod = {
   wifireData: 'https://wifire-data.sdsc.edu/api',
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
-  docs: 'https://docs.waggle-edge.ai/docs',
+  docs: 'https://sagecontinuum.org/docs',
 }
 
 

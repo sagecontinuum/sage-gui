@@ -414,7 +414,7 @@ export default function CreateJob() {
               <Alert severity="info">
                 <b>Note:</b> the create and recreate job form is currently an
                 <b> experimental feature</b> and in the <b>early stages of development</b>.{' '}
-                <a href="https://docs.waggle-edge.ai/docs/tutorials/schedule-jobs" target="_blank" rel="noreferrer">
+                <a href={`${config.docs}/tutorials/schedule-jobs`} target="_blank" rel="noreferrer">
                   Read more...
                 </a>
               </Alert>

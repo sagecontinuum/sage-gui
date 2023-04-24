@@ -77,11 +77,8 @@ export default function NavBar(props: Props) {
             <a
               href={`${config.docs}/about/overview`}
               className="no-style docs-link"
-              target="_blank"
-              rel="noreferrer"
             >
               Docs
-              <LaunchIcon className="external-link" sx={{ marginTop: '3px' }} />
             </a>
           </NavItems>
         }
