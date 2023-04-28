@@ -327,9 +327,7 @@ export default function NodeView() {
           <Card>
             <div className="timeline-title flex items-center gap">
               <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
-              {Object.keys(data || {}).length > 0 &&
-                <DataOptions onChange={handleOptionChange} opts={opts} condensed />
-              }
+              <DataOptions onChange={handleOptionChange} opts={opts} condensed />
             </div>
 
             {loadingTL && !tlError &&
