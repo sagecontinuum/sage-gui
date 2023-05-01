@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import ReactDom from 'react-dom'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -22,6 +23,7 @@ import AddIcon from '@mui/icons-material/AddRounded'
 
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
 import NavItem, { Item } from '/components/nav-bar/NavItem'
+import Progress from '/components/progress/LazyLoading'
 
 import AppList from './ecr/apps/AppList'
 import App from './ecr/app/App'
@@ -34,7 +36,8 @@ import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
 import JobStatus from './jobs/JobStatus'
-import CreateJob from './jobs/create-job/CreateJob'
+const CreateJob = lazy(() => import('./jobs/create-job/CreateJob'))
+
 import DataBrowser from './data-stream/DataBrowser'
 import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
@@ -242,7 +245,9 @@ export default function Sage() {
                     <Route path=":view" element={<JobStatus />} />
                   </Route>
 
-                  <Route path="create-job" element={<CreateJob />} />
+                  <Route path="create-job" element={
+                    <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
+                  }/>
 
                   <Route path="data" element={<Data />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
