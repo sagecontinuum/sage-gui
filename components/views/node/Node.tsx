@@ -42,7 +42,7 @@ import { endOfHour, subDays } from 'date-fns'
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
-const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
+const TIMELINE_LABEL_WIDTH = 175
 const TAIL_DAYS = '-7d'
 
 
@@ -361,7 +361,7 @@ export default function NodeView() {
                   window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`, '_blank')
                 }}
                 yFormat={(label) => timelineAppLabel(label, ecr)}
-                margin={TIMELINE_MARGIN}
+                labelWidth={TIMELINE_LABEL_WIDTH}
               />
             }
           </Card>

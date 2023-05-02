@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 
-import { TimelineProps } from './Timeline'
+import { type TimelineProps } from './Timeline'
 
 
 type Props = {
@@ -23,7 +23,7 @@ export default function TimelineLabels(props: Props) {
 
   return (
     <Root>
-      <div className="labels" style={{width: props.margin.left}}>
+      <div className="labels">
         {labels.map(label =>
           <div key={label} className="label">
             {formatter ? formatter(label, data) : label}
@@ -35,19 +35,13 @@ export default function TimelineLabels(props: Props) {
 }
 
 const Root = styled.div`
-  position: relative;
+  margin: -1px 2px 0 0;
+  white-space: nowrap;
   text-align: end;
   font-weight: bold;
 
-  .labels {
-    position: absolute;
-    top: 60px;
-    padding-right: 5px;
-  }
-
   .label {
     height: 15px;
-    padding: 2px 0;
     font-size: .8rem;
   }
 `

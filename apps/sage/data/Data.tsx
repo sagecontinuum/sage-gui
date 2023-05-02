@@ -12,7 +12,7 @@ import ErrorMsg from '../ErrorMsg'
 
 import TimelineChart, {colors} from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import timelineAppLabel from '/components/viz/timelineAppLabel'
+import timelineAppLabel from '/components/viz/TimelineAppLabel'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
@@ -30,7 +30,7 @@ const MDP_NODES = settings.mdpNodes
 const NO_ASSIGNMENT = 'None'
 const TIME_WINDOW = 'hour'
 
-const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
+const TIMELINE_LABEL_WIDTH = 175
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
@@ -307,10 +307,10 @@ export default function Data(props: Props) {
               <h2 className="title no-margin">Explore Data</h2>
               <h5 className="subtitle no-margin muted">
                 {opts.display == 'nodes' &&
-                  `${filtered.length} nodes with data`
+                  `${filtered.length} nodes with recent data`
                 }
                 {opts.display == 'apps' && byApp &&
-                  `${Object.keys(byApp).length} apps with data`
+                  `${loadingObject.keys(byApp).length} apps with data`
                 }
               </h5>
             </div>
@@ -381,7 +381,7 @@ export default function Data(props: Props) {
                         )
                       }}
                       yFormat={(label) => timelineAppLabel(label, ecr)}
-                      margin={TIMELINE_MARGIN}
+                      labelWidth={TIMELINE_LABEL_WIDTH}
                     />
                   </TimelineContainer>
                 )
@@ -418,7 +418,7 @@ export default function Data(props: Props) {
                         const win = opts.time == 'daily' ? 'd' : 'h'
                         window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
                       }}
-                      margin={TIMELINE_MARGIN}
+                      labelWidth={TIMELINE_LABEL_WIDTH}
                     />
                   </TimelineContainer>
                 )

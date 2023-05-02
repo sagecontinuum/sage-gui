@@ -5,7 +5,7 @@ import { subHours } from 'date-fns'
 import Tooltip from '@mui/material/Tooltip'
 
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
-import TimelineChart, {color} from '/components/viz/Timeline'
+import TimelineChart, { color } from '/components/viz/Timeline'
 
 import * as BH from '/components/apis/beehive'
 import type { PluginEvent, ErrorsByGoalID } from '/components/apis/ses'
@@ -103,7 +103,7 @@ export default function JobTimeLine(props: Props) {
             const app = image.slice(image.lastIndexOf('/') + 1)
             navigate(`/query-browser/?apps=.*${app}&nodes=${node}&window=d`)
           }}
-          margin={{left: 175, right: 0, bottom: 0}}
+          labelWidth={175}
           tooltipPos="top"
         />
       }

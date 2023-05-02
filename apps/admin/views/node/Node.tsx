@@ -256,7 +256,7 @@ export default function NodeView() {
                 </b>
                 `
               }
-              margin={{right: 20}}
+              labelWidth={20}
             />
           }
 
@@ -277,7 +277,7 @@ export default function NodeView() {
                 </b>
                 `
               }
-              margin={{right: 20}}
+              labelWidth={20}
             />
           }
 

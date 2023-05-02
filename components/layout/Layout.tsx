@@ -88,10 +88,8 @@ export const Card = (props) => {
   const {children, noPad, ...rest} = props
 
   return (
-    <MuiCard {...rest}>
-      <CardContent style={noPad ? {padding: 0} : {paddingBottom: 20}}>
-        {children}
-      </CardContent>
+    <MuiCard {...rest} style={{padding: noPad ? 0 : '16px 16px 20px 16px'}}>
+      {children}
     </MuiCard>
   )
 }

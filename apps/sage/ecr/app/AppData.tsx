@@ -21,7 +21,7 @@ import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
-const TIMELINE_MARGIN = {left: 40, right: 20, bottom: 0}
+const TIMELINE_LABEL_WIDTH = 40
 const TAIL_DAYS = '-7d'
 
 
@@ -160,7 +160,7 @@ export default function AppData(props: Props) {
                         `?nodes=${vsn}&apps=${plugin}&start=${timestamp}&window=${win}`, '_blank'
                       )
                     }}
-                    margin={TIMELINE_MARGIN}
+                    labelWidth={TIMELINE_LABEL_WIDTH}
                   />
                 </TimelineContainer>
               )

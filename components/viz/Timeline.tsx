@@ -23,7 +23,7 @@ const CELL_UNITS = {
   'day': DAY
 }
 
-const defaultMargin = { top: 20, left: 150, right: 150, bottom: 50 }
+const margin = { top: 20, left: 2, right: 10, bottom: 50 }
 const defaultWidth = 800
 
 const cellHeight = 15
@@ -138,7 +138,6 @@ function drawChart(
     startTime,
     endTime,
     scaleExtent,
-    margin,
     width = defaultWidth,
     yLabels,
     yFormat,
@@ -184,10 +183,12 @@ function drawChart(
     yAxis.tickFormat(yFormat)
   }
 
+  const svgHeight = height + margin.top
   const svg = d3.select(domEle).append('svg')
-    .attr('width', width + margin.left)
-    .attr('height',  height + margin.top + margin.bottom)
+    .attr('width', '100%')
+    .attr('height', svgHeight)
     .attr('cursor', 'grab')
+
 
   const gX = svg.append('g')
     .attr('cursor', 'grab')
@@ -321,7 +322,9 @@ function drawChart(
   }
 
   // add events for button controls
-  const ctrls = d3.select(domEle).select(function() { return this.parentNode })
+  const ctrls = d3.select(domEle).select(function() {
+    return this.parentNode.parentNode
+  })
   ctrls.select('.pan-left').on('click', (evt) => { evt.preventDefault(); pan('left') })
   ctrls.select('.pan-right').on('click', (evt) => { evt.preventDefault(); pan('right') })
   ctrls.select('.zoom-in').on('click', (evt) => { evt.preventDefault(); zoomTo('in') } )
@@ -340,9 +343,10 @@ function drawChart(
 
     const zoomTransform = d3.zoomTransform(svg.node())
 
-    let scale = zoomTransform.k,
-      extent = zoom.scaleExtent(),
-      x = zoomTransform.x,
+    const scale = zoomTransform.k,
+      extent = zoom.scaleExtent()
+
+    let x = zoomTransform.x,
       factor = dir == 'in' ? 1.5 : 1 / 1.5,
       targetScale = scale * factor
 
@@ -404,7 +408,7 @@ export type TimelineProps = {
   startTime?: Date
   endTime?: Date
   scaleExtent?: [number, number]
-  margin?: {top?: number, right?: number, bottom?: number, left?: number}
+  labelWidth?: number
   showLegend?: boolean
   showButtons?: boolean
   limitRowCount?: number
@@ -421,9 +425,9 @@ export type TimelineProps = {
 
 
 function Chart(props: TimelineProps) {
-  let {
+  const {
     data,
-    margin,
+    labelWidth,
     showLegend,
     showButtons = true,
     limitRowCount,
@@ -431,15 +435,12 @@ function Chart(props: TimelineProps) {
     ...rest
   } = props
 
-  // merge margins together
-  margin = {...defaultMargin, ...props.margin}
-
   const [showAllRows, setShowAllRows] = useState(false)
   const [totalRows, setTotalRows] = useState(0)
   const [labels, setLabels] = useState(null)
 
   const ref = useRef(null)
-  const legendRef = useRef(null)
+  // const legendRef = useRef(null)
 
   useEffect(() => {
     const node = ref.current
@@ -483,7 +484,7 @@ function Chart(props: TimelineProps) {
         yLabels,
         width,
         size,
-        margin,
+        labelWidth,
         useD3YAxis,
         ...rest
       })
@@ -522,18 +523,23 @@ function Chart(props: TimelineProps) {
         </Ctrls>
       }
 
-      {/* y axis labels */}
-      {labels &&
-        <TimelineLabels
-          labels={labels}
-          data={data}
-          formatter={props.yFormat}
-          margin={margin}
-        />
-      }
+      <div className="flex w-full">
+        {/* y axis labels */}
+        {labels &&
+          <div style={{marginTop: margin.top, width: labelWidth}}>
+            <TimelineLabels
+              labels={labels}
+              data={data}
+              formatter={props.yFormat}
+              margin={margin}
+            />
+          </div>
+        }
 
-      {/* d3.js timeline chart */}
-      <div ref={ref}></div>
+        {/* d3.js timeline chart */}
+        <div ref={ref} className="w-full"></div>
+      </div>
+
 
       {/* collapse chart if limitRowCount is provided */}
       {limitRowCount && totalRows > limitRowCount &&
@@ -567,6 +573,11 @@ export default memo(function TimelineContainer(props: TimelineProps) {
 )
 
 const Root = styled.div<{colorLinks: boolean}>`
+  width: 100%;
+  .timeline {
+    display: flex;
+  }
+
   button {
     margin: 0 2px;
     background: none;
