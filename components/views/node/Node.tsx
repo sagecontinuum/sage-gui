@@ -43,7 +43,7 @@ import { endOfHour, subDays } from 'date-fns'
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
 const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
-const TAIL_DAYS = '-2d'
+const TAIL_DAYS = '-7d'
 
 
 // todo(nc): remove hardcoded additional sensors

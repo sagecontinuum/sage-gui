@@ -34,6 +34,7 @@ const TIMELINE_MARGIN = {left: 175, right: 20, bottom: 0}
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
+const DAYS = 7
 
 const MDP_START = new Date('2022-04-05T12:00:00Z')
 const MDP_END = new Date('2022-05-05T12:00:00Z')
@@ -155,7 +156,7 @@ export default function Data(props: Props) {
     density: true,
     versions: false,
     time: 'hourly',
-    start: isMDP(focus) ? MDP_START : subDays(new Date(), 30)
+    start: isMDP(focus) ? MDP_START : subDays(new Date(), DAYS)
   })
 
   // note: endtime is not currently an option
@@ -189,7 +190,7 @@ export default function Data(props: Props) {
         return manifests
       }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup({...opts, end: addDays(opts.start, 30)})
+    const dProm = fetchRollup({...opts, end: addDays(opts.start, DAYS)})
 
     Promise.all([mProm, dProm])
       .then(([manifests, data]) => dispatch({type: 'INIT_DATA', data, manifests}))
@@ -269,7 +270,7 @@ export default function Data(props: Props) {
 
   const handleDateChange = (start: Date) => {
     setOpts(prev => ({...prev, start}))
-    setEnd(addDays(start, 30))
+    setEnd(addDays(start, DAYS))
   }
 
   const getNodeID = (vsn) => {
