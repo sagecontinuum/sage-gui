@@ -107,8 +107,8 @@ const NavMenu = () => {
             <Item
               icon={<WFOIcon />}
               component={Link}
-              to='/nodes/?project="WFO"'
-              label="WFO"
+              to='/nodes/?project="CROCUS"'
+              label="CROCUS"
             />
             <Divider />
             <Item
