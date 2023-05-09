@@ -119,7 +119,7 @@ const columns = [{
 
     const {health, sanity} = obj
 
-    return <Link to={`/node/${row.id}`} className="no-style flex column">
+    return <Link to={`/node/${row.vsn}`} className="no-style flex column">
       {health.failed == 0 ?
         <Tooltip title={`All health tests passed`} placement="right">
           <GoodChip icon={<CheckIcon className="success" />} label="pass" />
@@ -144,7 +144,8 @@ const columns = [{
   width: '100px',
   format: (val, obj) =>
     obj.node_type != 'Blade' ?
-      <Link to={`/node/${val}`}>{val}</Link> : val
+      <Link to={`/node/${obj.vsn}`}>{val}</Link> : val,
+  hide: true
 }, {
   id: 'vsn',
   label: 'VSN',
@@ -152,13 +153,13 @@ const columns = [{
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
       {obj.node_type != 'Blade' ?
-        <Link to={`/node/${obj.id}`}>{val || `-`}</Link> : (val || `-`)
+        <Link to={`/node/${val}`}>{val || `-`}</Link> : (val || `-`)
       }
       {obj.lat && obj.lng &&
         <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
           {obj.hasStaticGPS ?
             <MapIcon fontSize="small"/> :
-            <MapIcon fontSize="small" style={{color: "#36b8ff"}}/>
+            <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
           }
         </LiveGPSDot>
       }

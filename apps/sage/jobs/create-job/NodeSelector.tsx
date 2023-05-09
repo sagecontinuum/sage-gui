@@ -62,7 +62,7 @@ const columns = [{
 }, {
   id: 'View',
   format: (_, obj) =>
-    <Link to={`/node/${obj.node_id}`} target="_blank">
+    <Link to={`/node/${obj.vsn}`} target="_blank">
       view node <LaunchIcon className="external-link"/>
     </Link>
 }]

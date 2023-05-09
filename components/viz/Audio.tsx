@@ -18,7 +18,7 @@ import {bytesToSizeSI, msToTime, isOldData} from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as BH from '/components/apis/beehive'
-
+import { type VSN } from '/components/apis/beekeeper'
 
 const colors = colormap({
   colormap: 'hot',
@@ -28,16 +28,16 @@ const colors = colormap({
 
 
 type Props = {
-  node?: string
+  vsn?: VSN
   dataURL?: string
   className?: string
 }
 
 export default function Audio(props: Props) {
-  const {node, dataURL, className=''} = props
+  const {vsn, dataURL, className=''} = props
 
-  if (!node && !dataURL) {
-    throw 'Audio: no node or url provided'
+  if (!vsn && !dataURL) {
+    throw 'Audio: no node vsn or url provided'
   }
 
   const { setLoading } = useProgress()
@@ -51,16 +51,16 @@ export default function Audio(props: Props) {
   const [meta, setMeta] = useState<BH.OSNRecord>()
 
   // error for meta requests
-  const [error, setError] = useState()
+  const [error, setError] = useState(null)
 
   // wavesurfer error
   const [vizError, setVizError] = useState()
 
   // if node id is provided, find latest audio first
   useEffect(() => {
-    if (!node) return
+    if (!vsn) return
     setLoading(true)
-    BH.getLatestAudio(node.toLowerCase())
+    BH.getLatestAudio(vsn)
       .then(meta => {
         setMeta(meta)
 
@@ -73,7 +73,7 @@ export default function Audio(props: Props) {
       })
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
-  }, [node, setLoading])
+  }, [vsn, setLoading])
 
   // if OSN url is provided just load the player
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function Audio(props: Props) {
 
 
   function loadPlayer(url) {
-    var wavesurfer = WaveSurfer.create({
+    const wavesurfer = WaveSurfer.create({
       container: audioRef.current,
       waveColor: 'violet',
       progressColor: 'purple',
@@ -110,13 +110,13 @@ export default function Audio(props: Props) {
       {/* fallback to html audio element (if CORS is not configured) */}
       {vizError && (meta?.value || dataURL) &&
       <HtmlAudio>
-          <audio
-            controls
-            src={meta?.value || dataURL}
-          >
-            Your browser does not support the <code>audio</code> element.
-          </audio>
-        </HtmlAudio>
+        <audio
+          controls
+          src={meta?.value || dataURL}
+        >
+          Your browser does not support the <code>audio</code> element.
+        </audio>
+      </HtmlAudio>
       }
 
 

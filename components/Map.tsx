@@ -112,7 +112,7 @@ function PopupInfo(props: PopupProps) {
 
   // tooltip info deconstruction
   const {
-    vsn, node_id, project, focus, location, lng, lat, node_type
+    vsn,  project, focus, location, lng, lat, node_type
   } = data || {}
 
   return (
@@ -126,7 +126,7 @@ function PopupInfo(props: PopupProps) {
           <h2>
             {node_type == 'WSN' ?
               'Wild Sage Node' : node_type
-            } <Link to={`/node/${node_id}`}>
+            } <Link to={`/node/${vsn}`}>
               {vsn}
             </Link>
           </h2>

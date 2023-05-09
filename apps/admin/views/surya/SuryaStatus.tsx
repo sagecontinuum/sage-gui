@@ -33,12 +33,12 @@ const columns = [
   {
     id: 'id',
     label: 'ID',
-    width: '100px',
-    format: (val) => <Link to={`/node/${val}?factory=true`}>{val}</Link>
+    width: '100px'
   },
   {
     id: 'vsn',
-    label: 'VSN'
+    label: 'VSN',
+    format: (val) => <Link to={`/node/${val}?factory=true`}>{val}</Link>
   },
   getColumn('temp'),
   {

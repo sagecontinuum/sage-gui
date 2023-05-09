@@ -205,12 +205,12 @@ export function aggregateMetrics(data: Record[]) : AggMetrics {
 
 
 
-export async function getSanityChart(node?: string, start?: string) : Promise<AggMetrics> {
+export async function getSanityChart(vsn?: BK.VSN, start?: string) : Promise<AggMetrics> {
   const params = {
     start: start || '-2d',
     filter: {
       name: 'sys.sanity_status.*',
-      ...(node && {node})
+      ...(vsn && {vsn})
     }
   }
 
@@ -332,7 +332,7 @@ async function _findLatestAvail(
 
 
 export async function getRecentImages(
-  node: string,
+  vsn: BK.VSN,
   onStart?: (position: string, total: number) => void,
   onProgress?: (position: string, num: number) => void
 ) : Promise<{[position: string]: OSNRecord}> {
@@ -342,7 +342,7 @@ export async function getRecentImages(
       start: '-1d',
       filter: {
         name: 'upload',
-        node,
+        vsn,
         task: `imagesampler-${pos}`
       }
     }
@@ -381,12 +381,12 @@ export async function getRecentImages(
 
 
 
-export async function getLatestAudio(node: string) {
+export async function getLatestAudio(vsn: BK.VSN) {
   const data = await getData({
     start: '-1d',
     filter: {
       name: 'upload',
-      node,
+      vsn,
       filename: '*.flac',
     }
   })

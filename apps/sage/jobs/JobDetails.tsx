@@ -156,12 +156,12 @@ export default function JobDetails(props: Props) {
                   jobs.filter(o => o.id == job.job_id).flatMap(o => o.nodes).includes(vsn)
                 )
                 .map((vsn, i) => {
-                  const {location, node_id} = manifestByVSN[vsn]
+                  const {location} = manifestByVSN[vsn]
                   return (
                     <div key={i} className="title-row">
                       <div className="flex column">
                         <div>
-                          <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                          <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
                         </div>
                         <div>{location}</div>
                       </div>

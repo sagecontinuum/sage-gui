@@ -9,16 +9,16 @@ import Alert from '@mui/material/Alert'
 
 import { bytesToSizeSI, relativeTime, isOldData } from '/components/utils/units'
 import * as BH from '/components/apis/beehive'
-
+import { type VSN } from '/components/apis/beekeeper'
 
 
 type Props = {
-  node: string,
+  vsn: VSN,
   horizontal?: boolean
 }
 
 export default function RecentImages(props: Props) {
-  const {node, horizontal} = props
+  const {vsn, horizontal} = props
 
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
@@ -29,7 +29,7 @@ export default function RecentImages(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    BH.getRecentImages(node.toLowerCase(), onStart, onProgress)
+    BH.getRecentImages(vsn, onStart, onProgress)
       .then(images => {
         const hasData = !!Object.keys(images).filter(k => images[k]).length
         setImages(hasData ? images : null)
@@ -37,7 +37,7 @@ export default function RecentImages(props: Props) {
       }).catch((err) => {
         setError(err)
       }).finally(() => setLoading(false))
-  }, [node])
+  }, [vsn])
 
 
   const onStart = (position, total) => {

@@ -49,11 +49,11 @@ export const formatters = {
       </span>
     })}
   </>,
-  nodes: (vsns, obj) => <>
+  nodes: (vsns) => <>
     {vsns.map((vsn, i) => {
       const l = vsns.length - 1
       return <span key={vsn}>
-        <Link to={`/node/${obj.node_ids[i]}`}>
+        <Link to={`/node/${vsn}`}>
           {vsn}
         </Link>{i < l ? ', '  : ''}
       </span>
@@ -527,12 +527,12 @@ export default function JobStatus() {
             {Object.keys(pluginEvents)
               .filter(vsn => nodes ? nodes.includes(vsn) : true)
               .map((vsn, i) => {
-                const {location, node_id} = manifests[vsn]
+                const {location} = manifests[vsn]
                 return (
                   <Card key={i} className="title-row">
                     <div className="flex column">
                       <div>
-                        <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                        <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
                       </div>
                       <div>{location}</div>
                     </div>
@@ -550,7 +550,7 @@ export default function JobStatus() {
       </Main>
 
 
-      {jobs.length && jobDetails &&
+      {!!jobs.length && jobDetails &&
         <JobDetails
           job={jobDetails}
           jobs={jobs}

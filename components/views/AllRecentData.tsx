@@ -1,4 +1,3 @@
-
 import styled from 'styled-components'
 
 import RecentDataTable from './RecentDataTable'
@@ -6,12 +5,11 @@ import RecentImages from './RecentImages'
 import Audio from '/components/viz/Audio'
 import format from '/components/data/dataFormatter'
 
-import type {Manifest} from '/components/apis/beekeeper'
+import type {Manifest, VSN} from '/components/apis/beekeeper'
 
 
 type Props = {
-  node: string
-  vsn: string
+  vsn: VSN
   manifest: Manifest
 
   noData?: boolean
@@ -20,7 +18,7 @@ type Props = {
 }
 
 export default function RecentData(props: Props) {
-  const {node, vsn, manifest} = props
+  const {vsn, manifest} = props
 
   return (
     <Root className="flex column">
@@ -36,14 +34,14 @@ export default function RecentData(props: Props) {
       {!props.noImages &&
         <>
           <h2>Recent Images</h2>
-          <RecentImages node={node}/>
+          <RecentImages vsn={vsn}/>
         </>
       }
 
       {!props.noAudio &&
         <>
           <h2>Recent Audio</h2>
-          <Audio node={node} />
+          <Audio vsn={vsn} />
           {manifest?.shield === false &&
             <p className="muted">This node does not support audio</p>
           }

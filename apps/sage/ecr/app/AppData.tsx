@@ -98,10 +98,6 @@ export default function AppData(props: Props) {
   }
 
 
-  const getNodeID = (vsn) => {
-    return manifests.find(o => o.vsn == vsn).node_id
-  }
-
   const hasData = (data) =>
     Object.keys(data || {}).length > 0
 
@@ -150,7 +146,7 @@ export default function AppData(props: Props) {
                       ${item.value.toLocaleString()} records`
                     }
                     yFormat={vsn =>
-                      <Link to={`/node/${getNodeID(vsn)}`} target="_blank">{vsn}</Link>}
+                      <Link to={`/node/${vsn}`} target="_blank">{vsn}</Link>}
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta

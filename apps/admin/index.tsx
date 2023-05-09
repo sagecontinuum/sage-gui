@@ -48,7 +48,7 @@ export default function App() {
                 <Route path="status" element={<NodeList><StatusView /></NodeList>} />
                 <Route path="tests" element={<TestView />} />
                 <Route path="audio" element={<AudioView />} />
-                <Route path="node/:node" element={<NodeView />} />
+                <Route path="node/:vsn" element={<NodeView />} />
 
                 <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                 <Route path="surya/:phase" element={<SuryaStatus />} />

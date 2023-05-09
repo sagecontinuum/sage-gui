@@ -157,6 +157,8 @@ export default function TestView() {
 
       {error && <ErrorMsg>{error}</ErrorMsg>}
 
+      <br/>
+
       {sanity && Object.keys(sanity).find(vsn => sanity[vsn].length) &&
         <>
           <h2>Sanity Tests</h2>
@@ -176,7 +178,8 @@ export default function TestView() {
 }
 
 const Root = styled.div`
-  margin: 1em;
+  margin: 2rem auto;
+  width: 80%;
 
   h1 {
     border-bottom: 1px solid rgb(216, 222, 228);
@@ -184,7 +187,7 @@ const Root = styled.div`
   }
 
   h2 {
-    margin: 0 0 0 115px;
+    margin: 0 0 0;
     float: left;
   }
 `

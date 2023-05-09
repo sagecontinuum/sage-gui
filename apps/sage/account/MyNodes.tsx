@@ -17,7 +17,7 @@ const { docs } = config
 const columns = [{
   id: 'vsn',
   label: 'VSN',
-  format: (vsn, obj) => <Link to={`/node/${obj.node_id}`}>{vsn}</Link>
+  format: (vsn, obj) => <Link to={`/node/${obj.vsn}`}>{vsn}</Link>
 }, {
   id: 'schedule',
   label: 'Can schedule?',

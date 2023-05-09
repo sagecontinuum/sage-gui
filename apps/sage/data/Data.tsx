@@ -331,14 +331,14 @@ export default function Data(props: Props) {
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
                 const timelineData = data[vsn]
-                const {node_id, location} = manifestByVSN[vsn]
+                const {location} = manifestByVSN[vsn]
 
                 return (
                   <TimelineContainer key={vsn}>
                     <div className="flex justify-between title-row">
                       <div className="flex column">
                         <div>
-                          <h2><Link to={`/node/${node_id}`}>{vsn}</Link></h2>
+                          <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
                         </div>
                         <div>{location}</div>
                       </div>
@@ -355,7 +355,9 @@ export default function Data(props: Props) {
                       endTime={end}
                       tooltip={(item) => `
                         <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
+                          ${new Date(item.timestamp).toDateString()}${' '}
+                          ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
+                          (${TIME_WINDOW})
                         </div>
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
@@ -406,7 +408,9 @@ export default function Data(props: Props) {
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${TIME_WINDOW})
+                          ${new Date(item.timestamp).toDateString()}${' '}
+                          ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
+                          (${TIME_WINDOW})
                         </div>
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
@@ -416,7 +420,9 @@ export default function Data(props: Props) {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
                         const win = opts.time == 'daily' ? 'd' : 'h'
-                        window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`, '_blank')
+                        window.open(window.location.origin +
+                          `/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`
+                        , '_blank')
                       }}
                       labelWidth={TIMELINE_LABEL_WIDTH}
                     />

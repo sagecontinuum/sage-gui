@@ -56,10 +56,7 @@ type MimeType = keyof typeof exts
 const columns = [{
   id: 'vsn',
   label: 'VSN',
-  format: (val, r) =>
-    <a href={`/node/${r.node.toUpperCase()}`}>
-      {val}
-    </a>
+  format: (val) => <a href={`/node/${val}`}>{val}</a>
 }, {
   id: 'timestamp',
   label: 'Time',

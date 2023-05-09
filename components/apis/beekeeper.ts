@@ -130,8 +130,6 @@ export async function getProdSheet(params?: MetaParams) : Promise<ManifestMap | 
         .then(factory => ({...mapping[node], factory})) as Promise<Manifest>
     }
     return null
-  } else {
-    throw 'getManifest: must provide `by=vsn` option if filtering to a node by VSN'
   }
 }
 

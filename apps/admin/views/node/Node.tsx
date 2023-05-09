@@ -129,7 +129,7 @@ const SignedTable = styled.table`
 
 
 export default function NodeView() {
-  const {node} = useParams()
+  const vsn = useParams().vsn as BK.VSN
   const params = new URLSearchParams(useLocation().search)
   const factoryView = params.get('factory')
 
@@ -139,7 +139,7 @@ export default function NodeView() {
   const { setLoading } = useProgress()
 
   const [manifest, setManifest] = useState(null)
-  const [vsn, setVsn] = useState(null)
+  const [nodeID, setNodeID] = useState(null)
   const [meta, setMeta] = useState(null)
   const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
 
@@ -157,50 +157,53 @@ export default function NodeView() {
   useEffect(() => {
     setLoading(true)
 
-    BK.getProdSheet({node: node.toUpperCase()})
+    BK.getProdSheet({node: vsn, by: 'vsn'})
       .then(data => {
         setManifest(data)
 
         // if no manifest, we can not get the vsn for node health
         if (!data) return
 
-        const vsn = data.vsn
-        setVsn(vsn)
-        BH.getNodeDeviceHealth(vsn, '-7d')
-          .then((data) => setHealth(data))
-          .catch((err) => setHealthError(err))
+        setNodeID(data.node_id)
       })
 
+    BH.getNodeDeviceHealth(vsn, '-7d')
+      .then((data) => setHealth(data))
+      .catch((err) => setHealthError(err))
+
+  }, [vsn, setLoading, days, hours])
+
+  useEffect(() => {
+    if (!nodeID) return
 
     setLoading2(true)
-    const p2 = BH.getSanityChart(node.toLowerCase(), '-7d')
+    const p2 = BH.getSanityChart(vsn, '-7d')
       .then((sanity) => {
         if (!sanity) {
           return
         }
 
-        const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
+        // todo(nc): refactor data model?
+        const data = Object.values(Object.values(sanity)[0])[0]
 
         setSanityData(data)
       }).catch((err) => setError2(err))
       .finally(() => setLoading2(false))
 
     setLoading3(true)
-    const p3 = BK.getNode(node)
+    const p3 = BK.getNode(nodeID)
       .then(data => setMeta(data))
       .catch(err => setError3(err))
       .finally(() => setLoading3(false))
 
     Promise.all([p2, p3])
       .then(() => setLoading(false))
-
-  }, [node, setLoading, days, hours])
-
+  }, [vsn, nodeID, setLoading])
 
   return (
     <Root>
       <h1>
-        Node {vsn} | <small className="muted">{node}</small>
+        Node {vsn} | <small className="muted">{nodeID}</small>
       </h1>
 
       {manifest &&
@@ -256,10 +259,11 @@ export default function NodeView() {
                 </b>
                 `
               }
-              labelWidth={20}
+              labelWidth={200}
             />
           }
 
+          <br />
 
           <h2>Sanity Tests</h2>
           {sanityData &&
@@ -277,7 +281,7 @@ export default function NodeView() {
                 </b>
                 `
               }
-              labelWidth={20}
+              labelWidth={200}
             />
           }
 
@@ -305,7 +309,7 @@ export default function NodeView() {
               <FactoryNotes data={manifest.factory} />
             </>
           }
-          {vsn && <AllRecentData node={node} vsn={vsn} manifest={manifest} />}
+          {vsn && <AllRecentData vsn={vsn} manifest={manifest} />}
         </Data>
 
       </div>
@@ -333,6 +337,7 @@ const Charts = styled.div`
 
   h2 {
     float: left;
+    margin:0;
   }
 `
 

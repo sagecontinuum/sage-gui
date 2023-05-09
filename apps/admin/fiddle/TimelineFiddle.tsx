@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, Link} from 'react-router-dom'
 import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
@@ -8,7 +8,7 @@ import * as BH from '/components/apis/beehive'
 import TimelineChart, {color} from '/components/viz/Timeline'
 
 
-const node = '000048B02D05A0A4'
+const vsn = 'W021'
 
 
 export default function Timeline() {
@@ -32,9 +32,9 @@ export default function Timeline() {
 
 
     // test two: node sanity data
-    BH.getSanityChart(node.toLowerCase(), '-7d')
+    BH.getSanityChart(vsn, '-7d')
       .then((sanity) => {
-        const data = sanity[node.toLowerCase()][`${node.toLowerCase()}.ws-nxcore`]
+        const data = Object.values(Object.values(sanity)[0])[0]
         setData2(data)
       }).catch((err) => setError1(err))
   }, [days, hours])
@@ -59,7 +59,7 @@ export default function Timeline() {
       }
 
 
-      {data2 && <h2>Node <Link to={`/node/${node}`}>{node}</Link></h2>}
+      {data2 && <h2>Node <Link to={`/node/${vsn}`}>{vsn}</Link></h2>}
       {data2 &&
         <TimelineChart
           data={data2}
@@ -93,6 +93,7 @@ export default function Timeline() {
 }
 
 const Root = styled.div`
-
+  margin: 2rem auto;
+  width: 80%;
 `
 

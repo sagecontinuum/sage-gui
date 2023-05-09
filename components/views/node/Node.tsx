@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
-import { Link, useParams, useLocation } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import { Alert, Button, Tooltip } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -13,6 +13,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
 import { useProgress } from '/components/progress/ProgressProvider'
+import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
 import MetaTable from '/components/table/MetaTable'
@@ -20,7 +21,7 @@ import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import timelineAppLabel from '/components/viz/timelineAppLabel'
+import timelineAppLabel from '/components/viz/TimelineAppLabel'
 import { CardViewStyle, Card } from '/components/layout/Layout'
 
 import RecentDataTable from '../RecentDataTable'
@@ -115,21 +116,19 @@ const cameraMetaRows = [
 
 
 export default function NodeView() {
-  const {node} = useParams()
-  const params = new URLSearchParams(useLocation().search)
-  const hours = params.get('hours')
-  const days = params.get('days')
+  const vsn = useParams().vsn as BK.VSN
 
   const { loading, setLoading } = useProgress()
 
   const [manifest, setManifest] = useState<BK.Manifest>(null)
-  const [vsn, setVsn] = useState<BK.Manifest['vsn']>(null)
+  const [nodeID, setNodeID] = useState<BK.Manifest['node_id']>(null)
   const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
   const [ecr, setECR] = useState<ECR.App[]>()
 
   const [error, setError] = useState(null)
+  const [vsnNotFound, setVsnNotFound] = useState(null)
 
   const [hover, setHover] = useState<string>('')
 
@@ -155,36 +154,44 @@ export default function NodeView() {
 
 
   useEffect(() => {
-    BK.getProdSheet({node: node.toUpperCase()})
+    setLoading(true)
+    const p1 = BK.getProdSheet({node: vsn, by: 'vsn'})
       .then((data: BK.Manifest) => {
         setManifest(data)
 
-        // if no manifest, we can not get the vsn for node health
-        if (!data) return
+        if (!data) {
+          setVsnNotFound(true)
+          return
+        }
 
-        const vsn = data.vsn
-        setVsn(vsn)
+        const id = data.node_id
+        setNodeID(id)
 
-        BH.getSimpleNodeStatus(vsn)
-          .then((records) => {
-            const elapsed = records.map(o => new Date().getTime() - new Date(o.timestamp).getTime())
-            const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
-            setStatus(isReporting ? 'reporting' : 'not reporting')
-          }).catch(() => setStatus('unknown'))
-        BH.getGPS(vsn)
-          .then(d => setLiveGPS(d))
-          .catch(d => setLiveGPS({lat: null, lon: null}))
+        BK.getNode(id)
+          .then(data => setMeta(data))
+          .catch(err => setError(err))
       })
 
-    BK.getNode(node)
-      .then(data => setMeta(data))
-      .catch(err => setError(err))
-  }, [node, setLoading, days, hours])
+    const p2 = BH.getSimpleNodeStatus(vsn)
+      .then((records) => {
+        const elapsed = records.map(o => new Date().getTime() - new Date(o.timestamp).getTime())
+        const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
+        setStatus(isReporting ? 'reporting' : 'not reporting')
+      }).catch(() => setStatus('unknown'))
+
+    const p3 = BH.getGPS(vsn)
+      .then(d => setLiveGPS(d))
+      .catch(() => setLiveGPS({lat: null, lon: null}))
+
+    Promise.all([p1, p2, p3])
+      .finally(() => setLoading(false))
+
+  }, [vsn, setLoading])
 
 
   // data timeline
   useEffect(() => {
-    if (!vsn || !manifest) return
+    if (!manifest) return
     setLoadingTL(true)
     fetchRollup({...opts, vsn})
       .then(data => dispatch({type: 'INIT_DATA', data, manifests: [manifest]}))
@@ -198,7 +205,6 @@ export default function NodeView() {
     ECR.listApps('public')
       .then(ecr => setECR(ecr))
   }, [])
-
 
   const onOver = (id) => {
     const cls = `.hover-${id}`
@@ -250,9 +256,12 @@ export default function NodeView() {
 
 
   const {
-    node_type, shield, node_id, top_camera, bottom_camera,
+    node_type, shield, top_camera, bottom_camera,
     left_camera, right_camera
   } = manifest || {}
+
+  if (vsnNotFound)
+    return <NodeNotFound />
 
   return (
     <Root>
@@ -269,11 +278,11 @@ export default function NodeView() {
               <h1 className="no-margin">
                 {node_type == 'WSN' ?
                   'Wild Sage Node' : node_type
-                } {vsn} <small className="muted">{node}</small>
+                } {vsn} <small className="muted">{nodeID}</small>
               </h1>
 
               <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
-                <Button href={manifest ? `${config.adminURL}/node/${manifest.node_id}` : ''} target="_blank">
+                <Button href={manifest ? `${config.adminURL}/node/${vsn}` : ''} target="_blank">
                   <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
                     {status}
                   </span>
@@ -294,13 +303,13 @@ export default function NodeView() {
                     format: () =>
                       <div className="gps">
                         {hasStaticGPS(manifest) &&
-                          <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+                            <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
                         }
                         {!hasStaticGPS(manifest) && liveGPS &&
-                          <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+                            <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
                         }
-                        {!hasStaticGPS(manifest) && !liveGPS &&
-                          <span className="muted">not available</span>
+                        {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+                            <span className="muted">not available</span>
                         }
                       </div>
                   }
@@ -330,17 +339,17 @@ export default function NodeView() {
               <DataOptions onChange={handleOptionChange} opts={opts} condensed />
             </div>
 
-            {loadingTL && !tlError &&
+            {loadingTL &&
               <div className="clearfix w-full">
-                <TimelineSkeleton />
+                <TimelineSkeleton includeHeader={false} />
               </div>
             }
 
-            {!Object.keys(data || {}).length && !loadingTL &&
+            {data && !Object.keys(data).length &&
               <div className="clearfix muted">No data available</div>
             }
 
-            {Object.keys(data || {}).length > 0 && vsn && ecr && !loadingTL &&
+            {data && !!Object.keys(data).length && ecr &&
               <Timeline
                 data={data[vsn]}
                 cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -395,14 +404,14 @@ export default function NodeView() {
           <Card>
             <h2>Images</h2>
             <Imgs>
-              <RecentImages node={node} horizontal />
+              <RecentImages vsn={vsn} horizontal />
             </Imgs>
           </Card>
 
           {shield &&
             <Card>
               <h2>Audio</h2>
-              <Audio node={node} className="hover-audio"/>
+              <Audio vsn={vsn} className="hover-audio"/>
             </Card>
           }
         </LeftSide>
@@ -410,26 +419,26 @@ export default function NodeView() {
         <RightSide className="justify-end">
           <Card noPad>
             {hasStaticGPS(manifest) && status && vsn &&
-              <Map
-                data={[{
+                <Map
+                  data={[{
+                    vsn,
+                    lat: manifest.gps_lat,
+                    lng: manifest.gps_lon,
+                    status,
+                    ...manifest
+                  }]} />
+            }
+            {!hasStaticGPS(manifest) && liveGPS && status &&
+                <Map data={[{
                   vsn,
-                  lat: manifest.gps_lat,
-                  lng: manifest.gps_lon,
+                  lat: liveGPS.lat,
+                  lng: liveGPS.lon,
                   status,
                   ...manifest
                 }]} />
             }
-            {!hasStaticGPS(manifest) && liveGPS && status &&
-              <Map data={[{
-                vsn,
-                lat: liveGPS.lat,
-                lng: liveGPS.lon,
-                status,
-                ...manifest
-              }]} />
-            }
             {!hasStaticGPS(manifest) && !liveGPS && !loading &&
-              <div className="muted" style={{margin: 18}}>(Map not available)</div>
+                <div className="muted" style={{margin: 18}}>(Map not available)</div>
             }
           </Card>
 
@@ -438,15 +447,15 @@ export default function NodeView() {
               <img src={wsnode} width={WSN_VIEW_WIDTH} />
               <VSN>{vsn}</VSN>
               {manifest &&
-                <>
-                  {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
-                  {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
-                  {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
-                  {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
-                  {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
-                  {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
-                  {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
-                </>
+                  <>
+                    {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
+                    {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
+                    {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
+                    {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
+                    {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
+                    {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
+                    {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
+                  </>
               }
             </WSNView>
             :

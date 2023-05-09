@@ -18,12 +18,12 @@ function AllAudios() {
       if (i >= nodeList.length)
         return
 
-      const id = nodeList[i]
+      const vsn = nodeList[i]
 
       const ele = (
-        <Chart key={id}>
-          <h2>Node <Link to={`/node/${id}`}>{id}</Link></h2>
-          <Audio node={id} />
+        <Chart key={vsn}>
+          <h2>Node <Link to={`/node/${vsn}`}>{vsn}</Link></h2>
+          <Audio vsn={vsn} />
         </Chart>
       )
 
@@ -35,7 +35,7 @@ function AllAudios() {
       }, 0)
     }
 
-    BK.getProdSheet()
+    BK.getProdSheet({by: 'vsn'})
       .then(meta => {
         const nodeList = Object.keys(meta)
         addChart(nodeList)
