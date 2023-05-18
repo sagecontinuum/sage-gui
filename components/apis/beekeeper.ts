@@ -90,13 +90,19 @@ export async function getNode(id: string) : Promise<State> {
 }
 
 
-type MetaParams = {node?: string, by?: 'vsn' | 'id'}
+type MetaParams = {node?: string, by?: 'vsn' | 'id', project?: string, focus?: string}
 export type ManifestMap = {[id_or_vsn: string]: Manifest}
 
 export async function getProdSheet(params?: MetaParams) : Promise<ManifestMap | Manifest> {
-  const {node, by = 'id'} = params || {}
+  const {node, by = 'id', project, focus} = params || {}
 
   let data = await get(`${url}/production`)
+
+  if (project)
+    data = data.filter(o => o.project == project)
+  if (focus)
+    data = data.filter(o => o.focus == focus)
+
 
   // special handling of gps since they are of type 'string'; todo(nc): remove
   // also, add special "sensor" list for tables and convenience

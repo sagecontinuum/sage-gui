@@ -8,6 +8,9 @@ import CssBaseline from '@mui/material/CssBaseline'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import Node from '/components/views/node/Node'
 import Nodes from '/components/views/nodes/Nodes'
+import Sensor from '/components/views/sensor/Sensor'
+import SensorList from '/components/views/sensor/SensorList'
+
 import Data from '/apps/sage/data/Data'
 import DataBrowser from '/apps/sage/data-stream/DataBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
@@ -51,7 +54,10 @@ export default function App() {
                 <Route path="/" element={<Navigate to="nodes" replace />} />
 
                 <Route path="nodes" element={<Nodes/>} />
-                <Route path="node/:node" element={<Node />} />
+                <Route path="node/:vsn" element={<Node />} />
+                <Route path="sensors" element={<SensorList project={settings.project} focus={settings.focus} />} />
+                <Route path="sensors/:name" element={<Sensor />} />
+
 
                 <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
                 <Route path="data/ontology/:name" element={<Ontology />} />

@@ -17,11 +17,10 @@ const prod = {
   dataBrowserURL: 'https://portal.sagecontinuum.org/query-browser',
   adminURL: 'https://admin.sagecontinuum.org',
   wifireData: 'https://wifire-data.sdsc.edu/api',
-  sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://sagecontinuum.org/docs',
   contactUs: 'https://sagecontinuum.org/docs/contact-us',
-  ghDicussions: 'https://github.com/orgs/waggle-sensor/discussions'
+  ghDiscussions: 'https://github.com/orgs/waggle-sensor/discussions'
 }
 
 

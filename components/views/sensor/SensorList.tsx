@@ -12,11 +12,11 @@ import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import config from '/config'
 const {
-  sageCommons,
+  wifireData,
   missing_sensor_details
 } = config
 
-const url = `${sageCommons}/action/package_search` +
+const url = `${wifireData}/action/package_search` +
   `?facet.field=[%22organization%22,%22tags%22,%22res_format%22]` +
   `&rows=200` +
   `&fq=tags:(%22sensor%22)`
@@ -71,7 +71,16 @@ const columns = [{
 }]
 
 
-export default function SensorList() {
+type Props = {
+  project?: string
+  focus?: string
+}
+
+
+export default function SensorList(props: Props) {
+  // alter init state if project/focus is provided
+  const {project, focus} = props
+
   const [data, setData] = useState()
   const [error, setError] = useState()
   const {setLoading} = useProgress()
@@ -128,7 +137,7 @@ export default function SensorList() {
       }).catch((err) => setError(err))
       .finally(() => setLoading(false))
 
-  }, [])
+  }, [setLoading])
 
   return (
     <Root>
