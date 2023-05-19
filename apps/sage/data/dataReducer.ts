@@ -2,6 +2,8 @@ import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 import { groupBy, intersection, sum, pick } from 'lodash'
 
+import { NO_ASSIGNMENT } from './Data'
+
 
 type Filters = {
   [name: string]: string[]
@@ -133,7 +135,12 @@ const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
   const vsnsByField = {}
   for (const [field, vals] of Object.entries(filters)) {
     for (const manifest of manifests) {
-      if (!vals.includes(manifest[field]))
+
+      let isEmpty
+      if (vals.includes(NO_ASSIGNMENT) && manifest[field] == '')
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        isEmpty = true
+      else if (!vals.includes(manifest[field]))
         continue
 
       const vsn = manifest.vsn

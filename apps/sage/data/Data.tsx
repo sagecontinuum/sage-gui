@@ -27,7 +27,7 @@ const MDP_NODES = settings.mdpNodes
 
 
 // No assignment represents null, and is same as empty string in this view
-const NO_ASSIGNMENT = 'None'
+export const NO_ASSIGNMENT = 'Unassigned'
 const TIME_WINDOW = 'hour'
 
 const TIMELINE_LABEL_WIDTH = 175
@@ -99,7 +99,7 @@ const findApp = (apps, name) =>
 type FacetItem = {name: string, count: number}
 
 type Facets = {
-  [name: string]: {title: string, items: FacetItem[] }
+  [name: string]: {title: string, items: FacetItem[], hide?: boolean}
 }
 
 
@@ -326,7 +326,7 @@ export default function Data(props: Props) {
         </Top>
 
         <Items>
-          {opts.display == 'nodes' && filtered && manifestByVSN &&
+          {opts.display == 'nodes' && filtered && manifestByVSN && ecr &&
             filtered
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {

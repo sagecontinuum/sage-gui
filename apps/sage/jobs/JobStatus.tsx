@@ -346,6 +346,7 @@ export default function JobStatus() {
   useEffect(() => {
     if (view != 'timeline') return
 
+    setLoading(true)
     ES.getEvents()
       .then(({events, errors}) =>
         setData(prev => ({
@@ -354,6 +355,7 @@ export default function JobStatus() {
           pluginErrors: errors
         }))
       )
+      .finally(() => setLoading(false))
   }, [view])
 
 
