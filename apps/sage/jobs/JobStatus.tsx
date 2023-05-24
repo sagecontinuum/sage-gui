@@ -42,7 +42,7 @@ export const formatters = {
       const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
 
       const l = objs.length - 1
-      return <span key={name}>
+      return <span key={i}>
         <Link to={`/apps/app/${app}`}>
           {name}
         </Link>{i < l ? ', '  : ''}
