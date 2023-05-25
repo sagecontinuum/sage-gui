@@ -46,8 +46,11 @@ export default function JobActions(props: Props) {
         const count = ids.length
         enqueueSnackbar(`${count} job${count > 1 ? 's' : ''} resubmitted`, {variant: 'success'})
       })
-      .catch(() => {
-        enqueueSnackbar('Failed to resubmit at least one job', {variant: 'error'})
+      .catch((err) => {
+        enqueueSnackbar(
+          <>Failed to resubmit at least one job<br/>{err.message}</>,
+          {variant: 'error', autoHideDuration: 7000}
+        )
       })
       .finally(() => {
         setLoading(false)
@@ -62,8 +65,11 @@ export default function JobActions(props: Props) {
         const count = resList.filter(o => o.state == 'Suspended').length
         enqueueSnackbar(`${count} job${count > 1 ? 's' : ''} suspended`, {variant: 'success'})
       })
-      .catch(() => {
-        enqueueSnackbar('Failed to suspend at least one job', {variant: 'error'})
+      .catch((err) => {
+        enqueueSnackbar(
+          <>Failed to suspend at least one job<br/>{err.message}</>,
+          {variant: 'error', autoHideDuration: 7000}
+        )
       })
       .finally(() => {
         setLoading(false)
@@ -78,8 +84,11 @@ export default function JobActions(props: Props) {
         const count = resList.filter(o => o.state == 'Removed').length
         enqueueSnackbar(`${count} job${count > 1 ? 's' : ''} removed`, {variant: 'success'})
       })
-      .catch(() => {
-        enqueueSnackbar('Failed to remove at least one job', {variant: 'error'})
+      .catch((err) => {
+        enqueueSnackbar(
+          <>Failed to remove at least one job<br/>{err.message}</>,
+          {variant: 'error', autoHideDuration: 7000}
+        )
       })
       .finally(() => {
         setLoading(false)
