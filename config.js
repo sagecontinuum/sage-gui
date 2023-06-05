@@ -20,6 +20,8 @@ const prod = {
   sageCommons: 'https://sage-commons.sdsc.edu/api',
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://sagecontinuum.org/docs',
+  contactUs: 'https://sagecontinuum.org/docs/contact-us',
+  ghDicussions: 'https://github.com/orgs/waggle-sensor/discussions'
 }
 
 

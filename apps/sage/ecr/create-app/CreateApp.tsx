@@ -26,6 +26,9 @@ import Auth from '/components/auth/auth'
 import * as ECR from '/components/apis/ecr'
 import useIsApproved from '/components/hooks/useIsApproved'
 
+import config from '/config'
+const { contactUs, docs } = config
+
 const user = Auth.user
 
 const devList = [
@@ -342,7 +345,7 @@ export default function CreateApp() {
             <p>
               <br/>
               <b>Note:</b> You may register an application, but to enable builds of apps on
-              our infrastructure, please <a href={`${ECR.docs}/contact-us`} target="_blank" rel="noreferrer" >
+              our infrastructure, please <a href={contactUs} target="_blank" rel="noreferrer" >
                 contact us
                 <LaunchIcon className="external-link"/>
               </a>.
@@ -357,13 +360,13 @@ export default function CreateApp() {
         <hr/>
         <ul className="no-padding list-none">
           <li>
-            <a href={`${ECR.docs}/tutorials/edge-apps/intro-to-edge-apps`} target="_blank" rel="noreferrer" >
+            <a href={`${docs}/tutorials/edge-apps/intro-to-edge-apps`} target="_blank" rel="noreferrer" >
               Intro to edge apps
               <LaunchIcon className="external-link"/>
             </a>
           </li>
           <li>
-            <a href={`${ECR.docs}/tutorials/edge-apps/creating-an-edge-app`} target="_blank" rel="noreferrer" >
+            <a href={`${docs}/tutorials/edge-apps/creating-an-edge-app`} target="_blank" rel="noreferrer" >
               Creating an edge app
               <LaunchIcon className="external-link"/>
             </a>

@@ -1,6 +1,6 @@
 import { useState, ReactNode } from 'react'
 import styled from 'styled-components'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import sage from 'url:/assets/sage-drawing.png'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -8,6 +8,8 @@ import Divider from '@mui/material/Divider'
 import AccountIcon from '@mui/icons-material/AccountCircleRounded'
 import NodesIcon from '@mui/icons-material/HubOutlined'
 import AccessIcon from '@mui/icons-material/LockOutlined'
+import MailIcon from '@mui/icons-material/MailOutlineRounded'
+import ForumIcon from '@mui/icons-material/ForumOutlined'
 // import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
 import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
@@ -19,8 +21,8 @@ import Auth from '/components/auth/auth'
 const username = Auth.user
 const webOrigin = window.location.origin
 
-import config from '../../config'
-import { version } from '../../package.json'
+import config from '/config'
+import { version } from '/package.json'
 
 
 type Props = {
@@ -71,15 +73,34 @@ export default function NavBar(props: Props) {
       <Spacer />
 
 
-      <div className="flex items-center gap">
+      <div className="flex items-center">
         {hasDocsLink &&
           <NavItems>
-            <a
+            <NavItem
+              label="Docs"
               href={`${config.docs}/about/overview`}
-              className="no-style docs-link"
-            >
-              Docs
-            </a>
+            />
+            <NavItem
+              label="Help"
+              style={{left: '-30px'}}
+              menu={
+                <div>
+                  <Item
+                    icon={<MailIcon />}
+                    component="a"
+                    href={config.contactUs}
+                    label={<>Contact us</>}
+                  />
+                  <Item
+                    icon={<ForumIcon />}
+                    component="a"
+                    href={config.ghDiscussions}
+                    target="_blank"
+                    label={<>Discussions&nbsp;<LaunchIcon style={{fontSize: '1.1em'}} /></>}
+                  />
+                </div>
+              }
+            />
           </NavItems>
         }
 
@@ -159,7 +180,7 @@ const Root = styled.div`
     0px 1px 10px 0px rgb(0 0 0 / 12%);
 
   .docs-link {
-    margin-right: 15px;
+    margin: 20px;
   }
 `
 

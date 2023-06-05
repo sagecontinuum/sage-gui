@@ -54,8 +54,8 @@ import ErrorMsg from '../../ErrorMsg'
 
 import pluginGif from 'url:./gifs/plugin.gif'
 
+const { dockerRegistry, docs, contactUs } = config.dockerRegistry
 
-const docker = config.dockerRegistry
 
 type View = 'form' |'editor'
 
@@ -216,7 +216,7 @@ export default function CreateJob() {
           return {
             name: appParams[o.id]?.appName || appIDToName(o.id),
             pluginSpec: {
-              image: `${docker}/${o.id}`,
+              image: `${dockerRegistry}/${o.id}`,
               args: appParams[o.id] ?
                 Object.entries(appParams[o.id])
                   .filter(([k, _]) => k != 'appName')
@@ -504,13 +504,13 @@ export default function CreateJob() {
                   <hr/>
                   <ul className="no-padding list-none">
                     <li>
-                      <a href={`${ECR.docs}/tutorials/schedule-jobs`} target="_blank" rel="noreferrer" >
+                      <a href={`${docs}/tutorials/schedule-jobs`} target="_blank" rel="noreferrer" >
                         Submit your job
                         <LaunchIcon className="external-link"/>
                       </a>
                     </li>
                     <li>
-                      <a href={`${ECR.docs}/contact-us`} target="_blank" rel="noreferrer" >
+                      <a href={contactUs} target="_blank" rel="noreferrer" >
                         Contact us
                         <LaunchIcon className="external-link"/>
                       </a>

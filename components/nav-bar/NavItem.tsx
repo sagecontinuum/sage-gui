@@ -1,5 +1,5 @@
 
-import { useState, useRef, FC } from 'react'
+import { useState, useRef, ElementType } from 'react'
 import { NavLink, useMatch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -18,6 +18,7 @@ type Props = {
   to?: string
   root?: string
   style?: object // menu styling
+  href?: string  // use href for external link
 }
 
 export default function NavItem(props: Props) {
@@ -38,14 +39,18 @@ export default function NavItem(props: Props) {
 
   return (
     <Root ref={ref} className="flex items-center">
-      {to ?
+      {to &&
         <NavLink to={to}>
           {label}
         </NavLink>
-        :
+      }
+      {menu &&
         <a onClick={handleClick} className={`flex ${isActive ? 'active' : ''}`}>
           {label} {menu && <CaretIcon />}
         </a>
+      }
+      {props.href &&
+        <a href={props.href}>{label}</a>
       }
       {open && menu &&
         <MenuContainer onClick={handleClick} style={props.style}>
@@ -130,11 +135,13 @@ const MenuContainer = styled.div`
 
 
 type ItemProps = {
-  label: string
-  to: string
+  label: string | JSX.Element
+  to?: string
   icon?: JSX.Element
   onClick?: MouseEvent
-  component?: FC
+  component?: string | JSX.Element
+  href?: string
+  target?: string
 }
 
 export function Item(props: ItemProps) {
@@ -147,8 +154,9 @@ export function Item(props: ItemProps) {
 
   return (
     <MenuItem
-      component={props.component || NavLink} {...props}
+      component={props.component || NavLink}
       className={`flex ${isActive ? 'active' : ''}`}
+      {...props}
     >
       <ListItemIcon>{props.icon}</ListItemIcon>
       {props.label}

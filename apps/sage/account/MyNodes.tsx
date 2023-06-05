@@ -11,7 +11,7 @@ import * as BK from '/components/apis/beekeeper'
 import ErrorMsg from '../ErrorMsg'
 
 import config from '/config'
-const { docs } = config
+const { contactUs } = config
 
 
 const columns = [{
@@ -58,7 +58,7 @@ export default function MyNodes() {
           rows={data}
           emptyNotice={<div>
             Sorry, you do not have access to any nodes.<br/>
-            Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if
+            Please <b><a href={contactUs}>contact us</a></b> if
             interested in collaborating with Sage.
           </div>}
         />

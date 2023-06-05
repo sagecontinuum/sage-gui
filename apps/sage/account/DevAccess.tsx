@@ -12,7 +12,7 @@ import Auth from '/components/auth/auth'
 
 
 import config from '/config'
-const {docs} = config
+const { contactUs } = config
 
 const requestInfo =
 `Name:
@@ -88,7 +88,7 @@ export default function DevAccess() {
             <div>
               <Alert severity="warning">
                 <b>Note:</b> Treat this token as your username & password.
-                Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you have any questions.
+                Please <b><a href={contactUs}>contact us</a></b> if you have any questions.
               </Alert>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function DevAccess() {
         {isPermitted === false && <p>
           <Alert severity="info">
             <b>Note</b> you do not have scheduling or developer access to any nodes.<br/>
-            Please <b><a href={`${docs}/contact-us`}>contact us</a></b> if you'd like access to a
+            Please <b><a href={contactUs}>contact us</a></b> if you'd like access to a
             node. Once you have some permissions, your dev token will appear here
           </Alert>
         </p>}
@@ -164,7 +164,7 @@ export default function DevAccess() {
       <h3>1. Request dev access</h3>
 
       <p>
-        First, <b><a href={`${docs}/contact-us`} target="_blank" rel="noreferrer">email us</a></b> with
+        First, <b><a href={contactUs} target="_blank" rel="noreferrer">email us</a></b> with
         the subject "Dev Access", along with with the following info about your request:
       </p>
 
