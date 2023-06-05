@@ -10,3 +10,6 @@ coverage/
 beekeeper-keys/
 *.log
 apps/sage/jobs/test-job-data
+/test-results/
+/playwright-report/
+/playwright/.cache/
