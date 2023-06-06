@@ -10,6 +10,10 @@ const configs = {
     logo: 'DAWN',
     project: 'DAWN'
   },
+  'crocus': {
+    logo: 'CROCUS',
+    project: 'CROCUS'
+  },
   'neon-mdp': {
     logo: 'NEON-MDP',
     project: 'SAGE',
