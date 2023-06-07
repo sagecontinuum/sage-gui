@@ -13,7 +13,10 @@ import { ClickAwayListener } from '@mui/material'
 
 import Clipboard from './utils/Clipboard'
 import type { Manifest } from '/components/apis/beekeeper'
+
 import config from '/config'
+import settings from '/apps/project/settings'
+const {initialViewState} = settings
 
 
 const DISABLE_MAP = config['disableMaps'] || false
@@ -22,11 +25,13 @@ const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN || 'xyz.123'
 const dotSize = 10
 
 const mapSettings = {
-  initialViewState: {
-    longitude: -99,
-    latitude: 38.5,
-    zoom: 3.0
-  },
+  ...(initialViewState ? {initialViewState} : {
+    initialViewState: {
+      longitude: -99,
+      latitude: 38.5,
+      zoom: 3.0
+    }
+  }),
   mapboxAccessToken: MAPBOX_TOKEN,
   style: {height: '350px'},
   mapStyle: 'mapbox://styles/mapbox/light-v9',
@@ -192,7 +197,6 @@ export default function MapGL(props: Props) {
   const mapRef = useRef<MapRef>(null)
   const [popup, setPopup] = useState(null)
 
-  const [settings] = useState(mapSettings)
   const [geoData, setGeoData] = useState(null)
   const [markers, setMarkers] = useState([])
 
@@ -231,7 +235,7 @@ export default function MapGL(props: Props) {
 
   return (
     <Root>
-      <Map ref={mapRef} {...settings}>
+      <Map ref={mapRef} {...mapSettings}>
         <FullscreenControl />
         <NavigationControl position="bottom-right" showCompass={false} />
 

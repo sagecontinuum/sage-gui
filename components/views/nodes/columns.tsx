@@ -109,10 +109,6 @@ const columns = [{
       <Link to={`/node/${val}`}>{val}</Link> : val,
   hide: true
 }, {
-  id: 'project',
-  label: 'Project',
-  hide: SAGE_UI_PROJECT != 'sage'
-}, {
   id: 'focus',
   label: 'Focus'
 }, {
@@ -180,7 +176,7 @@ const columns = [{
           <Link to={`/sensors/${id}`}>{cam}</Link>
         </TT></li> : '-'}
     </SensorList>
-  }
+  },
 }, {
   id: 'l_sensors',
   label: 'Left Sensors',

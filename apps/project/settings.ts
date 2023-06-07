@@ -4,7 +4,6 @@ const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 
 const configs = {
   'sage': {
-    logo: 'SAGE',
     project: 'SAGE'
   },
   'dawn': {
@@ -13,7 +12,13 @@ const configs = {
   },
   'crocus': {
     logo: 'CROCUS',
-    project: 'CROCUS'
+    project: 'CROCUS',
+    /* override default map view bounding box */
+    initialViewState: {
+      latitude: 41.97,
+      longitude: -87.65,
+      zoom: 9.0
+    }
   },
   'neon-mdp': {
     logo: 'NEON-MDP',
@@ -27,7 +32,6 @@ const configs = {
 }
 
 export default {
-  SAGE_UI_PROJECT,
   elapsedThresholds: {
     fail: 360000,
     warning: 180000
