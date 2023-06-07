@@ -12,12 +12,6 @@ import JobsIcon from '@mui/icons-material/ListRounded'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
-import SageIcon from '@mui/icons-material/YardOutlined'
-import DevIcon from '@mui/icons-material/DataObject'
-import VTOIcon from '@mui/icons-material/FlightTakeoff'
-import DAWNIcon from '@mui/icons-material/ScienceOutlined'
-import WFOIcon from '@mui/icons-material/WorkspacesOutlined'
-import SensorIcon from '@mui/icons-material/SensorsRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 import AddIcon from '@mui/icons-material/AddRounded'
 
@@ -30,11 +24,12 @@ import App from './ecr/app/App'
 import CreateApp from './ecr/create-app/CreateApp'
 import RequireAuth from '/components/auth/RequireAuth'
 
-import Apps from './ecr/apps/Apps'
+import NodeTabs from '/components/views/nodes/NodeTabs'
 import Nodes from '/components/views/nodes/Nodes'
 import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
+import Apps from './ecr/apps/Apps'
 import JobStatus from './jobs/JobStatus'
 const CreateJob = lazy(() => import('./jobs/create-job/CreateJob'))
 
@@ -70,55 +65,7 @@ const NavMenu = () => {
     <NavItems>
       <NavItem
         label="Nodes"
-        root="/nodes"
-        menu={
-          <>
-            <Item
-              icon={<PublicIcon/>}
-              component={Link}
-              to="/nodes"
-              label="All nodes"
-            />
-            <Divider sx={{width: '170px'}} />
-            <Item
-              icon={<SageIcon />}
-              component={Link}
-              to='/nodes/?project="SAGE"'
-              label="Sage"
-            />
-            <Item
-              icon={<DevIcon />}
-              component={Link}
-              to='/nodes/?project="DEV"'
-              label="Dev"
-            />
-            <Item
-              icon={<VTOIcon />}
-              component={Link}
-              to='/nodes/?project="VTO"'
-              label="VTO"
-            />
-            <Item
-              icon={<DAWNIcon />}
-              component={Link}
-              to='/nodes/?project="DAWN"'
-              label="DAWN"
-            />
-            <Item
-              icon={<WFOIcon />}
-              component={Link}
-              to='/nodes/?project="CROCUS"'
-              label="CROCUS"
-            />
-            <Divider />
-            <Item
-              icon={<SensorIcon />}
-              component={Link}
-              to='/sensors'
-              label="Sensors"
-            />
-          </>
-        }
+        to="/nodes"
       />
       <NavItem
         label="App Catalog"
@@ -225,10 +172,13 @@ export default function Sage() {
                 <Routes>
                   <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                  <Route path="nodes" element={<NodeList><Nodes /></NodeList>} />
-                  <Route path="node/:vsn" element={<Node />} />
-                  <Route path="sensors" element={<SensorList />} />
+                  <Route path="/" element={<NodeTabs />}>
+                    <Route path="nodes" element={<Nodes />} />
+                    <Route path="sensors" element={<SensorList />} />
+                  </Route>
                   <Route path="sensors/:name" element={<Sensor />} />
+
+                  <Route path="node/:vsn" element={<Node />} />
 
                   <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
                   <Route path="apps" element={<Apps />}>
@@ -278,10 +228,6 @@ export default function Sage() {
 const Container = styled.div`
   margin: 60px 0 0 0;
   width: 100%;
-`
-
-const NodeList = styled.div`
-  margin: 0 10px 10px 10px;
 `
 
 

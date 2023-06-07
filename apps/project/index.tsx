@@ -6,8 +6,9 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
-import Node from '/components/views/node/Node'
+import NodeTabs from '/components/views/nodes/NodeTabs'
 import Nodes from '/components/views/nodes/Nodes'
+import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
 
@@ -53,6 +54,11 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="nodes" replace />} />
 
+                <Route path="/" element={<NodeTabs />}>
+                  <Route path="nodes" element={<Nodes />} />
+                  <Route path="sensors" element={<SensorList />} />
+                </Route>
+
                 <Route path="nodes" element={<Nodes/>} />
                 <Route path="node/:vsn" element={<Node />} />
                 <Route path="sensors" element={<SensorList project={settings.project} focus={settings.focus} />} />
@@ -75,7 +81,7 @@ export default function App() {
 }
 
 const Container = styled.div`
-  margin: 60px 10px 10px 10px;
+  margin: 60px 0 0 0;
   width: 100%;
 `
 

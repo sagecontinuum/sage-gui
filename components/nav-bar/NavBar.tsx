@@ -82,7 +82,7 @@ export default function NavBar(props: Props) {
             />
             <NavItem
               label="Help"
-              style={{left: '-30px'}}
+              style={{left: '-80px'}}
               menu={
                 <div>
                   <Item

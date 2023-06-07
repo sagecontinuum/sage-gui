@@ -69,7 +69,6 @@ export default function Nodes() {
 
   const query = params.get('query') || ''
   const status = params.get('status')
-  const project = params.get('project')
   const focus = params.get('focus')
   const location = params.get('location')
   const sensor = params.get('sensor')
@@ -83,7 +82,6 @@ export default function Nodes() {
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
-  const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [locations, setLocations] = useState<Option[]>()
   const [sensors, setSensors] = useState<Option[]>()
@@ -148,7 +146,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, focus, location, sensor, nodeType])
+  }, [query, status, focus, location, sensor, nodeType])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -168,7 +166,6 @@ export default function Nodes() {
     setFilterState(filterState)
 
     setStatuses(getOptions(data, 'status'))
-    setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
 
@@ -270,15 +267,6 @@ export default function Nodes() {
                     noSelectedSort
                   /> : <></>
                 }
-                {projects &&
-                  <FilterMenu
-                    label="Project"
-                    options={projects}
-                    value={filterState.project}
-                    onChange={vals => handleFilterChange('project', vals)}
-                    noSelectedSort
-                  />
-                }
                 {focuses &&
                   <FilterMenu
                     label="Focus"
@@ -307,7 +295,7 @@ export default function Nodes() {
 
                 {filtered.length != data.length &&
                   <>
-                    <VertDivider />
+                    <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
                     <Button variant="contained"
                       color="primary"
                       size="small"
@@ -334,18 +322,12 @@ export default function Nodes() {
 }
 
 
-
-const VertDivider = () =>
-  <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
-
-
 const Root = styled.div`
 `
 
 const Overview = styled.div`
-  top: 60px;
   z-index: 100;
-  padding: 20px 0 10px 0;
+  padding: 10px 0;
   background: #fff;
   border-bottom: 1px solid #f2f2f2;
 `

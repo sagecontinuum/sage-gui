@@ -5,16 +5,20 @@ import styled from 'styled-components'
 import Table from '/components/table/Table'
 
 import * as BK from '/components/apis/beekeeper'
-import { Card, CardViewStyle } from '/components/layout/Layout'
+
 import { formatters } from '/apps/sage/jobs/JobStatus'
 import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
+import settings from '/apps/project/settings'
 import config from '/config'
+
 const {
   wifireData,
   missing_sensor_details
 } = config
+
+const SAGE_UI_PROJECT = settings.project
 
 const url = `${wifireData}/action/package_search` +
   `?facet.field=[%22organization%22,%22tags%22,%22res_format%22]` +
@@ -71,15 +75,9 @@ const columns = [{
 }]
 
 
-type Props = {
-  project?: string
-  focus?: string
-}
 
 
-export default function SensorList(props: Props) {
-  // alter init state if project/focus is provided
-  const {project, focus} = props
+export default function SensorList() {
 
   const [data, setData] = useState()
   const [error, setError] = useState()
@@ -90,7 +88,7 @@ export default function SensorList(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getProdSheet({by: 'vsn'})
+    const prom1 = BK.getProdSheet({by: 'vsn', project: SAGE_UI_PROJECT})
       .then(data => {
         const d = Object.values(data)
         const sensors = [...new Set(d.flatMap(({sensor}) => sensor))]
@@ -141,24 +139,20 @@ export default function SensorList(props: Props) {
 
   return (
     <Root>
-      <CardViewStyle />
+      <h1>Sensors</h1>
+      {data &&
+        <Table
+          primaryKey="id"
+          columns={columns}
+          rows={data}
+          enableSorting
+          sort="-title"
+          onColumnMenuChange={() => {}}
+          onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.id}`)}
+        />
+      }
 
-      <Card>
-        <h1>Sensors</h1>
-        {data &&
-          <Table
-            primaryKey="id"
-            columns={columns}
-            rows={data}
-            enableSorting
-            sort="-title"
-            onColumnMenuChange={() => {}}
-            onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.id}`)}
-          />
-        }
-
-        {error && <ErrorMsg>{error}</ErrorMsg>}
-      </Card>
+      {error && <ErrorMsg>{error}</ErrorMsg>}
     </Root>
   )
 }

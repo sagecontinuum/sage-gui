@@ -5,6 +5,7 @@ const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 const configs = {
   'sage': {
     logo: 'SAGE',
+    project: 'SAGE'
   },
   'dawn': {
     logo: 'DAWN',
