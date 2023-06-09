@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import {Link} from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
+import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
+import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
@@ -111,6 +113,45 @@ const FSItem = styled.div`
 
 
 const columns = [{
+  id: 'status',
+  label: 'Status',
+  format: (val, obj) => {
+    let icon
+    if (val == 'reporting')
+      icon = <CheckIcon className="success status-icon" />
+    else if (val == 'not reporting')
+      icon = <ErrorIcon className="failed status-icon" />
+    else
+      icon = <InactiveIcon className="inactive status-icon" />
+
+    if (!obj.elapsedTimes) {
+      return (
+        <Tooltip
+          title="Node is marked as offline"
+          componentsProps={{tooltip: {sx: {background: '#000'}}}}
+          placement="top">
+          {icon}
+        </Tooltip>
+      )
+    }
+
+    return (
+      <Tooltip
+        title={
+          <>
+            Last reported metric<br/>
+            <NodeLastReported elapsedTimes={obj.elapsedTimes} />
+          </>
+        }
+        componentsProps={{tooltip: {sx: {background: '#000'}}}}
+        placement="top"
+      >
+        {icon}
+      </Tooltip>
+    )
+  },
+  width: '1px'
+}, {
   id: 'health',
   label: 'Health',
   width: '5px',
@@ -119,18 +160,28 @@ const columns = [{
 
     const {health, sanity} = obj
 
+    if (row.node_type == 'Blade') {
+      return <Tooltip title={`Health/sanity tests need to be configured for blades`} placement="right">
+        <span className="font-bold muted flex justify-center">n/a</span>
+      </Tooltip>
+    }
+
     return <Link to={`/node/${row.vsn}`} className="no-style flex column">
-      {health.failed == 0 ?
-        <Tooltip title={`All health tests passed`} placement="right">
-          <GoodChip icon={<CheckIcon className="success" />} label="pass" />
+      {health.details.length == 0 ?
+        <Tooltip title={`No health tests available`} placement="right">
+          <span className="font-bold muted flex justify-center">n/a</span>
         </Tooltip> :
-        <HealthSparkler data={health.details} colorFunc={healthColor} name="Node health" />
+        <div className="flex justify-end">
+          <HealthSparkler data={health.details} colorFunc={healthColor} name="Node health" />
+        </div>
       }
-      {sanity.failed == 0 ?
-        <Tooltip title={`All sanity tests passed`} placement="right">
-          <GoodChip icon={<CheckIcon className="success" />} label="pass" />
+      {sanity.details.length == 0 ?
+        <Tooltip title={`No sanity tests available`} placement="right">
+          <span className="font-bold muted flex justify-center">n/a</span>
         </Tooltip> :
-        <HealthSparkler data={sanity.details} colorFunc={sanityColor} name="Sanity tests" />
+        <div className="flex justify-end">
+          <HealthSparkler data={sanity.details} colorFunc={sanityColor} name="Sanity tests" />
+        </div>
       }
     </Link>
   }
@@ -187,7 +238,7 @@ const columns = [{
   label: 'Data',
   format: (val, obj) =>
     <>
-     {/*
+      {/*
       <Tooltip
         title={<>View sensors <LaunchIcon style={{fontSize: '1.1em'}}/></>}
         placement="top"
@@ -393,6 +444,23 @@ const NodeCell = styled.div`
 export const GoodChip = styled(Chip)`
   &.MuiChip-root {
     background-color: #3ac37e;
+    color: #fff;
+    font-size: .9em;
+    height: 18px;
+    margin-top: 2px;
+    cursor: pointer;
+    svg {
+      height: 15px;
+    }
+    span {
+      padding: 0 7px;
+    }
+  }
+`
+
+export const NotAvailChip = styled(Chip)`
+  &.MuiChip-root {
+    background-color: #888;
     color: #fff;
     font-size: .9em;
     height: 18px;
