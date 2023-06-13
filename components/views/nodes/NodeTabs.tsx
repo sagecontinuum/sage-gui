@@ -20,6 +20,10 @@ const label = (icon, label) =>
   </div>
 
 
+const ConditionalTab = (props) =>
+  props.show ? <Tab {...props} /> : <></>
+
+
 type Props = {
   includeSensors?: boolean
 }
@@ -77,20 +81,23 @@ export default function NodeTabs(props: Props) {
           to={'?'}
           replace
         />
+
         {includeSensors &&
           <>
-            <Divider
-              key="divider"
-              orientation="vertical"
-              style={{ height: 30, alignSelf: 'center' }}
-            />
-            <Tab
-              label={label(<SensorIcon />, 'Sensors')}
-              component={Link}
-              value={'/sensors'}
-              to={'/sensors'}
-              replace
-            />
+          <Divider
+            key="divider"
+            orientation="vertical"
+            style={{ height: 30, alignSelf: 'center' }}
+          />
+        }
+        
+        <ConditionalTab
+          label={label(<SensorIcon />, 'Sensors')}
+          component={Link}
+          value={'/sensors'}
+          to={'/sensors'}
+          show={includeSensors}
+        />
           </>
         }
       </Tabs>
