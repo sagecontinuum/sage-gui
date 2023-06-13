@@ -18,7 +18,12 @@ import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { queryData } from '/components/data/queryData'
 
-import { filterData, mergeMetrics, getFilterState } from '/components/views/statusDataUtils'
+import {
+  filterData,
+  getFilterState,
+  mergeMetrics,
+  type FilterState
+} from '/components/views/statusDataUtils'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
@@ -61,6 +66,8 @@ export default function StatusView() {
   const params = useParams()
   const navigate = useNavigate()
 
+  const phase = params.get('phase') as BK.Phase
+
   const query = params.get('query') || ''
   const status = params.get('status')
   const project = params.get('project')
@@ -72,7 +79,7 @@ export default function StatusView() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
-  const [filterState, setFilterState] = useState(null)
+  const [filterState, setFilterState] = useState<FilterState>({})
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
@@ -140,28 +147,32 @@ export default function StatusView() {
   // updating on state changes
   useEffect(() => {
     if (!data) return
-    updateAll(data)
+    updateAll(data, phase)
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, focus, location, nodeType])
+  }, [query, status, project, focus, location, nodeType, phase])
 
 
   // re-apply updates in case of sorting or such (remove?)
   useEffect(() => {
     if (!data) return
-    updateAll(data)
-  }, [data])
+    updateAll(data, phase)
+  }, [data, phase])
 
 
   // filter data (todo: this can probably be done more efficiently)
-  const updateAll = (d) => {
+  const updateAll = (d, phase) => {
     const filterState = getFilterState(params)
-    let filteredData = queryData(d, query)
-    filteredData = filterData(filteredData, filterState)
-
-    setFiltered(filteredData)
     setFilterState(filterState)
+
+    let filteredData = d
+    if (phase)
+      filteredData = d.filter(obj => obj.node_phase == BK.phaseMap[phase])
+
+    filteredData = queryData(filteredData, query)
+    filteredData = filterData(filteredData, filterState)
+    setFiltered(filteredData)
 
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
@@ -236,7 +247,7 @@ export default function StatusView() {
       </Overview>
 
       {/*
-              <ChartsContainer className="flex column" >
+        <ChartsContainer className="flex column" >
           {filtered && !selected?.length &&
             <ChartsTitle>
               {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
@@ -280,6 +291,7 @@ export default function StatusView() {
             onSearch={handleQuery}
             onColumnMenuChange={() => {}}
             onSelect={handleSelect}
+            emptyNotice="No nodes found"
             middleComponent={
               <FilterControls className="flex items-center">
                 {statuses ?
@@ -318,7 +330,7 @@ export default function StatusView() {
                   />
                 }
 
-                {filtered.length != data.length &&
+                {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
                   <>
                     <VertDivider />
                     <Button variant="contained"
@@ -373,6 +385,10 @@ const TableContainer = styled.div`
   margin-top: .5em;
   table thead th:first-child {
     text-align: center;
+  }
+
+  .status-icon {
+    margin: 0 10px;
   }
 `
 

@@ -33,12 +33,25 @@ export const Buckets = [
   '1 Production', '2 Development', '3 Hacker', '4 Not Deployed'
 ] as const
 
+
+export const phaseMap = {
+  'deployed': 'Deployed',
+  'pending': 'PendingDeploy',
+  'maintenance': 'Maintenance',
+  'standby': 'Standby',
+  'retired': 'Retired'
+}
+
+
+export type Phase = keyof typeof phaseMap
+
+
 export type Manifest = {
   vsn: VSN
-  commission_date: string
+  node_phase: Phase
   project: string
   focus: string
-  gps_lat: number // static gps
+  gps_lat: number // static gpsf
   gps_lon: number // static gps
   lng?: number    // live longitude (if avail)
   lat?: number    // live latitude (if avail)
@@ -58,6 +71,7 @@ export type Manifest = {
   build_date: string
   shipping_address: string
   bucket?: typeof Buckets[number]
+  commission_date: string
   sensor: string[]    // added client-side for joining data
 }
 

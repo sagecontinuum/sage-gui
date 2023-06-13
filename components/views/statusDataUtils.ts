@@ -198,6 +198,9 @@ export function mergeMetrics(
 }
 
 
+export type FilterState = {
+  [filter: string]: string[]
+}
 
 const initialState = {
   status: [],
@@ -209,9 +212,9 @@ const initialState = {
 
 
 export function getFilterState(params) {
-  let init = {...initialState}
+  const init = {...initialState}
   for (const [key, val] of params) {
-    if (['query'].includes(key)) continue
+    if (['query', 'phase'].includes(key)) continue
     init[key] = JSON.parse(`[${val}]`)
   }
 

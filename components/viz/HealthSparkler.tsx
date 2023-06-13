@@ -40,9 +40,9 @@ export default function HealthSparkler(props: Props) {
 
   if (!data) return <></>
 
-  let height = props.height || cellHeight
-  let cellW = props.cellW || cellWidth
-  let pad = props.cellPad ?? cellPad
+  const height = props.height || cellHeight
+  const cellW = props.cellW || cellWidth
+  const pad = props.cellPad ?? cellPad
 
   return (
     <Tooltip title={name} placement={ttPlacement || 'right'}>

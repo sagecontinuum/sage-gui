@@ -59,7 +59,7 @@ const columns = [{
         <Tooltip
           title="Node is marked as offline"
           componentsProps={{tooltip: {sx: {background: '#000'}}}}
-          placement="top" >
+          placement="top">
           {icon}
         </Tooltip>
       )
@@ -100,13 +100,17 @@ const columns = [{
         </LiveGPSDot>
       }
     </NodeCell>
-},  {
+}, {
   id: 'id',
   label: 'ID',
   width: '100px',
   format: (val, obj) =>
     obj.node_type != 'Blade' ?
       <Link to={`/node/${val}`}>{val}</Link> : val,
+  hide: true
+}, {
+  id: 'node_phase',
+  label: 'Phase',
   hide: true
 }, {
   id: 'focus',

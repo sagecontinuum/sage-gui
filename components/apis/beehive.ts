@@ -119,7 +119,7 @@ export async function getVSN(node: string) : Promise<string> {
 
 export function getAdminData() : Promise<Record[]> {
   const proms = [
-    getData({start: '-4d', filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: '-1y', filter: {name: 'sys.uptime'}, tail: 1}),
     getData({start: '-6m', filter: {name: 'sys.gps.*|sys.mem.*|sys.mem.*|sys.fs.*'}, tail: 1}),
     getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
   ]

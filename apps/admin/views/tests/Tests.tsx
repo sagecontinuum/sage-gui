@@ -70,7 +70,7 @@ export default function TestView() {
   const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
-  const [bucket, setBucket] = useState<'All' | BK.Manifest['bucket']>('1 Production')
+  const [phase, setPhase] = useState<'All' | BK.Manifest['node_phase']>('Deployed')
 
   const [error, setError]= useState(null)
 
@@ -79,7 +79,7 @@ export default function TestView() {
 
     const p1 = BH.getNodeHealth(null, '-7d')
     const p2 = BH.getNodeSanity('-7d')
-    const p3 = BK.getProdSheet({by: 'vsn'})  // temp solution for vsn <-> node id
+    const p3 = BK.getProdSheet({by: 'vsn'})
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
@@ -93,7 +93,7 @@ export default function TestView() {
           .filter(o => o.node_id.length)
 
         const vsns = includeList
-          .filter(o => bucket == 'All' || o.bucket == bucket)
+          .filter(o => phase == 'All' || o.node_phase == phase)
           .map(o => o.vsn)
 
         let d = reduceByVSNs(health, vsns)
@@ -107,18 +107,16 @@ export default function TestView() {
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
-  }, [setLoading, bucket])
+  }, [setLoading, phase])
 
 
   const handleCellClick = (item) => {
     const vsn = item.meta.vsn
-    const nodeId = manifest[vsn].node_id
-    navigate(`/node/${nodeId}`)
+    navigate(`/node/${vsn}`)
   }
 
   const handleLabelClick = (label) => {
-    const nodeId = manifest[label].node_id
-    navigate(`/node/${nodeId}`)
+    navigate(`/node/${label}`)
   }
 
   const allNodesItem = {id: 'All', label: 'All'}
@@ -130,10 +128,10 @@ export default function TestView() {
         <FilterMenu
           multiple={false}
           disableCloseOnSelect={false}
-          label={bucket.slice(bucket.indexOf(' ') + 1) || bucket}
-          options={[allNodesItem, ...BK.Buckets.map(v => ({id: v, label: v}))] }
-          value={{id: bucket, label: bucket}}
-          onChange={val => setBucket(val.id)}
+          label={phase}
+          options={[allNodesItem, ...Object.values(BK.phaseMap).map(v => ({id: v, label: v}))] }
+          value={{id: phase, label: phase}}
+          onChange={val => setPhase(val.id)}
           noSelectedSort
         />
       </div>

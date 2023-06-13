@@ -5,11 +5,16 @@ import {useLocation, useNavigate} from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
+import UndoIcon from '@mui/icons-material/UndoRounded'
 
 import columns from './columns'
-import { filterData, getFilterState, mergeMetrics } from '/components/views/statusDataUtils'
+import {
+  filterData,
+  getFilterState,
+  mergeMetrics,
+  type FilterState
+} from '/components/views/statusDataUtils'
 
 import Table from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
@@ -67,6 +72,8 @@ export default function Nodes() {
   const params = useParams()
   const navigate = useNavigate()
 
+  const phase = params.get('phase') as BK.Phase
+
   const query = params.get('query') || ''
   const status = params.get('status')
   const focus = params.get('focus')
@@ -78,7 +85,7 @@ export default function Nodes() {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
-  const [filterState, setFilterState] = useState(null)
+  const [filterState, setFilterState] = useState<FilterState>({})
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
@@ -127,7 +134,6 @@ export default function Nodes() {
         const allData = mergeMetrics(state, metrics, null, null)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
-        setLoading(false)
         ping()
       }).catch(err => {console.log('err', err) ; setError(err)})
       .finally(() => setLoading(false))
@@ -142,28 +148,32 @@ export default function Nodes() {
   // updating on state changes
   useEffect(() => {
     if (!data) return
-    updateAll(data)
+    updateAll(data, phase)
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, focus, location, sensor, nodeType])
+  }, [query, status, focus, location, sensor, nodeType, phase])
 
 
   // re-apply updates in case of sorting or such (remove?)
   useEffect(() => {
     if (!data) return
-    updateAll(data)
-  }, [data])
+    updateAll(data, phase)
+  }, [data, phase])
 
 
   // filter data (todo: this can probably be done more efficiently)
-  const updateAll = (d) => {
+  const updateAll = (d, phase) => {
     const filterState = getFilterState(params)
-    let filteredData = queryData(d, query)
-    filteredData = filterData(filteredData, filterState)
-
-    setFiltered(filteredData)
     setFilterState(filterState)
+
+    let filteredData = d
+    if (phase)
+      filteredData = d.filter(obj => obj.node_phase == BK.phaseMap[phase])
+
+    filteredData = queryData(filteredData, query)
+    filteredData = filterData(filteredData, filterState)
+    setFiltered(filteredData)
 
     setStatuses(getOptions(data, 'status'))
     setFocuses(getOptions(data, 'focus'))
@@ -256,6 +266,7 @@ export default function Nodes() {
             onSearch={handleQuery}
             onColumnMenuChange={() => {}}
             onSelect={handleSelect}
+            emptyNotice="No nodes found"
             middleComponent={
               <FilterControls className="flex items-center">
                 {statuses ?
@@ -293,7 +304,7 @@ export default function Nodes() {
                   />
                 }
 
-                {filtered.length != data.length &&
+                {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
                   <>
                     <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
                     <Button variant="contained"

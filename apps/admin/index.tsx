@@ -7,11 +7,12 @@ import CssBaseline from '@mui/material/CssBaseline'
 
 import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
-import StatusView from './views/status/Status'
-import TestView from './views/tests/Tests'
-import NodeView from './views/node/Node'
+import NodeTabs from '/components/views/nodes/NodeTabs'
+import Status from './views/status/Status'
+import Tests from './views/tests/Tests'
+import Node from './views/node/Node'
 import SuryaStatus from './views/surya/SuryaStatus'
-import AudioView from './views/audio/LatestAudio'
+import Audio from './views/audio/LatestAudio'
 
 import Stress from './fiddle/Stress'
 import Timeline from './fiddle/TimelineFiddle'
@@ -22,11 +23,12 @@ import { ProgressProvider } from '/components/progress/ProgressProvider'
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
+import config from '/config'
 
 
 const NavMenu = () =>
   <NavItems>
-    <NavItem label="Status" to="/status" />
+    <NavItem label="Nodes" to="/nodes?phase=deployed" />
     <NavItem label="Tests" to="/tests" />
     <NavItem label="Factory" to="/surya" />
   </NavItems>
@@ -54,12 +56,15 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route path="/" element={<Navigate to="status" replace />} />
+                <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
 
-                <Route path="status" element={<NodeList><StatusView /></NodeList>} />
-                <Route path="tests" element={<TestView />} />
-                <Route path="audio" element={<AudioView />} />
-                <Route path="node/:vsn" element={<NodeView />} />
+                <Route path="/" element={<NodeTabs includeSensors={false} />}>
+                  <Route path="nodes" element={<Status />} />
+                </Route>
+
+                <Route path="tests" element={<Tests />} />
+                <Route path="audio" element={<Audio />} />
+                <Route path="node/:vsn" element={<Node />} />
 
                 <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                 <Route path="surya/:phase" element={<SuryaStatus />} />
@@ -79,10 +84,6 @@ export default function App() {
 const Container = styled.div`
   margin: 60px 0;
   width: 100%;
-`
-
-const NodeList = styled.div`
-  margin: 0 10px 10px 10px;
 `
 
 
