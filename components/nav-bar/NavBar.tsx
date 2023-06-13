@@ -1,7 +1,8 @@
 import { useState, ReactNode } from 'react'
 import styled from 'styled-components'
-import { useLocation, Link } from 'react-router-dom'
-import sage from 'url:/assets/sage-drawing.png'
+import { useLocation } from 'react-router-dom'
+
+import SageLogo from './SageLogo'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 
@@ -22,7 +23,6 @@ const username = Auth.user
 const webOrigin = window.location.origin
 
 import config from '/config'
-import { version } from '/package.json'
 
 
 type Props = {
@@ -58,11 +58,7 @@ export default function NavBar(props: Props) {
       <div className="flex items-center">
         {logo ? logo :
           <a href={isDev() ? '/' : config.home} className="no-style flex items-center">
-            <LogoImg src={sage} height="35" />
-            <Logo title={`Sage: v${version}`}>
-                Sage
-              <sup>(beta)</sup>
-            </Logo>
+            <SageLogo />
           </a>
         }
         <Divider orientation="vertical" flexItem style={{ margin: '5px 0' }} />
@@ -181,27 +177,6 @@ const Root = styled.div`
 
   .docs-link {
     margin: 20px;
-  }
-`
-
-const LogoImg = styled.img`
-  margin-bottom: 2px;
-`
-
-const Logo = styled.span`
-  font-size: 2.2em;
-  font-family: 'Open sans', sans-serif;
-  font-weight: 800;
-  color: #87baa6;
-  margin-bottom: 2px;
-  padding-right: 20px;
-  padding-left: 2px;
-
-  sup {
-    position: relative;
-    top: -5px;
-    font-size: .3em;
-    color: #aaa;
   }
 `
 

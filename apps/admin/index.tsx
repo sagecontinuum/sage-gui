@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
+import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import StatusView from './views/status/Status'
 import TestView from './views/tests/Tests'
@@ -31,6 +32,9 @@ const NavMenu = () =>
   </NavItems>
 
 
+const isDev = () : boolean =>
+  process.env.NODE_ENV == 'development'
+
 
 export default function App() {
   return (
@@ -38,7 +42,14 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <CssBaseline/>
-          <NavBar menu={<NavMenu />} />
+          <NavBar
+            menu={<NavMenu />}
+            logo={
+              <a href={isDev() ? '/' : config.home} className="no-style flex items-center">
+                <AdminLogo />
+              </a>
+            }
+          />
 
           <Container>
             <ProgressProvider>
