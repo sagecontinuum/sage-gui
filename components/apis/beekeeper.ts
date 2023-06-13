@@ -40,10 +40,12 @@ export const phaseMap = {
   'maintenance': 'Maintenance',
   'standby': 'Standby',
   'retired': 'Retired'
-}
+} as const
 
 
-export type Phase = keyof typeof phaseMap
+export type PhaseTabs = keyof typeof phaseMap
+
+export type Phase = typeof phaseMap[PhaseTabs]
 
 
 export type Manifest = {

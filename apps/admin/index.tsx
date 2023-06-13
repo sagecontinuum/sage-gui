@@ -11,7 +11,7 @@ import NodeTabs from '/components/views/nodes/NodeTabs'
 import Status from './views/status/Status'
 import Tests from './views/tests/Tests'
 import Node from './views/node/Node'
-import SuryaStatus from './views/surya/SuryaStatus'
+import SuryaStatus from './views/factory/Factory'
 import Audio from './views/audio/LatestAudio'
 
 import Stress from './fiddle/Stress'

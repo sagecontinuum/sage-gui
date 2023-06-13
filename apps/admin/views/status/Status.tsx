@@ -66,7 +66,7 @@ export default function StatusView() {
   const params = useParams()
   const navigate = useNavigate()
 
-  const phase = params.get('phase') as BK.Phase
+  const phase = params.get('phase') as BK.PhaseTabs
 
   const query = params.get('query') || ''
   const status = params.get('status')

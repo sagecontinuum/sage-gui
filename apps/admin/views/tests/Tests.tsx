@@ -70,7 +70,7 @@ export default function TestView() {
   const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
-  const [phase, setPhase] = useState<'All' | BK.Manifest['node_phase']>('Deployed')
+  const [phase, setPhase] = useState<'All' | BK.Phase>('Deployed')
 
   const [error, setError]= useState(null)
 
@@ -124,7 +124,7 @@ export default function TestView() {
   return (
     <Root>
       <div className="flex items-center">
-        <b>Nodes:</b>
+        <b>Phase:</b>
         <FilterMenu
           multiple={false}
           disableCloseOnSelect={false}
