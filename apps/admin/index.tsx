@@ -29,7 +29,7 @@ import config from '/config'
 const NavMenu = () =>
   <NavItems>
     <NavItem label="Nodes" to="/nodes?phase=deployed" />
-    <NavItem label="Tests" to="/tests" />
+    <NavItem label="Tests" to="/tests?phase=deployed" />
     <NavItem label="Factory" to="/surya" />
   </NavItems>
 
@@ -60,9 +60,9 @@ export default function App() {
 
                 <Route path="/" element={<NodeTabs includeSensors={false} />}>
                   <Route path="nodes" element={<Status />} />
+                  <Route path="tests" element={<Tests />} />
                 </Route>
 
-                <Route path="tests" element={<Tests />} />
                 <Route path="audio" element={<Audio />} />
                 <Route path="node/:vsn" element={<Node />} />
 

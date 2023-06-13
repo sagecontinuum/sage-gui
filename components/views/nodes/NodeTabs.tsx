@@ -28,7 +28,7 @@ export default function NodeTabs(props: Props) {
   const {includeSensors = true} = props
 
   const loc = useLocation()
-  const path = loc.pathname + loc.search
+  const path = loc.search
 
   return (
     <Root>
@@ -39,42 +39,42 @@ export default function NodeTabs(props: Props) {
         <Tab
           label={label(<CheckIcon />, 'Deployed')}
           component={Link}
-          value={'/nodes?phase=deployed'}
-          to={'/nodes?phase=deployed'}
+          value={'?phase=deployed'}
+          to={'?phase=deployed'}
           replace
         />
         <Tab
           label={label(<PendingIcon />, 'Pending Deploy')}
           component={Link}
-          value={'/nodes?phase=pending'}
-          to={'/nodes?phase=pending'}
+          value={'?phase=pending'}
+          to={'?phase=pending'}
           replace
         />
         <Tab
           label={label(<ConstructionIcon />, 'Maintenance')}
           component={Link}
-          value={'/nodes?phase=maintenance'}
-          to={'/nodes?phase=maintenance'}
+          value={'?phase=maintenance'}
+          to={'?phase=maintenance'}
           replace
         />
         <Tab
           label={label(<WarehouseIcon />, 'Standby')}
           component={Link}
-          value={'/nodes?phase=standby'}
-          to={'/nodes?phase=standby'}
+          value={'?phase=standby'}
+          to={'?phase=standby'}
         />
         <Tab
           label={label(<CloudOffIcon />, 'Retired')}
           component={Link}
-          value={'/nodes?phase=retired'}
-          to={'/nodes?phase=retired'}
+          value={'?phase=retired'}
+          to={'?phase=retired'}
           replace
         />
         <Tab
           label={label(<ShowAllIcon />, 'Show all')}
           component={Link}
-          value={'/nodes'}
-          to={'/nodes'}
+          value={''}
+          to={'?'}
           replace
         />
         {includeSensors &&

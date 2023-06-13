@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import HelpIcon from '@mui/icons-material/HelpOutlineRounded'
-import Tooltip from '@mui/material/Tooltip'
-
 import ErrorMsg from '/apps/sage/ErrorMsg'
-import FilterMenu from '/components/FilterMenu'
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, { color } from '/components/viz/Timeline'
 import { endOfHour, subDays } from 'date-fns'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '/components/input/Checkbox'
 
 const timeOpts = { hour: '2-digit', minute:'2-digit' }
 const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
@@ -63,14 +61,16 @@ const sanityTooltip = (item) =>
 
 
 export default function TestView() {
+  const [params] = useSearchParams()
   const navigate = useNavigate()
+
+  const phase = params.get('phase') as BK.PhaseTabs
 
   const { setLoading } = useProgress()
   const [sanity, setSanity] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
-  const [manifest, setManifest] = useState<BK.ManifestMap>(null)
 
-  const [phase, setPhase] = useState<'All' | BK.Phase>('Deployed')
+  const [showBlades, setShowBlades] = useState(false)
 
   const [error, setError]= useState(null)
 
@@ -83,6 +83,15 @@ export default function TestView() {
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
+        if (!showBlades) {
+          health = Object.keys(health).reduce((acc, key) =>
+            key.charAt(0) == 'V' ? acc : {...acc, [key]: health[key]}
+          , {})
+          sanity = Object.keys(sanity).reduce((acc, key) =>
+            key.charAt(0) == 'V' ? acc : {...acc, [key]: sanity[key]}
+          , {})
+        }
+
         // sort sanity by node vsn
         sanity = Object.keys(sanity)
           .sort()
@@ -93,7 +102,7 @@ export default function TestView() {
           .filter(o => o.node_id.length)
 
         const vsns = includeList
-          .filter(o => phase == 'All' || o.node_phase == phase)
+          .filter(o => phase && o.node_phase == BK.phaseMap[phase])
           .map(o => o.vsn)
 
         let d = reduceByVSNs(health, vsns)
@@ -102,12 +111,11 @@ export default function TestView() {
         d = reduceByVSNs(sanity, vsns)
 
         setSanity(d)
-        setManifest(meta)
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
 
-  }, [setLoading, phase])
+  }, [setLoading, phase, showBlades])
 
 
   const handleCellClick = (item) => {
@@ -119,20 +127,17 @@ export default function TestView() {
     navigate(`/node/${label}`)
   }
 
-  const allNodesItem = {id: 'All', label: 'All'}
-
   return (
     <Root>
-      <div className="flex items-center">
-        <b>Phase:</b>
-        <FilterMenu
-          multiple={false}
-          disableCloseOnSelect={false}
-          label={phase}
-          options={[allNodesItem, ...Object.values(BK.phaseMap).map(v => ({id: v, label: v}))] }
-          value={{id: phase, label: phase}}
-          onChange={val => setPhase(val.id)}
-          noSelectedSort
+      <div className="flex justify-between gap">
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showBlades}
+              onChange={(evt) => setShowBlades(evt.target.checked)}
+            />
+          }
+          label="Show blades"
         />
       </div>
 
