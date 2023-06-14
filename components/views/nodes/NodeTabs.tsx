@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Outlet, useLocation, useSearchParams, Link } from 'react-router-dom'
 
 import { Tabs, Tab } from '/components/tabs/Tabs'
+import { TabProps } from '@mui/material'
+import Divider from '@mui/material/Divider'
 
 import CheckIcon from '@mui/icons-material/Check'
 import PendingIcon from '@mui/icons-material/PendingActionsRounded'
@@ -11,17 +14,31 @@ import CloudOffIcon from '@mui/icons-material/CloudOffRounded'
 import ShowAllIcon from '@mui/icons-material/SelectAll'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
 
-import Divider from '@mui/material/Divider'
+import { sum } from 'lodash'
+
+import * as BK from '/components/apis/beekeeper'
+
+import settings from '/apps/project/settings'
+
+type Label = BK.Phase | 'Show All' | 'Sensors'
+type Counts =  BK.PhaseCounts & {'Show All': number}
 
 
-const label = (icon, label) =>
+const label = (
+  icon: JSX.Element,
+  label: Label,
+  counts?: Counts
+) =>
   <div className="flex items-center">
-    {icon}&nbsp;{label}
+    {icon}&nbsp;{label} {
+      counts !== null &&
+        `(${counts ? (counts[label] || 0) : '…'})`
+    }
   </div>
 
 
 // a tab is rendered with react.clone, so we must explicity pass TabProps
-const ConditionalTab = (props) =>
+const ConditionalTab = (props: TabProps & {show: boolean, component, to}) =>
   props.show ? <Tab {...props} /> : <></>
 
 
@@ -35,6 +52,20 @@ export default function NodeTabs(props: Props) {
   const path = useLocation().pathname
   const [params] = useSearchParams()
 
+  const [counts, setCounts] = useState<Counts>()
+
+  useEffect(() => {
+    BK.getPhaseCounts(settings.project)
+      .then(counts =>
+        setCounts({
+          ...counts,
+          'Show All': sum(Object.values(counts))
+        })
+      )
+      .catch(() => { /* do nothing */ })
+  }, [])
+
+
   const tab = path == '/nodes' ? (params.get('phase') || '') : path
 
   return (
@@ -44,41 +75,41 @@ export default function NodeTabs(props: Props) {
         aria-label="node tabs by node phase"
       >
         <Tab
-          label={label(<CheckIcon />, 'Deployed')}
+          label={label(<CheckIcon />, 'Deployed', counts)}
           component={Link}
           value={'deployed'}
           to={'/nodes?phase=deployed'}
           replace
         />
         <Tab
-          label={label(<PendingIcon />, 'Pending Deploy')}
+          label={label(<PendingIcon />, 'Pending Deploy', counts)}
           component={Link}
           value={'pending'}
           to={'/nodes?phase=pending'}
           replace
         />
         <Tab
-          label={label(<ConstructionIcon />, 'Maintenance')}
+          label={label(<ConstructionIcon />, 'Maintenance', counts)}
           component={Link}
           value={'maintenance'}
           to={'/nodes?phase=maintenance'}
           replace
         />
         <Tab
-          label={label(<WarehouseIcon />, 'Standby')}
+          label={label(<WarehouseIcon />, 'Standby', counts)}
           component={Link}
           value={'standby'}
           to={'/nodes?phase=standby'}
         />
         <Tab
-          label={label(<CloudOffIcon />, 'Retired')}
+          label={label(<CloudOffIcon />, 'Retired', counts)}
           component={Link}
           value={'retired'}
           to={'/nodes?phase=retired'}
           replace
         />
         <Tab
-          label={label(<ShowAllIcon />, 'Show all')}
+          label={label(<ShowAllIcon />, 'Show All', counts)}
           component={Link}
           value={''}
           to={'/nodes'}
@@ -94,7 +125,7 @@ export default function NodeTabs(props: Props) {
         }
 
         <ConditionalTab
-          label={label(<SensorIcon />, 'Sensors')}
+          label={label(<SensorIcon />, 'Sensors', null)}
           component={Link}
           value={'/sensors'}
           to={'/sensors'}

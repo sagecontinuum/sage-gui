@@ -3,6 +3,7 @@ const url = config.beekeeper
 
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
+import { countBy } from 'lodash'
 
 
 const FILTER_NODES = true  // if true, filter to "node monitoring" list
@@ -36,7 +37,7 @@ export const Buckets = [
 
 export const phaseMap = {
   'deployed': 'Deployed',
-  'pending': 'PendingDeploy',
+  'pending': 'Pending Deploy',
   'maintenance': 'Maintenance',
   'standby': 'Standby',
   'retired': 'Retired'
@@ -282,6 +283,16 @@ export async function getNodeDetails(bucket?: Manifest['bucket']) : Promise<Node
 }
 
 
-export async function getSensors() {
+export type PhaseCounts = {
+  [phase in Phase]: number
+}
 
+export async function getPhaseCounts(project: string) : Promise<PhaseCounts> {
+  let data = await get(`${url}/production`)
+
+  if (project) {
+    data = data.filter(obj => obj.project == project)
+  }
+
+  return countBy<PhaseCounts>(data, 'node_phase') as PhaseCounts
 }
