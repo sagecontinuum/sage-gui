@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
@@ -29,9 +29,8 @@ import { marked } from 'marked'
 type Tab = 'science' | 'inputs' | 'tags' | 'data'
 
 export default function App() {
-  const navigate = useNavigate()
   const path = useParams()['*']
-  const params = new URLSearchParams(useLocation().search)
+  const [params, setParams] = useSearchParams()
   const tab = params.get('tab') || 'science'
 
   const { loading, setLoading } = useProgress()
@@ -60,7 +59,7 @@ export default function App() {
         } else {
           // if no description, just go to tags
           params.set('tab', 'tags')
-          navigate({search: params.toString()}, {replace: true})
+          setParams(params)
         }
       })
       .catch(err => setError(err.message))

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams, useLocation, NavLink } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams, NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { Button, IconButton, Tooltip } from '@mui/material'
@@ -238,7 +238,7 @@ export default function JobStatus() {
 
   const {view = 'all-jobs'} = useParams() as {view: Views}
 
-  const params = new URLSearchParams(useLocation().search)
+  const [params, setParams] = useSearchParams()
   const query = params.get('query') || '' // query string
   const nodes = params.get('nodes') || '' // vsns
   const job = params.get('job') || ''     // job id
@@ -381,7 +381,7 @@ export default function JobStatus() {
   const handleQuery = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
 

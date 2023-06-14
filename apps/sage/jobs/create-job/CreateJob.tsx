@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import styled from 'styled-components'
 
@@ -106,8 +106,7 @@ const initState = {
 export default function CreateJob() {
   const { enqueueSnackbar } = useSnackbar()
 
-  const navigate = useNavigate()
-  const params = new URLSearchParams(useLocation().search)
+  const [params, setParams] = useSearchParams()
   const jobID = Number(params.get('start_with_job'))
   const startWithSample = params.get('start_with_sample')
   const tab = params.get('tab') as View || 'editor'
@@ -364,23 +363,23 @@ export default function CreateJob() {
     else params.set('start_with_job', job.job_id)
 
     params.delete('start_with_sample')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleUseSample = () => {
     params.delete('start_with_job')
     params.set('start_with_sample', 'true')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleTabChange = (tab: View) => {
     params.set('tab', tab)
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleReviewSpec = () => {
     params.set('tab', 'editor')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const getJobName = (id: SES.Job['job_id']) =>

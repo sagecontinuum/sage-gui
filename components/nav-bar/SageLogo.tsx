@@ -22,7 +22,7 @@ const AdminLogo = () =>
     <LogoImg src={sage} height="35" />
     <Logo title="Sage Admin UI">
         Sage
-      <sup><span style={{color: '#8166a0'}}>(admin)</span></sup>
+      <sup><span style={{color: '#8166a0'}}>[Admin]</span></sup>
     </Logo>
   </>
 

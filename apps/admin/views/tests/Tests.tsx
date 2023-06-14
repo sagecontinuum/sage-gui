@@ -12,14 +12,15 @@ import { endOfHour, subDays } from 'date-fns'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '/components/input/Checkbox'
 
-const timeOpts = { hour: '2-digit', minute:'2-digit' }
-const dateOpts = { weekday: 'short', month: 'short', day: 'numeric' }
+const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute:'2-digit' }
+const dateOpts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' }
 
 
 function getDateTimeStr(timestamp) {
   return (
     `${new Date(timestamp).toLocaleDateString('en-US', dateOpts)}<br>
-    ${new Date(timestamp).toLocaleTimeString('en-US', timeOpts)} - ${new Date(new Date(timestamp).getTime() + 60*60*1000).toLocaleTimeString('en-US', timeOpts)}`
+    ${new Date(timestamp).toLocaleTimeString('en-US', timeOpts)} -
+    ${new Date(new Date(timestamp).getTime() + 60*60*1000).toLocaleTimeString('en-US', timeOpts)}`
   )
 }
 

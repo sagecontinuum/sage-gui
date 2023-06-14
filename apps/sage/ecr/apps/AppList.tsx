@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { useLocation, useNavigate, useMatch } from 'react-router-dom'
+import { useSearchParams, useNavigate, useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -68,14 +68,9 @@ const queryData = (data: object[], query: string) => {
   )
 }
 
-const useQueryParams = () =>
-  new URLSearchParams(useLocation().search)
-
-
-
 
 export default function AppList() {
-  const params = useQueryParams()
+  const [params, setParams] = useSearchParams()
   const path = useMatch('*').pathname
   const view = path.split('/')[2]
 
@@ -157,7 +152,7 @@ export default function AppList() {
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const onActionComplete = () => {

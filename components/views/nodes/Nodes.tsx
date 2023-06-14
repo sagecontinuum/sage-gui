@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import {useLocation, useNavigate} from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -36,10 +36,6 @@ const getOptions = (data: object[], field: string) : Option[] =>
     .filter(o => o.id?.length)
 
 
-const useParams = () =>
-  new URLSearchParams(useLocation().search)
-
-
 // helper to filter against project/focuses in setting file
 const filterOn = (data: BK.State[], key: string) =>
   data.filter(o => o[key]?.toLowerCase() == settings[key]?.toLowerCase())
@@ -69,8 +65,7 @@ type Option = {
 }
 
 export default function Nodes() {
-  const params = useParams()
-  const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
 
   const phase = params.get('phase') as BK.PhaseTabs
 
@@ -189,7 +184,7 @@ export default function Nodes() {
   const handleQuery = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
 
@@ -202,15 +197,13 @@ export default function Nodes() {
 
     if (!newStr.length) params.delete(field)
     else params.set(field, newStr)
-
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
 
   const handleRemoveFilters = () => {
     setNodeType('all')
-    params.delete('query')
-    navigate({search: ''}, {replace: true})
+    setParams(phase ? {phase} : {}, {replace: true})
   }
 
 
@@ -230,7 +223,7 @@ export default function Nodes() {
   const handleQueryViewerChange = (field: string, next: string[]) => {
     if (!next.length) params.delete(field)
     else params.set(field, next.join(','))
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
 

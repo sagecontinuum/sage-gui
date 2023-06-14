@@ -39,8 +39,8 @@ npm run build -w sage
 The [config](./apps/project/settings.ts) for a project page is controlled with the env variable `SAGE_UI_PROJECT`.  I.e.,
 
 ```
-export SAGE_UI_PROJECT=DAWN
-npm start -w admin
+export SAGE_UI_PROJECT=CROCUS
+npm start -w project
 ```
 
 #### Third-party tokens

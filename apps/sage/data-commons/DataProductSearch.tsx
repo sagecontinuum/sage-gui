@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Alert from '@mui/material/Alert'
@@ -89,14 +89,10 @@ const facetList = Object.keys(initFilterState)
 
 
 
-const useQueryParams = () =>
-  new URLSearchParams(useLocation().search)
-
 
 export default function Search() {
-  const params = useQueryParams()
+  const [params, setParams] = useSearchParams()
   const query = params.get('query') || ''
-  const navigate = useNavigate()
 
   const {setLoading} = useProgress()
   const [rows, setRows] = useState<Data.Result[]>(null)
@@ -130,7 +126,7 @@ export default function Search() {
   const onSearch = ({query}) => {
     if (query) params.set('query', query)
     else params.delete('query')
-    navigate({search: params.toString()})
+    setParams(params)
   }
 
 

@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import { useEffect, useState } from 'react'
-import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { useSearchParams, Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '/components/apis/beehive'
@@ -380,9 +380,7 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 
 
 export default function DataPreview() {
-  const navigate = useNavigate()
-
-  const params = new URLSearchParams(useLocation().search)
+  const [params, setParams] = useSearchParams()
   const app = params.get('apps')
   const name = params.get('names')
   const node = params.get('nodes')
@@ -584,7 +582,7 @@ export default function DataPreview() {
       params.set('mimeType', name)
     else
       params.delete('mimeType')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleFilterChange = (field: Facet, val: Option | Option[]) => {
@@ -601,24 +599,24 @@ export default function DataPreview() {
       params.set(field, val.id)
     }
 
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleTimeChange = (val) => {
     const start = new Date(val).toISOString()
     params.set('start', start)
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleUnitChange = (val) => {
     params.set('window', val)
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleRemoveFilters = () => {
     clearParams()
     params.set('apps', defaultPlugin)
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const goToTasks = (val: DataTypes, taskQuery: string) => {
@@ -627,7 +625,7 @@ export default function DataPreview() {
     params.set('tasks', taskQuery)
     params.set('window', 'h')
     if (val == 'images') params.set('mimeType', 'image')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const goToNames = (val: DataTypes, nameQuery: string) => {
@@ -635,7 +633,7 @@ export default function DataPreview() {
     params.set('type', val)
     params.set('names', nameQuery)
     params.set('window', 'h')
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
   const handleTypeChange = (_, val: DataTypes) => {
@@ -652,7 +650,7 @@ export default function DataPreview() {
   const handleQueryViewerChange = (field: string, next: string[]) => {
     if (!next.length) params.delete(field)
     else params.set(field, next.join('|'))
-    navigate({search: params.toString()}, {replace: true})
+    setParams(params, {replace: true})
   }
 
 
