@@ -58,7 +58,7 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
 
-                <Route path="/" element={<NodeTabs includeSensors={false} />}>
+                <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
                   <Route path="nodes" element={<Status />} />
                   <Route path="tests" element={<Tests />} />
                 </Route>

@@ -6,6 +6,10 @@ const configs = {
   'sage': {
     project: 'SAGE'
   },
+  'apiary': {
+    logo: 'Apiary',
+    project: 'Apiary'
+  },
   'dawn': {
     logo: 'DAWN',
     project: 'DAWN'

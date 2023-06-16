@@ -67,6 +67,7 @@ export default function TestView() {
 
   const phase = params.get('phase') as BK.PhaseTabs
 
+
   const { setLoading } = useProgress()
   const [sanity, setSanity] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
   const [health, setHealth] = useState<{dev: BH.ByMetric, prod: BH.ByMetric}>()
@@ -103,7 +104,7 @@ export default function TestView() {
           .filter(o => o.node_id.length)
 
         const vsns = includeList
-          .filter(o => phase && o.node_phase == BK.phaseMap[phase])
+          .filter(o => phase ? o.node_phase == BK.phaseMap[phase] : true)
           .map(o => o.vsn)
 
         let d = reduceByVSNs(health, vsns)

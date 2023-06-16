@@ -43,11 +43,12 @@ const ConditionalTab = (props: TabProps & {show: boolean, component, to}) =>
 
 
 type Props = {
-  includeSensors?: boolean
+  includeSensors?: boolean // weather or not to include the sensors tab
+  isAdmin?: boolean        // show totals for all projects in admin view
 }
 
 export default function NodeTabs(props: Props) {
-  const {includeSensors = true} = props
+  const {includeSensors = true, isAdmin = false} = props
 
   const path = useLocation().pathname
   const [params] = useSearchParams()
@@ -55,7 +56,7 @@ export default function NodeTabs(props: Props) {
   const [counts, setCounts] = useState<Counts>()
 
   useEffect(() => {
-    BK.getPhaseCounts(settings.project)
+    BK.getPhaseCounts(isAdmin ? undefined : settings.project)
       .then(counts =>
         setCounts({
           ...counts,
@@ -65,8 +66,9 @@ export default function NodeTabs(props: Props) {
       .catch(() => { /* do nothing */ })
   }, [])
 
+  const defaultPath = path === '/sensors' ? '/nodes' : path
+  const tab = params.get('phase') || path
 
-  const tab = path == '/nodes' ? (params.get('phase') || '') : path
 
   return (
     <Root>
@@ -78,41 +80,41 @@ export default function NodeTabs(props: Props) {
           label={label(<CheckIcon />, 'Deployed', counts)}
           component={Link}
           value={'deployed'}
-          to={'/nodes?phase=deployed'}
+          to={`${defaultPath}?phase=deployed`}
           replace
         />
         <Tab
           label={label(<PendingIcon />, 'Pending Deploy', counts)}
           component={Link}
           value={'pending'}
-          to={'/nodes?phase=pending'}
+          to={`${defaultPath}?phase=pending`}
           replace
         />
         <Tab
           label={label(<ConstructionIcon />, 'Maintenance', counts)}
           component={Link}
           value={'maintenance'}
-          to={'/nodes?phase=maintenance'}
+          to={`${defaultPath}?phase=maintenance`}
           replace
         />
         <Tab
           label={label(<WarehouseIcon />, 'Standby', counts)}
           component={Link}
           value={'standby'}
-          to={'/nodes?phase=standby'}
+          to={`${defaultPath}?phase=standby`}
         />
         <Tab
           label={label(<CloudOffIcon />, 'Retired', counts)}
           component={Link}
           value={'retired'}
-          to={'/nodes?phase=retired'}
+          to={`${defaultPath}?phase=retired`}
           replace
         />
         <Tab
           label={label(<ShowAllIcon />, 'Show All', counts)}
           component={Link}
-          value={''}
-          to={'/nodes'}
+          value={defaultPath}
+          to={defaultPath}
           replace
         />
 
