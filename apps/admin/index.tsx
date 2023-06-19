@@ -1,5 +1,5 @@
 import ReactDom from 'react-dom'
-import {BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -14,7 +14,6 @@ import Node from './views/node/Node'
 import SuryaStatus from './views/factory/Factory'
 import Audio from './views/audio/LatestAudio'
 
-import Stress from './fiddle/Stress'
 import Timeline from './fiddle/TimelineFiddle'
 
 import NotFound from '/components/404'
@@ -69,7 +68,6 @@ export default function App() {
                 <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                 <Route path="surya/:phase" element={<SuryaStatus />} />
 
-                <Route path="fiddle/stress" element={<Stress/>} />
                 <Route path="fiddle/timeline" element={<Timeline />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
