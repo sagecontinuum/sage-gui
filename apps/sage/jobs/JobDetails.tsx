@@ -19,19 +19,19 @@ import { formatters, TimelineContainer } from './JobStatus'
 import JobTimeLine from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
-import { type Manifest } from '/components/apis/beekeeper'
+import { type NodeMeta } from '/components/apis/beekeeper'
 
 
 
 type Props = {
   job: ES.Job
   jobs: ES.Job[]
-  manifestByVSN: {[vsn: string]: Manifest}
+  nodeMetaByVSN: {[vsn: string]: NodeMeta}
   handleCloseDialog: () => void
 }
 
 export default function JobDetails(props: Props) {
-  const {job, jobs, manifestByVSN, handleCloseDialog} = props
+  const {job, jobs, nodeMetaByVSN, handleCloseDialog} = props
 
   const {setLoading} = useProgress()
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
@@ -156,7 +156,7 @@ export default function JobDetails(props: Props) {
                   jobs.filter(o => o.id == job.job_id).flatMap(o => o.nodes).includes(vsn)
                 )
                 .map((vsn, i) => {
-                  const {location} = manifestByVSN[vsn]
+                  const {location} = nodeMetaByVSN[vsn]
                   return (
                     <div key={i} className="title-row">
                       <div className="flex column">

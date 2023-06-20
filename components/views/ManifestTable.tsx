@@ -32,13 +32,13 @@ const defaultCols = [
 ]
 
 type Props = {
-  manifest: object
+  nodeMeta: object
   meta: object
   columns?: string[]
 }
 
-export default function ManifestTable(props: Props) {
-  const {manifest, meta, columns} = props
+export default function NodeMetaTable(props: Props) {
+  const {nodeMeta, meta, columns} = props
 
   let cols = columns || defaultCols
 
@@ -46,8 +46,8 @@ export default function ManifestTable(props: Props) {
   return (
     <Root>
 
-      {manifest &&
-        <table className="hor-key-value manifest">
+      {nodeMeta &&
+        <table className="hor-key-value nodeMeta">
           <thead>
             <tr className="cat-header">
               {cols
@@ -80,7 +80,7 @@ export default function ManifestTable(props: Props) {
               {cols
                 .filter(name => name != 'registration')
                 .map(name => {
-                  const val = manifest[name]
+                  const val = nodeMeta[name]
                   return <td key={name}>{format(name, val)}</td>
                 })
               }

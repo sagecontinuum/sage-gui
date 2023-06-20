@@ -40,7 +40,7 @@ export default function MyNodes() {
     setLoading(true)
 
     Promise.all([User.listMyNodes(), BK.getProdSheet({by: 'vsn'})])
-      .then(([nodes, manifests]) => setData(nodes.map(o => ({...o, ...manifests[o.vsn]}))))
+      .then(([nodes, nodeMetas]) => setData(nodes.map(o => ({...o, ...nodeMetas[o.vsn]}))))
       .catch(error => setError(error))
       .finally(() => setLoading(false))
 

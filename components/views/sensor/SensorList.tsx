@@ -96,7 +96,7 @@ export default function SensorList() {
 
         return {
           sensors,
-          manifests: d
+          nodeMetas: d
         }
       })
 
@@ -105,7 +105,7 @@ export default function SensorList() {
       .then(data => data.result.results)
 
     Promise.all([prom1, prom2])
-      .then(([{sensors, manifests}, details]) => {
+      .then(([{sensors, nodeMetas}, details]) => {
         const data = sensors.map(name => {
           const id = name.includes('(') ?
             name.slice( name.indexOf('(') + 1, name.indexOf(')') ) : name
@@ -114,7 +114,7 @@ export default function SensorList() {
             return o.name.toLowerCase().replace(/ /g, '-') == id.toLowerCase().replace(/ /g, '-')
           })
 
-          const nodes = manifests
+          const nodes = nodeMetas
             .filter(o => o.sensor.includes(name))
 
           const vsns = nodes.map(o => o.vsn)

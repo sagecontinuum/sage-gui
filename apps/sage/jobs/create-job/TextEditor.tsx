@@ -121,8 +121,8 @@ export default function TextEditor(props: Props) {
 export function registerAutoComplete(
   keywords: string[],
   apps: ECR.AppDetails[],
-  nodes: BK.Manifest[],
-  availNodes: BK.Manifest[]
+  nodes: BK.NodeMeta[],
+  availNodes: BK.NodeMeta[]
 ) {
   const isLegit = (_, key) => !['none', 'undefined'].includes(key)
 

@@ -12,7 +12,7 @@ import type { MapRef, MapProps } from 'react-map-gl'
 import { ClickAwayListener } from '@mui/material'
 
 import Clipboard from './utils/Clipboard'
-import type { Manifest } from '/components/apis/beekeeper'
+import type { NodeMeta } from '/components/apis/beekeeper'
 
 import config from '/config'
 import settings from '/apps/project/settings'
@@ -108,7 +108,7 @@ const layerStyle = {
 
 
 type PopupProps = {
-  data: Manifest
+  data: NodeMeta
   onClose: () => void
 }
 
@@ -175,7 +175,7 @@ function PopupInfo(props: PopupProps) {
 
 
 type Data = {
-  vsn: Manifest['vsn'],
+  vsn: NodeMeta['vsn'],
   lng: number,
   lat: number,
   status?: string
@@ -302,5 +302,6 @@ const Root = styled.div`
   .marker-not-reporting {
      background: #d72020;
      border: 1px solid #992727;
+     opacity: .65;
   }
 `

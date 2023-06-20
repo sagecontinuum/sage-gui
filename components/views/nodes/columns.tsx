@@ -54,10 +54,10 @@ const columns = [{
     else
       icon = <InactiveIcon className="inactive status-icon" />
 
-    if (!obj.elapsedTimes) {
+    if (!obj.computes) {
       return (
         <Tooltip
-          title="Node is marked as offline"
+          title="Node has no compute resources assigned"
           componentsProps={{tooltip: {sx: {background: '#000'}}}}
           placement="top">
           {icon}
@@ -70,7 +70,7 @@ const columns = [{
         title={
           <>
             Last reported metric<br/>
-            <NodeLastReported elapsedTimes={obj.elapsedTimes} />
+            <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
           </>
         }
         componentsProps={{tooltip: {sx: {background: '#000'}}}}
@@ -118,10 +118,10 @@ const columns = [{
 }, {
   id: 'elapsedTimes',
   label: 'Last Updated',
-  format: (elapsedTimes) => {
+  format: (elapsedTimes, obj) => {
     if (!elapsedTimes) return '-'
 
-    return <NodeLastReported elapsedTimes={elapsedTimes} />
+    return <NodeLastReported computes={obj.computes} elapsedTimes={elapsedTimes} />
   },
   hide: true
 }, {

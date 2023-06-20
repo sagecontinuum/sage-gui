@@ -156,15 +156,15 @@ type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: strin
 
 function jobsToGeos(
   jobs: ES.Job[],
-  manifests: BK.ManifestMap
+  nodeMetas: BK.NodeMetaMap
 ) : GeoData {
   return [...new Set(jobs.flatMap(o => o.nodes))]
     .map(vsn => ({
-      ...manifests[vsn],
+      ...nodeMetas[vsn],
       id: vsn,
       vsn,
-      lng: Number(manifests[vsn]?.gps_lon),
-      lat: Number(manifests[vsn]?.gps_lat),
+      lng: Number(nodeMetas[vsn]?.gps_lon),
+      lat: Number(nodeMetas[vsn]?.gps_lat),
       status: 'reporting'
     }))
 }
@@ -253,7 +253,7 @@ export default function JobStatus() {
   const [jobState, setJobState] = useState<'Queued' | ES.State>()
 
   // additional meta
-  const [manifests, setManifests] = useState<BK.ManifestMap>(null)
+  const [nodeMetas, setNodeMetas] = useState<BK.NodeMetaMap>(null)
   const [geo, setGeo] = useState<GeoData>()
   const [counts, setCounts] = useState<Counts>(initCounts)
 
@@ -271,7 +271,7 @@ export default function JobStatus() {
 
 
   useEffect(() => {
-    if (!jobs || !manifests) return
+    if (!jobs || !nodeMetas) return
 
     let qJobs = queryData<ES.Job>(jobs, query)
 
@@ -296,10 +296,10 @@ export default function JobStatus() {
     }))
 
     // update map again
-    const geo = jobsToGeos(qJobs, manifests)
+    const geo = jobsToGeos(qJobs, nodeMetas)
     setGeo(geo)
     setUpdateMap(prev => prev + 1)
-  }, [query, jobs, manifests, selectedNodes, jobState])
+  }, [query, jobs, nodeMetas, selectedNodes, jobState])
 
 
   useEffect(() => {
@@ -314,12 +314,12 @@ export default function JobStatus() {
     const p2 = BK.getProdSheet({by: 'vsn'})
 
     Promise.all([p1, p2])
-      .then(([jobs, manifests]) => {
-        manifests = manifests as BK.ManifestMap
-        setManifests(manifests)
+      .then(([jobs, nodeMetas]) => {
+        nodeMetas = nodeMetas as BK.NodeMetaMap
+        setNodeMetas(nodeMetas)
 
         // todo(nc): remove when VSNs are used for urls
-        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => manifests[vsn]?.node_id)}))
+        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => nodeMetas[vsn]?.node_id)}))
         setCounts(getCounts(jobs, view == 'my-jobs'))
 
         // if 'my jobs', filter vsns to the user's nodes
@@ -329,7 +329,7 @@ export default function JobStatus() {
         }
 
         // create some geo data
-        const geo = jobsToGeos(jobs, manifests)
+        const geo = jobsToGeos(jobs, nodeMetas)
 
         setData({jobs})
         setGeo(geo)
@@ -367,7 +367,7 @@ export default function JobStatus() {
 
   const handleJobSelect = (sel) => {
     const objs = sel.objs.length ? sel.objs : []
-    const nodes = jobsToGeos(objs, manifests)
+    const nodes = jobsToGeos(objs, nodeMetas)
 
     setData(prev => ({
       ...prev,
@@ -524,12 +524,12 @@ export default function JobStatus() {
           </TableContainer>
         }
 
-        {view == 'timeline' && pluginEvents && manifests &&
+        {view == 'timeline' && pluginEvents && nodeMetas &&
           <TimelineContainer>
             {Object.keys(pluginEvents)
               .filter(vsn => nodes ? nodes.includes(vsn) : true)
               .map((vsn, i) => {
-                const {location} = manifests[vsn]
+                const {location} = nodeMetas[vsn]
                 return (
                   <Card key={i} className="title-row">
                     <div className="flex column">
@@ -556,7 +556,7 @@ export default function JobStatus() {
         <JobDetails
           job={jobDetails}
           jobs={jobs}
-          manifestByVSN={manifests}
+          nodeMetaByVSN={nodeMetas}
           handleCloseDialog={handleCloseDialog}
         />
       }

@@ -108,7 +108,7 @@ export default function Nodes() {
     function ping() {
       handle = setTimeout(async () => {
         if (done) return
-        const metrics = await BH.getAdminData()
+        const metrics = await BH.getNodeData()
 
         setData(mergeMetrics(dataRef.current, metrics, null, null))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
@@ -119,7 +119,7 @@ export default function Nodes() {
     }
 
     setLoading(true)
-    const proms = [getProjectNodes(), BH.getAdminData()]
+    const proms = [getProjectNodes(), BH.getNodeData()]
     Promise.all(proms)
       .then(([state, metrics]) => {
         if (done) return

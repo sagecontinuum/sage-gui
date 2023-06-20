@@ -36,7 +36,7 @@ type Props = {
 export default function AppData(props: Props) {
   const {plugin} = props
 
-  const [manifests, setManifests] = useState<BK.Manifest[]>()
+  const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
 
   const [{data, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
@@ -61,20 +61,20 @@ export default function AppData(props: Props) {
   useEffect(() => {
     BK.getProdSheet({by: 'vsn'})
       .then(data => {
-        setManifests(Object.values(data))
+        setNodeMetas(Object.values(data))
       }).catch(error => dispatch({type: 'ERROR', error}))
   }, [])
 
 
   useEffect(() => {
-    if (!manifests) return
+    if (!nodeMetas) return
 
     setLoadingTL(true)
     fetchRollup({...opts, plugin: `${registry}/${plugin}.*`})
-      .then(data => dispatch({type: 'INIT_DATA', data, manifests}))
+      .then(data => dispatch({type: 'INIT_DATA', data, nodeMetas}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [plugin, manifests, opts])
+  }, [plugin, nodeMetas, opts])
 
 
   const handleOptionChange = (evt, name) => {

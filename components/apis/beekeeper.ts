@@ -49,7 +49,7 @@ export type PhaseTabs = keyof typeof phaseMap
 export type Phase = typeof phaseMap[PhaseTabs]
 
 
-export type Manifest = {
+export type NodeMeta = {
   vsn: VSN
   node_phase: Phase
   project: string
@@ -108,10 +108,10 @@ export async function getNode(id: string) : Promise<State> {
 
 
 type MetaParams = {node?: string, by?: 'vsn' | 'id', project?: string, focus?: string}
-export type ManifestMap = {[id_or_vsn: string]: Manifest}
+export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
-export async function getProdSheet(params?: MetaParams) : Promise<ManifestMap | Manifest> {
-  const {node, by = 'id', project, focus} = params || {}
+export async function getProdSheet(params?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
+  const {node, by = 'vsn', project, focus} = params || {}
 
   let data = await get(`${url}/production`)
 
@@ -150,7 +150,7 @@ export async function getProdSheet(params?: MetaParams) : Promise<ManifestMap | 
   } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
     if (node in mapping) {
       return getFactory({node})
-        .then(factory => ({...mapping[node], factory})) as Promise<Manifest>
+        .then(factory => ({...mapping[node], factory})) as Promise<NodeMeta>
     }
     return null
   }
@@ -207,8 +207,26 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
 }
 
 
-
 export async function getState() : Promise<State[]> {
+  const proms = [getProdSheet(), getManifests()]
+  const [meta, manifests] = await Promise.all(proms)
+
+
+  // join manifests to meta
+  const data = (manifests as Manifest[]).map(obj => ({
+    ...obj,
+    ...meta[obj.vsn],
+    status: null,
+    hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
+    lat: obj.gps_lat,
+    lng: obj.gps_lon
+  }))
+
+  return data
+}
+
+
+export async function __getStateDeprecated() : Promise<State[]> {
   const proms = [getNodes(), getProdSheet(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
@@ -267,9 +285,9 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 }
 
 
-export type NodeDetails = (State & Manifest)[]
+export type NodeDetails = (State & NodeMeta)[]
 
-export async function getNodeDetails(bucket?: Manifest['bucket']) : Promise<NodeDetails> {
+export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<NodeDetails> {
   const [bkData, details] = await Promise.all([getNodes(), getProdSheet({by: 'vsn'})])
   let nodeDetails = bkData
     .filter(o => !!o.vsn)
@@ -295,4 +313,53 @@ export async function getPhaseCounts(project: string) : Promise<PhaseCounts> {
   }
 
   return countBy<PhaseCounts>(data, 'node_phase') as PhaseCounts
+}
+
+
+
+export type Compute = {
+  name: 'rpi' | 'nxcore' | 'nxagent'
+  zone: 'shield' | 'core'
+}
+
+type Sensor = {
+  name: 'top' | 'bottom' | 'left' | 'right' | string
+  hardware: {
+    hardware: string
+    hw_model: string
+  }
+}
+
+type Manifest = {
+  vsn: VSN
+  name: string // node id
+  gps_lat: number
+  gps_lon: number
+  computes: Compute[]
+  sensor: Sensor[]
+}
+
+
+export type SimpleManifest = Manifest & {
+  sensors: {
+    name: string
+    hardware: string
+    hw_model: string
+  }
+}
+
+
+export async function getManifests() : Promise<SimpleManifest[]> {
+  let data = await get(`${config.auth}/manifests/`)
+
+  data = data.map(o => ({
+    vsn: o.vsn,
+    name: o.name,
+    gps_lat: o.gps_lat,
+    gps_lon: o.gps_lon,
+    computes: o.computes.map(({name, zone}) => ({name, zone})),
+    sensors: o.sensors.map(({name, hardware}) => ({name, hardware: hardware.hardware, hw_model: hardware.hw_model}))
+  }))
+
+  return data
 }

@@ -1,10 +1,9 @@
-
 export default {
   hostSuffixMapping: {    // mapping for host suffix to short names (displayed in UI)
     'ws-rpi': 'rpi',
-    'ws-nxcore': 'nx',
+    'ws-nxcore': 'nxcore',
     'ws-nxagent': 'nxagent',
-    'sb-core': 'sb-core'
+    'sb-core': 'sbcore'
   },
   elapsedThresholds: {
     fail: 360000,

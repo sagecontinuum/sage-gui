@@ -35,13 +35,12 @@ export function filterData(data: object[], state: object) {
 }
 
 
-function getElapsedTimes(metrics: BH.AggMetrics, nodeID: string) {
-  const byHost = metrics[nodeID]
+function getElapsedTimes(metrics: BH.MetricsByHost) {
   const elapsedByHost = {}
 
   const mostRecent = {}
-  Object.keys(byHost).forEach(host => {
-    const uptimes = byHost[host]['sys.uptime']
+  Object.keys(metrics).forEach(host => {
+    const uptimes = metrics[host]['sys.uptime']
 
     // there may not be metrics in last x days
     if (!uptimes) return
@@ -66,16 +65,13 @@ function getElapsedTimes(metrics: BH.AggMetrics, nodeID: string) {
 
 
 function getMetric(
-  aggMetrics: BH.AggMetrics,
-  nodeID: string,
+  metrics: BH.MetricsByHost,
   metricName: string,
   latestOnly = true
 ) {
-  const metricObjs = aggMetrics[nodeID]
-
   const valueObj = {}
-  Object.keys(metricObjs).forEach(host => {
-    const m = metricObjs[host][metricName]
+  Object.keys(metrics).forEach(host => {
+    const m = metrics[host][metricName]
     if (!m) return
 
     const val = latestOnly ? m[m.length - 1].value : m
@@ -127,8 +123,8 @@ export function countNodeSanity(data) {
 
 
 
-const determineStatus = (elapsedTimes: {[host: string]: number}) => {
-  if (Object.values(elapsedTimes).some(val => val > ELAPSED_FAIL_THRES))
+const determineStatus = (computes: BK.Compute[], elapsedTimes: {[host: string]: number}) => {
+  if (computes.some(({name}) => !(name in elapsedTimes) || elapsedTimes[name] > ELAPSED_FAIL_THRES))
     return 'not reporting'
   return 'reporting'
 }
@@ -142,51 +138,51 @@ const getFakeIP = (id) =>
 
 // join beehive and beekeeper data, basically
 export function mergeMetrics(
-  data: BK.State[], records: BH.Record[], health, sanity
+  data: BK.SimpleManifest[], records: BH.Record[], health, sanity
 ) {
   // If a VSN is changed, the data api will return latest records for each VSN.
   // So, we only consider metrics with VSNs which are known by "beekeeper"
   const vsns = data.map(o => o.vsn)
   const metrics = records.filter(m => vsns.includes(m.meta.vsn))
-  const byNode = aggregateMetrics(metrics)
+  const byNode = aggregateMetrics(metrics, true)
 
   const joinedData = data.map(nodeObj => {
-    const id = nodeObj.id.toLowerCase()
-    if (!byNode || !(id in byNode))
+    const vsn = nodeObj.vsn
+
+    if (!byNode || !(vsn in byNode))
       return {...nodeObj, status: 'offline'}
 
-    const elapsedTimes = getElapsedTimes(byNode, id)
+    const metrics: BH.MetricsByHost = byNode[vsn]
 
-    const temp = getMetric(byNode, id, 'iio.in_temp_input').nx
-    const liveLat = getMetric(byNode, id, 'sys.gps.lat').nx
-    const liveLon = getMetric(byNode, id, 'sys.gps.lon').nx
+    const elapsedTimes = getElapsedTimes(metrics)
 
-    const vsn = nodeObj.vsn
+    const temp = getMetric(metrics, 'iio.in_temp_input').nx
+    const liveLat = getMetric(metrics, 'sys.gps.lat').nx
+    const liveLon = getMetric(metrics, 'sys.gps.lon').nx
 
     return {
       ...nodeObj,
-      vsn,
       temp: temp ? temp / 1000 : -999, // use -999 for better sorting
-      status: determineStatus(elapsedTimes),
+      status: determineStatus(nodeObj.computes, elapsedTimes),
       elapsedTimes,
       hasStaticGPS: !!nodeObj.gps_lat && !!nodeObj.gps_lon,
       hasLiveGPS: !!liveLat && !!liveLon,
       lat: nodeObj.gps_lat || liveLat,
       lng: nodeObj.gps_lon || liveLon,
-      alt: getMetric(byNode, id, 'sys.gps.alt').nx,
-      uptimes: getMetric(byNode, id, 'sys.uptime'),
-      memTotal: getMetric(byNode, id, 'sys.mem.total'),
-      memFree: getMetric(byNode, id, 'sys.mem.free'),
-      memAvail: getMetric(byNode, id, 'sys.mem.avail'),
-      fsAvail: getMetric(byNode, id, 'sys.fs.avail', false),
-      fsSize: getMetric(byNode, id, 'sys.fs.size', false),
-      // cpu: getMetric(byNode, id, 'sys.cpu_seconds', false),
-      // sysTimes: getMetric(byNode, id, 'sys.time'),
-      // txBytes: getMetric(byNode, id, 'sys.net.tx_bytes', false),
-      // txPackets: getMetric(byNode, id, 'sys.net.tx_packets', false),
-      // rxBytes: getMetric(byNode, id, 'sys.net.rx_bytes', false),
-      // rxPackets: getMetric(byNode, id, 'sys.net.rx_packets', false),
-      ip: getMetric(byNode, id, 'sys.net.ip', false)?.nx?.find(o => o.meta.device == 'wan0')?.value,
+      alt: getMetric(metrics, 'sys.gps.alt').nx,
+      uptimes: getMetric(metrics, 'sys.uptime'),
+      memTotal: getMetric(metrics, 'sys.mem.total'),
+      memFree: getMetric(metrics, 'sys.mem.free'),
+      memAvail: getMetric(metrics, 'sys.mem.avail'),
+      fsAvail: getMetric(metrics, 'sys.fs.avail', false),
+      fsSize: getMetric(metrics, 'sys.fs.size', false),
+      // cpu: getMetric(byNode, 'sys.cpu_seconds', false),
+      // sysTimes: getMetric(byNode, 'sys.time'),
+      // txBytes: getMetric(byNode, 'sys.net.tx_bytes', false),
+      // txPackets: getMetric(byNode, 'sys.net.tx_packets', false),
+      // rxBytes: getMetric(byNode, 'sys.net.rx_bytes', false),
+      // rxPackets: getMetric(byNode, 'sys.net.rx_packets', false),
+      ip: getMetric(metrics, 'sys.net.ip', false)?.nx?.find(o => o.meta.device == 'wan0')?.value,
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}

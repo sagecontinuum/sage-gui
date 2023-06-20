@@ -307,7 +307,7 @@ The following are some notable changes to the UI
 * **admin:** add old image/audio warnings and relative times ([3e27395](https://github.com/sagecontinuum/sage-gui/commit/3e2739531755ddf5c7017b985eb82ed0d17dfd5b))
 * **admin:** clean up display of fs util ([4e7e1dd](https://github.com/sagecontinuum/sage-gui/commit/4e7e1dd7d747380cd9753bb41ee04c02529eda79))
 * **admin:** device and nodehealth charts ([fa0ce5b](https://github.com/sagecontinuum/sage-gui/commit/fa0ce5b83108311b0a1d9f500d0e2cce88a121a2))
-* **admin:** manifest table ([b94a95e](https://github.com/sagecontinuum/sage-gui/commit/b94a95e7862aa9b60bedb807e7d512b387ce00d0))
+* **admin:** nodeMeta table ([b94a95e](https://github.com/sagecontinuum/sage-gui/commit/b94a95e7862aa9b60bedb807e7d512b387ce00d0))
 * **admin:** use aggregated data on "tests" page ([73ce2ab](https://github.com/sagecontinuum/sage-gui/commit/73ce2ab506ef43e61ac5adeba481906e58797f03))
 * **timeline:** add margin api & matrix size function ([9b5fed4](https://github.com/sagecontinuum/sage-gui/commit/9b5fed491d45be25ba8b30c4d75bd6cc5103510a))
 * **timeline:** basic legend support ([dd39e6b](https://github.com/sagecontinuum/sage-gui/commit/dd39e6b15110653feff1f0f9ea55f89635df03be))

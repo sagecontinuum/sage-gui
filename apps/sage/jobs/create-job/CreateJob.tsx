@@ -18,7 +18,7 @@ import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 
 import AppSelector from './AppSelector'
 import SelectedAppTable from './SelectedAppTable'
-import NodeSelector, { parseManifest } from './NodeSelector'
+import NodeSelector, { parseNodeMeta } from './NodeSelector'
 import RuleBuilder from './RuleBuilder'
 import SuccessBuilder from './SuccessBuilder'
 import TextEditor, { registerAutoComplete } from './TextEditor'
@@ -72,7 +72,7 @@ type State = {
   }
 }
 
-type Action = {type: 'SET', name: string, value: string | ECR.App[] | BK.Manifest[] }
+type Action = {type: 'SET', name: string, value: string | ECR.App[] | BK.NodeMeta[] }
 
 
 function reducer(state, action) {
@@ -147,7 +147,7 @@ export default function CreateJob() {
 
     Promise.allSettled([p1, p2, p3])
       .then(([apps, nodes, schedulable]) => {
-        nodes = parseManifest(nodes.value)
+        nodes = parseNodeMeta(nodes.value)
 
         let availNodes
         if (schedulable.status == 'fulfilled') {

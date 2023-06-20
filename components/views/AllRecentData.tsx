@@ -5,12 +5,12 @@ import RecentImages from './RecentImages'
 import Audio from '/components/viz/Audio'
 import format from '/components/data/dataFormatter'
 
-import type {Manifest, VSN} from '/components/apis/beekeeper'
+import type {NodeMeta, VSN} from '/components/apis/beekeeper'
 
 
 type Props = {
   vsn: VSN
-  manifest: Manifest
+  nodeMeta: NodeMeta
 
   noData?: boolean
   noImages?: boolean
@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function RecentData(props: Props) {
-  const {vsn, manifest} = props
+  const {vsn, nodeMeta} = props
 
   return (
     <Root className="flex column">
@@ -42,7 +42,7 @@ export default function RecentData(props: Props) {
         <>
           <h2>Recent Audio</h2>
           <Audio vsn={vsn} />
-          {manifest?.shield === false &&
+          {nodeMeta?.shield === false &&
             <p className="muted">This node does not support audio</p>
           }
         </>

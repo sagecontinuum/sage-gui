@@ -68,13 +68,15 @@ export type OSNRecord = Record & {
   size: number
 }
 
+export type MetricsByHost = {
+  [host: string]: {
+    [metricName: string]: Record[] | SanityMetric[]
+  }
+}
+
 // standard struct for grouping of metrics
 export type AggMetrics = {
-  [nodeID: string]: {
-    [host: string]: {
-      [metricName: string]: Record[] | SanityMetric[]
-    }
-  }
+  [nodeID: string]: MetricsByHost
 }
 
 
@@ -109,17 +111,23 @@ export async function getData(params: Params, abortable?: boolean) : Promise<Rec
 }
 
 
+export const NODE_STATUS_RANGE = '-30d'
 
-export async function getVSN(node: string) : Promise<string> {
-  const metrics = await getData({start: '-1h', filter: {name: 'sys.uptime', node}, tail: 1})
-  return metrics?.pop().meta.vsn
+export function getNodeData() : Promise<Record[]> {
+  const proms = [
+    getData({start: NODE_STATUS_RANGE, filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: '-6m', filter: {name: 'sys.gps.*'}, tail: 1}),
+  ]
+
+  return Promise.all(proms)
+    .then((recs) => flatten(recs))
 }
 
 
 
-export function getAdminData() : Promise<Record[]> {
+export function getNodeAdminData() : Promise<Record[]> {
   const proms = [
-    getData({start: '-1y', filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: NODE_STATUS_RANGE, filter: {name: 'sys.uptime'}, tail: 1}),
     getData({start: '-6m', filter: {name: 'sys.gps.*|sys.mem.*|sys.mem.*|sys.fs.*'}, tail: 1}),
     getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
   ]
@@ -132,7 +140,7 @@ export function getAdminData() : Promise<Record[]> {
 
 export function getFactoryData() : Promise<Record[]> {
   const proms = [
-    getData({start: '-4d', filter: {name: 'sys.uptime'}, tail: 1}),
+    getData({start: '-30d', filter: {name: 'sys.uptime'}, tail: 1}),
     getData({start: '-4d', filter: {name: 'sys.net.ip', device: 'wan0'}, tail: 1}),
     getData({start: '-6m', filter: {sensor: 'bme280', name: 'iio.in_temp_input'}, tail: 1})
   ]
@@ -161,14 +169,14 @@ export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {
 
 
 
-export function aggregateMetrics(data: Record[]) : AggMetrics {
+export function aggregateMetrics(data: Record[], byVSN: boolean) : AggMetrics {
   if (!data.length)
     return null
 
   const byNode = {}
   data.forEach(obj => {
     const {timestamp, name, value, meta} = obj
-    const {node} = meta
+    const node = byVSN ? meta.vsn : meta.node
     let {host} = meta
 
     // todo(nc): temp solution since IPs don't have a host?

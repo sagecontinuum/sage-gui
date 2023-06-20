@@ -71,7 +71,7 @@ function SignOffTable({data}) {
   if (!data) return <></>
 
   return (
-    <SignedTable className="hor-key-value manifest">
+    <SignedTable className="hor-key-value node-meta">
       <thead>
         <tr className="cat-header">
           <th colSpan="3">Phase 2 Sign-offs</th>
@@ -138,7 +138,7 @@ export default function NodeView() {
 
   const { setLoading } = useProgress()
 
-  const [manifest, setManifest] = useState(null)
+  const [nodeMeta, setNodeMeta] = useState(null)
   const [nodeID, setNodeID] = useState(null)
   const [meta, setMeta] = useState(null)
   const [sanityData, setSanityData] = useState<BH.ByMetric>(null)
@@ -159,9 +159,9 @@ export default function NodeView() {
 
     BK.getProdSheet({node: vsn, by: 'vsn'})
       .then(data => {
-        setManifest(data)
+        setNodeMeta(data)
 
-        // if no manifest, we can not get the vsn for node health
+        // if no nodeMeta, we can not get the vsn for node health
         if (!data) return
 
         setNodeID(data.node_id)
@@ -206,8 +206,8 @@ export default function NodeView() {
         Node {vsn} | <small className="muted">{nodeID}</small>
       </h1>
 
-      {manifest &&
-        <table className="hor-key-value manifest">
+      {nodeMeta &&
+        <table className="hor-key-value node-meta">
           <thead>
             <tr className="cat-header">
               {cols.map(name => name == 'top_camera' ?
@@ -229,7 +229,7 @@ export default function NodeView() {
           <tbody>
             <tr>
               {cols.map(name => {
-                const val = manifest[name]
+                const val = nodeMeta[name]
                 return <td key={name}>{format(name, val)}</td>
               })}
               <td>{new Date(meta?.registration_event).toLocaleString()}</td>
@@ -303,13 +303,13 @@ export default function NodeView() {
         </Charts>
 
         <Data>
-          {factoryView && manifest?.factory &&
+          {factoryView && nodeMeta?.factory &&
             <>
-              <SignOffTable data={manifest.factory} />
-              <FactoryNotes data={manifest.factory} />
+              <SignOffTable data={nodeMeta.factory} />
+              <FactoryNotes data={nodeMeta.factory} />
             </>
           }
-          {vsn && <AllRecentData vsn={vsn} manifest={manifest} />}
+          {vsn && <AllRecentData vsn={vsn} nodeMeta={nodeMeta} />}
         </Data>
 
       </div>
@@ -321,7 +321,7 @@ export default function NodeView() {
 const Root = styled.div`
   margin: 20px;
 
-  table.manifest {
+  table.node-meta {
     width: 100%;
     margin-bottom: 1em;
   }

@@ -140,7 +140,7 @@ const columns = [{
         title={
           <>
             Last reported metric<br/>
-            <NodeLastReported elapsedTimes={obj.elapsedTimes} />
+            <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
           </>
         }
         componentsProps={{tooltip: {sx: {background: '#000'}}}}
@@ -167,7 +167,7 @@ const columns = [{
     }
 
     return <Link to={`/node/${row.vsn}`} className="no-style flex column">
-      {health.details.length == 0 ?
+      {health?.details?.length == 0 ?
         <Tooltip title={`No health tests available`} placement="right">
           <span className="font-bold muted flex justify-center">n/a</span>
         </Tooltip> :
@@ -175,7 +175,7 @@ const columns = [{
           <HealthSparkler data={health.details} colorFunc={healthColor} name="Node health" />
         </div>
       }
-      {sanity.details.length == 0 ?
+      {sanity?.details?.length == 0 ?
         <Tooltip title={`No sanity tests available`} placement="right">
           <span className="font-bold muted flex justify-center">n/a</span>
         </Tooltip> :
@@ -287,10 +287,10 @@ const columns = [{
 }, {
   id: 'elapsedTimes',
   label: 'Last Updated',
-  format: (elapsedTimes) => {
+  format: (elapsedTimes, obj) => {
     if (!elapsedTimes) return '-'
 
-    return <NodeLastReported elapsedTimes={elapsedTimes} />
+    return <NodeLastReported computes={obj.computes} elapsedTimes={elapsedTimes} />
   }
 }, {
   id: 'uptimes',
@@ -350,7 +350,6 @@ const columns = [{
         {hosts.map((host, i) => {
           const aggFSSize = fsAggregator(obj.fsSize[host])
           const aggFSAvail = fsAggregator(obj.fsAvail[host])
-
           return (
             <div key={host + i} className="flex column">
               <div className="flex">

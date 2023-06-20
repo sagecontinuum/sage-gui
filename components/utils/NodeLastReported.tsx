@@ -1,5 +1,11 @@
 import settings from '/apps/project/settings'
+import adminSettings  from '/apps/admin/settings'
 import { msToTime } from '../utils/units'
+
+import { NODE_STATUS_RANGE } from '/components/apis/beehive'
+import * as BK from '/components/apis/beekeeper'
+
+const { hostSuffixMapping } = adminSettings
 
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning
@@ -7,24 +13,34 @@ const WARNING_THRES = settings.elapsedThresholds.warning
 
 
 type LastUpdatedProps = {
+  computes: BK.Compute[]
   elapsedTimes: {[device: string]: number }
 }
 
 export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element {
-  const {elapsedTimes} = props
+  const {computes, elapsedTimes} = props
+
+  if (!computes)
+    return <>n/a</>
 
   return (
     <div>
-      {Object.keys(elapsedTimes)
-        .map(host =>
-          <div key={host}>
+      {computes
+        .map(obj => {
+          const host = obj.name
+
+          return <div key={host}>
             {host}: <b className={
-              getColorClass(elapsedTimes[host], FAIL_THRES, WARNING_THRES, 'success font-bold')
+              elapsedTimes ? getColorClass(elapsedTimes[host], FAIL_THRES, WARNING_THRES, 'success font-bold') : ''
             }>
-              {msToTime(elapsedTimes[host])}
+              {host in (elapsedTimes || {}) ?
+                msToTime(elapsedTimes[host]) :
+                `no sys.uptime for ${NODE_STATUS_RANGE}`
+              }
             </b>
           </div>
-        )}
+        })
+      }
     </div>
   )
 }

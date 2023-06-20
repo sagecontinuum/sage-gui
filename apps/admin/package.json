@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "a UI for monitoring nodes",
   "scripts": {
-    "start": "parcel serve ./index.html --dist-dir build/",
+    "start": "parcel serve ./index.html --dist-dir build/ --port 3000",
     "build": "parcel build ./index.html",
     "test": "jest",
     "clean": "rm -rf build/ && rm -rf dist/",

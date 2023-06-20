@@ -24,7 +24,7 @@ const cameraTags =  BH.cameraOrientations.map(pos =>
   ({id: `camera_${pos}`, tag: `camera_${pos}`})
 )
 
-// todo(nc): note: we need manifests for some of this
+// todo(nc): note: we need nodeMetas for some of this
 const tags = [{
   id: 'node_type',
   tag: 'WSN'
@@ -68,7 +68,7 @@ const columns = [{
 }]
 
 
-export const parseManifest = (data) => data.map(o => ({
+export const parseNodeMeta = (data) => data.map(o => ({
   ...o,
   lat: o.gps_lat,
   lng: o.gps_lon,
@@ -98,7 +98,7 @@ export default function NodeSelector(props: Props) {
 
   const [tagState, setTagState] = useState<string[]>([])
 
-  const [bucket, setBucket] = useState<BK.Manifest['bucket']>(BK.Buckets[0])
+  const [bucket, setBucket] = useState<BK.NodeMeta['bucket']>(BK.Buckets[0])
 
   const [schedulable, setSchedulable] = useState<BK.VSN[]>()
   const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
@@ -110,7 +110,7 @@ export default function NodeSelector(props: Props) {
 
     Promise.all(([p1, p2]))
       .then(([objs, schedulable]) => {
-        objs = parseManifest(objs)
+        objs = parseNodeMeta(objs)
 
         if (isSchedulable) {
           objs = objs.filter(o => schedulable.includes(o.vsn))

@@ -103,7 +103,7 @@ type Facets = {
 }
 
 
-const filterOn = (data: BK.Manifest[], key: string, match?: string) =>
+const filterOn = (data: BK.NodeMeta[], key: string, match?: string) =>
   data.filter(o => o[key].toLowerCase() == match?.toLowerCase())
 
 
@@ -131,8 +131,8 @@ export default function Data(props: Props) {
 
   const navigate = useNavigate()
 
-  const [manifestByVSN, setManifestByVSN] = useState<{[vsn: string]: BK.Manifest}>()
-  const [manifests, setManifests] = useState<BK.Manifest[]>()
+  const [nodeMetaByVSN, setNodeMetaByVSN] = useState<{[vsn: string]: BK.NodeMeta}>()
+  const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
   const [ecr, setECR] = useState<ECR.App[]>()
 
   // infinite scroll
@@ -166,19 +166,19 @@ export default function Data(props: Props) {
     setLoading(true)
     const mProm = BK.getProdSheet({by: 'vsn'})
       .then(data => {
-        setManifestByVSN(data) // todo(nc): remove
+        setNodeMetaByVSN(data) // todo(nc): remove
 
-        let manifests = Object.values(data)
+        let nodeMetas = Object.values(data)
 
-        if (project) manifests = filterOn(manifests, 'project', project)
-        if (focus) manifests = filterOn(manifests, 'focus', focus)
+        if (project) nodeMetas = filterOn(nodeMetas, 'project', project)
+        if (focus) nodeMetas = filterOn(nodeMetas, 'focus', focus)
 
-        setManifests(manifests)
+        setNodeMetas(nodeMetas)
 
-        const projects = getFacets(manifests, 'project')
-        const focuses = getFacets(manifests, 'focus')
-        const locations = getFacets(manifests, 'location')
-        const vsns = getFacets(manifests, 'vsn')
+        const projects = getFacets(nodeMetas, 'project')
+        const focuses = getFacets(nodeMetas, 'focus')
+        const locations = getFacets(nodeMetas, 'location')
+        const vsns = getFacets(nodeMetas, 'vsn')
 
         setFacets({
           project: {title: 'Project', items: projects, hide: !!project},
@@ -187,13 +187,13 @@ export default function Data(props: Props) {
           vsn: {title: 'Node', items: vsns}
         })
 
-        return manifests
+        return nodeMetas
       }).catch(error => dispatch({type: 'ERROR', error}))
 
     const dProm = fetchRollup({...opts, end: addDays(opts.start, DAYS)})
 
     Promise.all([mProm, dProm])
-      .then(([manifests, data]) => dispatch({type: 'INIT_DATA', data, manifests}))
+      .then(([nodeMetas, data]) => dispatch({type: 'INIT_DATA', data, nodeMetas}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoading(false))
 
@@ -231,15 +231,15 @@ export default function Data(props: Props) {
 
   const handleFilter = (evt, facet: string, val: string) => {
     const checked = evt.target.checked
-    if (checked) dispatch({type: 'ADD_FILTER', manifests, facet, val})
-    else dispatch({type: 'RM_FILTER', manifests, facet, val})
+    if (checked) dispatch({type: 'ADD_FILTER', nodeMetas, facet, val})
+    else dispatch({type: 'RM_FILTER', nodeMetas, facet, val})
   }
 
 
   const handleSelectAll = (evt, facet: string, vals: string[]) => {
     const checked = evt.target.checked
-    if (checked) dispatch({type: 'SELECT_ALL', manifests, facet, vals})
-    else dispatch({type: 'CLEAR_CATEGORY', manifests, facet})
+    if (checked) dispatch({type: 'SELECT_ALL', nodeMetas, facet, vals})
+    else dispatch({type: 'CLEAR_CATEGORY', nodeMetas, facet})
   }
 
   // todo(nc): refactor into provider
@@ -274,7 +274,7 @@ export default function Data(props: Props) {
   }
 
   const getNodeID = (vsn) => {
-    return manifests.find(o => o.vsn == vsn).node_id
+    return nodeMetas.find(o => o.vsn == vsn).node_id
   }
 
   return (
@@ -326,12 +326,12 @@ export default function Data(props: Props) {
         </Top>
 
         <Items>
-          {opts.display == 'nodes' && filtered && manifestByVSN && ecr &&
+          {opts.display == 'nodes' && filtered && nodeMetaByVSN && ecr &&
             filtered
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
                 const timelineData = data[vsn]
-                const {location} = manifestByVSN[vsn]
+                const {location} = nodeMetaByVSN[vsn]
 
                 return (
                   <TimelineContainer key={vsn}>

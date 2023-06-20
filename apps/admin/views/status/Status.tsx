@@ -46,7 +46,7 @@ const FilterBtn = ({label}: {label: string}) =>
 
 
 const pingRequests = () => [
-  BH.getAdminData(),
+  BH.getNodeAdminData(),
   BH.getNodeHealth(null, SPARKLINE_START),
   BH.getNodeSanity(SPARKLINE_START)
 ]
@@ -127,7 +127,6 @@ export default function StatusView() {
         const allData = mergeMetrics(state, metrics, temps, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
-        setLoading(false)
         ping()
       }).catch(err => setError(err))
       .finally(() => setLoading(false))

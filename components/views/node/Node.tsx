@@ -51,8 +51,8 @@ const TAIL_DAYS = '-7d'
 import {hasMetOne} from '/config'
 
 
-const hasStaticGPS = (manifest: BK.Manifest) =>
-  manifest?.gps_lat && manifest?.gps_lat
+const hasStaticGPS = (nodeMeta: BK.NodeMeta) =>
+  nodeMeta?.gps_lat && nodeMeta?.gps_lat
 
 const noneFormatter = (val: boolean | 'yes' | 'no' | 'none') : string =>
   typeof val == 'boolean' ?
@@ -120,8 +120,8 @@ export default function NodeView() {
 
   const { loading, setLoading } = useProgress()
 
-  const [manifest, setManifest] = useState<BK.Manifest>(null)
-  const [nodeID, setNodeID] = useState<BK.Manifest['node_id']>(null)
+  const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>(null)
+  const [nodeID, setNodeID] = useState<BK.NodeMeta['node_id']>(null)
   const [meta, setMeta] = useState<BK.State>(null)
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
@@ -156,8 +156,8 @@ export default function NodeView() {
   useEffect(() => {
     setLoading(true)
     const p1 = BK.getProdSheet({node: vsn, by: 'vsn'})
-      .then((data: BK.Manifest) => {
-        setManifest(data)
+      .then((data: BK.NodeMeta) => {
+        setNodeMeta(data)
 
         if (!data) {
           setVsnNotFound(true)
@@ -191,13 +191,13 @@ export default function NodeView() {
 
   // data timeline
   useEffect(() => {
-    if (!manifest) return
+    if (!nodeMeta) return
     setLoadingTL(true)
     fetchRollup({...opts, vsn})
-      .then(data => dispatch({type: 'INIT_DATA', data, manifests: [manifest]}))
+      .then(data => dispatch({type: 'INIT_DATA', data, nodeMetas: [nodeMeta]}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [vsn, manifest, opts])
+  }, [vsn, nodeMeta, opts])
 
 
   // fetch public ECR apps to determine if apps are indeed public
@@ -258,7 +258,7 @@ export default function NodeView() {
   const {
     node_type, shield, top_camera, bottom_camera,
     left_camera, right_camera
-  } = manifest || {}
+  } = nodeMeta || {}
 
   if (vsnNotFound)
     return <NodeNotFound />
@@ -282,7 +282,7 @@ export default function NodeView() {
               </h1>
 
               <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
-                <Button href={manifest ? `${config.adminURL}/node/${vsn}` : ''} target="_blank">
+                <Button href={nodeMeta ? `${config.adminURL}/node/${vsn}` : ''} target="_blank">
                   <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
                     {status}
                   </span>
@@ -299,22 +299,22 @@ export default function NodeView() {
                   ...metaRows1,
                   {
                     id: 'gps',
-                    label: <> GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
+                    label: <> GPS ({hasStaticGPS(nodeMeta) ? 'static' : 'from stream'})</>,
                     format: () =>
                       <div className="gps">
-                        {hasStaticGPS(manifest) &&
-                            <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+                        {hasStaticGPS(nodeMeta) &&
+                            <Clipboard content={`${nodeMeta.gps_lat},\n${nodeMeta.gps_lon}`} />
                         }
-                        {!hasStaticGPS(manifest) && liveGPS &&
+                        {!hasStaticGPS(nodeMeta) && liveGPS &&
                             <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
                         }
-                        {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+                        {!hasStaticGPS(nodeMeta) && !liveGPS && !loading &&
                             <span className="muted">not available</span>
                         }
                       </div>
                   }
                 ]}
-                data={{...manifest, ...meta}}
+                data={{...nodeMeta, ...meta}}
               />
             </Card>
 
@@ -322,13 +322,13 @@ export default function NodeView() {
               <MetaTable
                 title="Hardware"
                 rows={metaRows2}
-                data={{...manifest, ...meta}}
+                data={{...nodeMeta, ...meta}}
               />
 
               <MetaTable
                 title="Cameras"
                 rows={cameraMetaRows}
-                data={{...manifest, ...meta}}
+                data={{...nodeMeta, ...meta}}
               />
             </Card>
           </div>
@@ -418,26 +418,26 @@ export default function NodeView() {
 
         <RightSide className="justify-end">
           <Card noPad>
-            {hasStaticGPS(manifest) && status && vsn &&
+            {hasStaticGPS(nodeMeta) && status && vsn &&
                 <Map
                   data={[{
                     vsn,
-                    lat: manifest.gps_lat,
-                    lng: manifest.gps_lon,
+                    lat: nodeMeta.gps_lat,
+                    lng: nodeMeta.gps_lon,
                     status,
-                    ...manifest
+                    ...nodeMeta
                   }]} />
             }
-            {!hasStaticGPS(manifest) && liveGPS && status &&
+            {!hasStaticGPS(nodeMeta) && liveGPS && status &&
                 <Map data={[{
                   vsn,
                   lat: liveGPS.lat,
                   lng: liveGPS.lon,
                   status,
-                  ...manifest
+                  ...nodeMeta
                 }]} />
             }
-            {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+            {!hasStaticGPS(nodeMeta) && !liveGPS && !loading &&
                 <div className="muted" style={{margin: 18}}>(Map not available)</div>
             }
           </Card>
@@ -446,7 +446,7 @@ export default function NodeView() {
             <WSNView>
               <img src={wsnode} width={WSN_VIEW_WIDTH} />
               <VSN>{vsn}</VSN>
-              {manifest &&
+              {nodeMeta &&
                   <>
                     {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
                     {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}

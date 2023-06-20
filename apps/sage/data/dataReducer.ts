@@ -28,11 +28,11 @@ export function dataReducer(state, action) {
   switch (action.type) {
   case 'INIT_DATA': {
     const {filters} = state
-    const {manifests} = action
+    const {nodeMetas} = action
     const {rawData, data} = action.data
 
     let filtered = sortVSNs(Object.keys(data))
-    filtered = getFilteredVSNs(manifests, data, filters)
+    filtered = getFilteredVSNs(nodeMetas, data, filters)
 
     return {
       ...state,
@@ -50,7 +50,7 @@ export function dataReducer(state, action) {
   }
   case 'ADD_FILTER': {
     const {data, filters} = state
-    const {manifests, facet, val} = action
+    const {nodeMetas, facet, val} = action
 
     // new filter state
     const newFilters = {
@@ -58,8 +58,8 @@ export function dataReducer(state, action) {
       [facet]: [...filters[facet], val]
     }
 
-    // new filtered data, using "manifest" data
-    const filtered = getFilteredVSNs(manifests, data, newFilters)
+    // new filtered data, using "nodeMeta" data
+    const filtered = getFilteredVSNs(nodeMetas, data, newFilters)
 
     return {
       ...state,
@@ -70,7 +70,7 @@ export function dataReducer(state, action) {
   }
   case 'RM_FILTER': {
     const {data, filters} = state
-    const {manifests, facet, val} = action
+    const {nodeMetas, facet, val} = action
 
     // new filter state
     const newFilters = {
@@ -78,8 +78,8 @@ export function dataReducer(state, action) {
       [facet]: filters[facet].filter(v => v != val)
     }
 
-    // new filtered data, using "manifest" data
-    const filtered = getFilteredVSNs(manifests, data, newFilters)
+    // new filtered data, using "nodeMeta" data
+    const filtered = getFilteredVSNs(nodeMetas, data, newFilters)
 
     return {
       ...state,
@@ -90,10 +90,10 @@ export function dataReducer(state, action) {
   }
   case 'SELECT_ALL': {
     const {data, filters} = state
-    const {manifests, facet, vals} = action
+    const {nodeMetas, facet, vals} = action
 
     const newFilters = {...filters, [facet]: vals}
-    const filtered = getFilteredVSNs(manifests, data, newFilters)
+    const filtered = getFilteredVSNs(nodeMetas, data, newFilters)
 
     return {
       ...state,
@@ -104,10 +104,10 @@ export function dataReducer(state, action) {
   }
   case 'CLEAR_CATEGORY': {
     const {data, filters} = state
-    const {manifests, facet} = action
+    const {nodeMetas, facet} = action
 
     const newFilters = {...filters, [facet]: []}
-    const filtered = getFilteredVSNs(manifests, data, newFilters)
+    const filtered = getFilteredVSNs(nodeMetas, data, newFilters)
 
     return {
       ...state,
@@ -131,19 +131,19 @@ export function dataReducer(state, action) {
 
 
 // core logic for intersection of unions; could be optimized or simplified if needed
-const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
+const getFilteredVSNs = (nodeMetas: BK.NodeMeta[], data, filters: Filters) => {
   const vsnsByField = {}
   for (const [field, vals] of Object.entries(filters)) {
-    for (const manifest of manifests) {
+    for (const nodeMeta of nodeMetas) {
 
       let isEmpty
-      if (vals.includes(NO_ASSIGNMENT) && manifest[field] == '')
+      if (vals.includes(NO_ASSIGNMENT) && nodeMeta[field] == '')
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         isEmpty = true
-      else if (!vals.includes(manifest[field]))
+      else if (!vals.includes(nodeMeta[field]))
         continue
 
-      const vsn = manifest.vsn
+      const vsn = nodeMeta.vsn
       vsnsByField[field] = field in vsnsByField ?
         [...vsnsByField[field], vsn] : [vsn]
     }
@@ -152,7 +152,7 @@ const getFilteredVSNs = (manifests: BK.Manifest[], data, filters: Filters) => {
   const count = sum(Object.values(vsnsByField).map(vals => vals.length))
 
   const vsns = count ?
-    intersection(...Object.values(vsnsByField)) : manifests.map(m => m.vsn)
+    intersection(...Object.values(vsnsByField)) : nodeMetas.map(m => m.vsn)
 
   // find intersection of vsns and data vsns
   let vsnSubset = Object.keys(data)
