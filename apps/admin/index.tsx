@@ -7,7 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 
 import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
-import NodeTabs from '/components/views/nodes/NodeTabs'
+import NodeTabs from '/components/views/nodes/NodeTabsBinned'
 import Status from './views/status/Status'
 import Tests from './views/tests/Tests'
 import Node from './views/node/Node'

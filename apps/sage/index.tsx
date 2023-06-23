@@ -65,7 +65,7 @@ const NavMenu = () => {
     <NavItems>
       <NavItem
         label="Nodes"
-        to="/nodes?phase=deployed"
+        to="/nodes"
       />
       <NavItem
         label="App Catalog"
@@ -170,7 +170,7 @@ export default function Sage() {
             <Container>
               <ProgressProvider>
                 <Routes>
-                  <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
+                  <Route path="/" element={<Navigate to="nodes" replace />} />
 
                   <Route path="/" element={<NodeTabs />}>
                     <Route path="nodes" element={<Nodes />} />
