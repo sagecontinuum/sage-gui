@@ -14,6 +14,8 @@ import * as utils from '/components/utils/units'
 import settings from '/apps/project/settings'
 import config from '/config'
 
+import { NODE_STATUS_RANGE } from '/components/apis/beehive'
+
 
 
 const SAGE_UI_PROJECT = settings.SAGE_UI_PROJECT
@@ -46,24 +48,22 @@ const columns = [{
   id: 'status',
   label: 'Status',
   format: (val, obj) => {
-    let icon
-    if (val == 'reporting')
-      icon = <CheckIcon className="success status-icon" />
-    else if (val == 'not reporting')
-      icon = <ErrorIcon className="failed status-icon" />
-    else
-      icon = <InactiveIcon className="inactive status-icon" />
-
-    if (!obj.computes) {
+    if (!obj.elapsedTimes) {
       return (
         <Tooltip
-          title="Node has no compute resources assigned"
+          title={`No sys.uptime(s) in ${NODE_STATUS_RANGE}`}
           componentsProps={{tooltip: {sx: {background: '#000'}}}}
           placement="top">
-          {icon}
+          <InactiveIcon className="inactive status-icon" />
         </Tooltip>
       )
     }
+
+    let icon
+    if (val == 'reporting')
+      icon = <CheckIcon className="success status-icon" />
+    else
+      icon = <ErrorIcon className="failed status-icon" />
 
     return (
       <Tooltip
@@ -101,18 +101,20 @@ const columns = [{
       }
     </NodeCell>
 }, {
-  id: 'id',
+  id: 'node_id',
   label: 'ID',
   width: '100px',
   format: (val, obj) =>
     obj.node_type != 'Blade' ?
       <Link to={`/node/${val}`}>{val}</Link> : val,
   hide: true
-}, {
+},
+/* {
   id: 'node_phase',
   label: 'Phase',
   hide: true
-}, {
+} */
+{
   id: 'focus',
   label: 'Focus'
 }, {
@@ -244,12 +246,14 @@ const columns = [{
       {sensors.map(name => <li key={name}>{name}</li>)}
     </SensorList>
   }
-}, {
+},
+/* {
   id: 'registration_event',
   label: 'Registered',
   format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
   hide: true
-}, {
+} */
+{
   id: 'commission_date',
   label: 'Commission Date',
 }, {

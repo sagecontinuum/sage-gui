@@ -81,7 +81,7 @@ export default function TestView() {
 
     const p1 = BH.getNodeHealth(null, '-7d')
     const p2 = BH.getNodeSanity('-7d')
-    const p3 = BK.getProdSheet({by: 'vsn'})
+    const p3 = BK.getNodeMeta({by: 'vsn'})
 
     Promise.all([p1, p2, p3])
       .then(([health, sanity, meta]) => {
@@ -104,7 +104,7 @@ export default function TestView() {
           .filter(o => o.node_id.length)
 
         const vsns = includeList
-          .filter(o => phase ? o.node_phase == BK.phaseMap[phase] : true)
+          .filter(o => phase ? o.node_phase_v2 == BK.phaseMap[phase] : true)
           .map(o => o.vsn)
 
         let d = reduceByVSNs(health, vsns)

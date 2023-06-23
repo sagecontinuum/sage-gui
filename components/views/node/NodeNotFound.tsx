@@ -16,7 +16,7 @@ export default function NodeNotFound() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    BK.getProdSheet({by: 'id'})
+    BK.getNodeMeta({by: 'id'})
       .then(data => setRecommended(vsn in data ? data[vsn].vsn : null))
       .catch(err => setError(err))
   }, [vsn])

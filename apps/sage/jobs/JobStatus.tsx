@@ -311,7 +311,7 @@ export default function JobStatus() {
     const p1 = ES.getJobs()
 
     // also fetch gps for map
-    const p2 = BK.getProdSheet({by: 'vsn'})
+    const p2 = BK.getNodeMeta({by: 'vsn'})
 
     Promise.all([p1, p2])
       .then(([jobs, nodeMetas]) => {
@@ -387,7 +387,7 @@ export default function JobStatus() {
 
   const handleCloseDialog = () => {
     params.delete('job')
-    navigate(`/jobs/${view}`, {search: params.toString(), replace: true})
+    navigate(`/jobs/${view}?${params.toString()}`, {replace: true})
   }
 
   const getSubset = (selectedNodes, nodes) => {

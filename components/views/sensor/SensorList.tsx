@@ -88,7 +88,7 @@ export default function SensorList() {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getProdSheet({by: 'vsn', project: SAGE_UI_PROJECT})
+    const prom1 = BK.getNodeMeta({by: 'vsn', project: SAGE_UI_PROJECT})
       .then(data => {
         const d = Object.values(data)
         const sensors = [...new Set(d.flatMap(({sensor}) => sensor))]

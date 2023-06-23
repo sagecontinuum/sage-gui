@@ -20,6 +20,7 @@ import config from '/config'
 
 import HealthSparkler, { healthColor, sanityColor } from '/components/viz/HealthSparkler'
 import NodeLastReported, { getColorClass } from '/components/utils/NodeLastReported'
+import { NODE_STATUS_RANGE } from '/components/apis/beehive'
 
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
 // const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
@@ -116,24 +117,22 @@ const columns = [{
   id: 'status',
   label: 'Status',
   format: (val, obj) => {
-    let icon
-    if (val == 'reporting')
-      icon = <CheckIcon className="success status-icon" />
-    else if (val == 'not reporting')
-      icon = <ErrorIcon className="failed status-icon" />
-    else
-      icon = <InactiveIcon className="inactive status-icon" />
-
     if (!obj.elapsedTimes) {
       return (
         <Tooltip
-          title="Node is marked as offline"
+          title={`No sys.uptime(s) in ${NODE_STATUS_RANGE}`}
           componentsProps={{tooltip: {sx: {background: '#000'}}}}
           placement="top">
-          {icon}
+          <InactiveIcon className="inactive status-icon" />
         </Tooltip>
       )
     }
+
+    let icon
+    if (val == 'reporting')
+      icon = <CheckIcon className="success status-icon" />
+    else
+      icon = <ErrorIcon className="failed status-icon" />
 
     return (
       <Tooltip
@@ -221,6 +220,10 @@ const columns = [{
 }, {
   id: 'focus',
   label: 'Focus'
+}, {
+  id: 'node_phase_v2',
+  label: 'Phase',
+  hide: true
 }, {
   id: 'location',
   label: 'Location',

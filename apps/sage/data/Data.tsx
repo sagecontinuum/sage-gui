@@ -164,7 +164,7 @@ export default function Data(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    const mProm = BK.getProdSheet({by: 'vsn'})
+    const mProm = BK.getNodeMeta({by: 'vsn'})
       .then(data => {
         setNodeMetaByVSN(data) // todo(nc): remove
 

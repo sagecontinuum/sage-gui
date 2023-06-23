@@ -10,7 +10,7 @@ const barColors = {
   'reporting': '#3ac37e',
   'failed': '#a30f0f',
   'not reporting': '#a30f0f',
-  'offline': '#aaa'
+  'not reporting (30d+)': '#aaa'
 }
 
 
@@ -35,7 +35,7 @@ function getIssues(data) : Issues {
 type Status = {
   'reporting': number,
   'not reporting': number
-  'offline': number
+  'not reporting (30d+)': number
 }
 
 
@@ -43,9 +43,9 @@ function getStatus(data: BK.State[]) : Status {
   const statuses = data.reduce((acc, o) => {
     acc['reporting'] += o.status == 'reporting' ? 1 : 0,
     acc['not reporting'] += o.status == 'not reporting' ? 1 : 0,
-    acc['offline'] += o.status == 'offline' ? 1 : 0
+    acc['not reporting (30d+)'] += o.status == 'not reporting (30d+)' ? 1 : 0
     return acc
-  }, {'reporting': 0, 'not reporting': 0, 'offline': 0})
+  }, {'reporting': 0, 'not reporting': 0, 'not reporting (30d+)': 0})
 
   return statuses
 }
@@ -80,7 +80,7 @@ export default function Charts(props: Props) {
     setStatuses({
       'reporting': status['reporting'],
       'not reporting': status['not reporting'],
-      'offline': status['offline']
+      'not reporting (30d+)': status['not reporting (30d+)']
     })
 
     const issues = getIssues(data)

@@ -3,7 +3,7 @@ const url = config.beekeeper
 
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
-import { countBy } from 'lodash'
+
 
 
 const FILTER_NODES = true  // if true, filter to "node monitoring" list
@@ -37,6 +37,7 @@ export const Buckets = [
 
 export const phaseMap = {
   'deployed': 'Deployed',
+  'awaiting': 'Awaiting Install',
   'pending': 'Pending Deploy',
   'maintenance': 'Maintenance',
   'standby': 'Standby',
@@ -52,9 +53,10 @@ export type Phase = typeof phaseMap[PhaseTabs]
 export type NodeMeta = {
   vsn: VSN
   node_phase: Phase
+  node_phase_v2: Phase
   project: string
   focus: string
-  gps_lat: number // static gpsf
+  gps_lat: number // static gps
   gps_lon: number // static gps
   lng?: number    // live longitude (if avail)
   lat?: number    // live latitude (if avail)
@@ -110,7 +112,7 @@ export async function getNode(id: string) : Promise<State> {
 type MetaParams = {node?: string, by?: 'vsn' | 'id', project?: string, focus?: string}
 export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
-export async function getProdSheet(params?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
+export async function getNodeMeta(params?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
   const {node, by = 'vsn', project, focus} = params || {}
 
   let data = await get(`${url}/production`)
@@ -186,7 +188,7 @@ export async function getFactory(params?: MetaParams) {
 }
 
 
-
+// todo(nc): deprecated; used for the factory page, but should eventually not be used there as well
 function _joinNodeData(nodes, nodeMetas, monitorMeta) {
   return nodes.map(obj => {
     const {id} = obj
@@ -200,7 +202,8 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
       ...obj,
       ...meta,
       expected_online: !!expected_online,
-      status: expected_online ? 'reporting' : 'offline',
+      computes: [], // todo(nc): manifests are used here, so leave blank for now
+      status: expected_online ? 'reporting' : 'not reporting (30d+)',
       registration_event: new Date(obj.registration_event).getTime()
     }
   })
@@ -208,7 +211,7 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
 
 
 export async function getState() : Promise<State[]> {
-  const proms = [getProdSheet(), getManifests()]
+  const proms = [getNodeMeta(), getManifests()]
   const [meta, manifests] = await Promise.all(proms)
 
 
@@ -227,7 +230,7 @@ export async function getState() : Promise<State[]> {
 
 
 export async function __getStateDeprecated() : Promise<State[]> {
-  const proms = [getNodes(), getProdSheet(), getMonitorData()]
+  const proms = [getNodes(), getNodeMeta(), getMonitorData()]
   let [nodes, meta, monitorMeta] = await Promise.all(proms)
 
   let allMeta = _joinNodeData(nodes, meta, monitorMeta)
@@ -263,7 +266,7 @@ export async function __getStateDeprecated() : Promise<State[]> {
 
 
 export async function getSuryaState() : Promise<State[]> {
-  const proms = [getNodes(), getProdSheet(), getMonitorData(), getFactory({by: 'id'})]
+  const proms = [getNodes(), getNodeMeta(), getMonitorData(), getFactory({by: 'id'})]
   const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
 
   const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
@@ -288,7 +291,7 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 export type NodeDetails = (State & NodeMeta)[]
 
 export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<NodeDetails> {
-  const [bkData, details] = await Promise.all([getNodes(), getProdSheet({by: 'vsn'})])
+  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta({by: 'vsn'})])
   let nodeDetails = bkData
     .filter(o => !!o.vsn)
     .map(obj => ({...obj, ...details[obj.vsn]}))
@@ -301,20 +304,10 @@ export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<Node
 }
 
 
-export type PhaseCounts = {
-  [phase in Phase]: number
+
+export async function getProduction() {
+  return await get(`${url}/production`)
 }
-
-export async function getPhaseCounts(project: string) : Promise<PhaseCounts> {
-  let data = await get(`${url}/production`)
-
-  if (project) {
-    data = data.filter(obj => obj.project == project)
-  }
-
-  return countBy<PhaseCounts>(data, 'node_phase') as PhaseCounts
-}
-
 
 
 export type Compute = {
