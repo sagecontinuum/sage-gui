@@ -1,26 +1,31 @@
 /* eslint-disable react/display-name */
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import styled from 'styled-components'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
+import CaretIconUp from '@mui/icons-material/ArrowDropUpRounded'
+import ThermoIcon from '@mui/icons-material/ThermostatRounded'
+import MapIcon from '@mui/icons-material/RoomOutlined'
+
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
-import MapIcon from '@mui/icons-material/RoomOutlined'
-import ThermoIcon from '@mui/icons-material/ThermostatRounded'
 import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
 
 import * as utils from '/components/utils/units'
+import * as BK from '/components/apis/beekeeper'
 
 import config from '/config'
 
 import HealthSparkler, { healthColor, sanityColor } from '/components/viz/HealthSparkler'
 import NodeLastReported, { getColorClass } from '/components/utils/NodeLastReported'
 import { NODE_STATUS_RANGE } from '/components/apis/beehive'
+import Button from '@mui/material/Button'
 
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
 // const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
@@ -110,6 +115,63 @@ const FSItem = styled.div`
   font-size: .85em;
   width: 40px;
 `
+
+function SensorSumary(props) {
+  const {data} = props
+
+  const [expanded, setExpanded] = useState(false)
+
+  const count = data.length
+
+  if (expanded) {
+    return <>
+        <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
+        {data.map((sensor, i) => {
+          const {hw_model} = sensor
+          return <div key={i}>
+            <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
+              {hw_model}
+            </Link>
+          </div>
+        })
+      }
+    </>
+  } else if (count)  {
+    return <a onClick={() => setExpanded(true)} className="flex items-center">
+      {count} sensor{count > 1 ? 's' : ''}<CaretIcon />
+    </a>
+  } else {
+    return <span>-</span>
+  }
+}
+
+
+function ComputeSummary(props) {
+  const {data} = props
+
+  const [expanded, setExpanded] = useState(false)
+
+  const count = data.length
+
+  if (expanded) {
+    return <>
+      <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
+      {data.map((sensor, i) => {
+          const {name} = sensor
+          return <div key={i}>
+            {name}
+          </div>
+        })
+      }
+    </>
+  } else if (count)  {
+    return <a onClick={() => setExpanded(true)} className="flex items-center">
+      {count} <CaretIcon />
+    </a>
+  } else {
+    return <span>-</span>
+  }
+}
 
 
 
@@ -233,7 +295,14 @@ const columns = [{
   label: 'GPS',
   format: (val, obj) => {
     if (!obj || !obj.lat || !obj.lng) return '-'
-    return `${obj.lat}, ${obj.lng}, ${obj.alt}`
+    return `${obj.lat}, ${obj.lng}`
+  },
+  hide: true
+}, {
+  id: 'alt',
+  label: 'Altitude',
+  format: (val) => {
+    return val || '-'
   },
   hide: true
 }, {
@@ -304,7 +373,21 @@ const columns = [{
     return Object.keys(val).map(host =>
       <div key={host}>{utils.prettyTime(val[host])}</div>
     )
+  },
+  hide: true
+},  {
+  id: 'sensors',
+  label: 'Sensors',
+  format: (sensors: BK.SimpleManifest['sensors'][]) => {
+    return <SensorSumary data={sensors} />
   }
+}, {
+  id: 'computes',
+  label: 'Computes',
+  format: (computes: BK.SimpleManifest['computes'][]) => {
+    return <ComputeSummary data={computes} />
+  },
+  hide: true
 }, {
   id: 'cpu',
   label: 'CPU Secs',

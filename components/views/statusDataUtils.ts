@@ -64,11 +64,28 @@ function getElapsedTimes(metrics: BH.MetricsByHost) {
 }
 
 
+function getNxMetric(
+  metrics: BH.MetricsByHost,
+  metricName: string,
+  latestOnly = true
+) {
+  // first find the nx host (16 chars + suffix)
+  const hostID = Object.keys(metrics).find(host => host.includes('ws-nxcore'))
+
+  const m = (metrics[hostID] || {})[metricName]
+  if (!m) return
+
+  const val = latestOnly ? m[m.length - 1].value : m
+  return val
+}
+
+
 function getMetric(
   metrics: BH.MetricsByHost,
   metricName: string,
   latestOnly = true
 ) {
+
   const valueObj = {}
   Object.keys(metrics).forEach(host => {
     const m = metrics[host][metricName]
@@ -76,9 +93,10 @@ function getMetric(
 
     const val = latestOnly ? m[m.length - 1].value : m
 
-    const suffix = host.split('.')[1]
-    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-    valueObj[key] = val
+    // const suffix = host.split('.')[1]
+    // const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
+
+    valueObj[host] = val
   })
 
   return valueObj
@@ -156,9 +174,9 @@ export function mergeMetrics(
 
     const elapsedTimes = getElapsedTimes(metrics)
 
-    const temp = getMetric(metrics, 'iio.in_temp_input').nx
-    const liveLat = getMetric(metrics, 'sys.gps.lat').nx
-    const liveLon = getMetric(metrics, 'sys.gps.lon').nx
+    const temp = getNxMetric(metrics, 'iio.in_temp_input')
+    const liveLat = getNxMetric(metrics, 'sys.gps.lat')
+    const liveLon = getNxMetric(metrics, 'sys.gps.lon')
 
     return {
       ...nodeObj,
@@ -169,7 +187,7 @@ export function mergeMetrics(
       hasLiveGPS: !!liveLat && !!liveLon,
       lat: nodeObj.gps_lat || liveLat,
       lng: nodeObj.gps_lon || liveLon,
-      alt: getMetric(metrics, 'sys.gps.alt').nx,
+      alt: getNxMetric(metrics, 'sys.gps.alt'),
       uptimes: getMetric(metrics, 'sys.uptime'),
       memTotal: getMetric(metrics, 'sys.mem.total'),
       memFree: getMetric(metrics, 'sys.mem.free'),
@@ -182,7 +200,7 @@ export function mergeMetrics(
       // txPackets: getMetric(byNode, 'sys.net.tx_packets', false),
       // rxBytes: getMetric(byNode, 'sys.net.rx_bytes', false),
       // rxPackets: getMetric(byNode, 'sys.net.rx_packets', false),
-      ip: getMetric(metrics, 'sys.net.ip', false)?.nx?.find(o => o.meta.device == 'wan0')?.value,
+      ip: (getNxMetric(metrics, 'sys.net.ip', false) || []).find(o => o.meta.device == 'wan0')?.value,
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}

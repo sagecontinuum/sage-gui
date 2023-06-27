@@ -91,7 +91,7 @@ const columns = [{
   format: (val, obj) =>
     <NodeCell className="flex items-center justify-between">
       <Link to={`/node/${val}`}>{val}</Link>
-      {obj.lat && obj.lng &&
+      {obj.gps_lat && obj.gps_lon &&
         <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
           {obj.hasStaticGPS ?
             <MapIcon fontSize="small"/> :
@@ -148,6 +148,13 @@ const columns = [{
     if (!obj || !obj.lat || !obj.lng) return '-'
     return `${obj.lat}, ${obj.lng}`
   }
+}, {
+  id: 'alt',
+  label: 'Altitude',
+  format: (val) => {
+    return val || '-'
+  },
+  hide: true
 }, {
   id: 't_sensors',
   label: 'Top Sensors',
