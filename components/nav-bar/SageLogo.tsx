@@ -9,24 +9,9 @@ const SageLogo = () =>
     <LogoImg src={sage} height="35" />
     <Logo title={`Sage: v${version}`}>
         Sage
-      <sup>(beta)</sup>
+      <SageSup>(beta)</SageSup>
     </Logo>
   </>
-
-
-export default SageLogo
-
-
-const AdminLogo = () =>
-  <>
-    <LogoImg src={sage} height="35" />
-    <Logo title="Sage Admin UI">
-        Sage
-      <sup><span style={{color: '#8166a0'}}>[Admin]</span></sup>
-    </Logo>
-  </>
-
-export {AdminLogo}
 
 
 const LogoImg = styled.img`
@@ -41,11 +26,39 @@ const Logo = styled.span`
   margin-bottom: 2px;
   padding-right: 20px;
   padding-left: 2px;
+`
 
-  sup {
-    position: relative;
-    top: -5px;
-    font-size: .3em;
-    color: #aaa;
+const SageSup = styled.sup`
+  position: relative;
+  top: -5px;
+  font-size: .3em;
+  color: #aaa;
+`
+
+
+export default SageLogo
+
+
+const AdminLogo = () =>
+  <>
+    <LogoImg src={sage} height="35" />
+    <Logo title="Sage Admin UI">
+        Sage
+      <AdminSup>[<span>Admin</span>]</AdminSup>
+    </Logo>
+  </>
+
+export {AdminLogo}
+
+
+const AdminSup = styled.sup`
+  position: relative;
+  top: -5px;
+  font-size: .3em;
+
+  span {
+    color: #8166a0;
+    text-decoration: underline;
+    text-decoration-color: #8166a0;
   }
 `
