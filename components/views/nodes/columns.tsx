@@ -88,18 +88,24 @@ const columns = [{
   id: 'vsn',
   label: 'VSN',
   width: '50px',
-  format: (val, obj) =>
-    <NodeCell className="flex items-center justify-between">
-      <Link to={`/node/${val}`}>{val}</Link>
-      {obj.gps_lat && obj.gps_lon &&
-        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
-          {obj.hasStaticGPS ?
-            <MapIcon fontSize="small"/> :
+  format: (val, obj) => {
+    if (!obj.hasStaticGPS && !obj.hasLiveGPS)
+      return
+
+    return (
+      <NodeCell className="flex items-center justify-between">
+        <Link to={`/node/${val}`}>{val}</Link>
+          {obj.hasStaticGPS &&
+            <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
+              <MapIcon fontSize="small"/>
+            </LiveGPSDot>
+          }
+          {!obj.hasStaticGPS && obj.hasLiveGPS &&
             <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
           }
-        </LiveGPSDot>
-      }
-    </NodeCell>
+      </NodeCell>
+    )
+  }
 }, {
   id: 'node_id',
   label: 'ID',
