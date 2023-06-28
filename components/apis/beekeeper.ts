@@ -312,6 +312,7 @@ export async function getProduction() {
 
 export type Compute = {
   name: 'rpi' | 'nxcore' | 'nxagent'
+  serial_no: string  // most likely 12 digit, uppercase hex
   zone: 'shield' | 'core'
 }
 
@@ -350,9 +351,26 @@ export async function getManifests() : Promise<SimpleManifest[]> {
     name: o.name,
     gps_lat: o.gps_lat,
     gps_lon: o.gps_lon,
-    computes: o.computes.map(({name, zone}) => ({name, zone})),
-    sensors: o.sensors.map(({name, hardware}) => ({name, hardware: hardware.hardware, hw_model: hardware.hw_model}))
+    computes: o.computes.map(({name, serial_no, zone}) => ({
+      name,
+      serial_no,
+      zone
+    })),
+    sensors: o.sensors.map(({name, hardware}) => ({
+      name,
+      hardware: hardware.hardware,
+      hw_model: hardware.hw_model
+    }))
   }))
 
   return data
+}
+
+
+// helper function normalize/match:
+// 0000456789abcdef.<suffix> (in beehive) 456789abcdef (in manifest)
+export function findHostWithSerial(hosts: string[], serial_no: string) : string {
+  return hosts.find(host =>
+    host.split('.')[0].slice(4).toUpperCase() == serial_no.toUpperCase()
+  )
 }

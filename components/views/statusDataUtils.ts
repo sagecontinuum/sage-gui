@@ -4,10 +4,7 @@ import * as BH from '/components/apis/beehive'
 import settings from '/apps/admin/settings'
 import { aggregateMetrics } from '/components/apis/beehive'
 
-
 const ELAPSED_FAIL_THRES = settings.elapsedThresholds.fail
-const HOST_SUFFIX_MAPPING = settings.hostSuffixMapping
-
 
 
 export function filterData(data: object[], state: object) {
@@ -47,17 +44,14 @@ function getElapsedTimes(metrics: BH.MetricsByHost) {
 
     const timestamp = uptimes[0].timestamp
 
-    const suffix = host.split('.')[1]
-    const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-
     // ensure the latest time per host is used; mostly for the factory
-    if (mostRecent[key]?.localeCompare(timestamp)) {
+    if (mostRecent[host]?.localeCompare(timestamp)) {
       return
     }
 
     const elapsedTime = new Date().getTime() - new Date(timestamp).getTime()
-    elapsedByHost[key] = elapsedTime
-    mostRecent[key] = timestamp
+    elapsedByHost[host] = elapsedTime
+    mostRecent[host] = timestamp
   })
 
   return elapsedByHost
@@ -92,10 +86,6 @@ function getMetric(
     if (!m) return
 
     const val = latestOnly ? m[m.length - 1].value : m
-
-    // const suffix = host.split('.')[1]
-    // const key = suffix ? (HOST_SUFFIX_MAPPING[suffix] || suffix) : host
-
     valueObj[host] = val
   })
 
@@ -142,9 +132,12 @@ export function countNodeSanity(data) {
 
 
 const determineStatus = (computes: BK.Compute[], elapsedTimes: {[host: string]: number}) => {
-  if (computes.some(({name}) => !(name in elapsedTimes) || elapsedTimes[name] > ELAPSED_FAIL_THRES))
-    return 'not reporting'
-  return 'reporting'
+  const notReporting = computes.some(({serial_no}) => {
+    const host = BK.findHostWithSerial(Object.keys(elapsedTimes), serial_no)
+    return !(host in elapsedTimes) || elapsedTimes[host] > ELAPSED_FAIL_THRES
+  })
+
+  return notReporting ? 'not reporting' : 'reporting'
 }
 
 
@@ -194,12 +187,12 @@ export function mergeMetrics(
       memAvail: getMetric(metrics, 'sys.mem.avail'),
       fsAvail: getMetric(metrics, 'sys.fs.avail', false),
       fsSize: getMetric(metrics, 'sys.fs.size', false),
-      // cpu: getMetric(byNode, 'sys.cpu_seconds', false),
-      // sysTimes: getMetric(byNode, 'sys.time'),
-      // txBytes: getMetric(byNode, 'sys.net.tx_bytes', false),
-      // txPackets: getMetric(byNode, 'sys.net.tx_packets', false),
-      // rxBytes: getMetric(byNode, 'sys.net.rx_bytes', false),
-      // rxPackets: getMetric(byNode, 'sys.net.rx_packets', false),
+      // cpu: getMetric(metrics, 'sys.cpu_seconds', false),
+      // sysTimes: getMetric(metrics, 'sys.time'),
+      // txBytes: getMetric(metrics, 'sys.net.tx_bytes', false),
+      // txPackets: getMetric(metrics, 'sys.net.tx_packets', false),
+      // rxBytes: getMetric(metrics, 'sys.net.rx_bytes', false),
+      // rxPackets: getMetric(metrics, 'sys.net.rx_packets', false),
       ip: (getNxMetric(metrics, 'sys.net.ip', false) || []).find(o => o.meta.device == 'wan0')?.value,
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},

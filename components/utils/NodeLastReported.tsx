@@ -27,10 +27,12 @@ export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element 
     <div>
       {computes
         .map(obj => {
-          const host = obj.name
+          const {serial_no, name} = obj
+
+          const host = BK.findHostWithSerial(Object.keys(elapsedTimes), serial_no)
 
           return <div key={host}>
-            {host}: <b className={
+            {name}: <b className={
               elapsedTimes ? getColorClass(elapsedTimes[host], FAIL_THRES, WARNING_THRES, 'success font-bold') : ''
             }>
               {host in (elapsedTimes || {}) ?
@@ -45,7 +47,7 @@ export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element 
   )
 }
 
-export function getColorClass(val, severe: number, warning: number, defaultClass?: string) {
+export function getColorClass(val, severe: number, warning: number, defaultClass?: string) : string {
   if (!val || val >= severe) return 'severe font-bold'
   else if (val > warning) return 'warning font-bold'
   else if (defaultClass) return defaultClass
