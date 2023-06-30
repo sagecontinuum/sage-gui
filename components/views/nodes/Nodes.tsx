@@ -49,11 +49,6 @@ function getProjectNodes() {
       if (settings.focus)
         data = filterOn(data, 'focus')
 
-      data = data.map(o => ({
-        ...o,
-        lat: o.gps_lat,
-        lng: o.gps_lon
-      })) // todo(nc): remove once blades are reporting
       return data
     })
 }

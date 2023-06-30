@@ -360,7 +360,7 @@ export async function getManifests() : Promise<SimpleManifest[]> {
       name,
       hardware: hardware.hardware,
       hw_model: hardware.hw_model
-    }))
+    })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
   }))
 
   return data

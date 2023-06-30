@@ -4,18 +4,16 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
-import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 import CaretIconUp from '@mui/icons-material/ArrowDropUpRounded'
 import ThermoIcon from '@mui/icons-material/ThermostatRounded'
-import MapIcon from '@mui/icons-material/RoomOutlined'
 
 import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
+import Button from '@mui/material/Button'
 
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
@@ -23,22 +21,15 @@ import * as BK from '/components/apis/beekeeper'
 import config from '/config'
 
 import HealthSparkler, { healthColor, sanityColor } from '/components/viz/HealthSparkler'
-import NodeLastReported, { getColorClass } from '/components/utils/NodeLastReported'
-import { NODE_STATUS_RANGE } from '/components/apis/beehive'
-import Button from '@mui/material/Button'
+import  { getColorClass } from '/components/utils/NodeLastReported'
+
+import * as formatters from '/components/views/nodes/nodeFormatters'
+
 
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
 // const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 
 
-const dateOpts = {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  second: 'numeric'
-}
 
 const sysTimeOpts = {
   hour: 'numeric',
@@ -116,7 +107,7 @@ const FSItem = styled.div`
   width: 40px;
 `
 
-function SensorSumary(props) {
+function SensorSummary(props) {
   const {data} = props
 
   const [expanded, setExpanded] = useState(false)
@@ -125,16 +116,21 @@ function SensorSumary(props) {
 
   if (expanded) {
     return <>
-        <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
+      <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
+      <SensorList>
         {data.map((sensor, i) => {
-          const {hw_model} = sensor
-          return <div key={i}>
-            <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
-              {hw_model}
-            </Link>
-          </div>
+          const {hw_model, name} = sensor
+          return (
+            <li key={i}>
+              <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
+                {hw_model}
+              </Link>
+              {' '}{name != hw_model.toLowerCase() && name}
+            </li>
+          )
         })
-      }
+        }
+      </SensorList>
     </>
   } else if (count)  {
     return <a onClick={() => setExpanded(true)} className="flex items-center">
@@ -178,39 +174,7 @@ function ComputeSummary(props) {
 const columns = [{
   id: 'status',
   label: 'Status',
-  format: (val, obj) => {
-    if (!obj.elapsedTimes) {
-      return (
-        <Tooltip
-          title={`No sys.uptime(s) in ${NODE_STATUS_RANGE}`}
-          componentsProps={{tooltip: {sx: {background: '#000'}}}}
-          placement="top">
-          <InactiveIcon className="inactive status-icon" />
-        </Tooltip>
-      )
-    }
-
-    let icon
-    if (val == 'reporting')
-      icon = <CheckIcon className="success status-icon" />
-    else
-      icon = <ErrorIcon className="failed status-icon" />
-
-    return (
-      <Tooltip
-        title={
-          <>
-            Last reported metric<br/>
-            <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
-          </>
-        }
-        componentsProps={{tooltip: {sx: {background: '#000'}}}}
-        placement="top"
-      >
-        {icon}
-      </Tooltip>
-    )
-  },
+  format: formatters.status,
   width: '1px'
 }, {
   id: 'health',
@@ -254,28 +218,12 @@ const columns = [{
   id: 'id',
   label: 'ID',
   width: '100px',
-  format: (val, obj) =>
-    obj.node_type != 'Blade' ?
-      <Link to={`/node/${obj.vsn}`}>{val}</Link> : val,
   hide: true
 }, {
   id: 'vsn',
   label: 'VSN',
   width: '50px',
-  format: (val, obj) =>
-    <NodeCell className="flex items-center justify-between">
-      {obj.node_type != 'Blade' ?
-        <Link to={`/node/${val}`}>{val || `-`}</Link> : (val || `-`)
-      }
-      {obj.lat && obj.lng &&
-        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
-          {obj.hasStaticGPS ?
-            <MapIcon fontSize="small"/> :
-            <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
-          }
-        </LiveGPSDot>
-      }
-    </NodeCell>
+  format: formatters.vsn
 }, {
   id: 'project',
   label: 'Project'
@@ -359,27 +307,17 @@ const columns = [{
 }, {
   id: 'elapsedTimes',
   label: 'Last Updated',
-  format: (elapsedTimes, obj) => {
-    if (!elapsedTimes) return '-'
-
-    return <NodeLastReported computes={obj.computes} elapsedTimes={elapsedTimes} />
-  }
+  format: formatters.lastUpdated
 }, {
   id: 'uptimes',
   label: 'Uptime',
-  format: (val) => {
-    if (!val) return '-'
-
-    return Object.keys(val).map(host =>
-      <div key={host}>{utils.prettyTime(val[host])}</div>
-    )
-  },
+  format: formatters.uptimes,
   hide: true
-},  {
+}, {
   id: 'sensors',
   label: 'Sensors',
   format: (sensors: BK.SimpleManifest['sensors'][]) => {
-    return <SensorSumary data={sensors} />
+    return <SensorSummary data={sensors} />
   }
 }, {
   id: 'computes',
@@ -476,11 +414,6 @@ const columns = [{
   },
   hide: true
 }, {
-  id: 'registration_event',
-  label: 'Registered',
-  format: (val) => new Date(val).toLocaleString('en-US', dateOpts),
-  hide: true
-}, {
   id: 'top_camera',
   label: 'Top Camera',
   hide: true
@@ -518,10 +451,12 @@ const columns = [{
 }]
 
 
-const NodeCell = styled.div`
-  margin-right: .2em;
-  .MuiButtonBase-root {
-    margin-bottom: 2px;
+const SensorList = styled.ul`
+  padding: 0;
+  font-size: 9pt;
+  list-style: none;
+  li {
+    white-space: nowrap;
   }
 `
 
