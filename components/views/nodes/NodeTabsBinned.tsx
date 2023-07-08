@@ -34,7 +34,7 @@ type Counts =  PhaseCounts & {'Show All': number}
 
 function getPhaseCounts(data: BK.NodeMeta[], filterState: FilterState) : PhaseCounts {
   data = filterData(data, filterState) as BK.NodeMeta[]
-  return countBy(data, 'node_phase_v2') as PhaseCounts
+  return countBy(data, 'node_phase_v3') as PhaseCounts
 }
 
 
@@ -129,11 +129,11 @@ export default function NodeTabs(props: Props) {
           value="deployed"
         />
         <Tab
-          label={label(<SupportIcon />, 'Awaiting Install', counts)}
+          label={label(<SupportIcon />, 'Awaiting Deployment', counts)}
           value="awaiting"
         />
         <Tab
-          label={label(<PendingIcon />, 'Pending Deploy', counts)}
+          label={label(<PendingIcon />, 'Shipment Pending', counts)}
           value="pending"
         />
         <Tab

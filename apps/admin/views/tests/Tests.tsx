@@ -104,7 +104,7 @@ export default function TestView() {
           .filter(o => o.node_id.length)
 
         const vsns = includeList
-          .filter(o => phase ? o.node_phase_v2 == BK.phaseMap[phase] : true)
+          .filter(o => phase ? o.node_phase_v3 == BK.phaseMap[phase] : true)
           .map(o => o.vsn)
 
         let d = reduceByVSNs(health, vsns)

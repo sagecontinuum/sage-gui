@@ -231,7 +231,7 @@ const columns = [{
   id: 'focus',
   label: 'Focus'
 }, {
-  id: 'node_phase_v2',
+  id: 'node_phase_v3',
   label: 'Phase',
   hide: true
 }, {

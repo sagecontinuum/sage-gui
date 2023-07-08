@@ -37,8 +37,8 @@ export const Buckets = [
 
 export const phaseMap = {
   'deployed': 'Deployed',
-  'awaiting': 'Awaiting Install',
-  'pending': 'Pending Deploy',
+  'awaiting': 'Awaiting Deployment',
+  'pending': 'Shipment Pending',
   'maintenance': 'Maintenance',
   'standby': 'Standby',
   'retired': 'Retired'
@@ -53,7 +53,7 @@ export type Phase = typeof phaseMap[PhaseTabs]
 export type NodeMeta = {
   vsn: VSN
   node_phase: Phase
-  node_phase_v2: Phase
+  node_phase_v3: Phase
   project: string
   focus: string
   gps_lat: number // static gps

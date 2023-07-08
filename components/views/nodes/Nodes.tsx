@@ -159,7 +159,7 @@ export default function Nodes() {
 
     let filteredData = d
     if (phase)
-      filteredData = d.filter(obj => obj.node_phase_v2 == BK.phaseMap[phase])
+      filteredData = d.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
 
     filteredData = queryData(filteredData, query)
     filteredData = filterData(filteredData, filterState)
