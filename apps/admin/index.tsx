@@ -69,6 +69,8 @@ export default function App() {
                 <Route path="surya/:phase" element={<SuryaStatus />} />
 
                 <Route path="fiddle/timeline" element={<Timeline />} />
+
+                {/*<Route path="login" element={<TestSignIn />} />*/}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </ProgressProvider>

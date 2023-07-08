@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import * as User from '../apis/user'
+import * as User from '/components/apis/user'
 
 
 export default function useIsApproved() {
