@@ -45,7 +45,7 @@ import MyNodes from './account/MyNodes'
 import Devices from './account/Devices'
 import DevAccess from './account/DevAccess'
 
-import TestSignIn from './sign-in/TestSignIn'
+import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
 import { ProgressProvider } from '/components/progress/ProgressProvider'
@@ -55,8 +55,6 @@ import theme from '/components/theme'
 import '/assets/styles.scss'
 
 import Auth from '/components/auth/auth'
-import { Divider } from '@mui/material'
-
 
 
 

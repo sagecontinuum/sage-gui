@@ -107,39 +107,6 @@ const FSItem = styled.div`
   width: 40px;
 `
 
-function SensorSummary(props) {
-  const {data} = props
-
-  const [expanded, setExpanded] = useState(false)
-
-  const count = data.length
-
-  if (expanded) {
-    return <>
-      <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
-      <SensorList>
-        {data.map((sensor, i) => {
-          const {hw_model, name} = sensor
-          return (
-            <li key={i}>
-              <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
-                {hw_model}
-              </Link>
-              {' '}{name != hw_model.toLowerCase() && name}
-            </li>
-          )
-        })
-        }
-      </SensorList>
-    </>
-  } else if (count)  {
-    return <a onClick={() => setExpanded(true)} className="flex items-center">
-      {count} sensor{count > 1 ? 's' : ''}<CaretIcon />
-    </a>
-  } else {
-    return <span>-</span>
-  }
-}
 
 
 function ComputeSummary(props) {
@@ -314,11 +281,30 @@ const columns = [{
   format: formatters.uptimes,
   hide: true
 }, {
-  id: 'sensors',
-  label: 'Sensors',
-  format: (sensors: BK.SimpleManifest['sensors'][]) => {
-    return <SensorSummary data={sensors} />
-  }
+  id: 't_sensors',
+  label: 'Top Sensors',
+  format: formatters.topSensors,
+  hide: true
+}, {
+  id: 'b_sensors',
+  label: 'Bottom Sensors',
+  format: formatters.bottomSensors,
+  hide: true
+}, {
+  id: 'l_sensors',
+  label: 'Left Sensors',
+  format: formatters.leftSensors,
+  hide: true
+}, {
+  id: 'r_sensors',
+  label: 'Right Sensors',
+  format: formatters.rightSensors,
+  hide: true
+}, {
+  id: 'additional_sensors',
+  label: 'Additional Sensors',
+  format: formatters.additionalSensors,
+  hide: true
 }, {
   id: 'computes',
   label: 'Computes',
@@ -413,7 +399,9 @@ const columns = [{
     )
   },
   hide: true
-}, {
+},
+/* (to be removed)
+{
   id: 'top_camera',
   label: 'Top Camera',
   hide: true
@@ -429,7 +417,8 @@ const columns = [{
   id: 'bottom_camera',
   label: 'Bottom Camera',
   hide: true
-}, {
+}, */
+{
   id: 'commission_date',
   label: 'Commission Date',
   hide: true

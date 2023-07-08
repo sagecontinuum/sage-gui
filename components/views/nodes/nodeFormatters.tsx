@@ -6,13 +6,9 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import MapIcon from '@mui/icons-material/RoomOutlined'
-import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
-import CaretIconUp from '@mui/icons-material/ArrowDropUpRounded'
-
 
 import Badge from '@mui/material/Badge'
 import Tooltip from '@mui/material/Tooltip'
-import Button from '@mui/material/Button'
 
 import { NODE_STATUS_RANGE } from '/components/apis/beehive'
 import NodeLastReported from '/components/utils/NodeLastReported'
@@ -21,19 +17,23 @@ import NodeLastReported from '/components/utils/NodeLastReported'
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
 
+import config from '/config'
+const {sensorMapping} = config
 
-
-export const gpsIcon = (obj) =>
-  <>
-    {obj.hasStaticGPS &&
-      <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
-        <MapIcon fontSize="small"/>
-      </LiveGPSDot>
-    }
-    {!obj.hasStaticGPS && obj.hasLiveGPS &&
-      <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
-    }
-  </>
+export function gpsIcon(obj) {
+  return (
+    <>
+      {obj.hasStaticGPS &&
+        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
+          <MapIcon fontSize="small"/>
+        </LiveGPSDot>
+      }
+      {!obj.hasStaticGPS && obj.hasLiveGPS &&
+        <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
+      }
+    </>
+  )
+}
 
 
 const LiveGPSDot = styled(Badge)`
@@ -81,9 +81,6 @@ export function status(val, obj) {
 
 
 export function vsn(val, obj) {
-  if (!obj.hasStaticGPS && !obj.hasLiveGPS)
-    return
-
   return (
     <NodeCell className="flex items-center justify-between">
       <Link to={`/node/${val}`}>{val}</Link>
@@ -116,16 +113,16 @@ export function uptimes(val) {
 }
 
 
-export function sensors(sensors: BK.SimpleManifest['sensors'][]) {
-  return <Sensors data={sensors} />
+type SensorsProps = {
+  data: BK.SimpleManifest['sensors'][]
 }
 
-function Sensors(props) {
+export function Sensors(props: SensorsProps) {
   const {data} = props
 
   const [expanded, setExpanded] = useState(false)
 
-  const count = data?.length
+  if (!data) return <></>
 
   return (
     <SensorList>
@@ -154,4 +151,99 @@ const SensorList = styled.ul`
     white-space: nowrap;
   }
 `
+
+
+
+const TT = (props) =>
+  <Tooltip placement="right" {...props}><span>{props.children}</span></Tooltip>
+
+
+
+export function topSensors(v, obj) {
+  const {sensors} = obj
+  const sens = sensors.filter(({name}) => name.match(/top|raingauge/gi))
+
+  return <SensorList>
+    {sens.map(({name, hw_model, hardware}, i) =>
+      <li key={i}>
+        <TT title={`${name} | ${hardware}`}>
+          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+        </TT>
+      </li>
+    )}
+  </SensorList>
+}
+
+
+
+export function bottomSensors(v, obj) {
+  const {sensors} = obj
+  const sens = sensors.filter(({name}) => name.match(/bottom/gi))
+
+  return <SensorList>
+    {sens.map(({name, hw_model, hardware}, i) =>
+      <li key={i}>
+        <TT title={`${name} | ${hardware}`}>
+          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+        </TT>
+      </li>
+    )}
+  </SensorList>
+}
+
+
+
+export function leftSensors(v, obj) {
+  const {sensors} = obj
+  const sens = sensors.filter(({name}) => name.match(/left/gi))
+
+  return <SensorList>
+    {sens.map(({name, hw_model, hardware}, i) =>
+      <li key={i}>
+        <TT title={`${name} | ${hardware}`}>
+          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+        </TT>
+      </li>
+    )}
+  </SensorList>
+}
+
+
+
+export function rightSensors(v, obj) {
+  const {sensors} = obj
+  const sens = sensors.filter(({name, scope}) =>
+    (name.match(/right/gi) || scope.match(/rpi/gi)) && !name.match(/raingauge/gi)
+  )
+
+  return <SensorList>
+    {sens.map(({name, hw_model, hardware}, i) =>
+      <li key={i}>
+        <TT title={`${name} | ${hardware}`}>
+          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+        </TT>
+      </li>
+    )}
+  </SensorList>
+}
+
+
+
+export function additionalSensors(v, obj) {
+  const {sensors} = obj
+  const sens = sensors.filter(({name, scope}) =>
+    !name.match(/top|bottom|left|right/gi) && scope.match(/global/gi)
+  )
+
+
+  return <SensorList>
+    {sens.map(({name, hw_model, hardware}, i) =>
+      <li key={i}>
+        <TT title={`${name} | ${hardware}`}>
+          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+        </TT>
+      </li>
+    )}
+  </SensorList>
+}
 

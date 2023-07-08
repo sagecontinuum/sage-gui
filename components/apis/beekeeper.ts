@@ -356,8 +356,9 @@ export async function getManifests() : Promise<SimpleManifest[]> {
       serial_no,
       zone
     })),
-    sensors: o.sensors.map(({name, hardware}) => ({
+    sensors: o.sensors.map(({name, scope, hardware}) => ({
       name,
+      scope,
       hardware: hardware.hardware,
       hw_model: hardware.hw_model
     })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)

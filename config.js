@@ -36,7 +36,14 @@ const config = {
 
   disableMaps: false,
 
-  // temp solution for additional meta
+  // ids for manifest -> wifire database
+  sensorMapping: {
+    'MX-M16TB-R079IP': 'MOBOTIX-MX-M16TB-R079IP',
+    'NetCam CS CAM-SEC5IR-B': 'stardot-netcam-cs-cam-sec5ir',
+    'ML1-WS IP54': 'ml1-ws-ip54'
+  },
+
+  // temp solution for additional meta (to be removed soon)
   additional_sensors: {
     'W022': [
       'OS0-64-GEN2.0 Gen2 64 Below Horizon',
