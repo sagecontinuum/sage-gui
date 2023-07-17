@@ -1,33 +1,22 @@
-import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { Outlet, useLocation, useSearchParams, Link } from 'react-router-dom'
 
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { TabProps } from '@mui/material'
-import Divider from '@mui/material/Divider'
-
 
 import HubIcon from '@mui/icons-material/HubOutlined'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
 
-import { sum } from 'lodash'
-
-import * as BK from '/components/apis/beekeeper'
-
-import settings from '/apps/project/settings'
-
-type Label = BK.Phase | 'Nodes' | 'Sensors'
-type Counts =  BK.PhaseCounts & {'Nodes': number}
 
 
 const label = (
   icon: JSX.Element,
-  label: Label,
-  counts?: Counts
+  label: 'Nodes' | 'Sensors'
 ) =>
   <div className="flex items-center">
     {icon}&nbsp;{label}
   </div>
+
 
 
 // a tab is rendered with react.clone, so we must explicity pass TabProps
@@ -64,7 +53,7 @@ export default function NodeTabs(props: Props) {
         />
 
         <ConditionalTab
-          label={label(<SensorIcon />, 'Sensors', null)}
+          label={label(<SensorIcon />, 'Sensors')}
           component={Link}
           value={'/sensors'}
           to={'/sensors'}
