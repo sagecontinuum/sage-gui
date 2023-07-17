@@ -44,10 +44,10 @@ export default function JobTimeLine(props: Props) {
 
 
   const getErrors = (pluginEvent: PluginEvent) => {
-    const {goal_id, k3s_pod_name} = pluginEvent.value
+    const {goal_id, k3s_pod_instance} = pluginEvent.value
 
     const text = errors[goal_id]
-      .filter(obj => obj.value.k3s_pod_name == k3s_pod_name)
+      .filter(obj => obj.value.k3s_pod_instance == k3s_pod_instance)
       .map(obj => obj.value.error_log)
 
     return text

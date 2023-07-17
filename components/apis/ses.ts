@@ -79,9 +79,8 @@ export type PluginEvent = Event & {
   name: typeof pluginEventTypes[number]
   value: {
     goal_id: string
-    k3s_job_name: string
-    k3s_job_status: string
-    k3s_pod_name: string
+    k3s_pod_instance?: string  // only available in newer data (ex: `app-name-PHMwrO`)
+    k3s_pod_name: string       // `app-name-PHMwrO` in older data and `app-name` in newer data
     k3s_pod_node_name: string
     k3s_pod_status: string
     plugin_args: string
@@ -92,6 +91,15 @@ export type PluginEvent = Event & {
     plugin_task: string
   }
   runtime?: number  // computed client-side
+}
+
+
+type FailedEvent = Event & {
+  name: typeof pluginEventTypes[number]
+  value: PluginEvent['value'] & {
+    error_log: string
+    k3s_pod_name: 'Failed'
+  }
 }
 
 export type GoalEvent = Event & {
@@ -156,7 +164,7 @@ type ScienceGoal = {
 // official SES job type
 type JobRecord = {
   name: string
-  job_id: number        // converted from string to number
+  job_id: string
   user: string
   email: string
   notification_on: null // todo(nc): define
@@ -179,6 +187,7 @@ type JobRecord = {
 
 // Job type for UI
 export type Job = JobRecord & {
+  job_id: number   // converted from string to number
   nodes: VSN[]
 }
 
@@ -249,9 +258,9 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
     )
   }
 
-  const byPod = groupBy(filtered, 'value.k3s_pod_name')
+  const byPod = groupBy(filtered, 'value.k3s_pod_instance')
 
-  // delete any runs with no k3s_pod_name?  todo(nc): check with YK
+  // delete any runs with no k3s_pod_instance?  todo(nc): check with YK
   delete byPod.undefined
 
   // create lookup by task name
@@ -314,36 +323,11 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
 }
 
 
-type ByApp = {
-  [name: string]: PluginEvent[]
-}
-
-function computeGoalMetrics(byApp: ByApp) {
-  let goalID
-  const metrics = Object.keys(byApp).reduce((acc, appName) => {
-    const appEvents = byApp[appName]
-
-    const meanTime = appEvents.reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
-
-    if (!goalID) {
-      goalID = appEvents[0].value.goal_id
-    }
-
-    return {...acc, [appName]: meanTime}
-  }, {})
-
-  return {metrics, goalID}
-}
-
-
 
 export type EventsByNode = {
     [vsn: string]: PluginEvent[]
 }
 
-type JobByJobName = {
-  [jobName: string]: Job
-}
 
 export function reduceData(taskEvents: PluginEvent[]) : EventsByNode {
   // first group by vsn
@@ -379,52 +363,10 @@ const parseESRecord = (data) : ESRecord[] =>
   }))
 
 
-const goalSignals = [
-  'sys.scheduler.status.goal.received',
-  'sys.scheduler.status.goal.updated'
-]
-
-// currently unused beehive goal parser
-function getGoals() : Promise<Goal[]> {
-  return BH.getData({
-    start: '-365d',
-    tail: 1,
-    filter: {
-      name: 'sys.scheduler.status.goal.*',
-    },
-  }).then(data => parseESRecord(data))
-    .then(data => {
-
-      // only consider "received" and "updated"
-      data = data.filter(o => goalSignals.includes(o.name))
-
-      // sort by most recently updated
-      data.sort((a,b) => b.timestamp.localeCompare(a.timestamp))
-
-      const byGoal = groupBy(data, 'value.goal_id')
-
-      const rows = Object.keys(byGoal).map(id => ({
-        id,
-        name: byGoal[id][0].value.goal_name
-      }))
-
-      return rows
-    })
-}
-
-
-type FailedEvent = Event & {
-  name: typeof pluginEventTypes[number]
-  value: {
-    goal_id: string
-    error_log: string
-    k3s_pod_name: string
-  }
-}
-
 export type ErrorsByGoalID = {
   [goal_id: string]: FailedEvent[]
 }
+
 
 type EventData = {
   events: EventsByNode
@@ -441,7 +383,7 @@ export function getEvents(nodes?: VSN[]) : Promise<EventData> {
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
     .then(pluginEvents => {
-      const errors = pluginEvents.filter(obj => obj.value.k3s_job_status == 'Failed')
+      const errors = pluginEvents.filter(obj => obj.value.k3s_pod_status == 'Failed') as FailedEvent[]
 
       const errorsByGoalID = groupBy(errors, 'value.goal_id')
 
@@ -495,7 +437,7 @@ export async function getTemplate(
 
 
 
-export async function downloadTemplate(jobID: string) {
+export async function downloadTemplate(jobID: number) {
   getTemplate(jobID, 'yaml')
     .then((spec) => {
       downloadFile(spec as string, `sage-job-${jobID}.yaml`)
@@ -527,12 +469,12 @@ type SuspendedJob = {
   state: 'Suspended'
 }
 
-async function suspendJob(id: string) : Promise<SuspendedJob> {
+async function suspendJob(id: number) : Promise<SuspendedJob> {
   return await get(`${url}/jobs/${id}/rm?id=${id}&suspend=true`)
 }
 
 
-export async function suspendJobs(ids: string[]) : Promise<SuspendedJob[]> {
+export async function suspendJobs(ids: number[]) : Promise<SuspendedJob[]> {
   return Promise.all(ids.map(id => suspendJob(id)))
 }
 
@@ -550,5 +492,28 @@ async function removeJob(id: string) : Promise<RemovedJob> {
 
 export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
   return Promise.all(ids.map(id => removeJob(id)))
+}
+
+
+
+type ByApp = {
+  [name: string]: PluginEvent[]
+}
+
+function _deprecatedComputeGoalMetrics(byApp: ByApp) {
+  let goalID
+  const metrics = Object.keys(byApp).reduce((acc, appName) => {
+    const appEvents = byApp[appName]
+
+    const meanTime = appEvents.reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
+
+    if (!goalID) {
+      goalID = appEvents[0].value.goal_id
+    }
+
+    return {...acc, [appName]: meanTime}
+  }, {})
+
+  return {metrics, goalID}
 }
 
