@@ -11,7 +11,7 @@ import * as ECR from '/components/apis/ecr'
 
 import { formatDistance } from 'date-fns'
 
-import settings from '../../settings'
+import settings from '/apps/sage/settings'
 const {featuredApps, samplers} = settings
 const featured = [...featuredApps, ...samplers]
 

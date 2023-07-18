@@ -19,7 +19,7 @@ import { sum, countBy } from 'lodash'
 
 import * as BK from '/components/apis/beekeeper'
 
-import settings from '/apps/project/settings'
+import settings from '/components/settings'
 import { getFilterState, filterData, type FilterState } from '../statusDataUtils'
 
 

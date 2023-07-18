@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 
-import settings from '/apps/project/settings'
+import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
 const SAGE_UI_PROJECT = settings.SAGE_UI_PROJECT

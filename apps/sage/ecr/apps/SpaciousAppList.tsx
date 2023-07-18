@@ -15,7 +15,8 @@ import BeeIcon from 'url:/assets/bee.svg'
 
 import Auth from '/components/auth/auth'
 import config from '/config'
-import settings from '../../settings'
+import settings from '/apps/sage/settings'
+
 const {featuredApps, samplers} = settings
 
 const isSignedIn = Auth.isSignedIn

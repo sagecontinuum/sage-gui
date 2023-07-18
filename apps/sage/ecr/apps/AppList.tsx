@@ -27,7 +27,7 @@ import LayoutToggle from '/components/layout/LayoutToggle'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
 
-import settings from '../../settings'
+import settings from '/apps/sage/settings'
 const {featuredApps, samplers} = settings
 
 import { getPluginStats } from '/apps/sage/data/rollupUtils'

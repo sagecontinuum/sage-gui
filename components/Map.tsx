@@ -15,7 +15,7 @@ import Clipboard from './utils/Clipboard'
 import type { NodeMeta } from '/components/apis/beekeeper'
 
 import config from '/config'
-import settings from '/apps/project/settings'
+import settings from './settings'
 const {initialViewState} = settings
 
 

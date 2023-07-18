@@ -26,7 +26,7 @@ import { queryData } from '/components/data/queryData'
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
-import settings from '/apps/project/settings'
+import settings from '/components/settings'
 
 const TIME_OUT = 5000
 

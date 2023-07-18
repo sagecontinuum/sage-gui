@@ -28,7 +28,7 @@ import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 
-import adminSettings from '/apps/admin/settings' // todo(nc): organize config
+import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
 

@@ -36,7 +36,7 @@ npm run build -w sage
 
 #### Project pages
 
-The [config](./apps/project/settings.ts) for a project page is controlled with the env variable `SAGE_UI_PROJECT`.  I.e.,
+The [config](./components/settings.ts) for a project page is controlled with the env variable `SAGE_UI_PROJECT`.  I.e.,
 
 ```
 export SAGE_UI_PROJECT=CROCUS

@@ -1,15 +1,11 @@
-import settings from '/apps/project/settings'
-import adminSettings  from '/apps/admin/settings'
+import settings from '../settings'
 import { msToTime } from '../utils/units'
 
 import { NODE_STATUS_RANGE } from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
-const { hostSuffixMapping } = adminSettings
-
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning
-
 
 
 type LastUpdatedProps = {

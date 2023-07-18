@@ -20,9 +20,10 @@ import DataProduct from '/apps/sage/data-commons/DataProduct'
 import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
-import theme from '/components/theme'
 import '/assets/styles.scss'
-import settings from './settings'
+
+import theme from '/components/theme'
+import settings from '/components/settings'
 
 
 const NavMenu = () =>

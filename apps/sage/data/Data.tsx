@@ -22,7 +22,9 @@ import { addDays, endOfHour, subDays } from 'date-fns'
 import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
-import settings from '/components/views/settings'
+import settings from '/components/settings'
+
+const SAGE_UI_PROJECT = settings.project
 const MDP_NODES = settings.mdpNodes
 
 

@@ -10,7 +10,7 @@ import { formatters } from '/apps/sage/jobs/JobStatus'
 import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
-import settings from '/apps/project/settings'
+import settings from '/components/settings'
 import config from '/config'
 
 const {
