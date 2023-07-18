@@ -333,6 +333,7 @@ export default function NodeView() {
             </Card>
           </div>
 
+          {/* timeline card */}
           <Card>
             <div className="timeline-title flex items-center gap">
               <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
@@ -345,11 +346,7 @@ export default function NodeView() {
               </div>
             }
 
-            {data && !Object.keys(data).length &&
-              <div className="clearfix muted">No data available</div>
-            }
-
-            {data && !!Object.keys(data).length && ecr &&
+            {data && !!Object.keys(data).length && ecr && !loadingTL &&
               <Timeline
                 data={data[vsn]}
                 cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -372,6 +369,10 @@ export default function NodeView() {
                 yFormat={(label) => timelineAppLabel(label, ecr)}
                 labelWidth={TIMELINE_LABEL_WIDTH}
               />
+            }
+
+            {data && !Object.keys(data).length &&
+              <div className="clearfix muted">No data available</div>
             }
           </Card>
 
