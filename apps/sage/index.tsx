@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import ReactDom from 'react-dom'
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -55,6 +55,7 @@ import theme from '/components/theme'
 import '/assets/styles.scss'
 
 import Auth from '/components/auth/auth'
+import settings from '/components/settings'
 
 
 
@@ -131,7 +132,7 @@ const NavMenu = () => {
             <Item
               icon={<ChartIcon/>}
               to="/data"
-              label="Data Browser"
+              label="Data Explorer"
             />
             <Item
               icon={<ChartBrowserIcon/>}
@@ -197,7 +198,7 @@ export default function Sage() {
                     <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
                   }/>
 
-                  <Route path="data" element={<Data />} />
+                  <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
                   <Route path="query-browser" element={<DataBrowser />} />

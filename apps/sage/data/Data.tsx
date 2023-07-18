@@ -23,8 +23,6 @@ import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
 import settings from '/components/settings'
-
-const SAGE_UI_PROJECT = settings.project
 const MDP_NODES = settings.mdpNodes
 
 
@@ -128,6 +126,7 @@ export default function Data(props: Props) {
   // alter init data state if project/focus is provided
   const {project, focus} = props
 
+
   if (project) initDataState.filters.project = [project]
   if (focus) initDataState.filters.focus = [focus]
 
@@ -166,7 +165,7 @@ export default function Data(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    const mProm = BK.getNodeMeta({by: 'vsn'})
+    const mProm = BK.getNodeMeta({project})
       .then(data => {
         setNodeMetaByVSN(data) // todo(nc): remove
 
