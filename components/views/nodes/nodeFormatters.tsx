@@ -213,7 +213,7 @@ export function leftSensors(v, obj) {
 export function rightSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name, scope}) =>
-    (name.match(/right/gi) || scope.match(/rpi/gi)) && !name.match(/raingauge/gi)
+    (name.match(/right/gi) || scope.match(/^rpi$/i)) && !name.match(/raingauge/gi)
   )
 
   return <SensorList>
@@ -232,7 +232,7 @@ export function rightSensors(v, obj) {
 export function additionalSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name, scope}) =>
-    !name.match(/top|bottom|left|right/gi) && scope.match(/global/gi)
+    !name.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
   )
 
 

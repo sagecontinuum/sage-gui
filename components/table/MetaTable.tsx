@@ -2,17 +2,16 @@ import styled from 'styled-components'
 import {startCase} from 'lodash'
 
 type Props = {
-  rows: {id: string, label?: string, format?: React.FC}[]
+  rows: {id: string, label?: string | JSX.Element, format?: () => JSX.Element}[]
   data: object[]
-  title?: string
-  striped?: boolean
+  title?: string | JSX.Element
 }
 
 export default function MetaTable(props:Props) {
-  const {title, rows, data, striped = true} = props
+  const {title, rows, data} = props
 
   return (
-    <Table className={`simple key-value`}>
+    <Table className="simple key-value">
       {title &&
         <thead>
           <tr><th colSpan={2}>{title}</th></tr>

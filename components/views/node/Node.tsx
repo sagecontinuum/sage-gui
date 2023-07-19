@@ -1,10 +1,12 @@
 /* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { Alert, Button, Tooltip } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
+import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
+import Grid from '@mui/material/Unstable_Grid2'
 
 import wsnode from 'url:/assets/wsn-closed.png'
 
@@ -13,6 +15,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
 import { useProgress } from '/components/progress/ProgressProvider'
+import { CardViewStyle, Card } from '/components/layout/Layout'
 import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
@@ -22,15 +25,15 @@ import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import timelineAppLabel from '/components/viz/TimelineAppLabel'
-import { CardViewStyle, Card } from '/components/layout/Layout'
+import Table from '/components/table/Table'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
+import ManifestTabs from './ManifestTabs'
 
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
-
 
 // todo(nc): promote/refactor into component lib
 import DataOptions from '/apps/sage/data/DataOptions'
@@ -40,39 +43,20 @@ import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays } from 'date-fns'
 
-
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
 const TIMELINE_LABEL_WIDTH = 175
 const TAIL_DAYS = '-7d'
 
 
-// todo(nc): remove hardcoded additional sensors
-import {hasMetOne} from '/config'
+
+const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
+  !!meta?.gps_lat && !!meta?.gps_lat
 
 
-const hasStaticGPS = (nodeMeta: BK.NodeMeta) =>
-  nodeMeta?.gps_lat && nodeMeta?.gps_lat
+const hasMetOne = (meta: BK.FlattenedManifest) : boolean =>
+  meta.sensors.some(({hw_model}) => hw_model.match(/ES-642/gi))
 
-const noneFormatter = (val: boolean | 'yes' | 'no' | 'none') : string =>
-  typeof val == 'boolean' ?
-    (val ? 'yes' : 'no') :
-    ((!val || val == 'none' || '') ? '-' : val)
-
-const camFormatter = (name: string) => {
-  const id = name?.slice( name.indexOf('(') + 1, name.indexOf(')') )
-
-  if (name == 'none')
-    return '-'
-  else if (config.missing_sensor_details.includes(id))
-    return name
-  else
-    return (
-      <Link to={`/sensors/${id}`}>
-        {name}
-      </Link>
-    )
-}
 
 const getStartTime = (str) =>
   subDays(new Date(), str.replace(/-|d/g, ''))
@@ -99,30 +83,181 @@ const metaRows1 = [{
   format: (val) => new Date(val).toLocaleString()
 }]
 
-const metaRows2 = [
-  {id: 'shield', format: noneFormatter},
-  {id: 'modem', format: noneFormatter},
-  {id: 'modem_sim', format: noneFormatter},
-  {id: 'nx_agent', format: noneFormatter}
-]
+
+const sensorOverview = [{
+  id: 'cameras',
+  format: (val, obj) => {
+    const cameras = obj.sensors
+      .filter(o => o.name.match(/camera/gi))
+
+    return (
+      <Grid container>
+        {cameras.map((o, i) =>
+          <Grid xs={3} key={i}>
+            <small className="muted font-bold">
+              {o.name.replace(/-|_/, ' ')}
+            </small>
+            <div>
+              <Link to={`/sensors/${o.hw_model}`}>{o.hw_model}</Link>
+            </div>
+          </Grid>
+        )}
+      </Grid>
+    )
+  }
+}, {
+  id: 'sensors',
+  label: 'Sensors',
+  format: (val, obj) => {
+    const sensors = obj.sensors
+      .filter(o => !o.name.match(/camera/gi))
+
+    return (
+      <Grid container>
+        {sensors.map((o, i) =>
+          <Grid xs={3} key={i}>
+            <small className="muted font-bold">
+              {o.name.replace(/-|_/, ' ')}
+            </small>
+            <div>
+              <Link to={`/sensors/${o.hw_model}`}>{o.hw_model}</Link>
+            </div>
+          </Grid>
+        )}
+      </Grid>
+    )
+  }
+}]
+
+const computeOverview = [{
+  id: 'computes',
+  format: (val, obj) => {
+    const {computes} = obj
+
+    return (
+      <Grid container>
+        {computes.map((o, i) =>
+          <Grid xs={3} key={i}>
+            <small className="muted font-bold">
+              {o.name.split(/-|_/)[0]}
+            </small>
+            <div>
+              {o.hw_model}
+            </div>
+          </Grid>
+        )}
+      </Grid>
+    )
+  },
+}]
 
 
-const cameraMetaRows = [
-  {id: 'top_camera', label: 'Top', format: camFormatter},
-  {id: 'bottom_camera',  label: 'Bottom', format: camFormatter},
-  {id: 'left_camera', label: 'Left', format: camFormatter},
-  {id: 'right_camera', label: 'Right', format: camFormatter}
-]
+
+const hardwareMeta = [{
+  id: 'all',
+  format: (val, obj) => {
+    const {modem, computes} = obj
+
+    return (
+      <Grid container>
+        <Grid xs={3}>
+          <small className="muted font-bold">shield</small>
+          <div>{computes.some(o => o.zone == 'shield') ? 'yes' : 'no'}</div>
+        </Grid>
+
+        <Grid xs={3}>
+          <small className="muted font-bold">NX Agent</small>
+          <div>{computes.some(o => o.name == 'nxagent') ? <Link to="?tab=computes" replace>yes</Link> : 'no'}</div>
+        </Grid>
+
+        <Grid xs={3}>
+          <small className="muted font-bold">Modem</small>
+          <div>{modem ? <Link to="?tab=peripherals" replace>{modem.model}</Link> : 'no'}</div>
+        </Grid>
+
+        <Grid xs={3}>
+          <small className="muted font-bold">Modem Sim</small>
+          <div>{obj.resources.some(o => o.name == 'modem-sim') ?
+            <Link to="?tab=peripherals" replace>{obj.resources.find(o => o.name == 'modem-sim').hardware}</Link> : 'no'}</div>
+        </Grid>
+      </Grid>
+    )
+  }
+}]
+
+/**
+ * column config for sensor/compute/peripherals table details
+ */
+const sensorCols = [{
+  id: 'name',
+  label: 'Name'
+}, {
+  id: 'hw_model',
+  label: 'Model',
+  format: (val, obj) =>
+    <Link to={`/sensors/${val}`}>
+      {val}
+    </Link>
+}, {
+  id: 'manufacturer',
+  label: 'Manufacturer'
+}, {
+  id: 'datasheet',
+  label: 'Datasheet',
+  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+}]
+
+
+const computeCols = [{
+  id: 'name',
+  label: 'Name'
+}, {
+  id: 'hw_model',
+  label: 'Model'
+}, {
+  id: 'manufacturer',
+  label: 'Manufacturer'
+}, /*{
+  id: 'serial_no',
+  label: 'Serial No.'
+}*/ {
+  id: 'datasheet',
+  label: 'Datasheet',
+  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+}]
+
+
+const resourceCols = [{
+  id: 'name',
+  label: 'Name'
+}, {
+  id: 'hw_model',
+  label: 'Model'
+}, {
+  id: 'manufacturer',
+  label: 'Manufacturer'
+}, {
+  id: 'datasheet',
+  label: 'Datasheet',
+  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+}]
 
 
 export default function NodeView() {
   const vsn = useParams().vsn as BK.VSN
 
+  const [params] = useSearchParams()
+  const tab = params.get('tab') || 'overview'
+
+
   const { loading, setLoading } = useProgress()
 
-  const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>(null)
   const [nodeID, setNodeID] = useState<BK.NodeMeta['node_id']>(null)
-  const [meta, setMeta] = useState<BK.State>(null)
+
+  const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>()
+  const [manifest, setManifest] = useState<BK.FlattenedManifest>()
+  const [bkMeta, setBKMeta] = useState<BK.State>()
+
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
   const [ecr, setECR] = useState<ECR.App[]>()
@@ -155,7 +290,7 @@ export default function NodeView() {
 
   useEffect(() => {
     setLoading(true)
-    const p1 = BK.getNodeMeta({node: vsn, by: 'vsn'})
+    const p1 = BK.getNodeMeta({node: vsn})
       .then((data: BK.NodeMeta) => {
         setNodeMeta(data)
 
@@ -168,22 +303,28 @@ export default function NodeView() {
         setNodeID(id)
 
         BK.getNode(id)
-          .then(data => setMeta(data))
+          .then(data => setBKMeta(data))
           .catch(err => setError(err))
       })
 
-    const p2 = BH.getSimpleNodeStatus(vsn)
+    const p2 = BK.getManifest(vsn)
+      .then(data => {
+        setManifest(data)
+      })
+
+    const p3 = BH.getSimpleNodeStatus(vsn)
       .then((records) => {
         const elapsed = records.map(o => new Date().getTime() - new Date(o.timestamp).getTime())
         const isReporting = elapsed.some(val => val < ELAPSED_FAIL_THRES)
         setStatus(isReporting ? 'reporting' : 'not reporting')
       }).catch(() => setStatus('unknown'))
 
-    const p3 = BH.getGPS(vsn)
+    const p4 = BH.getGPS(vsn)
       .then(d => setLiveGPS(d))
       .catch(() => setLiveGPS({lat: null, lon: null}))
 
-    Promise.all([p1, p2, p3])
+
+    Promise.all([p1, p2, p3, p4])
       .finally(() => setLoading(false))
 
   }, [vsn, setLoading])
@@ -291,47 +432,109 @@ export default function NodeView() {
             </div>
           </Card>
 
-          <div className="flex items-start meta-tables gap">
-            <Card noPad className="meta-left">
-              <MetaTable
-                title="Overview"
-                rows={[
-                  ...metaRows1,
-                  {
-                    id: 'gps',
-                    label: <> GPS ({hasStaticGPS(nodeMeta) ? 'static' : 'from stream'})</>,
-                    format: () =>
-                      <div className="gps">
-                        {hasStaticGPS(nodeMeta) &&
-                            <Clipboard content={`${nodeMeta.gps_lat},\n${nodeMeta.gps_lon}`} />
-                        }
-                        {!hasStaticGPS(nodeMeta) && liveGPS &&
+          <Card noPad style={{marginBotton: 0}}>
+            <ManifestTabs
+              counts={{
+                Sensors: manifest?.sensors.length,
+                Computes: manifest?.computes.length,
+                Peripherals: manifest?.resources.length
+              }}
+            />
+
+            {tab == 'sensors' && manifest &&
+              <TableContainer>
+                <Table
+                  primaryKey='name'
+                  columns={sensorCols}
+                  rows={manifest.sensors}
+                  enableSorting
+                />
+              </TableContainer>
+            }
+
+            {tab == 'computes' && manifest &&
+              <TableContainer>
+                <Table
+                  primaryKey='name'
+                  columns={computeCols}
+                  rows={manifest.computes}
+                  enableSorting
+                />
+              </TableContainer>
+            }
+
+            {tab == 'peripherals' && manifest &&
+              <TableContainer>
+                <Table
+                  primaryKey='name'
+                  columns={resourceCols}
+                  rows={manifest.resources}
+                  enableSorting
+                />
+              </TableContainer>
+            }
+          </Card>
+
+          {tab == 'overview' &&
+            <div className="flex gap">
+              <Card noPad className="meta-left">
+                <MetaTable
+                  title="Overview"
+                  rows={[
+                    ...metaRows1,
+                    {
+                      id: 'gps',
+                      label: <> GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
+                      format: () =>
+                        <div className="gps">
+                          {hasStaticGPS(manifest) &&
+                            <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+                          }
+                          {!hasStaticGPS(manifest) && liveGPS &&
                             <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
-                        }
-                        {!hasStaticGPS(nodeMeta) && !liveGPS && !loading &&
+                          }
+                          {!hasStaticGPS(manifest) && !liveGPS && !loading &&
                             <span className="muted">not available</span>
-                        }
-                      </div>
-                  }
-                ]}
-                data={{...nodeMeta, ...meta}}
-              />
-            </Card>
+                          }
+                        </div>
+                    }
+                  ]}
+                  data={{...nodeMeta, ...bkMeta}}
+                />
+              </Card>
 
-            <Card noPad className="meta-right">
-              <MetaTable
-                title="Hardware"
-                rows={metaRows2}
-                data={{...nodeMeta, ...meta}}
-              />
+              <Card noPad className="meta-right">
+                {manifest &&
+                  <>
+                    <div className="summary-table">
+                      <MetaTable
+                        title="Sensors"
+                        rows={sensorOverview}
+                        data={manifest}
+                      />
+                    </div>
 
-              <MetaTable
-                title="Cameras"
-                rows={cameraMetaRows}
-                data={{...nodeMeta, ...meta}}
-              />
-            </Card>
-          </div>
+                    <div className="summary-table">
+                      <MetaTable
+                        title="Computes"
+                        rows={computeOverview}
+                        data={manifest}
+                      />
+                    </div>
+
+                    <div className="summary-table">
+                      <MetaTable
+                        title="Hardware"
+                        rows={hardwareMeta}
+                        data={manifest}
+                      />
+                    </div>
+                  </>
+                }
+              </Card>
+            </div>
+          }
+
 
           {/* timeline card */}
           <Card>
@@ -391,7 +594,7 @@ export default function NodeView() {
                       items={format(['raingauge'], vsn)}
                       className="hover-rain"
                     />
-                    {hasMetOne(vsn) &&
+                    {hasMetOne(manifest) &&
                       <RecentDataTable
                         items={format(['es642AirQuality'], vsn)}
                       />
@@ -419,27 +622,27 @@ export default function NodeView() {
 
         <RightSide className="justify-end">
           <Card noPad>
-            {hasStaticGPS(nodeMeta) && status && vsn &&
-                <Map
-                  data={[{
-                    vsn,
-                    lat: nodeMeta.gps_lat,
-                    lng: nodeMeta.gps_lon,
-                    status,
-                    ...nodeMeta
-                  }]} />
-            }
-            {!hasStaticGPS(nodeMeta) && liveGPS && status &&
-                <Map data={[{
+            {hasStaticGPS(manifest) && status && vsn &&
+              <Map
+                data={[{
                   vsn,
-                  lat: liveGPS.lat,
-                  lng: liveGPS.lon,
+                  lat: manifest.gps_lat,
+                  lng: manifest.gps_lon,
                   status,
                   ...nodeMeta
                 }]} />
+          }
+            {!hasStaticGPS(manifest) && liveGPS && status &&
+              <Map data={[{
+                vsn,
+                lat: liveGPS.lat,
+                lng: liveGPS.lon,
+                status,
+                ...nodeMeta
+              }]} />
             }
-            {!hasStaticGPS(nodeMeta) && !liveGPS && !loading &&
-                <div className="muted" style={{margin: 18}}>(Map not available)</div>
+            {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+              <div className="muted" style={{margin: 18}}>(Map not available)</div>
             }
           </Card>
 
@@ -448,15 +651,15 @@ export default function NodeView() {
               <img src={wsnode} width={WSN_VIEW_WIDTH} />
               <VSN>{vsn}</VSN>
               {nodeMeta &&
-                  <>
-                    {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
-                    {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
-                    {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
-                    {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
-                    {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
-                    {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
-                    {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
-                  </>
+                <>
+                  {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
+                  {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
+                  {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
+                  {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
+                  {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
+                  {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
+                  {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
+                </>
               }
             </WSNView>
             :
@@ -475,12 +678,16 @@ const Root = styled.div`
   }
 
   .meta-left {
-    flex: 1;
+    flex: 3;
     height: 100%;
   }
 
   .meta-right {
-    flex: 1;
+    flex: 4;
+
+    .summary-table table td:first-child {
+      display: none;
+    }
   }
 
   .data-tables div {
@@ -500,6 +707,10 @@ const Root = styled.div`
   .timeline-title {
     float: left;
     h2 { margin-right: 1em; }
+  }
+
+  table {
+    width: 100%;
   }
 `
 
@@ -541,5 +752,9 @@ const VSN = styled.div`
   font-size: 3.5em;
   padding: 0;
   background: #b3b3b3;
+`
+
+const TableContainer = styled.div`
+  padding: 0 1rem 1rem 1rem;
 `
 

@@ -311,58 +311,146 @@ export async function getProduction() {
 
 
 export type Compute = {
-  name: 'rpi' | 'nxcore' | 'nxagent'
-  serial_no: string  // most likely 12 digit, uppercase hex
+  name: 'rpi' | 'rpi-shield' | 'nxcore' | 'nxagent'
+  serial_no: string       // most likely 12 digit, uppercase hex
   zone: 'shield' | 'core'
+  hardware: {
+    hardware: string      // rpi-4gb
+    hw_model: string      // RPI4B
+    hw_version: string    // rpi4b-4g
+    sw_version: string
+    manufacturer: string  // Raspberry Pi
+    datasheet: string     // https://www.foo.bar
+    capabilities: ('arm64' | 'poe')[]
+    description: string
+    cpu: string           // 4000
+    cpu_ram: string       // 4096
+    gpu_ram: string ,
+    shared_ram: boolean
+  }
 }
 
 type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
+  scope: 'global' | 'nxcore' | 'rpir-shield'
+  labels: string[],
+  serial_no: string,
+  uri: string,
+  hardware: {
+    hardware: string        // ptz-8081
+    hw_model: string        // XNV-8081Z
+    hw_version: string
+    sw_version: string
+    manufacturer: string    // 'some manfacturer'
+    datasheet: string       // https://foo.bar
+    capabilities: string[]
+    description: string
+  }
+}
+
+type Resource = {
+  name: 'usbhub' | 'switch' | 'wagman' | 'psu' | 'wifi' | string
   hardware: {
     hardware: string
     hw_model: string
+    hw_version: string
+    sw_version: string
+    manufacturer: string
+    datasheet: string
+    capabilities: string[]
+    description: string
   }
 }
 
 type Manifest = {
   vsn: VSN
-  name: string // node id
-  gps_lat: number
-  gps_lon: number
+  name: string          // node id
+  gps_lat?: number
+  gps_lon?: number
+  modem?: {
+    model:  string      // mtcm2,
+    sim_type: string    // anl-nu,
+    carrier: string     // 310030
+  }
+  tags?: string[]
   computes: Compute[]
   sensor: Sensor[]
 }
 
 
-export type SimpleManifest = Manifest & {
-  sensors: {
-    name: string
-    hardware: string
-    hw_model: string
-  }
+export type FlattenedManifest = Manifest & {
+  computes: (Omit<Compute, 'hardware'> & Compute['hardware'])[]
+  sensors: (Omit<Sensor, 'hardware'> & Sensor['hardware'])[]
+  resources: (Omit<Resource, 'hardware'> & Resource['hardware'])[]
 }
+
+
+export type SimpleManifest = Manifest & {
+  computes: {
+    name: Compute['name']
+    serial_no: Compute['serial_no']
+    zone: Compute['zone']
+  }
+  sensors: {
+    name: Sensor['name']
+    hardware: Sensor['hardware']['hardware']
+    hw_model: Sensor['hardware']['hw_model']
+  }[]
+}
+
+
+// used for tables, such as in node tables
+const toSimpleManifest = o => ({
+  vsn: o.vsn,
+  name: o.name,
+  gps_lat: o.gps_lat,
+  gps_lon: o.gps_lon,
+  computes: o.computes.map(({name, serial_no, zone}) => ({
+    name,
+    serial_no,
+    zone
+  })),
+  sensors: o.sensors.map(({name, scope, hardware}) => ({
+    name,
+    scope,
+    hardware: hardware.hardware,
+    hw_model: hardware.hw_model
+  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
+})
+
+
+// a convenient, flattened representation
+const flattenManifest = o => ({
+  vsn: o.vsn,
+  name: o.name,
+  gps_lat: o.gps_lat,
+  gps_lon: o.gps_lon,
+  modem: o.modem,
+  computes: o.computes.map(({hardware, ...rest}) => ({
+    ...rest,
+    ...hardware
+  })),
+  sensors: o.sensors.map(({hardware, ...rest}) => ({
+    ...rest,
+    ...hardware
+  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1),
+  resources:
+    o.resources.map(({name, hardware}) => ({name, ...hardware}))
+})
+
+
+export async function getManifest(vsn: VSN) : Promise<SimpleManifest> {
+  let data = await get(`${config.auth}/manifests/${vsn}`)
+  data = flattenManifest(data)
+
+  return data
+}
+
 
 
 export async function getManifests() : Promise<SimpleManifest[]> {
   let data = await get(`${config.auth}/manifests/`)
-
-  data = data.map(o => ({
-    vsn: o.vsn,
-    name: o.name,
-    gps_lat: o.gps_lat,
-    gps_lon: o.gps_lon,
-    computes: o.computes.map(({name, serial_no, zone}) => ({
-      name,
-      serial_no,
-      zone
-    })),
-    sensors: o.sensors.map(({name, scope, hardware}) => ({
-      name,
-      scope,
-      hardware: hardware.hardware,
-      hw_model: hardware.hw_model
-    })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
-  }))
+  data = data.map(toSimpleManifest)
 
   return data
 }
