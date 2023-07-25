@@ -73,8 +73,11 @@ export type UserInfo = User & Profile
 
 
 export function getUserDetails() : Promise<User> {
-  if (!user)
-    throw 'no user available'
+  if (!user) {
+    return new Promise((_, reject) => {
+      reject( Error('getUserDetails: no user available') )
+    })
+  }
 
   return get(`${url}/users/${user}`)
 }

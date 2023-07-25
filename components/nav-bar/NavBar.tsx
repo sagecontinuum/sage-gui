@@ -23,6 +23,7 @@ const username = Auth.user
 const webOrigin = window.location.origin
 
 import config from '/config'
+import SignInButton from './SignInButton'
 
 
 type Props = {
@@ -30,28 +31,15 @@ type Props = {
   logo?: ReactNode
   hasSignIn?: boolean
   hasDocsLink?: boolean
+  isAdmin?: boolean
 }
 
-const isDev = () : boolean =>
+const isDev = () =>
   process.env.NODE_ENV == 'development'
 
 
 export default function NavBar(props: Props) {
-  const { pathname } = useLocation()
-  const { menu, hasSignIn, hasDocsLink, logo } = props
-
-
-  const [signingOut, setSigningOut] = useState(false)
-
-
-  const handleSignOut = (evt) => {
-    evt.stopPropagation()
-
-    // display progress while signing out
-    setSigningOut(true)
-    Auth.signOut()
-  }
-
+  const { menu, hasSignIn, isAdmin, hasDocsLink, logo } = props
 
   return (
     <Root>
@@ -67,7 +55,6 @@ export default function NavBar(props: Props) {
       {menu}
 
       <Spacer />
-
 
       <div className="flex items-center">
         {hasDocsLink &&
@@ -100,58 +87,7 @@ export default function NavBar(props: Props) {
           </NavItems>
         }
 
-        {hasSignIn && username &&
-          <NavItem
-            label={
-              <div className="flex items-center">
-                <AccountIcon />&nbsp;{username}
-              </div>
-            }
-            style={{left: '-30px'}}
-            menu={
-              <div>
-                <Item
-                  icon={<AccountIcon />}
-                  to='/account/profile'
-                  label="Account"
-                />
-                <Item
-                  icon={<NodesIcon />}
-                  to='/account/nodes'
-                  label="Shared Nodes"
-                />
-                <Item
-                  icon={<AccessIcon />}
-                  to='/account/access'
-                  label="Access Creds"
-                />
-                {/* hide dev devices for now <Item
-                  icon={<DevicesIcon />}
-                  to='/account/dev-devices'
-                  label="Dev Devices"
-                /> */}
-                <Divider />
-                <Item
-                  onClick={handleSignOut}
-                  icon={signingOut ?  <Progress size={20} /> : <ExitIcon />}
-                  to="/jobs/timeline"
-                  label={signingOut ? 'Signing out...' : 'Sign out'}
-                />
-              </div>
-            }
-          />
-        }
-
-        {hasSignIn && !username && pathname != '/login' &&
-          <Button
-            href={isDev() ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
-            variant="outlined"
-            color="primary"
-            sx={{marginLeft: '20px'}}
-          >
-            Sign In
-          </Button>
-        }
+        {hasSignIn && <SignInButton isAdmin={isAdmin} />}
       </div>
 
     </Root>

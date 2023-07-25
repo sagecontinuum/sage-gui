@@ -205,12 +205,12 @@ const getCurlCmd = (query: object) =>
 const indent = 4
 const pad = ' '.repeat(indent)
 
-const getArgsStr = (obj: object) : string =>
+const getArgsStr = (obj: object) =>
   Object.entries(obj).map(([k, v]) => `${k}="${v}"`)
     .join(',\n' + pad) + ', '
 
 
-const getPythonSnippet = (query: BH.Params) : string => {
+const getPythonSnippet = (query: BH.Params)  => {
   const {filter = {}, ...rest} = query || {}
 
   const params = `\n${pad}${getArgsStr(rest)}`

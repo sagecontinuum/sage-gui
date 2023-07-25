@@ -24,6 +24,8 @@ import '/assets/styles.scss'
 
 import config from '/config'
 
+import RequireAuth from '/components/auth/RequireAuthAdmin'
+import TestSignIn from '/components/TestSignIn'
 
 const NavMenu = () =>
   <NavItems>
@@ -36,7 +38,7 @@ const NavMenu = () =>
 const isDev = () : boolean =>
   process.env.NODE_ENV == 'development'
 
-
+'
 export default function App() {
   return (
     <StyledEngineProvider injectFirst>
@@ -50,28 +52,33 @@ export default function App() {
                 <AdminLogo />
               </a>
             }
+            hasSignIn
+            isAdmin
           />
 
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
+                <Route element={<RequireAuth />}>
+                  <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
 
-                <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
-                  <Route path="nodes" element={<Status />} />
-                  <Route path="tests" element={<Tests />} />
+                  <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
+                    <Route path="nodes" element={<Status />} />
+                    <Route path="tests" element={<Tests />} />
+                  </Route>
+
+                  <Route path="audio" element={<Audio />} />
+                  <Route path="node/:vsn" element={<Node />} />
+
+                  <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
+                  <Route path="surya/:phase" element={<SuryaStatus />} />
+
+                  <Route path="fiddle/timeline" element={<Timeline />} />
+
+                  <Route path="*" element={<NotFound />} />
                 </Route>
 
-                <Route path="audio" element={<Audio />} />
-                <Route path="node/:vsn" element={<Node />} />
-
-                <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
-                <Route path="surya/:phase" element={<SuryaStatus />} />
-
-                <Route path="fiddle/timeline" element={<Timeline />} />
-
-                {/*<Route path="login" element={<TestSignIn />} />*/}
-                <Route path="*" element={<NotFound />} />
+                <Route path="login" element={<TestSignIn />} />
               </Routes>
             </ProgressProvider>
           </Container>
