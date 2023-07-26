@@ -55,7 +55,7 @@ const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
 
 
 const hasMetOne = (meta: BK.FlattenedManifest) : boolean =>
-  meta.sensors.some(({hw_model}) => hw_model.match(/ES-642/gi))
+  meta?.sensors.some(({hw_model}) => hw_model.match(/ES-642/gi))
 
 
 const getStartTime = (str) =>
