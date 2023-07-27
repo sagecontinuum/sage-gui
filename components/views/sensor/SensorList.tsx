@@ -10,12 +10,13 @@ import { formatters } from '/apps/sage/jobs/JobStatus'
 import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
+import { uniqBy } from 'lodash'
+
 import settings from '/components/settings'
 import config from '/config'
 
 const {
-  wifireData,
-  missing_sensor_details
+  wifireData
 } = config
 
 const SAGE_UI_PROJECT = settings.project
@@ -27,16 +28,14 @@ const url = `${wifireData}/action/package_search` +
 
 
 const columns = [{
-  id: 'name',
-  label: 'Name',
-  format: (name, obj) =>
-    missing_sensor_details.includes(obj.id) ?
-      name :
-      <Link to={`/sensors/${obj.id.replace(/ /g, '-')}`}>{name}</Link>,
+  id: 'hardware',
+  label: 'Hardware',
+  format: (val, obj) =>
+    obj.title ? <Link to={`/sensors/${obj.hw_model.replace(/ /g, '-')}`}>{val}</Link> : val,
   width: '250px'
 }, {
-  id: 'id',
-  label: 'ID',
+  id: 'hw_model',
+  label: 'Model ID',
   width: '250px'
 }, {
   id: 'title',
@@ -46,7 +45,7 @@ const columns = [{
     const len = 250
     const shortend = description.slice(0, len)
 
-    const linkID = obj.id.replace(/ /g, '-')
+    const linkID = obj.hw_model.replace(/ /g, '-')
 
     return (
       <div>
@@ -63,12 +62,12 @@ const columns = [{
   id: 'nodeCount',
   label: 'Nodes',
   format: (count, obj) =>
-    <Link to={`/nodes?sensor="${encodeURIComponent(obj.name)}"`}>
+    <Link to={`/nodes?sensor="${encodeURIComponent(obj.hw_model)}"`}>
       {count} node{count != 1 ? 's' : ''}
     </Link>,
   width: '100px'
 }, {
-  id: 'nodes',
+  id: 'vsns',
   label: 'Node List',
   format: formatters.nodes,
   hide: true
@@ -88,45 +87,41 @@ export default function SensorList() {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getNodeMeta({by: 'vsn', project: SAGE_UI_PROJECT})
+    const prom1 = BK.getNodeMeta({project: SAGE_UI_PROJECT})
       .then(data => {
         const d = Object.values(data)
-        const sensors = [...new Set(d.flatMap(({sensor}) => sensor))]
-          .map(name => name)
-
-        return {
-          sensors,
-          nodeMetas: d
-        }
+        return d
       })
 
-    const prom2 = fetch(url)
+    const prom2 = BK.getManifests()
+
+    const prom3 = fetch(url)
       .then(res => res.json())
       .then(data => data.result.results)
 
-    Promise.all([prom1, prom2])
-      .then(([{sensors, nodeMetas}, details]) => {
-        const data = sensors.map(name => {
-          const id = name.includes('(') ?
-            name.slice( name.indexOf('(') + 1, name.indexOf(')') ) : name
+    Promise.all([prom1, prom2, prom3])
+      .then(([nodeMetas, manifests, details]) => {
+        const vsns = nodeMetas.map(o => o.vsn)
+        manifests = manifests.filter(o => vsns.includes(o.vsn))
 
+        const sensors = uniqBy(manifests.flatMap(o => o.sensors), 'hw_model')
+          .map(({hardware, hw_model}) => ({hardware, hw_model}))
+
+        const data = sensors.map(({hardware, hw_model}) => {
           const meta = details.find(o => {
-            return o.name.toLowerCase().replace(/ /g, '-') == id.toLowerCase().replace(/ /g, '-')
+            return o.name.toLowerCase().replace(/ /g, '-') == hw_model.toLowerCase().replace(/ /g, '-')
           })
 
-          const nodes = nodeMetas
-            .filter(o => o.sensor.includes(name))
-
+          const nodes = manifests
+            .filter(o => o.sensors.map(o => o.hw_model).includes(hw_model))
           const vsns = nodes.map(o => o.vsn)
-          const node_ids = nodes.map(o => o.node_id)
 
           return {
-            name,
-            id,
+            hardware,
+            hw_model,
             title: meta?.title,
             description: meta?.notes || '-',
-            nodes: vsns,
-            node_ids,
+            vsns,
             nodeCount: vsns.length
           }
         })
@@ -148,7 +143,7 @@ export default function SensorList() {
           enableSorting
           sort="-title"
           onColumnMenuChange={() => {}}
-          onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.id}`)}
+          onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.hw_model.replace(/ /g, '-')}`)}
         />
       }
 

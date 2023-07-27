@@ -8,6 +8,8 @@ import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 
+import { uniqBy } from 'lodash'
+
 import columns from './columns'
 import {
   filterData,
@@ -169,8 +171,8 @@ export default function Nodes() {
     setFocuses(getOptions(data, 'focus'))
     setLocations(getOptions(data, 'location'))
 
-    const sensorOptions = [...new Set(data.flatMap(({sensor}) => sensor))]
-      .map(name => ({id: name, label: name }))
+    const sensorOptions = uniqBy(data.flatMap(o => o.sensors), 'hw_model')
+      .map(o => ({id: o.hw_model, label: o.hw_model}))
 
     setSensors(sensorOptions)
   }

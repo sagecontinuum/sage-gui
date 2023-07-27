@@ -122,22 +122,6 @@ export async function getNodeMeta(params?: MetaParams) : Promise<NodeMetaMap | N
   if (focus)
     data = data.filter(o => o.focus == focus)
 
-
-  // special handling of gps since they are of type 'string'; todo(nc): remove
-  // also, add special "sensor" list for tables and convenience
-  data = data.map(o => ({
-    ...o,
-    gps_lat: o.gps_lat?.length ? parseFloat(o.gps_lat) : null,
-    gps_lon: o.gps_lon?.length ? parseFloat(o.gps_lon) : null,
-    ...({
-      sensor: [
-        o.top_camera, o.bottom_camera, o.left_camera, o.right_camera, 'RG-15',
-        ...(o.shield ? ['ML1-WS IP54', 'BME680'] : []),
-        ...(config.additional_sensors[o.vsn] || [])
-      ].filter(name => name != 'none')
-    })
-  }))
-
   let mapping
   if (by == 'id') {
     mapping = data.reduce((acc, node) =>

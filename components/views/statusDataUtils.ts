@@ -197,7 +197,8 @@ export function mergeMetrics(
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}
-      }
+      },
+      sensor: nodeObj.sensors.map(o => o.hw_model)
     }
   })
 
