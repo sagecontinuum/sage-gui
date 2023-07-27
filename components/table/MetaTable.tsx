@@ -2,7 +2,11 @@ import styled from 'styled-components'
 import {startCase} from 'lodash'
 
 type Props = {
-  rows: {id: string, label?: string | JSX.Element, format?: () => JSX.Element}[]
+  rows: {
+    id: string,
+    label?: string | JSX.Element,
+    format?: (val?: any, obj?: object) => JSX.Element
+  }[]
   data: object[]
   title?: string | JSX.Element
 }

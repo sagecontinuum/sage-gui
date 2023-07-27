@@ -80,7 +80,7 @@ const metaRows1 = [{
 }, {
   id: 'registration_event',
   label: 'Registration',
-  format: (val) => new Date(val).toLocaleString()
+  format: (val) => val ? new Date(val).toLocaleString() : '-'
 }]
 
 
@@ -259,7 +259,7 @@ export default function NodeView() {
   const [bkMeta, setBKMeta] = useState<BK.State>()
 
   const [status, setStatus] = useState<string>()
-  const [liveGPS, setLiveGPS] = useState<{lat: number, lon: number}>()
+  const [liveGPS, setLiveGPS] = useState<BH.GPS>()
   const [ecr, setECR] = useState<ECR.App[]>()
 
   const [error, setError] = useState(null)
@@ -321,7 +321,7 @@ export default function NodeView() {
 
     const p4 = BH.getGPS(vsn)
       .then(d => setLiveGPS(d))
-      .catch(() => setLiveGPS({lat: null, lon: null}))
+      .catch(() => setLiveGPS(null))
 
 
     Promise.all([p1, p2, p3, p4])
@@ -484,17 +484,27 @@ export default function NodeView() {
                     ...metaRows1,
                     {
                       id: 'gps',
-                      label: <> GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
+                      label: <>GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
                       format: () =>
                         <div className="gps">
                           {hasStaticGPS(manifest) &&
                             <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
                           }
                           {!hasStaticGPS(manifest) && liveGPS &&
-                            <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+                            <>
+                              <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+                              <Tooltip title="Last available GPS timestamp">
+                                <small className="muted">
+                                  {new Date(liveGPS.timestamp).toLocaleString()}
+                                </small>
+                              </Tooltip>
+                            </>
                           }
                           {!hasStaticGPS(manifest) && !liveGPS && !loading &&
                             <span className="muted">not available</span>
+                          }
+                          {!hasStaticGPS(manifest) && !liveGPS && loading &&
+                            <span className="muted">loading...</span>
                           }
                         </div>
                     }
@@ -680,6 +690,10 @@ const Root = styled.div`
   .meta-left {
     flex: 3;
     height: 100%;
+
+    tbody td:first-child {
+      white-space: nowrap;
+    }
   }
 
   .meta-right {
@@ -698,6 +712,11 @@ const Root = styled.div`
   .gps {
     width: 150px;
     margin-bottom: 1em;
+
+    pre {
+      margin-bottom: 0;
+    }
+
     .clipboard-content {
       // less padding since scroll not needed
       padding-bottom: 8px;

@@ -435,15 +435,24 @@ export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
 }
 
 
-export async function getGPS(vsn: string) : Promise<{lat: number, lon: number}> {
-  const d = await getData({start: '-6m', filter: {name: 'sys.gps.*', vsn}, tail: 1})
-  const lat = Number(d.find(o => o.name === 'sys.gps.lat')?.value)
-  const lon = Number(d.find(o => o.name === 'sys.gps.lon')?.value)
+export type GPS = {lat: number, lon: number, timestamp: string}
+
+export async function getGPS(vsn: string) : Promise<GPS> {
+  const d = await getData({start: '-30d', filter: {name: 'sys.gps.*', vsn}, tail: 1})
+
+  const latRecord = d.find(o => o.name === 'sys.gps.lat')
+  const lonRecord = d.find(o => o.name === 'sys.gps.lon')
+  const lat = latRecord?.value as number
+  const lon = lonRecord?.value as number
 
   if (!lat || !lon)
     return null
 
-  return {vsn, lat, lon}
+  return {
+    lat,
+    lon,
+    timestamp: latRecord.timestamp // note: gps components have same timestamp
+  }
 }
 
 
