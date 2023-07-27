@@ -399,26 +399,7 @@ const columns = [{
     )
   },
   hide: true
-},
-/* (to be removed)
-{
-  id: 'top_camera',
-  label: 'Top Camera',
-  hide: true
 }, {
-  id: 'right_camera',
-  label: 'Right Camera',
-  hide: true
-}, {
-  id: 'left_camera',
-  label: 'Left Camera',
-  hide: true
-}, {
-  id: 'bottom_camera',
-  label: 'Bottom Camera',
-  hide: true
-}, */
-{
   id: 'commission_date',
   label: 'Commission Date',
   hide: true

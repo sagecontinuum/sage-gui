@@ -13,7 +13,7 @@ const API_URL = `${url}/api`
 export type VSN = `W${string}` | `V${string}`
 
 
-export type State = {
+export type BKState = {
   address: string
   beehive: string
   id: string
@@ -103,7 +103,7 @@ export async function getNodes() {
 }
 
 
-export async function getNode(id: string) : Promise<State> {
+export async function getNode(id: string) : Promise<BKState> {
   const data = await get(`${API_URL}/state/${id}`)
   return data.data
 }
@@ -193,107 +193,6 @@ function _joinNodeData(nodes, nodeMetas, monitorMeta) {
   })
 }
 
-
-export async function getState() : Promise<State[]> {
-  const proms = [getNodeMeta(), getManifests()]
-  const [meta, manifests] = await Promise.all(proms)
-
-
-  // join manifests to meta
-  const data = (manifests as Manifest[]).map(obj => ({
-    ...obj,
-    ...meta[obj.vsn],
-    status: null,
-    hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
-    lat: obj.gps_lat,
-    lng: obj.gps_lon
-  }))
-
-  return data
-}
-
-
-export async function __getStateDeprecated() : Promise<State[]> {
-  const proms = [getNodes(), getNodeMeta(), getMonitorData()]
-  let [nodes, meta, monitorMeta] = await Promise.all(proms)
-
-  let allMeta = _joinNodeData(nodes, meta, monitorMeta)
-
-  // whether or not to ignore things like 000000000001, laptop registration, test nodes, etc
-  const shouldSanitizeNodes = monitorMeta && FILTER_NODES
-  if (shouldSanitizeNodes) {
-    const includeList = Object.keys(monitorMeta)
-    allMeta = allMeta.filter(obj => includeList.includes(obj.id))
-  }
-
-  // Add in dell nodes (until they are in beekeeper);
-  // todo(nc): remove once registered!!
-  allMeta = [
-    ...allMeta,
-    ...Object.values(meta)
-      .filter(o => o.node_type == 'Blade')
-      .map(o => ({
-        ...o,
-        id: o.node_id?.length == 16 ? o.node_id : o.vsn,
-        hasStaticGPS: !!o.gps_lat && !!o.gps_lon,
-        status: 'dell node',
-        lat: o.gps_lat,
-        lng: o.gps_lon
-      }))
-  ].filter((o, i, self) =>
-    i == self.findIndex(o2 => o2.id == o.id)
-  )
-
-
-  return allMeta
-}
-
-
-export async function getSuryaState() : Promise<State[]> {
-  const proms = [getNodes(), getNodeMeta(), getMonitorData(), getFactory({by: 'id'})]
-  const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
-
-  const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
-  let data = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
-
-  return data
-}
-
-
-
-export async function getOntologyList() : Promise<OntologyObj[]> {
-  const data = await get(`${url}/ontology`)
-  return data
-}
-
-export async function getOntology(name: string) : Promise<OntologyObj> {
-  const data = await getOntologyList()
-  return data.find(o => o.ontology == name) as OntologyObj
-}
-
-
-export type NodeDetails = (State & NodeMeta)[]
-
-export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<NodeDetails> {
-  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta({by: 'vsn'})])
-  let nodeDetails = bkData
-    .filter(o => !!o.vsn)
-    .map(obj => ({...obj, ...details[obj.vsn]}))
-
-  if (bucket) {
-    nodeDetails = nodeDetails.filter(o => o.bucket == bucket)
-  }
-
-  return nodeDetails
-}
-
-
-
-export async function getProduction() {
-  return await get(`${url}/production`)
-}
-
-
 export type Compute = {
   name: 'rpi' | 'rpi-shield' | 'nxcore' | 'nxagent'
   serial_no: string       // most likely 12 digit, uppercase hex
@@ -358,7 +257,7 @@ type Manifest = {
   }
   tags?: string[]
   computes: Compute[]
-  sensor: Sensor[]
+  sensors: Sensor[]
 }
 
 
@@ -440,6 +339,7 @@ export async function getManifests() : Promise<SimpleManifest[]> {
 }
 
 
+
 // helper function normalize/match:
 // 0000456789abcdef.<suffix> (in beehive) 456789abcdef (in manifest)
 export function findHostWithSerial(hosts: string[], serial_no: string) : string {
@@ -447,3 +347,104 @@ export function findHostWithSerial(hosts: string[], serial_no: string) : string 
     host.split('.')[0].slice(4).toUpperCase() == serial_no.toUpperCase()
   )
 }
+
+
+
+export type State = SimpleManifest & {
+  node_phase_v3: NodeMeta['node_phase_v3']
+  project: NodeMeta['project']
+  focus: NodeMeta['focus']
+  location: NodeMeta['location']
+  node_type: NodeMeta['node_type']
+  modem: NodeMeta['modem']
+  nx_agent: NodeMeta['nx_agent']
+  shield: NodeMeta['shield']
+  build_date: string
+  commission_date: string
+  sensor?: string[]    // added client-side for joining data
+
+  status: string
+  hasStaticGPS: boolean
+  lat: number
+  lng: number
+}
+
+
+export async function getState() : Promise<State[]> {
+  const proms = [getNodeMeta(), getManifests()]
+  const [nodeMeta, manifests] = await Promise.all(proms)
+
+  // join manifests to meta
+  const data = (manifests as SimpleManifest[]).map(obj => {
+
+    const meta = nodeMeta[obj.vsn] || {}
+
+    return {
+      ...obj,
+      node_phase_v3: meta.node_phase_v3,
+      project: meta.project,
+      focus: meta.focus,
+      location: meta.location,
+      node_type: meta.node_type,
+      modem: meta.modem,
+      nx_agent: meta,
+      shield: meta.shield,
+      build_date: meta.build_date,
+      commission_date: meta.commission_date,
+      status: null,
+      hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
+      lat: obj.gps_lat,
+      lng: obj.gps_lon
+    }
+  })
+
+  return data
+}
+
+
+// todo(nc): refactor
+export async function getSuryaState() : Promise<object[]> {
+  const proms = [getNodes(), getNodeMeta(), getMonitorData(), getFactory({by: 'id'})]
+  const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
+
+  const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
+  let data = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
+
+  return data
+}
+
+
+
+export async function getOntologyList() : Promise<OntologyObj[]> {
+  const data = await get(`${url}/ontology`)
+  return data
+}
+
+export async function getOntology(name: string) : Promise<OntologyObj> {
+  const data = await getOntologyList()
+  return data.find(o => o.ontology == name) as OntologyObj
+}
+
+
+export type NodeDetails = (State & NodeMeta)[]
+
+export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<NodeDetails> {
+  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta({by: 'vsn'})])
+  let nodeDetails = bkData
+    .filter(o => !!o.vsn)
+    .map(obj => ({...obj, ...details[obj.vsn]}))
+
+  if (bucket) {
+    nodeDetails = nodeDetails.filter(o => o.bucket == bucket)
+  }
+
+  return nodeDetails
+}
+
+
+
+export async function getProduction() {
+  return await get(`${url}/production`)
+}
+
+

@@ -149,7 +149,7 @@ const getFakeIP = (id) =>
 
 // join beehive and beekeeper data, basically
 export function mergeMetrics(
-  data: BK.SimpleManifest[], records: BH.Record[], health, sanity
+  data: BK.State[], records: BH.Record[], health, sanity
 ) {
   // If a VSN is changed, the data api will return latest records for each VSN.
   // So, we only consider metrics with VSNs which are known by "beekeeper"
