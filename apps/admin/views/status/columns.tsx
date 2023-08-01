@@ -158,7 +158,7 @@ const columns = [{
       </Tooltip>
     }
 
-    return <Link to={`/node/${row.vsn}`} className="no-style flex column">
+    return <Link to={`/node/${row.vsn}?tab=health`} className="no-style flex column">
       {health?.details?.length == 0 ?
         <Tooltip title={`No health tests available`} placement="right">
           <span className="font-bold muted flex justify-center">n/a</span>

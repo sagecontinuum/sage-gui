@@ -32,6 +32,7 @@ import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 import ManifestTabs from './ManifestTabs'
 
+import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
@@ -42,6 +43,7 @@ import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays } from 'date-fns'
+
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
@@ -243,7 +245,12 @@ const resourceCols = [{
 }]
 
 
-export default function NodeView() {
+type Props = {
+  admin: boolean
+}
+
+export default function NodeView(props: Props) {
+  const {admin} = props
   const vsn = useParams().vsn as BK.VSN
 
   const [params] = useSearchParams()
@@ -439,6 +446,7 @@ export default function NodeView() {
                 Computes: manifest?.computes.length,
                 Peripherals: manifest?.resources.length
               }}
+              admin={admin}
             />
 
             {tab == 'sensors' && manifest &&
@@ -544,6 +552,11 @@ export default function NodeView() {
               </Card>
             </div>
           }
+
+          {admin && tab == "health" &&
+            <AdminNodeHealth />
+          }
+
 
 
           {/* timeline card */}

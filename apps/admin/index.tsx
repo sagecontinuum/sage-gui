@@ -8,9 +8,9 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import NodeTabs from '/components/views/nodes/NodeTabsBinned'
+import Node from '/components/views/node/Node'
 import Status from './views/status/Status'
 import Tests from './views/tests/Tests'
-import Node from './views/node/Node'
 import SuryaStatus from './views/factory/Factory'
 import Audio from './views/audio/LatestAudio'
 
@@ -66,9 +66,9 @@ export default function App() {
                     <Route path="nodes" element={<Status />} />
                     <Route path="tests" element={<Tests />} />
                   </Route>
+                  <Route path="/node/:vsn" element={<Node admin />} />
 
                   <Route path="audio" element={<Audio />} />
-                  <Route path="node/:vsn" element={<Node />} />
 
                   <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                   <Route path="surya/:phase" element={<SuryaStatus />} />

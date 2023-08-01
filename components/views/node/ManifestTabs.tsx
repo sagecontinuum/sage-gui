@@ -8,6 +8,7 @@ import OverviewIcon from '@mui/icons-material/ListAltRounded'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
 import ComputesIcon from '@mui/icons-material/DeveloperBoardRounded'
 import PeripheralsIcon from '@mui/icons-material/Cable'
+import HealthIcon from '@mui/icons-material/MonitorHeartOutlined'
 
 
 
@@ -23,11 +24,18 @@ const label = (
 
 
 // a tab is rendered with react.clone, so we must explicity pass TabProps
-const ConditionalTab = (props: TabProps & {show: boolean, component, to}) =>
+const ConditionalTab = (props: TabProps & {show: boolean, component, to, replace}) =>
   props.show ? <Tab {...props} /> : <></>
 
 
-export default function ManifestTabs({counts}) {
+type Props = {
+  admin: boolean
+  counts: {[tabLabel: string]: number}
+}
+
+export default function ManifestTabs(props: Props) {
+  const {admin, counts} = props
+
   const [params] = useSearchParams()
   const tab = params.get('tab') || 'overview'
 
@@ -42,6 +50,14 @@ export default function ManifestTabs({counts}) {
           component={Link}
           value="overview"
           to="?tab=overview"
+          replace
+        />
+        <ConditionalTab
+          show={admin}
+          label={label(<HealthIcon fontSize="small" />, 'Health')}
+          component={Link}
+          value="health"
+          to="?tab=health"
           replace
         />
         <Tab

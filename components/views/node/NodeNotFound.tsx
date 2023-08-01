@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 import BeeIcon from 'url:/assets/bee.svg'
 import styled from 'styled-components'
