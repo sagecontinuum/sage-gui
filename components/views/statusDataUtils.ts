@@ -155,7 +155,7 @@ export function mergeMetrics(
   // So, we only consider metrics with VSNs which are known by "beekeeper"
   const vsns = data.map(o => o.vsn)
   const metrics = records.filter(m => vsns.includes(m.meta.vsn))
-  const byNode = aggregateMetrics(metrics, true)
+  const byNode = aggregateMetrics(metrics)
 
   const joinedData = data.map(nodeObj => {
     const vsn = nodeObj.vsn

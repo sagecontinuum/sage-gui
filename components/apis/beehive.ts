@@ -169,14 +169,14 @@ export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {
 
 
 
-export function aggregateMetrics(data: Record[], byVSN: boolean) : AggMetrics {
+export function aggregateMetrics(data: Record[], byHost: boolean = false) : AggMetrics {
   if (!data.length)
     return null
 
   const byNode = {}
   data.forEach(obj => {
     const {timestamp, name, value, meta} = obj
-    const node = byVSN ? meta.vsn : meta.node
+    const node = byHost ? meta.node : meta.vsn
     let {host} = meta
 
     // todo(nc): temp solution since IPs don't have a host?
@@ -213,7 +213,7 @@ export function aggregateMetrics(data: Record[], byVSN: boolean) : AggMetrics {
 
 
 
-export async function getSanityChart(vsn?: BK.VSN, start?: string) : Promise<AggMetrics> {
+export async function getSanityData(vsn?: BK.VSN, start?: string) : Promise<AggMetrics> {
   const params = {
     start: start || '-2d',
     filter: {
