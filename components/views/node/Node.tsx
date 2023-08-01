@@ -263,7 +263,7 @@ export default function NodeView(props: Props) {
 
   const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
-  const [bkMeta, setBKMeta] = useState<BK.State>()
+  const [bkMeta, setBKMeta] = useState<BK.BKState>()
 
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<BH.GPS>()
@@ -297,6 +297,7 @@ export default function NodeView(props: Props) {
 
   useEffect(() => {
     setLoading(true)
+
     const p1 = BK.getNodeMeta({node: vsn})
       .then((data: BK.NodeMeta) => {
         setNodeMeta(data)
@@ -305,19 +306,19 @@ export default function NodeView(props: Props) {
           setVsnNotFound(true)
           return
         }
-
-        const id = data.node_id
-        setNodeID(id)
-
-        BK.getNode(id)
-          .then(data => setBKMeta(data))
-          .catch(err => setError(err))
       })
 
     const p2 = BK.getManifest(vsn)
       .then(data => {
         setManifest(data)
-      })
+
+        const id = data.name
+        setNodeID(id)
+
+        BK.getNode(id)
+          .then(data => setBKMeta(data))
+          .catch(err => setError(err))
+      }).catch(() => { /* do nothing for now */ })
 
     const p3 = BH.getSimpleNodeStatus(vsn)
       .then((records) => {

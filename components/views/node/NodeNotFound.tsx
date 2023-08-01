@@ -12,12 +12,18 @@ import * as BK from '/components/apis/beekeeper'
 export default function NodeNotFound() {
   const vsn = useParams().vsn as BK.VSN
 
-  const [recommended, setRecommended] = useState()
+  const [recommended, setRecommended] = useState<BK.VSN>()
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    BK.getNodeMeta({by: 'id'})
-      .then(data => setRecommended(vsn in data ? data[vsn].vsn : null))
+    BK.getManifests()
+      .then(data => {
+        const urlParam = vsn.toUpperCase()
+        const node = data.find(({vsn, name}) =>
+          vsn.toUpperCase() == urlParam || name.toUpperCase() == urlParam
+        )
+        setRecommended(node.vsn)
+      })
       .catch(err => setError(err))
   }, [vsn])
 

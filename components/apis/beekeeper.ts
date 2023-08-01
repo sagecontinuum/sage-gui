@@ -322,7 +322,7 @@ const flattenManifest = o => ({
 })
 
 
-export async function getManifest(vsn: VSN) : Promise<SimpleManifest> {
+export async function getManifest(vsn: VSN) : Promise<FlattenedManifest> {
   let data = await get(`${config.auth}/manifests/${vsn}`)
   data = flattenManifest(data)
 
