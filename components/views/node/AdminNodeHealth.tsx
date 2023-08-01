@@ -61,8 +61,10 @@ export default function () {
       .then((sanity) => {
         if (!sanity) return
 
-        // todo(nc): refactor data model?
         const data = Object.values(Object.values(sanity)[0])[0]
+
+        // ignore failing telegraf cadvisor metric
+        delete data['sys.sanity_status.wes_telegraf_cadvisor']
 
         setSanityData(data)
       }).catch((err) => setSanityError(err))
