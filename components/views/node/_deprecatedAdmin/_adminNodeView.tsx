@@ -177,7 +177,7 @@ export default function NodeView() {
     if (!nodeID) return
 
     setLoading2(true)
-    const p2 = BH.getSanityChart(vsn, '-7d')
+    const p2 = BH.getSanityData(vsn, '-7d')
       .then((sanity) => {
         if (!sanity) {
           return

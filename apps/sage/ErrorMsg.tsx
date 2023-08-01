@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import Alert from '@mui/material/Alert'
 
 type Props = {
-  children: JSX.Element
+  children: React.ReactNode
 }
 
 export default function ErrorMsg(props: Props) {

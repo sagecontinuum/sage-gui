@@ -52,14 +52,6 @@ export default function ManifestTabs(props: Props) {
           to="?tab=overview"
           replace
         />
-        <ConditionalTab
-          show={admin}
-          label={label(<HealthIcon fontSize="small" />, 'Health')}
-          component={Link}
-          value="health"
-          to="?tab=health"
-          replace
-        />
         <Tab
           label={label(<SensorIcon />, 'Sensors', counts)}
           component={Link}
@@ -79,6 +71,14 @@ export default function ManifestTabs(props: Props) {
           component={Link}
           value="peripherals"
           to="?tab=peripherals"
+          replace
+        />
+        <ConditionalTab
+          show={admin}
+          label={label(<HealthIcon fontSize="small" />, 'Health')}
+          component={Link}
+          value="health"
+          to="?tab=health"
           replace
         />
       </Tabs>

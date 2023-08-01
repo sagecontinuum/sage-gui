@@ -79,8 +79,8 @@ export default function TestView() {
   useEffect(() => {
     setLoading(true)
 
-    const p1 = BH.getNodeHealth(null, '-7d')
-    const p2 = BH.getNodeSanity('-7d')
+    const p1 = BH.getNodeHealth(null, '-14d')
+    const p2 = BH.getNodeSanity('-14d')
     const p3 = BK.getNodeMeta({by: 'vsn'})
 
     Promise.all([p1, p2, p3])
@@ -150,7 +150,7 @@ export default function TestView() {
           <h2>Health</h2>
           <TimelineChart
             data={health}
-            startTime={subDays(new Date(), 3)}
+            startTime={subDays(new Date(), 7)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
@@ -169,7 +169,7 @@ export default function TestView() {
           <h2>Sanity Tests</h2>
           <TimelineChart
             data={sanity}
-            startTime={subDays(new Date(), 3)}
+            startTime={subDays(new Date(), 7)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}

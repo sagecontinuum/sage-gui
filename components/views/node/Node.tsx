@@ -24,8 +24,9 @@ import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import timelineAppLabel from '/components/viz/TimelineAppLabel'
+import AppLabel from '/components/viz/TimelineAppLabel'
 import Table from '/components/table/Table'
+import Portal from '/components/PortalLink'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
@@ -44,10 +45,12 @@ import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays } from 'date-fns'
 
+import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
+
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
-const TIMELINE_LABEL_WIDTH = 175
+const TL_LABEL_WIDTH = 175 // default timeline label width
 const TAIL_DAYS = '-7d'
 
 
@@ -100,7 +103,7 @@ const sensorOverview = [{
               {o.name.replace(/-|_/, ' ')}
             </small>
             <div>
-              <Link to={`/sensors/${o.hw_model}`}>{o.hw_model}</Link>
+              <Portal to={`/sensors/${o.hw_model}`}>{o.hw_model}</Portal>
             </div>
           </Grid>
         )}
@@ -122,7 +125,7 @@ const sensorOverview = [{
               {o.name.replace(/-|_/, ' ')}
             </small>
             <div>
-              <Link to={`/sensors/${o.hw_model}`}>{o.hw_model}</Link>
+              <Portal to={`/sensors/${o.hw_model}`}>{o.hw_model}</Portal>
             </div>
           </Grid>
         )}
@@ -246,7 +249,7 @@ const resourceCols = [{
 
 
 type Props = {
-  admin: boolean
+  admin?: boolean
 }
 
 export default function NodeView(props: Props) {
@@ -267,7 +270,7 @@ export default function NodeView(props: Props) {
 
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<BH.GPS>()
-  const [ecr, setECR] = useState<ECR.App[]>()
+  const [ecr, setECR] = useState<ECR.AppDetails[]>()
 
   const [error, setError] = useState(null)
   const [vsnNotFound, setVsnNotFound] = useState(null)
@@ -430,8 +433,16 @@ export default function NodeView(props: Props) {
                 } {vsn} <small className="muted">{nodeID}</small>
               </h1>
 
-              <Tooltip title={<>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>} placement="top">
-                <Button href={nodeMeta ? `${config.adminURL}/node/${vsn}` : ''} target="_blank">
+              <Tooltip
+                placement="top"
+                title={
+                  admin ? 'Node health' : <>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>
+                }
+              >
+                <Button
+                  href={nodeMeta ? `${config.adminURL}/node/${vsn}?tab=health` : ''}
+                  {...(admin ? {} : {target: '_blank'})}
+                >
                   <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
                     {status}
                   </span>
@@ -558,8 +569,6 @@ export default function NodeView(props: Props) {
             <AdminNodeHealth />
           }
 
-
-
           {/* timeline card */}
           <Card>
             <div className="timeline-title flex items-center gap">
@@ -591,10 +600,10 @@ export default function NodeView(props: Props) {
                   const {timestamp, meta} = data
                   const {vsn, origPluginName} = meta
                   const win = opts.time == 'daily' ? 'd' : 'h'
-                  window.open(`${window.location.origin}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`, '_blank')
+                  window.open(`${config.portal}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`, '_blank')
                 }}
-                yFormat={(label) => timelineAppLabel(label, ecr)}
-                labelWidth={TIMELINE_LABEL_WIDTH}
+                yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
+                labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
               />
             }
 

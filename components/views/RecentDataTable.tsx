@@ -7,14 +7,14 @@ import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 import ZoomInIcon from '@mui/icons-material/ZoomInRounded'
 
 import ErrorMsg from '../../apps/sage/ErrorMsg'
-import { relativeTime, isOldData} from '/components/utils/units'
+import { relativeTime, isOldData } from '/components/utils/units'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'
-import config from '/config'
-import SparkLine from '/components/viz/SparkLine'
 
-const dataBrowser = config.dataBrowserURL
+import SparkLine from '/components/viz/SparkLine'
+import Portal from '/components/PortalLink'
+
 
 
 type Props = {
@@ -163,10 +163,10 @@ export default memo(function RecentDataTable(props: Props) {
                         <small>(click for description)</small></>}
                       placement="left"
                     >
-                      <a  href={`/data/ontology/${item.query.name}`}
+                      <Portal to={`/data/ontology/${item.query.name}`}
                         target="_blank" rel="noreferrer">
                         <HelpIcon />
-                      </a>
+                      </Portal>
                     </Tooltip>
                   </td>
                   <td className={isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap'}>
@@ -193,7 +193,7 @@ export default memo(function RecentDataTable(props: Props) {
                   {!showSparkline &&
                     <td>
                       {data && linkParams && data.value != 'loading' &&
-                        <a href={`${dataBrowser}?${linkParams(data)}`}>more...</a>
+                        <Portal to={`/query-browser?${linkParams(data)}`}>more...</Portal>
                       }
                     </td>
                   }
@@ -201,9 +201,11 @@ export default memo(function RecentDataTable(props: Props) {
                   {showSparkline &&
                     <td>
                       {data && linkParams && data.value != 'loading' &&
-                        <SparkLineLink href={`${dataBrowser}?${linkParams(data)}`} target="_blank">
-                          <SparkLine data={sparkLines[label]}/>
-                          <ZoomInIcon />
+                        <SparkLineLink>
+                          <Portal href={`/query-browser?${linkParams(data)}`} target="_blank">
+                            <SparkLine data={sparkLines[label]}/>
+                            <ZoomInIcon />
+                          </Portal>
                         </SparkLineLink>
                       }
                     </td>
@@ -233,7 +235,7 @@ const HelpIcon = styled(QuestionMark)`
   color: #1c8cc9;
 `
 
-const SparkLineLink = styled.a`
+const SparkLineLink = styled.div`
   &:hover canvas {
     background-color: rgba(0, 0, 0, .3);
   }

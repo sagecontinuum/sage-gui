@@ -32,7 +32,7 @@ export default function Timeline() {
 
 
     // test two: node sanity data
-    BH.getSanityChart(vsn, '-7d')
+    BH.getSanityData(vsn, '-7d')
       .then((sanity) => {
         const data = Object.values(Object.values(sanity)[0])[0]
         setData2(data)

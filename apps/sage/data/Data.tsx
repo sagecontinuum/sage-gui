@@ -12,7 +12,7 @@ import ErrorMsg from '../ErrorMsg'
 
 import TimelineChart, {colors} from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import timelineAppLabel from '/components/viz/TimelineAppLabel'
+import AppLabel from '/components/viz/TimelineAppLabel'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
@@ -383,7 +383,7 @@ export default function Data(props: Props) {
                           '_blank'
                         )
                       }}
-                      yFormat={(label) => timelineAppLabel(label, ecr)}
+                      yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
                       labelWidth={TIMELINE_LABEL_WIDTH}
                     />
                   </TimelineContainer>

@@ -12,6 +12,8 @@ import { Card } from '/components/layout/Layout'
 
 import { endOfHour, subDays } from 'date-fns'
 
+export const LABEL_WIDTH = 200
+
 
 function sanityColor(val, obj) {
   if (val == null)
@@ -48,12 +50,14 @@ export default function () {
   useEffect(() => {
     setLoading(true)
 
+    setLoadingHealth(true)
     const p1 = BH.getNodeDeviceHealth(vsn, '-7d')
       .then((data) => setHealth(data))
       .catch((err) => setHealthError(err))
       .finally(() => setLoadingHealth(false))
 
-    const p2 = BH.getSanityChart(vsn, '-7d')
+    setLoadingSanity(true)
+    const p2 = BH.getSanityData(vsn, '-7d')
       .then((sanity) => {
         if (!sanity) return
 
@@ -77,7 +81,8 @@ export default function () {
         {health &&
           <TimelineChart
             data={health}
-            startTime={subDays(new Date(), 3)}
+            // same range as the request, but can be modified if needed
+            startTime={subDays(new Date(), 7)}
             endTime={endOfHour(new Date())}
             colorCell={(val, obj) => {
               if (val == null)
@@ -92,7 +97,7 @@ export default function () {
               </b>
               `
             }
-            labelWidth={200}
+            labelWidth={LABEL_WIDTH}
           />
         }
 
@@ -113,7 +118,7 @@ export default function () {
         {sanityData &&
           <TimelineChart
             data={sanityData}
-            startTime={subDays(new Date(), 3)}
+            startTime={subDays(new Date(), 7)}
             endTime={endOfHour(new Date())}
             yFormat={l => l.split('.').pop()}
             colorCell={sanityColor}
@@ -125,7 +130,7 @@ export default function () {
               </b>
               `
             }
-            labelWidth={200}
+            labelWidth={LABEL_WIDTH}
           />
         }
 
