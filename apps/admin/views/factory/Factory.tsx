@@ -203,8 +203,8 @@ const getTabIdx = (phase: string) =>
 
 const pingRequests = () => [
   BH.getFactoryData(),
-  BH.getNodeHealth(null, SPARKLINE_START),
-  BH.getNodeSanity(SPARKLINE_START)
+  BH.getHealthData({start: SPARKLINE_START}),
+  BH.getSanitySummary({start: SPARKLINE_START})
 ]
 
 

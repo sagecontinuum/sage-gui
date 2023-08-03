@@ -212,8 +212,15 @@ export function aggregateMetrics(data: Record[], byHost: boolean = false) : AggM
 }
 
 
+type TestArgs = {
+  vsn?: BK.VSN,
+  start?: string
+}
 
-export async function getSanityData(vsn?: BK.VSN, start?: string) : Promise<AggMetrics> {
+
+export async function getSanityData(args?: TestArgs) : Promise<AggMetrics> {
+  const {vsn, start} = args || {}
+
   const params = {
     start: start || '-2d',
     filter: {
@@ -229,8 +236,9 @@ export async function getSanityData(vsn?: BK.VSN, start?: string) : Promise<AggM
 }
 
 
+export async function getHealthData(args?: TestArgs) : Promise<ByMetric> {
+  const {vsn, start, } = args || {}
 
-export async function getNodeHealth(vsn?: string, start?: string) : Promise<ByMetric> {
   const params = {
     start: start ?? '-60h',
     bucket: 'health-check-test',
@@ -251,12 +259,16 @@ export async function getNodeHealth(vsn?: string, start?: string) : Promise<ByMe
   return byNode
 }
 
-export async function getNodeSanity(start?: string) : Promise<ByMetric> {
+
+export async function getSanitySummary(args?: TestArgs) : Promise<ByMetric> {
+  const {vsn, start} = args || {}
+
   const params = {
     bucket: 'downsampled-test',
     start: start ?? '-60h',
     filter: {
-      name: 'sanity_test_.*'
+      name: 'sanity_test_.*',
+      ...(vsn && {vsn})
     }
   }
 
@@ -284,13 +296,16 @@ export async function getNodeSanity(start?: string) : Promise<ByMetric> {
 }
 
 
-export async function getNodeDeviceHealth(vsn: string, start?: string) : Promise<ByMetric> {
+export async function getDeviceHealthSummary(args?: TestArgs) : Promise<ByMetric> {
+  const {vsn, start, device} = args || {}
+
   const params = {
     start: start ?? '-60h',
     bucket: 'health-check-test',
     filter: {
       name: 'device_health_check',
-      vsn
+      ...(vsn && {vsn}),
+      ...(device && {device})
     }
   }
 

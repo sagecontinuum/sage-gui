@@ -167,7 +167,7 @@ export default function NodeView() {
         setNodeID(data.node_id)
       })
 
-    BH.getNodeDeviceHealth(vsn, '-7d')
+    BH.getDeviceHealthSummary({vsn, start: '-7d'})
       .then((data) => setHealth(data))
       .catch((err) => setHealthError(err))
 
@@ -177,7 +177,7 @@ export default function NodeView() {
     if (!nodeID) return
 
     setLoading2(true)
-    const p2 = BH.getSanityData(vsn, '-7d')
+    const p2 = BH.getSanityData({vsn, start: '-7d'})
       .then((sanity) => {
         if (!sanity) {
           return

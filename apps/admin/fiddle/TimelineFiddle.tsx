@@ -26,13 +26,13 @@ export default function Timeline() {
   useEffect(() => {
 
     // test one: influx aggregated data
-    BH.getNodeSanity()
+    BH.getSanitySummary()
       .then((data) => setData1(data))
       .catch((err) => setError2(err))
 
 
     // test two: node sanity data
-    BH.getSanityData(vsn, '-7d')
+    BH.getSanityData({vsn, start: '-7d'})
       .then((sanity) => {
         const data = Object.values(Object.values(sanity)[0])[0]
         setData2(data)

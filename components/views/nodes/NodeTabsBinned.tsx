@@ -20,7 +20,9 @@ import { sum, countBy } from 'lodash'
 import * as BK from '/components/apis/beekeeper'
 
 import settings from '/components/settings'
-import { getFilterState, filterData, type FilterState } from '../statusDataUtils'
+import { filterData, type FilterState, initialState } from '../statusDataUtils'
+
+import { parseQueryStr } from '/components/utils/queryString'
 
 
 type Label = BK.Phase | 'Show All' | 'Sensors'
@@ -98,7 +100,7 @@ export default function NodeTabs(props: Props) {
       data = data.filter(obj => obj.project == settings.project)
     }
 
-    const filterState = getFilterState(params)
+    const filterState = parseQueryStr(params, {initialState, exclude: ['query', 'phase']})
     const counts = getPhaseCounts(data, filterState)
 
     setCounts({

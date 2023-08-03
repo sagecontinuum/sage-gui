@@ -40,15 +40,10 @@ const getOptions = (data: object[], field: string) : Option[] =>
     .filter(o => o.id?.length)
 
 
-const FilterBtn = ({label}: {label: string}) =>
-  <Button size="medium">{label}<CaretIcon /></Button>
-
-
-
 const pingRequests = () => [
   BH.getNodeAdminData(),
-  BH.getNodeHealth(null, SPARKLINE_START),
-  BH.getNodeSanity(SPARKLINE_START)
+  BH.getHealthData({start: SPARKLINE_START}),
+  BH.getSanitySummary({start: SPARKLINE_START})
 ]
 
 
@@ -120,11 +115,11 @@ export default function StatusView() {
     Promise.allSettled(proms)
       .then((results) => {
         if (done) return
-        const [state, metrics, temps, health, sanity] = results.map(r => r.value)
+        const [state, metrics, health, sanity] = results.map(r => r.value)
 
         setData(state)
 
-        const allData = mergeMetrics(state, metrics, temps, health, sanity)
+        const allData = mergeMetrics(state, metrics, health, sanity)
         setData(allData)
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
         ping()

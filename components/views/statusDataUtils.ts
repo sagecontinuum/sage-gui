@@ -1,6 +1,8 @@
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
+import { parseQueryStr } from '/components/utils/queryString'
+
 import settings from '/apps/admin/settings'
 import { aggregateMetrics } from '/components/apis/beehive'
 
@@ -210,7 +212,7 @@ export type FilterState = {
   [filter: string]: string[]
 }
 
-const initialState = {
+export const initialState = {
   status: [],
   project: [],
   location: [],
@@ -218,14 +220,7 @@ const initialState = {
   sensor: []
 }
 
-
 export function getFilterState(params) {
-  const init = {...initialState}
-  for (const [key, val] of params) {
-    if (['query', 'phase'].includes(key)) continue
-    init[key] = JSON.parse(`[${val}]`)
-  }
-
-  return init
+  return parseQueryStr<FilterState>(params, {initialState, exclude: ['query', 'phase']})
 }
 

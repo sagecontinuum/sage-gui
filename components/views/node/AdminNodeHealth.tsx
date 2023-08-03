@@ -51,13 +51,13 @@ export default function () {
     setLoading(true)
 
     setLoadingHealth(true)
-    const p1 = BH.getNodeDeviceHealth(vsn, '-7d')
+    const p1 = BH.getDeviceHealthSummary({vsn, start: '-7d'})
       .then((data) => setHealth(data))
       .catch((err) => setHealthError(err))
       .finally(() => setLoadingHealth(false))
 
     setLoadingSanity(true)
-    const p2 = BH.getSanityData(vsn, '-7d')
+    const p2 = BH.getSanityData({vsn, start: '-7d'})
       .then((sanity) => {
         if (!sanity) return
 
