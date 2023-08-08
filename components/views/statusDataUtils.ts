@@ -143,7 +143,7 @@ const determineStatus = (computes: BK.Compute[], elapsedTimes: {[host: string]: 
 }
 
 
-
+// handy util function for mocking up the factory view
 const getFakeIP = (id) =>
   `10.11.1${parseInt(id, 16) % 3 + 1}.${Math.floor(Math.random() * 255) + 1}`
 
@@ -195,7 +195,7 @@ export function mergeMetrics(
       // txPackets: getMetric(metrics, 'sys.net.tx_packets', false),
       // rxBytes: getMetric(metrics, 'sys.net.rx_bytes', false),
       // rxPackets: getMetric(metrics, 'sys.net.rx_packets', false),
-      ip: (getNxMetric(metrics, 'sys.net.ip', false) || []).find(o => o.meta.device == 'wan0')?.value,
+      ip: Object.values(getMetric(metrics, 'sys.net.ip', true))[0],
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}

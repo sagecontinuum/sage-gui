@@ -22,12 +22,12 @@ export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element 
   return (
     <div>
       {computes
-        .map(obj => {
+        .map((obj, i) => {
           const {serial_no, name} = obj
 
           const host = BK.findHostWithSerial(Object.keys(elapsedTimes), serial_no)
 
-          return <div key={host}>
+          return <div key={i}>
             {name}: <b className={
               elapsedTimes ? getColorClass(elapsedTimes[host], FAIL_THRES, WARNING_THRES, 'success font-bold') : ''
             }>

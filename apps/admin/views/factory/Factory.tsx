@@ -14,6 +14,8 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 import * as utils from '/components/utils/units'
+
+import NodeLastReported from '/components/utils/NodeLastReported'
 import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
 import { getColorClass } from '/components/utils/NodeLastReported'
 import cols, { GoodChip } from '../status/columns'
@@ -31,7 +33,7 @@ const getColumn = (id) => cols.find(c => c.id == id)
 
 const columns = [
   {
-    id: 'id',
+    id: 'name',
     label: 'ID',
     width: '100px'
   },
@@ -55,10 +57,7 @@ const columns = [
       if (!obj.shield)
         return <span className="muted">no shield</span>
 
-      const val = obj.elapsedTimes['rpi']
-      return <b className={getColorClass(val, FAIL_THRES, WARNING_THRES, 'success font-bold')}>
-        {utils.msToTime(val)}
-      </b>
+      return <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
     }
   }, {
     id: 'nx',
@@ -66,10 +65,7 @@ const columns = [
     format: (_, obj) => {
       if (!obj || !obj.elapsedTimes) return '-'
 
-      const val = obj.elapsedTimes['nx']
-      return <b className={getColorClass(val, FAIL_THRES, WARNING_THRES,'success font-bold')}>
-        {utils.msToTime(val)}
-      </b>
+      return <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
     }
   }, {
     id: 'health1',
@@ -248,6 +244,7 @@ export default function StatusView() {
         const results = await Promise.allSettled(pingRequests())
         const [ metrics, health, sanity]  = results.map(r => r.value)
 
+
         setData(mergeMetrics(dataRef.current, metrics, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
 
@@ -257,11 +254,14 @@ export default function StatusView() {
     }
 
     setLoading(true)
-    const proms = [BK.getSuryaState(), ...pingRequests()]
+    const proms = [BK.getState(), BK.getFactory(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
         if (done) return
-        const [state, metrics, health, sanity] = results.map(r => r.value)
+        let [state, factory, metrics, health, sanity] = results.map(r => r.value)
+
+        // join in factory data
+        state = state.map(o => ({...o, factory: factory[o.vsn]}))
         setData(state)
 
         const allData = mergeMetrics(state, metrics, health, sanity)
@@ -290,7 +290,7 @@ export default function StatusView() {
     if (tabIdx == 0) {
       filteredData = phase1
       setCols(columns.filter(colObj =>
-        ['id', 'vsn', 'nx'].includes(colObj.id)
+        ['name', 'vsn', 'nx'].includes(colObj.id)
       ))
     } else if (tabIdx == 1) {
       filteredData = phase2
@@ -301,7 +301,7 @@ export default function StatusView() {
     } else if (tabIdx == 3) {
       filteredData = phase4
       setCols([
-        ...columns.filter(colObj => ['id', 'vsn'].includes(colObj.id)),
+        ...columns.filter(colObj => ['name', 'vsn'].includes(colObj.id)),
         getColumn('project'),
         getColumn('focus'),
         {...getColumn('location'), hide: false},

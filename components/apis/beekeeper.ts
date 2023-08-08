@@ -4,9 +4,6 @@ const url = config.beekeeper
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
 
-
-
-const FILTER_NODES = true  // if true, filter to "node monitoring" list
 const API_URL = `${url}/api`
 
 
@@ -143,55 +140,12 @@ export async function getNodeMeta(params?: MetaParams) : Promise<NodeMetaMap | N
 }
 
 
-
-async function getMonitorData() {
-  const data = await get(`${url}/monitoring`)
-
-  return data
-    .reduce((acc, {node_id, expected_online}) =>
-      ({...acc, [node_id]: {expected_online}})
-    , {})
-}
-
-
-
-export async function getFactory(params?: MetaParams) {
-  const {node, by = 'id'} = params
-
+export async function getFactory(vsn?: VSN) {
   const data = await get(`${url}/factory`)
-
-  let mapping
-  if (by == 'id') {
-    mapping = data.reduce((acc, node) => ({...acc, [node['node_id']]: node}), {})
-  } else if (by == 'vsn') {
-    mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
-  }
-
-  return node ?
-    data.filter(o => node.length == 4 ? o.vsn == node : o.node_id == node)[0] : mapping
+  const mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+  return vsn ? data.find(o => o.vsn == vsn) : mapping
 }
 
-
-// todo(nc): deprecated; used for the factory page, but should eventually not be used there as well
-function _joinNodeData(nodes, nodeMetas, monitorMeta) {
-  return nodes.map(obj => {
-    const {id} = obj
-
-    const meta = nodeMetas[id]
-    const monIsAvail = monitorMeta && id in monitorMeta
-
-    const { expected_online = null } = monIsAvail ? monitorMeta[id] : {}
-
-    return {
-      ...obj,
-      ...meta,
-      expected_online: !!expected_online,
-      computes: [], // todo(nc): manifests are used here, so leave blank for now
-      status: expected_online ? 'reporting' : 'not reporting (30d+)',
-      registration_event: new Date(obj.registration_event).getTime()
-    }
-  })
-}
 
 export type Compute = {
   name: 'rpi' | 'rpi-shield' | 'nxcore' | 'nxagent'
@@ -387,7 +341,7 @@ export async function getState() : Promise<State[]> {
       location: meta.location,
       node_type: meta.node_type,
       modem: meta.modem,
-      nx_agent: meta,
+      nx_agent: meta.nx_agent,
       shield: meta.shield,
       build_date: meta.build_date,
       commission_date: meta.commission_date,
@@ -402,23 +356,11 @@ export async function getState() : Promise<State[]> {
 }
 
 
-// todo(nc): refactor
-export async function getSuryaState() : Promise<object[]> {
-  const proms = [getNodes(), getNodeMeta(), getMonitorData(), getFactory({by: 'id'})]
-  const [nodes, meta, monitorMeta, factory] = await Promise.all(proms)
-
-  const allButFactory = _joinNodeData(nodes, meta, monitorMeta)
-  let data = allButFactory.map(o => ({...o, factory: factory[o.id]}) )
-
-  return data
-}
-
-
-
 export async function getOntologyList() : Promise<OntologyObj[]> {
   const data = await get(`${url}/ontology`)
   return data
 }
+
 
 export async function getOntology(name: string) : Promise<OntologyObj> {
   const data = await getOntologyList()
@@ -442,9 +384,7 @@ export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<Node
 }
 
 
-
 export async function getProduction() {
   return await get(`${url}/production`)
 }
-
 
