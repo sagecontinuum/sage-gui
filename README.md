@@ -5,7 +5,7 @@ React.js components for Sage UIs.
 
 ## Installation
 
-Requires [node.js](https://nodejs.org) (v16+ recommended).
+Requires [node.js](https://nodejs.org) (v18.17.0+ recommended).
 
 Clone this repo, `cd` to that directory, and run:
 

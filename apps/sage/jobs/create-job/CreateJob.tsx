@@ -54,7 +54,7 @@ import ErrorMsg from '../../ErrorMsg'
 
 import pluginGif from 'url:./gifs/plugin.gif'
 
-const { dockerRegistry, docs, contactUs } = config.dockerRegistry
+const { dockerRegistry, docs, contactUs } = config
 
 
 type View = 'form' |'editor'

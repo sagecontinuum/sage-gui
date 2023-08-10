@@ -7,8 +7,7 @@
       "@parcel/transformer-js",
       "@parcel/transformer-react-refresh-wrap"
     ],
-    "*.svg": ["@parcel/transformer-svg-react"],
-    "url:*.svg": ["@parcel/transformer-svgo", "@parcel/transformer-raw"]
+    "*.svg": ["@parcel/transformer-svg-react"]
   },
   "optimizers": {
     "*.{png,jpg,jpeg,svg}": []

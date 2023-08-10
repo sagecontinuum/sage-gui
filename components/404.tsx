@@ -1,4 +1,4 @@
-import BeeIcon from 'url:../assets/bee.svg'
+import BeeIcon from '/assets/bee.svg'
 import styled from 'styled-components'
 
 
@@ -7,8 +7,8 @@ export default function NotFound() {
 
   return (
     <Root className="flex align-center column">
-      <div>
-        <img src={BeeIcon} />
+      <div className="bee">
+        <BeeIcon />
       </div>
       <h1>
         Page Not Found
@@ -23,7 +23,7 @@ const Root = styled.div`
   text-align: center;
   color: #666;
 
-  img {
+  .bee svg {
     max-width: 300px;
   }
 `

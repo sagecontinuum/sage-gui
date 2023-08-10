@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
-import GitIcon from 'url:/assets/git.svg'
-import LinkIcon from 'url:/assets/link.svg'
+import GitIcon from '/assets/git.svg'
+import LinkIcon from '/assets/link.svg'
 import Chip from '@mui/material/Chip'
 
 import * as ECR from '/components/apis/ecr'
@@ -74,7 +74,7 @@ export default function AppMeta(props: Props) {
       <h4>Repository</h4>
       <p>
         <a href={data?.source.url} target="_blank" rel="noreferrer" className="flex items-center">
-          <img src={GitIcon} className="icon" /> {' '}
+          <GitIcon /> {' '}
           {urlShortner(data?.source.url.slice(0, 40))}
         </a>
       </p>
@@ -84,7 +84,7 @@ export default function AppMeta(props: Props) {
         <h4>Homepage</h4>
         <p>
           <a href={data.homepage} className="flex items-center">
-            <img src={LinkIcon} width="15" className="icon" /> {' '}
+            <LinkIcon /> {' '}
             {urlShortner(data.homepage)}
           </a>
         </p>
@@ -140,8 +140,12 @@ const Root = styled.div`
   p, ul {
     margin: .5em 2px 1.5em 4px;
     font-weight: 600;
-    .icon {
+
+    svg {
       margin-right: .3em;
+      width: 16px;
+      height: 16px;
+      color: rgb(10, 11, 9);
     }
   }
 

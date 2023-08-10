@@ -16,14 +16,14 @@ import LessIcon from '@mui/icons-material/UnfoldLessOutlined'
 import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded'
 import BuildIcon from '@mui/icons-material/BuildRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
-import GithubIcon from '@mui/icons-material/Github'
+import GithubIcon from '@mui/icons-material/GitHub'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
 import Divider from '@mui/material/Divider'
 
 import { useSnackbar } from 'notistack'
 import { stringify } from 'yaml'
-import yamlIcon from 'url:/assets/yaml-logo.svg'
+import YAMLIcon from '/assets/yaml-logo.svg'
 import { formatters } from '../formatters'
 
 import useWithBuildStatus from '../hooks/useWithBuildStatus'
@@ -229,7 +229,7 @@ export default function TagList(props: Props) {
                   aria-label="display config format"
                 >
                   <ToggleButton value="yaml" aria-label="yaml">
-                    <img src={yamlIcon} height="18" />
+                    <YAMLIcon height="18" width="18" />
                   </ToggleButton>
                   <ToggleButton value="json" aria-label="json">
                     <span className="text-color">{'{'}</span>

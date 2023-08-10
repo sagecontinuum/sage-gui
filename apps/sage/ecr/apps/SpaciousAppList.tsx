@@ -11,7 +11,7 @@ import { Item, Title } from '/components/layout/Layout'
 import BuildIndicator from '../BuildIndicator'
 import RepoActions from '../RepoActions'
 import { formatters, Thumb, Dot } from '../formatters'
-import BeeIcon from 'url:/assets/bee.svg'
+import BeeIcon from '/assets/bee.svg'
 
 import Auth from '/components/auth/auth'
 import config from '/config'
@@ -102,8 +102,8 @@ function Row(props) {
       <div className="flex">
         <div>
           {thumbnail?.length ?
-            <Thumb src={`${config.ecr}/meta-files/${thumbnail}`} /> :
-            <Thumb className="placeholder" src={BeeIcon} />
+            <Thumb><img src={`${config.ecr}/meta-files/${thumbnail}`} /></Thumb> :
+            <Thumb><BeeIcon /></Thumb>
           }
         </div>
 

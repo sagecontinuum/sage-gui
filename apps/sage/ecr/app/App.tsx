@@ -7,7 +7,7 @@ import InputIcon from '@mui/icons-material/InputRounded'
 import TagIcon from '@mui/icons-material/LocalOfferRounded'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import Divider from '@mui/material/Divider'
-import BeeIcon from 'url:/assets/bee.svg'
+import BeeIcon from '/assets/bee.svg'
 
 import ErrorMsg from '../../ErrorMsg'
 import RepoActions from '../RepoActions'
@@ -82,8 +82,8 @@ export default function App() {
       <div className="flex justify-between">
         <div className="flex">
           {repo && latestTag.thumbnail ?
-            <Thumb src={`${ECR.url}/meta-files/${latestTag.thumbnail}`} /> :
-            <Thumb className="placeholder" src={BeeIcon} />
+            <Thumb><img src={`${ECR.url}/meta-files/${latestTag.thumbnail}`} /></Thumb> :
+            <Thumb><BeeIcon /></Thumb>
           }
 
           <div className="flex column">
@@ -203,21 +203,6 @@ export default function App() {
 
 const Root = styled.div`
   padding: 20px 0px;
-
-  // todo(nc): remove thumb component
-  .thumb {
-    width: 125px;
-    height: 125px;
-    object-fit: contain;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-right: 1em;
-
-    &.placeholder {
-      padding: 1em;
-      filter: drop-shadow(0px 0px 0.3rem #ccc);
-    }
-  }
 `
 
 const HR = styled(Divider)`

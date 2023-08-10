@@ -17,7 +17,7 @@ import LayoutToggle from '/components/layout/LayoutToggle'
 import {Top} from '/components/layout/Layout'
 import DataProductList from './SpaciousDataList'
 import QueryViewer from '/components/QueryViewer'
-import BeeIcon from 'url:../../../assets/bee.svg'
+import BeeIcon from '../../../assets/bee.svg'
 
 import * as Data from '/components/apis/dataCommons'
 import * as utils from '/components/utils/units'
@@ -228,7 +228,7 @@ export default function Search() {
           {/* todo: refactor */}
           {rows && !rows.length &&
             <NoneFound className="flex column items-center justify-center muted">
-              <img src={BeeIcon} />
+              <BeeIcon />
               <span>No data was found</span>
             </NoneFound>
           }

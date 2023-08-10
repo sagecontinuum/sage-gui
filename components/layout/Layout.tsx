@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 import MuiDivider from '@mui/material/Divider'
-import { Card as MuiCard, CardContent } from '@mui/material'
+import { Card as MuiCard } from '@mui/material'
 
 import { createGlobalStyle } from 'styled-components'
 

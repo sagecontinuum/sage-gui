@@ -65,15 +65,17 @@ export const formatters = {
 }
 
 
-export const Thumb = styled.img`
-  width: 125px;
-  height: 125px;
-  object-fit: cover;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-right: 1em;
+export const Thumb = styled.div`
+  img, svg {
+    width: 125px;
+    height: 125px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 1em;
+  }
 
-  &.placeholder {
+  svg {
     padding: 1em;
     filter: drop-shadow(0px 0px 0.3rem #ccc);
   }

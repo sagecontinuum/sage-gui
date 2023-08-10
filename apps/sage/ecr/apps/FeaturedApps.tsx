@@ -9,12 +9,12 @@ import Grid from '@mui/material/Unstable_Grid2'
 
 import { Item, Title } from '/components/layout/Layout'
 import { formatters, Thumb, Dot } from '../formatters'
-import BeeIcon from 'url:/assets/bee.svg'
+import BeeIcon from '/assets/bee.svg'
 
 import { truncate } from 'lodash'
 
 import config from '/config'
-import { AppDetails } from '~components/apis/ecr'
+import { type AppDetails } from '/components/apis/ecr'
 
 
 function AppBox(props) {
@@ -53,8 +53,8 @@ function AppBox(props) {
       >
         <div>
           {thumbnail?.length ?
-            <Thumb className="thumbnail" src={`${config.ecr}/meta-files/${thumbnail}`} /> :
-            <Thumb className="placeholder" src={BeeIcon} />
+            <Thumb><img src={`${config.ecr}/meta-files/${thumbnail}`} /></Thumb> :
+            <Thumb><BeeIcon /></Thumb>
           }
         </div>
 
