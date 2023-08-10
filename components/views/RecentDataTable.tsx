@@ -15,6 +15,7 @@ import * as BH from '/components/apis/beehive'
 import SparkLine from '/components/viz/SparkLine'
 import Portal from '/components/PortalLink'
 
+import { subDays } from 'date-fns'
 
 
 type Props = {
@@ -33,12 +34,9 @@ type Props = {
   className?: string
 }
 
-const getStartTime = () => {
-  const datetime = new Date()
-  datetime.setDate(datetime.getDate() - 1)
+const getStartTime = () =>
+  subDays(new Date(), 1).toISOString()
 
-  return new Date(datetime).toISOString()
-}
 
 
 export default memo(function RecentDataTable(props: Props) {

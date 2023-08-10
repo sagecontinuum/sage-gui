@@ -83,7 +83,6 @@ export default function SparkLine(props: Props) {
   const [chart, setChart] = useState(null)
 
   useEffect(() => {
-
     if (data['value'] == 'loading') return
     if (chart) {
       chart.destroy()
@@ -110,5 +109,6 @@ const Root = styled.span`
   canvas {
     max-height: 50px;
     min-width: 100%;
+    max-width: 125px;
   }
 `
