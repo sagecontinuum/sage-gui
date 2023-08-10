@@ -6,7 +6,7 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
-import NodeTabs from '/components/views/nodes/NodeTabsBinned'
+import NodeTabs from '/components/views/nodes/NodeTabs'
 import Nodes from '/components/views/nodes/Nodes'
 import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
