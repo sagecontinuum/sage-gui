@@ -49,7 +49,7 @@ To use [Mapbox](https://www.mapbox.com/), you can use a local env variable `MAPB
 
 ```
 export MAPBOX_TOKEN=<token_string>
-npm start -w admin
+npm start
 ```
 
 

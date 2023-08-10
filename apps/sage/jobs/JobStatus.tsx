@@ -311,7 +311,7 @@ export default function JobStatus() {
     const p1 = ES.getJobs()
 
     // also fetch gps for map
-    const p2 = BK.getNodeMeta({by: 'vsn'})
+    const p2 = BK.getNodeMeta()
 
     Promise.all([p1, p2])
       .then(([jobs, nodeMetas]) => {

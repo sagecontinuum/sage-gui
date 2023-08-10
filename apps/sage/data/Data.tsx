@@ -23,8 +23,11 @@ import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
 import settings from '/components/settings'
-const MDP_NODES = settings.mdpNodes
 
+// optional project config
+const DATA_START = settings.dataStart
+const DATA_END = settings.dataEnd
+const DATA_PRODUCT_PATH = settings.dataProductPath
 
 // No assignment represents null, and is same as empty string in this view
 export const NO_ASSIGNMENT = 'Unassigned'
@@ -35,13 +38,6 @@ const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
 
 const DAYS = 7
-
-const MDP_START = new Date('2022-04-05T12:00:00Z')
-const MDP_END = new Date('2022-05-05T12:00:00Z')
-
-
-const isMDP = (name) =>
-  name?.toLowerCase() == 'neon-mdp'
 
 
 
@@ -77,17 +73,15 @@ export const colorDensity = (val, obj) => {
 const getInfiniteEnd = (page: number) =>
   page == 1 ? ITEMS_INITIALLY : page * ITEMS_PER_PAGE
 
-const getDownloadLink = (vsn: string) =>
-  MDP_NODES.includes(vsn) ?
-    <Button
-      startIcon={<FileDownloadRounded />}
-      to="/data/product/neon-mdp-sage-wifire-bp3d-konza-prairie-burn-experiment"
-      variant="outlined"
-      component={Link}
-    >
-      Download
-    </Button>
-    : <></>
+const getDownloadLink = (path) =>
+  <Button
+    startIcon={<FileDownloadRounded />}
+    to={path}
+    variant="outlined"
+    component={Link}
+  >
+    Download
+  </Button>
 
 
 // todo(nc): temp solution until we have references!
@@ -102,11 +96,6 @@ type Facets = {
   [name: string]: {title: string, items: FacetItem[], hide?: boolean}
 }
 
-
-const filterOn = (data: BK.NodeMeta[], key: string, match?: string) =>
-  data.filter(o => o[key].toLowerCase() == match?.toLowerCase())
-
-
 export type Options = {
   display: 'nodes' | 'apps'
   time: 'hourly' | 'daily'
@@ -120,12 +109,12 @@ export type Options = {
 type Props = {
   project?: string
   focus?: string
+  nodes?: BK.VSN[]
 }
 
 export default function Data(props: Props) {
   // alter init data state if project/focus is provided
-  const {project, focus} = props
-
+  const {project, focus, nodes} = props
 
   if (project) initDataState.filters.project = [project]
   if (focus) initDataState.filters.focus = [focus]
@@ -157,22 +146,20 @@ export default function Data(props: Props) {
     density: true,
     versions: false,
     time: 'hourly',
-    start: isMDP(focus) ? MDP_START : subDays(new Date(), DAYS)
+    start: DATA_START || subDays(new Date(), DAYS)
   })
 
   // note: endtime is not currently an option
-  const [end, setEnd] = useState<Date>(isMDP(focus) ? MDP_END : endOfHour(new Date()))
+  const [end, setEnd] = useState<Date>(DATA_END || endOfHour(new Date()))
 
   useEffect(() => {
     setLoading(true)
-    const mProm = BK.getNodeMeta({project})
+    const mProm = BK.getNodeMeta({project, focus, nodes})
       .then(data => {
         setNodeMetaByVSN(data) // todo(nc): remove
 
-        let nodeMetas = Object.values(data)
+        const nodeMetas = Object.values(data)
 
-        if (project) nodeMetas = filterOn(nodeMetas, 'project', project)
-        if (focus) nodeMetas = filterOn(nodeMetas, 'focus', focus)
 
         setNodeMetas(nodeMetas)
 
@@ -191,7 +178,7 @@ export default function Data(props: Props) {
         return nodeMetas
       }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup({...opts, end: addDays(opts.start, DAYS)})
+    const dProm = fetchRollup({...opts, end: DATA_END || addDays(opts.start, DAYS)})
 
     Promise.all([mProm, dProm])
       .then(([nodeMetas, data]) => dispatch({type: 'INIT_DATA', data, nodeMetas}))
@@ -271,7 +258,7 @@ export default function Data(props: Props) {
 
   const handleDateChange = (start: Date) => {
     setOpts(prev => ({...prev, start}))
-    setEnd(addDays(start, DAYS))
+    setEnd(DATA_END || addDays(start, DAYS))
   }
 
   const getNodeID = (vsn) => {
@@ -344,9 +331,11 @@ export default function Data(props: Props) {
                         <div>{location}</div>
                       </div>
 
-                      <div className="data-opts">
-                        {getDownloadLink(vsn)}
-                      </div>
+                      {DATA_PRODUCT_PATH &&
+                        <div className="data-opts">
+                          {getDownloadLink(DATA_PRODUCT_PATH)}
+                        </div>
+                      }
                     </div>
                     <TimelineChart
                       data={timelineData}

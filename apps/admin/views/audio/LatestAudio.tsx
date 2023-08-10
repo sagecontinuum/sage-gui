@@ -35,7 +35,7 @@ function AllAudios() {
       }, 0)
     }
 
-    BK.getNodeMeta({by: 'vsn'})
+    BK.getNodeMeta()
       .then(meta => {
         const nodeList = Object.keys(meta)
         addChart(nodeList)

@@ -25,6 +25,8 @@ import '/assets/styles.scss'
 import theme from '/components/theme'
 import settings from '/components/settings'
 
+const {project, focus, nodes} = settings
+
 
 const NavMenu = () =>
   <NavItems>
@@ -34,7 +36,7 @@ const NavMenu = () =>
 
 
 const LogoPlaceHolder = () =>
-  <Logo>{settings.logo || settings.project || settings.focus}</Logo>
+  <Logo>{settings.logo || project || focus}</Logo>
 
 
 
@@ -62,11 +64,10 @@ export default function App() {
 
                 <Route path="nodes" element={<Nodes/>} />
                 <Route path="node/:vsn" element={<Node />} />
-                <Route path="sensors" element={<SensorList project={settings.project} focus={settings.focus} />} />
+                <Route path="sensors" element={<SensorList {...{project, focus, nodes}} />} />
                 <Route path="sensors/:name" element={<Sensor />} />
 
-
-                <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
+                <Route path="data" element={<Data {...{project, focus, nodes}} />} />
                 <Route path="data/ontology/:name" element={<Ontology />} />
                 <Route path="data/product/:name" element={<DataProduct />} />
                 <Route path="query-browser" element={<DataBrowser />} />

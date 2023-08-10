@@ -248,7 +248,7 @@ export async function getHealthData(args?: TestArgs) : Promise<ByMetric> {
     }
   }
 
-  const [data, nodes] = await Promise.all([getData(params), BK.getNodeMeta({by: 'vsn'})])
+  const [data, nodes] = await Promise.all([getData(params), BK.getNodeMeta()])
   const byNode = groupBy(data, 'meta.vsn')
 
   // removed unbuilt nodes

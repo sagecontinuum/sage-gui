@@ -26,7 +26,10 @@ const configs = {
   'neon-mdp': {
     logo: 'NEON-MDP',
     project: 'SAGE',
-    focus: 'NEON-MDP'
+    nodes: ['W038', 'W01D', 'W01F', 'V008'],
+    dataStart: new Date('2022-04-05T12:00:00Z'),
+    dataEnd: new Date('2022-05-05T12:00:00Z'),
+    dataProductPath: '/data/product/neon-mdp-sage-wifire-bp3d-konza-prairie-burn-experiment'
   },
   'vto': {
     logo: 'VTO',
@@ -42,8 +45,4 @@ export default {
 
   // merge in appropriate config from above
   ...configs[SAGE_UI_PROJECT.toLowerCase()],
-
-  // currently used for custom sensors such as Met One;
-  // todo(nc): this could be removed once the manifest DB v2.0 is used.
-  mdpNodes: ['W038', 'W01D', 'W01F', 'V008']
 }

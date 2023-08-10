@@ -301,7 +301,7 @@ export default function NodeView(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    const p1 = BK.getNodeMeta({node: vsn})
+    const p1 = BK.getNodeMeta({vsn})
       .then((data: BK.NodeMeta) => {
         setNodeMeta(data)
 

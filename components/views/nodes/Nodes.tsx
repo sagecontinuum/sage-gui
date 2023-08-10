@@ -50,6 +50,8 @@ function getProjectNodes() {
         data = filterOn(data, 'project')
       if (settings.focus)
         data = filterOn(data, 'focus')
+      if (settings.nodes)
+        data = data.filter(o => settings.nodes.includes(o.vsn))
 
       return data
     })

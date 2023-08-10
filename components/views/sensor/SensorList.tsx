@@ -12,14 +12,12 @@ import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import { uniqBy } from 'lodash'
 
-import settings from '/components/settings'
 import config from '/config'
 
 const {
   wifireData
 } = config
 
-const SAGE_UI_PROJECT = settings.project
 
 const url = `${wifireData}/action/package_search` +
   `?facet.field=[%22organization%22,%22tags%22,%22res_format%22]` +
@@ -74,9 +72,15 @@ const columns = [{
 }]
 
 
+type Props = {
+  project?: string
+  focus?: string
+  nodes?: BK.VSN[]
+}
 
 
-export default function SensorList() {
+export default function SensorList(props: Props) {
+  const {project, focus, nodes} = props
 
   const [data, setData] = useState()
   const [error, setError] = useState()
@@ -87,7 +91,7 @@ export default function SensorList() {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getNodeMeta({project: SAGE_UI_PROJECT})
+    const prom1 = BK.getNodeMeta({project, focus, nodes})
       .then(data => {
         const d = Object.values(data)
         return d

@@ -59,7 +59,7 @@ export default function AppData(props: Props) {
 
 
   useEffect(() => {
-    BK.getNodeMeta({by: 'vsn'})
+    BK.getNodeMeta()
       .then(data => {
         setNodeMetas(Object.values(data))
       }).catch(error => dispatch({type: 'ERROR', error}))

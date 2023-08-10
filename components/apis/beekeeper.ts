@@ -106,37 +106,25 @@ export async function getNode(id: string) : Promise<BKState> {
 }
 
 
-type MetaParams = {node?: string, by?: 'vsn' | 'id', project?: string, focus?: string}
+type MetaParams = {vsn?: VSN, project?: string, focus?: string, nodes?: VSN[]}
+
 export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
 export async function getNodeMeta(params?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
-  const {node, by = 'vsn', project, focus} = params || {}
+  const {vsn, project, focus, nodes} = params || {}
 
   let data = await get(`${url}/production`)
 
   if (project)
-    data = data.filter(o => o.project == project)
+    data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
   if (focus)
-    data = data.filter(o => o.focus == focus)
+    data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
+  if (nodes)
+    data = data.filter(o => nodes.includes(o.vsn))
 
-  let mapping
-  if (by == 'id') {
-    mapping = data.reduce((acc, node) =>
-      ({...acc, [node.node_id?.length == 16 ? node.node_id : node.vsn]: node})
-    , {})
-  } else if (by == 'vsn') {
-    mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
-  }
+  const mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
 
-  if (!node) {
-    return mapping
-  } else if (node.length == 16 || (node.length == 4 && by == 'vsn')) {
-    if (node in mapping) {
-      return getFactory({node})
-        .then(factory => ({...mapping[node], factory})) as Promise<NodeMeta>
-    }
-    return null
-  }
+  return vsn ? (mapping[vsn] || null) : mapping
 }
 
 
@@ -370,15 +358,11 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 
 export type NodeDetails = (State & NodeMeta)[]
 
-export async function getNodeDetails(bucket?: NodeMeta['bucket']) : Promise<NodeDetails> {
-  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta({by: 'vsn'})])
+export async function getNodeDetails() : Promise<NodeDetails> {
+  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta()])
   let nodeDetails = bkData
     .filter(o => !!o.vsn)
     .map(obj => ({...obj, ...details[obj.vsn]}))
-
-  if (bucket) {
-    nodeDetails = nodeDetails.filter(o => o.bucket == bucket)
-  }
 
   return nodeDetails
 }

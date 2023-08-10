@@ -39,7 +39,7 @@ export default function MyNodes() {
   useEffect(() => {
     setLoading(true)
 
-    Promise.all([User.listMyNodes(), BK.getNodeMeta({by: 'vsn'})])
+    Promise.all([User.listMyNodes(), BK.getNodeMeta()])
       .then(([nodes, nodeMetas]) => setData(nodes.map(o => ({...o, ...nodeMetas[o.vsn]}))))
       .catch(error => setError(error))
       .finally(() => setLoading(false))
