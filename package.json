@@ -31,5 +31,8 @@
     "apps/sage",
     "apps/project",
     "apps/registration-api"
-  ]
+  ],
+  "alias": {
+    "d3": "d3/dist/d3.js"
+  }
 }

@@ -1,13 +1,24 @@
 # build
-FROM node:14.16 AS build
+FROM node:18.17 AS build
+ARG SAGE_UI_APP
+ARG SAGE_UI_PROJECT
+ARG SAGE_UI_SERVICE_CONFIG
+ARG MAPBOX_TOKEN
+
+ENV SAGE_UI_PROJECT=${SAGE_UI_PROJECT}
+ENV SAGE_UI_SERVICE_CONFIG=${SAGE_UI_SERVICE_CONFIG}
 ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
+
 WORKDIR /app
+COPY apps/${SAGE_UI_APP}/package.json ./apps/${SAGE_UI_APP}/package.json
+COPY package*.json .
+RUN npm install
 COPY . .
-#RUN npm install -s --production
-#RUN npm run build-admin
+
+RUN npm run build -w ${SAGE_UI_APP}
 
 # server
-FROM nginx:1.18-alpine
+FROM nginx:1.24-alpine
 ARG SAGE_UI_APP
 WORKDIR /usr/share/nginx/html
 RUN rm -rf ./*
