@@ -1,7 +1,19 @@
 // use env variable to load corresponding config below
 const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 
-const configs = {
+type Configs = {
+  [key: string]: {
+    project: string
+    logo?: string
+    initialViewState?: { latitude: number, longitude: number, zoom: number }
+    nodes?: string[]
+    dataStart?: Date
+    dataEnd?: Date
+    dataProductPath?: string
+  }
+}
+
+const configs : Configs = {
   'sage': {
     project: 'SAGE'
   },
@@ -10,18 +22,14 @@ const configs = {
     project: 'Apiary'
   },
   'dawn': {
+    project: 'DAWN',
     logo: 'DAWN',
-    project: 'DAWN'
+    initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.5 }
   },
   'crocus': {
     logo: 'CROCUS',
     project: 'CROCUS',
-    /* override default map view bounding box */
-    initialViewState: {
-      latitude: 41.97,
-      longitude: -87.65,
-      zoom: 9.0
-    }
+    initialViewState: { latitude: 41.97, longitude: -87.65, zoom: 9.0 }
   },
   'neon-mdp': {
     logo: 'NEON-MDP',
@@ -33,7 +41,8 @@ const configs = {
   },
   'vto': {
     logo: 'VTO',
-    project: 'VTO'
+    project: 'VTO',
+    initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.0 }
   }
 }
 
