@@ -14,7 +14,8 @@ const columns = [{
   width: '1px'
 }, {
   id: 'node_type',
-  label: 'Type'
+  label: 'Type',
+  hide: SAGE_UI_PROJECT != 'sage'
 }, {
   id: 'vsn',
   label: 'VSN',
@@ -25,13 +26,7 @@ const columns = [{
   label: 'ID',
   width: '100px',
   hide: true
-},
-/* {
-  id: 'node_phase',
-  label: 'Phase',
-  hide: true
-} */
-{
+},{
   id: 'focus',
   label: 'Focus'
 }, {
@@ -49,6 +44,12 @@ const columns = [{
   label: 'Location',
   hide: SAGE_UI_PROJECT == 'sage'
 }, {
+  ...(SAGE_UI_PROJECT != 'sage' ? {
+    id: 'node_phase_v3',
+    label: 'Phase'
+  } : {})
+},
+{
   id: 'gps',
   label: 'GPS',
   format: (val, obj) => {

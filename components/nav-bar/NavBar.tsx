@@ -1,26 +1,13 @@
-import { useState, ReactNode } from 'react'
+import { ReactNode } from 'react'
 import styled from 'styled-components'
-import { useLocation } from 'react-router-dom'
 
 import SageLogo from './SageLogo'
-import Button from '@mui/material/Button'
+import NavItem, { Item } from './NavItem'
 import Divider from '@mui/material/Divider'
 
-import AccountIcon from '@mui/icons-material/AccountCircleRounded'
-import NodesIcon from '@mui/icons-material/HubOutlined'
-import AccessIcon from '@mui/icons-material/LockOutlined'
 import MailIcon from '@mui/icons-material/MailOutlineRounded'
 import ForumIcon from '@mui/icons-material/ForumOutlined'
-// import DevicesIcon from '@mui/icons-material/DeviceHubRounded'
-import ExitIcon from '@mui/icons-material/ExitToApp'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
-import Progress from '@mui/material/CircularProgress'
-
-import NavItem, { Item } from './NavItem'
-import Auth from '/components/auth/auth'
-
-const username = Auth.user
-const webOrigin = window.location.origin
 
 import config from '/config'
 import SignInButton from './SignInButton'

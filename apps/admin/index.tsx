@@ -22,8 +22,6 @@ import { ProgressProvider } from '/components/progress/ProgressProvider'
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
-import config from '/config'
-
 import RequireAuth from '/components/auth/RequireAuthAdmin'
 import TestSignIn from '/components/TestSignIn'
 
@@ -35,10 +33,7 @@ const NavMenu = () =>
   </NavItems>
 
 
-const isDev = () : boolean =>
-  process.env.NODE_ENV == 'development'
 
-'
 export default function App() {
   return (
     <StyledEngineProvider injectFirst>
@@ -48,7 +43,7 @@ export default function App() {
           <NavBar
             menu={<NavMenu />}
             logo={
-              <a href={isDev() ? '/' : config.home} className="no-style flex items-center">
+              <a href="/" className="no-style flex items-center">
                 <AdminLogo />
               </a>
             }
