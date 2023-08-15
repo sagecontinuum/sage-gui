@@ -20,7 +20,10 @@ const {initialViewState} = settings
 
 
 const DISABLE_MAP = config['disableMaps'] || false
-const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN || 'xyz.123'
+const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ||
+  'pk.eyJ1IjoibmNvbnJhZGFubCIsImEiOiJjbGt3dXhod2UxMzAyM2dwcnl4ZGJubnd1In0.' +
+  'FNVNhHfEIZ2qjy8mqFQmQw'
+
 
 const dotSize = 10
 
