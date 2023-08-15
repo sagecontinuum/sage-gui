@@ -70,13 +70,17 @@ Read more about tests [here](/docs/ui-testing.md).
 
 ## Docker
 
-*NOTE*: there is currently a bug in this docker flow!
-
-Build/run:
+Simple build/run example:
 
 ```
-export MAPBOX_TOKEN=<token_string>
-docker build --build-arg MAPBOX_TOKEN -t sage-ui .
+docker build -t sage-ui .
 docker run -dp 8080:80 sage-ui
 ```
+
+Passing a build arg variable:
+
+```
+docker build --build-arg MAPBOX_TOKEN=<token_string> -t sage-ui .
+docker run -dp 8080:80 sage-ui
+``````
 
