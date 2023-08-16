@@ -1,5 +1,5 @@
 import ReactDom from 'react-dom'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
@@ -25,7 +25,7 @@ import '/assets/styles.scss'
 import theme from '/components/theme'
 import settings from '/components/settings'
 
-const {project, focus, nodes} = settings
+const {logo, project, focus, nodes} = settings
 
 
 const NavMenu = () =>
@@ -36,7 +36,9 @@ const NavMenu = () =>
 
 
 const LogoPlaceHolder = () =>
-  <Logo>{settings.logo || project || focus}</Logo>
+  <Logo>
+    <Link to="/" className="no-style">{logo || project || focus}</Link>
+  </Logo>
 
 
 
@@ -59,12 +61,10 @@ export default function App() {
 
                 <Route path="/" element={<NodeTabs />}>
                   <Route path="nodes" element={<Nodes />} />
-                  <Route path="sensors" element={<SensorList />} />
+                  <Route path="sensors" element={<SensorList {...{project, focus, nodes}} />} />
                 </Route>
 
-                <Route path="nodes" element={<Nodes/>} />
                 <Route path="node/:vsn" element={<Node />} />
-                <Route path="sensors" element={<SensorList {...{project, focus, nodes}} />} />
                 <Route path="sensors/:name" element={<Sensor />} />
 
                 <Route path="data" element={<Data {...{project, focus, nodes}} />} />
@@ -101,6 +101,10 @@ const Logo = styled.span`
     top: -5px;
     font-size: .3em;
     color: #aaa;
+  }
+
+  a:hover {
+    opacity: .85;
   }
 `
 
