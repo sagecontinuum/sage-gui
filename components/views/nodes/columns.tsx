@@ -48,14 +48,26 @@ const columns = [{
     id: 'node_phase_v3',
     label: 'Phase'
   } : {})
-},
-{
+}, {
   id: 'gps',
   label: 'GPS',
-  format: (val, obj) => {
-    if (!obj || !obj.lat || !obj.lng) return '-'
-    return `${obj.lat}, ${obj.lng}`
+  format: (_, obj) => {
+    return (!obj.lat || !obj.lng) ? '-' :`${obj.lat}, ${obj.lng}`
   }
+}, {
+  id: 'staticGPS',
+  label: 'Static GPS',
+  format: (_, obj) => {
+    return (!obj.gps_lat || !obj.gps_lon) ? '-' :`${obj.gps_lat}, ${obj.gps_lon}`
+  },
+  hide: true
+}, {
+  id: 'liveGPS',
+  label: 'Live GPS',
+  format: (_, obj) => {
+    return (!obj.liveLat || !obj.liveLon) ? '-' :`${obj.liveLat}, ${obj.liveLon}`
+  },
+  hide: true
 }, {
   id: 'alt',
   label: 'Altitude',

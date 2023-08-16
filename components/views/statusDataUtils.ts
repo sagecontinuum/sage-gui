@@ -60,7 +60,7 @@ function getElapsedTimes(metrics: BH.MetricsByHost) {
 }
 
 
-function getNxMetric(
+function getNxMetric<T>(
   metrics: BH.MetricsByHost,
   metricName: string,
   latestOnly = true
@@ -72,7 +72,7 @@ function getNxMetric(
   if (!m) return
 
   const val = latestOnly ? m[m.length - 1].value : m
-  return val
+  return val as T
 }
 
 
@@ -169,19 +169,24 @@ export function mergeMetrics(
 
     const elapsedTimes = getElapsedTimes(metrics)
 
-    const temp = getNxMetric(metrics, 'iio.in_temp_input')
+    const temp = getNxMetric<number>(metrics, 'iio.in_temp_input')
     const liveLat = getNxMetric(metrics, 'sys.gps.lat')
     const liveLon = getNxMetric(metrics, 'sys.gps.lon')
+    const {gps_lat, gps_lon} = nodeObj
 
     return {
       ...nodeObj,
       temp: temp ? temp / 1000 : -999, // use -999 for better sorting
       status: determineStatus(nodeObj.computes, elapsedTimes),
       elapsedTimes,
-      hasStaticGPS: !!nodeObj.gps_lat && !!nodeObj.gps_lon,
+      hasStaticGPS: !!gps_lat && !!gps_lon,
       hasLiveGPS: !!liveLat && !!liveLon,
-      lat: nodeObj.gps_lat || liveLat,
-      lng: nodeObj.gps_lon || liveLon,
+      lat: gps_lat || liveLat,
+      lng: gps_lon || liveLon,
+      gps_lat,
+      gps_lon,
+      liveLat,
+      liveLon,
       alt: getNxMetric(metrics, 'sys.gps.alt'),
       uptimes: getMetric(metrics, 'sys.uptime'),
       memTotal: getMetric(metrics, 'sys.mem.total'),

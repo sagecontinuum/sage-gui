@@ -38,15 +38,6 @@ const sysTimeOpts = {
 }
 
 
-const LiveGPSDot = styled(Badge)`
-  .MuiBadge-badge {
-    right: 3px;
-    top: 2px;
-    padding: 0px;
-  }
-`
-
-
 function fsAggregator(data) {
   return data?.reduce((acc, o) => {
     const mountPoint = o.meta.mountpoint
@@ -208,9 +199,22 @@ const columns = [{
 }, {
   id: 'gps',
   label: 'GPS',
-  format: (val, obj) => {
-    if (!obj || !obj.lat || !obj.lng) return '-'
-    return `${obj.lat}, ${obj.lng}`
+  format: (_, obj) => {
+    return (!obj.lat || !obj.lng) ? '-' : `${obj.lat}, ${obj.lng}`
+  },
+  hide: true
+}, {
+  id: 'staticGPS',
+  label: 'Static GPS',
+  format: (_, obj) => {
+    return (!obj.gps_lat || !obj.gps_lon) ? '-' :`${obj.gps_lat}, ${obj.gps_lon}`
+  },
+  hide: true
+}, {
+  id: 'liveGPS',
+  label: 'Live GPS',
+  format: (_, obj) => {
+    return (!obj.liveLat || !obj.liveLon) ? '-' :`${obj.liveLat}, ${obj.liveLon}`
   },
   hide: true
 }, {

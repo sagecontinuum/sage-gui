@@ -1,12 +1,15 @@
+import { type VSN } from '/components/apis/beekeeper'
+
 // use env variable to load corresponding config below
 const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 
 type Configs = {
   [key: string]: {
     project: string
+    focus?: string
     logo?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
-    nodes?: string[]
+    nodes?: VSN[]
     dataStart?: Date
     dataEnd?: Date
     dataProductPath?: string
