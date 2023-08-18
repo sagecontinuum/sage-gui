@@ -360,7 +360,7 @@ export type NodeDetails = (State & NodeMeta)[]
 
 export async function getNodeDetails() : Promise<NodeDetails> {
   const [bkData, details] = await Promise.all([getNodes(), getNodeMeta()])
-  let nodeDetails = bkData
+  const nodeDetails = bkData
     .filter(o => !!o.vsn)
     .map(obj => ({...obj, ...details[obj.vsn]}))
 

@@ -391,8 +391,8 @@ export default function JobStatus() {
   }
 
   const getSubset = (selectedNodes, nodes) => {
-    const ids = selectedNodes.map(o => o.id)
-    const subset = nodes.filter(obj => ids.includes(obj.id))
+    const vsns = selectedNodes.map(o => o.vsn)
+    const subset = nodes.filter(obj => vsns.includes(obj.vsn))
     return subset
   }
 

@@ -76,9 +76,9 @@ export default function Nodes() {
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
-  const [data, setData] = useState(null)
+  const [data, setData] = useState<BK.State[]>(null)
   const [error, setError] = useState(null)
-  const [filtered, setFiltered] = useState(null)
+  const [filtered, setFiltered] = useState<BK.State[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
 
   // filter options
@@ -91,8 +91,8 @@ export default function Nodes() {
   const [updateID, setUpdateID] = useState(0)
   const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
-  const [selected, setSelected] = useState([])
-  const [lastUpdate, setLastUpdate] = useState(null)
+  const [selected, setSelected] = useState<BK.State[]>([])
+  const [lastUpdate, setLastUpdate] = useState<Date>(null)
 
   const dataRef = useRef(null)
   dataRef.current = data
@@ -110,7 +110,7 @@ export default function Nodes() {
         const metrics = await BH.getNodeData()
 
         setData(mergeMetrics(dataRef.current, metrics, null, null))
-        setLastUpdate(new Date().toLocaleTimeString('en-US'))
+        setLastUpdate(new Date())
 
         // recursive
         ping()
@@ -127,7 +127,7 @@ export default function Nodes() {
 
         const allData = mergeMetrics(state, metrics, null, null)
         setData(allData)
-        setLastUpdate(new Date().toLocaleTimeString('en-US'))
+        setLastUpdate(new Date())
         ping()
       }).catch(err => {console.log('err', err) ; setError(err)})
       .finally(() => setLoading(false))
@@ -213,8 +213,8 @@ export default function Nodes() {
 
 
   const getSubset = (selected, nodes) => {
-    const ids = selected.map(o => o.id)
-    const subset = nodes.filter(obj => ids.includes(obj.id))
+    const vsns = selected.map(o => o.vsn)
+    const subset = nodes.filter(obj => vsns.includes(obj.vsn))
     return subset
   }
 
@@ -231,7 +231,9 @@ export default function Nodes() {
       <Overview className="flex">
         {filtered && !selected?.length &&
           <Title>
-            {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>{lastUpdate}</small>
+            {filtered.length} Node{filtered.length == 1 ? '' : 's'} | <small>
+              {lastUpdate?.toLocaleTimeString('en-US')}
+            </small>
           </Title>
         }
 

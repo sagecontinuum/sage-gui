@@ -1,12 +1,13 @@
 node_modules/
 test-data/
-*token*
-*Token*
 build/
 dist/
 .parcel-cache/
 coverage/
 .DS_Store
+
+# test keys and extra precautions
 beekeeper-keys/
 *.log
-apps/sage/jobs/test-job-data
+*token*
+*Token*
