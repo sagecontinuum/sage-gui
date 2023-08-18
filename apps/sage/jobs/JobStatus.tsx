@@ -36,9 +36,9 @@ export const formatters = {
   apps: (objs) => <>
     {objs?.map((obj, i) => {
       const {name, plugin_spec} = obj
-      const {image} = plugin_spec
+      const {image = ''} = plugin_spec || {}
 
-      // todo(nc): ignore dockerhub component for now?
+      // todo(nc): ignore docker registry component for now?
       const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
 
       const l = objs.length - 1

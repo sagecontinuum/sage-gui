@@ -2,6 +2,7 @@
 **/dist/
 **/build/
 .parcel-cache/
+coverage/
 *.md
 .gitignore
 Dockerfile

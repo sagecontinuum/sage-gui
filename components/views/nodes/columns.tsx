@@ -4,7 +4,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
-const SAGE_UI_PROJECT = settings.SAGE_UI_PROJECT
+const PROJECT = settings.project
 
 
 const columns = [{
@@ -15,7 +15,7 @@ const columns = [{
 }, {
   id: 'node_type',
   label: 'Type',
-  hide: SAGE_UI_PROJECT != 'sage'
+  hide: PROJECT != 'SAGE'
 }, {
   id: 'vsn',
   label: 'VSN',
@@ -42,12 +42,7 @@ const columns = [{
 }, {
   id: 'location',
   label: 'Location',
-  hide: SAGE_UI_PROJECT == 'sage'
-}, {
-  ...(SAGE_UI_PROJECT != 'sage' ? {
-    id: 'node_phase_v3',
-    label: 'Phase'
-  } : {})
+  hide: PROJECT == 'SAGE'
 }, {
   id: 'gps',
   label: 'GPS',
@@ -116,4 +111,13 @@ const columns = [{
 }]
 
 
+if (PROJECT != 'SAGE') {
+  columns.splice(8, 0, {
+    id: 'node_phase_v3',
+    label: 'Phase'
+  })
+}
+
 export default columns
+
+
