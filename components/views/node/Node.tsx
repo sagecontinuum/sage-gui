@@ -565,7 +565,7 @@ export default function NodeView(props: Props) {
             </div>
           }
 
-          {admin && tab == "health" &&
+          {admin && tab == 'health' &&
             <AdminNodeHealth />
           }
 

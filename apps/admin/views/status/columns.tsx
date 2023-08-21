@@ -171,7 +171,7 @@ const columns = [{
 }, {
   id: 'node_type',
   label: 'Type',
-  hide: false
+  hide: true
 }, {
   id: 'id',
   label: 'ID',

@@ -212,31 +212,20 @@ export function aggregateMetrics(data: Record[], byHost: boolean = false) : AggM
 }
 
 
-type TestArgs = {
+type HealthTestArgs = {
   vsn?: BK.VSN,
   start?: string
+  device?: string
+}
+
+type SanityTestArgs = {
+  vsn?: BK.VSN,
+  start?: string
+  name?: string
 }
 
 
-export async function getSanityData(args?: TestArgs) : Promise<AggMetrics> {
-  const {vsn, start} = args || {}
-
-  const params = {
-    start: start || '-2d',
-    filter: {
-      name: 'sys.sanity_status.*',
-      ...(vsn && {vsn})
-    }
-  }
-
-  const sanityTests = await getData(params)
-  const byNode = aggregateMetrics(sanityTests)
-
-  return byNode
-}
-
-
-export async function getHealthData(args?: TestArgs) : Promise<ByMetric> {
+export async function getHealthData(args?: HealthTestArgs) : Promise<ByMetric> {
   const {vsn, start, } = args || {}
 
   const params = {
@@ -260,7 +249,51 @@ export async function getHealthData(args?: TestArgs) : Promise<ByMetric> {
 }
 
 
-export async function getSanitySummary(args?: TestArgs) : Promise<ByMetric> {
+
+export async function getSanityData(args?: SanityTestArgs & {tail?: number}) : Promise<AggMetrics> {
+  const {vsn, start, name, tail} = args || {}
+
+  const params = {
+    start: start || '-2d',
+    filter: {
+      name: name || 'sys.sanity_status.*',
+      ...(vsn && {vsn})
+    },
+    ...(tail && {tail}),
+  }
+
+  const sanityTests = await getData(params)
+  const byNode = aggregateMetrics(sanityTests)
+
+  return byNode
+}
+
+
+
+export async function getDeviceHealthSummary(args?: HealthTestArgs & {tail?: number}) : Promise<ByMetric> {
+  const {vsn, start, device, tail} = args || {}
+
+  const params = {
+    start: start ?? '-60h',
+    bucket: 'health-check-test',
+    filter: {
+      name: 'device_health_check',
+      ...(vsn && {vsn}),
+      ...(device && {device}),
+    },
+    ...(tail && {tail}),
+  }
+
+  const data = await getData(params)
+  const byNode = groupBy(data, 'meta.vsn')
+  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.device'))
+
+  return vsn ? byNode[vsn] : byNode
+}
+
+
+
+export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric> {
   const {vsn, start} = args || {}
 
   const params = {
@@ -293,27 +326,6 @@ export async function getSanitySummary(args?: TestArgs) : Promise<ByMetric> {
   })
 
   return byNode
-}
-
-
-export async function getDeviceHealthSummary(args?: TestArgs) : Promise<ByMetric> {
-  const {vsn, start, device} = args || {}
-
-  const params = {
-    start: start ?? '-60h',
-    bucket: 'health-check-test',
-    filter: {
-      name: 'device_health_check',
-      ...(vsn && {vsn}),
-      ...(device && {device})
-    }
-  }
-
-  const data = await getData(params)
-  const byNode = groupBy(data, 'meta.vsn')
-  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.device'))
-
-  return vsn ? byNode[vsn] : byNode
 }
 
 

@@ -106,12 +106,19 @@ export async function getNode(id: string) : Promise<BKState> {
 }
 
 
-type MetaParams = {vsn?: VSN, project?: string, focus?: string, nodes?: VSN[]}
+type FilteringArgs = {
+  project?: string,
+  focus?: string,
+  nodes?: VSN[]
+}
+
+type MetaParams = {vsn?: VSN} & FilteringArgs
 
 export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
-export async function getNodeMeta(params?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
-  const {vsn, project, focus, nodes} = params || {}
+
+export async function getNodeMeta(args?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
+  const {vsn, project, focus, nodes} = args || {}
 
   let data = await get(`${url}/production`)
 
@@ -312,12 +319,15 @@ export type State = SimpleManifest & {
 }
 
 
-export async function getState() : Promise<State[]> {
-  const proms = [getNodeMeta(), getManifests()]
-  const [nodeMeta, manifests] = await Promise.all(proms)
+export async function getState(args: FilteringArgs) : Promise<State[]> {
+  const {project, focus, nodes} = args || {}
+
+  const res = await Promise.all([getNodeMeta(), getManifests()])
+  const nodeMeta = res[0]
+  let data = res[1]
 
   // join manifests to meta
-  const data = (manifests as SimpleManifest[]).map(obj => {
+  data = (data as SimpleManifest[]).map(obj => {
 
     const meta = nodeMeta[obj.vsn] || {}
 

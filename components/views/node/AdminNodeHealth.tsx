@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useParams, useLocation } from 'react-router-dom'
+import { useParams, useLocation, Link } from 'react-router-dom'
 
 import Alert from '@mui/material/Alert'
 
@@ -27,8 +27,14 @@ function sanityColor(val, obj) {
     return color.red4
 }
 
+const yFormat = (test, testType: 'health' | 'sanity', label?: string) =>
+  <Link to={`/tests/?phase=deployed&test=${test}&test_type=${testType}`} target="_blank" className="text-inherit">
+    {label || test}
+  </Link>
 
-export default function () {
+
+
+export default function AdminNodeHealth() {
   const vsn = useParams().vsn as BK.VSN
   const params = new URLSearchParams(useLocation().search)
 
@@ -51,13 +57,13 @@ export default function () {
     setLoading(true)
 
     setLoadingHealth(true)
-    const p1 = BH.getDeviceHealthSummary({vsn, start: '-7d'})
+    const p1 = BH.getDeviceHealthSummary({vsn, start: '-14d'})
       .then((data) => setHealth(data))
       .catch((err) => setHealthError(err))
       .finally(() => setLoadingHealth(false))
 
     setLoadingSanity(true)
-    const p2 = BH.getSanityData({vsn, start: '-7d'})
+    const p2 = BH.getSanityData({vsn, start: '-14d'})
       .then((sanity) => {
         if (!sanity) return
 
@@ -100,6 +106,7 @@ export default function () {
               `
             }
             labelWidth={LABEL_WIDTH}
+            yFormat={label => yFormat(label, 'health')}
           />
         }
 
@@ -122,7 +129,6 @@ export default function () {
             data={sanityData}
             startTime={subDays(new Date(), 7)}
             endTime={endOfHour(new Date())}
-            yFormat={l => l.split('.').pop()}
             colorCell={sanityColor}
             tooltip={(item) =>
               `${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString()}<br>
@@ -133,6 +139,7 @@ export default function () {
               `
             }
             labelWidth={LABEL_WIDTH}
+            yFormat={label => yFormat(label, 'sanity', label.split('.').pop())}
           />
         }
 

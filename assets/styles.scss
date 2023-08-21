@@ -205,7 +205,7 @@ button.delete:hover, button.cancel:hover {
 
 // text
 .text-left { text-align: left; }
-.text-center {text-align: center; }
+.text-center { text-align: center; }
 .text-right	{ text-align: right; }
 .text-justify	{ text-align: justify; }
 
@@ -214,6 +214,8 @@ button.delete:hover, button.cancel:hover {
 .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
 .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+.text-inherit { color: inherit; }
 
 .flex-wrap { flex-wrap: wrap; }
 .flex-nowrap { flex-shrink: 0; }
