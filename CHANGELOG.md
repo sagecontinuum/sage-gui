@@ -3,6 +3,54 @@
 The following are some notable changes to the UI
 
 
+## [2.5.0](https://github.com/sagecontinuum/sage-gui/compare/v2.4.0...v2.5.0) (2023-08-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* change admin /status url to /nodes
+* /node/<node_id> URLs will result in error page unless a valid VSN is provided instead
+
+### Features
+
+* add live and static gps columns to node lists ([147db45](https://github.com/sagecontinuum/sage-gui/commit/147db4599861f421ede3c6d1f14cd1b8ac59c4eb))
+* add node phase tabs and url routing for use as needed in admin/portal ui; change admin /status url to /nodes; some cleanup ([4c1e3eb](https://github.com/sagecontinuum/sage-gui/commit/4c1e3eb2fbd9924e6031ae76821cf0676543eed1))
+* add phase counts ([2a66915](https://github.com/sagecontinuum/sage-gui/commit/2a6691577c5ec0b01ea1ed8e3d025e6f9af33ac9))
+* **admin:** add time series charts per metric ([e932d20](https://github.com/sagecontinuum/sage-gui/commit/e932d20ce6a87d9fa6c8bada88a4041b3401c271))
+* **admin:** support health/sanity test filtering accross nodes (officially); related enhancements/optimizations ([0d2faa1](https://github.com/sagecontinuum/sage-gui/commit/0d2faa1ac22f35472f64dc63a2a0e333a8743124))
+* **data:** deletable filter chips in query summary ([e6800a9](https://github.com/sagecontinuum/sage-gui/commit/e6800a9dd1249fdf8a9632ed6ed39d65b656caf2))
+* drop legacy sensor sources; update sensor lists to use manifest ([12fc74f](https://github.com/sagecontinuum/sage-gui/commit/12fc74fa8850889e2d0873533424cff84e64837f))
+* **jobs:** add job error message dialog; minor enhancements ([304ec71](https://github.com/sagecontinuum/sage-gui/commit/304ec71a3411a734ae518044040cf7328a632d37))
+* **portal:** add status tooltip to node list ([2baac46](https://github.com/sagecontinuum/sage-gui/commit/2baac4663f9c2deebdba1bd281abce85aef7370f))
+* refactor/consolidate node view for admin/portal/project pages ([8b91a27](https://github.com/sagecontinuum/sage-gui/commit/8b91a27cbe9362e41655ef944c7b2ffd08d12ed2))
+* update node meta overview to include sensors, computes, and resources ([99358e4](https://github.com/sagecontinuum/sage-gui/commit/99358e46936cd5ecd43dbe0bfdc0f688ea4e1c03))
+* use manifest computes in node status (in node listing tables); code refactoring ([fa0cd85](https://github.com/sagecontinuum/sage-gui/commit/fa0cd859c357ab8dbbb2b1882ffb1eb85ab6a19b))
+
+
+### Bug Fixes
+
+* add admin logo superscript text (and refactor) ([3186b90](https://github.com/sagecontinuum/sage-gui/commit/3186b90a836fd386c6599e3ab2da15aa5edd29dd))
+* **admin:** add n/a in node list; remove pass/fail;  add status icon; improved health styling ([1ae9843](https://github.com/sagecontinuum/sage-gui/commit/1ae984322ecea266a6cb4daaa4311985560c93ca))
+* **admin:** update factory view to use manifests; refactor ([8d1051c](https://github.com/sagecontinuum/sage-gui/commit/8d1051c0a5e7774873f63e6b5a353f27c900aa91))
+* bump node view beehive gps query to -30d; add timestamp to node view; waggle-sensor/tickets[#79](https://github.com/sagecontinuum/sage-gui/issues/79) ([1653bcd](https://github.com/sagecontinuum/sage-gui/commit/1653bcdcf17435ee5332d53194615de5e27f1bd6))
+* **data:** always show the data timeline buttons on the node view ([d2b4289](https://github.com/sagecontinuum/sage-gui/commit/d2b428968e1dbf8c21a3e45047913b4a3882040c))
+* **data:** drop sage commons in favor of wifire; add sensor list on all UIs; fix node linkage on project UI ([f403053](https://github.com/sagecontinuum/sage-gui/commit/f4030534f7313e20a60615ef2ae4e13ea662d189))
+* **data:** fix "Unassigned" filter on data browser; minor state improvements ([27914dc](https://github.com/sagecontinuum/sage-gui/commit/27914dc6b6c7a9e812af471f2a0924e1291dad8b))
+* **data:** fix links for locally-ran plugins from timeline to query browser ([64d05fb](https://github.com/sagecontinuum/sage-gui/commit/64d05fb705487cebde1674dc9e27f5c74ccd99c5))
+* **data:** fix timeline label layout/positioning issue (and some related cleanup) ([930bd28](https://github.com/sagecontinuum/sage-gui/commit/930bd2834d1509b274413da67a8cc78ad2737be2))
+* fix "last updated" column; properly check against manifest computes using the host serial_no ([c239f54](https://github.com/sagecontinuum/sage-gui/commit/c239f5407a0b21037d4065a733d8181d2c31d234))
+* fix metone check in sensor previews on node page; (to be generalized later) ([4f6bf6c](https://github.com/sagecontinuum/sage-gui/commit/4f6bf6c5a88e9be2338c8e6c3a8dd191a456121b))
+* fix timeline "loading" skeleton effect ([f0bad21](https://github.com/sagecontinuum/sage-gui/commit/f0bad214bc158f1db27bca3cdf1a046695d3b867))
+* fix/improve gps icon colors in node lists ([8ac54af](https://github.com/sagecontinuum/sage-gui/commit/8ac54af99d2012882c9ffa83429f6743c66b392a))
+* include blades when filtering by sensor; (and rename function in prep for migration) ([2939aa7](https://github.com/sagecontinuum/sage-gui/commit/2939aa7eef1f693e9066b1cd8cd5170c8fcb0853))
+* **jobs:** add error message to job action errors; fixes waggle-sensor/tickets[#38](https://github.com/sagecontinuum/sage-gui/issues/38) ([a79282a](https://github.com/sagecontinuum/sage-gui/commit/a79282a48641b03630b584be0fdef142c9677568))
+* **jobs:** add missing map tooltip info ([345e038](https://github.com/sagecontinuum/sage-gui/commit/345e038d8b9f8eebb74eb7669302183726e9a27d))
+* **jobs:** aggregate on k3s_pod_instance instead of k3s_pod_name (for newer data); some cleanup / type fixing ([8637d41](https://github.com/sagecontinuum/sage-gui/commit/8637d411b7d1830979219668fa2be57a19c06995))
+* **projects:** remove extraneous url routing, fixing the sensor list; styling / add logo link ([d30eef7](https://github.com/sagecontinuum/sage-gui/commit/d30eef72bcc66c3bb4ed7bb2f6b855edbeec9636))
+* update sensor list source; fix live gps reporting; put gps altitude in separate column ([47a0359](https://github.com/sagecontinuum/sage-gui/commit/47a0359390c2c1d7675df77c447344e4bd0c76a8))
+* use manifests for sensor columns in node listings; refactor sensor lists ([56058c3](https://github.com/sagecontinuum/sage-gui/commit/56058c31151b87c9f491c0ab27719bc2f747213c))
+* use VSNs for node urls; add node-not-found/suggested link page; some smaller UX enhancements and bug fixes ([d73d509](https://github.com/sagecontinuum/sage-gui/commit/d73d5097dfb3bde12c16f20a426bd0ed55c5da1a))
+
 ## [2.4.0](https://github.com/sagecontinuum/sage-gui/compare/v2.3.0...v2.4.0) (2023-02-23)
 
 
