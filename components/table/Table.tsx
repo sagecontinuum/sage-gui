@@ -258,12 +258,14 @@ const indexData = (data, key?: string) =>
 
 
 const clientSideSort = (data, id, direction) => {
-  let isArrayCol, isNumeric
+  let isArrayCol, isObject, isNumeric
   try {
     isArrayCol = Array.isArray(data[0][id])
-    isNumeric = typeof data[0][id] === 'number'
+    isObject = typeof data[0][id] === 'object'
+    isNumeric = data.some(o => typeof o[id] === 'number')
   } catch {
     isArrayCol = false
+    isObject = false
     isNumeric = false
   }
 
@@ -282,6 +284,8 @@ const clientSideSort = (data, id, direction) => {
         (b[id] || -Infinity).toString()
           .localeCompare((a[id] || -Infinity).toString(), undefined, {numeric: true})
     )
+  } else if (isObject) {
+    // do nothing for objects
   } else {
     data.sort((a, b) =>
       direction == 'asc' ?
