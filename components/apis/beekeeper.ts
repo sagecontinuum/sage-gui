@@ -319,9 +319,7 @@ export type State = SimpleManifest & {
 }
 
 
-export async function getState(args: FilteringArgs) : Promise<State[]> {
-  const {project, focus, nodes} = args || {}
-
+export async function getState() : Promise<State[]> {
   const res = await Promise.all([getNodeMeta(), getManifests()])
   const nodeMeta = res[0]
   let data = res[1]

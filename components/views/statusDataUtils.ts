@@ -62,32 +62,42 @@ function getElapsedTimes(metrics: BH.MetricsByHost) {
 
 function getNxMetric<T>(
   metrics: BH.MetricsByHost,
-  metricName: string,
-  latestOnly = true
+  serial: string,
+  metricName: string
 ) {
-  // first find the nx host (16 chars + suffix)
-  const hostID = Object.keys(metrics).find(host => host.includes('ws-nxcore'))
+  if (!serial) return
 
-  const m = (metrics[hostID] || {})[metricName]
+  // first find the nx host (16 chars + suffix)
+  const host = BK.findHostWithSerial(Object.keys(metrics), serial)
+
+  const m = (metrics[host] || {})[metricName]
   if (!m) return
 
-  const val = latestOnly ? m[m.length - 1].value : m
+  const val = m.at(-1).value
   return val as T
 }
 
 
-function getMetric(
+function getMetricsByHost(
   metrics: BH.MetricsByHost,
+  computes: BK.SimpleManifest['computes'],
   metricName: string,
   latestOnly = true
 ) {
 
   const valueObj = {}
   Object.keys(metrics).forEach(host => {
+    const suffixEnding = host.split('-')[1]  // example: '0123456789abcdef.ws-rpi' -> rpi
+
+    const serial = computes.find(o => o.name == suffixEnding)?.serial_no
+    if (!serial) return
+
+    host = BK.findHostWithSerial(Object.keys(metrics), serial)
+
     const m = metrics[host][metricName]
     if (!m) return
 
-    const val = latestOnly ? m[m.length - 1].value : m
+    const val = latestOnly ? m.at(-1).value : m
     valueObj[host] = val
   })
 
@@ -160,7 +170,7 @@ export function mergeMetrics(
   const byNode = aggregateMetrics(metrics)
 
   const joinedData = data.map(nodeObj => {
-    const vsn = nodeObj.vsn
+    const {vsn, computes} = nodeObj
 
     if (!byNode || !(vsn in byNode))
       return {...nodeObj, status: 'not reporting (30d+)'}
@@ -169,15 +179,19 @@ export function mergeMetrics(
 
     const elapsedTimes = getElapsedTimes(metrics)
 
-    const temp = getNxMetric<number>(metrics, 'iio.in_temp_input')
-    const liveLat = getNxMetric(metrics, 'sys.gps.lat')
-    const liveLon = getNxMetric(metrics, 'sys.gps.lon')
+    const nxSerial = computes.find(o => o.name == 'nxcore')?.serial_no
+
+    const temp = getNxMetric<number>(metrics, nxSerial, 'iio.in_temp_input')
+    const liveLat = getNxMetric(metrics, nxSerial, 'sys.gps.lat')
+    const liveLon = getNxMetric(metrics, nxSerial, 'sys.gps.lon')
+    const alt = getNxMetric(metrics, nxSerial, 'sys.gps.alt')
+
     const {gps_lat, gps_lon} = nodeObj
 
     return {
       ...nodeObj,
-      temp: temp ? temp / 1000 : -999, // use -999 for better sorting
-      status: determineStatus(nodeObj.computes, elapsedTimes),
+      temp: temp ? temp / 1000 : null,
+      status: determineStatus(computes, elapsedTimes),
       elapsedTimes,
       hasStaticGPS: !!gps_lat && !!gps_lon,
       hasLiveGPS: !!liveLat && !!liveLon,
@@ -187,20 +201,20 @@ export function mergeMetrics(
       gps_lon,
       liveLat,
       liveLon,
-      alt: getNxMetric(metrics, 'sys.gps.alt'),
-      uptimes: getMetric(metrics, 'sys.uptime'),
-      memTotal: getMetric(metrics, 'sys.mem.total'),
-      memFree: getMetric(metrics, 'sys.mem.free'),
-      memAvail: getMetric(metrics, 'sys.mem.avail'),
-      fsAvail: getMetric(metrics, 'sys.fs.avail', false),
-      fsSize: getMetric(metrics, 'sys.fs.size', false),
-      // cpu: getMetric(metrics, 'sys.cpu_seconds', false),
-      // sysTimes: getMetric(metrics, 'sys.time'),
-      // txBytes: getMetric(metrics, 'sys.net.tx_bytes', false),
-      // txPackets: getMetric(metrics, 'sys.net.tx_packets', false),
-      // rxBytes: getMetric(metrics, 'sys.net.rx_bytes', false),
-      // rxPackets: getMetric(metrics, 'sys.net.rx_packets', false),
-      ip: Object.values(getMetric(metrics, 'sys.net.ip', true))[0],
+      alt,
+      uptimes: getMetricsByHost(metrics, computes, 'sys.uptime'),
+      memTotal: getMetricsByHost(metrics, computes, 'sys.mem.total'),
+      memFree: getMetricsByHost(metrics, computes, 'sys.mem.free'),
+      memAvail: getMetricsByHost(metrics, computes, 'sys.mem.avail'),
+      fsAvail: getMetricsByHost(metrics, computes, 'sys.fs.avail', false),
+      fsSize: getMetricsByHost(metrics, computes, 'sys.fs.size', false),
+      // cpu: getMetricsByHost(metrics, 'sys.cpu_seconds', false),
+      // sysTimes: getMetricsByHost(metrics, 'sys.time'),
+      // txBytes: getMetricsByHost(metrics, 'sys.net.tx_bytes', false),
+      // txPackets: getMetricsByHost(metrics, 'sys.net.tx_packets', false),
+      // rxBytes: getMetricsByHost(metrics, 'sys.net.rx_bytes', false),
+      // rxPackets: getMetricsByHost(metrics, 'sys.net.rx_packets', false),
+      ip: Object.values(getMetricsByHost(metrics, computes, 'sys.net.ip'))[0],
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}

@@ -251,10 +251,11 @@ export async function getHealthData(args?: HealthTestArgs) : Promise<ByMetric> {
 
 
 export async function getSanityData(args?: SanityTestArgs & {tail?: number}) : Promise<AggMetrics> {
-  const {vsn, start, name, tail} = args || {}
+  const {vsn, start = '-2d', end, name, tail} = args || {}
 
   const params = {
-    start: start || '-2d',
+    start: start,
+    ...(end && {end}),
     filter: {
       name: name || 'sys.sanity_status.*',
       ...(vsn && {vsn})
