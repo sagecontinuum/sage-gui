@@ -14,6 +14,9 @@ import { endOfHour, subDays } from 'date-fns'
 
 export const LABEL_WIDTH = 200
 
+const DEFAULT_VIEW = 7  // days
+const start = '-14d'    // query start
+
 
 function sanityColor(val, obj) {
   if (val == null)
@@ -57,13 +60,13 @@ export default function AdminNodeHealth() {
     setLoading(true)
 
     setLoadingHealth(true)
-    const p1 = BH.getDeviceHealthSummary({vsn, start: '-14d'})
+    const p1 = BH.getDeviceHealthSummary({vsn, start})
       .then((data) => setHealth(data))
       .catch((err) => setHealthError(err))
       .finally(() => setLoadingHealth(false))
 
     setLoadingSanity(true)
-    const p2 = BH.getSanityData({vsn, start: '-14d'})
+    const p2 = BH.getSanityData({vsn, start})
       .then((sanity) => {
         if (!sanity) return
 
@@ -90,7 +93,7 @@ export default function AdminNodeHealth() {
           <TimelineChart
             data={health}
             // same range as the request, but can be modified if needed
-            startTime={subDays(new Date(), 7)}
+            startTime={subDays(new Date(), DEFAULT_VIEW)}
             endTime={endOfHour(new Date())}
             colorCell={(val, obj) => {
               if (val == null)
@@ -127,7 +130,7 @@ export default function AdminNodeHealth() {
         {sanityData &&
           <TimelineChart
             data={sanityData}
-            startTime={subDays(new Date(), 7)}
+            startTime={subDays(new Date(), DEFAULT_VIEW)}
             endTime={endOfHour(new Date())}
             colorCell={sanityColor}
             tooltip={(item) =>

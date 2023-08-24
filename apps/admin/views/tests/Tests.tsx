@@ -19,11 +19,11 @@ import Checkbox from '/components/input/Checkbox'
 import { union } from 'lodash'
 
 
-const RANGE_IN_DAYS = 7
+const DEFAULT_VIEW = 7  // days
+const start = '-14d'    // query start
 
 const healthGithubURL = 'https://github.com/search?q=repo%3Awaggle-sensor%2Fnode-health-reporter'
 const sanityGithubURL = 'https://github.com/search?q=repo%3Awaggle-sensor%2Fwaggle-sanity-check'
-
 
 const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute:'2-digit' }
 const dateOpts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' }
@@ -176,8 +176,8 @@ export default function TestView() {
 
     setLoading(true)
 
-    const p1 = BH.getHealthData({start: '-14d'})
-    const p2 = BH.getSanitySummary({start: '-14d'})
+    const p1 = BH.getHealthData({start})
+    const p2 = BH.getSanitySummary({start})
 
     Promise.all([p1, p2])
       .then(([health, sanity]) => {
@@ -211,7 +211,7 @@ export default function TestView() {
     setTestsByVSN(null)
 
     setLoading(true)
-    const args = {start: '-14d', device: test}
+    const args = {start, device: test}
     BH.getDeviceHealthSummary(args)
       .then((data) => {
         let d = {}
@@ -240,7 +240,7 @@ export default function TestView() {
     setTestsByVSN(null)
 
     setLoading(true)
-    const args = {start: '-14d', name: test}
+    const args = {start, name: test}
     BH.getSanityData(args)
       .then((data) => {
         let d = {}
@@ -318,7 +318,7 @@ export default function TestView() {
           <h2>Health</h2>
           <TimelineChart
             data={health}
-            startTime={subDays(new Date(), RANGE_IN_DAYS)}
+            startTime={subDays(new Date(), DEFAULT_VIEW)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
@@ -337,7 +337,7 @@ export default function TestView() {
           <h2>Sanity Tests</h2>
           <TimelineChart
             data={sanity}
-            startTime={subDays(new Date(), RANGE_IN_DAYS)}
+            startTime={subDays(new Date(), DEFAULT_VIEW)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
@@ -378,7 +378,7 @@ export default function TestView() {
           </h2>
           <TimelineChart
             data={testsByVSN}
-            startTime={subDays(new Date(), RANGE_IN_DAYS)}
+            startTime={subDays(new Date(), DEFAULT_VIEW)}
             endTime={endOfHour(new Date())}
             onRowClick={handleLabelClick}
             onCellClick={handleCellClick}
