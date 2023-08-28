@@ -7,6 +7,7 @@ import * as BK from '/components/apis/beekeeper'
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning
 
+const noneMsg = `no sys.uptime(s) for ${NODE_STATUS_RANGE}`
 
 type LastUpdatedProps = {
   computes: BK.Compute[]
@@ -16,8 +17,8 @@ type LastUpdatedProps = {
 export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element {
   const {computes, elapsedTimes} = props
 
-  if (!computes)
-    return <>n/a</>
+  if (!computes || !elapsedTimes)
+    return <div className="muted">no sys.uptime(s) for {NODE_STATUS_RANGE}</div>
 
   return (
     <div>
@@ -32,8 +33,7 @@ export default function NodeLastReported(props: LastUpdatedProps) : JSX.Element 
               elapsedTimes ? getColorClass(elapsedTimes[host], FAIL_THRES, WARNING_THRES, 'success font-bold') : ''
             }>
               {host in (elapsedTimes || {}) ?
-                msToTime(elapsedTimes[host]) :
-                `no sys.uptime for ${NODE_STATUS_RANGE}`
+                msToTime(elapsedTimes[host]) : `no sys.uptime for ${NODE_STATUS_RANGE}`
               }
             </b>
           </div>

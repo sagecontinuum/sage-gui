@@ -50,7 +50,7 @@ const columns = [
       !val ? '-' : utils.prettyTime(val.nx)
   }, {
     id: 'rpi',
-    label: 'RPi last updated',
+    label: 'RPi last reported',
     format: (_, obj) => {
       if (!obj || !obj.elapsedTimes) return '-'
 
@@ -61,7 +61,7 @@ const columns = [
     }
   }, {
     id: 'nx',
-    label: 'NX last updated',
+    label: 'NX last reported',
     format: (_, obj) => {
       if (!obj || !obj.elapsedTimes) return '-'
 

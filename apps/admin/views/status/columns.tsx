@@ -277,7 +277,7 @@ const columns = [{
   }
 }, {
   id: 'elapsedTimes',
-  label: 'Last Updated',
+  label: 'Last Reported',
   format: formatters.lastUpdated
 }, {
   id: 'uptimes',

@@ -161,7 +161,9 @@ export default function StatusView() {
 
     filteredData = queryData(filteredData, query)
     filteredData = filterData(filteredData, filterState)
-    setFiltered(filteredData)
+
+    // sort by not reporting to place not reporting in top layer of map
+    setFiltered(filteredData.sort((a) => a.status == 'not reporting' ? 1 : -1))
 
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))

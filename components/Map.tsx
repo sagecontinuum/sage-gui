@@ -12,10 +12,13 @@ import type { MapRef, MapProps } from 'react-map-gl'
 import { ClickAwayListener } from '@mui/material'
 
 import Clipboard from './utils/Clipboard'
-import type { NodeMeta } from '/components/apis/beekeeper'
+import NodeLastReported from './utils/NodeLastReported'
 
 import config from '/config'
 import settings from './settings'
+
+import * as BK from '/components/apis/beekeeper'
+
 const {initialViewState} = settings
 
 
@@ -111,16 +114,17 @@ const layerStyle = {
 
 
 type PopupProps = {
-  data: NodeMeta
+  data: BK.State
   onClose: () => void
+  showUptime: boolean
 }
 
 function PopupInfo(props: PopupProps) {
-  const {onClose, data} = props
+  const {onClose, data, showUptime} = props
 
   // tooltip info deconstruction
   const {
-    vsn,  project, focus, location, lng, lat, node_type
+    vsn,  project, focus, location, lng, lat, node_type, computes, elapsedTimes
   } = data || {}
 
   return (
@@ -138,38 +142,47 @@ function PopupInfo(props: PopupProps) {
               {vsn}
             </Link>
           </h2>
-          <table className="key-value simple">
-            <tbody>
-              <tr>
-                <td>Project</td>
-                <td>
-                  <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
-                    {project}
-                  </Link>&nbsp;
-                  {focus &&
-                    <>(<Link to={
-                      `/nodes/?project="${encodeURIComponent(project)}"` +
-                      `&focus="${encodeURIComponent(focus)}"`
-                    }>
-                      {focus}
-                    </Link>)</>
-                  }
-                </td>
-              </tr>
-              <tr>
-                <td>Location</td>
-                <td>
-                  <Link to={`/nodes/?location="${encodeURIComponent(location)}"`}>
-                    {location}
-                  </Link>
-                </td>
-              </tr>
-              <tr>
-                <td>Coordinates</td>
-                <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
-              </tr>
-            </tbody>
-          </table>
+
+          <div className="flex gap">
+            <table className="key-value simple node-meta">
+              <tbody>
+                <tr>
+                  <td>Project</td>
+                  <td>
+                    <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
+                      {project}
+                    </Link>&nbsp;
+                    {focus &&
+                      <>| <Link to={
+                        `/nodes/?project="${encodeURIComponent(project)}"` +
+                        `&focus="${encodeURIComponent(focus)}"`
+                      }>
+                        {focus}
+                      </Link></>
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <td>Location</td>
+                  <td>
+                    <Link to={`/nodes/?location="${encodeURIComponent(location)}"`}>
+                      {location}
+                    </Link>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Coordinates</td>
+                  <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
+                </tr>
+              </tbody>
+            </table>
+            {showUptime &&
+              <div className="uptimes">
+                <b>Last reported metric</b><br/>
+                <NodeLastReported computes={computes} elapsedTimes={elapsedTimes} />
+              </div>
+            }
+          </div>
         </div>
       </ClickAwayListener>
     </Popup>
@@ -178,7 +191,7 @@ function PopupInfo(props: PopupProps) {
 
 
 type Data = {
-  vsn: NodeMeta['vsn'],
+  vsn: BK.VSN,
   lng: number,
   lat: number,
   status?: string
@@ -187,14 +200,15 @@ type Data = {
 type Props = {
   data: Data
   updateID?: number
-  projection?: 'globe'
+  showUptime?: boolean
 }
 
 
 export default function MapGL(props: Props) {
   const {
     data = null,
-    updateID
+    updateID,
+    showUptime = true
   } = props
 
   const mapRef = useRef<MapRef>(null)
@@ -215,7 +229,7 @@ export default function MapGL(props: Props) {
       return
     }
 
-    const d = data
+    let d = data
     const geoData = getGeoSpec(d)
     const coords = getValidCoords(d)
     const bbox = getBBox(coords)
@@ -252,20 +266,19 @@ export default function MapGL(props: Props) {
           .filter(o => o.lng && o.lat)
           .map(obj => {
             const {vsn, lng, lat, status} = obj
-
             return (
               <Marker key={vsn}
                 longitude={lng}
                 latitude={lat}
                 onClick={(evt) => handleClick(evt, obj)}
               >
-                <div className={`marker-dot marker-${status}`}></div>
+                <div className={`marker-dot marker-${(status || '').replace(/ /g, '-')}`}></div>
               </Marker>
             )
           })}
 
         {popup &&
-          <PopupInfo data={popup} onClose={() => setPopup(null)} />
+          <PopupInfo data={popup} onClose={() => setPopup(null)} showUptime={showUptime} />
         }
       </Map>
     </Root>
@@ -288,6 +301,7 @@ const Root = styled.div`
     height: ${dotSize}px;
     width: ${dotSize}px;
     border: 1px solid #666;
+    // background: #d8d8d8;
     border-radius: 50%;
     display: inline-block;
   }
@@ -298,13 +312,32 @@ const Root = styled.div`
     opacity: .65;
   }
 
-  .marker-degraded {
-    background: hsl(41, 83%, 35%);
+  ${settings.project != 'SAGE' &&
+    `
+    .marker-degraded {
+      background: hsl(41, 83%, 35%);
+    }
+
+    .marker-not-reporting {
+      background: #d72020;
+      border: 1px solid #992727;
+      opacity: .65;
+    }
+    `}
+
+  .mapboxgl-popup-content {
+    width: fit-content;
+
+    .node-meta {
+      width: 50%;
+    }
+    .uptimes {
+      width: 50%;
+      white-space: nowrap;
+    }
   }
 
-  .marker-not-reporting {
-     background: #d72020;
-     border: 1px solid #992727;
-     opacity: .65;
+  .clipboard-content {
+    margin-right: 20px;
   }
 `

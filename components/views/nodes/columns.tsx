@@ -31,7 +31,7 @@ const columns = [{
   label: 'Focus'
 }, {
   id: 'elapsedTimes',
-  label: 'Last Updated',
+  label: 'Last Reported',
   format: formatters.lastUpdated,
   hide: true
 }, {

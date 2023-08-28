@@ -27,7 +27,7 @@ const configs : Configs = {
   'dawn': {
     project: 'DAWN',
     logo: 'DAWN',
-    initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.5 }
+    initialViewState: { latitude: 41.88, longitude: -87.66, zoom: 12.3 }
   },
   'crocus': {
     logo: 'CROCUS',
@@ -46,6 +46,9 @@ const configs : Configs = {
     logo: 'VTO',
     project: 'VTO',
     initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.0 }
+  },
+  'admin': {
+    project: 'ALL' // (an arbitrary project since the admin ui shows all projects)
   }
 }
 

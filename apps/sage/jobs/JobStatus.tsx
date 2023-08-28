@@ -419,7 +419,9 @@ export default function JobStatus() {
           {geo &&
             <Map
               data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
-              updateID={updateMap} />
+              updateID={updateMap}
+              showUptime={false}
+            />
           }
         </MapContainer>
 
