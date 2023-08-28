@@ -5,8 +5,8 @@ const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 
 type Configs = {
   [key: string]: {
-    project: string
-    focus?: string
+    project: string   // case insensitive for data/api purposes
+    focus?: string    // case insensitive for data/api purposes
     logo?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
     nodes?: VSN[]
@@ -18,7 +18,7 @@ type Configs = {
 
 const configs : Configs = {
   'sage': {
-    project: 'SAGE'
+    project: 'Sage'
   },
   'apiary': {
     logo: 'Apiary',
@@ -48,7 +48,7 @@ const configs : Configs = {
     initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.0 }
   },
   'admin': {
-    project: 'ALL' // (an arbitrary project since the admin ui shows all projects)
+    project: 'Admin' // (an arbitrary project since the admin ui shows all projects)
   }
 }
 

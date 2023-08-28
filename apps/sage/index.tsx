@@ -15,6 +15,7 @@ import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
 import AddIcon from '@mui/icons-material/AddRounded'
 
+import MetaRoute from '/components/Meta'
 import NavBar, { NavItems } from '/components/nav-bar/NavBar'
 import NavItem, { Item } from '/components/nav-bar/NavItem'
 import Progress from '/components/progress/LazyLoading'
@@ -171,49 +172,55 @@ export default function Sage() {
                 <Routes>
                   <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                  <Route path="/" element={<NodeTabs />}>
-                    <Route path="nodes" element={<Nodes />} />
-                    <Route path="sensors" element={<SensorList />} />
+                  <Route path='/' element={<MetaRoute />}>
+
+                    <Route path="/" element={<NodeTabs />}>
+                      <Route
+                        path="nodes"
+                        element={<Nodes />} />
+                      <Route
+                        path="sensors"
+                        element={<SensorList />} />
+                    </Route>
+                    <Route path="sensors/:name" element={<Sensor />} />
+
+                    <Route path="node/:vsn" element={<Node />} />
+
+                    <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
+                    <Route path="apps" element={<Apps />}>
+                      <Route path="explore" element={<AppList />} />
+                      <Route path="app/*" element={<App />} />
+                      <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
+                      <Route  path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
+                    </Route>
+
+                    <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
+                    <Route path="jobs" element={<JobStatus />}>
+                      <Route path=":view" element={<JobStatus />} />
+                    </Route>
+
+                    <Route path="create-job" element={
+                      <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
+                    }/>
+
+                    <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
+                    <Route path="data/ontology/:name" element={<Ontology />} />
+                    <Route path="data/product/:name" element={<DataProduct />} />
+                    <Route path="query-browser" element={<DataBrowser />} />
+
+                    <Route path="data-commons-demo" element={<DataProductSearch />} />
+
+                    <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                      <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                      <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                      <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                      <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                    </Route>
+
+                    <Route path="login" element={<TestSignIn />} />
+                    <Route path="*" element={<NotFound />} />
+
                   </Route>
-                  <Route path="sensors/:name" element={<Sensor />} />
-
-                  <Route path="node/:vsn" element={<Node />} />
-
-                  <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
-                  <Route path="apps" element={<Apps />}>
-                    <Route path="explore" element={<AppList />} />
-                    <Route path="app/*" element={<App />} />
-                    <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
-                    <Route path="shared-with-me" element={<RequireAuth><AppList /></RequireAuth>} />
-                    <Route path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
-                  </Route>
-
-
-                  <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
-                  <Route path="jobs" element={<JobStatus />}>
-                    <Route path=":view" element={<JobStatus />} />
-                  </Route>
-
-                  <Route path="create-job" element={
-                    <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
-                  }/>
-
-                  <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
-                  <Route path="data/ontology/:name" element={<Ontology />} />
-                  <Route path="data/product/:name" element={<DataProduct />} />
-                  <Route path="query-browser" element={<DataBrowser />} />
-
-                  <Route path="data-commons-demo" element={<DataProductSearch />} />
-
-                  <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
-                    <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
-                    <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                    <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                    <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
-                  </Route>
-
-                  <Route path="login" element={<TestSignIn />} />
-                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </ProgressProvider>
             </Container>

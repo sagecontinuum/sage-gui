@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
+import MetaRoute from '/components/Meta'
 import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import NodeTabs from '/components/views/nodes/NodeTabsBinned'
@@ -54,26 +55,28 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route element={<RequireAuth />}>
-                  <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
+                <Route path='/' element={<MetaRoute />}>
+                  <Route element={<RequireAuth />}>
+                    <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
 
-                  <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
-                    <Route path="nodes" element={<Status />} />
-                    <Route path="tests" element={<Tests />} />
+                    <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
+                      <Route path="nodes" element={<Status />} />
+                      <Route path="tests" element={<Tests />} />
+                    </Route>
+                    <Route path="/node/:vsn" element={<Node admin />} />
+
+                    <Route path="audio" element={<Audio />} />
+
+                    <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
+                    <Route path="surya/:phase" element={<SuryaStatus />} />
+
+                    <Route path="fiddle/timeline" element={<Timeline />} />
+
+                    <Route path="*" element={<NotFound />} />
                   </Route>
-                  <Route path="/node/:vsn" element={<Node admin />} />
 
-                  <Route path="audio" element={<Audio />} />
-
-                  <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
-                  <Route path="surya/:phase" element={<SuryaStatus />} />
-
-                  <Route path="fiddle/timeline" element={<Timeline />} />
-
-                  <Route path="*" element={<NotFound />} />
+                  <Route path="login" element={<TestSignIn />} />
                 </Route>
-
-                <Route path="login" element={<TestSignIn />} />
               </Routes>
             </ProgressProvider>
           </Container>

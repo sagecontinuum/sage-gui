@@ -17,7 +17,6 @@ import Table from '/components/table/Table'
 import TableSearch from '/components/table/TableSearch'
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as ECR from '/components/apis/ecr'
-import * as BH from '/components/apis/beehive'
 
 import {Top} from '/components/layout/Layout'
 import SpaciousLayout from './SpaciousAppList'

@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
+import MetaRoute from '/components/Meta'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import NodeTabs from '/components/views/nodes/NodeTabs'
 import Nodes from '/components/views/nodes/Nodes'
@@ -59,20 +60,22 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                <Route path="/" element={<NodeTabs />}>
-                  <Route path="nodes" element={<Nodes />} />
-                  <Route path="sensors" element={<SensorList {...{project, focus, nodes}} />} />
+                <Route path='/' element={<MetaRoute />}>
+                  <Route path="/" element={<NodeTabs />}>
+                    <Route path="nodes" element={<Nodes />} />
+                    <Route path="sensors" element={<SensorList {...{project, focus, nodes}} />} />
+                  </Route>
+
+                  <Route path="node/:vsn" element={<Node />} />
+                  <Route path="sensors/:name" element={<Sensor />} />
+
+                  <Route path="data" element={<Data {...{project, focus, nodes}} />} />
+                  <Route path="data/ontology/:name" element={<Ontology />} />
+                  <Route path="data/product/:name" element={<DataProduct />} />
+                  <Route path="query-browser" element={<DataBrowser />} />
+
+                  <Route path="*" element={<NotFound />} />
                 </Route>
-
-                <Route path="node/:vsn" element={<Node />} />
-                <Route path="sensors/:name" element={<Sensor />} />
-
-                <Route path="data" element={<Data {...{project, focus, nodes}} />} />
-                <Route path="data/ontology/:name" element={<Ontology />} />
-                <Route path="data/product/:name" element={<DataProduct />} />
-                <Route path="query-browser" element={<DataBrowser />} />
-
-                <Route path="*" element={<NotFound />} />
               </Routes>
             </ProgressProvider>
           </Container>

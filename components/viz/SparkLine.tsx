@@ -109,6 +109,6 @@ const Root = styled.span`
   canvas {
     max-height: 50px;
     min-width: 100%;
-    max-width: 125px;
+    max-width: 50px;
   }
 `

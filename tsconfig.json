@@ -11,8 +11,7 @@
     "experimentalDecorators": true,
     "baseUrl": "./",
     "paths": {
-      "~*": ["./*"],
-      "/*": ["./*"],
+      "/*": ["./*"]
     },
     "moduleResolution": "Node",
     "skipLibCheck": true
