@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 import { useEffect, useState } from 'react'
-import { useSearchParams, Link, useNavigate } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '/components/apis/beehive'
@@ -401,7 +401,7 @@ export default function DataPreview() {
     showMeta: false,
   })
 
-  const [query, setQuery] = useState<object>()
+  const [query, setQuery] = useState<BH.Params>()
   const [data, setData] = useState<BH.Record[]>()
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
@@ -460,6 +460,9 @@ export default function DataPreview() {
     }
 
     function fetchFilterMenus() {
+      if (!plugin && !task)
+        return
+
       getFilterMenus({plugin, task})
         .then((menuItems) => {
           setMenus(prev => ({...prev, ...menuItems}))

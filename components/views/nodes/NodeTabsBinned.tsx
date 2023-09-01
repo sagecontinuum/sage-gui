@@ -97,7 +97,7 @@ export default function NodeTabs(props: Props) {
 
   const updateCounts = (data: BK.NodeMeta[]) => {
     if (settings.project && !isAdmin) {
-      data = data.filter(obj => obj.project == settings.project)
+      data = data.filter(obj => obj.project.toLowerCase() == settings.project.toLowerCase())
     }
 
     const filterState = parseQueryStr(params, {initialState, exclude: ['query', 'phase']})

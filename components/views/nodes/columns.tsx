@@ -4,7 +4,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
-const PROJECT = settings.project
+const PROJECT = settings.project.toLowerCase()
 
 
 const columns = [{
@@ -15,7 +15,7 @@ const columns = [{
 }, {
   id: 'node_type',
   label: 'Type',
-  hide: PROJECT != 'SAGE'
+  hide: PROJECT != 'sage'
 }, {
   id: 'vsn',
   label: 'VSN',
@@ -42,7 +42,7 @@ const columns = [{
 }, {
   id: 'location',
   label: 'Location',
-  hide: PROJECT == 'SAGE'
+  hide: PROJECT == 'sage'
 }, {
   id: 'gps',
   label: 'GPS',
@@ -111,7 +111,7 @@ const columns = [{
 }]
 
 
-if (PROJECT != 'SAGE') {
+if (PROJECT != 'sage') {
   columns.splice(8, 0, {
     id: 'node_phase_v3',
     label: 'Phase'
