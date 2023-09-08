@@ -193,8 +193,8 @@ const columns = [{
   label: 'Phase',
   hide: true
 }, {
-  id: 'location',
-  label: 'Location',
+  id: 'city',
+  label: 'City',
   hide: true
 }, {
   id: 'gps',

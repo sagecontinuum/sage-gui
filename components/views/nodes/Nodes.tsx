@@ -72,7 +72,8 @@ export default function Nodes() {
   const query = params.get('query') || ''
   const status = params.get('status')
   const focus = params.get('focus')
-  const location = params.get('location')
+  const city = params.get('city')
+  const state = params.get('state')
   const sensor = params.get('sensor')
 
   // all data and current state of filtered data
@@ -85,7 +86,8 @@ export default function Nodes() {
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
-  const [locations, setLocations] = useState<Option[]>()
+  const [cities, setCities] = useState<Option[]>()
+  const [states, setStates] = useState<Option[]>()
   const [sensors, setSensors] = useState<Option[]>()
 
   // filter state
@@ -147,7 +149,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, focus, location, sensor, nodeType, phase])
+  }, [query, status, focus, city, state, sensor, nodeType, phase])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -172,7 +174,8 @@ export default function Nodes() {
 
     setStatuses(getOptions(data, 'status'))
     setFocuses(getOptions(data, 'focus'))
-    setLocations(getOptions(data, 'location'))
+    setCities(getOptions(data, 'city'))
+    setStates(getOptions(data, 'state'))
 
     const sensorOptions = uniqBy(data.flatMap(o => o.sensors), 'hw_model')
       .map(o => ({id: o.hw_model, label: o.hw_model}))
@@ -282,12 +285,20 @@ export default function Nodes() {
                     noSelectedSort
                   />
                 }
-                {locations &&
+                {cities &&
                   <FilterMenu
-                    label="Location"
-                    options={locations}
-                    value={filterState.location}
-                    onChange={vals => handleFilterChange('location', vals)}
+                    label="City"
+                    options={cities}
+                    value={filterState.city}
+                    onChange={vals => handleFilterChange('city', vals)}
+                  />
+                }
+                {states &&
+                  <FilterMenu
+                    label="State"
+                    options={states}
+                    value={filterState.state}
+                    onChange={vals => handleFilterChange('state', vals)}
                   />
                 }
                 {sensors &&

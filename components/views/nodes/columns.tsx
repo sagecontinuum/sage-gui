@@ -40,8 +40,12 @@ const columns = [{
   format: formatters.uptimes,
   hide: true
 }, {
-  id: 'location',
-  label: 'Location',
+  id: 'city',
+  label: 'City',
+  hide: PROJECT == 'sage'
+}, {
+  id: 'state',
+  label: 'State',
   hide: PROJECT == 'sage'
 }, {
   id: 'gps',

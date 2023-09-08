@@ -6,6 +6,8 @@ import { NodeStatus } from './node'
 
 const API_URL = `${url}/api`
 
+import USStates from './us-states'
+
 
 export type VSN = `W${string}` | `V${string}`
 
@@ -328,13 +330,20 @@ export async function getState() : Promise<State[]> {
   data = (data as SimpleManifest[]).map(obj => {
 
     const meta = nodeMeta[obj.vsn] || {}
+    const {location: loc} = meta
+
+    // allow "<city>, <state_abbrev>", "<city>, <country>",
+    // "<state>", or "<country>", etc., for now.
+    const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
+    const state = part in USStates ? `${USStates[part]} (${part})` : part
 
     return {
       ...obj,
       node_phase_v3: meta.node_phase_v3,
       project: meta.project,
       focus: meta.focus,
-      location: meta.location,
+      state,
+      city: loc,
       node_type: meta.node_type,
       modem: meta.modem,
       nx_agent: meta.nx_agent,

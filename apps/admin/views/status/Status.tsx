@@ -62,7 +62,8 @@ export default function StatusView() {
   const status = params.get('status')
   const project = params.get('project')
   const focus = params.get('focus')
-  const location = params.get('location')
+  const city = params.get('city')
+  const state = params.get('state')
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
@@ -75,7 +76,8 @@ export default function StatusView() {
   const [statuses, setStatuses] = useState<Option[]>()
   const [projects, setProjects] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
-  const [locations, setLocations] = useState<Option[]>()
+  const [cities, setCities] = useState<Option[]>()
+  const [states, setStates] = useState<Option[]>()
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
@@ -140,7 +142,7 @@ export default function StatusView() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, project, focus, location, nodeType, phase])
+  }, [query, status, project, focus, city, state, nodeType, phase])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -168,7 +170,8 @@ export default function StatusView() {
     setStatuses(getOptions(data, 'status'))
     setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
-    setLocations(getOptions(data, 'location'))
+    setCities(getOptions(data, 'city'))
+    setStates(getOptions(data, 'state'))
   }
 
 
@@ -310,12 +313,20 @@ export default function StatusView() {
                     noSelectedSort
                   />
                 }
-                {locations &&
+                {cities &&
                   <FilterMenu
-                    label="Location"
-                    options={locations}
-                    value={filterState.location}
-                    onChange={vals => handleFilterChange('location', vals)}
+                    label="City"
+                    options={cities}
+                    value={filterState.city}
+                    onChange={vals => handleFilterChange('city', vals)}
+                  />
+                }
+                {states &&
+                  <FilterMenu
+                    label="State"
+                    options={states}
+                    value={filterState.state}
+                    onChange={vals => handleFilterChange('state', vals)}
                   />
                 }
 

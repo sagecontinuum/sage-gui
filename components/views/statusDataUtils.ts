@@ -234,7 +234,8 @@ export type FilterState = {
 export const initialState = {
   status: [],
   project: [],
-  location: [],
+  city: [],
+  state: [],
   focus: [],
   sensor: []
 }
