@@ -16,7 +16,11 @@
     "@mui/lab": "^5.0.0-alpha.64",
     "@mui/material": "^5.12.0",
     "@mui/styles": "^5.12.0",
+    "@parcel/transformer-image": "^2.9.3",
+    "@parcel/transformer-sass": "^2.9.3",
+    "@parcel/transformer-svg-react": "^2.9.3",
     "@types/date-fns": "^2.6.0",
+    "@wojtekmaj/react-datetimerange-picker": "^5.4.2",
     "chart.js": "^3.7.1",
     "chartjs-adapter-date-fns": "^2.0.0",
     "chartjs-plugin-zoom": "^1.2.1",
@@ -28,17 +32,15 @@
     "mapbox-gl": "^2.10.0",
     "marked": "^4.0.16",
     "notistack": "^1.0.5",
+    "parcel": "^2.9.3",
+    "process": "^0.11.10",
     "react": "^17.0.1",
+    "react-datetime-picker": "^5.5.1",
     "react-dom": "^17.0.1",
     "react-map-gl": "^7.0.19",
     "react-router-dom": "^6.12.1",
     "styled-components": "^5.2.1",
-    "wavesurfer.js": "^5.2.0",
-    "parcel": "^2.9.3",
-    "@parcel/transformer-image": "^2.9.3",
-    "@parcel/transformer-sass": "^2.9.3",
-    "@parcel/transformer-svg-react": "^2.9.3",
-    "process": "^0.11.10"
+    "wavesurfer.js": "^5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",
@@ -67,6 +69,6 @@
     "typescript": "^4.2.3"
   },
   "alias": {
-    "d3": "d3/dist/d3.js"
+    "datetimerange-picker": "@wojtekmaj/react-datetimerange-picker"
   }
 }

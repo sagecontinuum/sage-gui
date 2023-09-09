@@ -30,13 +30,9 @@ import ImageIcon from '@mui/icons-material/ImageOutlined'
 import AudioIcon from '@mui/icons-material/Headphones'
 import NamesIcon from '@mui/icons-material/CategoryRounded'
 
-import DatePicker from '@mui/lab/DatePicker'
-import TimePicker from '@mui/lab/TimePicker'
-import LocalizationProvider from '@mui/lab/LocalizationProvider'
-import AdapterDateFns from '@mui/lab/AdapterDateFns'
-
 import { capitalize } from 'lodash'
 
+import DateRangePicker from './DateRangePicker'
 
 import config from '/config'
 const registry = config.dockerRegistry
@@ -141,17 +137,23 @@ const findColumn = (cols, name) =>
 
 
 const units = {
-  'm': 'minute',
-  'h': 'hour',
-  '12h': '12 hours',
-  'd': 'day',
-  '2d': '2 days',
-  '7d': '7 days',
-  '30d': '30 days [slow]',
-  '90d': '90 days [very slow]'
+  'custom': 'Custom range',
+  '-1m': 'last minute',
+  '-5m': 'last 5 mins',
+  '-30m': 'last 30 mins',
+  '-1h': 'last hour',
+  '-12h': 'last 12 hours',
+  '-1d': 'last day',
+  '-2d': 'last 2 days',
+  '-7d': 'last 7 days',
+  '-30d': 'last 30 days [slow]',
+  '-90d': 'last 90 days [very slow]'
 }
 
 type Unit = keyof typeof units
+type RelativeTimeStr =
+  `-${string}m` | `-${string}h` | `-${string}d`
+
 
 type RangeIndicatorProps = {
   data: BH.Record[]
@@ -173,7 +175,6 @@ function RangeIndicator(props: RangeIndicatorProps) : JSX.Element {
     </span>
   )
 }
-
 
 
 const VertDivider = () =>
@@ -229,7 +230,7 @@ const getPythonSnippet = (query: BH.Params)  => {
 
 function getAppMenus() {
   return BH.getData({
-    start: `-1d`,
+    start: `-2h`,
     tail: 1,
     filter: {
       plugin: `.*`
@@ -261,28 +262,38 @@ async function getFilterMenus({plugin, task}) {
 }
 
 
-const getStartTime = (win: Unit) : string => {
-  const amount = Number(win.slice(0, -1)) || 1
-  const unit = win.charAt(win.length - 1)
+const getStartTime = (start: DateStr | RelativeTimeStr) : Date => {
+  if (isDateStr(start))
+    return new Date(start)
+
+  const amount = Number(start.slice(0, -1)) || 1
+  const unit = start.charAt(start.length - 1)
 
   const datetime = new Date()
   if (unit == 'm')
-    datetime.setMinutes(datetime.getMinutes() - amount)
+    datetime.setMinutes(datetime.getMinutes() + amount)
   else if (unit == 'h')
-    datetime.setHours(datetime.getHours() - amount)
+    datetime.setHours(datetime.getHours() + amount)
   else if (unit == 'd')
-    datetime.setDate(datetime.getDate() - amount)
+    datetime.setDate(datetime.getDate() + amount)
+  else if (unit == 'y')
+    datetime.setFullYear(datetime.getFullYear() + amount)
   else {
-    alert(`getStartTime: win (window) not valid.  was window=${win}`)
+    alert(`getStartTime: start time not valid.  was start=${start}`)
     return
   }
 
-  return new Date(datetime).toISOString()
+  return new Date(datetime)
 }
 
-const getEndTime = (start: string, win: Unit) : string => {
-  const amount = Number(win.slice(0, -1)) || 1
-  const unit = win.charAt(win.length - 1)
+const getEndTime = (start: DateStr | RelativeTimeStr, end?: DateStr | RelativeTimeStr) : Date => {
+  if (isDateStr(end))
+    return new Date(end)
+  else if (!end)
+    return new Date()
+
+  const amount = Number(end.slice(0, -1)) || 1
+  const unit = end.charAt(end.length - 1)
 
   const startTime = new Date(start)
   const endTime = new Date(start)
@@ -292,12 +303,14 @@ const getEndTime = (start: string, win: Unit) : string => {
     endTime.setHours(startTime.getHours() + amount)
   else if (unit == 'd')
     endTime.setDate(startTime.getDate() + amount)
+  else if (unit == 'y')
+    endTime.setFullYear(startTime.getFullYear() + amount)
   else {
-    alert(`getEndTime: win (window) not valid.  was window=${win}`)
+    alert(`getEndTime: end time not valid.  was end=${end}`)
     return
   }
 
-  return new Date(endTime).toISOString()
+  return new Date(endTime)
 }
 
 const isMedia = (type: DataTypes) =>
@@ -317,6 +330,8 @@ const getRowsPerPage = (app: string, type: DataTypes) => {
   else
     return 100
 }
+
+const isDateStr = (str: string) => !!Date.parse(str)
 
 
 const initMenuState = {
@@ -378,6 +393,8 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 }
 
 
+type DateStr = `${string}T${string}Z`
+
 
 export default function DataPreview() {
   const [params, setParams] = useSearchParams()
@@ -389,8 +406,10 @@ export default function DataPreview() {
   const type = params.get('type') as DataTypes || 'apps'  // for tabs
   const mimeType = isMedia(type) ?
     params.get('mimeType') as MimeType : null             // for filtering on ext
-  const unit = params.get('window') as Unit || 'h'
-  const start = params.get('start')
+
+  const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
+  const end = params.get('end') as DateStr | RelativeTimeStr
+
 
   const {setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
@@ -412,6 +431,7 @@ export default function DataPreview() {
 
   // selected filters
   const [filters, setFilters] = useState<FilterState>(initFilterState)
+
 
   // update selected filters whenever url param changes
   useEffect(() => {
@@ -470,12 +490,9 @@ export default function DataPreview() {
     }
 
     function fetchData() {
-      const s = start || getStartTime(unit)
-      const end = getEndTime(s, unit)
-
       const query = {
-        start: s,
-        end: end,
+        ...(start ? {start} : {}),
+        ...(end ? {end} : {}),
         filter: {
           ...(plugin ? {plugin} : {}),
           ...(node ? {vsn: node} : {}),
@@ -545,8 +562,7 @@ export default function DataPreview() {
     fetchData()
     fetchFilterMenus()
   }, [
-    app, node, name, sensor, task, type, mimeType,
-    unit, start, setLoading
+    app, node, name, sensor, task, type, mimeType, start, setLoading
   ])
 
 
@@ -576,9 +592,11 @@ export default function DataPreview() {
       .forEach(key => params.delete(key))
   }
 
+
   const handleOptionCheck = (evt, name) => {
     setChecked(prev => ({...prev, [name]: evt.target.checked}))
   }
+
 
   const handleMimeCheck = (evt, name) => {
     if (evt.target.checked)
@@ -587,6 +605,7 @@ export default function DataPreview() {
       params.delete('mimeType')
     setParams(params, {replace: true})
   }
+
 
   const handleFilterChange = (field: Facet, val: Option | Option[]) => {
     if (!val || (Array.isArray(val) && !val.length)) {
@@ -605,22 +624,27 @@ export default function DataPreview() {
     setParams(params, {replace: true})
   }
 
-  const handleTimeChange = (val) => {
-    const start = new Date(val).toISOString()
-    params.set('start', start)
+
+  const handleQuickRangeChange = (val) => {
+    params.delete('end')
+    params.set('start', val)
     setParams(params, {replace: true})
   }
 
-  const handleUnitChange = (val) => {
-    params.set('window', val)
+
+  const handleDatePickerChange = ([start, end]) => {
+    params.set('start', new Date(start).toISOString())
+    params.set('end',  new Date(end).toISOString())
     setParams(params, {replace: true})
   }
+
 
   const handleRemoveFilters = () => {
     clearParams()
     params.set('apps', defaultPlugin)
     setParams(params, {replace: true})
   }
+
 
   const goToTasks = (val: DataTypes, taskQuery: string) => {
     clearParams()
@@ -631,6 +655,7 @@ export default function DataPreview() {
     setParams(params, {replace: true})
   }
 
+
   const goToNames = (val: DataTypes, nameQuery: string) => {
     clearParams()
     params.set('type', val)
@@ -638,6 +663,7 @@ export default function DataPreview() {
     params.set('window', 'h')
     setParams(params, {replace: true})
   }
+
 
   const handleTypeChange = (_, val: DataTypes) => {
     if (val == 'names') {
@@ -649,6 +675,7 @@ export default function DataPreview() {
     else
       handleRemoveFilters()
   }
+
 
   const handleQueryViewerChange = (field: string, next: string[]) => {
     if (!next.length) params.delete(field)
@@ -735,45 +762,6 @@ export default function DataPreview() {
             />
           }
 
-          <TimeOpts>
-            <h3>Time Range</h3>
-
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                label="Start Date"
-                value={start}
-                onChange={(val) => handleTimeChange(val)}
-                renderInput={(params) => <TextField {...params} />}
-              />
-
-              <TimePicker
-                label="Start Time"
-                value={start}
-                onChange={(val) => handleTimeChange(val)}
-                renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-
-
-            <FormControl variant="outlined" style={{width: 150}}>
-              <InputLabel id="unit-label">Window</InputLabel>
-              <Select
-                labelId="unit-label"
-                id="unit"
-                value={unit}
-                onChange={evt => handleUnitChange(evt.target.value)}
-                label="Window"
-                margin="dense"
-              >
-                {Object.keys(units)
-                  .map(k =>
-                    <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                  )
-                }
-              </Select>
-            </FormControl>
-          </TimeOpts>
-
           <Snippets>
             <div>
               <h4>cURL download</h4>
@@ -847,7 +835,7 @@ export default function DataPreview() {
           }
 
           {data?.length == 0 &&
-            <Alert severity="info">No recent data found <b>for the last {units[unit]}</b></Alert>
+            <Alert severity="info">No recent data found for the selected period.</Alert>
           }
 
           {/* todo(nc): here we have to check data.length because of bug
@@ -865,7 +853,7 @@ export default function DataPreview() {
               limit={data.length} // todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
-                  <span>No records found from</span>&nbsp;<RangeIndicator data={data} unit={unit}/>
+                  <span>No records found from the selected period</span>
                 </span>
               }
               disableRowSelect={() => true}
@@ -895,10 +883,31 @@ export default function DataPreview() {
                 </div>
               }
               middleComponent={
-                <div className="flex justify-end">
-                  {data &&
-                    <RangeIndicator data={data} unit={unit}/>
-                  }
+                <div className="flex items-center justify-end time-opts">
+                  <FormControl variant="outlined" style={{width: 150}}>
+                    <InputLabel id="range-label">Quick Ranges</InputLabel>
+                    <Select
+                      labelId="range-label"
+                      id="range"
+                      value={isDateStr(start) ? 'custom' : start}
+                      onChange={evt => handleQuickRangeChange(evt.target.value)}
+                      label="Quick Ranges"
+                      margin="dense"
+                    >
+                      {(isDateStr(start) ? ['custom', ...Object.keys(units)] : Object.keys(units))
+                        .map(k =>
+                          <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                        )
+                      }
+                    </Select>
+                  </FormControl>
+
+                  <div className="range-picker">
+                    <DateRangePicker
+                      value={[getStartTime(start), getEndTime(start, end)]}
+                      onChange={handleDatePickerChange}
+                    />
+                  </div>
                   <VertDivider />
                 </div>
               }
@@ -939,6 +948,11 @@ const Root = styled.div<{isMedia: boolean}>`
       background-color: initial;
     }
     `}
+
+  .time-opts .MuiInputBase-root {
+    height: 29px;
+    border-radius: 5px;
+  }
 `
 
 const Main = styled.div`
@@ -963,15 +977,8 @@ const Menu = styled(Autocomplete)`
   background: #fff;
 `
 
-const TimeOpts = styled.div`
-  margin: 2em 0;
-  > div {
-    margin-bottom: 15px;
-  }
-`
-
 const Snippets = styled.div`
-  margin-bottom: 100px;
+  margin: 40px 0 100px 0;
 
   > div { margin: 0 0 30px 0; }
   h4 { margin: 2px 0; }
