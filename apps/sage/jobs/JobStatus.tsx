@@ -415,16 +415,6 @@ export default function JobStatus() {
   return (
     <Root>
       <Main className="flex column">
-        <MapContainer>
-          {geo &&
-            <Map
-              data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
-              updateID={updateMap}
-              showUptime={false}
-            />
-          }
-        </MapContainer>
-
         <Tabs
           value={view}
           aria-label="job status tabs"
@@ -464,6 +454,17 @@ export default function JobStatus() {
             replace
           />
         </Tabs>
+        <hr />
+
+        <MapContainer>
+          {geo &&
+            <Map
+              data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
+              updateID={updateMap}
+              showUptime={false}
+            />
+          }
+        </MapContainer>
 
         <StateFilters
           counts={counts}
@@ -572,6 +573,11 @@ export default function JobStatus() {
 
 const Root = styled.div`
   margin: 10px 20px;
+
+  hr {
+    margin-top: 2px;
+    margin-bottom: 0;
+  }
 `
 
 const Main = styled.div`
@@ -581,7 +587,9 @@ const Main = styled.div`
 
 const MapContainer = styled.div`
   width: 100%;
-  height: 350px;
+  height:  350px;
+  border: 1px solid #ddd;
+  background: #f2f2f2;
 `
 
 export const TimelineContainer = styled.div`
