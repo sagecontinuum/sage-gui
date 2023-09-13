@@ -12,7 +12,7 @@ type TooltipToggleButtonProps = ToggleButtonProps & {
 const TooltipToggleButton: FC<TooltipToggleButtonProps> = forwardRef(
   ({ TooltipProps, ...props }, ref) => {
     return (
-      <Tooltip {...TooltipProps}>
+      <Tooltip {...{leaveDelay: 0, enterDelay: 2000, ...TooltipProps}} className="justify-start gap">
         <ToggleButton ref={ref} {...props} />
       </Tooltip>
     )

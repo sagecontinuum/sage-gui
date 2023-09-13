@@ -15,12 +15,11 @@ import TimeSeries from './TimeSeries'
 import ErrorMsg from '../ErrorMsg'
 import { relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
-import TooltipToggleButton from '/components/input/TooltipToggleButton'
 
 import {
   FormControlLabel, Button, Divider, Select,
   MenuItem, FormControl, InputLabel, Alert,
-  Autocomplete, TextField, Popper, ToggleButtonGroup
+  Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton
 } from '@mui/material'
 
 import UndoIcon from '@mui/icons-material/UndoRounded'
@@ -410,6 +409,7 @@ export default function DataPreview() {
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
 
+  const [range, setRange] = useState([getStartTime(start), getEndTime(start, end)])
 
   const {setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
@@ -650,7 +650,7 @@ export default function DataPreview() {
     clearParams()
     params.set('type', val)
     params.set('tasks', taskQuery)
-    params.set('window', 'h')
+    params.set('start', '-1h')
     if (val == 'images') params.set('mimeType', 'image')
     setParams(params, {replace: true})
   }
@@ -687,10 +687,7 @@ export default function DataPreview() {
   return (
     <Root isMedia={isMediaApp(app) || isMedia(type)}>
       <div className="flex">
-        <Sidebar width="240px" style={{padding: '0 10px'}}>
-          <h5 className="subtitle muted">
-            Query type
-          </h5>
+        <Sidebar width="240px" style={{padding: '25px 10px 10px 10px'}}>
 
           <div className="shortcuts">
             <ToggleButtonGroup
@@ -699,24 +696,25 @@ export default function DataPreview() {
               value={type}
               onChange={handleTypeChange}
               aria-label="data type"
+              orientation="vertical"
               fullWidth
             >
-              <TooltipToggleButton TooltipProps={{title: 'Apps', placement: 'top'}} value="apps">
-                <AppsIcon fontSize="small"/>
-              </TooltipToggleButton>
-              <TooltipToggleButton TooltipProps={{title: 'Names', placement: 'top'}} value="names">
-                <NamesIcon fontSize="small"/>
-              </TooltipToggleButton>
-              <TooltipToggleButton TooltipProps={{title: 'Images', placement: 'top'}} value="images">
-                <ImageIcon fontSize="small"/>
-              </TooltipToggleButton>
-              <TooltipToggleButton TooltipProps={{title: 'Audio', placement: 'top'}} value="audio">
-                <AudioIcon fontSize="small"/>
-              </TooltipToggleButton>
+              <ToggleButton value="apps" className="flex justify-start gap">
+                <AppsIcon /> Apps <div className="help-text self-end">Query by ECR application</div>
+              </ToggleButton>
+              <ToggleButton value="names" className="flex justify-start gap">
+                <NamesIcon /> Names <div className="help-text self-end">Query by measurement name</div>
+              </ToggleButton>
+              <ToggleButton value="images" className="flex justify-start gap">
+                <ImageIcon /> Images <div className="help-text self-end">Query for image samples</div>
+              </ToggleButton>
+              <ToggleButton value="audio" className="flex justify-start gap">
+                <AudioIcon /> Audio <div className="help-text self-end">Query for audio samples</div>
+              </ToggleButton>
             </ToggleButtonGroup>
           </div>
 
-          <h3>Filters</h3>
+          <h3>{capitalize(type.replace(/s$/, ''))} Filters</h3>
 
           {menus && facetInputs[type].map(facet => {
             // if no sensors are associated with the data, don't show sensor input
@@ -788,10 +786,9 @@ export default function DataPreview() {
         </Sidebar>
 
         <Main>
-          <div className="flex items-center gap">
+          <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="flex items-center">
-                {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
+              {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
                   <Button
                     variant="outlined"
                     onClick={handleRemoveFilters}
@@ -799,23 +796,50 @@ export default function DataPreview() {
                   >
                     Clear
                   </Button>
-                }
+              }
 
-                <QueryViewer
-                  filterState={
-                    Object.keys(filters)
-                      .filter(k => !['start', 'end', 'type'].includes(k))
-                      .reduce((acc, k) => ({
-                        ...acc,
-                        [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
-                      }), {})
+              <QueryViewer
+                filterState={
+                  Object.keys(filters)
+                    .filter(k => !['start', 'end', 'type'].includes(k))
+                    .reduce((acc, k) => ({
+                      ...acc,
+                      [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
+                    }), {})
+                }
+                onDelete={handleQueryViewerChange}
+                disableDelete={{field: 'apps', filter: defaultPlugin}}
+              />
+            </div>
+
+            <div className="flex items-center time-opts">
+              <FormControl variant="outlined" style={{width: 150}}>
+                <InputLabel id="range-label">Quick Ranges</InputLabel>
+                <Select
+                  labelId="range-label"
+                  id="range"
+                  value={isDateStr(start) ? 'custom' : start}
+                  onChange={evt => handleQuickRangeChange(evt.target.value)}
+                  label="Quick Ranges"
+                  margin="dense"
+                >
+                  {(isDateStr(start) ? Object.keys(units) : Object.keys(units).slice(1))
+                    .map(k =>
+                      <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                    )
                   }
-                  onDelete={handleQueryViewerChange}
-                  disableDelete={{field: 'apps', filter: defaultPlugin}}
+                </Select>
+              </FormControl>
+
+              <div className="range-picker">
+                <DateRangePicker
+                  value={range}
+                  onChange={handleDatePickerChange}
                 />
               </div>
             </div>
           </div>
+
 
           <br />
 
@@ -882,35 +906,7 @@ export default function DataPreview() {
                   </div>
                 </div>
               }
-              middleComponent={
-                <div className="flex items-center justify-end time-opts">
-                  <FormControl variant="outlined" style={{width: 150}}>
-                    <InputLabel id="range-label">Quick Ranges</InputLabel>
-                    <Select
-                      labelId="range-label"
-                      id="range"
-                      value={isDateStr(start) ? 'custom' : start}
-                      onChange={evt => handleQuickRangeChange(evt.target.value)}
-                      label="Quick Ranges"
-                      margin="dense"
-                    >
-                      {(isDateStr(start) ? ['custom', ...Object.keys(units)] : Object.keys(units))
-                        .map(k =>
-                          <MenuItem value={k} key={k}>{units[k]}</MenuItem>
-                        )
-                      }
-                    </Select>
-                  </FormControl>
-
-                  <div className="range-picker">
-                    <DateRangePicker
-                      value={[getStartTime(start), getEndTime(start, end)]}
-                      onChange={handleDatePickerChange}
-                    />
-                  </div>
-                  <VertDivider />
-                </div>
-              }
+              middleComponent={<></>}
             />
           }
         </Main>
@@ -932,10 +928,15 @@ const Root = styled.div<{isMedia: boolean}>`
 
   .shortcuts {
     margin-bottom: 30px;
-  }
+    .help-text {
+      display: none;
+      font-size: .8em;
+      line-height: 1em;
+    }
 
-  .MuiToggleButtonGroup-grouped:not(:first-of-type) {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    button:hover .help-text {
+      display: block;
+    }
   }
 
   /* remove some styles when displaying media */
