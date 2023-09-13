@@ -599,8 +599,9 @@ export default function NodeView(props: Props) {
                 onCellClick={(data) => {
                   const {timestamp, meta} = data
                   const {vsn, origPluginName} = meta
-                  const win = opts.time == 'daily' ? 'd' : 'h'
-                  window.open(`${config.portal}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`, '_blank')
+                  const date = new Date(timestamp)
+                  const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
+                  window.open(`${config.portal}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank')
                 }}
                 yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
                 labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
@@ -664,7 +665,7 @@ export default function NodeView(props: Props) {
                   status,
                   ...nodeMeta
                 }]} />
-          }
+            }
             {!hasStaticGPS(manifest) && liveGPS && status &&
               <Map data={[{
                 vsn,

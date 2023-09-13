@@ -97,11 +97,11 @@ export default function JobTimeLine(props: Props) {
               return
             }
 
-            const {value, meta} = data
+            const {value, meta, timestamp, end} = data
             const image = value.plugin_image
-            const node = meta.vsn
+            const {vsn} = meta
             const app = image.slice(image.lastIndexOf('/') + 1)
-            navigate(`/query-browser/?apps=.*${app}&nodes=${node}&window=d`)
+            navigate(`/query-browser/?apps=.*${app}&nodes=${vsn}&start=${timestamp}&end=${end}`)
           }}
           labelWidth={175}
           tooltipPos="top"

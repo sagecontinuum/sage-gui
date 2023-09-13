@@ -8,7 +8,7 @@ import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 
 import * as BK from '/components/apis/beekeeper'
 
-import { endOfHour, subDays } from 'date-fns'
+import { addDays, addHours, endOfHour, subDays } from 'date-fns'
 
 import config from '/config'
 const registry = config.dockerRegistry
@@ -150,10 +150,11 @@ export default function AppData(props: Props) {
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta
-                      const win = opts.time == 'daily' ? 'd' : 'h'
+                      const date = new Date(timestamp)
+                      const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
                       window.open(
                         `${window.location.origin}/query-browser` +
-                        `?nodes=${vsn}&apps=${plugin}&start=${timestamp}&window=${win}`, '_blank'
+                        `?nodes=${vsn}&apps=${plugin}&start=${timestamp}&end=${end}`, '_blank'
                       )
                     }}
                     labelWidth={TIMELINE_LABEL_WIDTH}

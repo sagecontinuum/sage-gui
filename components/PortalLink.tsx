@@ -21,11 +21,11 @@ export default function PortalLink(props: Props) {
     return <Link to={to}>{children}</Link>
   else
     return (
-      <a
-        href={`${config.portal}${to}`}
+      <a href={`${config.portal}${to}`}
         {...(target ? {target} : {})}
-        {...(rel ? {rel} : {})}>
-          {children}
+        {...(rel ? {rel} : {})}
+      >
+        {children}
       </a>
     )
 }

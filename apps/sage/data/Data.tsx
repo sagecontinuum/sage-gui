@@ -18,7 +18,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
 import { chain, startCase } from 'lodash'
-import { addDays, endOfHour, subDays } from 'date-fns'
+import { addDays, addHours, endOfHour, subDays } from 'date-fns'
 import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
@@ -365,10 +365,11 @@ export default function Data(props: Props) {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, origPluginName} = meta
-                        const win = opts.time == 'daily' ? 'd' : 'h'
+                        const date = new Date(timestamp)
+                        const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
                         window.open(
                           `${window.location.origin}/query-browser` +
-                          `?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&window=${win}`,
+                          `?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`,
                           '_blank'
                         )
                       }}
@@ -409,9 +410,10 @@ export default function Data(props: Props) {
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
-                        const win = opts.time == 'daily' ? 'd' : 'h'
+                        const date = new Date(timestamp)
+                        const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
                         window.open(window.location.origin +
-                          `/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&window=${win}`
+                          `/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&end=${end}`
                         , '_blank')
                       }}
                       labelWidth={TIMELINE_LABEL_WIDTH}

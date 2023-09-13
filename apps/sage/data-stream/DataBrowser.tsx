@@ -562,7 +562,7 @@ export default function DataPreview() {
     fetchData()
     fetchFilterMenus()
   }, [
-    app, node, name, sensor, task, type, mimeType, start, setLoading
+    app, node, name, sensor, task, type, mimeType, start, end, setLoading
   ])
 
 
@@ -660,7 +660,7 @@ export default function DataPreview() {
     clearParams()
     params.set('type', val)
     params.set('names', nameQuery)
-    params.set('window', 'h')
+    params.set('start', '-1h')
     setParams(params, {replace: true})
   }
 
@@ -804,7 +804,7 @@ export default function DataPreview() {
                 <QueryViewer
                   filterState={
                     Object.keys(filters)
-                      .filter(k => !['window', 'type'].includes(k))
+                      .filter(k => !['start', 'end', 'type'].includes(k))
                       .reduce((acc, k) => ({
                         ...acc,
                         [k]: filters[k].map(s => s.replace(`${registry}/`, ''))

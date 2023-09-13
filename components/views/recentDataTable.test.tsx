@@ -45,7 +45,7 @@ const items = [{
   },
   format: v => `${v}°C`,
   linkParams: (data) =>
-    `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+    `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&start=h`
 }, {
   label: 'Raingauge',
   query: {
@@ -53,7 +53,7 @@ const items = [{
     name: 'env.raingauge.event_acc'
   },
   linkParams: (data) =>
-    `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&window=h`
+    `apps=${data.meta.plugin}&nodes=${data.meta.vsn}&names=${data.name}&start=h`
 }]
 
 

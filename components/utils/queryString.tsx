@@ -32,8 +32,6 @@ export function parseQueryStr<T>(params: URLSearchParams, opts?: Opts<T>) {
     } else {
       obj[k] = v
     }
-
-
   })
 
   return obj as T
