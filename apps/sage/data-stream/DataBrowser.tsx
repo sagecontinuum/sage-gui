@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -376,7 +376,7 @@ const facetInputs: Facets = {
 }
 
 const allowMultiSelect = (field: Facet) =>
-  field == 'nodes'
+  ['nodes', 'names'].includes(field)
 
 
 export function getFilterState(params, includeDefaultApp=true) : FilterState {
@@ -409,7 +409,7 @@ export default function DataPreview() {
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
 
-  const [range, setRange] = useState([getStartTime(start), getEndTime(start, end)])
+  const range = useMemo(() => [getStartTime(start), getEndTime(start, end)], [start, end])
 
   const {setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
@@ -724,8 +724,10 @@ export default function DataPreview() {
 
             const label = capitalize(facet)
 
-            let value = allowMultiSelect(facet) ? [] : ''
-            if (facet == 'nodes' && filters[facet]?.length)
+            const allowMultiple = allowMultiSelect(facet)
+
+            let value = allowMultiple ? [] : ''
+            if (allowMultiple && filters[facet]?.length)
               value = filters[facet]
             else if (facet == 'apps' && filters[facet]?.length)
               value = (filters[facet][0] || '').replace(`${registry}/`, '')
@@ -733,18 +735,21 @@ export default function DataPreview() {
               value = filters[facet][0]
 
             return (
-              <Menu
-                key={facet}
-                options={menus[facet]}
-                renderInput={(props) =>
-                  <TextField {...props} label={label} />}
-                PopperComponent={(props) =>
-                  <Popper {...props} style={{width: label == 'Apps' ? 350 : 300, zIndex: 9999}} />}
-                value={value}
-                onChange={(evt, val) => handleFilterChange(facet, val)}
-                disableCloseOnSelect={allowMultiSelect(facet)}
-                multiple={allowMultiSelect(facet)}
-              />
+              <Menu key={facet}>
+                <Autocomplete
+                  options={menus[facet]}
+                  renderInput={(props) =>
+                    <TextField {...props} label={label} />}
+                  PopperComponent={(props) =>
+                    <Popper {...props} style={{width: label == 'Apps' ? 350 : 300, zIndex: 9999}} />}
+                  value={value}
+                  onChange={(evt, val) => handleFilterChange(facet, val)}
+                  disableCloseOnSelect={allowMultiple}
+                  multiple={allowMultiple}
+                  isOptionEqualToValue={(opt, val) => val ? opt.id == val : false}
+                  limitTags={4}
+                />
+              </Menu>
             )
           })}
 
@@ -785,9 +790,9 @@ export default function DataPreview() {
           </Snippets>
         </Sidebar>
 
-        <Main>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+        <Main className="toolbar">
+          <div className="flex items-start">
+            <div className="flex items-start query-viewer">
               {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
                   <Button
                     variant="outlined"
@@ -809,6 +814,7 @@ export default function DataPreview() {
                 }
                 onDelete={handleQueryViewerChange}
                 disableDelete={{field: 'apps', filter: defaultPlugin}}
+                scroll
               />
             </div>
 
@@ -950,6 +956,13 @@ const Root = styled.div<{isMedia: boolean}>`
     }
     `}
 
+  .query-viewer {
+    width: 50%;
+  }
+  .time-opts {
+    width: 50%;
+  }
+
   .time-opts .MuiInputBase-root {
     height: 29px;
     border-radius: 5px;
@@ -961,7 +974,7 @@ const Main = styled.div`
   height: 100%;
   margin: 30px 20px 30px 0;
   padding: 0 0 0 20px;
-  width: 100%;
+  width: calc(100% - 240px - 20px);
 
   tr.MuiTableRow-root:hover,
   .MuiTableRow-hover:hover  {
@@ -973,7 +986,7 @@ const Main = styled.div`
   }
 `
 
-const Menu = styled(Autocomplete)`
+const Menu = styled.div`
   margin-bottom: 15px;
   background: #fff;
 `

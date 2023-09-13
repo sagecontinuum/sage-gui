@@ -5,12 +5,13 @@ import Chip from '@mui/material/Chip'
 
 type Props = {
   filterState: {[field: string]: string[]}
-  onDelete?: (field: string, newState: string[]) => void
   disableDelete?: {field: string, filter: string}
+  scroll?: boolean
+  onDelete?: (field: string, newState: string[]) => void
 }
 
 export default function QueryViewer(props: Props) {
-  const {filterState, onDelete, disableDelete} = props
+  const {filterState, scroll, disableDelete, onDelete} = props
 
   const handleDelete = (field: string, filters: string[], toRemove: string) => {
     filters.splice(filters.indexOf(toRemove), 1)
@@ -25,13 +26,13 @@ export default function QueryViewer(props: Props) {
       .filter(field => filterState[field].length)
 
   return (
-    <Root>
+    <Root scroll={scroll}>
       {fields
         .map((field, i) => {
           const filters = filterState[field]
 
           return (
-            <span key={field}>
+            <span key={field} className="part">
               <FilterSet>
                 <b>{field}</b>
                 <span> is </span>
@@ -59,9 +60,15 @@ export default function QueryViewer(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled.div<{scroll: boolean}>`
   margin: 0 10px;
-`
+
+  ${props => props.scroll ?
+    `white-space: nowrap;
+    overflow-x: scroll;
+    height: 40px;`
+    : ''
+}`
 
 const FilterSet = styled.span`
 `
