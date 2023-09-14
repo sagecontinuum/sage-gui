@@ -46,7 +46,7 @@ const columns = [{
 }, {
   id: 'state',
   label: 'State',
-  hide: PROJECT == 'sage'
+  hide: true
 }, {
   id: 'gps',
   label: 'GPS',

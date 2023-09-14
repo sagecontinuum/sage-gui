@@ -197,6 +197,10 @@ const columns = [{
   label: 'City',
   hide: true
 }, {
+  id: 'state',
+  label: 'State',
+  hide: true
+}, {
   id: 'gps',
   label: 'GPS',
   format: (_, obj) => {

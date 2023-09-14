@@ -43,7 +43,7 @@ import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
-import { endOfHour, subDays } from 'date-fns'
+import { endOfHour, subDays, addHours, addDays } from 'date-fns'
 
 import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
 
