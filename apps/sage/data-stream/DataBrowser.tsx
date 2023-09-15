@@ -13,7 +13,7 @@ import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
 import ErrorMsg from '../ErrorMsg'
-import { relativeTime } from '/components/utils/units'
+import { quickRanges, relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import {
@@ -135,21 +135,8 @@ const findColumn = (cols, name) =>
 
 
 
-const units = {
-  'custom': 'Custom range',
-  '-1m': 'last minute',
-  '-5m': 'last 5 mins',
-  '-30m': 'last 30 mins',
-  '-1h': 'last hour',
-  '-12h': 'last 12 hours',
-  '-1d': 'last day',
-  '-2d': 'last 2 days',
-  '-7d': 'last 7 days',
-  '-30d': 'last 30 days [slow]',
-  '-90d': 'last 90 days [very slow]'
-}
 
-type Unit = keyof typeof units
+type Unit = keyof typeof quickRanges
 type RelativeTimeStr =
   `-${string}m` | `-${string}h` | `-${string}d`
 
@@ -829,9 +816,9 @@ export default function DataPreview() {
                   label="Quick Ranges"
                   margin="dense"
                 >
-                  {(isDateStr(start) ? Object.keys(units) : Object.keys(units).slice(1))
+                  {(isDateStr(start) ? Object.keys(quickRanges) : Object.keys(quickRanges).slice(1))
                     .map(k =>
-                      <MenuItem value={k} key={k}>{units[k]}</MenuItem>
+                      <MenuItem value={k} key={k}>{quickRanges[k]}</MenuItem>
                     )
                   }
                 </Select>

@@ -107,7 +107,7 @@ export default function AppData(props: Props) {
       <Card>
         <div className="flex gap">
           <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
-          <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+          <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
         </div>
       </Card>
 

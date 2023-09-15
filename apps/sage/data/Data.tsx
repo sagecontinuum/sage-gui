@@ -309,6 +309,8 @@ export default function Data(props: Props) {
               onChange={handleOptionChange}
               onDateChange={handleDateChange}
               opts={opts}
+              aggregation
+              density
             />
           </Controls>
         </Top>

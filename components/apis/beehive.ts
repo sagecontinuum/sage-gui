@@ -226,7 +226,7 @@ type SanityTestArgs = {
 
 
 export async function getHealthData(args?: HealthTestArgs) : Promise<ByMetric> {
-  const {vsn, start, } = args || {}
+  const {vsn, start} = args || {}
 
   const params = {
     start: start ?? '-60h',

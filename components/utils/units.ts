@@ -1,3 +1,19 @@
+
+export const quickRanges = {
+  'custom': 'Custom range',
+  '-1m': 'last minute',
+  '-5m': 'last 5 mins',
+  '-30m': 'last 30 mins',
+  '-1h': 'last hour',
+  '-12h': 'last 12 hours',
+  '-1d': 'last day',
+  '-2d': 'last 2 days',
+  '-7d': 'last 7 days',
+  '-30d': 'last 30 days [slow]',
+  '-90d': 'last 90 days [very slow]'
+}
+
+
 export function prettyTime(secs: number) {
   if (!secs && secs != 0) return
   const days = Math.floor(secs / (24*60*60))

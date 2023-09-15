@@ -573,7 +573,7 @@ export default function NodeView(props: Props) {
           <Card>
             <div className="timeline-title flex items-center gap">
               <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
-              <DataOptions onChange={handleOptionChange} opts={opts} condensed />
+              <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
             </div>
 
             {loadingTL &&

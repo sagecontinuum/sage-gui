@@ -1,5 +1,4 @@
-// todo(nc): use labels for input labels
-
+import { memo } from 'react'
 import styled from 'styled-components'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -8,18 +7,30 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '/components/input/Checkbox'
 import DateInput from '/components/input/DateInput'
 
+import { quickRanges as quickRangeLabels } from '/components/utils/units'
 import { Options } from './Data'
 
 
 type Props = {
   opts: Options
   condensed?: boolean
+  aggregation?: boolean
+  density?: boolean
+  quickRanges?: string[]
   onChange: (evt: Event, name: string) => void
   onDateChange?: (val: Date) => void
 }
 
-export default function DataOptions(props: Props) {
-  const {opts, condensed, onChange, onDateChange} = props
+export default memo(function DataOptions(props: Props) {
+  const {
+    opts,
+    condensed = false,
+    aggregation = false,
+    density = false,
+    quickRanges = ['-1y', '-90d', '-30d', '-7d', '-2d'],
+    onChange,
+    onDateChange
+  } = props
 
   return (
     <Root className="flex items-center">
@@ -42,22 +53,24 @@ export default function DataOptions(props: Props) {
         </div>
       }
 
-      <div>
-        <h5 className="subtitle no-margin muted">{!condensed && 'Aggregation'}</h5>
-        <ToggleButtonGroup
-          value={opts.time}
-          onChange={(evt) => onChange(evt, 'time')}
-          aria-label="change time (windows)"
-          exclusive
-        >
-          <ToggleButton value="hourly" aria-label="hourly">
-            hourly
-          </ToggleButton>
-          <ToggleButton value="daily" aria-label="daily">
-            daily
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </div>
+      {aggregation &&
+        <div>
+          <h5 className="subtitle no-margin muted">{!condensed && 'Aggregation'}</h5>
+          <ToggleButtonGroup
+            value={opts.time}
+            onChange={(evt) => onChange(evt, 'time')}
+            aria-label="change time (windows)"
+            exclusive
+          >
+            <ToggleButton value="hourly" aria-label="hourly">
+              hourly
+            </ToggleButton>
+            <ToggleButton value="daily" aria-label="daily">
+              daily
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      }
 
       {condensed &&
         <div>
@@ -67,21 +80,13 @@ export default function DataOptions(props: Props) {
             aria-label="change last x days"
             exclusive
           >
-            <ToggleButton value="-365d" aria-label="last year (365 days)">
-              -1y
-            </ToggleButton>
-            <ToggleButton value="-90d" aria-label="last 90 days">
-              -90d
-            </ToggleButton>
-            <ToggleButton value="-30d" aria-label="last 30 days">
-              -30d
-            </ToggleButton>
-            <ToggleButton value="-7d" aria-label="last 7 days">
-              -7d
-            </ToggleButton>
-            <ToggleButton value="-2d" aria-label="last 2 days">
-              -2d
-            </ToggleButton>
+            {quickRanges.map(v => {
+              return (
+                <ToggleButton value={v} aria-label={quickRangeLabels[v]} key={v}>
+                  {v}
+                </ToggleButton>
+              )
+            })}
           </ToggleButtonGroup>
         </div>
       }
@@ -108,19 +113,22 @@ export default function DataOptions(props: Props) {
           label="versions"
         />
         */}
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={opts.density}
-              onChange={(evt) => onChange(evt, 'density')}
-            />
-          }
-          label="density"
-        />
+        {density &&
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={opts.density}
+                onChange={(evt) => onChange(evt, 'density')}
+              />
+            }
+            label="density"
+          />
+        }
       </div>
     </Root>
   )
-}
+}, (prev, next) => prev.opts == next.opts)
+
 
 const Root = styled.div`
   [role=group] {

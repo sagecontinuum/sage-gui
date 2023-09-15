@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import { Button, Divider, IconButton, Tooltip } from '@mui/material'
+import { Button, Divider, FormControlLabel, IconButton, Tooltip } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
 import TerminalRounded from '@mui/icons-material/TerminalRounded'
 import TableView from '@mui/icons-material/TableViewRounded'
@@ -13,6 +13,7 @@ import ParamDetails from './ParamDetails'
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import MetaTable from '/components/table/MetaTable'
 import Clipboard from '/components/utils/Clipboard'
+import Checkbox from '/components/input/Checkbox'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import { formatters, TimelineContainer } from './JobStatus'
@@ -20,36 +21,86 @@ import JobTimeLine from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
 import { type NodeMeta } from '/components/apis/beekeeper'
+import DataOptions from '../data/DataOptions'
+import TimelineSkeleton from '/components/viz/TimelineSkeleton'
+import { quickRanges } from '/components/utils/units'
+
+import { pickBy } from 'lodash'
+import { subDays  } from 'date-fns'
+
+const TAIL_DAYS = '-2d'
+
+
+const getStartTime = (str) =>
+  subDays(new Date(), str.replace(/-|d/g, ''))
+
+
+type Options = {
+  start: Date
+  window: string
+}
 
 
 
 type Props = {
   job: ES.Job
-  jobs: ES.Job[]
   nodeMetaByVSN: {[vsn: string]: NodeMeta}
   handleCloseDialog: () => void
 }
 
 export default function JobDetails(props: Props) {
-  const {job, jobs, nodeMetaByVSN, handleCloseDialog} = props
+  const {job, nodeMetaByVSN, handleCloseDialog} = props
 
-  const {setLoading} = useProgress()
+  const {loading, setLoading} = useProgress()
+  const [yaml, setYaml] = useState<string>()
+
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
   const [errorsByGoalID, setErrorsByGoalID] = useState<ES.ErrorsByGoalID>()
-  const [yaml, setYaml] = useState<string>(null)
+
+  // all events related to the job being looked at (by node)
+  const [events, setEvents] = useState<ES.EventsByNode>()
+
+  const [showAllTasks, setShowAllTasks] = useState<boolean>(false)
+
+  const [opts, setOpts] = useState<Options>({
+    start: getStartTime(TAIL_DAYS),
+    window: TAIL_DAYS
+  })
 
 
   useEffect(() => {
     if (!job) return
 
+    const {start} = opts
+
     setLoading(true)
-    ES.getEvents(job.nodes)
+    ES.getEvents({vsns: job.nodes, start})
       .then(({events, errors}) => {
+
         setEventsByNode(events)
         setErrorsByGoalID(errors)
       })
       .finally(() => setLoading(false))
-  }, [job, setLoading])
+  }, [job, setLoading, opts])
+
+
+  useEffect(() => {
+    if (!eventsByNode || !job) return
+
+    if (showAllTasks) {
+      setEvents(eventsByNode)
+    } else {
+      const taskNames = job.plugins.map(o => o.name)
+
+      // filter to relevant tasks (by node)
+      const byNode = {}
+      Object.keys(eventsByNode).forEach(vsn => {
+        byNode[vsn] = pickBy(eventsByNode[vsn], (_, key) => taskNames.includes(key))
+      })
+
+      setEvents(byNode)
+    }
+  }, [job, eventsByNode, showAllTasks])
 
 
   const handleViewYaml = () => {
@@ -63,6 +114,18 @@ export default function JobDetails(props: Props) {
       .catch(error => setYaml(error.message))
   }
 
+  const handleOptionChange = (evt, name) => {
+    if (name == 'window') {
+      const window = evt.target.value
+      setOpts(prev => ({
+        ...prev,
+        start: getStartTime(window),
+        window
+      }))
+    } else {
+      throw `unhandled option state change name=${name}`
+    }
+  }
 
   const handleDownload = () => {
     ES.downloadTemplate(job.job_id)
@@ -102,7 +165,7 @@ export default function JobDetails(props: Props) {
       onClose={handleCloseDialog}
       confirmBtnText="Close"
       content={
-        <div>
+        <Content>
           <JobMetaContainer>
             {yaml &&
               <Clipboard content={yaml} />
@@ -148,15 +211,37 @@ export default function JobDetails(props: Props) {
             }
           </JobMetaContainer>
 
-          <h2>Timelines</h2>
-          {eventsByNode &&
+
+          <div className="timeline-title flex items-center gap">
+            <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of events</h2>
+            <DataOptions
+              quickRanges={['-90d', '-30d', '-7d', '-2d']}
+              onChange={handleOptionChange}
+              opts={opts}
+              condensed
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showAllTasks}
+                  onChange={(evt) => setShowAllTasks(evt.target.checked)}
+                />
+              }
+              label="Show all tasks"
+            />
+          </div>
+
+          {!events &&
+            <TimelineSkeleton />
+          }
+
+          {events &&
             <TimelineContainer>
-              {Object.keys(eventsByNode)
-                .filter(vsn =>
-                  jobs.filter(o => o.id == job.job_id).flatMap(o => o.nodes).includes(vsn)
-                )
+              {Object.keys(events)
                 .map((vsn, i) => {
                   const {location} = nodeMetaByVSN[vsn]
+                  const data = events[vsn]
+
                   return (
                     <div key={i} className="title-row">
                       <div className="flex column">
@@ -165,14 +250,33 @@ export default function JobDetails(props: Props) {
                         </div>
                         <div>{location}</div>
                       </div>
-                      <JobTimeLine data={eventsByNode[vsn]} errors={errorsByGoalID}/>
+
+                      {loading &&
+                        <div className="w-full">
+                          <TimelineSkeleton includeHeader={false} />
+                        </div>
+                      }
+
+                      {!loading && !Object.keys(data).length &&
+                        <p className="muted">
+                          {!showAllTasks &&
+                            <>No events found for this job (for the {quickRanges[opts.window]}).</>
+                          }
+                          {showAllTasks &&
+                            <>No events found for the {quickRanges[opts.window]}.</>
+                          }
+                        </p>
+                      }
+                      {!loading && Object.keys(data).length > 0 &&
+                        <JobTimeLine data={data} errors={errorsByGoalID} start={opts.start} />
+                      }
                     </div>
                   )
                 })
               }
             </TimelineContainer>
           }
-        </div>
+        </Content>
       }
     />
   )
@@ -189,5 +293,11 @@ const JobMetaContainer = styled.div`
 
   td > pre {
     margin: 0;
+  }
+`
+
+const Content = styled.div`
+  .timeline-title {
+    margin-top: 2rem;
   }
 `

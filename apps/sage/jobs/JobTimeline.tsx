@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { subHours } from 'date-fns'
 import Tooltip from '@mui/material/Tooltip'
 
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
@@ -34,10 +33,11 @@ type GroupedApps = {
 type Props = {
   data: GroupedApps
   errors: ErrorsByGoalID
+  start?: string
 }
 
 export default function JobTimeLine(props: Props) {
-  const {data, errors} = props
+  const {data, errors, start} = props
 
   const navigate = useNavigate()
   const [selectedEvent, setSelectedEvent] = useState<PluginEvent | false>(false)
@@ -58,8 +58,8 @@ export default function JobTimeLine(props: Props) {
       {data &&
         <TimelineChart
           data={data}
-          startTime={subHours(new Date(), 24)}
-          endTime={new Date()}
+          // startTime={start}
+          // endTime={new Date()}
           scaleExtent={[.2, 1000]}
           colorCell={(val, obj) => {
             if (obj.status === undefined) return color.noValue
@@ -78,6 +78,9 @@ export default function JobTimeLine(props: Props) {
               <b class="${obj.status}">${obj.status}</b><br>
           `}
           yFormat={(label: string, data) => {
+            // todo: this is workaround to ensure chart can be updated when y axis changes(?)
+            if (!data[label]) return
+
             // just form label from first entry
             const l = data[label][0].value.plugin_image
             const path = l.replace('registry.sagecontinuum.org/', '').split(':')[0]

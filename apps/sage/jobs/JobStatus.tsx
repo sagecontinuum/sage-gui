@@ -558,7 +558,6 @@ export default function JobStatus() {
       {!!jobs.length && jobDetails &&
         <JobDetails
           job={jobDetails}
-          jobs={jobs}
           nodeMetaByVSN={nodeMetas}
           handleCloseDialog={handleCloseDialog}
         />

@@ -368,18 +368,25 @@ export type ErrorsByGoalID = {
 }
 
 
+type GetEventsArgs = {
+  start?: Date | string
+  vsns?: VSN[]
+}
+
 type EventData = {
   events: EventsByNode
   errors: ErrorsByGoalID
 }
 
 // fetch tasks state event changes, and parse SES JSON Messages
-export function getEvents(nodes?: VSN[]) : Promise<EventData> {
+export function getEvents(args: GetEventsArgs) : Promise<EventData> {
+  const {start, vsns} = args || {}
+
   return BH.getData({
-    start: '-24h',
+    start: start || '-24h',
     filter: {
       name: 'sys.scheduler.status.plugin.*',
-      ...(nodes && {vsn: nodes.join('|')})
+      ...(vsns && {vsn: vsns.join('|')})
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
     .then(pluginEvents => {
