@@ -61,7 +61,7 @@ export default function QueryViewer(props: Props) {
 }
 
 const Root = styled.div<{scroll: boolean}>`
-  margin: 0 10px;
+  margin: 2px 10px;
 
   ${props => props.scroll ?
     `white-space: nowrap;
