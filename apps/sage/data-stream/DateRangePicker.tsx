@@ -1,10 +1,6 @@
-
-
-
 import styled from 'styled-components'
 
 import DateTimePicker, { type DateTimeRangePickerProps } from '@wojtekmaj/react-datetimerange-picker'
-import 'react-datetime-picker/dist/DateTimePicker.css'
 import '@wojtekmaj/react-datetimerange-picker/dist/DateTimeRangePicker.css'
 import 'react-calendar/dist/Calendar.css'
 
@@ -25,21 +21,18 @@ export default function DateRangePicker(props: DateTimeRangePickerProps) {
 }
 
 
+
 const Root = styled.div`
+  white-space: nowrap;
+
   input[type=number]::-webkit-outer-spin-button,
   input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
 
-  .input {
-    -webkit-appearance: textfield;
-    -moz-appearance: textfield;
-    appearance: textfield;
-  }
-
-  .react-calendar {
-    border: 1px solid #ddd;
+  select {
+    -webkit-appearance: none;
   }
 
   .react-calendar__tile--now {
@@ -54,7 +47,7 @@ const Root = styled.div`
   }
 
   [class*=-picker__wrapper] {
-    border: solid #e3e3e3;
+    border: 1px solid #c4c4c4;
     border-radius: 5px;
     margin: 0 10px 0 20px;
   }

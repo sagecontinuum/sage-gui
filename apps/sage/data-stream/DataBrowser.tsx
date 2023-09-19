@@ -382,7 +382,7 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 type DateStr = `${string}T${string}Z`
 
 
-export default function DataPreview() {
+export default function DataBrowser() {
   const [params, setParams] = useSearchParams()
   const app = params.get('apps')
   const name = params.get('names')
@@ -777,8 +777,8 @@ export default function DataPreview() {
           </Snippets>
         </Sidebar>
 
-        <Main className="toolbar">
-          <div className="flex items-start">
+        <Main>
+          <div className="flex items-start justify-between">
             <div className="flex items-start query-viewer">
               {Object.keys(filters).reduce((acc, k) => acc + filters[k].length, 0) > 1 &&
                   <Button
@@ -805,7 +805,7 @@ export default function DataPreview() {
               />
             </div>
 
-            <div className="flex items-center time-opts">
+            <div className="flex time-opts">
               <FormControl variant="outlined" style={{width: 150}}>
                 <InputLabel id="range-label">Quick Ranges</InputLabel>
                 <Select
@@ -824,15 +824,12 @@ export default function DataPreview() {
                 </Select>
               </FormControl>
 
-              <div className="range-picker">
-                <DateRangePicker
-                  value={range}
-                  onChange={handleDatePickerChange}
-                />
-              </div>
+              <DateRangePicker
+                value={range}
+                onChange={handleDatePickerChange}
+              />
             </div>
           </div>
-
 
           <br />
 
@@ -944,10 +941,7 @@ const Root = styled.div<{isMedia: boolean}>`
     `}
 
   .query-viewer {
-    width: 50%;
-  }
-  .time-opts {
-    width: 50%;
+    overflow: hidden;
   }
 
   .time-opts .MuiInputBase-root {
