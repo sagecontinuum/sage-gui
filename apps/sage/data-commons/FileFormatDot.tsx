@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import Dot from '/components/utils/Dot'
 
 const typeColorMap = {
   default: 'rgb(28,140,201)',
@@ -25,13 +25,3 @@ export function FileFormatDot(props: FileFormatProps) {
     </div>
   )
 }
-
-const Dot = styled.div<{color: string}>`
-  display: inline-block;
-  height: 12px;
-  width: 12px;
-  border-radius: 50%;
-  margin-right: 3px;
-  background-color: ${props => props.color};
-`
-

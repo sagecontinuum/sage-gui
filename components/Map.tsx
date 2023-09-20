@@ -165,7 +165,7 @@ function PopupInfo(props: PopupProps) {
                 <tr>
                   <td>Location</td>
                   <td>
-                    <Link to={`/nodes/?location="${encodeURIComponent(location)}"`}>
+                    <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
                       {location}
                     </Link>
                   </td>

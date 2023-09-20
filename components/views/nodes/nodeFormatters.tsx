@@ -12,6 +12,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import { NODE_STATUS_RANGE } from '/components/apis/beehive'
 import NodeLastReported from '/components/utils/NodeLastReported'
+import Dot from '/components/utils/Dot'
 
 
 import * as utils from '/components/utils/units'
@@ -21,18 +22,27 @@ import config from '/config'
 const {sensorMapping} = config
 
 export function gpsIcon(obj) {
-  return (
-    <>
-      {obj.hasStaticGPS &&
-        <LiveGPSDot invisible={!obj.hasLiveGPS} color="primary" variant="dot">
+  const {hasLiveGPS, hasStaticGPS} = obj
+
+  if (hasStaticGPS) {
+    return (
+      <Tooltip
+        title={hasLiveGPS ?
+          <>Static GPS<br/><Dot size="8" /> = recent live GPS found</> :
+          'Static GPS'
+        }>
+        <LiveGPSDot invisible={!hasLiveGPS} color="primary" variant="dot">
           <MapIcon fontSize="small"/>
         </LiveGPSDot>
-      }
-      {!obj.hasStaticGPS && obj.hasLiveGPS &&
+      </Tooltip>
+    )
+  } else if (!hasStaticGPS && hasLiveGPS) {
+    return (
+      <Tooltip title={<>Live GPS<br/>(no static gps found)</>}>
         <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
-      }
-    </>
-  )
+      </Tooltip>
+    )
+  }
 }
 
 
@@ -80,7 +90,15 @@ export function status(val, obj) {
 }
 
 
-export function vsn(val, obj) {
+export function vsn(val) {
+  return (
+    <NodeCell className="flex items-center justify-between">
+      <Link to={`/node/${val}`}>{val}</Link>
+    </NodeCell>
+  )
+}
+
+export function vsnWithGPS(val, obj) {
   return (
     <NodeCell className="flex items-center justify-between">
       <Link to={`/node/${val}`}>{val}</Link>
@@ -95,6 +113,16 @@ const NodeCell = styled.div`
     margin-bottom: 2px;
   }
 `
+
+
+export function gps(vsl, obj) {
+  return <div className="flex items-center">
+    <span className="gps-icon">{gpsIcon(obj)}</span>
+
+    {(!obj.lat || !obj.lng) ? '-' :`${obj.lat}, ${obj.lng}`}
+  </div>
+}
+
 
 
 export function lastUpdated(elapsedTimes, obj) {

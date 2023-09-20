@@ -75,7 +75,7 @@ const metaRows1 = [{
   format: (val) => <a href={`/nodes?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'location',
-  format: (val) => <a href={`/nodes?location="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
+  format: (val) => <a href={`/nodes?city="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
   id: 'build_date',
   label: 'Built'
