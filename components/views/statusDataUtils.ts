@@ -94,7 +94,7 @@ function getMetricsByHost(
 
     host = BK.findHostWithSerial(Object.keys(metrics), serial)
 
-    const m = metrics[host][metricName]
+    const m = (metrics[host] || {})[metricName]
     if (!m) return
 
     const val = latestOnly ? m.at(-1).value : m
