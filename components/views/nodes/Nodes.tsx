@@ -361,6 +361,10 @@ const TableContainer = styled.div`
   .status-icon {
     margin: 0 10px;
   }
+
+  .gps-icon {
+    margin-right: 10px;
+  }
 `
 
 const FilterControls = styled.div`

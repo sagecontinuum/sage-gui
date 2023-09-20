@@ -50,9 +50,7 @@ const columns = [{
 }, {
   id: 'gps',
   label: 'GPS',
-  format: (_, obj) => {
-    return (!obj.lat || !obj.lng) ? '-' :`${obj.lat}, ${obj.lng}`
-  }
+  format: formatters.gps
 }, {
   id: 'staticGPS',
   label: 'Static GPS',

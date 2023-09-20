@@ -181,7 +181,7 @@ const columns = [{
   id: 'vsn',
   label: 'VSN',
   width: '50px',
-  format: formatters.vsn
+  format: formatters.vsnWithGPS
 }, {
   id: 'project',
   label: 'Project'
@@ -203,9 +203,7 @@ const columns = [{
 }, {
   id: 'gps',
   label: 'GPS',
-  format: (_, obj) => {
-    return (!obj.lat || !obj.lng) ? '-' : `${obj.lat}, ${obj.lng}`
-  },
+  format: formatters.gps,
   hide: true
 }, {
   id: 'staticGPS',

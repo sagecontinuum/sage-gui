@@ -327,35 +327,37 @@ export async function getState() : Promise<State[]> {
   let data = res[1]
 
   // join manifests to meta
-  data = (data as SimpleManifest[]).map(obj => {
+  data = (data as SimpleManifest[])
+    .filter(o => !!o.computes.length)
+    .map(obj => {
+      const meta = nodeMeta[obj.vsn] || {}
+      const {location: loc} = meta
 
-    const meta = nodeMeta[obj.vsn] || {}
-    const {location: loc} = meta
+      // allow "<city>, <state_abbrev>", "<city>, <country>",
+      // "<state>", or "<country>", etc., for now.
+      const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
+      const state = part in USStates ? `${USStates[part]} (${part})` : part
 
-    // allow "<city>, <state_abbrev>", "<city>, <country>",
-    // "<state>", or "<country>", etc., for now.
-    const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
-    const state = part in USStates ? `${USStates[part]} (${part})` : part
-
-    return {
-      ...obj,
-      node_phase_v3: meta.node_phase_v3,
-      project: meta.project,
-      focus: meta.focus,
-      state,
-      city: loc,
-      node_type: meta.node_type,
-      modem: meta.modem,
-      nx_agent: meta.nx_agent,
-      shield: meta.shield,
-      build_date: meta.build_date,
-      commission_date: meta.commission_date,
-      status: null,
-      hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
-      lat: obj.gps_lat,
-      lng: obj.gps_lon
-    }
-  })
+      return {
+        ...obj,
+        node_phase_v3: meta.node_phase_v3,
+        project: meta.project,
+        focus: meta.focus,
+        state,
+        city: loc,
+        location: loc,  // same as city for now
+        node_type: meta.node_type,
+        modem: meta.modem,
+        nx_agent: meta.nx_agent,
+        shield: meta.shield,
+        build_date: meta.build_date,
+        commission_date: meta.commission_date,
+        status: null,
+        hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
+        lat: obj.gps_lat,
+        lng: obj.gps_lon
+      }
+    })
 
   return data
 }

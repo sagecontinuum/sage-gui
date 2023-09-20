@@ -6,7 +6,7 @@ function format(label: string, val: string) {
   if (label == 'project')
     return <Link to={`/nodes?project="${encodeURIComponent(val)}"`}>{val}</Link>
   else if (label == 'location')
-    return <Link to={`/nodes?location="${encodeURIComponent(val)}"`}>{val}</Link>
+    return <Link to={`/nodes?city="${encodeURIComponent(val)}"`}>{val}</Link>
 
   return typeof val == 'boolean' ?
     (val ? 'yes' : 'no'):
