@@ -13,18 +13,15 @@ import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
-import * as utils from '/components/utils/units'
 
-import NodeLastReported from '/components/utils/NodeLastReported'
 import HealthSparkler, {healthColor, sanityColor} from '/components/viz/HealthSparkler'
-import { getColorClass } from '/components/utils/NodeLastReported'
 import cols, { GoodChip } from '../status/columns'
 
 import { mergeMetrics } from '/components/views/statusDataUtils'
 
-import settings from '/apps/admin/settings'
-const FAIL_THRES = settings.elapsedThresholds.fail
-const WARNING_THRES = settings.elapsedThresholds.warning
+import * as formatters from '/components/views/nodes/nodeFormatters'
+
+
 const SPARKLINE_START = '-7d'
 const TIME_OUT = 5000
 
@@ -44,29 +41,9 @@ const columns = [
   },
   getColumn('temp'),
   {
-    id: 'uptimes',
-    label: 'Uptime',
-    format: (val) =>
-      !val ? '-' : utils.prettyTime(val.nx)
-  }, {
-    id: 'rpi',
-    label: 'RPi last reported',
-    format: (_, obj) => {
-      if (!obj || !obj.elapsedTimes) return '-'
-
-      if (!obj.shield)
-        return <span className="muted">no shield</span>
-
-      return <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
-    }
-  }, {
-    id: 'nx',
-    label: 'NX last reported',
-    format: (_, obj) => {
-      if (!obj || !obj.elapsedTimes) return '-'
-
-      return <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
-    }
+    id: 'elapsedTimes',
+    label: 'Last Reported',
+    format: formatters.lastUpdated
   }, {
     id: 'health1',
     label: 'Health',
@@ -79,7 +56,7 @@ const columns = [
       const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
-      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-end">
+      return <Link to={`/node/${row.vsn}?tab=health`} className="no-style flex justify-end">
         {!data?.length ? <div>no data</div> :
           <HealthSparkler
             name={<>summary of last (available) {data?.length} hours</>}
@@ -104,7 +81,7 @@ const columns = [
       const lastN = isPhase2 ? 3*24 : 7*24
       const data = details?.slice(-lastN)
 
-      return <Link to={`/node/${row.id}?factory=true`} className="no-style flex justify-end">
+      return <Link to={`/node/${row.vsn}?tab=health`} className="no-style flex justify-end">
         {!data?.length ? <div>no data</div> :
           <HealthSparkler
             name={<>summary of last (available) {data?.length} hours</>}
@@ -370,7 +347,9 @@ export default function StatusView() {
         <Tab label={`NX flash ${getCountIndicator('phase1')}`} component={Link} to="/surya/phase1" />
         <Tab label={`Open build ${getCountIndicator('phase2')}`} component={Link} to="/surya/phase2" />
         <Tab label={`Long soak ${getCountIndicator('phase3')}`} component={Link} to="/surya/phase3" />
-        <Tab label={`Completed ${getCountIndicator('phase4')}`} component={Link} to="/surya/phase4" className="completed-tab" />
+        <Tab label={`Completed ${getCountIndicator('phase4')}`} component={Link} to="/surya/phase4"
+          className="completed-tab"
+        />
       </Tabs>
 
 
@@ -426,8 +405,8 @@ const Overview = styled.div`
 
 const TableContainer = styled.div`
   table {
-    th:nth-child(n+7):not(:nth-child(9)),
-    td:nth-child(n+7):not(:nth-child(9)) {
+    th:nth-child(n+5):not(:nth-child(7)),
+    td:nth-child(n+5):not(:nth-child(7)) {
       text-align: center; // center for viz / signoffs
     }
   }

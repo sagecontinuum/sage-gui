@@ -169,14 +169,14 @@ export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {
 
 
 
-export function aggregateMetrics(data: Record[], byHost: boolean = false) : AggMetrics {
+export function aggregateMetrics(data: Record[]) : AggMetrics {
   if (!data.length)
     return null
 
   const byNode = {}
   data.forEach(obj => {
     const {timestamp, name, value, meta} = obj
-    const node = byHost ? meta.node : meta.vsn
+    const {node, vsn} = meta
     let {host} = meta
 
     // todo(nc): temp solution since IPs don't have a host?
@@ -185,19 +185,18 @@ export function aggregateMetrics(data: Record[], byHost: boolean = false) : AggM
     }
 
     // if no node or host, don't include in aggregation
-    if (!node || !host) {
+    if (!vsn || !host) {
       return
     }
 
     // add entry for node
-    if (!(node in byNode))
-      byNode[node] = {}
+    if (!(vsn in byNode))
+      byNode[vsn] = {}
 
-    if (!(host in byNode[node]))
-      byNode[node][host] = {}
+    if (!(host in byNode[vsn]))
+      byNode[vsn][host] = {}
 
-
-    const nodeData = byNode[node][host]
+    const nodeData = byNode[vsn][host]
 
     // append data
     const record = {timestamp, value, meta}
@@ -307,7 +306,7 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
   }
 
   const data = await getData(params)
-  let byNode = groupBy(data, 'meta.vsn')
+  const byNode = groupBy(data, 'meta.vsn')
   mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
 
   Object.entries(byNode).forEach(([id, obj]) => {
