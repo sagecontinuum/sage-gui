@@ -98,10 +98,17 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
   let idx = 0
   Object.keys(byName).forEach((name) => {
     const namedData = byName[name]
+    const grouped = groupBy(namedData, o => {
+      const {sensor, zone, vsn} = o.meta
+      if (sensor && zone) {
+        return `${vsn}; ${sensor}; ${zone}`
+      } else if (sensor) {
+        return `${vsn}; ${sensor}`
+      } else {
+        return vsn
+      }
+    })
 
-    const grouped = groupBy(namedData, o =>
-      o.meta.sensor ? `${o.meta.vsn}; ${o.meta.sensor}` : o.meta.vsn
-    )
     const hasGroup = Object.keys(grouped)[0] != 'undefined'
 
     Object.keys(grouped)
