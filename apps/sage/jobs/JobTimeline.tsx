@@ -33,7 +33,7 @@ type GroupedApps = {
 type Props = {
   data: GroupedApps
   errors: ErrorsByGoalID
-  start?: string
+  start?: string  // show timeline range that is selected?
 }
 
 export default function JobTimeLine(props: Props) {
@@ -46,11 +46,11 @@ export default function JobTimeLine(props: Props) {
   const getErrors = (pluginEvent: PluginEvent) => {
     const {goal_id, k3s_pod_instance} = pluginEvent.value
 
-    const text = errors[goal_id]
+    const text = (errors[goal_id] || [])
       .filter(obj => obj.value.k3s_pod_instance == k3s_pod_instance)
       .map(obj => obj.value.error_log)
 
-    return text
+    return text.length == 0 ? 'no errors found' : text
   }
 
   return (
@@ -58,8 +58,7 @@ export default function JobTimeLine(props: Props) {
       {data &&
         <TimelineChart
           data={data}
-          // startTime={start}
-          // endTime={new Date()}
+          startTime={new Date(start)}
           scaleExtent={[.2, 1000]}
           colorCell={(val, obj) => {
             if (obj.status === undefined) return color.noValue

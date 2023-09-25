@@ -28,7 +28,7 @@ import { quickRanges } from '/components/utils/units'
 import { pickBy } from 'lodash'
 import { subDays  } from 'date-fns'
 
-const TAIL_DAYS = '-2d'
+const TAIL_DAYS = '-1d'
 
 
 const getStartTime = (str) =>
@@ -131,6 +131,9 @@ export default function JobDetails(props: Props) {
     ES.downloadTemplate(job.job_id)
   }
 
+
+  const dayCount = opts.window.replace(/-|d/g, '')
+
   return (
     <ConfirmationDialog
       title={
@@ -213,9 +216,11 @@ export default function JobDetails(props: Props) {
 
 
           <div className="timeline-title flex items-center gap">
-            <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of events</h2>
+            <h2 className="no-margin">
+              Last {dayCount == '1' ? 'day' : `${dayCount} days`} of events
+            </h2>
             <DataOptions
-              quickRanges={['-90d', '-30d', '-7d', '-2d']}
+              quickRanges={['-90d', '-30d', '-7d', '-2d', '-1d']}
               onChange={handleOptionChange}
               opts={opts}
               condensed
