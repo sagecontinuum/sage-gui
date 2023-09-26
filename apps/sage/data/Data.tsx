@@ -298,7 +298,7 @@ export default function Data(props: Props) {
                   `${filtered.length} nodes with recent data`
                 }
                 {opts.display == 'apps' && byApp &&
-                  `${loadingObject.keys(byApp).length} apps with data`
+                  `${Object.keys(byApp).length} apps with data`
                 }
               </h5>
             </div>

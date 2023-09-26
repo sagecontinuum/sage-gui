@@ -12,7 +12,7 @@ ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
 WORKDIR /app
 COPY apps/${SAGE_UI_APP}/package.json ./apps/${SAGE_UI_APP}/package.json
 COPY package*.json .
-RUN npm install --omit=dev
+RUN npm install -w ${SAGE_UI_APP} --omit=dev
 COPY . .
 
 RUN npm run build -w ${SAGE_UI_APP}
