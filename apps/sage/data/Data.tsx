@@ -261,9 +261,6 @@ export default function Data(props: Props) {
     setEnd(DATA_END || addDays(start, DAYS))
   }
 
-  const getNodeID = (vsn) => {
-    return nodeMetas.find(o => o.vsn == vsn).node_id
-  }
 
   return (
     <Root className="flex">
@@ -408,7 +405,7 @@ export default function Data(props: Props) {
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
                       }
-                      yFormat={vsn => <Link to={`/node/${getNodeID(vsn)}`} target="_blank">{vsn}</Link>}
+                      yFormat={vsn => <Link to={`/node/${vsn}`} target="_blank">{vsn}</Link>}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, plugin} = meta
