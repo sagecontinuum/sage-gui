@@ -32,6 +32,9 @@ const theme = createTheme({
     },
     secondary: {
       main: '#8166a0'
+    },
+    success: {
+      main: '#3ac37e'
     }
   },
   components: {

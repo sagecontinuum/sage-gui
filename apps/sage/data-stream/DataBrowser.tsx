@@ -12,6 +12,7 @@ import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
+import DateRangePicker from '/components/input/DateRangePicker'
 import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
@@ -19,7 +20,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import {
   FormControlLabel, Button, Divider, Select,
   MenuItem, FormControl, InputLabel, Alert,
-  Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton
+  Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton, CircularProgress, Tooltip
 } from '@mui/material'
 
 import UndoIcon from '@mui/icons-material/UndoRounded'
@@ -28,10 +29,10 @@ import AppsIcon from '@mui/icons-material/Apps'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
 import AudioIcon from '@mui/icons-material/Headphones'
 import NamesIcon from '@mui/icons-material/CategoryRounded'
+import RefreshIcon from '@mui/icons-material/RefreshRounded'
+import StopIcon from '@mui/icons-material/StopCircle'
 
 import { capitalize } from 'lodash'
-
-import DateRangePicker from './DateRangePicker'
 
 import config from '/config'
 const registry = config.dockerRegistry
@@ -396,9 +397,19 @@ export default function DataBrowser() {
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
 
-  const range = useMemo(() => [getStartTime(start), getEndTime(start, end)], [start, end])
+  // update the UI if dates are changed, but not times
+  const [timeIsFocused, setTimeIsFocused] = useState<boolean>()
+  const [pendingRange, setPendingRange] = useState<[Date, Date]>()
+  const [queryCount, setQueryCount] = useState(0)
+  const [prevQuery] = useState(params)
 
-  const {setLoading} = useProgress()
+  // only update the range when start, end, or 'refresh' is pressed
+  const range = useMemo<[Date, Date]>(() =>
+    [getStartTime(start), getEndTime(start, end)]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  , [start, end, queryCount])
+
+  const {loading, setLoading} = useProgress()
   const [cols, setCols] = useState(columns)
   const [page, setPage] = useState(0)
 
@@ -549,7 +560,8 @@ export default function DataBrowser() {
     fetchData()
     fetchFilterMenus()
   }, [
-    app, node, name, sensor, task, type, mimeType, start, end, setLoading
+    app, node, name, sensor, task, type, mimeType,
+    start, end, queryCount, setLoading
   ])
 
 
@@ -613,13 +625,30 @@ export default function DataBrowser() {
 
 
   const handleQuickRangeChange = (val) => {
+    setPendingRange(null)
     params.delete('end')
     params.set('start', val)
     setParams(params, {replace: true})
   }
 
 
+  const handleDatePickerFocus = (evt) => {
+    const {name} = evt.target
+    const isTime = ['hour12', 'minute', 'second', 'mPM'].includes(name)
+    setTimeIsFocused(isTime)
+  }
+
+
   const handleDatePickerChange = ([start, end]) => {
+    if (timeIsFocused) {
+      setPendingRange([start, end])
+    } else {
+      handleDateUpdate([start, end])
+    }
+  }
+
+
+  const handleDateUpdate = ([start, end]) => {
     params.set('start', new Date(start).toISOString())
     params.set('end',  new Date(end).toISOString())
     setParams(params, {replace: true})
@@ -668,6 +697,18 @@ export default function DataBrowser() {
     if (!next.length) params.delete(field)
     else params.set(field, next.join('|'))
     setParams(params, {replace: true})
+  }
+
+
+  const handleRefresh = () => {
+    if (loading) {
+      setParams(prevQuery, {replace: true})
+    } else if (pendingRange) {
+      handleDateUpdate(pendingRange)
+      setPendingRange(null)
+    } else {
+      setQueryCount(prev => prev + 1)
+    }
   }
 
 
@@ -823,11 +864,31 @@ export default function DataBrowser() {
                   }
                 </Select>
               </FormControl>
-
               <DateRangePicker
-                value={range}
+                value={pendingRange || range}
                 onChange={handleDatePickerChange}
+                onFocus={handleDatePickerFocus}
               />
+              <Tooltip title={
+                loading ? 'Cancel' : (pendingRange ? 'Submit' : 'Refresh')}
+              >
+                <Button
+                  variant={pendingRange ? 'contained' : 'outlined'}
+                  color={pendingRange ? 'success' : 'info'}
+                  onClick={handleRefresh}
+                >
+                  {loading ?
+                    <>
+                      <CircularProgress size={25}/>
+                      <StopIcon color="action" />
+                    </> :
+                    (pendingRange ?
+                      'Go' :
+                      <RefreshIcon color="action" sx={pendingRange && {color: '#f2f2f2'}} />
+                    )
+                  }
+                </Button>
+              </Tooltip>
             </div>
           </div>
 
@@ -944,9 +1005,26 @@ const Root = styled.div<{isMedia: boolean}>`
     overflow: hidden;
   }
 
-  .time-opts .MuiInputBase-root {
-    height: 29px;
-    border-radius: 5px;
+  .time-opts {
+
+    .MuiInputBase-root,
+    .MuiButtonBase-root {
+      height: 29px;
+      border-radius: 5px;
+    }
+
+    .MuiButtonBase-root {
+      min-width: 30px;
+      border-color: #c4c4c4;
+    }
+
+    .MuiButtonBase-root:hover {
+      border-color: #212121
+    }
+
+    .MuiCircularProgress-root {
+      position: absolute
+    }
   }
 `
 
