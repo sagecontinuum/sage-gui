@@ -101,8 +101,9 @@ export type Options = {
   time: 'hourly' | 'daily'
   density: boolean
   versions: boolean
-  start: Date
   window: `-${number}d`
+  start: Date
+  end: Date
 }
 
 
@@ -143,14 +144,14 @@ export default function Data(props: Props) {
   // options
   const [opts, setOpts] = useState<Options>({
     display: 'nodes',
+    time: 'hourly',
     density: true,
     versions: false,
-    time: 'hourly',
-    start: DATA_START || subDays(new Date(), DAYS)
+    window: `-${DAYS}d`,
+    start: DATA_START || subDays(new Date(), DAYS),
+    end: DATA_END || endOfHour(new Date())
   })
 
-  // note: endtime is not currently an option
-  const [end, setEnd] = useState<Date>(DATA_END || endOfHour(new Date()))
 
   useEffect(() => {
     setLoading(true)
@@ -178,14 +179,14 @@ export default function Data(props: Props) {
         return nodeMetas
       }).catch(error => dispatch({type: 'ERROR', error}))
 
-    const dProm = fetchRollup({...opts, end: DATA_END || addDays(opts.start, DAYS)})
+    const dProm = fetchRollup(opts)
 
     Promise.all([mProm, dProm])
       .then(([nodeMetas, data]) => dispatch({type: 'INIT_DATA', data, nodeMetas}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoading(false))
 
-  }, [opts.start])
+  }, [opts.start, opts.end])
 
 
   // fetch public ECR apps to determine if apps are indeed public
@@ -255,10 +256,8 @@ export default function Data(props: Props) {
     }
   }
 
-
-  const handleDateChange = (start: Date) => {
-    setOpts(prev => ({...prev, start}))
-    setEnd(DATA_END || addDays(start, DAYS))
+  const handleDateChange = ([start, end]: [Date, Date]) => {
+    setOpts(prev => ({...prev, start, end}))
   }
 
 
@@ -306,6 +305,7 @@ export default function Data(props: Props) {
               onChange={handleOptionChange}
               onDateChange={handleDateChange}
               opts={opts}
+              condensed
               aggregation
               density
             />
@@ -341,7 +341,7 @@ export default function Data(props: Props) {
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
                       startTime={opts.start}
-                      endTime={end}
+                      endTime={opts.end}
                       tooltip={(item) => `
                         <div style="margin-bottom: 5px;">
                           ${new Date(item.timestamp).toDateString()}${' '}
@@ -394,7 +394,7 @@ export default function Data(props: Props) {
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
                       colorCell={opts.density ? colorDensity : stdColor}
                       startTime={opts.start}
-                      endTime={end}
+                      endTime={opts.end}
                       tooltip={(item) =>
                         `
                         <div style="margin-bottom: 5px;">

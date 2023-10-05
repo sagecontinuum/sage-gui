@@ -1,14 +1,19 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import styled from 'styled-components'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import ToggleButton from '@mui/material/ToggleButton'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import {
+  FormControlLabel, ToggleButtonGroup, ToggleButton, Button,
+  CircularProgress, Tooltip
+} from '@mui/material'
+
+import RefreshIcon from '@mui/icons-material/RefreshRounded'
+import StopIcon from '@mui/icons-material/StopCircle'
 
 import Checkbox from '/components/input/Checkbox'
-import DateInput from '/components/input/DateInput'
+import DateRangePicker from '/components/input/DateRangePicker'
 
 import { quickRanges as quickRangeLabels } from '/components/utils/units'
 import { Options } from './Data'
+import { useProgress } from '/components/progress/ProgressProvider'
 
 
 type Props = {
@@ -18,7 +23,7 @@ type Props = {
   density?: boolean
   quickRanges?: string[]
   onChange: (evt: Event, name: string) => void
-  onDateChange?: (val: Date) => void
+  onDateChange?: (val: [Date, Date]) => void
 }
 
 export default memo(function DataOptions(props: Props) {
@@ -32,8 +37,59 @@ export default memo(function DataOptions(props: Props) {
     onDateChange
   } = props
 
+  const {loading} = useProgress()
+  const [timeIsFocused, setTimeIsFocused] = useState<boolean>()
+  const [pendingRange, setPendingRange] = useState<[Date, Date]>()
+  const [queryCount, setQueryCount] = useState(0)
+
+
+
+  const handleDatePickerFocus = (evt) => {
+    const {name} = evt.target
+    const isTime = ['hour12', 'minute', 'second', 'mPM'].includes(name)
+    setTimeIsFocused(isTime)
+  }
+
+
+  const handleDatePickerChange = ([start, end]) => {
+    if (timeIsFocused) {
+      setPendingRange([start, end])
+    } else {
+      onDateChange([start, end])
+    }
+  }
+
+
+  const handleRefresh = () => {
+    if (loading) {
+      // do nothing for now
+      // setParams(prevQuery, {replace: true})
+    } else if (pendingRange) {
+      handleDateUpdate(pendingRange)
+      setPendingRange(null)
+    } else {
+      onDateChange([start, end])
+    }
+  }
+
+
+
   return (
     <Root className="flex items-center">
+      <div className="checkboxes">
+        {density &&
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={opts.density}
+                onChange={(evt) => onChange(evt, 'density')}
+              />
+            }
+            label="density"
+          />
+        }
+      </div>
+
       {!condensed &&
         <div>
           <h5 className="subtitle no-margin muted">Group by</h5>
@@ -93,38 +149,34 @@ export default memo(function DataOptions(props: Props) {
 
       {onDateChange &&
         <div>
-          <h5 className="subtitle no-margin muted">Start Date</h5>
-          <DateInput
-            value={opts.start}
-            onChange={(val) => onDateChange(val)}
+          <DateRangePicker
+            value={[opts.start, opts.end]}
+            onChange={handleDatePickerChange}
+            onFocus={handleDatePickerFocus}
           />
+
+          <Tooltip title={
+            loading ? 'Cancel' : (pendingRange ? 'Submit' : 'Refresh')}
+          >
+            <Button
+              variant={pendingRange ? 'contained' : 'outlined'}
+              color={pendingRange ? 'success' : 'info'}
+              onClick={handleRefresh}
+            >
+              {loading ?
+                <>
+                  <CircularProgress size={25}/>
+                  <StopIcon color="action" />
+                </> :
+                (pendingRange ?
+                  'Go' :
+                  <RefreshIcon color="action" sx={pendingRange && {color: '#f2f2f2'}} />
+                )
+              }
+            </Button>
+          </Tooltip>
         </div>
       }
-
-      <div className="checkboxes">
-        {/*
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={opts.versions}
-              onChange={(evt) => onChange(evt, 'versions')}
-            />
-          }
-          label="versions"
-        />
-        */}
-        {density &&
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={opts.density}
-                onChange={(evt) => onChange(evt, 'density')}
-              />
-            }
-            label="density"
-          />
-        }
-      </div>
     </Root>
   )
 }, (prev, next) => prev.opts == next.opts)

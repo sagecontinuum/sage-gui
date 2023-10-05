@@ -133,7 +133,7 @@ const NavMenu = () => {
             <Item
               icon={<ChartIcon/>}
               to="/data"
-              label="Data Explorer"
+              label="Data"
             />
             <Item
               icon={<ChartBrowserIcon/>}
