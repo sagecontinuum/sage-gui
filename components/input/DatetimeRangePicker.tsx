@@ -1,19 +1,20 @@
 import styled from 'styled-components'
 import CalendarMonth from '@mui/icons-material/CalendarMonth'
 
-import DatePicker, { type DateRangePickerProps } from '@wojtekmaj/react-daterange-picker'
-import '@wojtekmaj/react-daterange-picker/dist/DateRangePicker.css'
+import DateTimePicker, { type DateTimeRangePickerProps } from '@wojtekmaj/react-datetimerange-picker'
+import '@wojtekmaj/react-datetimerange-picker/dist/DateTimeRangePicker.css'
 import 'react-calendar/dist/Calendar.css'
 
 
-export default function DateRangePicker(props: DateRangePickerProps) {
+export default function DateRangePicker(props: DateTimeRangePickerProps) {
   return (
     <Root>
-      <DatePicker
+      <DateTimePicker
         clearIcon={false}
         maxDate={new Date()}
+        maxDetail="second"
         rangeDivider="to"
-        showLeadingZeros
+        disableClock
         calendarIcon={<CalendarMonth color="action" />}
         {...props}
       />
@@ -40,13 +41,8 @@ const Root = styled.div`
     background: #f2f2f2;
   }
 
-  .react-daterange-picker__clear-button {
-    display: none;
-  }
-
   [class*=-picker__calendar--open] {
-    position: absolute;
-    top: 60px;
+    left: 50px !important;
     z-index: 5000;
     box-shadow: 0px -1px 10px 1px rgba(0,0,0,.2);
     border: none;
@@ -63,10 +59,10 @@ const Root = styled.div`
   }
 
   [class*=-picker__range-divider] {
-    margin: 0 5px;
+    margin: 0 10px;
   }
   [class*=-picker__calendar-button] {
-    padding: 1px 2px 2px 0;
+    padding: 1px 2px 2px 2px;
   }
 
   .react-calendar__tile--range {

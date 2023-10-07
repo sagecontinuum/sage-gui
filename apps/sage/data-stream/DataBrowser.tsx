@@ -12,10 +12,11 @@ import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
 import TimeSeries from './TimeSeries'
-import DateRangePicker from '/components/input/DateRangePicker'
+import DateRangePicker from '/components/input/DatetimeRangePicker'
 import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
+import TimeOpts from '/components/input/StyledTimeOpts'
 
 import {
   FormControlLabel, Button, Divider, Select,
@@ -846,7 +847,7 @@ export default function DataBrowser() {
               />
             </div>
 
-            <div className="flex time-opts">
+            <TimeOpts>
               <FormControl variant="outlined" style={{width: 150}}>
                 <InputLabel id="range-label">Quick Ranges</InputLabel>
                 <Select
@@ -889,7 +890,7 @@ export default function DataBrowser() {
                   }
                 </Button>
               </Tooltip>
-            </div>
+            </TimeOpts>
           </div>
 
           <br />
@@ -1004,28 +1005,6 @@ const Root = styled.div<{isMedia: boolean}>`
   .query-viewer {
     overflow: hidden;
   }
-
-  .time-opts {
-
-    .MuiInputBase-root,
-    .MuiButtonBase-root {
-      height: 29px;
-      border-radius: 5px;
-    }
-
-    .MuiButtonBase-root {
-      min-width: 30px;
-      border-color: #c4c4c4;
-    }
-
-    .MuiButtonBase-root:hover {
-      border-color: #212121
-    }
-
-    .MuiCircularProgress-root {
-      position: absolute
-    }
-  }
 `
 
 const Main = styled.div`
@@ -1062,5 +1041,3 @@ const Snippets = styled.div`
     background: #fff !important;
   }
 `
-
-

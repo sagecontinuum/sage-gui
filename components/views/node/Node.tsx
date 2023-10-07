@@ -38,12 +38,12 @@ import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
 // todo(nc): promote/refactor into component lib
-import DataOptions from '/apps/sage/data/DataOptions'
+import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
-import { endOfHour, subDays, addHours, addDays } from 'date-fns'
+import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
 
 import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
 
@@ -64,7 +64,9 @@ const hasMetOne = (meta: BK.FlattenedManifest) : boolean =>
 
 
 const getStartTime = (str) =>
-  subDays(new Date(), str.replace(/-|d/g, ''))
+  str.includes('y') ?
+    subYears(new Date(), str.replace(/-|y/g, '')) :
+    subDays(new Date(), str.replace(/-|d/g, ''))
 
 
 const metaRows1 = [{
@@ -166,7 +168,7 @@ const hardwareMeta = [{
     return (
       <Grid container>
         <Grid xs={3}>
-          <small className="muted font-bold">shield</small>
+          <small className="muted font-bold">Shield</small>
           <div>{computes.some(o => o.zone == 'shield') ? 'yes' : 'no'}</div>
         </Grid>
 
@@ -376,30 +378,29 @@ export default function NodeView(props: Props) {
 
   const mouse = {onMouseOver: onOver, onMouseOut: onOut}
 
-  const handleOptionChange = (evt, name) => {
+  const handleOptionChange = (name, val) => {
     if (['nodes', 'apps'].includes(name)) {
       setOpts(prev => ({...prev, display: name}))
       return
     } else  if (name == 'time') {
-      const time = evt.target.value
+      const time = val
       const data = parseData({data: rawData, time})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: time}))
       return
     } else if (name == 'versions') {
-      const versions = evt.target.checked
+      const versions = val
       const data = parseData({data: rawData, time: opts.time, versions})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: versions}))
       return
     } else if (name == 'density') {
-      setOpts(prev => ({...prev, [name]: evt.target.checked}))
+      setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'window') {
-      const window = evt.target.value
       setOpts(prev => ({
         ...prev,
-        start: getStartTime(window),
-        window
+        ...(val && {start: getStartTime(val)}),
+        window: val
       }))
     } else {
       throw `unhandled option state change name=${name}`

@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import Button from '@mui/material/Button'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
-import DataOptions from './DataOptions'
+import DataOptions from '/components/input/DataOptions'
 import { Sidebar, Top, Controls, Divider, FilterTitle } from '/components/layout/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
@@ -18,7 +18,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
 import { chain, startCase } from 'lodash'
-import { addDays, addHours, endOfHour, subDays } from 'date-fns'
+import { addDays, addHours, endOfHour, subDays, subYears } from 'date-fns'
 import { fetchRollup, parseData } from './rollupUtils'
 import { initFilterState, initDataState, dataReducer } from './dataReducer'
 
@@ -39,6 +39,11 @@ const ITEMS_PER_PAGE = 5
 
 const DAYS = 7
 
+
+const getStartTime = (str) =>
+  str.includes('y') ?
+    subYears(new Date(), str.replace(/-|y/g, '')) :
+    subDays(new Date(), str.replace(/-|d/g, ''))
 
 
 const getFacets = (data, name) =>
@@ -232,25 +237,31 @@ export default function Data(props: Props) {
   }
 
   // todo(nc): refactor into provider
-  const handleOptionChange = (evt, name) => {
+  const handleOptionChange = (name, val) => {
     if (['nodes', 'apps'].includes(name)) {
       setPage(1) // reset page
       setOpts(prev => ({...prev, display: name}))
       return
-    } else  if (name == 'time') {
-      const time = evt.target.value
+    } else if (name == 'time') {
+      const time = val
       const data = parseData({data: rawData, time})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: time}))
       return
     } else if (name == 'versions') {
-      const versions = evt.target.checked
+      const versions = val
       const data = parseData({data: rawData, time: opts.time, versions})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: versions}))
       return
     } else if (name == 'density') {
-      setOpts(prev => ({...prev, [name]: evt.target.checked}))
+      setOpts(prev => ({...prev, [name]: val}))
+    } else if (name == 'window') {
+      setOpts(prev => ({
+        ...prev,
+        ...(val && {start: getStartTime(val)}),
+        window: val
+      }))
     } else {
       throw `unhandled option state change name=${name}`
     }
@@ -301,14 +312,17 @@ export default function Data(props: Props) {
 
             <Divider />
 
-            <DataOptions
-              onChange={handleOptionChange}
-              onDateChange={handleDateChange}
-              opts={opts}
-              condensed
-              aggregation
-              density
-            />
+            <div className="flex-grow">
+              <DataOptions
+                onChange={handleOptionChange}
+                onDateChange={handleDateChange}
+                opts={opts}
+                quickRanges={['-30d', '-7d', '-2d', '-1d']}
+                groupByToggle
+                aggregation
+                density
+              />
+            </div>
           </Controls>
         </Top>
 

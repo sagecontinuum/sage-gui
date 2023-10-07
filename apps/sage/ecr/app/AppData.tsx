@@ -14,7 +14,7 @@ import config from '/config'
 const registry = config.dockerRegistry
 
 // todo(nc): promote/refactor into component lib
-import DataOptions from '/apps/sage/data/DataOptions'
+import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'

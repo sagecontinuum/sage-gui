@@ -21,7 +21,7 @@ import JobTimeLine from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
 import { type NodeMeta } from '/components/apis/beekeeper'
-import DataOptions from '../data/DataOptions'
+import DataOptions from '/components/input/DataOptions'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import { quickRanges } from '/components/utils/units'
 
@@ -223,7 +223,6 @@ export default function JobDetails(props: Props) {
               quickRanges={['-90d', '-30d', '-7d', '-2d', '-1d']}
               onChange={handleOptionChange}
               opts={opts}
-              condensed
             />
             <FormControlLabel
               control={
