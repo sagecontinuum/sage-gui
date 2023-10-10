@@ -483,6 +483,17 @@ export default function NodeView(props: Props) {
                 />
               </TableContainer>
             }
+        
+            {tab == 'lorawandevices' && manifest &&
+              <TableContainer>
+                <Table
+                  primaryKey='name'
+                  columns={computeCols}
+                  rows={manifest.computes}
+                  enableSorting
+                />
+              </TableContainer>
+            }
 
             {tab == 'peripherals' && manifest &&
               <TableContainer>
