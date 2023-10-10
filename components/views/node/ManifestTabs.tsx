@@ -9,6 +9,7 @@ import SensorIcon from '@mui/icons-material/SensorsRounded'
 import ComputesIcon from '@mui/icons-material/DeveloperBoardRounded'
 import PeripheralsIcon from '@mui/icons-material/Cable'
 import HealthIcon from '@mui/icons-material/MonitorHeartOutlined'
+import CellTowerIcon from '@mui/icons-material/CellTower';
 
 
 
@@ -64,6 +65,13 @@ export default function ManifestTabs(props: Props) {
           component={Link}
           value="computes"
           to="?tab=computes"
+          replace
+        />
+        <Tab
+          label={label(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
+          component={Link}
+          value="lorawandevices"
+          to="?tab=lorawandevices"
           replace
         />
         <Tab
