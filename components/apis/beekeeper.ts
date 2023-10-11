@@ -196,6 +196,15 @@ type Resource = {
   }
 }
 
+type LorawanDevice = {
+  name: string
+  DevEUI: string
+  last_seen_at: Date
+  battery_level: number
+  margin: number
+  expected_uplink: number
+}
+
 type Manifest = {
   vsn: VSN
   name: string          // node id
@@ -209,6 +218,7 @@ type Manifest = {
   tags?: string[]
   computes: Compute[]
   sensors: Sensor[]
+  lorawandevices: LorawanDevice[]
 }
 
 
