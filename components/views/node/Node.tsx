@@ -193,7 +193,7 @@ const hardwareMeta = [{
 }]
 
 /**
- * column config for sensor/compute/peripherals table details
+ * column config for sensor/compute/peripherals/lorawandevices table details
  */
 const sensorCols = [{
   id: 'name',
@@ -247,6 +247,29 @@ const resourceCols = [{
   id: 'datasheet',
   label: 'Datasheet',
   format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+}]
+
+const lorawandeviceCols = [{
+  id: 'name',
+  label: 'Name'
+}, {
+  id: 'dev_eui',
+  label: 'DevEUI'
+}, {
+  id: 'last_seen_at',
+  label: 'Last Seen At'
+},
+{
+  id: 'battery_level',
+  label: 'Battery Level'
+},
+{
+  id: 'margin',
+  label: 'Margin'
+},
+{
+  id: 'expected_uplink',
+  label: 'Expected uplink interval (sec)'
 }]
 
 
