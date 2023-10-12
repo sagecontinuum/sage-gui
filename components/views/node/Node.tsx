@@ -37,6 +37,9 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
+//import lorawan components
+import lorawandeviceCols from './lorawandevice/columns'
+
 // todo(nc): promote/refactor into component lib
 import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
@@ -193,7 +196,7 @@ const hardwareMeta = [{
 }]
 
 /**
- * column config for sensor/compute/peripherals/lorawandevices table details
+ * column config for sensor/compute/peripherals table details
  */
 const sensorCols = [{
   id: 'name',
@@ -248,30 +251,6 @@ const resourceCols = [{
   label: 'Datasheet',
   format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
 }]
-
-const lorawandeviceCols = [{
-  id: 'name',
-  label: 'Name'
-}, {
-  id: 'dev_eui',
-  label: 'DevEUI'
-}, {
-  id: 'last_seen_at',
-  label: 'Last Seen At'
-},
-{
-  id: 'battery_level',
-  label: 'Battery Level'
-},
-{
-  id: 'margin',
-  label: 'Margin'
-},
-{
-  id: 'expected_uplink',
-  label: 'Expected uplink interval (sec)'
-}]
-
 
 type Props = {
   admin?: boolean
@@ -480,7 +459,8 @@ export default function NodeView(props: Props) {
               counts={{
                 Sensors: manifest?.sensors.length,
                 Computes: manifest?.computes.length,
-                Peripherals: manifest?.resources.length
+                Peripherals: manifest?.resources.length,
+                'LoRaWAN Devices': manifest?.lorawandevices.length
               }}
               admin={admin}
             />
@@ -506,13 +486,13 @@ export default function NodeView(props: Props) {
                 />
               </TableContainer>
             }
-        
+            
             {tab == 'lorawandevices' && manifest &&
               <TableContainer>
                 <Table
-                  primaryKey='name'
-                  columns={computeCols}
-                  rows={manifest.computes}
+                  primaryKey='deveui' //once you can use your localhost djanog db, change to dev_eui
+                  columns={lorawandeviceCols} //once you can use your localhost django db, change to lorawandeviceCols
+                  rows={manifest.lorawandevices} //once you can use your localhost django db, change to lorawandevices
                   enableSorting
                 />
               </TableContainer>
