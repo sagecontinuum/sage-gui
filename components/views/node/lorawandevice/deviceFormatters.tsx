@@ -10,7 +10,7 @@ export function status(val,obj) {
     {
         return (
             <Tooltip
-                title={`No activity from device`}
+                title={`No activity`}
                 componentsProps={{tooltip: { sx: { background: '#000' }}}}
                 placement="top"
                 >
@@ -19,13 +19,8 @@ export function status(val,obj) {
         )
     }
 
-    // Convert the last_seen_at from ISO string to Date
     const lastSeenDate = new Date(val);
-
-    // Calculate the current time in milliseconds
     const currentTime = new Date().getTime();
-
-    // Format lastSeenDate in the desired format
     const formattedLastSeenDate = lastSeenDate.toLocaleString(undefined, {
         month: 'short',
         day: '2-digit',
@@ -35,7 +30,6 @@ export function status(val,obj) {
         second: '2-digit',
         });
 
-    // Determine the status based on the comparison
     let icon;
     let interval_tooltip;
 
@@ -47,7 +41,6 @@ export function status(val,obj) {
     }
     else
     {
-        // Calculate the expected last seen time based on expected_uplink_interval_sec
         const expectedLastSeenTime = new Date(currentTime - obj.expected_uplink_interval_sec * 1000);
 
         if (lastSeenDate >= expectedLastSeenTime) {
