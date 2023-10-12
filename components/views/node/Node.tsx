@@ -490,9 +490,9 @@ export default function NodeView(props: Props) {
             {tab == 'lorawandevices' && manifest &&
               <TableContainer>
                 <Table
-                  primaryKey='deveui' //once you can use your localhost djanog db, change to dev_eui
-                  columns={lorawandeviceCols} //once you can use your localhost django db, change to lorawandeviceCols
-                  rows={manifest.lorawandevices} //once you can use your localhost django db, change to lorawandevices
+                  primaryKey='deveui'
+                  columns={lorawandeviceCols}
+                  rows={manifest.lorawandevices}
                   enableSorting
                 />
               </TableContainer>
