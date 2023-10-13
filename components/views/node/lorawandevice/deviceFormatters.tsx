@@ -6,7 +6,7 @@ import QuestionIcon from '@mui/icons-material/HelpOutline';
 import Tooltip from '@mui/material/Tooltip'
 
 export function status(val,obj) {
-    if(!val || val == '1970-01-01 00:00:00')
+    if(!val || val == '1970-01-01T00:00:00Z')
     {
         return (
             <Tooltip
@@ -18,6 +18,7 @@ export function status(val,obj) {
             </Tooltip>
         )
     }
+    console.log(val)
 
     const lastSeenDate = new Date(val);
     const currentTime = new Date().getTime();
