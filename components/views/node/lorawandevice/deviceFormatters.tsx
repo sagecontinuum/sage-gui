@@ -6,7 +6,7 @@ import QuestionIcon from '@mui/icons-material/HelpOutline';
 import Tooltip from '@mui/material/Tooltip'
 
 export function status(val,obj) {
-    if(!val)
+    if(!val || val == '1970-01-01 00:00:00')
     {
         return (
             <Tooltip
