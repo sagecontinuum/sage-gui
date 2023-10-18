@@ -200,15 +200,13 @@ type LorawanConnection = {
   connection_name: string
   dev_eui: string
   last_seen_at: string
-  battery_level: number
   margin: number
   expected_uplink: number
-  lorawan_device: {
+  lorawandevice: {
     device_name: string
     dev_eui: string
+    battery_level: number
   }
-
-
 }
 
 type Manifest = {
@@ -232,6 +230,7 @@ export type FlattenedManifest = Manifest & {
   computes: (Omit<Compute, 'hardware'> & Compute['hardware'])[]
   sensors: (Omit<Sensor, 'hardware'> & Sensor['hardware'])[]
   resources: (Omit<Resource, 'hardware'> & Resource['hardware'])[]
+  lorawanconnections: (Omit<LorawanConnection, 'lorawandevice'> & LorawanConnection['lorawandevice'])[]
 }
 
 
@@ -276,7 +275,10 @@ const flattenManifest = o => ({
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
   modem: o.modem,
-  lorawandevices: o.lorawandevices,
+  lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({
+    ...rest,
+    ...lorawandevice
+  })),
   computes: o.computes.map(({hardware, ...rest}) => ({
     ...rest,
     ...hardware

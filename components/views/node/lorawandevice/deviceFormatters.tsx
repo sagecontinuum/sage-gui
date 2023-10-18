@@ -18,7 +18,6 @@ export function status(val,obj) {
             </Tooltip>
         )
     }
-    console.log(val)
 
     const lastSeenDate = new Date(val);
     const currentTime = new Date().getTime();
