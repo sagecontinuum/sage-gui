@@ -460,7 +460,7 @@ export default function NodeView(props: Props) {
                 Sensors: manifest?.sensors.length,
                 Computes: manifest?.computes.length,
                 Peripherals: manifest?.resources.length,
-                'LoRaWAN Devices': manifest?.lorawandevices.length
+                'LoRaWAN Devices': manifest?.lorawanconnections.length
               }}
               admin={admin}
             />
@@ -492,7 +492,7 @@ export default function NodeView(props: Props) {
                 <Table
                   primaryKey='deveui'
                   columns={lorawandeviceCols}
-                  rows={manifest.lorawandevices}
+                  rows={manifest.lorawanconnections}
                   enableSorting
                 />
               </TableContainer>
