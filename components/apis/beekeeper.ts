@@ -196,13 +196,19 @@ type Resource = {
   }
 }
 
-type LorawanDevice = {
-  name: string
+type LorawanConnection = {
+  connection_name: string
   dev_eui: string
   last_seen_at: string
   battery_level: number
   margin: number
   expected_uplink: number
+  lorawan_device: {
+    device_name: string
+    dev_eui: string
+  }
+
+
 }
 
 type Manifest = {
@@ -218,7 +224,7 @@ type Manifest = {
   tags?: string[]
   computes: Compute[]
   sensors: Sensor[]
-  lorawandevices: LorawanDevice[]
+  lorawanconnections: LorawanConnection[]
 }
 
 
