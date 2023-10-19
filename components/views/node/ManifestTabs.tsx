@@ -68,17 +68,17 @@ export default function ManifestTabs(props: Props) {
           replace
         />
         <Tab
-          label={label(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
-          component={Link}
-          value="lorawandevices"
-          to="?tab=lorawandevices"
-          replace
-        />
-        <Tab
           label={label(<PeripheralsIcon fontSize="small"/>, 'Peripherals', counts)}
           component={Link}
           value="peripherals"
           to="?tab=peripherals"
+          replace
+        />
+        <Tab
+          label={label(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
+          component={Link}
+          value="lorawandevices"
+          to="?tab=lorawandevices"
           replace
         />
         <ConditionalTab
