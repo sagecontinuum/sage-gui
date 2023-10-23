@@ -185,6 +185,7 @@ export function mergeMetrics(
     const liveLat = getNxMetric(metrics, nxSerial, 'sys.gps.lat')
     const liveLon = getNxMetric(metrics, nxSerial, 'sys.gps.lon')
     const alt = getNxMetric(metrics, nxSerial, 'sys.gps.alt')
+    const ip = Object.values(getMetricsByHost(metrics, computes, 'sys.net.ip'))[0]
 
     const {gps_lat, gps_lon} = nodeObj
 
@@ -202,6 +203,7 @@ export function mergeMetrics(
       liveLat,
       liveLon,
       alt,
+      ip,
       uptimes: getMetricsByHost(metrics, computes, 'sys.uptime'),
       memTotal: getMetricsByHost(metrics, computes, 'sys.mem.total'),
       memFree: getMetricsByHost(metrics, computes, 'sys.mem.free'),
@@ -214,7 +216,6 @@ export function mergeMetrics(
       // txPackets: getMetricsByHost(metrics, 'sys.net.tx_packets', false),
       // rxBytes: getMetricsByHost(metrics, 'sys.net.rx_bytes', false),
       // rxPackets: getMetricsByHost(metrics, 'sys.net.rx_packets', false),
-      ip: Object.values(getMetricsByHost(metrics, computes, 'sys.net.ip'))[0],
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}

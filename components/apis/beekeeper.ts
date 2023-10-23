@@ -119,6 +119,7 @@ type MetaParams = {vsn?: VSN} & FilteringArgs
 export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
 
+// to be deprecated
 export async function getNodeMeta(args?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
   const {vsn, project, focus, nodes} = args || {}
 
@@ -130,6 +131,18 @@ export async function getNodeMeta(args?: MetaParams) : Promise<NodeMetaMap | Nod
     data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
   if (nodes)
     data = data.filter(o => nodes.includes(o.vsn))
+
+  data = data.map(obj => {
+    const {location: loc} = obj
+    const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
+    const state = part in USStates ? `${USStates[part]} (${part})` : part
+
+    return {
+      ...obj,
+      state,
+      city: loc,
+    }
+  })
 
   const mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
 

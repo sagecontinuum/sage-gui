@@ -152,15 +152,16 @@ export default function App() {
               to="?tab=tags"
               replace
             />
-            <Tab label={
-              <div className="flex items-center">
-                <ChartIcon fontSize="small" />&nbsp;Data
-              </div>
-            }
-            value="data"
-            component={Link}
-            to="?tab=data"
-            replace
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <ChartIcon fontSize="small" />&nbsp;Data
+                </div>
+              }
+              value="data"
+              component={Link}
+              to="?tab=data"
+              replace
             />
           </Tabs>
           <br/>
