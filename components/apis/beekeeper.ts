@@ -1,11 +1,10 @@
 import config from '/config'
 const url = config.beekeeper
+const API_URL = `${url}/api`
 
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
-
-const API_URL = `${url}/api`
-
+import { uniqBy } from 'lodash'
 import USStates from './us-states'
 
 
@@ -242,6 +241,8 @@ export type SimpleManifest = Manifest & {
     name: Sensor['name']
     hardware: Sensor['hardware']['hardware']
     hw_model: Sensor['hardware']['hw_model']
+    description: Sensor['hardware']['description']
+    capabilities: Sensor['hardware']['capabilities']
   }[]
 }
 
@@ -261,7 +262,9 @@ const toSimpleManifest = o => ({
     name,
     scope,
     hardware: hardware.hardware,
-    hw_model: hardware.hw_model
+    hw_model: hardware.hw_model,
+    description: hardware.description,
+    capabilities: hardware.capabilities
   })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
 })
 
@@ -294,7 +297,6 @@ export async function getManifest(vsn: VSN) : Promise<FlattenedManifest> {
 }
 
 
-
 export async function getManifests() : Promise<SimpleManifest[]> {
   let data = await get(`${config.auth}/manifests/`)
   data = data.map(toSimpleManifest)
@@ -302,6 +304,26 @@ export async function getManifests() : Promise<SimpleManifest[]> {
   return data
 }
 
+
+export async function getFullManifests() : Promise<SimpleManifest[]> {
+  let data = await get(`${config.auth}/manifests/`)
+  data = data.map(flattenManifest)
+
+  return data
+}
+
+
+export async function getSensor(hw_model: string) : Promise<Sensor['hardware']> {
+  const data = await get(`${config.auth}/manifests/`)
+
+  // find matching sensor based on hw_model.  compare by replacing spaces with hyphens (since url based).
+  const sensorsMetas = data.reduce((acc, obj) => [...acc, ...obj.sensors], [])
+  const hardwares = sensorsMetas.reduce((acc, obj) => [...acc, obj.hardware], [])
+  const sensors = uniqBy(hardwares, 'hardware')
+  const sensor = sensors.find(obj => obj.hw_model == hw_model)
+
+  return sensor
+}
 
 
 // helper function normalize/match:

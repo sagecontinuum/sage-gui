@@ -14,12 +14,9 @@ import { NODE_STATUS_RANGE } from '/components/apis/beehive'
 import NodeLastReported from '/components/utils/NodeLastReported'
 import Dot from '/components/utils/Dot'
 
-
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
 
-import config from '/config'
-const {sensorMapping} = config
 
 export function gpsIcon(obj) {
   const {hasLiveGPS, hasStaticGPS} = obj
@@ -195,7 +192,7 @@ export function topSensors(v, obj) {
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
-          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+          <Link to={`/sensors/${hw_model}`}>{hw_model}</Link>
         </TT>
       </li>
     )}
@@ -212,7 +209,7 @@ export function bottomSensors(v, obj) {
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
-          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+          <Link to={`/sensors/${hw_model}`}>{hw_model}</Link>
         </TT>
       </li>
     )}
@@ -229,7 +226,7 @@ export function leftSensors(v, obj) {
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
-          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+          <Link to={`/sensors/${hw_model}`}>{hw_model}</Link>
         </TT>
       </li>
     )}
@@ -248,7 +245,7 @@ export function rightSensors(v, obj) {
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
-          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+          <Link to={`/sensors/${hw_model}`}>{hw_model}</Link>
         </TT>
       </li>
     )}
@@ -268,7 +265,7 @@ export function additionalSensors(v, obj) {
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
-          <Link to={`/sensors/${sensorMapping[hw_model] || hw_model}`}>{hw_model}</Link>
+          <Link to={`/sensors/${hw_model}`}>{hw_model}</Link>
         </TT>
       </li>
     )}
