@@ -463,6 +463,7 @@ export default function NodeView(props: Props) {
                 'LoRaWAN Devices': manifest?.lorawanconnections.length
               }}
               admin={admin}
+              lorawan= {manifest?.sensors.some(item => item.capabilities.includes('lorawan'))}
             />
 
             {tab == 'sensors' && manifest &&
