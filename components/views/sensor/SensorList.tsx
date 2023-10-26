@@ -9,32 +9,35 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import { formatters } from '/apps/sage/jobs/JobStatus'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
-import { uniqBy } from 'lodash'
 import { marked } from 'marked'
 
 
-
-const getTitle = (hardware: string, hw_model: string) =>
-  hardware.toLowerCase() == hw_model.toLowerCase() ? hardware : `${hardware} (${hw_model})`
+const getTitle = (hardware: string, description: string) => {
+  const match = description.match(/^#\s+(.+)\r\n/m)
+  const title = match ? match[1] : null
+  return title ? title : hardware
+}
 
 
 const getDescriptionHTML = (description: string, hw_model: string) => {
   if (!description) return
 
-  const maxSentences = 1
-  const sentences = description.split('. ')
-  const count = sentences.length
-  const shortend = sentences.slice(0, maxSentences).join('. ') + '.'
+  // ignore h1 titles since handled separately for links
+  const match = description.match(/^#\s+(.+)\r\n/m)
+  const title = match ? match[0] : null
+  const text = description.replace(title, '')
 
-  if (count > maxSentences)
+  const intro = text.split(/^\s+\r\n/m)[0]
+
+  if (intro.length < text.length)
     return (
       <>
-        <span dangerouslySetInnerHTML={{__html: marked(shortend)}}></span>
+        <span dangerouslySetInnerHTML={{__html: marked(intro)}}></span>
         <Link to={`/sensors/${hw_model}`}>read more...</Link>
       </>
     )
 
-  return <span dangerouslySetInnerHTML={{__html: marked(shortend)}}></span>
+  return <span dangerouslySetInnerHTML={{__html: marked(intro)}}></span>
 }
 
 
@@ -43,11 +46,17 @@ const columns = [{
   label: 'Name',
   format: (val, obj) =>
     <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>,
-  width: '250px'
+
 }, {
   id: 'hw_model',
-  label: 'Model ID',
-  width: '250px'
+  label: 'Model',
+  width: '200px',
+  format: (val, obj) =>
+    <div>
+      <small className="muted"><b>{obj.manufacturer}</b></small>
+      <div>{val}</div>
+    </div>
+
 }, {
   id: 'description',
   label: 'Description',
@@ -58,7 +67,7 @@ const columns = [{
       <div>
         <h3>
           <Link to={`/sensors/${hw_model}`}>
-            {getTitle(hardware, hw_model)}
+            {getTitle(hardware, description)}
           </Link>
         </h3>
         {getDescriptionHTML(description, hw_model)}
@@ -96,7 +105,7 @@ type Props = {
 export default function SensorList(props: Props) {
   const {project, focus, nodes} = props
 
-  const [data, setData] = useState()
+  const [data, setData] = useState<BK.SensorTableRow[]>()
   const [error, setError] = useState()
   const {setLoading} = useProgress()
 
@@ -105,37 +114,9 @@ export default function SensorList(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    const prom1 = BK.getNodeMeta({project, focus, nodes})
+
+    BK.getSensors({project, focus, nodes})
       .then(data => {
-        const d = Object.values(data)
-        return d
-      })
-
-    const prom2 = BK.getManifests()
-
-    Promise.all([prom1, prom2])
-      .then(([nodeMetas, manifests]) => {
-        const vsns = nodeMetas.map(o => o.vsn)
-        manifests = manifests.filter(o => vsns.includes(o.vsn))
-
-        const sensors = uniqBy(manifests.flatMap(o => o.sensors), 'hw_model')
-
-        const data = sensors.map(({hardware, hw_model, capabilities, description}) => {
-          const nodes = manifests
-            .filter(o => o.sensors.map(o => o.hw_model).includes(hw_model))
-          const vsns = nodes.map(o => o.vsn)
-
-          return {
-            hardware,
-            hw_model,
-            capabilities,
-            description,
-            vsns,
-            nodeCount: vsns.length
-          }
-        })
-
-
         setData(data)
       }).catch((err) => setError(err))
       .finally(() => setLoading(false))
@@ -143,16 +124,15 @@ export default function SensorList(props: Props) {
 
   return (
     <Root>
-      <h1>Sensors</h1>
       {data &&
         <Table
           primaryKey="id"
           columns={columns}
           rows={data}
           enableSorting
-          sort="-hw_model"
+          sort="+hw_model"
           onColumnMenuChange={() => {}}
-          onDoubleClick={(_, row) => navigate(`/sensors/${row.hw_model.replace(/ /g, '-')}`)}
+          onDoubleClick={(_, row) => navigate(`/sensors/${row.hw_model}`)}
         />
       }
 

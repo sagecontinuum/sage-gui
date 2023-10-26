@@ -7,7 +7,6 @@ import { NodeStatus } from './node'
 import { uniqBy } from 'lodash'
 import USStates from './us-states'
 
-
 export type VSN = `W${string}` | `V${string}`
 
 
@@ -156,56 +155,67 @@ export async function getFactory(vsn?: VSN) {
 }
 
 
+type ComputeHardware = {
+  hardware: string      // rpi-4gb
+  hw_model: string      // RPI4B
+  hw_version: string    // rpi4b-4g
+  sw_version: string
+  manufacturer: string  // Raspberry Pi
+  datasheet: string     // https://www.foo.bar
+  capabilities: ('arm64' | 'poe')[]
+  description: string
+  cpu: string           // 4000
+  cpu_ram: string       // 4096
+  gpu_ram: string ,
+  shared_ram: boolean
+}
+
+
 export type Compute = {
   name: 'rpi' | 'rpi-shield' | 'nxcore' | 'nxagent'
   serial_no: string       // most likely 12 digit, uppercase hex
   zone: 'shield' | 'core'
-  hardware: {
-    hardware: string      // rpi-4gb
-    hw_model: string      // RPI4B
-    hw_version: string    // rpi4b-4g
-    sw_version: string
-    manufacturer: string  // Raspberry Pi
-    datasheet: string     // https://www.foo.bar
-    capabilities: ('arm64' | 'poe')[]
-    description: string
-    cpu: string           // 4000
-    cpu_ram: string       // 4096
-    gpu_ram: string ,
-    shared_ram: boolean
-  }
+  hardware: ComputeHardware
 }
+
+
+export type SensorHardware = {
+  hardware: string        // ptz-8081
+  hw_model: string        // XNV-8081Z
+  hw_version: string
+  sw_version: string
+  manufacturer: string    // 'some manufacturer'
+  datasheet: string       // https://foo.bar
+  capabilities: string[]
+  description: string
+}
+
 
 type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
-  scope: 'global' | 'nxcore' | 'rpir-shield'
+  scope: 'global' | 'nxcore' | 'rpi-shield'
   labels: string[],
   serial_no: string,
   uri: string,
-  hardware: {
-    hardware: string        // ptz-8081
-    hw_model: string        // XNV-8081Z
-    hw_version: string
-    sw_version: string
-    manufacturer: string    // 'some manfacturer'
-    datasheet: string       // https://foo.bar
-    capabilities: string[]
-    description: string
-  }
+  hardware: SensorHardware
 }
+
+
+type ResourceHardware = {
+  hardware: string
+  hw_model: string
+  hw_version: string
+  sw_version: string
+  manufacturer: string
+  datasheet: string
+  capabilities: string[]
+  description: string
+}
+
 
 type Resource = {
   name: 'usbhub' | 'switch' | 'wagman' | 'psu' | 'wifi' | string
-  hardware: {
-    hardware: string
-    hw_model: string
-    hw_version: string
-    sw_version: string
-    manufacturer: string
-    datasheet: string
-    capabilities: string[]
-    description: string
-  }
+  hardware: ResourceHardware
 }
 
 type Manifest = {
@@ -221,13 +231,14 @@ type Manifest = {
   tags?: string[]
   computes: Compute[]
   sensors: Sensor[]
+  resources: Resource[]
 }
 
 
 export type FlattenedManifest = Manifest & {
-  computes: (Omit<Compute, 'hardware'> & Compute['hardware'])[]
-  sensors: (Omit<Sensor, 'hardware'> & Sensor['hardware'])[]
-  resources: (Omit<Resource, 'hardware'> & Resource['hardware'])[]
+  computes: (Omit<Compute, 'hardware'> & ComputeHardware)[]
+  sensors: (Omit<Sensor, 'hardware'> & SensorHardware)[]
+  resources: (Omit<Resource, 'hardware'> & ResourceHardware)[]
 }
 
 
@@ -239,10 +250,8 @@ export type SimpleManifest = Manifest & {
   }
   sensors: {
     name: Sensor['name']
-    hardware: Sensor['hardware']['hardware']
-    hw_model: Sensor['hardware']['hw_model']
-    description: Sensor['hardware']['description']
-    capabilities: Sensor['hardware']['capabilities']
+    hardware: SensorHardware['hardware']
+    hw_model: SensorHardware['hw_model']
   }[]
 }
 
@@ -289,6 +298,14 @@ const flattenManifest = o => ({
 })
 
 
+export async function getManifests() : Promise<FlattenedManifest[]> {
+  let data = await get(`${config.auth}/manifests/`)
+  data = data.map(flattenManifest)
+
+  return data
+}
+
+
 export async function getManifest(vsn: VSN) : Promise<FlattenedManifest> {
   let data = await get(`${config.auth}/manifests/${vsn}`)
   data = flattenManifest(data)
@@ -297,7 +314,7 @@ export async function getManifest(vsn: VSN) : Promise<FlattenedManifest> {
 }
 
 
-export async function getManifests() : Promise<SimpleManifest[]> {
+export async function getSimpleManifests() : Promise<SimpleManifest[]> {
   let data = await get(`${config.auth}/manifests/`)
   data = data.map(toSimpleManifest)
 
@@ -305,25 +322,53 @@ export async function getManifests() : Promise<SimpleManifest[]> {
 }
 
 
-export async function getFullManifests() : Promise<SimpleManifest[]> {
-  let data = await get(`${config.auth}/manifests/`)
-  data = data.map(flattenManifest)
 
-  return data
+export type SensorTableRow = SensorHardware & {
+  vsns: VSN[]
+  nodeCount: number
 }
 
 
-export async function getSensor(hw_model: string) : Promise<Sensor['hardware']> {
-  const data = await get(`${config.auth}/manifests/`)
+export async function getSensors(args?: MetaParams, asTable = true) : Promise<SensorHardware[] | SensorTableRow[]> {
 
-  // find matching sensor based on hw_model.  compare by replacing spaces with hyphens (since url based).
-  const sensorsMetas = data.reduce((acc, obj) => [...acc, ...obj.sensors], [])
-  const hardwares = sensorsMetas.reduce((acc, obj) => [...acc, obj.hardware], [])
-  const sensors = uniqBy(hardwares, 'hardware')
-  const sensor = sensors.find(obj => obj.hw_model == hw_model)
+  // todo(nc): update when prod sheet is no longer used; optimize: add api method
+  const p1 = getNodeMeta(args)
+  const p2 = get(`${config.auth}/manifests/`)
+  const [nodeMetas, data] = await Promise.all([p1, p2])
 
-  return sensor
+  const vsns = Object.values(nodeMetas).map(o => o.vsn)
+  const manifests = data.filter(o => vsns.includes(o.vsn))
+
+  const sensors = manifests.reduce((acc, obj) => [...acc, ...obj.sensors], [])
+  const hardwares = sensors.reduce((acc, obj) => [...acc, obj.hardware], [])
+  let sensorHardwares = uniqBy<SensorHardware>(hardwares, 'hardware')
+
+  if (asTable) {
+    sensorHardwares = sensorHardwares.map(obj => {
+      const {hw_model} = obj
+
+      const nodes = manifests
+        .filter(o => o.sensors.map(o => o.hardware.hw_model).includes(hw_model))
+      const vsns = nodes.map(o => o.vsn)
+
+      return {
+        ...obj,
+        vsns,
+        nodeCount: vsns.length
+      }
+    }) as SensorTableRow[]
+  }
+
+  return sensorHardwares
 }
+
+
+export async function getSensor(hw_model: string) : Promise<SensorHardware> {
+  // todo(optimize): add api method
+  const data = await getSensors()
+  return data.find(obj => obj.hw_model == hw_model)
+}
+
 
 
 // helper function normalize/match:
@@ -357,7 +402,7 @@ export type State = SimpleManifest & {
 
 
 export async function getState() : Promise<State[]> {
-  const res = await Promise.all([getNodeMeta(), getManifests()])
+  const res = await Promise.all([getNodeMeta(), getSimpleManifests()])
   const nodeMeta = res[0]
   let data = res[1]
 

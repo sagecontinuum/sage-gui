@@ -16,7 +16,7 @@ export default function NodeNotFound() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    BK.getManifests()
+    BK.getSimpleManifests()
       .then(data => {
         const urlParam = vsn.toUpperCase()
         const node = data.find(({vsn, name}) =>
