@@ -221,6 +221,7 @@ type Resource = {
 type Manifest = {
   vsn: VSN
   name: string          // node id
+  phase: Phase
   gps_lat?: number
   gps_lon?: number
   modem?: {
@@ -298,6 +299,19 @@ const flattenManifest = o => ({
 })
 
 
+export async function getRawManifests(args?: MetaParams) : Promise<Manifest[]> {
+  const p1 = getNodeMeta(args)
+  const p2 = await get(`${config.auth}/manifests/`)
+
+  const [nodeMetas, data] = await Promise.all([p1, p2])
+
+  const vsns = Object.values(nodeMetas).map(o => o.vsn)
+  const manifests = data.filter(o => vsns.includes(o.vsn))
+
+  return manifests
+}
+
+
 export async function getManifests() : Promise<FlattenedManifest[]> {
   let data = await get(`${config.auth}/manifests/`)
   data = data.map(flattenManifest)
@@ -356,7 +370,7 @@ export async function getSensors(args?: MetaParams, asTable = true) : Promise<Se
         vsns,
         nodeCount: vsns.length
       }
-    }) as SensorTableRow[]
+    })
   }
 
   return sensorHardwares
