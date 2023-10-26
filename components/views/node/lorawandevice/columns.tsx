@@ -21,5 +21,13 @@ const lorawandeviceCols = [{
     label: 'Margin'
   }]
 
+  const lorawandeviceCols_temp = [{
+    id: 'device_name',
+    label: 'Name'
+  }, {
+    id: 'deveui',
+    label: 'DevEUI'
+  }]
 
-export default lorawandeviceCols
+
+export default lorawandeviceCols_temp
