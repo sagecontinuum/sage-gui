@@ -26,11 +26,10 @@ const sortOptions = (options, checked) =>
 type Props = {
   title: string
   data: {name: string, count: number}[]
-  type?: string
   checked: string[]
   hideSearch?: boolean
   hideSelectAll?: boolean
-  defaultShown: number
+  defaultShown?: number
   onCheck: (evt: ChangeEvent<HTMLInputElement>, val: string) => void
   onSelectAll: (evt: ChangeEvent<HTMLInputElement>, val: string[]) => void
 }
@@ -38,7 +37,6 @@ type Props = {
 export default function Filter(props: Props) {
   const {
     title,
-    type,
     hideSearch,
     hideSelectAll,
     defaultShown,

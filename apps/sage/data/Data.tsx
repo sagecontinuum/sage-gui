@@ -6,7 +6,9 @@ import Button from '@mui/material/Button'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
 import DataOptions from '/components/input/DataOptions'
-import { Sidebar, Top, Controls, Divider, FilterTitle } from '/components/layout/Layout'
+import {
+  Sidebar, Top, Controls, Divider, FilterTitle, Card
+} from '/components/layout/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
@@ -171,13 +173,15 @@ export default function Data(props: Props) {
 
         const projects = getFacets(nodeMetas, 'project')
         const focuses = getFacets(nodeMetas, 'focus')
-        const locations = getFacets(nodeMetas, 'location')
+        const cities = getFacets(nodeMetas, 'city')
+        const states = getFacets(nodeMetas, 'state')
         const vsns = getFacets(nodeMetas, 'vsn')
 
         setFacets({
           project: {title: 'Project', items: projects, hide: !!project},
           focus: {title: 'Focus', items: focuses, hide: !!focus},
-          location: {title: 'Location', items: locations},
+          city: {title: 'City', items: cities},
+          state: {title: 'State', items: states},
           vsn: {title: 'Node', items: vsns}
         })
 
@@ -277,7 +281,7 @@ export default function Data(props: Props) {
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <FilterTitle>Filters</FilterTitle>
         {facets && facetList.map(facet => {
-          const {title, items, hide} = facets[facet]
+          const {title, items, hide} = facets[facet] || {}
 
           if (hide) return <div key={title}></div>
 
@@ -288,7 +292,6 @@ export default function Data(props: Props) {
               checked={filters[facet]}
               onCheck={(evt, val) => handleFilter(evt, facet, val)}
               onSelectAll={(evt, vals) => handleSelectAll(evt, facet, vals)}
-              type="text"
               data={items}
             />
           )
@@ -336,7 +339,7 @@ export default function Data(props: Props) {
 
                 return (
                   <TimelineContainer key={vsn}>
-                    <div className="flex justify-between title-row">
+                    <div className="flex title-row">
                       <div className="flex column">
                         <div>
                           <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
@@ -446,7 +449,9 @@ export default function Data(props: Props) {
         {(loading || loadingMore) && (data ? getInfiniteEnd(page) < data?.length : true) &&
           [...Array(ITEMS_INITIALLY)]
             .map((_, i) =>
-              <TimelineSkeleton key={i} />
+              <TimelineContainer key={i}>
+                <TimelineSkeleton />
+              </TimelineContainer>
             )
         }
 
@@ -473,10 +478,11 @@ const Main = styled.div`
   width: 100%;
 `
 
-const TimelineContainer = styled.div`
-  margin-bottom: 100px;
+const TimelineContainer = styled(Card)`
+  margin: 25px 0;
 
   .title-row {
+    float: left;
     margin: 0 20px;
     h2 {
       margin: 0;
@@ -485,7 +491,7 @@ const TimelineContainer = styled.div`
 `
 
 const Items = styled.div`
-  margin-top: 40px;
+
 `
 
 const LoadingMore = styled.div`

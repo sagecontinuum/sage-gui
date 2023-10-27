@@ -3,59 +3,73 @@ import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Table from '/components/table/Table'
-
 import * as BK from '/components/apis/beekeeper'
+import { useProgress } from '/components/progress/ProgressProvider'
 
 import { formatters } from '/apps/sage/jobs/JobStatus'
-import { useProgress } from '/components/progress/ProgressProvider'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import { uniqBy } from 'lodash'
-
-import config from '/config'
-
-const {
-  wifireData
-} = config
+import { marked } from 'marked'
 
 
-const url = `${wifireData}/action/package_search` +
-  `?facet.field=[%22organization%22,%22tags%22,%22res_format%22]` +
-  `&rows=200` +
-  `&fq=tags:(%22sensor%22)`
+
+const getTitle = (hardware: string, hw_model: string) =>
+  hardware.toLowerCase() == hw_model.toLowerCase() ? hardware : `${hardware} (${hw_model})`
+
+
+const getDescriptionHTML = (description: string, hw_model: string) => {
+  if (!description) return
+
+  const maxSentences = 1
+  const sentences = description.split('. ')
+  const count = sentences.length
+  const shortend = sentences.slice(0, maxSentences).join('. ') + '.'
+
+  if (count > maxSentences)
+    return (
+      <>
+        <span dangerouslySetInnerHTML={{__html: marked(shortend)}}></span>
+        <Link to={`/sensors/${hw_model}`}>read more...</Link>
+      </>
+    )
+
+  return <span dangerouslySetInnerHTML={{__html: marked(shortend)}}></span>
+}
 
 
 const columns = [{
   id: 'hardware',
-  label: 'Hardware',
+  label: 'Name',
   format: (val, obj) =>
-    obj.title ? <Link to={`/sensors/${obj.hw_model.replace(/ /g, '-')}`}>{val}</Link> : val,
+    <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>,
   width: '250px'
 }, {
   id: 'hw_model',
   label: 'Model ID',
   width: '250px'
 }, {
-  id: 'title',
+  id: 'description',
   label: 'Description',
-  format: (title, obj) => {
-    const {description} = obj
-    const len = 250
-    const shortend = description.slice(0, len)
-
-    const linkID = obj.hw_model.replace(/ /g, '-')
+  format: (description, obj) => {
+    const {hardware, hw_model} = obj
 
     return (
       <div>
-        {title ?
-          <h3><Link to={`/sensors/${linkID}`}>{title}</Link></h3> :
-          '-'}
-        {description.length > len ?
-          <>{shortend}... <Link to={`/sensors/${linkID}`}>read more</Link></>
-          : description}
+        <h3>
+          <Link to={`/sensors/${hw_model}`}>
+            {getTitle(hardware, hw_model)}
+          </Link>
+        </h3>
+        {getDescriptionHTML(description, hw_model)}
       </div>
     )
   }
+}, {
+  id: 'capabilities',
+  label: 'Capabilities',
+  format:(val, obj) => val ? val.join(', ') : '-',
+  hide: true
 }, {
   id: 'nodeCount',
   label: 'Nodes',
@@ -99,23 +113,14 @@ export default function SensorList(props: Props) {
 
     const prom2 = BK.getManifests()
 
-    const prom3 = fetch(url)
-      .then(res => res.json())
-      .then(data => data.result.results)
-
-    Promise.all([prom1, prom2, prom3])
-      .then(([nodeMetas, manifests, details]) => {
+    Promise.all([prom1, prom2])
+      .then(([nodeMetas, manifests]) => {
         const vsns = nodeMetas.map(o => o.vsn)
         manifests = manifests.filter(o => vsns.includes(o.vsn))
 
         const sensors = uniqBy(manifests.flatMap(o => o.sensors), 'hw_model')
-          .map(({hardware, hw_model}) => ({hardware, hw_model}))
 
-        const data = sensors.map(({hardware, hw_model}) => {
-          const meta = details.find(o => {
-            return o.name.toLowerCase().replace(/ /g, '-') == hw_model.toLowerCase().replace(/ /g, '-')
-          })
-
+        const data = sensors.map(({hardware, hw_model, capabilities, description}) => {
           const nodes = manifests
             .filter(o => o.sensors.map(o => o.hw_model).includes(hw_model))
           const vsns = nodes.map(o => o.vsn)
@@ -123,17 +128,17 @@ export default function SensorList(props: Props) {
           return {
             hardware,
             hw_model,
-            title: meta?.title,
-            description: meta?.notes || '-',
+            capabilities,
+            description,
             vsns,
             nodeCount: vsns.length
           }
         })
 
+
         setData(data)
       }).catch((err) => setError(err))
       .finally(() => setLoading(false))
-
   }, [setLoading])
 
   return (
@@ -145,9 +150,9 @@ export default function SensorList(props: Props) {
           columns={columns}
           rows={data}
           enableSorting
-          sort="-title"
+          sort="-hw_model"
           onColumnMenuChange={() => {}}
-          onDoubleClick={(_, row) => row.title && navigate(`/sensors/${row.hw_model.replace(/ /g, '-')}`)}
+          onDoubleClick={(_, row) => navigate(`/sensors/${row.hw_model.replace(/ /g, '-')}`)}
         />
       }
 

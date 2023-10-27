@@ -10,10 +10,11 @@ type Filters = {
 }
 
 export const initFilterState = {
-  'project': [],
-  'focus': [],
-  'location': [],
-  'vsn': []
+  project: [],
+  focus: [],
+  city: [],
+  state: [],
+  vsn: []
 }
 
 export const initDataState = {

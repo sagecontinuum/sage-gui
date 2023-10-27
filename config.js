@@ -1,4 +1,3 @@
-
 // no trailing slashes in API endpoints, please
 
 const prod = {
@@ -33,78 +32,14 @@ const dev = {
 
 const config = {
   ...(process.env.SAGE_UI_SERVICE_CONFIG == 'dev' ? dev : prod),
-
   disableMaps: false,
 
-  // ids for manifest -> wifire database
-  sensorMapping: {
-    'MX-M16TB-R079IP': 'MOBOTIX-MX-M16TB-R079IP',
-    'NetCam CS CAM-SEC5IR-B': 'stardot-netcam-cs-cam-sec5ir',
-    'ML1-WS IP54': 'ml1-ws-ip54'
-  },
-
-  // temp solution for additional meta (to be removed soon)
-  additional_sensors: {
-    'W022': [
-      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
-      'ORTEC digiBASE PMT with NaI detector'
-    ],
-    'W01A': [
-      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
-      'ORTEC digiBASE PMT with NaI detector'
-    ],
-    'W01B': [
-      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
-      'ORTEC digiBASE PMT with NaI detector'
-    ],
-    'W01C': [
-      'OS0-64-GEN2.0 Gen2 64 Below Horizon',
-      'ORTEC digiBASE PMT with NaI detector'
-    ],
-    'W027': [
-      'Metone ES-642'
-    ],
-    'W038': [
-      'Metone ES-642'
-    ],
-    'W06F': [
-      'Metone ES-642'
-    ],
-    'V008': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'W056': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'W057': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'W071': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'W084': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'V030': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ],
-    'V032': [
-      'MOBOTIX MX-M16TB-R079IP'
-    ]
-  },
-  // another temp solution for missing sensor meta
-  missing_sensor_details: [
-    'OS0-64-GEN2.0 Gen2 64 Below Horizon',
-    'ORTEC digiBASE PMT with NaI detector'
-  ]
+  // todo: do we actually need a dictionary?
+  sensorDictionary: {
+    bme680: 'Ambient Environment',
+    bme280: 'System Environment'
+  }
 }
 
 
 export default config
-
-
-export const hasMetOne = (vsn) => {
-  const sensors = config.additional_sensors
-  const nodes = Object.keys(sensors).filter(k => sensors[k].includes('Metone ES-642'))
-  return nodes.includes(vsn)
-}
