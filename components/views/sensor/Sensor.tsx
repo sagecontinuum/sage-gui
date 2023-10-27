@@ -73,12 +73,6 @@ export default function Sensor() {
           </Card>
 
           <Card>
-            {data &&
-              <div className="flex items-center justify-between">
-                <h1>{hardware in sensorDictionary ? `${sensorDictionary[hardware]} Sensor` : hardware} ({hw_model})</h1>
-              </div>
-            }
-
             {description &&
               <div dangerouslySetInnerHTML={{__html: marked(description)}}></div>
             }

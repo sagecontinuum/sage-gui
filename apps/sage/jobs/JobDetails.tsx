@@ -114,13 +114,12 @@ export default function JobDetails(props: Props) {
       .catch(error => setYaml(error.message))
   }
 
-  const handleOptionChange = (evt, name) => {
+  const handleOptionChange = (name, val) => {
     if (name == 'window') {
-      const window = evt.target.value
       setOpts(prev => ({
         ...prev,
-        start: getStartTime(window),
-        window
+        ...(val && {start: getStartTime(val)}),
+        window: val
       }))
     } else {
       throw `unhandled option state change name=${name}`

@@ -77,20 +77,18 @@ export default function AppData(props: Props) {
   }, [plugin, nodeMetas, opts])
 
 
-  const handleOptionChange = (evt, name) => {
+  const handleOptionChange = (name, val) => {
     if (name == 'time') {
-      const time = evt.target.value
-      const data = parseData({data: rawData, time})
+      const data = parseData({data: rawData, time: val})
       dispatch({type: 'SET_DATA', data})
-      setOpts(prev => ({...prev, [name]: time}))
+      setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'density') {
-      setOpts(prev => ({...prev, [name]: evt.target.checked}))
+      setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'window') {
-      const window = evt.target.value
       setOpts(prev => ({
         ...prev,
-        start: getStartTime(window),
-        window
+        ...(val && {start: getStartTime(val)}),
+        window: val
       }))
     } else {
       throw `unhandled option state change name=${name}`

@@ -13,7 +13,9 @@ import Node from '/components/views/node/Node'
 import Status from './views/status/Status'
 import Tests from './views/tests/Tests'
 import SuryaStatus from './views/factory/Factory'
-import Audio from './views/audio/LatestAudio'
+// import AudioTests from './views/tests/AudioTests'
+import ImageTests from './views/tests/ImageTests'
+
 
 import Timeline from './fiddle/TimelineFiddle'
 
@@ -65,7 +67,8 @@ export default function App() {
                     </Route>
                     <Route path="/node/:vsn" element={<Node admin />} />
 
-                    <Route path="audio" element={<Audio />} />
+                    {/* <Route path="tests/audio" element={<AudioTests />} />*/}
+                    <Route path="tests/images" element={<ImageTests />} />
 
                     <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                     <Route path="surya/:phase" element={<SuryaStatus />} />

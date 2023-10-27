@@ -18,15 +18,10 @@ const columns = [{
   hide: PROJECT != 'sage'
 }, {
   id: 'vsn',
-  label: 'VSN',
+  label: 'Node',
   width: '50px',
   format: formatters.vsn
 }, {
-  id: 'node_id',
-  label: 'ID',
-  width: '100px',
-  hide: true
-},{
   id: 'focus',
   label: 'Focus'
 }, {
@@ -52,22 +47,8 @@ const columns = [{
   label: 'GPS',
   format: formatters.gps
 }, {
-  id: 'staticGPS',
-  label: 'Static GPS',
-  format: (_, obj) => {
-    return (!obj.gps_lat || !obj.gps_lon) ? '-' :`${obj.gps_lat}, ${obj.gps_lon}`
-  },
-  hide: true
-}, {
-  id: 'liveGPS',
-  label: 'Live GPS',
-  format: (_, obj) => {
-    return (!obj.liveLat || !obj.liveLon) ? '-' :`${obj.liveLat}, ${obj.liveLon}`
-  },
-  hide: true
-}, {
   id: 'alt',
-  label: 'Altitude',
+  label: 'Elevation (m)',
   format: (val) => {
     return val || '-'
   },
