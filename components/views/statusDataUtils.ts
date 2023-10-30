@@ -173,7 +173,7 @@ export function mergeMetrics(
     const {vsn, computes} = nodeObj
 
     if (!byNode || !(vsn in byNode))
-      return {...nodeObj, status: 'not reporting (30d+)'}
+      return {...nodeObj, status: 'not reporting'}
 
     const metrics: BH.MetricsByHost = byNode[vsn]
 

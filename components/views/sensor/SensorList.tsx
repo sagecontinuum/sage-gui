@@ -42,12 +42,6 @@ const getDescriptionHTML = (description: string, hw_model: string) => {
 
 
 const columns = [{
-  id: 'hardware',
-  label: 'Name',
-  format: (val, obj) =>
-    <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>,
-
-}, {
   id: 'hw_model',
   label: 'Model',
   width: '200px',
@@ -57,6 +51,12 @@ const columns = [{
       <div>{val}</div>
     </div>
 
+}, {
+  id: 'name',
+  label: 'Developer UUID',
+  format: (val, obj) =>
+    <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>,
+  hide: true
 }, {
   id: 'description',
   label: 'Description',

@@ -49,7 +49,6 @@ export type Phase = typeof phaseMap[PhaseTabs]
 
 export type NodeMeta = {
   vsn: VSN
-  node_phase: Phase
   node_phase_v3: Phase
   project: string
   focus: string
@@ -191,7 +190,7 @@ export type SensorHardware = {
 }
 
 
-type Sensor = {
+export type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
   scope: 'global' | 'nxcore' | 'rpi-shield'
   labels: string[],
@@ -236,7 +235,7 @@ type Manifest = {
 }
 
 
-export type FlattenedManifest = Manifest & {
+export type FlattenedManifest = Omit<Manifest, 'sensors'> & {
   computes: (Omit<Compute, 'hardware'> & ComputeHardware)[]
   sensors: (Omit<Sensor, 'hardware'> & SensorHardware)[]
   resources: (Omit<Resource, 'hardware'> & ResourceHardware)[]

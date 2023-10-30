@@ -47,6 +47,10 @@ const filterOn = (data: BK.State[], key: string) =>
 function getProjectNodes() {
   return BK.getState()
     .then((data) => {
+      data = data.filter(obj =>
+        ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.node_phase_v3)
+      )
+
       if (settings.project)
         data = filterOn(data, 'project')
       if (settings.focus)
