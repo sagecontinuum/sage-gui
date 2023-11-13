@@ -105,6 +105,8 @@ export function statusWithPhase(val, obj) {
     icon = <InactiveIcon className="in-progress status-icon" />
   else if (phase == 'Awaiting Deployment')
     icon = <PendingIcon className="inactive status-icon" />
+  else
+    icon = <PendingIcon className="inactive status-icon" />
 
   return (
     <Tooltip

@@ -4,8 +4,8 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
-const PROJECT = settings.project.toLowerCase()
 
+const PROJECT = settings.project.toLowerCase()
 
 const columns = [{
   id: 'status',
@@ -56,32 +56,7 @@ const columns = [{
   id: 'sensors',
   label: 'Sensors',
   format: (val) => <formatters.Sensors data={val} />
-}, /* {
-  id: 't_sensors',
-  label: 'Top Sensors',
-  format: formatters.topSensors,
-  hide: true
 }, {
-  id: 'b_sensors',
-  label: 'Bottom Sensors',
-  format: formatters.bottomSensors,
-  hide: true
-}, {
-  id: 'l_sensors',
-  label: 'Left Sensors',
-  format: formatters.leftSensors,
-  hide: true
-}, {
-  id: 'r_sensors',
-  label: 'Right Sensors',
-  format: formatters.rightSensors,
-  hide: true
-}, {
-  id: 'additional_sensors',
-  label: 'Additional Sensors',
-  format: formatters.additionalSensors,
-  hide: true
-}, */ {
   id: 'commission_date',
   label: 'Commission Date',
 }, {
@@ -104,13 +79,14 @@ const columns = [{
   hide: true
 }*/]
 
-/*
+
 if (PROJECT != 'sage') {
-  columns.splice(8, 0, {
+  columns.splice(4, 0, {
     id: 'node_phase_v3',
-    label: 'Phase'
+    label: 'Phase',
+    hide: true
   })
-}*/
+}
 
 export default columns
 

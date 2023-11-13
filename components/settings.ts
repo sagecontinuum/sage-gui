@@ -1,4 +1,5 @@
 import { type VSN } from '/components/apis/beekeeper'
+import crocusLogo from 'url:./projects/logos/CROCUS-logo.png'
 
 // use env variable to load corresponding config below
 const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
@@ -7,7 +8,9 @@ type Configs = {
   [key: string]: {
     project: string   // case insensitive for data/api purposes
     focus?: string    // case insensitive for data/api purposes
-    logo?: string
+    logo?: string     // full path of logo (see imports above)
+    alt?: string      // logo alt text
+    url?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
     nodes?: VSN[]
     dataStart?: Date
@@ -30,8 +33,10 @@ const configs : Configs = {
     initialViewState: { latitude: 41.88, longitude: -87.66, zoom: 12.3 }
   },
   'crocus': {
-    logo: 'CROCUS',
+    logo: crocusLogo,
+    alt: 'CROCUS: Community Research on Climate and Urban Science',
     project: 'CROCUS',
+    url: 'https://crocus-urban.org',
     initialViewState: { latitude: 41.97, longitude: -87.65, zoom: 9.0 }
   },
   'neon-mdp': {
