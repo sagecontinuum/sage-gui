@@ -26,7 +26,7 @@ export function gpsIcon(obj) {
     return (
       <Tooltip
         title={hasLiveGPS ?
-          <>Static GPS<br/><Dot size="8" /> = recent live GPS found</> :
+          <>Static GPS<br/><Dot size="8" /> {'->'} recent live GPS found</> :
           'Static GPS'
         }>
         <LiveGPSDot invisible={!hasLiveGPS} color="primary" variant="dot">
@@ -200,7 +200,7 @@ export function Sensors(props: SensorsProps) {
         const {hw_model, hardware, name} = sensor
         return (
           <span key={i}>
-            <Tooltip placement="top" title={`${name} | ${hardware}`}>
+            <Tooltip placement="top" title={name == hardware ? name : `${hardware} | ${name}`}>
               <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
                 {hw_model}
               </Link>

@@ -37,11 +37,10 @@ const columns = [{
 }, {
   id: 'city',
   label: 'City',
-  hide: PROJECT == 'sage'
+  hide: true
 }, {
   id: 'state',
-  label: 'State',
-  hide: true
+  label: 'State'
 }, {
   id: 'gps',
   label: 'GPS',
@@ -57,7 +56,7 @@ const columns = [{
   id: 'sensors',
   label: 'Sensors',
   format: (val) => <formatters.Sensors data={val} />
-}, {
+}, /* {
   id: 't_sensors',
   label: 'Top Sensors',
   format: formatters.topSensors,
@@ -82,7 +81,7 @@ const columns = [{
   label: 'Additional Sensors',
   format: formatters.additionalSensors,
   hide: true
-}, {
+}, */ {
   id: 'commission_date',
   label: 'Commission Date',
 }, {
@@ -90,17 +89,20 @@ const columns = [{
   label: 'Has Shield',
   format: (val) => val ? <CheckIcon className="success" /> : 'no',
   hide: true,
-}, {
+}, /* {
   id: 'modem',
   label: 'Modem',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  format: (val, obj) => {
+    console.log('val', obj)
+    val ? <CheckIcon className="success" /> : 'no'
+  },
   hide: true
 }, {
   id: 'modem_sim',
   label: 'Modem Sim',
   format: (val) => val ? <CheckIcon className="success" /> : 'no',
   hide: true
-}]
+}*/]
 
 /*
 if (PROJECT != 'sage') {

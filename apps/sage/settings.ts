@@ -21,8 +21,8 @@ export default {
     'seanshahkarami/audio-sampler',
     'seanshahkarami/air-quality',
     'bhupendraraut/mobotix-scan',
-    'bhupendraraut/mobotix-sampler'
-
+    'bhupendraraut/mobotix-sampler',
+    'flozano/lorawan-listener'
   ],
   plugins: [
     'seanshahkarami/plugin-iio',
