@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo 'Running eslint on changed code...'
+
+# Get all JS files which have been staged
+files=$(git diff --name-only --cached)
+js_files=$(echo "$files" | grep -E '\.(js|jsx|ts|tsx)$')
+
+# Run eslint on the filtered list of files
+if [ -n "$js_files" ]; then
+  ./node_modules/eslint/bin/eslint.js $js_files
+  if [ $? -ne 0 ]; then
+    echo "ESLint found errors. Aborting commit."
+    exit 1
+  fi
+fi
+
+echo 'Done.'

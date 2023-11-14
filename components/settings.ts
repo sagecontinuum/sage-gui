@@ -24,12 +24,10 @@ const configs : Configs = {
     project: 'Sage'
   },
   'apiary': {
-    logo: 'Apiary',
     project: 'Apiary'
   },
   'dawn': {
     project: 'DAWN',
-    logo: 'DAWN',
     initialViewState: { latitude: 41.88, longitude: -87.66, zoom: 12.3 }
   },
   'crocus': {
@@ -40,15 +38,13 @@ const configs : Configs = {
     initialViewState: { latitude: 41.97, longitude: -87.65, zoom: 9.0 }
   },
   'neon-mdp': {
-    logo: 'NEON-MDP',
-    project: 'SAGE',
+    project: 'Sage',
     nodes: ['W038', 'W01D', 'W01F', 'V008'],
     dataStart: new Date('2022-04-05T12:00:00Z'),
     dataEnd: new Date('2022-05-05T12:00:00Z'),
     dataProductPath: '/data/product/neon-mdp-sage-wifire-bp3d-konza-prairie-burn-experiment'
   },
   'vto': {
-    logo: 'VTO',
     project: 'VTO',
     initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.0 }
   },

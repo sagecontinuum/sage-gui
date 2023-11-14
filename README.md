@@ -23,6 +23,16 @@ npm start
 
 > You can start a dev server for a different app with `npm start -w <app>`.  For example, `npm start -w project`
 
+#### Linting
+
+Before committing code, please configure pre-commit linting:
+
+```
+git config --local core.hooksPath .githooks
+```
+
+If using vscode, it is also recommended to install [vscode-eslint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
+
 
 ## Builds
 
