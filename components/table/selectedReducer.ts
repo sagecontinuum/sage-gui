@@ -2,8 +2,9 @@ import React from 'react'
 
 export type SelectedState = {
   lastSelected: number
-  ids: string[] | number[]
+  ids: number[]
   objs: object[]
+  event?: React.MouseEvent | null
 }
 
 
@@ -11,7 +12,7 @@ export type Action = {
   type: 'SELECT_ALL' | 'CLEAR' | 'SET' | 'SHIFT_SET' | 'CTRL_SET'
   event?: React.MouseEvent | null
   id?: number
-  rows?: object[]
+  rows?: {rowID: number}[]
   obj?: object
 }
 
@@ -24,7 +25,7 @@ const initialSelectedState = {
 }
 
 export function getInitSelectedState(
-  ids: string[] = [],
+  ids: number[] = [],
   data: object[],
   primaryKey: string
 ) : SelectedState {
@@ -40,7 +41,7 @@ export function getInitSelectedState(
 
 
 // handles selection of rows
-export default function selectedReducer(state: SelectedState, action: Action) {
+export default function selectedReducer(state: SelectedState, action: Action) : SelectedState {
 
   const {type, event} = action
 

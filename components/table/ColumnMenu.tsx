@@ -1,4 +1,4 @@
-
+// @ts-nocheck: ignore for mui/styles theme typing issues (mui/styles is deprecated)
 import React, { useState } from 'react'
 import { useTheme, alpha } from '@mui/material/styles'
 import makeStyles from '@mui/styles/makeStyles'
@@ -188,7 +188,6 @@ export default function ColumnMenu(props: Props) {
           }}
           value={value}
           onChange={(event, newValue) => {
-            // @ts-ignore
             setValue(newValue)
             onChange(newValue)
           }}

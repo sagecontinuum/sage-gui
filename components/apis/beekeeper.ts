@@ -274,7 +274,7 @@ const toSimpleManifest = o => ({
     hw_model: hardware.hw_model,
     description: hardware.description,
     capabilities: hardware.capabilities
-  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
+  })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
 })
 
 
@@ -292,7 +292,7 @@ const flattenManifest = o => ({
   sensors: o.sensors.map(({hardware, ...rest}) => ({
     ...rest,
     ...hardware
-  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1),
+  })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1),
   resources:
     o.resources.map(({name, hardware}) => ({name, ...hardware}))
 })
@@ -452,7 +452,7 @@ export async function getState() : Promise<State[]> {
       }
     })
 
-  return data
+  return data as State[]
 }
 
 

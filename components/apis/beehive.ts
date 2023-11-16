@@ -25,13 +25,14 @@ export const cameraOrientations = [
 
 
 export type Params = {
-  start: string
+  start?: string
   end?: string
   tail?: number
   filter?: {
     [tag: string]: string
   }
 }
+
 
 // standard meta.  todo(nc): break into standard meta and "other" meta
 export type Meta = {
@@ -66,6 +67,7 @@ export type ByMetric = {
 
 // (client side) record type for things stored in OSN
 export type OSNRecord = Record & {
+  value: string   // file paths only
   size: number
 }
 
@@ -76,8 +78,15 @@ export type MetricsByHost = {
 }
 
 // standard struct for grouping of metrics
-export type AggMetrics = {
-  [nodeID: string]: MetricsByHost
+type AggMetrics = {
+  [vsn: string]: MetricsByHost
+}
+
+
+export type ByNodeByName = {
+  [vsn: string]: {
+    [name: string]: Record[]
+  }
 }
 
 
@@ -152,16 +161,6 @@ export function getFactoryData() : Promise<Record[]> {
 
 
 
-export async function getLatestTemp() {
-  const params = {start: '-3m', filter: {sensor: 'bme280'}, tail: 1}
-  const data = await getData(params)
-  const byNode = groupBy(data, 'meta.node')
-  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
-  return byNode
-}
-
-
-
 export async function getSimpleNodeStatus(vsn: string) : Promise<Record[]> {
   const params = {start: '-4d', filter: {name: 'sys.uptime', vsn}, tail: 1}
   const metrics = await getData(params)
@@ -221,6 +220,7 @@ type HealthTestArgs = {
 type SanityTestArgs = {
   vsn?: BK.VSN,
   start?: string
+  end?: string
   name?: string
 }
 
@@ -271,7 +271,8 @@ export async function getSanityData(args?: SanityTestArgs & {tail?: number}) : P
 
 
 
-export async function getDeviceHealthSummary(args?: HealthTestArgs & {tail?: number}) : Promise<ByMetric> {
+export async function getDeviceHealthSummary(args?: HealthTestArgs & {tail?: number}) :
+Promise<ByMetric | ByNodeByName> {
   const {vsn, start, device, tail} = args || {}
 
   const params = {
@@ -287,9 +288,10 @@ export async function getDeviceHealthSummary(args?: HealthTestArgs & {tail?: num
 
   const data = await getData(params)
   const byNode = groupBy(data, 'meta.vsn')
-  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'meta.device'))
+  const byNodeByName: ByNodeByName = {}
+  mapValues(byNode, (objs, id) => byNodeByName[id] = groupBy(objs, 'meta.device'))
 
-  return vsn ? byNode[vsn] : byNode
+  return vsn ? byNodeByName[vsn] : byNodeByName
 }
 
 
@@ -307,10 +309,12 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
   }
 
   const data = await getData(params)
-  const byNode = groupBy(data, 'meta.vsn')
-  mapValues(byNode, (objs, id) => byNode[id] = groupBy(objs, 'name'))
+  const byNode: {[vsn: string]: Record[]} = groupBy(data, 'meta.vsn')
 
-  Object.entries(byNode).forEach(([id, obj]) => {
+  const byNodeByName: ByNodeByName = {}
+  mapValues(byNode, (objs, id) => byNodeByName[id] = groupBy(objs, 'name'))
+
+  Object.entries(byNodeByName).forEach(([id, obj]) => {
     const failObjs = obj['sanity_test_fail_total']
     const totalObjs = obj['sanity_test_total']
 
@@ -485,8 +489,8 @@ export async function getGPS(vsn: string) : Promise<GPS> {
 
 
 type PluginCountsProps = {
-  start?: Date | string,
-  end?: Date,
+  start?:  string,
+  end?: string,
   vsn?: string,
   plugin?: string
   tail?: number

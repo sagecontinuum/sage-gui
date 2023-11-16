@@ -20,7 +20,8 @@
     "eslint": "^8.22.0",
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "standard-version": "^9.3.0"
+    "standard-version": "^9.3.0",
+    "tsc-files": "^1.1.4"
   },
   "standard-version": {
     "header": "# Changelog\n\nThe following are some notable changes to the UI\n\n"

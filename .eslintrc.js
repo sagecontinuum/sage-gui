@@ -29,9 +29,11 @@ module.exports = {
       {
         forbid: ['>', '}'],
       },
-    ]
+    ],
+    '@typescript-eslint/ban-ts-comment': 'off'
   },
   globals: {
+    'module': true,
     'document': true,
     'alert': true,
     'localStorage': true,

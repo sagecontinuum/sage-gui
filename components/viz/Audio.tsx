@@ -112,7 +112,7 @@ export default function Audio(props: Props) {
       <HtmlAudio>
         <audio
           controls
-          src={meta?.value || dataURL}
+          src={(meta?.value) || dataURL}
         >
           Your browser does not support the <code>audio</code> element.
         </audio>
