@@ -21,7 +21,8 @@ echo 'Running type checking on modified (and related) modules...'
 
 ts_files=$(echo "$files" | grep -E '\.(ts|tsx)$')
 
-# Run eslint on the filtered list of files
+# Run tsc --noEmit on the filtered list of files
+# See https://github.com/microsoft/TypeScript/issues/27379 for why tsc-files is used.
 if [ -n "$ts_files" ]; then
   ./node_modules/.bin/tsc-files --noEmit $ts_files
   if [ $? -ne 0 ]; then
