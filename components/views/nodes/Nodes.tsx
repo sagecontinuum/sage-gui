@@ -45,14 +45,22 @@ const filterOn = (data: BK.State[], key: string) =>
 
 
 function getProjectNodes() {
+  const {project, focus, nodes} = settings
+
   return BK.getState()
     .then((data) => {
-      if (settings.project)
+      if (project)
         data = filterOn(data, 'project')
-      if (settings.focus)
+      if (focus)
         data = filterOn(data, 'focus')
-      if (settings.nodes)
+      if (nodes)
         data = data.filter(o => settings.nodes.includes(o.vsn))
+
+      if (project == 'Sage') {
+        data = data.filter(obj =>
+          ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.node_phase_v3)
+        )
+      }
 
       return data
     })

@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import * as BH from '/components/apis/beehive'
 
 import { Sidebar } from '/components/layout/Layout'
-import Table from '/components/table/Table'
+import Table, { type Column } from '/components/table/Table'
 import Checkbox from '/components/input/Checkbox'
 import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
@@ -19,7 +19,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import TimeOpts from '/components/input/StyledTimeOpts'
 
 import {
-  FormControlLabel, Button, Divider, Select,
+  FormControlLabel, Button, Select,
   MenuItem, FormControl, InputLabel, Alert,
   Autocomplete, TextField, Popper, ToggleButtonGroup, ToggleButton, CircularProgress, Tooltip
 } from '@mui/material'
@@ -49,7 +49,6 @@ const exts = {
 
 type MimeType = keyof typeof exts
 
-
 const columns = [{
   id: 'vsn',
   label: 'VSN',
@@ -57,7 +56,6 @@ const columns = [{
 }, {
   id: 'timestamp',
   label: 'Time',
-
 }, {
   id: 'name',
   label: 'Name',
@@ -136,37 +134,8 @@ const findColumn = (cols, name) =>
   cols.findIndex(o => o.id == name)
 
 
-
-
-type Unit = keyof typeof quickRanges
 type RelativeTimeStr =
   `-${string}m` | `-${string}h` | `-${string}d`
-
-
-type RangeIndicatorProps = {
-  data: BH.Record[]
-  unit: Unit
-}
-
-function RangeIndicator(props: RangeIndicatorProps) : JSX.Element {
-  const {data, unit} = props
-  const start = data[0].timestamp
-  const end = data[data.length - 1].timestamp
-
-  return (
-    <span>
-      {new Date(end).toLocaleString()} to {' '}
-      {['m', 'h'].includes(unit) ?
-        new Date(start).toLocaleTimeString() :
-        new Date(start).toLocaleString()
-      }
-    </span>
-  )
-}
-
-
-const VertDivider = () =>
-  <Divider orientation="vertical" flexItem style={{margin: '0 15px' }} />
 
 
 
@@ -342,7 +311,7 @@ const initFilterState = {
 type Facet = keyof typeof initFilterState
 
 type MenuState = {
-  [name in Facet]: string[]
+  [name in Facet]: {id: string, label: string}[]
 }
 
 type FilterState = {
@@ -411,7 +380,7 @@ export default function DataBrowser() {
   , [start, end, queryCount])
 
   const {loading, setLoading} = useProgress()
-  const [cols, setCols] = useState(columns)
+  const [cols, setCols] = useState<Column[]>(columns)
   const [page, setPage] = useState(0)
 
   const [checked, setChecked] = useState({
@@ -612,13 +581,13 @@ export default function DataBrowser() {
       params.delete(field)
     } else if (allowMultiSelect(field)) {
       // MUI seems to result in vals may be string or option; todo(nc): address this?
-      const newStr = val.map(item =>
+      const newStr = (val as Option[]).map(item =>
         typeof item == 'string' ? item : item.id
       ).join('|')
 
       params.set(field, newStr)
     } else {
-      params.set(field, val.id)
+      params.set(field, (val as Option).id)
     }
 
     setParams(params, {replace: true})

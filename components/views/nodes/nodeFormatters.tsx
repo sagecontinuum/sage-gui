@@ -3,7 +3,8 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
+import InactiveIcon from '@mui/icons-material/ReportProblemOutlined'
+import PendingIcon from '@mui/icons-material/PendingOutlined'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import MapIcon from '@mui/icons-material/RoomOutlined'
 
@@ -25,7 +26,7 @@ export function gpsIcon(obj) {
     return (
       <Tooltip
         title={hasLiveGPS ?
-          <>Static GPS<br/><Dot size="8" /> = recent live GPS found</> :
+          <>Static GPS<br/><Dot size="8" /> {'->'} recent live GPS found</> :
           'Static GPS'
         }>
         <LiveGPSDot invisible={!hasLiveGPS} color="primary" variant="dot">
@@ -76,6 +77,52 @@ export function status(val, obj) {
         <>
           Last reported metric<br/>
           <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} />
+        </>
+      }
+      componentsProps={{tooltip: {sx: {background: '#000'}}}}
+      placement="top"
+    >
+      {icon}
+    </Tooltip>
+  )
+}
+
+
+const phaseNotes = {
+  Maintenance: 'In Maintenance'
+}
+
+export function statusWithPhase(val, obj) {
+  const phase = obj.node_phase_v3
+  const phaseTitle = phaseNotes[phase] || phase
+
+  let icon
+  if (phase == 'Deployed' && val == 'reporting')
+    icon = <CheckIcon className="success status-icon" />
+  else if (phase == 'Deployed' && val != 'reporting')
+    icon = <ErrorIcon className="failed status-icon" />
+  else if (phase == 'Maintenance')
+    icon = <InactiveIcon className="in-progress status-icon" />
+  else if (phase == 'Awaiting Deployment')
+    icon = <PendingIcon className="inactive status-icon" />
+  else
+    icon = <PendingIcon className="inactive status-icon" />
+
+  return (
+    <Tooltip
+      title={
+        <>
+          <b>{phaseTitle}</b><br/>
+          {phase == 'Deployed' &&
+            <div>
+              <br/>
+              Last reported metrics:<br/>
+              {obj.elapsedTimes ?
+                <NodeLastReported computes={obj.computes} elapsedTimes={obj.elapsedTimes} /> :
+                `No sys.uptime(s) in ${NODE_STATUS_RANGE}`
+              }
+            </div>
+          }
         </>
       }
       componentsProps={{tooltip: {sx: {background: '#000'}}}}
@@ -139,10 +186,38 @@ export function uptimes(val) {
 
 
 type SensorsProps = {
-  data: BK.SimpleManifest['sensors'][]
+  data: BK.FlattenedManifest['sensors']
 }
 
 export function Sensors(props: SensorsProps) {
+  const {data} = props
+
+  if (!data) return <></>
+
+  const len = data.length
+
+  return (
+    <SensorList>
+      {data.map((sensor, i) => {
+        const {hw_model, hardware, name} = sensor
+        return (
+          <span key={i}>
+            <Tooltip placement="top" title={name == hardware ? name : `${hardware} | ${name}`}>
+              <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
+                {hw_model}
+              </Link>
+            </Tooltip>
+            {i < len - 1  && ', '}
+          </span>
+        )
+      })
+      }
+    </SensorList>
+  )
+}
+
+
+export function SensorsDeprecated(props: SensorsProps) {
   const {data} = props
 
   const [expanded, setExpanded] = useState(false)

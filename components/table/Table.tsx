@@ -51,6 +51,15 @@ const exampleColumns = [
 ]
 */
 
+export type Column = {
+  id: string
+  label?: string
+  format?: (any, object) => string | number | JSX.Element | JSX.Element[]
+  hide?: boolean
+  width?: string
+  type?: 'number'
+  align?: 'right'
+}
 
 type Row = { rowID: number }
 type Rows = Row[]
@@ -252,7 +261,7 @@ const TableHeadComponent = (props) => {
 }
 
 
-const indexData = (data, key?: string) =>
+const indexData = (data) =>
   data.map((row, i) => ({...row, rowID: i}))
 
 
@@ -342,7 +351,7 @@ type Props = {
   stripes?: boolean
   enableSorting?: boolean
   disableClickOutside?: boolean
-  selected?: string[]             // ids
+  selected?: number[]             // ids
   onSearch?: ({query} : {query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
@@ -394,7 +403,7 @@ export default function TableComponent(props: Props) {
   const [rowsPerPage, setRowsPerPage] = useState(props.rowsPerPage || 100)
 
 
-  let data = indexData(props.rows, primaryKey)
+  let data = indexData(props.rows)
   if (pagination) {
     data = data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
   }
@@ -418,7 +427,7 @@ export default function TableComponent(props: Props) {
 
   useEffect(() => {
     // when rows change, reindex
-    let newRows = indexData(props.rows, primaryKey)
+    let newRows = indexData(props.rows)
 
     // need to re-sort if updating table dynamically
     const sortID = Object.keys(sortBy).length ?
@@ -532,7 +541,7 @@ export default function TableComponent(props: Props) {
 
     // client-side sorting
     if (enableSorting) {
-      let allRows = indexData(props.rows, primaryKey)
+      let allRows = indexData(props.rows)
       allRows = clientSideSort(allRows, id, direction)
 
       const newRows = pagination ?
@@ -588,7 +597,6 @@ export default function TableComponent(props: Props) {
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handlePageChange}
-            component="div"
           />
         }
 

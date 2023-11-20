@@ -72,7 +72,7 @@ const lineConfig = {
             enabled: true,
           },
           mode: 'x',
-          onZoomComplete: () => {}
+          onZoomComplete: () => { /* do nothing? */ }
         },
       }
     }
@@ -112,7 +112,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
     const hasGroup = Object.keys(grouped)[0] != 'undefined'
 
     Object.keys(grouped)
-      .forEach((key, j) => {
+      .forEach((key) => {
         const d = grouped[key].map(o => ({
           x: new Date(o.timestamp).getTime(),
           y: o.value
@@ -136,7 +136,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
 }
 
 
-function getCountData(records: BH.Record[], opts: ChartOpts) {
+function getCountData(records: BH.Record[]) {
   const items = chain(records)
     .countBy('name')
     .map((val, key) => ({
@@ -161,7 +161,7 @@ function getCountData(records: BH.Record[], opts: ChartOpts) {
 }
 
 
-function getSumData(records: BH.Record[], opts: ChartOpts) {
+function getSumData(records: BH.Record[]) {
   const items = chain(records)
     .groupBy('name')
     .map((objs, key) => ({
@@ -186,7 +186,6 @@ function getSumData(records: BH.Record[], opts: ChartOpts) {
 }
 
 
-
 type ChartOpts = {
   showLines: boolean
   showPoints: boolean
@@ -196,7 +195,7 @@ type ChartOpts = {
 const chartOpts = {
   showLines: true,
   showPoints: false,
-  chartType: 'timeseries'
+  chartType: 'timeseries' as const
 }
 
 
@@ -213,9 +212,9 @@ export default function TimeSeries(props) {
   useEffect(() => {
     let datasets
     if (opts.chartType == 'frequency')
-      datasets = getCountData(data, opts)
+      datasets = getCountData(data)
     else if (opts.chartType == 'sum')
-      datasets = getSumData(data, opts)
+      datasets = getSumData(data)
     else
       datasets = getLineDatasets(data, opts)
 

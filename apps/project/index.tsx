@@ -26,7 +26,7 @@ import '/assets/styles.scss'
 import theme from '/components/theme'
 import settings from '/components/settings'
 
-const {logo, project, focus, nodes} = settings
+const {logo, alt, url, project, focus, nodes} = settings
 
 
 const NavMenu = () =>
@@ -36,11 +36,42 @@ const NavMenu = () =>
   </NavItems>
 
 
-const LogoPlaceHolder = () =>
-  <Logo>
-    <Link to="/" className="no-style">{logo || project || focus}</Link>
-  </Logo>
+const LogoPlaceHolder = () => {
+  return (
+    <>
+      {logo ?
+        <a href={url} target="_blank" rel="noreferrer" className="no-style">
+          <LogoImg src={logo} alt={alt} />
+        </a> :
+        <LogoText>
+          <Link to="/" className="no-style">
+            {project || focus}
+          </Link>
+        </LogoText>
+      }
+    </>
+  )
+}
 
+
+const LogoImg = styled.img`
+  height: 60px;
+  margin-right: 20px;
+`
+
+const LogoText = styled.span`
+  font-size: 2.2em;
+  font-family: 'Open sans', sans-serif;
+  font-weight: 800;
+  color: #666;
+  margin-bottom: 2px;
+  padding-right: 20px;
+  padding-left: 2px;
+
+  a:hover {
+    opacity: .85;
+  }
+`
 
 
 export default function App() {
@@ -58,7 +89,7 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route path="/" element={<Navigate to="nodes" replace />} />
+                <Route path="/" element={<Navigate to={`nodes?status="reporting"`} replace />} />
 
                 <Route path='/' element={<MetaRoute />}>
                   <Route path="/" element={<NodeTabs />}>
@@ -90,25 +121,5 @@ const Container = styled.div`
   width: 100%;
 `
 
-const Logo = styled.span`
-  font-size: 2.2em;
-  font-family: 'Open sans', sans-serif;
-  font-weight: 800;
-  color: #666;
-  margin-bottom: 2px;
-  padding-right: 20px;
-  padding-left: 2px;
-
-  sup {
-    position: relative;
-    top: -5px;
-    font-size: .3em;
-    color: #aaa;
-  }
-
-  a:hover {
-    opacity: .85;
-  }
-`
 
 ReactDom.render(<App />, document.getElementById('app'))

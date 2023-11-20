@@ -17,12 +17,16 @@ export const quickRanges = {
 export function prettyTime(secs: number) {
   if (!secs && secs != 0) return
   const days = Math.floor(secs / (24*60*60))
-  const parts = new Date(secs * 1000).toISOString().substr(11, 8).split(':')
+  const parts = new Date(secs * 1000).toISOString().slice(11, 19).split(':')
+
+  const h = parseInt(parts[0]),
+    m = parseInt(parts[1]),
+    s = parseInt(parts[2])
 
   const time = `${days > 0 ? days + 'd ' : ''}` +
-    (parts[0] > 0 ? `${ parseInt(parts[0])}h ` : '') +
-    (parts[1] > 0 ? `${ parseInt(parts[1])}m ` : '') +
-    (parts[2] > 0 ? `${ parseInt(parts[2])}s ` : '')
+    (h > 0 ? `${h}h ` : '') +
+    (m > 0 ? `${m}m ` : '') +
+    (s > 0 ? `${s}s ` : '')
 
   return time
 }
@@ -49,10 +53,10 @@ export function bytesToSizeSI(bytes) {
 // https://stackoverflow.com/a/32180863
 export function msToTime(ms: number) {
   if (!ms && ms != 0) return
-  let secs = Number( (ms / 1000).toFixed(1))
-  let mins = Number( (ms / (1000 * 60)).toFixed(1) )
-  let hours = Number( (ms / (1000 * 60 * 60)).toFixed(1) )
-  let days = Number( (ms / (1000 * 60 * 60 * 24)).toFixed(1) )
+  const secs = Number( (ms / 1000).toFixed(1))
+  const mins = Number( (ms / (1000 * 60)).toFixed(1) )
+  const hours = Number( (ms / (1000 * 60 * 60)).toFixed(1) )
+  const days = Number( (ms / (1000 * 60 * 60 * 24)).toFixed(1) )
   if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
   else if (mins < 60) return mins + ' min ago'
   else if (hours < 24) return hours + ' hrs ago'
@@ -61,10 +65,10 @@ export function msToTime(ms: number) {
 
 export function msToTimeApprox(ms: number) {
   if (!ms && ms != 0) return
-  let secs = Math.floor( (ms / 1000))
-  let mins = Math.floor( (ms / (1000 * 60)))
-  let hours = Math.floor( (ms / (1000 * 60 * 60)))
-  let days = Math.floor( (ms / (1000 * 60 * 60 * 24)))
+  const secs = Math.floor( (ms / 1000))
+  const mins = Math.floor( (ms / (1000 * 60)))
+  const hours = Math.floor( (ms / (1000 * 60 * 60)))
+  const days = Math.floor( (ms / (1000 * 60 * 60 * 24)))
   if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
   else if (mins < 60) return `${mins} min${mins != 1 ? 's' : ''} ago`
   else if (hours < 24) return `${hours} hr${hours != 1 ? 's' : ''} ago`
@@ -79,7 +83,7 @@ export function relativeTime(val: string) {
 
 
 export function isOldData(timestamp, grain = 'hours', amount = 2) {
-  let date = new Date(timestamp)
+  const date = new Date(timestamp)
 
   let d
   if (grain == 'hours') {

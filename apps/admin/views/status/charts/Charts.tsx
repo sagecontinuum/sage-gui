@@ -35,15 +35,15 @@ function getIssues(data) : Issues {
 type Status = {
   'reporting': number,
   'not reporting': number
-  'not reporting (30d+)': number
+ //   'not reporting (30d+)': number
 }
 
 
 function getStatus(data: BK.State[]) : Status {
   const statuses = data.reduce((acc, o) => {
     acc['reporting'] += o.status == 'reporting' ? 1 : 0,
-    acc['not reporting'] += o.status == 'not reporting' ? 1 : 0,
-    acc['not reporting (30d+)'] += o.status == 'not reporting (30d+)' ? 1 : 0
+    acc['not reporting'] += o.status == 'not reporting' ? 1 : 0
+    // acc['not reporting (30d+)'] += o.status == 'not reporting (30d+)' ? 1 : 0
     return acc
   }, {'reporting': 0, 'not reporting': 0, 'not reporting (30d+)': 0})
 
@@ -80,7 +80,7 @@ export default function Charts(props: Props) {
     setStatuses({
       'reporting': status['reporting'],
       'not reporting': status['not reporting'],
-      'not reporting (30d+)': status['not reporting (30d+)']
+      // 'not reporting (30d+)': status['not reporting (30d+)']
     })
 
     const issues = getIssues(data)

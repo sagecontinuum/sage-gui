@@ -6,10 +6,15 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:react/jsx-runtime'
   ],
+  settings: {
+    react: {
+      version: 'detect',
+    }
+  },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
   root: true,
-  'rules': {
+  rules: {
     'indent': ['error', 2],
     'linebreak-style': ['error','unix'],
     'quotes': ['error', 'single', {'allowTemplateLiterals': true}],
@@ -24,9 +29,11 @@ module.exports = {
       {
         forbid: ['>', '}'],
       },
-    ]
+    ],
+    '@typescript-eslint/ban-ts-comment': 'off'
   },
-  'globals': {
+  globals: {
+    'module': true,
     'document': true,
     'alert': true,
     'localStorage': true,

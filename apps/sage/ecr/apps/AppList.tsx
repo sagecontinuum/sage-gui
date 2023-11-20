@@ -226,7 +226,7 @@ export default function AppList() {
           />
           <br/>
           <h2 className="flex items-center">
-            <SamplersIcon/>&nbsp;Featured Samplers
+            <SamplersIcon/>&nbsp;Sampling and Integration Apps
           </h2>
           <FeaturedApps
             rows={rows.filter(row => samplers.includes(`${row.namespace}/${row.name}`))}

@@ -124,7 +124,8 @@ function PopupInfo(props: PopupProps) {
 
   // tooltip info deconstruction
   const {
-    vsn,  project, focus, location, lng, lat, node_type, computes, elapsedTimes
+    vsn,  project, focus, location, lng, lat, node_type, computes, elapsedTimes,
+    node_phase_v3
   } = data || {}
 
   return (
@@ -134,55 +135,59 @@ function PopupInfo(props: PopupProps) {
       onClose={onClose}
     >
       <ClickAwayListener onClickAway={onClose}>
-        <div>
-          <h2>
-            {node_type == 'WSN' ?
-              'Wild Sage Node' : node_type
-            } <Link to={`/node/${vsn}`}>
-              {vsn}
-            </Link>
-          </h2>
-
-          <div className="flex gap">
-            <table className="key-value simple node-meta">
-              <tbody>
-                <tr>
-                  <td>Project</td>
-                  <td>
-                    <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
-                      {project}
-                    </Link>&nbsp;
-                    {focus &&
+        <div className="flex gap">
+          <div>
+            <h2>
+              {node_type == 'WSN' ?
+                'Wild Sage Node' : node_type
+              }&nbsp;
+              <Link to={`/node/${vsn}`}>
+                {vsn}
+              </Link>
+            </h2>
+            <div>
+              <table className="key-value simple node-meta">
+                <tbody>
+                  <tr>
+                    <td>Project</td>
+                    <td>
+                      <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
+                        {project}
+                      </Link>&nbsp;
+                      {focus &&
                       <>| <Link to={
                         `/nodes/?project="${encodeURIComponent(project)}"` +
                         `&focus="${encodeURIComponent(focus)}"`
                       }>
                         {focus}
                       </Link></>
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td>Location</td>
-                  <td>
-                    <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
-                      {location}
-                    </Link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Coordinates</td>
-                  <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
-                </tr>
-              </tbody>
-            </table>
-            {showUptime &&
-              <div className="uptimes">
-                <b>Last reported metric</b><br/>
-                <NodeLastReported computes={computes} elapsedTimes={elapsedTimes} />
-              </div>
-            }
+                      }
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Location</td>
+                    <td>
+                      <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
+                        {location}
+                      </Link>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Coordinates</td>
+                    <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {showUptime &&
+            <div className="uptimes">
+              <h2>{node_phase_v3}</h2>
+              <b>Last reported metric</b><br/>
+              <NodeLastReported computes={computes} elapsedTimes={elapsedTimes} />
+            </div>
+          }
         </div>
       </ClickAwayListener>
     </Popup>
@@ -229,7 +234,7 @@ export default function MapGL(props: Props) {
       return
     }
 
-    let d = data
+    const d = data
     const geoData = getGeoSpec(d)
     const coords = getValidCoords(d)
     const bbox = getBBox(coords)

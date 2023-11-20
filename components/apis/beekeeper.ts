@@ -49,7 +49,6 @@ export type Phase = typeof phaseMap[PhaseTabs]
 
 export type NodeMeta = {
   vsn: VSN
-  node_phase: Phase
   node_phase_v3: Phase
   project: string
   focus: string
@@ -191,7 +190,7 @@ export type SensorHardware = {
 }
 
 
-type Sensor = {
+export type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
   scope: 'global' | 'nxcore' | 'rpi-shield'
   labels: string[],
@@ -252,7 +251,7 @@ type Manifest = {
 }
 
 
-export type FlattenedManifest = Manifest & {
+export type FlattenedManifest = Omit<Manifest, 'sensors'> & {
   computes: (Omit<Compute, 'hardware'> & ComputeHardware)[]
   sensors: (Omit<Sensor, 'hardware'> & SensorHardware)[]
   resources: (Omit<Resource, 'hardware'> & ResourceHardware)[]
@@ -292,7 +291,7 @@ const toSimpleManifest = o => ({
     hw_model: hardware.hw_model,
     description: hardware.description,
     capabilities: hardware.capabilities
-  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
+  })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
 })
 
 
@@ -314,7 +313,7 @@ const flattenManifest = o => ({
   sensors: o.sensors.map(({hardware, ...rest}) => ({
     ...rest,
     ...hardware
-  })).sort((a, b) => a.name != a.hw_model.toLowerCase() ? -1 : 1),
+  })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1),
   resources:
     o.resources.map(({name, hardware}) => ({name, ...hardware}))
 })
@@ -474,7 +473,7 @@ export async function getState() : Promise<State[]> {
       }
     })
 
-  return data
+  return data as State[]
 }
 
 

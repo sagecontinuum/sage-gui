@@ -1,4 +1,5 @@
 import { type VSN } from '/components/apis/beekeeper'
+import crocusLogo from 'url:./projects/logos/CROCUS-logo.png'
 
 // use env variable to load corresponding config below
 const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
@@ -7,7 +8,9 @@ type Configs = {
   [key: string]: {
     project: string   // case insensitive for data/api purposes
     focus?: string    // case insensitive for data/api purposes
-    logo?: string
+    logo?: string     // full path of logo (see imports above)
+    alt?: string      // logo alt text
+    url?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
     nodes?: VSN[]
     dataStart?: Date
@@ -21,29 +24,27 @@ const configs : Configs = {
     project: 'Sage'
   },
   'apiary': {
-    logo: 'Apiary',
     project: 'Apiary'
   },
   'dawn': {
     project: 'DAWN',
-    logo: 'DAWN',
     initialViewState: { latitude: 41.88, longitude: -87.66, zoom: 12.3 }
   },
   'crocus': {
-    logo: 'CROCUS',
+    logo: crocusLogo,
+    alt: 'CROCUS: Community Research on Climate and Urban Science',
     project: 'CROCUS',
+    url: 'https://crocus-urban.org',
     initialViewState: { latitude: 41.97, longitude: -87.65, zoom: 9.0 }
   },
   'neon-mdp': {
-    logo: 'NEON-MDP',
-    project: 'SAGE',
+    project: 'Sage',
     nodes: ['W038', 'W01D', 'W01F', 'V008'],
     dataStart: new Date('2022-04-05T12:00:00Z'),
     dataEnd: new Date('2022-05-05T12:00:00Z'),
     dataProductPath: '/data/product/neon-mdp-sage-wifire-bp3d-konza-prairie-burn-experiment'
   },
   'vto': {
-    logo: 'VTO',
     project: 'VTO',
     initialViewState: { latitude: 41.8, longitude: -87.9, zoom: 9.0 }
   },
