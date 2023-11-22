@@ -1,3 +1,4 @@
+// @ts-nocheck -- type checking for timeline is still a todo
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -6,7 +7,6 @@ import Tooltip from '@mui/material/Tooltip'
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import TimelineChart, { color } from '/components/viz/Timeline'
 
-import * as BH from '/components/apis/beehive'
 import type { PluginEvent, ErrorsByGoalID } from '/components/apis/ses'
 
 
@@ -21,7 +21,7 @@ const colorMap = {
 
 type GroupedApps = {
   [app: string]: (
-    BH.Record &
+    PluginEvent &
     {
       status: 'launched' | 'running' | 'complete' | 'failed'
       runtime: string
@@ -36,7 +36,7 @@ type Props = {
   start?: string  // show timeline range that is selected?
 }
 
-export default function JobTimeLine(props: Props) {
+export default function JobTimeline(props: Props) {
   const {data, errors, start} = props
 
   const navigate = useNavigate()
@@ -64,7 +64,7 @@ export default function JobTimeLine(props: Props) {
             if (obj.status === undefined) return color.noValue
             return colorMap[obj.status]
           }}
-          tooltip={(obj) => `
+          tooltip={(obj: PluginEvent) => `
             ${new Date(obj.timestamp).toLocaleString()}
             - ${new Date(obj.end).toLocaleTimeString()}<br>
             <br/>
@@ -76,7 +76,7 @@ export default function JobTimeLine(props: Props) {
             <b>${obj.status == 'running' ? 'status': 'end status'}:</b>
               <b class="${obj.status}">${obj.status}</b><br>
           `}
-          yFormat={(label: string, data) => {
+          yFormat={(label: string) => {
             // todo: this is workaround to ensure chart can be updated when y axis changes(?)
             if (!data[label]) return
 

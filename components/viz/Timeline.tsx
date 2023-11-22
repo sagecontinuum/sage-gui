@@ -401,6 +401,7 @@ function appendLegend(ele, chartData) {
 type Record = {
   timestamp: string
   value: string | number
+  name: string
   end?: string
   meta?: { // user provided meta is allowed
     [key: string]: string | number

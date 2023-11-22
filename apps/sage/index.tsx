@@ -58,6 +58,7 @@ import '/assets/styles.scss'
 import Auth from '/components/auth/auth'
 import settings from '/components/settings'
 
+const {project} = settings
 
 
 const NavMenu = () => {
@@ -180,7 +181,7 @@ export default function Sage() {
                         element={<Nodes />} />
                       <Route
                         path="sensors"
-                        element={<SensorList />} />
+                        element={<SensorList project={project} />} />
                     </Route>
                     <Route path="sensors/:name" element={<Sensor />} />
 
@@ -203,7 +204,7 @@ export default function Sage() {
                       <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
                     }/>
 
-                    <Route path="data" element={<Data project={settings.project} focus={settings.focus} />} />
+                    <Route path="data" element={<Data project={project} />} />
                     <Route path="data/ontology/:name" element={<Ontology />} />
                     <Route path="data/product/:name" element={<DataProduct />} />
                     <Route path="query-browser" element={<DataBrowser />} />

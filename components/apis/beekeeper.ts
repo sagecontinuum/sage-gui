@@ -2,6 +2,9 @@ import config from '/config'
 const url = config.beekeeper
 const API_URL = `${url}/api`
 
+import settings from '/components/settings'
+const DEFAULT_PROJECT = settings.project
+
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
 import { uniqBy } from 'lodash'
@@ -108,8 +111,6 @@ type FilteringArgs = {
   focus?: string,
   nodes?: VSN[]
 }
-
-type MetaParams = {vsn?: VSN} & FilteringArgs
 
 export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
@@ -301,8 +302,8 @@ const flattenManifest = o => ({
 })
 
 
-export async function getRawManifests(args?: MetaParams) : Promise<Manifest[]> {
-  const p1 = getNodeMeta(args)
+export async function getRawManifests() : Promise<Manifest[]> {
+  const p1 = getNodeMeta()
   const p2 = await get(`${config.auth}/manifests/`)
 
   const [nodeMetas, data] = await Promise.all([p1, p2])
@@ -345,11 +346,12 @@ export type SensorTableRow = SensorHardware & {
 }
 
 
-export async function getSensors(args?: MetaParams, asTable = true) : Promise<SensorHardware[] | SensorTableRow[]> {
+export async function getSensors(args?: FilteringArgs, asTable = true) : Promise<SensorHardware[] | SensorTableRow[]> {
+  const project = (args || {}).project || DEFAULT_PROJECT
 
   // todo(nc): update when prod sheet is no longer used; optimize: add api method
   const p1 = getNodeMeta(args)
-  const p2 = get(`${config.auth}/manifests/`)
+  const p2 = get(`${config.auth}/manifests/${project ? `?project=${project}` : ''}`)
   const [nodeMetas, data] = await Promise.all([p1, p2])
 
   const vsns = Object.values(nodeMetas).map(o => o.vsn)
@@ -357,32 +359,30 @@ export async function getSensors(args?: MetaParams, asTable = true) : Promise<Se
 
   const sensors = manifests.reduce((acc, obj) => [...acc, ...obj.sensors], [])
   const hardwares = sensors.reduce((acc, obj) => [...acc, obj.hardware], [])
-  let sensorHardwares = uniqBy<SensorHardware>(hardwares, 'hardware')
+  const sensorHardwares = uniqBy<SensorHardware>(hardwares, 'hardware')
 
-  if (asTable) {
-    sensorHardwares = sensorHardwares.map(obj => {
-      const {hw_model} = obj
+  const sensorTableRows: SensorTableRow[] = sensorHardwares.map(obj => {
+    const {hw_model} = obj
 
-      const nodes = manifests
-        .filter(o => o.sensors.map(o => o.hardware.hw_model).includes(hw_model))
-      const vsns = nodes.map(o => o.vsn)
+    const nodes = manifests
+      .filter(o => o.sensors.map(o => o.hardware.hw_model).includes(hw_model))
+    const vsns = nodes.map(o => o.vsn)
 
-      return {
-        ...obj,
-        vsns,
-        nodeCount: vsns.length
-      }
-    })
-  }
+    return {
+      ...obj,
+      vsns,
+      nodeCount: vsns.length
+    }
+  })
 
-  return sensorHardwares
+  return asTable ? sensorTableRows : sensorHardwares
 }
 
 
-export async function getSensor(hw_model: string) : Promise<SensorHardware> {
+export async function getSensor(hw_model: string) : Promise<SensorTableRow> {
   // todo(optimize): add api method
   const data = await getSensors()
-  return data.find(obj => obj.hw_model == hw_model)
+  return data.find(obj => obj.hw_model == hw_model) as SensorTableRow
 }
 
 

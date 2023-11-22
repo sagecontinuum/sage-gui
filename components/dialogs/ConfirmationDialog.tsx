@@ -7,6 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/icons-material/Close'
+import type { Breakpoint } from '@mui/material/'
 
 
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
   cancelBtn?: boolean
   onClose: () => void
   onConfirm: () => void | Promise<any>
-  maxWidth?: string
+  maxWidth?: false | Breakpoint
 }
 
 

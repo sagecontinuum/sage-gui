@@ -1,3 +1,4 @@
+// @ts-nocheck -- type checking for timeline is still a todo
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
@@ -17,7 +18,7 @@ import Checkbox from '/components/input/Checkbox'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import { formatters, TimelineContainer } from './JobStatus'
-import JobTimeLine from './JobTimeline'
+import JobTimeline from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
 import { type NodeMeta } from '/components/apis/beekeeper'
@@ -271,7 +272,7 @@ export default function JobDetails(props: Props) {
                         </p>
                       }
                       {!loading && Object.keys(data).length > 0 &&
-                        <JobTimeLine data={data} errors={errorsByGoalID} start={opts.start} />
+                        <JobTimeline data={data} errors={errorsByGoalID} start={opts.start} />
                       }
                     </div>
                   )

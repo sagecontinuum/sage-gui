@@ -85,11 +85,14 @@ export type PluginEvent = Event & {
     plugin_status_by_scheduler: string
     plugin_task: string
   }
-  runtime?: number  // computed client-side
+  status: 'failed' | 'complete' | 'launched' | 'running'
+  // computed client-side
+  end?: number
+  runtime?: number
 }
 
 
-type FailedEvent = Event & {
+type FailedEvent = PluginEvent & {
   name: typeof pluginEventTypes[number]
   value: PluginEvent['value'] & {
     error_log: string
@@ -374,7 +377,7 @@ type EventData = {
 }
 
 // fetch tasks state event changes, and parse SES JSON Messages
-export function getEvents(args: GetEventsArgs) : Promise<EventData> {
+export function getEvents(args?: GetEventsArgs) : Promise<EventData> {
   const {start, vsns} = args || {}
 
   return BH.getData({

@@ -19,7 +19,7 @@ import { Tabs, Tab } from '/components/tabs/Tabs'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { Card } from '/components/layout/Layout'
 
-import JobTimeLine from './JobTimeline'
+import JobTimeline from './JobTimeline'
 import JobDetails from './JobDetails'
 import JobActions from './JobActions'
 import StateFilters from './StateFilters'
@@ -138,20 +138,6 @@ const myJobCols = [{
 ]
 
 
-const goalCols = [{
-  id: 'name',
-  label: 'Name'
-}, {
-  id: 'id',
-  label: 'ID',
-  format: (v) => v.split('-')[0]
-}, {
-  id: 'appCount',
-  label: 'Apps',
-}]
-
-
-
 type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: string}[]
 
 function jobsToGeos(
@@ -246,7 +232,7 @@ export default function JobStatus() {
   const {loading, setLoading} = useProgress()
 
   const [{
-    jobs, pluginEvents, pluginErrors, isFiltered, qJobs, qNodes, selectedNodes, selectedJobs
+    jobs, pluginEvents, pluginErrors, isFiltered, qJobs, selectedNodes, selectedJobs
   }, setData] = useState<State>(initState)
 
   // filter for job's state
@@ -265,7 +251,7 @@ export default function JobStatus() {
   const [updateTable, setUpdateTable] = useState<number>(0)
 
   // todo(nc): poll data; some optimization is needed
-  const [lastUpdate, setLastUpdate] = useState(null)
+  // const [lastUpdate, setLastUpdate] = useState(null)
 
   const [error, setError] = useState()
 
@@ -324,7 +310,7 @@ export default function JobStatus() {
 
         // if 'my jobs', filter vsns to the user's nodes
         if (filterUser) {
-          const nodes = jobs.flatMap(o => o.nodes)
+          // const nodes = jobs.flatMap(o => o.nodes)
           jobs = jobs.filter(o => o.user == user)
         }
 
@@ -444,15 +430,18 @@ export default function JobStatus() {
             />
           }
 
-          <Tab
-            label={<div className="flex items-center">
-              <TimelineIcon />&nbsp;Timelines
-            </div>}
-            value="timeline"
-            component={Link}
-            to={`/jobs/timeline`}
-            replace
-          />
+          {/* todo(nc): rendering all timelines isn't scalable;
+              possibly revist the concept later in a different form.
+            <Tab
+              label={<div className="flex items-center">
+                <TimelineIcon />&nbsp;Timelines
+              </div>}
+              value="timeline"
+              component={Link}
+              to={`/jobs/timeline`}
+              replace
+            />
+          */}
         </Tabs>
         <hr />
 
@@ -541,7 +530,8 @@ export default function JobStatus() {
                       </div>
                       <div>{location}</div>
                     </div>
-                    <JobTimeLine data={pluginEvents[vsn]} errors={pluginErrors} />
+                    {/* @ts-ignore */}
+                    <JobTimeline data={pluginEvents[vsn]} errors={pluginErrors} />
                   </Card>
                 )
               })

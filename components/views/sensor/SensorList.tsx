@@ -41,7 +41,7 @@ const getDescriptionHTML = (description: string, hw_model: string) => {
 }
 
 
-const columns = [{
+export const columns = [{
   id: 'hw_model',
   label: 'Model',
   width: '200px',
@@ -77,7 +77,7 @@ const columns = [{
 }, {
   id: 'capabilities',
   label: 'Capabilities',
-  format:(val, obj) => val ? val.join(', ') : '-',
+  format:(val) => val ? val.join(', ') : '-',
   hide: true
 }, {
   id: 'nodeCount',
@@ -114,13 +114,12 @@ export default function SensorList(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-
     BK.getSensors({project, focus, nodes})
       .then(data => {
-        setData(data)
+        setData(data as BK.SensorTableRow[])
       }).catch((err) => setError(err))
       .finally(() => setLoading(false))
-  }, [setLoading])
+  }, [setLoading, project, focus, nodes])
 
   return (
     <Root>
@@ -131,8 +130,8 @@ export default function SensorList(props: Props) {
           rows={data}
           enableSorting
           sort="+hw_model"
-          onColumnMenuChange={() => {}}
-          onDoubleClick={(_, row) => navigate(`/sensors/${row.hw_model}`)}
+          onColumnMenuChange={() => { /* do nothing */ }}
+          onDoubleClick={(_, row: BK.SensorTableRow) => navigate(`/sensors/${row.hw_model}`)}
         />
       }
 

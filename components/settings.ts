@@ -21,7 +21,7 @@ type Configs = {
 
 const configs : Configs = {
   'sage': {
-    project: 'Sage'
+    project: 'SAGE'
   },
   'apiary': {
     project: 'Apiary'
