@@ -9,6 +9,7 @@ import SensorIcon from '@mui/icons-material/SensorsRounded'
 import ComputesIcon from '@mui/icons-material/DeveloperBoardRounded'
 import PeripheralsIcon from '@mui/icons-material/Cable'
 import HealthIcon from '@mui/icons-material/MonitorHeartOutlined'
+import CellTowerIcon from '@mui/icons-material/CellTower'
 
 
 
@@ -31,10 +32,11 @@ const ConditionalTab = (props: TabProps & {show: boolean, component, to, replace
 type Props = {
   admin: boolean
   counts: {[tabLabel: string]: number}
+  lorawan: boolean
 }
 
 export default function ManifestTabs(props: Props) {
-  const {admin, counts} = props
+  const {admin, counts, lorawan} = props
 
   const [params] = useSearchParams()
   const tab = params.get('tab') || 'overview'
@@ -71,6 +73,14 @@ export default function ManifestTabs(props: Props) {
           component={Link}
           value="peripherals"
           to="?tab=peripherals"
+          replace
+        />
+        <ConditionalTab
+          show={lorawan}
+          label={label(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
+          component={Link}
+          value="lorawandevices"
+          to="?tab=lorawandevices"
           replace
         />
         <ConditionalTab

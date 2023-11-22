@@ -37,6 +37,9 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
+// import lorawan components
+import lorawandeviceCols from './lorawandevice/columns'
+
 // todo(nc): promote/refactor into component lib
 import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
@@ -249,7 +252,6 @@ const resourceCols = [{
   format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
 }]
 
-
 type Props = {
   admin?: boolean
 }
@@ -457,9 +459,11 @@ export default function NodeView(props: Props) {
               counts={{
                 Sensors: manifest?.sensors.length,
                 Computes: manifest?.computes.length,
-                Peripherals: manifest?.resources.length
+                Peripherals: manifest?.resources.length,
+                'LoRaWAN Devices': manifest?.lorawanconnections.length
               }}
               admin={admin}
+              lorawan= {manifest?.sensors.some(item => item.capabilities.includes('lorawan'))}
             />
 
             {tab == 'sensors' && manifest &&
@@ -479,6 +483,17 @@ export default function NodeView(props: Props) {
                   primaryKey='name'
                   columns={computeCols}
                   rows={manifest.computes}
+                  enableSorting
+                />
+              </TableContainer>
+            }
+            
+            {tab == 'lorawandevices' && manifest &&
+              <TableContainer>
+                <Table
+                  primaryKey='deveui'
+                  columns={lorawandeviceCols}
+                  rows={manifest.lorawanconnections}
                   enableSorting
                 />
               </TableContainer>

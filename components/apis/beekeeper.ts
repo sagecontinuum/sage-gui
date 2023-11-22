@@ -220,6 +220,21 @@ type Resource = {
   hardware: ResourceHardware
 }
 
+type LorawanDevice = {
+  device_name: string
+  dev_eui: string
+  battery_level: number
+}
+
+type LorawanConnection = {
+  connection_name: string
+  dev_eui: string
+  last_seen_at: string
+  margin: number
+  expected_uplink: number
+  lorawandevice: LorawanDevice
+}
+
 type Manifest = {
   vsn: VSN
   name: string          // node id
@@ -235,6 +250,7 @@ type Manifest = {
   computes: Compute[]
   sensors: Sensor[]
   resources: Resource[]
+  lorawanconnections: LorawanConnection[]
 }
 
 
@@ -242,6 +258,7 @@ export type FlattenedManifest = Omit<Manifest, 'sensors'> & {
   computes: (Omit<Compute, 'hardware'> & ComputeHardware)[]
   sensors: (Omit<Sensor, 'hardware'> & SensorHardware)[]
   resources: (Omit<Resource, 'hardware'> & ResourceHardware)[]
+  lorawanconnections: (Omit<LorawanConnection, 'lorawandevice'> & LorawanDevice)[]
 }
 
 
@@ -288,6 +305,10 @@ const flattenManifest = o => ({
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
   modem: o.modem,
+  lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({
+    ...rest,
+    ...lorawandevice
+  })),
   computes: o.computes.map(({hardware, ...rest}) => ({
     ...rest,
     ...hardware
