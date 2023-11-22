@@ -5,9 +5,9 @@ type Props = {
   rows: {
     id: string,
     label?: string | JSX.Element,
-    format?: (val?: any, obj?: object) => JSX.Element
+    format?: (val?: any, obj?: object) => string | JSX.Element
   }[]
-  data: object[]
+  data: object
   title?: string | JSX.Element
 }
 

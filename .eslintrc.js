@@ -16,6 +16,7 @@ module.exports = {
   root: true,
   rules: {
     'indent': ['error', 2],
+    'brace-style': ['error', '1tbs'],
     'linebreak-style': ['error','unix'],
     'quotes': ['error', 'single', {'allowTemplateLiterals': true}],
     'semi': ['error', 'never'],

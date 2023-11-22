@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { useEffect, useRef, useState, memo } from 'react'
 import styled from 'styled-components'
 
 import * as d3 from 'd3'
-import Legend from './d3-color-legend'
+// todo(nc): import Legend from './d3-color-legend'
 
 import TimelineLabels from './TimelineLabels'
 
@@ -54,10 +55,11 @@ export const color = {
 }
 
 export const colors = {
-  blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c', '#053e78']
+  blues: ['#eff3ff', '#c6dbef', '#9ecae1', '#6baed6', '#3182bd', '#08519c', '#053e78'],
+  noValue: '#dcdcdc'
 }
 
-function parseData(data) {
+function parseData(data: Data) : Record[] {
   let array = []
   Object.keys(data).map((key) => {
     const rows = data[key].map(obj => ({
@@ -101,12 +103,14 @@ export function getColorScale(data) {
 
   const colorScale = d3.scaleLinear()
     .domain([min, 10, max])
+    // @ts-ignore: ???
     .range(redSpectrum)
 
   return colorScale
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function showGuide(ref, svg, y) {
   const foo = d3.select(ref).node().getBBox()
 
@@ -114,7 +118,7 @@ function showGuide(ref, svg, y) {
     .attr('class', 'guide')
     .attr('x', 0 + guideStroke)
     .attr('y', foo.y + margin.top)
-    .attr('width', width + margin.left)
+    .attr('width', margin.left)
     .attr('height', y.bandwidth() - 2 )
     .attr('stroke', '#0088ff')
     .attr('stroke-width', guideStroke)
@@ -180,7 +184,7 @@ function drawChart(
 
   // format y axis labels if needed
   if (yFormat && useD3YAxis) {
-    yAxis.tickFormat(yFormat)
+    yAxis.tickFormat(yFormat as (label: string) => string)
   }
 
   const svgHeight = height + margin.top
@@ -261,7 +265,7 @@ function drawChart(
       .on('click', (evt) => {
         if (!onRowClick) return
 
-        const label = d3.select(evt.target).data()[0]
+        const label = d3.select(evt.target).data()[0] as string
         const row = data.filter(o => o.row == label)
         onRowClick(label, row)
       })
@@ -376,9 +380,9 @@ function drawChart(
 }
 
 
-
+/* // todo(nc): generic legend
 function appendLegend(ele, chartData) {
-  const [_, max] = getMinMax(chartData) // todo(nc): optimze; only needs to be computed once
+  const [_, max] = getMinMax(chartData)
 
   const legend = Legend(
     d3.scaleOrdinal(
@@ -390,15 +394,19 @@ function appendLegend(ele, chartData) {
 
   d3.select(ele).node().append(legend)
 }
+*/
 
 
 
 type Record = {
   timestamp: string
-  value: number
+  value: string | number
   end?: string
-  meta?: object           // user provided meta is allowed
-  [other: string]: any    // extra user provided key/values is allowed too
+  meta?: { // user provided meta is allowed
+    [key: string]: string | number
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [other: string]: any
 }
 
 type Data = { [key: string]: Record[] }
@@ -413,7 +421,7 @@ export type TimelineProps = {
   showButtons?: boolean
   limitRowCount?: number
   cellUnit?: 'hour' | 'day'
-  yFormat?: (label: string, data: Data) => string | JSX.Element
+  yFormat?: (label: string) => string | JSX.Element
   useD3YAxis?: boolean
   onRowClick?: (label: string, items: Record[]) => void
   onCellClick?: (Record) => void

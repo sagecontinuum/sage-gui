@@ -22,7 +22,7 @@ export default function RecentImages(props: Props) {
 
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
-  const [error, setError] = useState()
+  const [error, setError] = useState<{message: string}>()
 
   const [total, setTotal] = useState<{[pos: string]: number}>()
   const [progress, setProgress] = useState<{[pos: string]: number}>()

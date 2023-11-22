@@ -3,7 +3,7 @@
 echo 'Running eslint on modified modules...'
 
 # Get all JS-related files which have been staged
-files=$(git diff --name-only --cached)
+files=$(git diff --name-only --cached --diff-filter=d)
 js_files=$(echo "$files" | grep -E '\.(js|jsx|ts|tsx)$')
 
 # Run eslint on the filtered list of files
@@ -24,7 +24,7 @@ ts_files=$(echo "$files" | grep -E '\.(ts|tsx)$')
 # Run tsc --noEmit on the filtered list of files
 # See https://github.com/microsoft/TypeScript/issues/27379 for why tsc-files is used.
 if [ -n "$ts_files" ]; then
-  ./node_modules/.bin/tsc-files --noEmit $ts_files
+  ./node_modules/.bin/tsc-files --noEmit parcel.d.ts $ts_files
   if [ $? -ne 0 ]; then
     echo "Tsc found type errors. Aborting commit."
     exit 1

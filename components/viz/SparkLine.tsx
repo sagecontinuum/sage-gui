@@ -15,7 +15,8 @@ import {
   BarElement,
   CategoryScale,
   Title,
-  Decimation
+  Decimation,
+  type ChartConfiguration
 } from 'chart.js'
 
 import 'chartjs-adapter-date-fns'
@@ -26,7 +27,7 @@ ChartJS.register(
 )
 
 
-const config = {
+const config: ChartConfiguration = {
   type: 'line',
   data: {
     labels: [],
@@ -60,6 +61,7 @@ const config = {
       legend: {
         display: false,
         labels: {
+          // @ts-ignore
           display: false
         }
       },
@@ -73,7 +75,7 @@ const config = {
 
 
 type Props = {
-  data: {timestamp: string, value: number | 'loading' }[]
+  data: {timestamp: string, value: number }[]
 }
 
 export default function SparkLine(props: Props) {
@@ -83,7 +85,7 @@ export default function SparkLine(props: Props) {
   const [chart, setChart] = useState(null)
 
   useEffect(() => {
-    if (data['value'] == 'loading') return
+    if (!data) return
     if (chart) {
       chart.destroy()
     }

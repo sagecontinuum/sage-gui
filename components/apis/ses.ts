@@ -42,11 +42,6 @@ function post(endpoint: string, data = '') {
 }
 
 
-const jobEventTypes = [
-  'sys.scheduler.status.job.suspended',
-  'sys.scheduler.status.job.removed'
-]
-
 const goalEventTypes = [
   'sys.scheduler.status.goal.submitted',
   'sys.scheduler.status.goal.updated',
@@ -215,7 +210,7 @@ async function listJobs(params?: ListJobsParams) : Promise<Job[]> {
 
   let data = user ?
     await get(`${url}/jobs/list`, options) :
-    await get(`${url}/jobs/list`, {})
+    await get(`${url}/jobs/list`)
 
   // hashed by job_id; convert to array list
   data = Object.values(data)
@@ -432,7 +427,7 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
 
 
 export async function getTemplate(
-  jobID: Job['job_id'],
+  jobID: number,
   type?: 'yaml' | 'json'
 ) : Promise<JobTemplate | string> {
   const yaml = await getYAML(`${url}/jobs/${jobID}/template`, options)
@@ -501,26 +496,4 @@ export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
   return Promise.all(ids.map(id => removeJob(id)))
 }
 
-
-
-type ByApp = {
-  [name: string]: PluginEvent[]
-}
-
-function _deprecatedComputeGoalMetrics(byApp: ByApp) {
-  let goalID
-  const metrics = Object.keys(byApp).reduce((acc, appName) => {
-    const appEvents = byApp[appName]
-
-    const meanTime = appEvents.reduce((acc, obj) => acc + obj.runtime, 0) / byApp[appName].length
-
-    if (!goalID) {
-      goalID = appEvents[0].value.goal_id
-    }
-
-    return {...acc, [appName]: meanTime}
-  }, {})
-
-  return {metrics, goalID}
-}
 

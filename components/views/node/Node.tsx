@@ -204,7 +204,7 @@ const sensorCols = [{
 }, {
   id: 'hw_model',
   label: 'Model',
-  format: (val, obj) =>
+  format: (val) =>
     <Link to={`/sensors/${val}`}>
       {val}
     </Link>
@@ -214,7 +214,7 @@ const sensorCols = [{
 }, {
   id: 'datasheet',
   label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
 }]
 
 
@@ -227,13 +227,13 @@ const computeCols = [{
 }, {
   id: 'manufacturer',
   label: 'Manufacturer'
-}, /*{
+}, /* {
   id: 'serial_no',
   label: 'Serial No.'
 }*/ {
   id: 'datasheet',
   label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
 }]
 
 
@@ -249,7 +249,7 @@ const resourceCols = [{
 }, {
   id: 'datasheet',
   label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank"><DescriptionIcon/></a> : '-'
+  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
 }]
 
 type Props = {
@@ -282,7 +282,7 @@ export default function NodeView(props: Props) {
   const [hover, setHover] = useState<string>('')
 
   // todo(nc): refactor into provider?
-  const [{data, rawData, error: tlError}, dispatch] = useReducer(
+  const [{data, rawData}, dispatch] = useReducer(
     dataReducer,
     initDataState,
   )
@@ -299,13 +299,13 @@ export default function NodeView(props: Props) {
   })
 
   // note: endtime is not currently an option
-  const [end, setEnd] = useState<Date>(endOfHour(new Date()))
+  const [end] = useState<Date>(endOfHour(new Date()))
 
 
   useEffect(() => {
     setLoading(true)
 
-    const p1 = BK.getNodeMeta({vsn})
+    const p1 = BK.getNodeMeta(vsn)
       .then((data: BK.NodeMeta) => {
         setNodeMeta(data)
 
@@ -364,17 +364,17 @@ export default function NodeView(props: Props) {
 
   const onOver = (id) => {
     const cls = `.hover-${id}`
-    const ele = document.querySelector(cls)
+    const ele: HTMLElement = document.querySelector(cls)
     if (!ele) return
 
     ele.style.outline = '3px solid #1a779c'
     setHover(cls)
   }
 
-  const onOut = (id) => {
+  const onOut = () => {
     if (!hover) return
 
-    const ele = document.querySelector(hover)
+    const ele: HTMLElement = document.querySelector(hover)
     ele.style.outline = 'none'
   }
 
@@ -674,22 +674,28 @@ export default function NodeView(props: Props) {
           <Card noPad>
             {hasStaticGPS(manifest) && status && vsn &&
               <Map
+                showUptime={false}
+                // @ts-ignore; todo: map does not actually need manifest info since showUptime == false
                 data={[{
                   vsn,
                   lat: manifest.gps_lat,
                   lng: manifest.gps_lon,
                   status,
-                  ...nodeMeta
+                  ...nodeMeta,
                 }]} />
             }
             {!hasStaticGPS(manifest) && liveGPS && status &&
-              <Map data={[{
-                vsn,
-                lat: liveGPS.lat,
-                lng: liveGPS.lon,
-                status,
-                ...nodeMeta
-              }]} />
+              <Map
+                showUptime={false}
+                // @ts-ignore; todo: map does not actually need manifest info since showUptime == false
+                data={[{
+                  vsn,
+                  lat: liveGPS.lat,
+                  lng: liveGPS.lon,
+                  status,
+                  ...nodeMeta
+                }]}
+              />
             }
             {!hasStaticGPS(manifest) && !liveGPS && !loading &&
               <div className="muted" style={{margin: 18}}>(Map not available)</div>

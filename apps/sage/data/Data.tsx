@@ -59,7 +59,7 @@ export const stdColor = (val) =>
   val == null ? colors.noValue : colors.blues[4]
 
 
-export const colorDensity = (val, obj) => {
+export const colorDensity = (val) => {
   if (val == null)
     return colors.noValue
 
@@ -110,7 +110,7 @@ export type Options = {
   versions: boolean
   window: `-${number}d`
   start: Date
-  end: Date
+  end?: Date
 }
 
 
@@ -129,9 +129,9 @@ export default function Data(props: Props) {
 
   const navigate = useNavigate()
 
-  const [nodeMetaByVSN, setNodeMetaByVSN] = useState<{[vsn: string]: BK.NodeMeta}>()
+  const [nodeMetaByVSN, setNodeMetaByVSN] = useState<BK.NodeMetaMap>()
   const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
-  const [ecr, setECR] = useState<ECR.App[]>()
+  const [ecr, setECR] = useState<ECR.AppDetails[]>()
 
   // infinite scroll
   const [page, setPage] = useState(1)

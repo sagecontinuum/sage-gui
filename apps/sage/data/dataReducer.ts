@@ -133,14 +133,13 @@ export function dataReducer(state, action) {
 
 // core logic for intersection of unions; could be optimized or simplified if needed
 const getFilteredVSNs = (nodeMetas: BK.NodeMeta[], data, filters: Filters) => {
-  const vsnsByField = {}
+  const vsnsByField: {[field: string]: string[]} = {}
   for (const [field, vals] of Object.entries(filters)) {
     for (const nodeMeta of nodeMetas) {
 
       let isEmpty
       if (vals.includes(NO_ASSIGNMENT) && nodeMeta[field] == '')
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        isEmpty = true
+        isEmpty = true  // eslint-disable-line @typescript-eslint/no-unused-vars
       else if (!vals.includes(nodeMeta[field]))
         continue
 
@@ -170,8 +169,6 @@ const sortVSNs = (vsns: string[]) => ([
   ...vsns.filter(vsn => vsn.charAt(0) == 'W').sort(),
   ...vsns.filter(vsn => vsn.charAt(0) == 'V').sort()
 ])
-
-
 
 
 

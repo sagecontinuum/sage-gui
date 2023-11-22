@@ -18,6 +18,12 @@ import Portal from '/components/PortalLink'
 import { subDays } from 'date-fns'
 
 
+type SparkLine = {timestamp: string, value: number}[]
+
+const getStartTime = () =>
+  subDays(new Date(), 1).toISOString()
+
+
 type Props = {
   items: {
     label: string
@@ -27,28 +33,22 @@ type Props = {
       name: string
       sensor?: string
     },
-    format?: (val: string) => string
+    format?: (val: number) => string
     linkParams?: (data: BH.Record) => string
   }[]
   showSparkline?: boolean
   className?: string
 }
 
-const getStartTime = () =>
-  subDays(new Date(), 1).toISOString()
-
-
-
 export default memo(function RecentDataTable(props: Props) {
   const {items, showSparkline = true, className} = props
 
   const {setLoading} = useProgress()
-  const [recentData, setRecentData] = useState(
+  const [recentData, setRecentData] = useState<{[label: string]: BH.Record}>(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )
-  const [sparkLines, setSparkLines] = useState(
-    items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
-  )
+  const [sparkLines, setSparkLines] = useState<{[label: string]: SparkLine}>({})
+
   const [error, setError] = useState(null)
 
   const start = showSparkline ? getStartTime() : null
@@ -71,7 +71,7 @@ export default memo(function RecentDataTable(props: Props) {
           }
 
           setRecentData(prev => ({...prev, [label]: d}))
-          setSparkLines(prev => ({...prev, [label]: data}))
+          setSparkLines(prev => ({...prev, [label]: data as SparkLine}))
         }).catch((err) => {
           setRecentData(prev => ({...prev, [label]: null}))
           setError(err)
@@ -182,7 +182,7 @@ export default memo(function RecentDataTable(props: Props) {
                       <span className="muted">loading...</span>
                     }
                     {(value && value != 'loading' && format)
-                      ? format(value) : (value != 'loading' && value)
+                      ? format(value as number) : (value != 'loading' && value)
                     }
                     {value == null &&
                       <span className="muted">Not available</span>

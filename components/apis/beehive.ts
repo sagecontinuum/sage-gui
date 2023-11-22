@@ -25,8 +25,8 @@ export const cameraOrientations = [
 
 
 export type Params = {
-  start?: string
-  end?: string
+  start?: string | Date
+  end?: string | Date
   tail?: number
   filter?: {
     [tag: string]: string
@@ -489,8 +489,8 @@ export async function getGPS(vsn: string) : Promise<GPS> {
 
 
 type PluginCountsProps = {
-  start?:  string,
-  end?: string,
+  start?: string | Date,
+  end?: string | Date,
   vsn?: string,
   plugin?: string
   tail?: number
