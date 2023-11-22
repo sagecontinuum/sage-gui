@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import {
   FormControlLabel, ToggleButtonGroup, ToggleButton, Button,
@@ -25,7 +25,7 @@ type Props = {
   density?: boolean
   hideQuickRanges?: boolean
   quickRanges?: string[]
-  onChange: (name: string, val?: string) => void
+  onChange: (name: string, val?: string | boolean) => void
   onDateChange?: (val: [Date, Date]) => void
 }
 
@@ -121,7 +121,7 @@ export default function DataOptions(props: Props) {
             }
             <ToggleButtonGroup
               value={opts.time}
-              onChange={(evt) => onChange('time', evt.target.value)}
+              onChange={(_evt, val) => onChange('time', val)}
               aria-label="change time (windows)"
               exclusive
             >
@@ -157,7 +157,7 @@ export default function DataOptions(props: Props) {
           <div>
             <ToggleButtonGroup
               value={opts.window}
-              onChange={(evt) => onChange('window', evt.target.value)}
+              onChange={(_evt, val) => onChange('window', val)}
               aria-label="change last x days"
               exclusive
             >

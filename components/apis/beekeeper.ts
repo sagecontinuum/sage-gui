@@ -58,11 +58,9 @@ export type NodeMeta = {
   lat?: number    // live latitude (if avail)
   left_camera: string
   location: string
-  modem_sim: string
   node_id: string
   node_type: 'WSN' | 'Blade'
   notes: string
-  modem: boolean
   nx_agent: boolean
   retire_date: string
   bottom_camera: string
@@ -117,17 +115,22 @@ export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
 
 
 // to be deprecated
-export async function getNodeMeta(args?: MetaParams) : Promise<NodeMetaMap | NodeMeta> {
-  const {vsn, project, focus, nodes} = args || {}
-
+export async function getNodeMeta(args?: FilteringArgs) : Promise<NodeMetaMap>
+export async function getNodeMeta(vsn?: VSN) : Promise<NodeMeta>
+export async function getNodeMeta(args?: VSN | FilteringArgs) : Promise<NodeMeta | NodeMetaMap> {
   let data = await get(`${url}/production`)
 
-  if (project)
-    data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
-  if (focus)
-    data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
-  if (nodes)
-    data = data.filter(o => nodes.includes(o.vsn))
+  const isSingleNode = typeof args === 'string'
+
+  if (!isSingleNode) {
+    const {project, focus, nodes} = args || {}
+    if (project)
+      data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
+    if (focus)
+      data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
+    if (nodes)
+      data = data.filter(o => nodes.includes(o.vsn))
+  }
 
   data = data.map(obj => {
     const {location: loc} = obj
@@ -141,9 +144,9 @@ export async function getNodeMeta(args?: MetaParams) : Promise<NodeMetaMap | Nod
     }
   })
 
-  const mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
+  const mapping: NodeMetaMap = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
 
-  return vsn ? (mapping[vsn] || null) : mapping
+  return isSingleNode ? (mapping[args] || null) : mapping
 }
 
 
@@ -400,7 +403,6 @@ export type State = SimpleManifest & {
   focus: NodeMeta['focus']
   location: NodeMeta['location']
   node_type: NodeMeta['node_type']
-  modem: NodeMeta['modem']
   nx_agent: NodeMeta['nx_agent']
   shield: NodeMeta['shield']
   build_date: string
@@ -420,10 +422,10 @@ export async function getState() : Promise<State[]> {
   let data = res[1]
 
   // join manifests to meta
-  data = (data as SimpleManifest[])
-    .filter(o => !!o.computes.length)
+  data = data
+    .filter(o => !!o.computes.length && o.vsn in nodeMeta)
     .map(obj => {
-      const meta = nodeMeta[obj.vsn] || {}
+      const meta = nodeMeta[obj.vsn]
       const {location: loc} = meta
 
       // allow "<city>, <state_abbrev>", "<city>, <country>",
@@ -440,7 +442,6 @@ export async function getState() : Promise<State[]> {
         city: loc,
         location: loc,  // same as city for now
         node_type: meta.node_type,
-        modem: meta.modem,
         nx_agent: meta.nx_agent,
         shield: meta.shield,
         build_date: meta.build_date,

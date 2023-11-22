@@ -12,7 +12,7 @@ type Props = {
 }
 
 export default function TimelineLabels(props: Props) {
-  const {formatter, data} = props
+  const {formatter} = props
 
   const [labels, setLabels] = useState(props.labels)
 
@@ -26,7 +26,7 @@ export default function TimelineLabels(props: Props) {
       <div className="labels">
         {labels.map(label =>
           <div key={label} className="label">
-            {formatter ? formatter(label, data) : label}
+            {formatter ? formatter(label) : label}
           </div>
         )}
       </div>

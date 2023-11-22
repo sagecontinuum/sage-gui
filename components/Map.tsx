@@ -4,10 +4,9 @@ import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import Map, {
-  Marker, Popup, Source, Layer,
-  FullscreenControl, NavigationControl
+  Marker, Popup, Source, Layer, FullscreenControl, NavigationControl,
 } from 'react-map-gl'
-import type { MapRef, MapProps } from 'react-map-gl'
+import type { MapRef, MapProps, SymbolLayer, MapboxEvent } from 'react-map-gl'
 
 import { ClickAwayListener } from '@mui/material'
 
@@ -51,7 +50,7 @@ const mapSettings = {
 const fitBoundsPadding = {top: 35, bottom: 35, left: 35, right: 35}
 
 
-const getBBox = (coordinates) => {
+const getBBox = (coordinates) : [[number, number], [number, number]] => {
   const lngs = coordinates.map(o => o.lng)
   const lats = coordinates.map(o => o.lat)
 
@@ -65,15 +64,15 @@ const getBBox = (coordinates) => {
 
 
 
-const getValidCoords = (data) =>
-  data.filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
+const getValidCoords = (data: Data[]) =>
+  data.filter(({lat, lng}) => lat && lng)
     .map(({lat, lng}) => ({lng, lat}))
 
 
 
-const getGeoSpec = (data) => {
-  const nodes = data
-    .filter(({lat, lng}) => lat && lng && lat != 'N/A' && lng != 'N/A')
+const getGeoSpec = (data: Data[]) => {
+  const features = data
+    .filter(({lat, lng}) => lat && lng)
     .map(obj => ({
       type: 'Feature',
       status: obj.status,
@@ -90,12 +89,12 @@ const getGeoSpec = (data) => {
 
   return {
     type: 'FeatureCollection',
-    features: nodes
+    features
   }
 }
 
 
-const layerStyle = {
+const layerStyle: SymbolLayer = {
   'id': 'marker-labels',
   'type': 'symbol',
   'source': 'geoSpec',
@@ -114,7 +113,7 @@ const layerStyle = {
 
 
 type PopupProps = {
-  data: BK.State
+  data: Data
   onClose: () => void
   showUptime: boolean
 }
@@ -124,7 +123,7 @@ function PopupInfo(props: PopupProps) {
 
   // tooltip info deconstruction
   const {
-    vsn,  project, focus, location, lng, lat, node_type, computes, elapsedTimes,
+    vsn, project, focus, location, lng, lat, node_type, computes, elapsedTimes,
     node_phase_v3
   } = data || {}
 
@@ -195,15 +194,16 @@ function PopupInfo(props: PopupProps) {
 }
 
 
-type Data = {
+type Data = BK.State & {
   vsn: BK.VSN,
   lng: number,
   lat: number,
   status?: string
-}[]
+  elapsedTimes: {[device: string]: number }
+}
 
 type Props = {
-  data: Data
+  data: Data[]
   updateID?: number
   showUptime?: boolean
 }
@@ -220,7 +220,7 @@ export default function MapGL(props: Props) {
   const [popup, setPopup] = useState(null)
 
   const [geoData, setGeoData] = useState(null)
-  const [markers, setMarkers] = useState([])
+  const [markers, setMarkers] = useState<Data[]>([])
 
   // keep track of primary keys
   const [lastID, setLastID] = useState(-1)
@@ -250,7 +250,7 @@ export default function MapGL(props: Props) {
   }, [data, updateID, lastID])
 
 
-  const handleClick = (evt, obj) => {
+  const handleClick = (evt: MapboxEvent<MouseEvent>, obj: Data) => {
     evt.originalEvent.stopPropagation()
     setPopup(obj)
   }

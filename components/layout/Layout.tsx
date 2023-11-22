@@ -77,8 +77,9 @@ export const FilterTitle = styled.h2`
 `
 
 
-// second incarnation of card design (WIP)
-export const CardViewStyle = createGlobalStyle`
+// second version of card design (WIP)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- to be fixed with react 18 upgrade?
+export const CardViewStyle: any = createGlobalStyle`
   body {
     background: rgb(231, 235, 240) !important;
   }
