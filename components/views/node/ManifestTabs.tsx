@@ -9,7 +9,7 @@ import SensorIcon from '@mui/icons-material/SensorsRounded'
 import ComputesIcon from '@mui/icons-material/DeveloperBoardRounded'
 import PeripheralsIcon from '@mui/icons-material/Cable'
 import HealthIcon from '@mui/icons-material/MonitorHeartOutlined'
-import CellTowerIcon from '@mui/icons-material/CellTower';
+import CellTowerIcon from '@mui/icons-material/CellTower'
 
 
 
