@@ -25,20 +25,15 @@ const prod = {
 
 const dev = {
   ...prod,
-  ecr: 'https://sage-ecr-dev.sagecontinuum.org/api',
-  jenkins: 'https://jenkins-dev.sagecontinuum.org'
+  es: 'https://es-dev.sagecontinuum.org/api/v1',
+  // ecr: 'https://sage-ecr-dev.sagecontinuum.org/api',
+  // jenkins: 'https://jenkins-dev.sagecontinuum.org'
 }
 
 
 const config = {
   ...(process.env.SAGE_UI_SERVICE_CONFIG == 'dev' ? dev : prod),
   disableMaps: false,
-
-  // todo: do we actually need a dictionary?
-  sensorDictionary: {
-    bme680: 'Ambient Environment',
-    bme280: 'System Environment'
-  }
 }
 
 

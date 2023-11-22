@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 type BreadcrumbProps = {
   path: string
-  onNavigate?: (evt: MouseEvent, path: string) => void
+  onNavigate?: (evt: React.MouseEvent<HTMLElement>, path: string) => void
 }
 
 export default function Breadcrumbs(props: BreadcrumbProps) {

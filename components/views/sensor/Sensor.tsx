@@ -2,22 +2,21 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import DownloadIcon from '@mui/icons-material/FileDownloadRounded'
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import Breadcrumbs from '/apps/sage/data-commons/BreadCrumbs'
-import { FileFormatDot } from '/apps/sage/data-commons/FileFormatDot'
+
 import { Card, CardViewStyle } from '/components/layout/Layout'
 
 import * as BK from '/components/apis/beekeeper'
 import { marked } from 'marked'
 
-import config from '/config'
-const { sensorDictionary } = config
 
-
+/* table version of related data (if needed)
+import DownloadIcon from '@mui/icons-material/FileDownloadRounded'
+import { FileFormatDot } from '/apps/sage/data-commons/FileFormatDot'
 
 const columns = [{
   id: 'name',
@@ -38,6 +37,7 @@ const columns = [{
   label: 'Format',
   format: (val) => <FileFormatDot format={val} />
 }]
+*/
 
 
 export default function Sensor() {
@@ -60,11 +60,37 @@ export default function Sensor() {
   }, [name, setLoading])
 
 
-  const {hardware, hw_model, description, datasheet} = data || {}
+  const {description, datasheet} = data || {}
 
   return (
     <Root>
       <CardViewStyle />
+
+      <Sidebar>
+        <h2>About</h2>
+
+        <h4>Organization</h4>
+        {data && data.organization.title}
+
+        <h4>Keywords</h4>
+        <Keywords>
+          {data && data.tags.map(tag =>
+            <Chip key={tag.name} label={tag.display_name} />
+          )}
+        </Keywords>
+
+        <h4>Last Updated</h4>
+        <div>{new Date(data?.metadata_modified).toLocaleString()}</div>
+
+        <h4>Created</h4>
+        <div>{new Date(data?.metadata_modified).toLocaleString()}</div>
+
+        <h4>Resource Type</h4>
+        <div>{data && formatter.resources(data.resources)}</div>
+
+        <h4>License</h4>
+        <div>{data?.license_title || 'N/A'}</div>
+      </Sidebar>
 
       <Main>
         <Details className="flex column gap">
@@ -108,6 +134,25 @@ const Root = styled.div`
     color: #666;
   }
 `
+
+const Sidebar = styled.div`
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 60px);
+  width: 300px;
+  padding: 0 10px;
+`
+const Keywords = styled.div`
+  div {
+    margin: 2px;
+  }
+`
+
+const Details = styled.div`
+  width: 100%;
+  margin-bottom: 50px;
+`
+
 
 const Main = styled.div`
   padding: 20px;
