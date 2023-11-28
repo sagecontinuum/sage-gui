@@ -23,9 +23,9 @@ npm start
 
 > You can start a dev server for a different app with `npm start -w <app>`.  For example, `npm start -w project`
 
-#### Linting
+#### Pre-commit hook
 
-Before committing code, please configure pre-commit linting:
+Before committing code, please configure pre-commit linting and type checking:
 
 ```
 git config --local core.hooksPath .githooks
