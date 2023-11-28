@@ -317,18 +317,15 @@ const Root = styled.div`
     opacity: .65;
   }
 
-  ${settings.project != 'SAGE' &&
-    `
-    .marker-degraded {
-      background: hsl(41, 83%, 35%);
-    }
+  .marker-degraded {
+    background: hsl(41, 83%, 35%);
+  }
 
-    .marker-not-reporting {
-      background: #d72020;
-      border: 1px solid #992727;
-      opacity: .65;
-    }
-    `}
+  .marker-not-reporting {
+    background: #d72020;
+    border: 1px solid #992727;
+    opacity: .65;
+  }
 
   .mapboxgl-popup-content {
     width: fit-content;

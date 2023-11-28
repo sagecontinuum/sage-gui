@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
@@ -203,7 +202,7 @@ export function Sensors(props: SensorsProps) {
         return (
           <span key={i}>
             <Tooltip placement="top" title={name == hardware ? name : `${hardware} | ${name}`}>
-              <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
+              <Link to={`/sensors/${hw_model}`}>
                 {hw_model}
               </Link>
             </Tooltip>
@@ -215,33 +214,6 @@ export function Sensors(props: SensorsProps) {
     </SensorList>
   )
 }
-
-
-export function SensorsDeprecated(props: SensorsProps) {
-  const {data} = props
-
-  const [expanded, setExpanded] = useState(false)
-
-  if (!data) return <></>
-
-  return (
-    <SensorList>
-      {data.map((sensor, i) => {
-        const {hw_model, name} = sensor
-        return (
-          <li key={i}>
-            <Link to={`https://portal.sagecontinuum.org/sensors/${hw_model}`} target="_blank">
-              {hw_model}
-            </Link>
-            {' '}{name != hw_model.toLowerCase() && name}
-          </li>
-        )
-      })
-      }
-    </SensorList>
-  )
-}
-
 
 const SensorList = styled.ul`
   padding: 0;
@@ -331,10 +303,9 @@ export function rightSensors(v, obj) {
 
 export function additionalSensors(v, obj) {
   const {sensors} = obj
-  const sens = sensors.filter(({name, scope}) =>
+  const sens = sensors.filter(({name}) =>
     !name.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
   )
-
 
   return <SensorList>
     {sens.map(({name, hw_model, hardware}, i) =>

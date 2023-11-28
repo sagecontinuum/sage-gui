@@ -89,7 +89,7 @@ export default function App() {
           <Container>
             <ProgressProvider>
               <Routes>
-                <Route path="/" element={<Navigate to={`nodes?status="reporting"`} replace />} />
+                <Route path="/" element={<Navigate to="nodes" replace />} />
 
                 <Route path='/' element={<MetaRoute />}>
                   <Route path="/" element={<NodeTabs />}>

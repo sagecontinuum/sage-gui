@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import styled from 'styled-components'
 
 import SageLogo from './SageLogo'
@@ -14,8 +13,8 @@ import SignInButton from './SignInButton'
 
 
 type Props = {
-  menu?: ReactNode
-  logo?: ReactNode
+  menu?: JSX.Element
+  logo?: JSX.Element
   hasSignIn?: boolean
   hasDocsLink?: boolean
   isAdmin?: boolean

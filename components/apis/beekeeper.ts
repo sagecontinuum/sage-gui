@@ -83,7 +83,8 @@ export type OntologyObj = {
   description: string
   ontology: string // xxy.yyy.zzz
   source: `https://${string}`
-  unit: string
+  unit: string  // todo(nc): change to "type"
+  units: string
 }
 
 

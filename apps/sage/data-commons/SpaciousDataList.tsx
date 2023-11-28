@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { formatter } from './DataProductSearch'
 import { Item, Title } from '/components/layout/Layout'
@@ -8,6 +7,7 @@ import highlightText from '/components/utils/text'
 
 type Props = {
   rows: {[key: string]: any}
+  query: string
 }
 
 export default function SpaciousLayout(props: Props) {
@@ -49,6 +49,7 @@ function Row(props) {
 
 
   return (
+    // @ts-ignore; DataProductSearch is actually deprecated
     <Item className="flex column" to={`data/product/${name}`}>
       <Title>{formatter.title(title, data)}</Title>
 

@@ -37,7 +37,6 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
-// import lorawan components
 import lorawandeviceCols from './lorawandevice/columns'
 
 // todo(nc): promote/refactor into component lib
@@ -487,7 +486,7 @@ export default function NodeView(props: Props) {
                 />
               </TableContainer>
             }
-            
+
             {tab == 'lorawandevices' && manifest &&
               <TableContainer>
                 <Table

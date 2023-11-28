@@ -1,5 +1,5 @@
 
-import { useState, useRef, ElementType } from 'react'
+import { useState, useRef } from 'react'
 import { NavLink, useMatch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -138,7 +138,7 @@ type ItemProps = {
   label: string | JSX.Element
   to?: string
   icon?: JSX.Element
-  onClick?: MouseEvent
+  onClick?: (evt: React.MouseEvent) => void
   component?: string | JSX.Element
   href?: string
   target?: string
@@ -156,6 +156,7 @@ export function Item(props: ItemProps) {
   }
 
   return (
+    // @ts-ignore; custom component props mismatch; todo
     <MenuItem
       component={props.component || NavLink}
       className={`flex ${isActive ? 'active' : ''}`}

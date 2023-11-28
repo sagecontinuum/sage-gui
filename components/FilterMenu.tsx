@@ -1,3 +1,5 @@
+// @ts-nocheck -- todo(nc): the string vs "Option" types for onChange _seem_ to
+// be an issue with MUI; fix if needed
 import { useEffect, useState, cloneElement } from 'react'
 import PropTypes from 'prop-types'
 import { useTheme, styled } from '@mui/material/styles'
@@ -44,6 +46,7 @@ const StyledAutocompletePopper = styled('div')(({ theme }) => ({
 }))
 
 function PopperComponent(props) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { disablePortal, anchorEl, open, ...other } = props
   return <StyledAutocompletePopper {...other} />
 }
@@ -66,9 +69,9 @@ const StyledPopper = styled(Popper)(({ theme }) => ({
   color: theme.palette.mode === 'light' ? '#24292e' : '#c9d1d9',
   backgroundColor: theme.palette.mode === 'light' ? '#fff' : '#1c2128',
   '& .title': {
-     backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1c2128',
-     color: theme.palette.mode === 'light' ? '#24292e' : '#c9d1d9',
-     padding: 10
+    backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : '#1c2128',
+    color: theme.palette.mode === 'light' ? '#24292e' : '#c9d1d9',
+    padding: 10
   }
 }))
 
@@ -109,7 +112,7 @@ type Option = {
 
 type Props = {
   options: Option[]
-  value: Option | Option[]
+  value: string[] | Option[]
   ButtonComponent?: JSX.Element
   label?: string
   multiple?: boolean    // default: true
@@ -224,7 +227,8 @@ export default function FilterMenu(props: Props) {
                       {option.label || option.id}
                     </Box>
                   </li>
-                )}}
+                )
+              }}
               options={
                 multiple && noSelectedSort == false ?
                   [...options].sort((a, b) => {

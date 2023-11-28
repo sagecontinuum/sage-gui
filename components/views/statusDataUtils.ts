@@ -60,7 +60,7 @@ function getElapsedTimes(metrics: BH.MetricsByHost) {
 }
 
 
-function getNxMetric<T>(
+function getNxMetric<R extends string | number>(
   metrics: BH.MetricsByHost,
   serial: string,
   metricName: string
@@ -74,7 +74,7 @@ function getNxMetric<T>(
   if (!m) return
 
   const val = m.at(-1).value
-  return val as T
+  return val as R
 }
 
 
@@ -143,19 +143,30 @@ export function countNodeSanity(data) {
 
 
 
-const determineStatus = (computes: BK.Compute[], elapsedTimes: {[host: string]: number}) => {
+const determineStatus = (nodeObj: BK.State, elapsedTimes: {[host: string]: number}) => {
+  const {computes, node_phase_v3: phase} = nodeObj
+
+  if (phase == 'Maintenance') {
+    return 'degraded'
+  }
+
   const notReporting = computes.some(({serial_no}) => {
     const host = BK.findHostWithSerial(Object.keys(elapsedTimes), serial_no)
     return !(host in elapsedTimes) || elapsedTimes[host] > ELAPSED_FAIL_THRES
   })
 
-  return notReporting ? 'not reporting' : 'reporting'
+  if (phase == 'Deployed' && notReporting)
+    return 'not reporting'
+  else if (phase == 'Deployed' && !notReporting)
+    return 'reporting'
+  else
+    return 'pending'
 }
 
 
 // handy util function for mocking up the factory view
-const getFakeIP = (id) =>
-  `10.11.1${parseInt(id, 16) % 3 + 1}.${Math.floor(Math.random() * 255) + 1}`
+// const getFakeIP = (id) =>
+//  `10.11.1${parseInt(id, 16) % 3 + 1}.${Math.floor(Math.random() * 255) + 1}`
 
 
 
@@ -182,9 +193,9 @@ export function mergeMetrics(
     const nxSerial = computes.find(o => o.name == 'nxcore')?.serial_no
 
     const temp = getNxMetric<number>(metrics, nxSerial, 'iio.in_temp_input')
-    const liveLat = getNxMetric(metrics, nxSerial, 'sys.gps.lat')
-    const liveLon = getNxMetric(metrics, nxSerial, 'sys.gps.lon')
-    const alt = getNxMetric(metrics, nxSerial, 'sys.gps.alt')
+    const liveLat = getNxMetric<number>(metrics, nxSerial, 'sys.gps.lat')
+    const liveLon = getNxMetric<number>(metrics, nxSerial, 'sys.gps.lon')
+    const alt = getNxMetric<number>(metrics, nxSerial, 'sys.gps.alt')
     const ip = Object.values(getMetricsByHost(metrics, computes, 'sys.net.ip'))[0]
 
     const {gps_lat, gps_lon} = nodeObj
@@ -192,7 +203,7 @@ export function mergeMetrics(
     return {
       ...nodeObj,
       temp: temp ? temp / 1000 : null,
-      status: determineStatus(computes, elapsedTimes),
+      status: determineStatus(nodeObj, elapsedTimes),
       elapsedTimes,
       hasStaticGPS: !!gps_lat && !!gps_lon,
       hasLiveGPS: !!liveLat && !!liveLon,
@@ -219,8 +230,7 @@ export function mergeMetrics(
       health: {
         sanity: sanity ? countNodeSanity(sanity[vsn]) : {},
         health: health ? countNodeHealth(health[vsn]) : {}
-      },
-      sensor: nodeObj.sensors.map(o => o.hw_model)
+      }
     }
   })
 

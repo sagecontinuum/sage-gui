@@ -59,7 +59,7 @@ const columns = [
   }, {
     id: 'name',
     label: 'Name',
-    format: (val, obj) => val
+    format: (val) => val
   }, {
     id: 'organization',
     label: 'Organization',
@@ -69,7 +69,7 @@ const columns = [
     label: 'Type',
     format: formatter.resources
   },
-  /*{
+  /* {
     id: 'tags',
     label: 'Tags',
     format: formatter.tags
@@ -99,7 +99,7 @@ export default function Search() {
   const [facets, setFacets] = useState(null)
   const [error, setError] = useState(null)
 
-  const [sort, setSort] = useState('most_relevant')
+  const [sort] = useState('most_relevant')
 
   const [filterState, setFilterState] = useState<Data.FilterState>(initFilterState)
   const [viewStyle, setViewStyle] = useState<'compact' | 'spacious'>('spacious')
@@ -114,9 +114,7 @@ export default function Search() {
         setRows(results)
         setFacets(search_facets)
       })
-      .catch(error => {
-        // setError(error)
-      })
+      .catch(error => setError(error))
       .finally(() => setLoading(false))
 
   }, [setLoading, query, filterState])
@@ -160,10 +158,11 @@ export default function Search() {
                 title={title.replace('res_', '').replace(/\b[a-z](?=[a-z]{1})/g, c => c.toUpperCase())}
                 checked={filterState[facet]}
                 onCheck={(evt, val) => handleFilter(evt, facet, val)}
+                // @ts-ignore; DataProductSearch is actually deprecated
                 type="text"
                 data={items}
               />
-            );
+            )
           })}
         </Sidebar>
 
@@ -187,7 +186,9 @@ export default function Search() {
                     labelId="namespace-label"
                     id="namespace"
                     value={sort}
-                    onChange={evt => alert('Sorting is not implemented yet.  Check back later.') /*setSort(evt.target.value)*/}
+                    onChange={() =>
+                      alert('Sorting is not implemented yet.  Check back later.')
+                    }
                     variant="outlined"
                     size="small"
                     style={{marginTop: '1px'}}
@@ -241,7 +242,7 @@ export default function Search() {
       </div>
 
     </Root>
-  );
+  )
 }
 
 const Root = styled.div`

@@ -6,6 +6,8 @@ import { useSearchParams } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Tooltip from '@mui/material/Tooltip'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 
 import { uniqBy } from 'lodash'
@@ -29,6 +31,7 @@ import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
 import settings from '/components/settings'
+import Checkbox from '/components/input/Checkbox'
 
 
 const TIME_OUT = 5000
@@ -56,7 +59,7 @@ function getProjectNodes() {
       if (nodes)
         data = data.filter(o => settings.nodes.includes(o.vsn))
 
-      if (project == 'Sage') {
+      if (project == 'SAGE') {
         data = data.filter(obj =>
           ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.node_phase_v3)
         )
@@ -78,7 +81,7 @@ export default function Nodes() {
   const phase = params.get('phase') as BK.PhaseTabs
 
   const query = params.get('query') || ''
-  const status = params.get('status')
+  const show_all = params.get('show_all') ? true : false
   const focus = params.get('focus')
   const city = params.get('city')
   const state = params.get('state')
@@ -86,13 +89,12 @@ export default function Nodes() {
 
   // all data and current state of filtered data
   const { setLoading } = useProgress()
-  const [data, setData] = useState<BK.State[]>(null)
+  const [data, setData] = useState<ReturnType<typeof mergeMetrics>>(null)
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState<BK.State[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
 
   // filter options
-  const [statuses, setStatuses] = useState<Option[]>()
   const [focuses, setFocuses] = useState<Option[]>()
   const [cities, setCities] = useState<Option[]>()
   const [states, setStates] = useState<Option[]>()
@@ -129,12 +131,9 @@ export default function Nodes() {
     }
 
     setLoading(true)
-    const proms = [getProjectNodes(), BH.getNodeData()]
-    Promise.all(proms)
+    Promise.all([getProjectNodes(), BH.getNodeData()])
       .then(([state, metrics]) => {
         if (done) return
-
-        setData(state)
 
         const allData = mergeMetrics(state, metrics, null, null)
         setData(allData)
@@ -157,7 +156,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, status, focus, city, state, sensor, nodeType, phase])
+  }, [query, focus, city, state, sensor, nodeType, phase, show_all])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -168,19 +167,22 @@ export default function Nodes() {
 
 
   // filter data (todo: this can probably be done more efficiently)
-  const updateAll = (d, phase) => {
+  const updateAll = (filteredData, phase) => {
     const filterState = getFilterState(params)
     setFilterState(filterState)
 
-    let filteredData = d
     if (phase)
-      filteredData = d.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
+      filteredData = filteredData.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
+
+    if (!show_all)
+      filteredData = filteredData.filter(obj => obj.status == 'reporting')
+
 
     filteredData = queryData(filteredData, query)
     filteredData = filterData(filteredData, filterState)
+
     setFiltered(filteredData)
 
-    setStatuses(getOptions(data, 'status'))
     setFocuses(getOptions(data, 'focus'))
     setCities(getOptions(data, 'city'))
     setStates(getOptions(data, 'state'))
@@ -199,7 +201,7 @@ export default function Nodes() {
   }
 
 
-  const handleFilterChange = (field: string, vals: ({id: string, label: string} | string)[]) => {
+  const handleFilterChange = (field: string, vals: Option[]) => {
     // MUI seems to result in vals may be string or option; todo(nc): address this?
     const newStr = vals.map(item =>
       `"${typeof item == 'string' ? item : item.id}"`
@@ -211,6 +213,14 @@ export default function Nodes() {
     setParams(params, {replace: true})
   }
 
+
+  const handleShowAll = (evt) => {
+    const checked = evt.target.checked
+
+    if (checked) params.set('show_all', 'true')
+    else params.delete('show_all')
+    setParams(params, {replace: true})
+  }
 
   const handleRemoveFilters = () => {
     setNodeType('all')
@@ -270,26 +280,17 @@ export default function Nodes() {
             enableSorting
             sort='-vsn'
             onSearch={handleQuery}
-            onColumnMenuChange={() => {}}
+            onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
             emptyNotice="No nodes found"
             middleComponent={
               <FilterControls className="flex items-center">
-                {statuses ?
-                  <FilterMenu
-                    label="Status"
-                    options={statuses}
-                    value={filterState.status}
-                    onChange={vals => handleFilterChange('status', vals)}
-                    noSelectedSort
-                  /> : <></>
-                }
                 {focuses &&
                   <FilterMenu
                     label="Focus"
                     options={focuses}
                     value={filterState.focus}
-                    onChange={vals => handleFilterChange('focus', vals)}
+                    onChange={vals => handleFilterChange('focus', vals as Option[])}
                     noSelectedSort
                   />
                 }
@@ -298,7 +299,7 @@ export default function Nodes() {
                     label="City"
                     options={cities}
                     value={filterState.city}
-                    onChange={vals => handleFilterChange('city', vals)}
+                    onChange={vals => handleFilterChange('city', vals as Option[])}
                   />
                 }
                 {states &&
@@ -306,7 +307,7 @@ export default function Nodes() {
                     label="State"
                     options={states}
                     value={filterState.state}
-                    onChange={vals => handleFilterChange('state', vals)}
+                    onChange={vals => handleFilterChange('state', vals as Option[])}
                   />
                 }
                 {sensors &&
@@ -314,13 +315,29 @@ export default function Nodes() {
                     label="Sensors"
                     options={sensors}
                     value={filterState.sensor}
-                    onChange={vals => handleFilterChange('sensor', vals)}
+                    onChange={vals => handleFilterChange('sensor', vals as Option[])}
                   />
                 }
-
+                <Tooltip
+                  sx={{mx: 1}}
+                  placement="top"
+                  title={
+                    <>Show nodes which are in maintenance, pending deployment, or not reporting.</>
+                  }
+                >
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={show_all}
+                        onChange={(evt) => handleShowAll(evt)}
+                      />
+                    }
+                    label="Show all"
+                  />
+                </Tooltip>
                 {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
                   <>
-                    <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
+                    <VertDivider />
                     <Button variant="contained"
                       color="primary"
                       size="small"
@@ -345,6 +362,10 @@ export default function Nodes() {
     </Root>
   )
 }
+
+
+const VertDivider = () =>
+  <Divider orientation="vertical" flexItem style={{margin: '5px 15px 5px 15px' }} />
 
 
 const Root = styled.div`

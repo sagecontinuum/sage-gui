@@ -38,7 +38,7 @@ export type Params = {
 export type Meta = {
   node: string
   host?: string
-  vsn?: string
+  vsn?: BK.VSN
   sensor?: string
   plugin?: string
   task?: string
