@@ -456,9 +456,9 @@ export default function NodeView(props: Props) {
           <Card noPad style={{marginBotton: 0}}>
             <ManifestTabs
               counts={{
-                Sensors: manifest?.sensors.length,
-                Computes: manifest?.computes.length,
-                Peripherals: manifest?.resources.length,
+                'Sensors': manifest?.sensors.length,
+                'Computes': manifest?.computes.length,
+                'Peripherals': manifest?.resources.length,
                 'LoRaWAN Devices': manifest?.lorawanconnections.length
               }}
               admin={admin}

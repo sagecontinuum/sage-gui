@@ -16,10 +16,12 @@ import CellTowerIcon from '@mui/icons-material/CellTower'
 const label = (
   icon: JSX.Element,
   label: string,
-  counts?: {[tab: string]: number}
+  counts: {[tab: string]: number} = {}
 ) =>
   <div className="flex items-center">
-    {icon}&nbsp;{label} {counts && label in counts && `(${counts[label]})`}
+    {icon}&nbsp;{label}&nbsp;
+    {label in counts && counts[label] === undefined && '(…)'}
+    {counts[label] !== undefined && `(${counts[label]})`}
   </div>
 
 
