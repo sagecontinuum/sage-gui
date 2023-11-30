@@ -213,7 +213,7 @@ async function listJobs(params?: ListJobsParams) : Promise<Job[]> {
 
   let data = user ?
     await get(`${url}/jobs/list`, options) :
-    await get(`${url}/jobs/list`)
+    await get(`${url}/jobs/list`, {headers: {}})
 
   // hashed by job_id; convert to array list
   data = Object.values(data)
