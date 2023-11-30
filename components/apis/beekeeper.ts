@@ -159,7 +159,7 @@ export async function getFactory(vsn?: VSN) {
 }
 
 
-type ComputeHardware = {
+export type ComputeHardware = {
   hardware: string      // rpi-4gb
   hw_model: string      // RPI4B
   hw_version: string    // rpi4b-4g

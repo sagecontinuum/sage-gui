@@ -3,9 +3,10 @@ import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
-import { Alert, Button, Tooltip } from '@mui/material'
+import { Alert, Button, Tooltip, IconButton } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
+import InfoIcon from '@mui/icons-material/InfoOutlined'
 import Grid from '@mui/material/Unstable_Grid2'
 
 import wsnode from 'url:/assets/wsn-closed.png'
@@ -26,7 +27,6 @@ import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import Table from '/components/table/Table'
-import Portal from '/components/PortalLink'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
@@ -46,8 +46,10 @@ import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
+import { startCase } from 'lodash'
 
 import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
+import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
@@ -55,6 +57,38 @@ const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 const TL_LABEL_WIDTH = 175 // default timeline label width
 const TAIL_DAYS = '-7d'
 
+
+const labelDict = {
+  gps: 'GPS',
+  bme280: 'T·P·H·G',
+  bme680: 'T·P·H',
+  nxcore: 'NX',
+  rpi: 'RPi',
+  sbcore: 'Sage Blade'
+}
+
+
+const getConfigTable = (o) => {
+  const {description, datasheet, ...rest} = o
+  return (
+    <div style={{width: '300px'}}>
+      <MetaTable
+        title="Configuration Details"
+        rows={Object.keys(rest).map(k => ({id: k, label: k}))}
+        data={rest}
+      />
+    </div>
+  )
+}
+
+const sanitizeLabel = (obj: {name: string}) => {
+  const {name} = obj
+  return (
+    <>
+      {name in labelDict ? labelDict[name] : startCase(name.replace(/-|_/, ' '))}
+    </>
+  )
+}
 
 
 const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
@@ -93,26 +127,63 @@ const metaRows1 = [{
 }]
 
 
+type NodeDetailsProps = {
+  data: BK.SensorHardware[] | BK.ComputeHardware[]
+  linkPath?: '/sensors'  // just sensors for now
+}
+
+function NodeDetails(props: NodeDetailsProps) {
+  const {data, linkPath} = props
+
+  const [details, setDetails] = useState<typeof data[0]>(null)
+
+  const handleCloseDetails = () => setDetails(null)
+
+  return (
+    <Grid container>
+      {data.map((o, i) =>
+        <Grid xs={3} key={i}>
+          <NodeInfo>
+            <small className="muted font-bold">
+              {sanitizeLabel(o)}
+
+              <Tooltip title="Show config">
+                <IconButton onClick={() => setDetails(o)} size="small">
+                  <InfoIcon />
+                </IconButton>
+              </Tooltip>
+            </small>
+            <div>
+              {linkPath ?
+                <Link to={`${linkPath}/${o.hw_model}`}>{o.hw_model}</Link> :
+                o.hw_model
+              }
+            </div>
+          </NodeInfo>
+        </Grid>
+      )}
+
+      {details &&
+        <ConfirmationDialog
+          title={details.hw_model}
+          content={getConfigTable(details)}
+          onClose={handleCloseDetails}
+          onConfirm={handleCloseDetails}
+          maxWidth="xl"
+        />
+      }
+    </Grid>
+  )
+
+}
+
 const sensorOverview = [{
   id: 'cameras',
   format: (val, obj) => {
     const cameras = obj.sensors
       .filter(o => o.name.match(/camera/gi))
 
-    return (
-      <Grid container>
-        {cameras.map((o, i) =>
-          <Grid xs={3} key={i}>
-            <small className="muted font-bold">
-              {o.name.replace(/-|_/, ' ')}
-            </small>
-            <div>
-              <Portal to={`/sensors/${o.hw_model}`}>{o.hw_model}</Portal>
-            </div>
-          </Grid>
-        )}
-      </Grid>
-    )
+    return <NodeDetails data={cameras} linkPath="/sensors" />
   }
 }, {
   id: 'sensors',
@@ -121,20 +192,7 @@ const sensorOverview = [{
     const sensors = obj.sensors
       .filter(o => !o.name.match(/camera/gi))
 
-    return (
-      <Grid container>
-        {sensors.map((o, i) =>
-          <Grid xs={3} key={i}>
-            <small className="muted font-bold">
-              {o.name.replace(/-|_/, ' ')}
-            </small>
-            <div>
-              <Portal to={`/sensors/${o.hw_model}`}>{o.hw_model}</Portal>
-            </div>
-          </Grid>
-        )}
-      </Grid>
-    )
+    return <NodeDetails data={sensors} linkPath="/sensors" />
   }
 }]
 
@@ -143,20 +201,7 @@ const computeOverview = [{
   format: (val, obj) => {
     const {computes} = obj
 
-    return (
-      <Grid container>
-        {computes.map((o, i) =>
-          <Grid xs={3} key={i}>
-            <small className="muted font-bold">
-              {o.name.split(/-|_/)[0]}
-            </small>
-            <div>
-              {o.hw_model}
-            </div>
-          </Grid>
-        )}
-      </Grid>
-    )
+    return <NodeDetails data={computes} />
   },
 }]
 
@@ -170,13 +215,8 @@ const hardwareMeta = [{
     return (
       <Grid container>
         <Grid xs={3}>
-          <small className="muted font-bold">Shield</small>
+          <small className="muted font-bold">Stevenson Shield</small>
           <div>{computes.some(o => o.zone == 'shield') ? 'yes' : 'no'}</div>
-        </Grid>
-
-        <Grid xs={3}>
-          <small className="muted font-bold">NX Agent</small>
-          <div>{computes.some(o => o.name == 'nxagent') ? <Link to="?tab=computes" replace>yes</Link> : 'no'}</div>
         </Grid>
 
         <Grid xs={3}>
@@ -566,14 +606,15 @@ export default function NodeView(props: Props) {
                         data={manifest}
                       />
                     </div>
-
-                    <div className="summary-table">
-                      <MetaTable
-                        title="Hardware"
-                        rows={hardwareMeta}
-                        data={manifest}
-                      />
-                    </div>
+                    {node_type == 'WSN' &&
+                      <div className="summary-table">
+                        <MetaTable
+                          title="Hardware"
+                          rows={hardwareMeta}
+                          data={manifest}
+                        />
+                      </div>
+                    }
                   </>
                 }
               </Card>
@@ -822,3 +863,23 @@ const TableContainer = styled.div`
   padding: 0 1rem 1rem 1rem;
 `
 
+
+const NodeInfo = styled.div`
+  position: relative;
+
+  & .MuiIconButton-root  {
+    visibility: hidden;
+    position: absolute;
+    top: -2px;
+    margin-left: 5px;
+    .MuiSvgIcon-root { font-size: 1rem;}
+  }
+
+  &:hover .MuiIconButton-root  {
+    visibility: visible;
+  }
+
+  &:hover .MuiIconButton-root:hover {
+    color: #222;
+  }
+`

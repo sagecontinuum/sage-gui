@@ -61,7 +61,7 @@ const columns = [{
   label: 'Commission Date',
 }, {
   id: 'shield',
-  label: 'Has Shield',
+  label: 'Stevenson Shield',
   format: (val) => val ? <CheckIcon className="success" /> : 'no',
   hide: true,
 }, /* {
