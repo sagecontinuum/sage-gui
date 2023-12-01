@@ -311,10 +311,14 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
   const data = await getData(params)
   const byNode: {[vsn: string]: Record[]} = groupBy(data, 'meta.vsn')
 
+  // group records on the names of counts. i.e.,
+  // {sanity_test_fail_total: [...], sanity_test_pass_total: [...], sanity_test_total: [...]}
   const byNodeByName: ByNodeByName = {}
   mapValues(byNode, (objs, id) => byNodeByName[id] = groupBy(objs, 'name'))
 
-  Object.entries(byNodeByName).forEach(([id, obj]) => {
+  // summarize the tests by node
+  const summary: ByMetric = {}
+  Object.entries(byNodeByName).forEach(([vsn, obj]) => {
     const failObjs = obj['sanity_test_fail_total']
     const totalObjs = obj['sanity_test_total']
 
@@ -327,7 +331,7 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
       totalCount: totalObjs[i].value
     })).filter(o => o.totalCount !== 0)
 
-    byNode[id] = mergedObjs
+    summary[vsn] = mergedObjs
   })
 
   return byNode
