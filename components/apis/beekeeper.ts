@@ -3,11 +3,10 @@ const url = config.beekeeper
 const API_URL = `${url}/api`
 
 import settings from '/components/settings'
-const DEFAULT_PROJECT = settings.project
+const PROJECT = settings.project
 
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
-import { uniqBy } from 'lodash'
 import USStates from './us-states'
 
 export type VSN = `W${string}` | `V${string}`
@@ -195,7 +194,7 @@ export type SensorHardware = {
 }
 
 
-export type Sensor = {
+type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
   scope: 'global' | 'nxcore' | 'rpi-shield'
   labels: string[],
@@ -264,12 +263,12 @@ export type FlattenedManifest = Omit<Manifest, 'sensors'> & {
 }
 
 
-export type SimpleManifest = Manifest & {
+export type SimpleManifest = Omit<Manifest, 'computes' | 'sensors'> & {
   computes: {
     name: Compute['name']
     serial_no: Compute['serial_no']
     zone: Compute['zone']
-  }
+  }[]
   sensors: {
     name: Sensor['name']
     hardware: SensorHardware['hardware']
@@ -362,49 +361,30 @@ export async function getSimpleManifests() : Promise<SimpleManifest[]> {
 
 
 
-export type SensorTableRow = SensorHardware & {
+export type SensorListRow = SensorHardware & {
   vsns: VSN[]
-  nodeCount: number
 }
 
 
-export async function getSensors(args?: FilteringArgs, asTable = true) : Promise<SensorHardware[] | SensorTableRow[]> {
-  const project = (args || {}).project || DEFAULT_PROJECT
+export async function getSensors() : Promise<SensorListRow[]> {
+  const project = PROJECT
 
-  // todo(nc): update when prod sheet is no longer used; optimize: add api method
-  const p1 = getNodeMeta(args)
-  const p2 = get(`${config.auth}/manifests/${project ? `?project=${project}` : ''}`)
-  const [nodeMetas, data] = await Promise.all([p1, p2])
+  const params = [
+    project ? `project=${project}` : '',
+    project.toLowerCase() == 'sage' ?
+      `phase=${['Deployed', 'Awaiting Deployment', 'Maintenance'].join(',')}` : ''
+  ]
 
-  const vsns = Object.values(nodeMetas).map(o => o.vsn)
-  const manifests = data.filter(o => vsns.includes(o.vsn))
-
-  const sensors = manifests.reduce((acc, obj) => [...acc, ...obj.sensors], [])
-  const hardwares = sensors.reduce((acc, obj) => [...acc, obj.hardware], [])
-  const sensorHardwares = uniqBy<SensorHardware>(hardwares, 'hardware')
-
-  const sensorTableRows: SensorTableRow[] = sensorHardwares.map(obj => {
-    const {hw_model} = obj
-
-    const nodes = manifests
-      .filter(o => o.sensors.map(o => o.hardware.hw_model).includes(hw_model))
-    const vsns = nodes.map(o => o.vsn)
-
-    return {
-      ...obj,
-      vsns,
-      nodeCount: vsns.length
-    }
-  })
-
-  return asTable ? sensorTableRows : sensorHardwares
+  const data = await get(`${config.auth}/sensors/?${params.join('&')}`)
+  return data
 }
 
 
-export async function getSensor(hw_model: string) : Promise<SensorTableRow> {
-  // todo(optimize): add api method
+// Note: the API provided to fetch a sensor is /sensors/<hardware>,
+// while the front-end uses /sensors/<hw_model>
+export async function getSensor(hw_model: string) : Promise<SensorListRow> {
   const data = await getSensors()
-  return data.find(obj => obj.hw_model == hw_model) as SensorTableRow
+  return data.find(obj => obj.hw_model == hw_model)
 }
 
 
@@ -471,9 +451,11 @@ export async function getState() : Promise<State[]> {
         status: null,
         hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
         lat: obj.gps_lat,
-        lng: obj.gps_lon
+        lng: obj.gps_lon,
+        sensor: obj.sensors.map(o => o.hw_model)
       }
     })
+
 
   return data as State[]
 }

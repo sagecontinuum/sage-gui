@@ -52,10 +52,10 @@ export const columns = [{
     </div>
 
 }, {
-  id: 'name',
-  label: 'Developer UUID',
+  id: 'hardware',
+  label: 'Developer Name (UUID)',
   format: (val, obj) =>
-    <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>,
+    <Link to={`/sensors/${obj.hardware}`}>{val}</Link>,
   hide: true
 }, {
   id: 'description',
@@ -82,10 +82,14 @@ export const columns = [{
 }, {
   id: 'nodeCount',
   label: 'Nodes',
-  format: (count, obj) =>
-    <Link to={`/nodes?sensor="${encodeURIComponent(obj.hw_model)}"`}>
-      {count} node{count != 1 ? 's' : ''}
-    </Link>,
+  format: (_, obj) => {
+    const count = obj.vsns.length
+    return (
+      <Link to={`/nodes?sensor="${encodeURIComponent(obj.hw_model)}"`}>
+        {count} node{count != 1 ? 's' : ''}
+      </Link>
+    )
+  },
   width: '100px'
 }, {
   id: 'vsns',
@@ -105,7 +109,7 @@ type Props = {
 export default function SensorList(props: Props) {
   const {project, focus, nodes} = props
 
-  const [data, setData] = useState<BK.SensorTableRow[]>()
+  const [data, setData] = useState<BK.SensorListRow[]>()
   const [error, setError] = useState()
   const {setLoading} = useProgress()
 
@@ -114,10 +118,9 @@ export default function SensorList(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    BK.getSensors({project, focus, nodes})
-      .then(data => {
-        setData(data as BK.SensorTableRow[])
-      }).catch((err) => setError(err))
+    BK.getSensors()
+      .then(data => setData(data))
+      .catch((err) => setError(err))
       .finally(() => setLoading(false))
   }, [setLoading, project, focus, nodes])
 
@@ -131,7 +134,7 @@ export default function SensorList(props: Props) {
           enableSorting
           sort="+hw_model"
           onColumnMenuChange={() => { /* do nothing */ }}
-          onDoubleClick={(_, row: BK.SensorTableRow) => navigate(`/sensors/${row.hw_model}`)}
+          onDoubleClick={(_, row: BK.SensorListRow) => navigate(`/sensors/${row.hw_model}`)}
         />
       }
 

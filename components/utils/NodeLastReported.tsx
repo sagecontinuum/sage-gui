@@ -7,10 +7,9 @@ import * as BK from '/components/apis/beekeeper'
 const FAIL_THRES = settings.elapsedThresholds.fail
 const WARNING_THRES = settings.elapsedThresholds.warning
 
-const noneMsg = `no sys.uptime(s) for ${NODE_STATUS_RANGE}`
 
 type LastUpdatedProps = {
-  computes: BK.Compute[]
+  computes: BK.SimpleManifest['computes']
   elapsedTimes: {[device: string]: number }
 }
 
