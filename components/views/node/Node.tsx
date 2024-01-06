@@ -123,7 +123,14 @@ const metaRows1 = [{
 }, {
   id: 'registration_event',
   label: 'Registration',
-  format: (val) => val ? new Date(val).toLocaleString() : '-'
+  format: (val) => {
+    if (val === null)
+      return <span className="muted">Not found</span>
+    else if (!val)
+      return <span className="muted">loading...</span>
+    else
+      return new Date(val).toLocaleString()
+  }
 }]
 
 
@@ -182,6 +189,10 @@ const sensorOverview = [{
   format: (val, obj) => {
     const cameras = obj.sensors
       .filter(o => o.name.match(/camera/gi))
+
+    if (!obj.sensors.length) {
+      return <span className="muted">No sensors configured</span>
+    }
 
     return <NodeDetails data={cameras} linkPath="/sensors" />
   }
@@ -361,9 +372,13 @@ export default function NodeView(props: Props) {
         const id = data.name
         setNodeID(id)
 
+        // fetch the registration time from beekeeper
         BK.getNode(id)
           .then(data => setBKMeta(data))
-          .catch(err => setError(err))
+          .catch(err => {
+            setError({message: `Beekeeper ${err.message}. Hence, the node registration time for ${vsn} was not found.`})
+            setBKMeta({registration_event: null})
+          })
       }).catch(() => { /* do nothing for now */ })
 
     const p3 = BH.getSimpleNodeStatus(vsn)
@@ -462,7 +477,7 @@ export default function NodeView(props: Props) {
       <CardViewStyle />
 
       {error &&
-        <Alert severity="error">{error.message}</Alert>
+        <Alert severity="info">{error.message}</Alert>
       }
 
       <div className="flex">
