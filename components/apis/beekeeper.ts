@@ -125,12 +125,14 @@ export async function getNodeMeta(args?: VSN | FilteringArgs) : Promise<NodeMeta
 
   if (!isSingleNode) {
     const {project, focus, nodes} = args || {}
-    if (project)
-      data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
-    if (focus)
-      data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
     if (nodes)
       data = data.filter(o => nodes.includes(o.vsn))
+    else {
+      if (project)
+        data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
+      if (focus)
+        data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
+    }
   }
 
   data = data.map(obj => {
