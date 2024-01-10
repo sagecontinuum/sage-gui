@@ -55,7 +55,7 @@ export default function AppData(props: Props) {
   })
 
   // note: endtime is not currently an option
-  const [end, setEnd] = useState<Date>(endOfHour(new Date()))
+  const [end] = useState<Date>(endOfHour(new Date()))
 
 
   useEffect(() => {
@@ -87,8 +87,7 @@ export default function AppData(props: Props) {
     } else if (name == 'window') {
       setOpts(prev => ({
         ...prev,
-        ...(val && {start: getStartTime(val)}),
-        window: val
+        ...(val && {window: val, start: getStartTime(val)})
       }))
     } else {
       throw `unhandled option state change name=${name}`

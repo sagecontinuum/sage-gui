@@ -320,7 +320,7 @@ export default function NodeView(props: Props) {
 
   const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
-  const [bkMeta, setBKMeta] = useState<BK.BKState>()
+  const [bkMeta, setBKMeta] = useState<BK.BKState | {registration_event: null}>()
 
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<BH.GPS>()
@@ -455,8 +455,7 @@ export default function NodeView(props: Props) {
     } else if (name == 'window') {
       setOpts(prev => ({
         ...prev,
-        ...(val && {start: getStartTime(val)}),
-        window: val
+        ...(val && {window: val, start: getStartTime(val)})
       }))
     } else {
       throw `unhandled option state change name=${name}`

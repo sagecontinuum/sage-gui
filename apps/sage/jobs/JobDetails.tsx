@@ -119,8 +119,7 @@ export default function JobDetails(props: Props) {
     if (name == 'window') {
       setOpts(prev => ({
         ...prev,
-        ...(val && {start: getStartTime(val)}),
-        window: val
+        ...(val && {window: val, start: getStartTime(val)})
       }))
     } else {
       throw `unhandled option state change name=${name}`
