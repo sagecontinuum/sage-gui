@@ -60,8 +60,8 @@ const TAIL_DAYS = '-7d'
 
 const labelDict = {
   gps: 'GPS',
-  bme280: 'T·P·H·G',
-  bme680: 'T·P·H',
+  bme280: 'T·P·H',
+  bme680: 'T·P·H·G',
   nxcore: 'NX',
   rpi: 'RPi',
   sbcore: 'Sage Blade'
@@ -95,8 +95,16 @@ const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
   !!meta?.gps_lat && !!meta?.gps_lat
 
 
-const hasMetOne = (meta: BK.FlattenedManifest) : boolean =>
-  meta?.sensors.some(({hw_model}) => hw_model.match(/ES-642/gi))
+
+// todo(nc): refactor more into a general config
+const COMMON_SENSORS = ['BME680', 'RG-15', 'ES-642']
+
+const hasSensor = (meta: BK.FlattenedManifest, sensors: string | string[]) : boolean =>
+  meta?.sensors.some(({hw_model}) => {
+    sensors = Array.isArray(sensors) ? sensors : [sensors]
+    const re = new RegExp(sensors.join('|'), 'gi')
+    return hw_model.match(re)
+  })
 
 
 const getStartTime = (str) =>
@@ -435,6 +443,7 @@ export default function NodeView(props: Props) {
   const mouse = {onMouseOver: onOver, onMouseOut: onOut}
 
   const handleOptionChange = (name, val) => {
+    setError(null)
     if (['nodes', 'apps'].includes(name)) {
       setOpts(prev => ({...prev, display: name}))
       return
@@ -641,8 +650,8 @@ export default function NodeView(props: Props) {
 
           {/* timeline card */}
           <Card>
-            <div className="timeline-title flex items-center gap">
-              <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
+            <div className="timeline-title flex items-start gap">
+              <h2>Last {opts.window.replace(/-|d/g, '')} days of data</h2>
               <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
             </div>
 
@@ -678,36 +687,48 @@ export default function NodeView(props: Props) {
               />
             }
 
-            {data && !Object.keys(data).length &&
-              <div className="clearfix muted">No data available</div>
+            {data && !Object.keys(data).length && !loadingTL &&
+              <div>
+                <div className="clearfix"></div>
+                <p className="muted">No data available</p>
+              </div>
             }
           </Card>
 
-          {shield &&
-            <Card>
-              <h2>Sensors</h2>
-              {vsn &&
-                <div className="flex data-tables">
+          <Card>
+            <h2>Sensors</h2>
+            {vsn && 
+              <div className="flex data-tables">
+                {hasSensor(manifest, 'BME680') &&
                   <RecentDataTable
                     items={format(['temp', 'humidity', 'pressure'], vsn)}
                     className="hover-bme"
                   />
+                }
 
-                  <div>
+                <div>
+                  {hasSensor(manifest, 'RG-15') &&
                     <RecentDataTable
                       items={format(['raingauge'], vsn)}
                       className="hover-rain"
                     />
-                    {hasMetOne(manifest) &&
-                      <RecentDataTable
-                        items={format(['es642AirQuality'], vsn)}
-                      />
-                    }
-                  </div>
+                  }
+                  {hasSensor(manifest, 'ES-642') &&
+                    <RecentDataTable
+                      items={format(['es642AirQuality'], vsn)}
+                    />
+                  }
                 </div>
-              }
-            </Card>
-          }
+              </div>
+            }
+            {!hasSensor(manifest, COMMON_SENSORS) &&
+              <p className="muted">
+                No configuration was found for  
+                common sensors ({COMMON_SENSORS.slice(0, -1).join(', ')}, or {COMMON_SENSORS.slice(-1)})
+              </p>
+            }
+          </Card>
+
 
           <Card>
             <h2>Images</h2>

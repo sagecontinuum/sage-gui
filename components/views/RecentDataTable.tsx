@@ -100,7 +100,7 @@ export default memo(function RecentDataTable(props: Props) {
     if (noUnavailData)
       return
 
-    // kick off tail searching search
+    // kick off the search for the tail
     setLoading(true)
     const proms = []
     for (const item of items) {
