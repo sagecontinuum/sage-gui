@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams, NavLink } from 'react-ro
 import styled from 'styled-components'
 
 import { Button, IconButton, Tooltip } from '@mui/material'
+import { keyBy } from 'lodash'
 
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import PublicIcon from '@mui/icons-material/Public'
@@ -142,15 +143,15 @@ type GeoData = {id: BK.VSN, vsn: string, lng: number, lat: number, status: strin
 
 function jobsToGeos(
   jobs: ES.Job[],
-  nodeMetas: BK.NodeMetaMap
+  mainfestMap: ManifestByVSN
 ) : GeoData {
   return [...new Set(jobs.flatMap(o => o.nodes))]
     .map(vsn => ({
-      ...nodeMetas[vsn],
+      ...mainfestMap[vsn],
       id: vsn,
       vsn,
-      lng: Number(nodeMetas[vsn]?.gps_lon),
-      lat: Number(nodeMetas[vsn]?.gps_lat),
+      lng: Number(mainfestMap[vsn]?.gps_lon),
+      lat: Number(mainfestMap[vsn]?.gps_lat),
       status: 'reporting'
     }))
 }
@@ -217,7 +218,10 @@ const filterByState = (jobs: ES.Job[], states: ES.State[]) : ES.Job[] =>
   jobs.filter(o => states.includes(o.state.last_state) )
 
 
+type ManifestByVSN = {[vsn: BK.VSN]: BK.FlattenedManifest}
+
 export type Views = 'all-jobs' | 'my-jobs' | 'timeline'
+
 
 export default function JobStatus() {
   const navigate = useNavigate()
@@ -239,7 +243,7 @@ export default function JobStatus() {
   const [jobState, setJobState] = useState<'Queued' | ES.State>()
 
   // additional meta
-  const [nodeMetas, setNodeMetas] = useState<BK.NodeMetaMap>(null)
+  const [manifests, setManifests] = useState<ManifestByVSN>(null)
   const [geo, setGeo] = useState<GeoData>()
   const [counts, setCounts] = useState<Counts>(initCounts)
 
@@ -257,7 +261,7 @@ export default function JobStatus() {
 
 
   useEffect(() => {
-    if (!jobs || !nodeMetas) return
+    if (!jobs || !manifests) return
 
     let qJobs = queryData<ES.Job>(jobs, query)
 
@@ -282,10 +286,10 @@ export default function JobStatus() {
     }))
 
     // update map again
-    const geo = jobsToGeos(qJobs, nodeMetas)
+    const geo = jobsToGeos(qJobs, manifests)
     setGeo(geo)
     setUpdateMap(prev => prev + 1)
-  }, [query, jobs, nodeMetas, selectedNodes, jobState])
+  }, [query, jobs, manifests, selectedNodes, jobState])
 
 
   useEffect(() => {
@@ -297,15 +301,12 @@ export default function JobStatus() {
     const p1 = ES.getJobs()
 
     // also fetch gps for map
-    const p2 = BK.getNodeMeta()
+    const p2 = BK.getManifests()
 
     Promise.all([p1, p2])
-      .then(([jobs, nodeMetas]) => {
-        nodeMetas = nodeMetas as BK.NodeMetaMap
-        setNodeMetas(nodeMetas)
-
-        // todo(nc): remove when VSNs are used for urls
-        jobs = jobs.map(o => ({...o, node_ids: o.nodes.map(vsn => nodeMetas[vsn]?.node_id)}))
+      .then(([jobs, manifests]) => {
+        const manifestsByVSN: ManifestByVSN = keyBy(manifests, 'vsn')
+        setManifests(manifestsByVSN)
         setCounts(getCounts(jobs, view == 'my-jobs'))
 
         // if 'my jobs', filter vsns to the user's nodes
@@ -315,7 +316,7 @@ export default function JobStatus() {
         }
 
         // create some geo data
-        const geo = jobsToGeos(jobs, nodeMetas)
+        const geo = jobsToGeos(jobs, manifestsByVSN)
 
         setData({jobs})
         setGeo(geo)
@@ -353,7 +354,7 @@ export default function JobStatus() {
 
   const handleJobSelect = (sel) => {
     const objs = sel.objs.length ? sel.objs : []
-    const nodes = jobsToGeos(objs, nodeMetas)
+    const nodes = jobsToGeos(objs, manifests)
 
     setData(prev => ({
       ...prev,
@@ -516,12 +517,12 @@ export default function JobStatus() {
           </TableContainer>
         }
 
-        {view == 'timeline' && pluginEvents && nodeMetas &&
+        {view == 'timeline' && pluginEvents && manifests &&
           <TimelineContainer>
             {Object.keys(pluginEvents)
               .filter(vsn => nodes ? nodes.includes(vsn) : true)
               .map((vsn, i) => {
-                const {location} = nodeMetas[vsn]
+                const {location} = manifests[vsn]
                 return (
                   <Card key={i} className="title-row">
                     <div className="flex column">
@@ -548,7 +549,7 @@ export default function JobStatus() {
       {!!jobs.length && jobDetails &&
         <JobDetails
           job={jobDetails}
-          nodeMetaByVSN={nodeMetas}
+          nodeMetaByVSN={manifests}
           handleCloseDialog={handleCloseDialog}
         />
       }

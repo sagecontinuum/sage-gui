@@ -242,7 +242,7 @@ export default function JobDetails(props: Props) {
             <TimelineContainer>
               {Object.keys(events)
                 .map((vsn, i) => {
-                  const {location} = nodeMetaByVSN[vsn]
+                  const {address} = nodeMetaByVSN[vsn]
                   const data = events[vsn]
 
                   return (
@@ -251,7 +251,7 @@ export default function JobDetails(props: Props) {
                         <div>
                           <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
                         </div>
-                        <div>{location}</div>
+                        <div>{address}</div>
                       </div>
 
                       {loading &&

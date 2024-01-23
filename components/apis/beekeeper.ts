@@ -308,6 +308,7 @@ const flattenManifest = o => ({
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
   modem: o.modem,
+  project: o.project,
   lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({
     ...rest,
     ...lorawandevice

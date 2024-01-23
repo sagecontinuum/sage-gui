@@ -162,15 +162,17 @@ function PopupInfo(props: PopupProps) {
                       </Link></>
                       }
                     </td>
-                  </tr>
-                  <tr>
-                    <td>Location</td>
-                    <td>
-                      <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
-                        {location}
-                      </Link>
-                    </td>
-                  </tr>
+                  </tr>                  
+                  {location && // todo(nc): this condition is not needed, once new api is complete
+                    <tr>
+                      <td>Location</td>
+                      <td>
+                        <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
+                          {location}
+                        </Link>
+                      </td>
+                    </tr>
+                  }
                   <tr>
                     <td>Coordinates</td>
                     <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
