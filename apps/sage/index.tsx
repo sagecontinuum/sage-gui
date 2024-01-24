@@ -9,7 +9,6 @@ import CssBaseline from '@mui/material/CssBaseline'
 import PublicIcon from '@mui/icons-material/PublicRounded'
 import UserIcon from '@mui/icons-material/AccountCircleRounded'
 import JobsIcon from '@mui/icons-material/ListRounded'
-import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ChartIcon from '@mui/icons-material/TimelineRounded'
 import ChartBrowserIcon from '@mui/icons-material/QueryStatsRounded'
 import MyJobsIcon from '@mui/icons-material/Engineering'
@@ -102,11 +101,6 @@ const NavMenu = () => {
               icon={<JobsIcon/>}
               to="/jobs/all-jobs"
               label="Job Status"
-            />
-            <Item
-              icon={<TimelineIcon/>}
-              to="/jobs/timeline"
-              label="Timelines"
             />
 
             {Auth.isSignedIn &&

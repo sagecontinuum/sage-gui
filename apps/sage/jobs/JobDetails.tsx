@@ -17,17 +17,19 @@ import Clipboard from '/components/utils/Clipboard'
 import Checkbox from '/components/input/Checkbox'
 import { useProgress } from '/components/progress/ProgressProvider'
 
-import { formatters, TimelineContainer } from './JobStatus'
+import { formatters } from './JobStatus'
 import JobTimeline from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
 import { type NodeMeta } from '/components/apis/beekeeper'
 import DataOptions from '/components/input/DataOptions'
+import TimelineContainer from '/components/viz/TimelineContainer'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import { quickRanges } from '/components/utils/units'
 
 import { pickBy } from 'lodash'
 import { subDays  } from 'date-fns'
+
 
 const TAIL_DAYS = '-1d'
 
@@ -239,14 +241,14 @@ export default function JobDetails(props: Props) {
           }
 
           {events &&
-            <TimelineContainer>
-              {Object.keys(events)
-                .map((vsn, i) => {
-                  const {address} = nodeMetaByVSN[vsn]
-                  const data = events[vsn]
+            Object.keys(events)
+              .map((vsn) => {
+                const {address} = nodeMetaByVSN[vsn]
+                const data = events[vsn]
 
-                  return (
-                    <div key={i} className="title-row">
+                return (
+                  <TimelineContainer key={vsn}>
+                    <div className="title-row">
                       <div className="flex column">
                         <div>
                           <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
@@ -255,30 +257,30 @@ export default function JobDetails(props: Props) {
                       </div>
 
                       {loading &&
-                        <div className="w-full">
-                          <TimelineSkeleton includeHeader={false} />
-                        </div>
+                      <div className="w-full">
+                        <TimelineSkeleton includeHeader={false} />
+                      </div>
                       }
 
                       {!loading && !Object.keys(data).length &&
-                        <p className="muted">
-                          {!showAllTasks &&
-                            <>No events found for this job (for the {quickRanges[opts.window]}).</>
-                          }
-                          {showAllTasks &&
-                            <>No events found for the {quickRanges[opts.window]}.</>
-                          }
-                        </p>
+                      <p className="muted">
+                        {!showAllTasks &&
+                          <>No events found for this job (for the {quickRanges[opts.window]}).</>
+                        }
+                        {showAllTasks &&
+                          <>No events found for the {quickRanges[opts.window]}.</>
+                        }
+                      </p>
                       }
                       {!loading && Object.keys(data).length > 0 &&
                         <JobTimeline data={data} errors={errorsByGoalID} start={opts.start} />
                       }
                     </div>
-                  )
-                })
-              }
-            </TimelineContainer>
+                  </TimelineContainer>
+                )
+              })
           }
+
         </Content>
       }
     />

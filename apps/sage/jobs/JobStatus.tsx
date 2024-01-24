@@ -21,6 +21,7 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import { Card } from '/components/layout/Layout'
 
 import JobTimeline from './JobTimeline'
+import TimelineContainer from '/components/viz/TimelineContainer'
 import JobDetails from './JobDetails'
 import JobActions from './JobActions'
 import StateFilters from './StateFilters'
@@ -580,16 +581,6 @@ const MapContainer = styled.div`
   height:  350px;
   border: 1px solid #ddd;
   background: #f2f2f2;
-`
-
-export const TimelineContainer = styled.div`
-  margin-bottom: 50px;
-  .title-row {
-    margin: 20px;
-    h2 {
-      margin: 0;
-    }
-  }
 `
 
 const TableContainer = styled.div`

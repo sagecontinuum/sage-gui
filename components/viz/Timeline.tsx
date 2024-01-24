@@ -15,6 +15,9 @@ import HomeIcon from '@mui/icons-material/HomeOutlined'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMoreRounded'
 import ExpandLessIcon from '@mui/icons-material/ExpandLessRounded'
 
+import TimelineContainer from './TimelineContainer'
+export { TimelineContainer }
+
 
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR

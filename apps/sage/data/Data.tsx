@@ -7,12 +7,12 @@ import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
 
 import DataOptions from '/components/input/DataOptions'
 import {
-  Sidebar, Top, Controls, Divider, FilterTitle, Card
+  Sidebar, Top, Controls, Divider, FilterTitle
 } from '/components/layout/Layout'
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
-import TimelineChart, {colors} from '/components/viz/Timeline'
+import TimelineChart, { TimelineContainer, colors } from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import { useProgress } from '/components/progress/ProgressProvider'
@@ -477,17 +477,6 @@ const Main = styled.div`
   width: 100%;
 `
 
-const TimelineContainer = styled(Card)`
-  margin: 25px 0;
-
-  .title-row {
-    float: left;
-    margin: 0 20px;
-    h2 {
-      margin: 0;
-    }
-  }
-`
 
 const Items = styled.div`
 
