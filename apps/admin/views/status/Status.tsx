@@ -5,7 +5,6 @@ import { useSearchParams } from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
-import CaretIcon from '@mui/icons-material/ExpandMoreRounded'
 import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
@@ -280,8 +279,9 @@ export default function StatusView() {
             rows={filtered}
             columns={columns}
             enableSorting
+            search={query}
             onSearch={handleQuery}
-            onColumnMenuChange={() => {}}
+            onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
             emptyNotice="No nodes found"
             middleComponent={

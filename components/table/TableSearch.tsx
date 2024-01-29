@@ -1,50 +1,48 @@
-
-import React, { useState, useEffect } from 'react'
+import { useState, memo } from 'react'
 import styled from 'styled-components'
 import SearchIcon from '@mui/icons-material/SearchOutlined'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 
-import useDebounce from '../hooks/useDebounce'
+import useDebounce from '/components/hooks/useDebounce'
 
 type Props = {
   value?: string
   placeholder?: string
-  onSearch: ({query: string}) => void
-  [rest: string]: any
+  width?: React.CSSProperties['width']
+  onSearch: (val: {query: string}) => void
 }
 
-export default function TableSearch(props: Props) {
-  const {onSearch, placeholder, ...rest} = props
+export default memo(function TableSearch(props: Props) {
+  const {onSearch, placeholder, width} = props
 
   const [query, setQuery] = useState(props.value || '')
-  const debounceQuery = useDebounce(query, 300)
 
-  useEffect(() => {
+  const handleChange = () => {
     onSearch({query})
-  }, [debounceQuery])
+  }
 
-  useEffect(() => {
-    setQuery(props.value)
-  }, [props.value])
+  const debouncedOnChange = useDebounce(handleChange)
 
   return (
     <>
       <Search
         placeholder={placeholder || 'Search'}
         value={query}
-        onChange={e => { setQuery(e.target.value) }}
+        onChange={(e) => {
+          debouncedOnChange()
+          setQuery(e.target.value)
+        }}
         InputProps={{
-          style: { width: rest.width || '275px'},
+          style: { width: width || '275px'},
           startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
         }}
         size="small"
         variant="outlined"
-        {...rest}
       />
     </>
   )
-}
+}, (prev, next) => prev.value == next.value)
 
 
 const Search = styled(TextField)`

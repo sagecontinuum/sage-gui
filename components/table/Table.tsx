@@ -352,7 +352,7 @@ type Props = {
   enableSorting?: boolean
   disableClickOutside?: boolean
   selected?: number[]             // ids
-  onSearch?: ({query} : {query: string}) => void
+  onSearch?: (val: {query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
   onSelect?: (state: SelectedState) => void        // todo: define

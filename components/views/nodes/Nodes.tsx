@@ -279,6 +279,7 @@ export default function Nodes() {
             columns={columns}
             enableSorting
             sort='-vsn'
+            search={query}
             onSearch={handleQuery}
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
