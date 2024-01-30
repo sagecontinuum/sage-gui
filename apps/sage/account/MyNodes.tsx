@@ -16,7 +16,7 @@ const { contactUs } = config
 
 const columns = [{
   id: 'vsn',
-  label: 'VSN',
+  label: <>Node (VSN)</>,
   format: (vsn, obj) => <Link to={`/node/${obj.vsn}`}>{vsn}</Link>
 }, {
   id: 'schedule',
@@ -48,7 +48,7 @@ export default function MyNodes() {
 
   return (
     <Root>
-      <h1 className="no-margin">My privileges on shared nodes</h1>
+      <h1 className="no-margin">My Node Privileges</h1>
       <br/>
       {data &&
         <Table

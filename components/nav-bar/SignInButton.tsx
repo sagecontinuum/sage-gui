@@ -59,7 +59,7 @@ export default function SignInButton(props: Props) {
               <Item
                 icon={<NodesIcon />}
                 to='/account/nodes'
-                label="Shared Nodes"
+                label="My Nodes"
               />
               <Item
                 icon={<AccessIcon />}

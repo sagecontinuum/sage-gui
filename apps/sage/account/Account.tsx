@@ -15,7 +15,7 @@ const tabs = [{
   icon: <AccountIcon />,
   to: '/account/profile'
 }, {
-  label: 'Shared Nodes',
+  label: 'My Nodes',
   icon: <NodesIcon />,
   to: '/account/nodes'
 }, {

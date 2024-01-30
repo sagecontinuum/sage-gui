@@ -75,7 +75,7 @@ export default function DevAccess() {
     <Root>
 
       <CopyToken>
-        <h1 className="no-margin">Your access token</h1>
+        <h1 className="no-margin">Your Access Token</h1>
 
         {isPermitted === true &&
           <div className="flex items-center justify-between gap">
@@ -103,7 +103,7 @@ export default function DevAccess() {
         </p>}
       </CopyToken>
 
-      <h1 className="no-margin">Update SSH public keys</h1>
+      <h1 className="no-margin">Update SSH Public Keys</h1>
 
       {!canDev && <p>
         <Alert severity="info">
@@ -124,13 +124,12 @@ export default function DevAccess() {
 
       {state &&
         <FormControl className="flex column">
-          <FormLabel id="ssk-keys">My SSH Public Keys:</FormLabel>
+          <FormLabel id="ssk-keys">My SSH Public Keys</FormLabel>
           <OutlinedInput
             placeholder={
               `sh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK0LT3jNyfUtkJwxiv/7YfPU4PIOsQzeCVKlLCAfwlg3\\n` +
               `\n\n(no ssh key provided)`
             }
-            shrink="true"
             id="ssh-keys"
             aria-label="ssh keys"
             name="ssh_public_keys"
@@ -157,7 +156,7 @@ export default function DevAccess() {
         <Alert severity="error">{error}</Alert>
       }
 
-      <h2>Finish setting up node access</h2>
+      <h2>Finish Setup for Node Access</h2>
 
       <p>Once you've updated your SSH public key above, you'll need to do the following steps.</p>
 

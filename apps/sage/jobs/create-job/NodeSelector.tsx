@@ -14,7 +14,7 @@ import * as User from '/components/apis/user'
 
 import { pick } from 'lodash'
 
-import { Chip, FormControlLabel, ToggleButtonGroup, ToggleButton } from '@mui/material'
+import { Chip, FormControlLabel } from '@mui/material'
 import Checkbox from '/components/input/Checkbox'
 
 import Auth from '/components/auth/auth'
@@ -52,7 +52,7 @@ const queryByTag = (data, tagState: string[]) => {
 
 const columns = [{
   id: 'vsn',
-  label: 'VSN'
+  label: 'Node'
 }, {
   id: 'project',
   label: 'Project'
@@ -93,12 +93,12 @@ export default function NodeSelector(props: Props) {
   const [data, setData] = useState<BK.NodeDetails>()
   const [query, setQuery] = useState<string>('')
   const [filtered, setFiltered] = useState<object[]>()
-  const [page, setPage] = useState(0)
+  const [page] = useState(0)
   const [updateID, setUpdateID] = useState(0)
 
   const [tagState, setTagState] = useState<string[]>([])
 
-  const [bucket, setBucket] = useState<BK.NodeMeta['bucket']>(BK.Buckets[0])
+  const [bucket] = useState<BK.NodeMeta['bucket']>(BK.Buckets[0])
 
   const [schedulable, setSchedulable] = useState<BK.VSN[]>()
   const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
@@ -148,10 +148,6 @@ export default function NodeSelector(props: Props) {
     )
   }
 
-  const handleBucketChange = (_, val) => {
-    setBucket(val)
-  }
-
   const handleRemoveChip = (vsn: BK.VSN) => {
     onSelected(selected.filter(selVSN => selVSN != vsn))
   }
@@ -167,7 +163,7 @@ export default function NodeSelector(props: Props) {
     <Root className="flex column">
       <div className="flex justify-between items-center">
         <TagFilters>
-          {tags.map(({id, tag}) =>
+          {tags.map(({tag}) =>
             <TagFilter
               key={tag}
               label={tag}

@@ -51,7 +51,7 @@ type MimeType = keyof typeof exts
 
 const columns = [{
   id: 'vsn',
-  label: 'VSN',
+  label: 'Node',
   format: (val) => <a href={`/node/${val}`}>{val}</a>
 }, {
   id: 'timestamp',
@@ -80,8 +80,7 @@ const columns = [{
           </div>
         </div>
       )
-    }
-    else if (val.includes('.flac')) {
+    } else if (val.includes('.flac')) {
       return (
         <div className="flex column">
           <Audio dataURL={val}/>

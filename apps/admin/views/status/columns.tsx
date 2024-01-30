@@ -30,7 +30,7 @@ const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20
 
 
 
-const sysTimeOpts = {
+const sysTimeOpts: Intl.DateTimeFormatOptions = {
   hour: 'numeric',
   minute: 'numeric',
   second: 'numeric'
@@ -172,15 +172,15 @@ const columns = [{
   label: 'Type',
   hide: true
 }, {
-  id: 'node_id',
+  id: 'vsn',
+  label: 'Node',
+  width: '50px',
+  format: formatters.vsnWithGPS
+}, {
+  id: 'name',
   label: 'ID',
   width: '100px',
   hide: true
-}, {
-  id: 'vsn',
-  label: 'VSN',
-  width: '50px',
-  format: formatters.vsnWithGPS
 }, {
   id: 'project',
   label: 'Project'
