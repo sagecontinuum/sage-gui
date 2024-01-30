@@ -291,7 +291,7 @@ export default function StatusView() {
                     label="Status"
                     options={statuses}
                     value={filterState.status}
-                    onChange={vals => handleFilterChange('status', vals)}
+                    onChange={vals => handleFilterChange('status', vals as Option[])}
                     noSelectedSort
                   /> : <></>
                 }
@@ -300,7 +300,7 @@ export default function StatusView() {
                     label="Project"
                     options={projects}
                     value={filterState.project}
-                    onChange={vals => handleFilterChange('project', vals)}
+                    onChange={vals => handleFilterChange('project', vals as Option[])}
                     noSelectedSort
                   />
                 }
@@ -309,7 +309,7 @@ export default function StatusView() {
                     label="Focus"
                     options={focuses}
                     value={filterState.focus}
-                    onChange={vals => handleFilterChange('focus', vals)}
+                    onChange={vals => handleFilterChange('focus', vals as Option[])}
                     noSelectedSort
                   />
                 }
@@ -318,7 +318,7 @@ export default function StatusView() {
                     label="City"
                     options={cities}
                     value={filterState.city}
-                    onChange={vals => handleFilterChange('city', vals)}
+                    onChange={vals => handleFilterChange('city', vals as Option[])}
                   />
                 }
                 {states &&
@@ -326,7 +326,7 @@ export default function StatusView() {
                     label="State"
                     options={states}
                     value={filterState.state}
-                    onChange={vals => handleFilterChange('state', vals)}
+                    onChange={vals => handleFilterChange('state', vals as Option[])}
                   />
                 }
 

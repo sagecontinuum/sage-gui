@@ -334,9 +334,8 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
     summary[vsn] = mergedObjs
   })
 
-  return byNode
+  return summary
 }
-
 
 
 async function _findLatestAvail(

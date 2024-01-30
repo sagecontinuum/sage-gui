@@ -9,7 +9,6 @@ import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 import CaretIconUp from '@mui/icons-material/ArrowDropUpRounded'
 import ThermoIcon from '@mui/icons-material/ThermostatRounded'
 
-import Badge from '@mui/material/Badge'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
 import Tooltip from '@mui/material/Tooltip'
@@ -111,11 +110,11 @@ function ComputeSummary(props) {
     return <>
       <Button onClick={() => setExpanded(false)} >less <CaretIconUp /></Button>
       {data.map((sensor, i) => {
-          const {name} = sensor
-          return <div key={i}>
-            {name}
-          </div>
-        })
+        const {name} = sensor
+        return <div key={i}>
+          {name}
+        </div>
+      })
       }
     </>
   } else if (count)  {
@@ -426,15 +425,6 @@ const columns = [{
   hide: true
 }]
 
-
-const SensorList = styled.ul`
-  padding: 0;
-  font-size: 9pt;
-  list-style: none;
-  li {
-    white-space: nowrap;
-  }
-`
 
 
 export const GoodChip = styled(Chip)`
