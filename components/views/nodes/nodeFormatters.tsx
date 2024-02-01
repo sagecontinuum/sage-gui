@@ -24,10 +24,12 @@ export function gpsIcon(obj) {
   if (hasStaticGPS) {
     return (
       <Tooltip
+        placement="top"
         title={hasLiveGPS ?
           <>Static GPS<br/><Dot size="8" /> {'->'} recent live GPS found</> :
           'Static GPS'
-        }>
+        }
+      >
         <LiveGPSDot invisible={!hasLiveGPS} color="primary" variant="dot">
           <MapIcon fontSize="small"/>
         </LiveGPSDot>
@@ -158,11 +160,14 @@ const NodeCell = styled.div`
 `
 
 
-export function gps(vsl, obj) {
+export function gps(_, obj, newline = false) {
   return <div className="flex items-center">
     <span className="gps-icon">{gpsIcon(obj)}</span>
 
-    {(!obj.lat || !obj.lng) ? '-' :`${obj.lat}, ${obj.lng}`}
+    {(!obj.lat || !obj.lng) ? 
+      '-' :
+      `${obj.lat},` + (newline ? '\n' : '') + `${obj.lng}`
+    }
   </div>
 }
 

@@ -8,14 +8,12 @@ import Map, {
 } from 'react-map-gl'
 import type { MapRef, MapProps, SymbolLayer, MapboxEvent } from 'react-map-gl'
 
-import { ClickAwayListener } from '@mui/material'
-
 import Clipboard from './utils/Clipboard'
-import NodeLastReported from './utils/NodeLastReported'
 
 import config from '/config'
 import settings from './settings'
 
+import * as formatters from '/components/views/nodes/nodeFormatters'
 import * as BK from '/components/apis/beekeeper'
 
 const {initialViewState} = settings
@@ -112,6 +110,7 @@ const layerStyle: SymbolLayer = {
 }
 
 
+
 type PopupProps = {
   data: Data
   onClose: () => void
@@ -121,76 +120,79 @@ type PopupProps = {
 function PopupInfo(props: PopupProps) {
   const {onClose, data, showUptime} = props
 
-  // tooltip info deconstruction
-  const {
-    vsn, project, focus, location, lng, lat, node_type, computes, elapsedTimes,
-    node_phase_v3
-  } = data || {}
+  // todo(nc): use new manifests endpoint when avail
+  // @ts-ignore; use new manifests endpoint when avail
+  const {vsn, focus, location, state, status, lng, lat} = data || {}  
 
   return (
     <Popup
       longitude={lng}
       latitude={lat}
       onClose={onClose}
+      closeButton={false}
+      closeOnClick
     >
-      <ClickAwayListener onClickAway={onClose}>
-        <div className="flex gap">
+      <h2 className="no-margin flex justify-between">
+        <div>
+          {vsn.charAt(0) == 'V' &&
+            'Sage Blade'
+          }
+          {vsn.charAt(0) == 'W' &&
+            'Wild Sage Node'
+          }&nbsp;
+          <Link to={`/node/${vsn}`}>
+            {vsn}
+          </Link>
+        </div>
+      </h2>
+      
+      <div className="flex gap-2 items-center node-meta">
+        {showUptime &&
+          <div className="flex column status">
+            <small className="muted font-bold">Status</small>
+            {formatters.statusWithPhase(status, data)}
+          </div>
+        }
+
+        {focus &&
           <div>
-            <h2>
-              {node_type == 'WSN' ?
-                'Wild Sage Node' : node_type
-              }&nbsp;
-              <Link to={`/node/${vsn}`}>
-                {vsn}
+            <small className="muted font-bold">Focus</small>
+            <div>                 
+              <Link to={`/nodes/&focus="${encodeURIComponent(focus)}"`}>
+                {focus}
               </Link>
-            </h2>
-            <div>
-              <table className="key-value simple node-meta">
-                <tbody>
-                  <tr>
-                    <td>Project</td>
-                    <td>
-                      <Link to={`/nodes/?project="${encodeURIComponent(project)}"`}>
-                        {project}
-                      </Link>&nbsp;
-                      {focus &&
-                      <>| <Link to={
-                        `/nodes/?project="${encodeURIComponent(project)}"` +
-                        `&focus="${encodeURIComponent(focus)}"`
-                      }>
-                        {focus}
-                      </Link></>
-                      }
-                    </td>
-                  </tr>                  
-                  {location && // todo(nc): this condition is not needed, once new api is complete
-                    <tr>
-                      <td>Location</td>
-                      <td>
-                        <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
-                          {location}
-                        </Link>
-                      </td>
-                    </tr>
-                  }
-                  <tr>
-                    <td>Coordinates</td>
-                    <td><Clipboard content={`${lat},\n${lng}`} tooltip="Copy coordinates" /></td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           </div>
+        }
 
-          {showUptime &&
-            <div className="uptimes">
-              <h2>{node_phase_v3}</h2>
-              <b>Last reported metric</b><br/>
-              <NodeLastReported computes={computes} elapsedTimes={elapsedTimes} />
+        {location &&
+          <div>
+            <small className="muted font-bold">City</small>
+            <div>
+              <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
+                {location.split(',')[0]}
+              </Link>
             </div>
-          }
+          </div>
+        }
+
+        {state && 
+          <div>
+            <small className="muted font-bold">State</small>
+            <div>
+              {location &&
+                <Link to={`/nodes/?state="${encodeURIComponent(state)}"`}>
+                  {state.split(' (')[0]}
+                </Link>
+              }            
+            </div>
+          </div>
+        }        
+
+        <div className="gps">
+          <Clipboard content={formatters.gps(null, data, true)} tooltip="Copy coordinates" />          
         </div>
-      </ClickAwayListener>
+      </div>
     </Popup>
   )
 }
@@ -329,15 +331,26 @@ const Root = styled.div`
     opacity: .65;
   }
 
-  .mapboxgl-popup-content {
-    width: fit-content;
-
+  .mapboxgl-popup {
+    max-width: 100% !important;
     .node-meta {
-      width: 50%;
-    }
-    .uptimes {
-      width: 50%;
       white-space: nowrap;
+      font-size: 1.2em;
+    }
+    
+    .gps pre {
+      margin: 0;
+      padding-top: 20px;
+
+      .gps-icon {
+        padding-right: 5px;
+      }
+    }
+
+    .status {
+      .MuiSvgIcon-root {
+        font-size: 19px;
+      }
     }
   }
 
