@@ -18,7 +18,9 @@ import DataBrowser from '/apps/sage/data-stream/DataBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
 import DataProduct from '/apps/sage/data-commons/DataProduct'
 
+import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
+
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
 import '/assets/styles.scss'
@@ -84,6 +86,7 @@ export default function App() {
             logo={<LogoPlaceHolder/>}
             menu={<NavMenu />}
             hasDocsLink
+            hasSignIn
           />
 
           <Container>
@@ -105,6 +108,7 @@ export default function App() {
                   <Route path="data/product/:name" element={<DataProduct />} />
                   <Route path="query-browser" element={<DataBrowser />} />
 
+                  <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>

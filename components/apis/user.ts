@@ -60,6 +60,7 @@ type User = {
   name: string
   is_staff: boolean
   is_approved: boolean
+  is_superuser: boolean
 }
 
 type Profile = {

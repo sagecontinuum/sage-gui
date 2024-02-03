@@ -9,6 +9,17 @@ import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
 import USStates from './us-states'
 
+import Auth from '../auth/auth'
+
+const __token = Auth.token
+
+const options = {
+  headers: __token ? {
+    Authorization: `sage ${__token}`
+  } : {}
+}
+
+
 export type VSN = `W${string}` | `V${string}`
 
 
@@ -89,6 +100,22 @@ export type OntologyObj = {
 
 function get(endpoint: string, opts={}) {
   return fetch(endpoint, opts)
+    .then(handleErrors)
+    .then(res => res.json())
+}
+
+
+function put(endpoint: string, data) {
+  const putOptions = {
+    'headers': {
+      ...options.headers,
+      'Content-Type': 'application/json'
+    },
+    'method': 'PUT',
+    'body': JSON.stringify(data)
+  }
+
+  return fetch(endpoint, putOptions)
     .then(handleErrors)
     .then(res => res.json())
 }
@@ -389,6 +416,10 @@ export async function getSensors() : Promise<SensorListRow[]> {
 export async function getSensor(hw_model: string) : Promise<SensorListRow> {
   const data = await getSensors()
   return data.find(obj => obj.hw_model == hw_model)
+}
+
+export function saveSensor(state: SensorHardware) : Promise<SensorHardware> {
+  return put(`${config.auth}/sensorhardwares/${state.hw_model}`, state)
 }
 
 

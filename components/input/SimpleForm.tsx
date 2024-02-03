@@ -9,6 +9,7 @@ type Field = {
   label: string
   edit?: boolean
   type?: 'textarea' | string // todo(nc): add types
+  helpText?: string
   maxLength?: number
 }
 
@@ -27,7 +28,7 @@ export default function SimpleForm(props: Props) {
   return (
     <Root>
       {fields.map(obj => {
-        const {key, label, edit, type, maxLength} = obj
+        const {key, label, edit, type, helpText, maxLength} = obj
         const value = data[key]
 
         return (
@@ -36,7 +37,7 @@ export default function SimpleForm(props: Props) {
             {isEditing && edit != false ?
               <FormControl>
                 <OutlinedInput
-                  placeholder={`My ${label}`}
+                  placeholder={label}
                   aria-label={label}
                   name={key}
                   onChange={onChange}
@@ -46,10 +47,15 @@ export default function SimpleForm(props: Props) {
                   style={type == 'textarea' ? {width: 500} : {width: 300}}
                   inputProps={{maxLength}}
                 />
-                <FocusedHelperText
-                  text={state[key]?.length > 20 &&
-                    `${maxLength - state[key]?.length} characters left`}
-                />
+                {helpText && 
+                  <FormHelperText>{helpText}</FormHelperText>
+                }
+                {maxLength &&
+                  <FocusedHelperText
+                    text={state[key]?.length > 20 &&
+                      `${maxLength - state[key]?.length} characters left`}
+                  />
+                }
               </FormControl> :
               <p>{value ? value : <i className="muted">Not available</i>}</p>
             }
@@ -61,7 +67,9 @@ export default function SimpleForm(props: Props) {
 }
 
 const Root = styled.div`
-
+  .MuiFormHelperText-root {
+    margin-left: 0;
+  }
 `
 
 
