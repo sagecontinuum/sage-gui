@@ -731,10 +731,7 @@ const Container = styled(TableContainer)<StylingProps>`
     }`}
 
   td.MuiTableCell-sizeSmall {
-    padding: 6px 12px 6px 6px;
-  }
-  th.MuiTableCell-sizeSmall {
-    padding: 1px 15px 6px 6px;
+    padding: 6px 12px;
   }
 
   tr.MuiTableRow-root:hover {
@@ -759,7 +756,7 @@ const Container = styled(TableContainer)<StylingProps>`
     position: sticky;
     background-color: #fff;
     user-select: none;
-    padding: 6px 12px 6px 2px;
+    padding: 0px 12px 6px 12px;
     font-weight: 800;
   }
 `
