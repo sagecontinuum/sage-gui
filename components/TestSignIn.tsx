@@ -74,14 +74,27 @@ export default function TestSignIn() {
                 id="sage-debug-token"
                 label="Sage Token"
                 onChange={evt => setToken(evt.target.value)}
+                type="password"
               />
               <br/>
-              <Button variant="contained" color="primary" onClick={handleSignIn} disabled={loading || !isValid()} type="submit">
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={handleSignIn} 
+                disabled={loading || !isValid()} 
+                type="submit"
+              >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </>
             :
-            <Button variant="contained" color="primary" onClick={handleSignOut} disabled={loading} type="submit">
+            <Button 
+              variant="contained" 
+              color="primary"
+              onClick={handleSignOut} 
+              disabled={loading} 
+              type="submit"
+            >
               {loading ? 'Signing out...' : 'Sign Out'}
             </Button>
           }
