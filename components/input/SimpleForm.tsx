@@ -1,59 +1,103 @@
-import { FormEvent, useMemo } from 'react'
+import { useMemo } from 'react'
 import styled from 'styled-components'
 
-import { FormHelperText, FormControl, useFormControl, OutlinedInput } from '@mui/material'
+import { 
+  FormHelperText, FormControl, useFormControl, 
+  Autocomplete, TextField
+} from '@mui/material'
 
 
-type Field = {
-  key: string
+export type Field = {
+  id: string
   label: string
   edit?: boolean
   type?: 'textarea' | string // todo(nc): add types
   helpText?: string
+  placeholder?: string
   maxLength?: number
+  multiple?: boolean
+  width?: number | string
+  options?: string[]
 }
 
 
-type Props = {
+type Props<T> = {
   fields: Field[]
-  data: {[key: string]: string}
-  state: {[key: string]: string}
+  data: T | {[id: string]: string | string[]}
+  state: T | {[id: string]: string}
   isEditing: boolean
-  onChange: (evt: FormEvent) => void
+  onChange: (id: string, value: string | string[]) => void
 }
 
-export default function SimpleForm(props: Props) {
+export default function SimpleForm<T>(props: Props<T>) {
   const {fields, data, state, isEditing, onChange} = props
+
+  const handleInputChange = (evt) => {
+    const {name, value} = evt.target
+    onChange(name, value)
+  }
+
+  const handleAutocompleteChange = (id: string, value: string[]) => {
+    onChange(id, value)
+  }
 
   return (
     <Root>
       {fields.map(obj => {
-        const {key, label, edit, type, helpText, maxLength} = obj
-        const value = data[key]
+        const {
+          id, label, edit, type, helpText, maxLength, 
+          multiple, options, width, placeholder, 
+        } = obj
+        
+        const value = data[id]
 
         return (
-          <div key={key}>
-            <h2>{label}</h2>
+          <div key={id}>
+            {(edit == false || !isEditing) && 
+              <h2>{label}</h2>
+            }
             {isEditing && edit != false ?
-              <FormControl>
-                <OutlinedInput
-                  placeholder={label}
-                  aria-label={label}
-                  name={key}
-                  onChange={onChange}
-                  value={state[key]}
-                  multiline={type == 'textarea'}
-                  minRows={type == 'textarea' ? 4 : 0}
-                  style={type == 'textarea' ? {width: 500} : {width: 300}}
-                  inputProps={{maxLength}}
-                />
+              <FormControl margin="normal">
+                {multiple ? 
+                  <Autocomplete
+                    multiple
+                    freeSolo
+                    options={options || []}
+                    onChange={(_, value) => handleAutocompleteChange(id, value)}
+                    // getOptionLabel={(option) => option.label}
+                    defaultValue={value}
+                    filterSelectedOptions
+                    sx={{ width: width || 500 }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={label}
+                        placeholder={placeholder}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    )}
+                  />
+                  :
+                  <TextField
+                    label={label}
+                    placeholder={placeholder}
+                    aria-label={label}
+                    name={id}
+                    onChange={handleInputChange}
+                    value={state[id]}
+                    multiline={type == 'textarea'}
+                    minRows={type == 'textarea' ? 4 : 0}
+                    inputProps={{maxLength}}
+                    InputLabelProps={{shrink: true}}
+                    sx={{ width: width || (type == 'textarea' ?  500 : 300) }}
+                  />
+                }
                 {helpText && 
                   <FormHelperText>{helpText}</FormHelperText>
                 }
                 {maxLength &&
-                  <FocusedHelperText
-                    text={state[key]?.length > 20 &&
-                      `${maxLength - state[key]?.length} characters left`}
+                  <FocusedHelperText text={
+                    state[id]?.length > 20 && `${maxLength - state[id]?.length} characters left`}
                   />
                 }
               </FormControl> :
@@ -67,9 +111,6 @@ export default function SimpleForm(props: Props) {
 }
 
 const Root = styled.div`
-  .MuiFormHelperText-root {
-    margin-left: 0;
-  }
 `
 
 

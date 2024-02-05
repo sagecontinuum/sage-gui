@@ -8,18 +8,18 @@ import CancelIcon from '@mui/icons-material/UndoRounded'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import * as User from '/components/apis/user'
-import SimpleForm from '/components/input/SimpleForm'
+import SimpleForm, { type Field } from '/components/input/SimpleForm'
 
 
 
 
-const fields = [
-  {key: 'name', label: 'Name', edit: false},
-  {key: 'username', label: 'Username', edit: false},
-  {key: 'email', label: 'Email', edit: false},
-  {key: 'organization', label: 'Organization', maxLength: 30},
-  {key: 'department', label: 'Department', maxLength: 30},
-  {key: 'bio', label: 'Biography', type: 'textarea', maxLength: 500}
+const fields: Field[] = [
+  {id: 'name', label: 'Name', edit: false},
+  {id: 'username', label: 'Username', edit: false},
+  {id: 'email', label: 'Email', edit: false},
+  {id: 'organization', label: 'Organization', maxLength: 30},
+  {id: 'department', label: 'Department', maxLength: 30},
+  {id: 'bio', label: 'Biography', type: 'textarea', maxLength: 500}
 ]
 
 

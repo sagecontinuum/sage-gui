@@ -10,7 +10,7 @@ import CancelIcon from '@mui/icons-material/UndoRounded'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { Sidebar, Card, CardViewStyle } from '/components/layout/Layout'
-import SimpleForm from '/components/input/SimpleForm'
+import SimpleForm, { type Field } from '/components/input/SimpleForm'
 import Breadcrumbs from '/apps/sage/data-commons/BreadCrumbs'
 import { columns } from './SensorList'
 
@@ -18,16 +18,20 @@ import * as BK from '/components/apis/beekeeper'
 import { marked } from 'marked'
 import useIsSuper from '/components/hooks/useIsSuper'
 
+import { flatten, uniq } from 'lodash'
 
-const fields = [
-  {key: 'hardware', label: 'Hardware'},
-  {key: 'hw_model', label: 'Model', 
+
+const fieldSpec: Field[] = [
+  {id: 'hardware', label: 'Hardware'},
+  {id: 'hw_model', label: 'Model', 
     helpText: 'The model number of your sensor, without the manufacturer name.'}, 
-  {key: 'hw_version', label: 'Version'},
-  {key: 'sw_version', label: 'Software Version'},
-  {key: 'description', label: 'Description', type: 'textarea'},
-  {key: 'datasheet', label: 'Datasheet Link'},
-  // {key: 'capabilities', label: 'Capabilities'} // todo(nc)
+  /* hide capabilities until updates are supported 
+    {id: 'capabilities', label: 'Capabilities',  multiple: true,
+      helpText: 'Search or type a new capability', placeholder: 'Search...'}, */
+  {id: 'hw_version', label: 'Hardware Version'},
+  {id: 'sw_version', label: 'Software Version'},
+  {id: 'description', label: 'Description', type: 'textarea'},
+  {id: 'datasheet', label: 'Datasheet Link', width: '800px'}
 ]
 
 
@@ -44,6 +48,7 @@ export default function Sensor() {
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [state, setState] = useState<BK.SensorHardware>()
+  const [fields, setFields] = useState<Field[]>(fieldSpec)
 
   const getData = useCallback(() => {
     BK.getSensor(name)
@@ -60,8 +65,29 @@ export default function Sensor() {
     getData()
   }, [setLoading, getData])
 
-  const handleChange = (evt) => {
-    const {name, value} = evt.target
+  // fetch capability options if editing
+  useEffect(() => {
+    if (!isEditing) return
+
+    // fetch and add options to field spec (for the "capabilities" dropdown)
+    setLoading(true)
+    BK.getAllSensors()
+      .then((sensors) => {
+        const capabilityLists = sensors.map(o => o.capabilities)
+        const flatList = flatten(capabilityLists)
+        const options = uniq(flatList)
+
+        const i = fields.findIndex(o => o.id == 'capabilities')
+        if (i < 0) 
+          return
+
+        fields.splice(i, 1, {...fields[i], options})
+        setFields(fields)
+      })
+      .finally(() => setLoading(false))
+  }, [isEditing, setLoading])
+
+  const handleChange = (name, value) => {
     setState(prev => ({...prev, [name]: value}))
   }
 
@@ -124,25 +150,23 @@ export default function Sensor() {
 
       <Main className="flex gap">
         <Details className="flex column gap">
-          <Card className="flex items-center justify-between">
+          <Card className="flex items-center gap">
             <Breadcrumbs path={`/sensors/${name}`} />
 
-            {isSuper && 
-              <>
-                {isEditing ?
-                  <Button
-                    variant="outlined"
-                    className="cancel"
-                    onClick={handleCancel}
-                    startIcon={<CancelIcon/>}
-                  >
-                    Cancel
-                  </Button> :
-                  <Button startIcon={<EditIcon/>} onClick={() => setIsEditing(true)}>
-                    Edit
-                  </Button>
-                }
-              </>
+            {isSuper && !isEditing &&
+              <Button startIcon={<EditIcon/>} onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+            }
+            {isEditing &&
+              <Button
+                variant="outlined"
+                className="cancel"
+                onClick={handleCancel}
+                startIcon={<CancelIcon/>}
+              >
+                Cancel
+              </Button> 
             }
           </Card>
 
@@ -150,16 +174,25 @@ export default function Sensor() {
             <Card>
               <SimpleForm {...formData} onChange={handleChange} />
               {isEditing &&
-                <Button
-                  className="save"
-                  variant="contained"
-                  type="submit"
-                  onClick={handleSave}
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-              }              
+                <div className="flex items-center gap action-btns">
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    className="cancel"
+                    onClick={handleCancel}
+                    startIcon={<CancelIcon/>}
+                  >
+                    Cancel
+                  </Button> 
+                </div>
+              }            
             </Card>
           }
 
@@ -172,10 +205,6 @@ export default function Sensor() {
 
                 {!loading && !description &&
                   <span className="muted">no description provided</span>
-                }
-
-                {error &&
-                  <ErrorMsg>{error.message}</ErrorMsg>
                 }
               </Card>
 
@@ -190,6 +219,10 @@ export default function Sensor() {
             </>
           }
         </Details>
+
+        {error &&
+          <ErrorMsg>{error.message}</ErrorMsg>
+        }        
       </Main>
     </Root>
   )
@@ -208,7 +241,7 @@ const Main = styled.div`
   padding: 20px;
   width: 100%;
 
-  .save {
+  .action-btns {
     margin-top: 2rem;
   }
 `

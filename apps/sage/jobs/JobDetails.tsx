@@ -21,7 +21,7 @@ import { formatters } from './JobStatus'
 import JobTimeline from './JobTimeline'
 
 import * as ES from '/components/apis/ses'
-import { type NodeMeta } from '/components/apis/beekeeper'
+// import { type NodeMeta } from '/components/apis/beekeeper' // todo(nc)
 import DataOptions from '/components/input/DataOptions'
 import TimelineContainer from '/components/viz/TimelineContainer'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
@@ -47,7 +47,7 @@ type Options = {
 
 type Props = {
   job: ES.Job
-  nodeMetaByVSN: {[vsn: string]: NodeMeta}
+  nodeMetaByVSN: {[vsn: string]: object} // todo(nc): type after migration
   handleCloseDialog: () => void
 }
 

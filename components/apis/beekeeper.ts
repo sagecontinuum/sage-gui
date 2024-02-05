@@ -396,6 +396,11 @@ export type SensorListRow = SensorHardware & {
   vsns: VSN[]
 }
 
+export async function getAllSensors() : Promise<SensorListRow[]> {
+  const data = await get(`${config.auth}/sensors/`)
+  return data
+}
+
 
 export async function getSensors() : Promise<SensorListRow[]> {
   const project = PROJECT
