@@ -33,7 +33,7 @@ import Apps from './ecr/apps/Apps'
 import JobStatus from './jobs/JobStatus'
 const CreateJob = lazy(() => import('./jobs/create-job/CreateJob'))
 
-import DataBrowser from './data-stream/DataBrowser'
+import QueryBrowser from './data-stream/QueryBrowser'
 import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
@@ -201,7 +201,7 @@ export default function Sage() {
                     <Route path="data" element={<Data project={project} />} />
                     <Route path="data/ontology/:name" element={<Ontology />} />
                     <Route path="data/product/:name" element={<DataProduct />} />
-                    <Route path="query-browser" element={<DataBrowser />} />
+                    <Route path="query-browser" element={<QueryBrowser />} />
 
                     <Route path="data-commons-demo" element={<DataProductSearch />} />
 

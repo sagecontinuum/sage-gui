@@ -352,7 +352,7 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 type DateStr = `${string}T${string}Z`
 
 
-export default function DataBrowser() {
+export default function QueryBrowser() {
   const [params, setParams] = useSearchParams()
   const app = params.get('apps')
   const name = params.get('names')

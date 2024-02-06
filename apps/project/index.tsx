@@ -14,7 +14,7 @@ import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
 
 import Data from '/apps/sage/data/Data'
-import DataBrowser from '/apps/sage/data-stream/DataBrowser'
+import QueryBrowser from '../sage/data-stream/QueryBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
 import DataProduct from '/apps/sage/data-commons/DataProduct'
 
@@ -106,7 +106,7 @@ export default function App() {
                   <Route path="data" element={<Data {...{project, focus, nodes}} />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
-                  <Route path="query-browser" element={<DataBrowser />} />
+                  <Route path="query-browser" element={<QueryBrowser />} />
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
