@@ -734,6 +734,7 @@ export default function QueryBrowser() {
             return (
               <Menu key={facet}>
                 <Autocomplete
+                  freeSolo
                   options={menus[facet]}
                   renderInput={(props) =>
                     <TextField {...props} label={label} />}
