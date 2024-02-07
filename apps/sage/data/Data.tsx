@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Button from '@mui/material/Button'
@@ -91,11 +91,6 @@ const getDownloadLink = (path) =>
   </Button>
 
 
-// todo(nc): temp solution until we have references!
-// use the most recent app with same substring, ignoring "plugin-" and version
-const findApp = (apps, name) =>
-  apps.find(o => o.id.includes(name.replace('plugin-', '')))
-
 
 type FacetItem = {name: string, count: number}
 
@@ -126,8 +121,6 @@ export default function Data(props: Props) {
 
   if (project) initDataState.filters.project = [project]
   if (focus) initDataState.filters.focus = [focus]
-
-  const navigate = useNavigate()
 
   const [nodeMetaByVSN, setNodeMetaByVSN] = useState<BK.NodeMetaMap>()
   const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
@@ -367,16 +360,6 @@ export default function Data(props: Props) {
                         ${item.meta.plugin}<br>
                         ${item.value.toLocaleString()} records`
                       }
-                      onRowClick={(name) => {
-                        const id = findApp(ecr, name).id.split(':')[0]
-                        const origin = window.location.origin
-                        const portal = 'https://portal.sagecontinuum.org'
-
-                        if (origin == portal)
-                          navigate(`/apps/app/${id}`)
-                        else
-                          window.open(`${portal}/apps/app/${id}`, '_blank')
-                      }}
                       onCellClick={(data) => {
                         const {timestamp, meta} = data
                         const {vsn, origPluginName} = meta
@@ -403,7 +386,7 @@ export default function Data(props: Props) {
                 const timelineData = byApp[name]
                 return (
                   <TimelineContainer key={name}>
-                    <h2>{name}</h2>
+                    <h2><AppLabel label={name} ecr={ecr} /></h2>
                     <TimelineChart
                       data={timelineData}
                       limitRowCount={10}

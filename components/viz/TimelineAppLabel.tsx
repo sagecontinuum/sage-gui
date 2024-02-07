@@ -14,7 +14,9 @@ export default function TimelineAppLabel(props: Props) {
   const path = label.replace('registry.sagecontinuum.org/', '')
   const shortened = label.slice(label.lastIndexOf('/') + 1 )
 
-  if (!ECR.repoIsPublic(ecrAppList, path))
+  const name = path.split(':')[0] 
+
+  if (!ECR.repoIsPublic(ecrAppList, name))
     return (
       <Tooltip title={label} placement="right">
         <span>{shortened}</span>
@@ -23,9 +25,11 @@ export default function TimelineAppLabel(props: Props) {
 
   return (
     <Tooltip title={<>{path}<br/>(click for details)</>} placement="right">
-      <Portal to={`/apps/app/${path}`}>
-        {shortened}
-      </Portal>
+      <span>
+        <Portal to={`/apps/app/${name}`}>
+          {shortened}
+        </Portal>
+      </span>
     </Tooltip>
   )
 }
