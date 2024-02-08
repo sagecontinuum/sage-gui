@@ -338,6 +338,7 @@ export async function getSanitySummary(args?: SanityTestArgs) : Promise<ByMetric
 }
 
 
+
 async function _findLatestAvail(
   data: Record[],
   position?: string,
@@ -360,7 +361,7 @@ async function _findLatestAvail(
           onProgress(position, i)
         }
 
-        const size = parseInt(res.headers.get('content-length'))
+        const size = parseInt(res.headers.get('x-object-content-length') || res.headers.get('content-length'))
         return res.ok ? {...obj, size} : null
       })
 
