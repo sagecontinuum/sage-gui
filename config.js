@@ -34,6 +34,13 @@ const dev = {
 const config = {
   ...(process.env.SAGE_UI_SERVICE_CONFIG == 'dev' ? dev : prod),
   disableMaps: false,
+
+  // temp solution for display names
+  nodeSites: {
+    W08D: 'NEIU',
+    W099: 'NU',
+    W08E: 'CSU'
+  }
 }
 
 

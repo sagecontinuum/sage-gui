@@ -17,6 +17,7 @@ import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimeOpts from '/components/input/StyledTimeOpts'
+import { vsn as vsnFormatter, vsnToDisplayName } from '/components/views/nodes/nodeFormatters'
 
 import {
   FormControlLabel, Button, Select,
@@ -52,7 +53,7 @@ type MimeType = keyof typeof exts
 const columns = [{
   id: 'vsn',
   label: 'Node',
-  format: (val) => <a href={`/node/${val}`}>{val}</a>
+  format: vsnFormatter
 }, {
   id: 'timestamp',
   label: 'Time',
@@ -143,6 +144,10 @@ const getUniqueOpts = (data: string[]) =>
     .filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: v}))
 
+const getUniqueNodeOpts = (data: string[]) =>
+  data.sort()
+    .filter((v, i, self) => v && self.indexOf(v) == i)
+    .map(v => ({id: v, label: vsnToDisplayName(v)}))
 
 const getUniqueAppOpts = (data: string[]) =>
   data.sort()
@@ -208,7 +213,7 @@ async function getFilterMenus({plugin, task}) {
   })
 
   return {
-    nodes: getUniqueOpts(data.map(o => o.meta.vsn)),
+    nodes: getUniqueNodeOpts(data.map(o => o.meta.vsn)),
     names: getUniqueOpts(data.map(o => o.name)),
     sensors: getUniqueOpts(data.map(o => o.meta.sensor)),
     ...(plugin ? {} : {

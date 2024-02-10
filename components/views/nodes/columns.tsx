@@ -19,7 +19,7 @@ const columns = [{
 }, {
   id: 'vsn',
   label: 'Node',
-  width: '50px',
+  width: '60px',
   format: formatters.vsn
 }, {
   id: 'focus',

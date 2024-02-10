@@ -12,10 +12,12 @@ import {
 import Filter from '../common/FacetFilter'
 import ErrorMsg from '../ErrorMsg'
 
+import { useProgress } from '/components/progress/ProgressProvider'
 import TimelineChart, { TimelineContainer, colors } from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
-import { useProgress } from '/components/progress/ProgressProvider'
+import { vsnLink } from '/components/views/nodes/nodeFormatters'
+
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 
@@ -334,7 +336,7 @@ export default function Data(props: Props) {
                     <div className="flex title-row">
                       <div className="flex column">
                         <div>
-                          <h2><Link to={`/node/${vsn}`}>{vsn}</Link></h2>
+                          <h2>{vsnLink(vsn)}</h2>
                         </div>
                         <div>{location}</div>
                       </div>

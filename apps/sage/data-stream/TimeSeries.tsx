@@ -4,6 +4,7 @@ import { schemeCategory10 } from 'd3-scale-chromatic'
 import { chain, groupBy, sumBy } from 'lodash'
 
 import * as BH from '/components/apis/beehive'
+import { vsnToDisplayStr } from '/components/views/nodes/nodeFormatters'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '/components/input/Checkbox'
@@ -100,12 +101,14 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
     const namedData = byName[name]
     const grouped = groupBy(namedData, o => {
       const {sensor, zone, vsn} = o.meta
+
+      const node = vsnToDisplayStr(vsn)
       if (sensor && zone) {
-        return `${vsn}; ${sensor}; ${zone}`
+        return `${node}; ${sensor}; ${zone}`
       } else if (sensor) {
-        return `${vsn}; ${sensor}`
+        return `${node}; ${sensor}`
       } else {
-        return vsn
+        return node
       }
     })
 

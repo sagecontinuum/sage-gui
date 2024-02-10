@@ -33,6 +33,7 @@ import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 import ManifestTabs from './ManifestTabs'
 
+import { vsnToDisplayName } from '/components/views/nodes/nodeFormatters'
 import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
@@ -324,8 +325,6 @@ export default function NodeView(props: Props) {
 
   const { loading, setLoading } = useProgress()
 
-  const [nodeID, setNodeID] = useState<BK.NodeMeta['node_id']>(null)
-
   const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
   const [bkMeta, setBKMeta] = useState<BK.BKState | {registration_event: null}>()
@@ -378,7 +377,9 @@ export default function NodeView(props: Props) {
         setManifest(data)
 
         const id = data.name
-        setNodeID(id)
+
+        // todo(nc): move host id to table?
+        // setNodeID(id)
 
         // fetch the registration time from beekeeper
         BK.getNode(id)
@@ -495,7 +496,7 @@ export default function NodeView(props: Props) {
               <h1 className="no-margin">
                 {node_type == 'WSN' ?
                   'Wild Sage Node' : node_type
-                } {vsn} <small className="muted">{nodeID}</small>
+                } {vsnToDisplayName(vsn)}
               </h1>
 
               <Tooltip

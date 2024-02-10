@@ -16,6 +16,7 @@ import Dot from '/components/utils/Dot'
 
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
+import config from '/config'
 
 
 export function gpsIcon(obj) {
@@ -136,11 +137,28 @@ export function statusWithPhase(val, obj) {
 
 
 export function vsn(val) {
-  return (
-    <NodeCell className="flex items-center justify-between">
-      <Link to={`/node/${val}`}>{val}</Link>
-    </NodeCell>
-  )
+  return <Link to={`/node/${val}`}>
+    {config.nodeSites[val] || val}
+  </Link>
+}
+
+export function vsnLink(val) {
+  const displayName = config.nodeSites[val]
+  return <Link to={`/node/${val}`}>
+    {displayName || val} <small className="muted">{displayName && `${val}` }</small>
+  </Link>
+}
+
+export function vsnToDisplayName(val) {
+  const displayName = config.nodeSites[val]
+  return <>
+    {displayName || val}&nbsp;<small className="muted">{displayName && val}</small>
+  </>
+}
+
+export function vsnToDisplayStr(val) {
+  const displayName = config.nodeSites[val]
+  return `${displayName || val} ${displayName && `| ${val}`}`
 }
 
 export function vsnWithGPS(val, obj) {
