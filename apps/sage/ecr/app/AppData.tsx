@@ -1,5 +1,4 @@
 import { useEffect, useState, useReducer } from 'react'
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { Card } from '/components/layout/Layout'
 
@@ -8,7 +7,7 @@ import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 
 import * as BK from '/components/apis/beekeeper'
 
-import { addDays, addHours, endOfHour, subDays } from 'date-fns'
+import { addDays, addHours, endOfHour, subDays, subYears } from 'date-fns'
 
 import config from '/config'
 const registry = config.dockerRegistry
@@ -20,13 +19,27 @@ import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
+import { vsnLinkNameOnly } from '/components/views/nodes/nodeFormatters'
 
 const TIMELINE_LABEL_WIDTH = 40
 const TAIL_DAYS = '-7d'
 
+// todo(nc): generalize a la data/query browser handling of times
+const getStartTime = (str) => {
+  if (str.includes('d'))
+    return subDays(new Date(), str.replace(/-|d/g, ''))
+  else if (str.includes('y'))
+    return subYears(new Date(), str.replace(/-|y/g, ''))  
+  else 
+    throw new Error(`getStartTime: relative start time '%{string}' not supported.`)
+}
 
-const getStartTime = (str) =>
-  subDays(new Date(), str.replace(/-|d/g, ''))
+const getRangeTitle = (str) => {
+  if (str.includes('d'))
+    return `Last ${str.replace(/-|d/g, '')} days of data`
+  else if (str.includes('y'))
+    return `Last ${str.replace(/-|y/g, '')} year of data`
+}
 
 
 type Props = {
@@ -103,7 +116,7 @@ export default function AppData(props: Props) {
       {/* <CardViewStyle /> */}
       <Card>
         <div className="flex gap">
-          <h2 className="no-margin">Last {opts.window.replace(/-|d/g, '')} days of data</h2>
+          <h2 className="no-margin">{getRangeTitle(opts.window)}</h2>
           <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
         </div>
       </Card>
@@ -142,8 +155,7 @@ export default function AppData(props: Props) {
                       ${item.meta.plugin}<br>
                       ${item.value.toLocaleString()} records`
                     }
-                    yFormat={vsn =>
-                      <Link to={`/node/${vsn}`} target="_blank">{vsn}</Link>}
+                    yFormat={vsn => vsnLinkNameOnly(vsn)}
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta

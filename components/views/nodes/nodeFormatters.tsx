@@ -149,6 +149,13 @@ export function vsnLink(val) {
   </Link>
 }
 
+export function vsnLinkNameOnly(val) {
+  const displayName = config.nodeSites[val]
+  return <Link to={`/node/${val}`}>
+    {displayName || val}
+  </Link>
+}
+
 export function vsnToDisplayName(val) {
   const displayName = config.nodeSites[val]
   return <>
