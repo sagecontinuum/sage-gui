@@ -338,7 +338,7 @@ const facetInputs: Facets = {
 }
 
 const allowMultiSelect = (field: Facet) =>
-  ['nodes', 'names'].includes(field)
+  ['nodes', 'names', 'tasks'].includes(field)
 
 
 export function getFilterState(params, includeDefaultApp=true) : FilterState {
@@ -739,7 +739,7 @@ export default function QueryBrowser() {
             return (
               <Menu key={facet}>
                 <Autocomplete
-                  freeSolo
+                  freeSolo={facet !== 'apps'}
                   options={menus[facet]}
                   renderInput={(props) =>
                     <TextField {...props} label={label} />}
