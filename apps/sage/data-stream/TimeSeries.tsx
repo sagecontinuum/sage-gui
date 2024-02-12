@@ -269,7 +269,7 @@ export default function TimeSeries(props) {
 
 
       <Ctrls className="flex items-center justify-between">
-        <div>
+        <div className="flex items-centern gap">
           {opts.chartType == 'timeseries' && isZoomed &&
             <Button onClick={handleZoomReset} color="primary" variant="contained">
               Reset zoom

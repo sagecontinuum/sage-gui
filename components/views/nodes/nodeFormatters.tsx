@@ -165,7 +165,7 @@ export function vsnToDisplayName(val) {
 
 export function vsnToDisplayStr(val) {
   const displayName = config.nodeSites[val]
-  return `${displayName || val} ${displayName && `| ${val}`}`
+  return `${displayName || val} ${displayName ? `| ${val}` : ''}`
 }
 
 export function vsnWithGPS(val, obj) {

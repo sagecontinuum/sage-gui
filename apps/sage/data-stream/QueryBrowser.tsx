@@ -17,7 +17,7 @@ import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
 import { useProgress } from '/components/progress/ProgressProvider'
 import TimeOpts from '/components/input/StyledTimeOpts'
-import { vsn as vsnFormatter, vsnToDisplayName } from '/components/views/nodes/nodeFormatters'
+import { vsn as vsnFormatter, vsnToDisplayStr } from '/components/views/nodes/nodeFormatters'
 
 import {
   FormControlLabel, Button, Select,
@@ -70,7 +70,7 @@ const columns = [{
 
     const suffix = val.slice(val.lastIndexOf('.'))
 
-    if (val.includes('.jpg')) {
+    if (exts.image.includes(suffix)) {
       return (
         <div className="flex column">
           <img src={val} style={{maxWidth: '760px'}} />
@@ -147,7 +147,7 @@ const getUniqueOpts = (data: string[]) =>
 const getUniqueNodeOpts = (data: string[]) =>
   data.sort()
     .filter((v, i, self) => v && self.indexOf(v) == i)
-    .map(v => ({id: v, label: vsnToDisplayName(v)}))
+    .map(v => ({id: v, label: vsnToDisplayStr(v)}))
 
 const getUniqueAppOpts = (data: string[]) =>
   data.sort()
