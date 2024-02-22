@@ -128,6 +128,156 @@ function showGuide(ref, svg, y) {
     .attr('fill', 'none')
 }
 
+function drawRect(ctx, x: number, y: number, w: number, h: number, color) {
+  ctx.beginPath()
+  ctx.rect(x, y, w, h)
+  ctx.fillStyle = color
+  ctx.fill()
+  ctx.closePath()
+}
+
+const getFill = (d, colorCell, colorScale) => {
+  if (colorCell)
+    return colorCell(d.value, d)
+  else if (d.value > 0 && d.meta.severity == 'warning')
+    return color.orange
+  else
+    return d.value == 0 ? color.green : colorScale(d.value)
+}
+
+
+
+function renderCanvasCells(args) {
+  const {
+    domEle,
+    data,
+    width,
+    height,
+    x, y,
+    computeWidth,
+    colorCell,
+    colorScale
+  } = args
+
+  const pixelRatio = window.devicePixelRatio
+
+  // Add the canvas
+  const canvasHeight = height + margin.top
+  const context = d3.select(domEle)
+    .append('div')
+    .style('position', 'absolute')
+    .style('top', 0)
+    .style('left', 0)
+    .append('canvas')
+    .attr('width', width * pixelRatio)
+    .attr('height', canvasHeight * pixelRatio)
+    .style('width', `${width}px`)
+    .style('height', `${canvasHeight}px`)
+    .style('border', '1px solid black')
+    .node().getContext('2d')
+
+  context.scale(pixelRatio, pixelRatio)
+
+
+  data.forEach(function(d) {
+    drawRect(context,
+      x(new Date(d.timestamp)),
+      y(d.row) + cellPad,
+      computeWidth(d, x),
+      10,
+      getFill(d, colorCell, colorScale)
+    )
+  })
+
+  return context
+}
+
+
+function renderSVGCells(args) {
+  const {
+    svg,
+    domEle,
+    data,
+    width,
+    x, y,
+    computeWidth,
+    onCellClick,
+    colorCell,
+    tooltip,
+    tooltipPos,
+    colorScale
+  } = args
+
+  // add cell container
+  const cells = svg.append('g')
+    .attr('width', width)
+    .style('cursor', onCellClick ? 'pointer' : 'auto')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+  // add cells
+  cells.selectAll()
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('class', 'cell')
+    .attr('x', (d) => x(new Date(d.timestamp)) )
+    .attr('y', (d) => y(d.row) + cellPad)
+    .attr('width', (d) => computeWidth(d, x))
+    .attr('height', y.bandwidth() - 2 )
+    .attr('rx', borderRadius)
+    .attr('stroke-width', 2)
+    // .attr('opacity', .5)
+    .attr('fill', (d) => getFill(d, colorCell, colorScale))
+    .on('mouseenter', function(evt, data) {
+      // showGuide(this, svg, y)
+      d3.select(this)
+        .attr('opacity', 0.85)
+        .attr('stroke-width', 2)
+        .attr('stroke', '#444')
+      showTooltip(evt, data)
+    })
+    .on('mouseleave', function() {
+      d3.select('.guide').remove()
+      d3.select(this)
+        .attr('opacity', 1.0)
+        .attr('stroke', null)
+      tt.style('display', 'none')
+    })
+    .on('click', (evt, data) => {
+      if (!onCellClick) return
+      onCellClick(data)
+    })
+
+  /**
+   * tooltip
+   */
+  const tt = d3.select(domEle)
+    .selectAll('#tooltip')
+    .data([null])
+    .join('div')
+    .attr('id', 'tooltip')
+    .style('position', 'absolute')
+    .style('display', 'none')
+    .style('background', '#000')
+    .style('color', '#fff')
+    .style('padding', '1em')
+
+  const showTooltip = (evt, data) => {
+    tt.html(tooltip ? tooltip(data) :
+      `${new Date(data.timestamp).toDateString()} ` +
+      `${new Date(data.timestamp).toLocaleTimeString()}<br>
+       ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
+       value: ${data.value}`
+    )
+      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 265}px`)
+      .style('left', `${evt.pageX - 80}px`)
+      .style('z-index', 999)
+
+    tt.style('display', null)
+  }
+
+  return cells
+}
 
 
 
@@ -155,6 +305,7 @@ function drawChart(
     onCellClick,
     onRowClick
   } = params
+
 
   const cellUnit = params.cellUnit ? CELL_UNITS[params.cellUnit] : CELL_UNITS.hour
 
@@ -202,53 +353,19 @@ function drawChart(
     .attr('transform', `translate(${margin.left}, ${margin.top})`)
     .call(xAxis)
 
-
-  // add cells
-  const cells = svg.append('g')
-    .attr('width', width)
-    .style('cursor', onCellClick ? 'pointer' : 'auto')
-    .attr('transform', `translate(${margin.left}, ${margin.top})`)
-
-  cells.selectAll()
-    .data(data)
-    .enter()
-    .append('rect')
-    .attr('class', 'cell')
-    .attr('x', (d) => x(new Date(d.timestamp)) )
-    .attr('y', (d) => y(d.row) + cellPad)
-    .attr('width', (d) => computeWidth(d, x))
-    .attr('height', y.bandwidth() - 2 )
-    .attr('rx', borderRadius)
-    .attr('stroke-width', 2)
-    // .attr('opacity', .5)
-    .attr('fill', (d) => {
-      if (colorCell)
-        return colorCell(d.value, d)
-      else if (d.value > 0 && d.meta.severity == 'warning')
-        return color.orange
-      else
-        return d.value == 0 ? color.green : colorScale(d.value)
+  const useCanvas = false
+  let cells, context
+  if (useCanvas) {
+    context = renderCanvasCells({
+      svg, domEle, data, x, y, width, height, tooltip, tooltipPos,
+      computeWidth, onCellClick, colorCell, colorScale
     })
-    .on('mouseenter', function(evt, data) {
-      // showGuide(this, svg, y)
-      d3.select(this)
-        .attr('opacity', 0.85)
-        .attr('stroke-width', 2)
-        .attr('stroke', '#444')
-      showTooltip(evt, data)
+  } else {
+    cells = renderSVGCells({
+      svg, domEle, data, x, y, width, tooltip, tooltipPos,
+      computeWidth, onCellClick, colorCell, colorScale
     })
-    .on('mouseleave', function() {
-      d3.select('.guide').remove()
-      d3.select(this)
-        .attr('opacity', 1.0)
-        .attr('stroke', null)
-      tt.style('display', 'none')
-    })
-    .on('click', (evt, data) => {
-      if (!onCellClick) return
-      onCellClick(data)
-    })
-
+  }
 
   // add y axis overlay
   svg.append('g')
@@ -274,33 +391,6 @@ function drawChart(
       })
   }
 
-  /**
-   * tooltip
-   */
-  const tt = d3.select(domEle)
-    .selectAll('#tooltip')
-    .data([null])
-    .join('div')
-    .attr('id', 'tooltip')
-    .style('position', 'absolute')
-    .style('display', 'none')
-    .style('background', '#000')
-    .style('color', '#fff')
-    .style('padding', '1em')
-
-  const showTooltip = (evt, data) => {
-    tt.html(tooltip ? tooltip(data) :
-      `${new Date(data.timestamp).toDateString()} ` +
-      `${new Date(data.timestamp).toLocaleTimeString()}<br>
-       ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
-       value: ${data.value}`
-    )
-      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 265}px`)
-      .style('left', `${evt.pageX - 80}px`)
-      .style('z-index', 999)
-
-    tt.style('display', null)
-  }
 
   /**
    * panning/zooming
@@ -310,9 +400,16 @@ function drawChart(
   function zoomed(e) {
     const newScale = e.transform.rescaleX(x)
 
-    cells.selectAll('.cell')
-      .attr('x', (d) => newScale(new Date(d.timestamp)))
-      .attr('width', (d) => computeWidth(d, newScale))
+    if (useCanvas) {
+      context.clearRect(0, 0, width, height)
+      data.forEach(function(d) {
+        drawRect(context, newScale(new Date(d.timestamp)), y(d.row) + cellPad, computeWidth(d, newScale), 10)
+      })
+    } else {
+      cells.selectAll('.cell')
+        .attr('x', (d) => newScale(new Date(d.timestamp)))
+        .attr('width', (d) => computeWidth(d, newScale))
+    }
 
     gX.call(xAxis.scale(newScale))
   }
@@ -481,6 +578,12 @@ function Chart(props: TimelineProps) {
         svg.remove()
       }
 
+      // todo(nc): redraw, instead entirely replacing the canvas
+      const canvas = node.querySelector('canvas')
+      if (canvas) {
+        canvas.remove()
+      }
+
       if (limitRowCount) {
         setTotalRows(yLabels.length)
         yLabels = (limitRowCount && !showAllRows) ? yLabels.slice(0, limitRowCount) : yLabels
@@ -549,6 +652,7 @@ function Chart(props: TimelineProps) {
         }
 
         {/* d3.js timeline chart */}
+        {/* note: for canvas we'll need `position: 'relative'` */}
         <div ref={ref} className="w-full"></div>
       </div>
 
