@@ -213,6 +213,37 @@ export function uptimes(val) {
   )
 }
 
+// todo(nc): use new /nodes endpoint?
+export function modem(val, obj) {
+
+  const modemModel = obj.resources.find(o => o.name == 'modem')?.hw_model
+  return (
+    <>
+      <small className="muted font-bold">
+        {obj.modem.carrier ? 
+          'Cellular Connected' : 
+          (modemModel ? 'Cellular-Ready' : '-')
+        }
+      </small>
+      <div>
+        {modemModel && <Link to={`/node/${obj.vsn}?tab=peripherals`}>{modemModel}</Link>}
+      </div>
+    </>
+  )
+}
+
+// details on a sim card for a node
+export function modemSim(val: BK.SimpleManifest['modem'], obj: BK.SimpleManifest) {
+  return (
+    <>
+      <small className="muted"><b>{obj.modem.carrier_name}</b></small>
+      <div>
+        {obj.modem.carrier || '-'}{' '}
+        {obj.modem.sim_type && <span className="muted">{obj.modem.sim_type}</span>}
+      </div>
+    </>
+  )
+}
 
 type SensorsProps = {
   data: BK.FlattenedManifest['sensors']

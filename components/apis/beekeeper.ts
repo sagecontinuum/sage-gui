@@ -8,6 +8,7 @@ const PROJECT = settings.project
 import { handleErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
 import USStates from './us-states'
+import { getCarrierName } from './carrier-codes'
 
 import Auth from '../auth/auth'
 
@@ -272,9 +273,10 @@ type Manifest = {
   gps_lat?: number
   gps_lon?: number
   modem?: {
-    model:  string      // mtcm2,
-    sim_type: string    // anl-nu,
-    carrier: string     // 310030
+    model:  string        // mtcm2,
+    sim_type: string      // anl-nu,
+    carrier: string       // 310030
+    carrier_name?: string // added client-side
   }
   tags?: string[]
   computes: Compute[]
@@ -312,6 +314,10 @@ const toSimpleManifest = o => ({
   name: o.name,
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
+  modem: {
+    ...o.modem, 
+    ...(o.modem && { carrier_name: getCarrierName(o.modem?.carrier) })
+  },
   computes: o.computes.map(({name, serial_no, zone}) => ({
     name,
     serial_no,
@@ -324,6 +330,11 @@ const toSimpleManifest = o => ({
     hw_model: hardware.hw_model,
     description: hardware.description,
     capabilities: hardware.capabilities
+  })),
+  resources: o.resources.map(({name, hardware}) => ({
+    name,
+    hardware: hardware.hardware,
+    hw_model: hardware.hw_model,
   })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
 })
 
@@ -334,7 +345,10 @@ const flattenManifest = o => ({
   name: o.name,
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
-  modem: o.modem,
+  modem: {
+    ...o.modem, 
+    ...(o.modem && { carrier_name: getCarrierName(o.modem?.carrier) })
+  },
   project: o.project,
   address: o.address,
   lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({

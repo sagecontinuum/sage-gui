@@ -33,7 +33,7 @@ import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 import ManifestTabs from './ManifestTabs'
 
-import { vsnToDisplayName } from '/components/views/nodes/nodeFormatters'
+import * as nodeFormatters from '/components/views/nodes/nodeFormatters'
 import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
@@ -240,14 +240,11 @@ const hardwareMeta = [{
         </Grid>
 
         <Grid xs={3}>
-          <small className="muted font-bold">Modem</small>
-          <div>{modem ? <Link to="?tab=peripherals" replace>{modem.model}</Link> : 'no'}</div>
+          {nodeFormatters.modem(modem, obj)}
         </Grid>
 
         <Grid xs={3}>
-          <small className="muted font-bold">Modem Sim</small>
-          <div>{obj.resources.some(o => o.name == 'modem-sim') ?
-            <Link to="?tab=peripherals" replace>{obj.resources.find(o => o.name == 'modem-sim').hardware}</Link> : 'no'}</div>
+          {nodeFormatters.modemSim(modem, obj)}
         </Grid>
       </Grid>
     )
@@ -496,7 +493,7 @@ export default function NodeView(props: Props) {
               <h1 className="no-margin">
                 {node_type == 'WSN' ?
                   'Wild Sage Node' : node_type
-                } {vsnToDisplayName(vsn)}
+                } {nodeFormatters.vsnToDisplayName(vsn)}
               </h1>
 
               <Tooltip

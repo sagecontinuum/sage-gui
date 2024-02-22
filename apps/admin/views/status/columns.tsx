@@ -416,12 +416,12 @@ const columns = [{
 }, {
   id: 'modem',
   label: 'Modem',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  format: formatters.modem,
   hide: true
 }, {
   id: 'modem_sim',
   label: 'Modem Sim',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  format: formatters.modemSim,
   hide: true
 }]
 
