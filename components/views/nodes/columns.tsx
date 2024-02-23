@@ -64,20 +64,17 @@ const columns = [{
   label: 'Stevenson Shield',
   format: (val) => val ? <CheckIcon className="success" /> : 'no',
   hide: true,
-}, /* {
-  id: 'modem',
+}, {
+  id: 'modem_hw_model',
   label: 'Modem',
-  format: (val, obj) => {
-    console.log('val', obj)
-    val ? <CheckIcon className="success" /> : 'no'
-  },
+  format: formatters.modem,
   hide: true
 }, {
-  id: 'modem_sim',
+  id: 'modem_carrier_name',
   label: 'Modem Sim',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
+  format: formatters.modemSim,
   hide: true
-}*/]
+}]
 
 
 if (PROJECT != 'sage') {

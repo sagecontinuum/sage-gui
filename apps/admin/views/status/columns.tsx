@@ -414,12 +414,12 @@ const columns = [{
   format: (val) => val ? <CheckIcon className="success" /> : 'no',
   hide: true,
 }, {
-  id: 'modem',
+  id: 'modem_hw_model',
   label: 'Modem',
   format: formatters.modem,
-  hide: true
+  hide: false
 }, {
-  id: 'modem_sim',
+  id: 'modem_carrier_name',
   label: 'Modem Sim',
   format: formatters.modemSim,
   hide: true

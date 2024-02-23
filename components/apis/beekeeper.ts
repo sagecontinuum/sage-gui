@@ -314,10 +314,11 @@ const toSimpleManifest = o => ({
   name: o.name,
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
-  modem: {
-    ...o.modem, 
-    ...(o.modem && { carrier_name: getCarrierName(o.modem?.carrier) })
-  },
+  modem_model: o.modem?.model,
+  modem_hw_model: o.resources.find(obj => obj.name == 'modem')?.hardware.hw_model,
+  modem_sim_type: o.modem?.sim_type,
+  modem_carrier: o.modem?.carrier,
+  ...(o.modem && { modem_carrier_name: getCarrierName(o.modem?.carrier) }),
   computes: o.computes.map(({name, serial_no, zone}) => ({
     name,
     serial_no,
@@ -330,11 +331,6 @@ const toSimpleManifest = o => ({
     hw_model: hardware.hw_model,
     description: hardware.description,
     capabilities: hardware.capabilities
-  })),
-  resources: o.resources.map(({name, hardware}) => ({
-    name,
-    hardware: hardware.hardware,
-    hw_model: hardware.hw_model,
   })).sort((a) => a.name != a.hw_model.toLowerCase() ? -1 : 1)
 })
 
@@ -345,10 +341,11 @@ const flattenManifest = o => ({
   name: o.name,
   gps_lat: o.gps_lat,
   gps_lon: o.gps_lon,
-  modem: {
-    ...o.modem, 
-    ...(o.modem && { carrier_name: getCarrierName(o.modem?.carrier) })
-  },
+  modem_model: o.modem?.model,
+  modem_hw_model: o.resources.find(obj => obj.name == 'modem')?.hardware.hw_model,
+  modem_sim_type: o.modem?.sim_type,
+  modem_carrier: o.modem?.carrier,
+  ...(o.modem && { modem_carrier_name: getCarrierName(o.modem?.carrier) }),
   project: o.project,
   address: o.address,
   lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({
