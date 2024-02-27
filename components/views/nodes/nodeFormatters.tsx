@@ -168,6 +168,11 @@ export function vsnToDisplayStr(val) {
   return `${displayName || val} ${displayName ? `| ${val}` : ''}`
 }
 
+export function vsnToDisplayStrAlt(val) {
+  const displayName = config.nodeSites[val]
+  return `${displayName || val} ${displayName ? `(${val})` : ''}`
+}
+
 export function vsnWithGPS(val, obj) {
   return (
     <NodeCell className="flex items-center justify-between">

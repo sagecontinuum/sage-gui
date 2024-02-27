@@ -79,7 +79,7 @@ const getGeoSpec = (data: Data[]) => {
         coordinates: [obj.lng, obj.lat]
       },
       properties: {
-        title: obj.vsn,
+        title: formatters.vsnToDisplayStrAlt(obj.vsn),
         description: '',
         data: obj
       },
@@ -140,9 +140,7 @@ function PopupInfo(props: PopupProps) {
           {vsn.charAt(0) == 'W' &&
             'Wild Sage Node'
           }&nbsp;
-          <Link to={`/node/${vsn}`}>
-            {vsn}
-          </Link>
+          {formatters.vsnLink(vsn)}
         </div>
       </h2>
       
