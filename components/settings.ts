@@ -35,7 +35,7 @@ const configs : Configs = {
     alt: 'CROCUS: Community Research on Climate and Urban Science',
     project: 'CROCUS',
     url: 'https://crocus-urban.org',
-    initialViewState: { latitude: 41.97, longitude: -87.65, zoom: 9.0 }
+    initialViewState: { latitude: 41.88, longitude: -87.65, zoom: 8.7 }
   },
   'neon-mdp': {
     project: 'Sage',
