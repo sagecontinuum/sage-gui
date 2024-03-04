@@ -156,7 +156,7 @@ function PopupInfo(props: PopupProps) {
           <div>
             <small className="muted font-bold">Focus</small>
             <div>                 
-              <Link to={`/nodes/&focus="${encodeURIComponent(focus)}"`}>
+              <Link to={`/nodes/?focus="${encodeURIComponent(focus)}"`}>
                 {focus}
               </Link>
             </div>
