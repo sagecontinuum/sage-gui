@@ -79,7 +79,6 @@ export default function JobDetails(props: Props) {
     setLoading(true)
     ES.getEvents({vsns: job.nodes, start})
       .then(({events, errors}) => {
-
         setEventsByNode(events)
         setErrorsByGoalID(errors)
       })

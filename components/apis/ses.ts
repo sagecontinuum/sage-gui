@@ -5,6 +5,8 @@ import { groupBy } from 'lodash'
 import { handleErrors } from '../fetch-utils'
 import { downloadFile } from '/components/utils/downloadFile'
 
+import { uniqBy } from 'lodash'
+
 import * as YAML from 'yaml'
 
 import config from '/config'
@@ -41,7 +43,7 @@ function post(endpoint: string, data = '') {
     .then(res => res.json())
 }
 
-
+// todo(nc): update goals?  These aren't user-facing right now.
 const goalEventTypes = [
   'sys.scheduler.status.goal.submitted',
   'sys.scheduler.status.goal.updated',
@@ -50,14 +52,18 @@ const goalEventTypes = [
   'sys.scheduler.status.goal.removed',
 ]
 
+
 const pluginEventTypes = [
-  'sys.scheduler.status.plugin.promoted',
-  'sys.scheduler.status.plugin.scheduled',
-  'sys.scheduler.status.plugin.launched',
-  'sys.scheduler.status.plugin.complete',
+  'sys.scheduler.status.plugin.queued',
+  'sys.scheduler.status.plugin.selected',   // indicates that agiven scheduling policy selected the plugin to schedule
+  'sys.scheduler.status.plugin.scheduled',      // created a Pod for the plugin
+  'sys.scheduler.status.plugin.initializing',   // initContainer is running or plugin container image is being pulled
+  'sys.scheduler.status.plugin.running',
+  'sys.scheduler.status.plugin.completed',  
   'sys.scheduler.plugin.lastexecution',
   'sys.scheduler.status.plugin.failed',
-  'sys.scheduler.failure'
+  'sys.scheduler.status.plugin.complete',       // "deprecated"
+  'sys.scheduler.status.plugin.launched',       // "deprecated"
 ]
 
 
@@ -75,7 +81,7 @@ export type PluginEvent = Event & {
   value: {
     goal_id: string
     k3s_pod_instance?: string  // only available in newer data (ex: `app-name-PHMwrO`)
-    k3s_pod_name: string       // `app-name-PHMwrO` in older data and `app-name` in newer data
+    k3s_pod_name: string       // `app-name-PHMwrO` in older data and `app-name-{jobid}` in newer data
     k3s_pod_node_name: string
     k3s_pod_status: string
     plugin_args: string
@@ -85,7 +91,7 @@ export type PluginEvent = Event & {
     plugin_status_by_scheduler: string
     plugin_task: string
   }
-  status: 'failed' | 'complete' | 'launched' | 'running'
+  status: 'failed' | 'launched' | 'running' | 'complete' | 'completed' 
   // computed client-side
   end?: number
   runtime?: number
@@ -224,35 +230,54 @@ async function listJobs(params?: ListJobsParams) : Promise<Job[]> {
 }
 
 
+/* todo(nc): need linkage between various pod runs
+const queuedSignals = [
+  'sys.scheduler.status.plugin.promoted', // deprecated in favor of "queued"
+  'sys.scheduler.status.plugin.queued'
+]
 
-const startedSignal = 'sys.scheduler.status.plugin.launched'
 
-const endedSignals = [
-  'sys.scheduler.status.plugin.complete',
+const selectedSignals = [
+  'sys.scheduler.status.plugin.scheduled', // deprecated in favor of "selected"?
+  'sys.scheduler.status.plugin.selected'
+]
+
+const startStatuses = ['launched', 'initializing']
+*/
+
+
+const startSignals = [
+  'sys.scheduler.status.plugin.launched', // deprecated in favor of "initializing"
+  'sys.scheduler.status.plugin.initializing'
+]
+
+
+const endSignals = [
+  'sys.scheduler.status.plugin.complete', // deprecated in favor of "completed"
+  'sys.scheduler.status.plugin.completed',
   'sys.scheduler.status.plugin.failed'
 ]
 
 
-const filterEvents = (o) =>
-  startedSignal == o.name || endedSignals.includes(o.name)
+const filterEventsV2 = (o, startList, endList) =>
+  startList.includes(o.name) || endList.includes(o.name)
 
-
+const isDevMode = process.env.NODE_ENV == 'development'
 const warnings = []
 
-type ByTask = {
+type EventsByAppName = {
   [appName: string]: (PluginEvent & {end: string})
 }
 
-function aggregateEvents(data: PluginEvent[]) : ByTask {
+function findEventsByApp(data: PluginEvent[], startList, endList) : EventsByAppName {
 
-  // we only care about start / end signals (for now)
-  const filtered = data.filter(filterEvents)
+  const filtered = data.filter((obj) => filterEventsV2(obj, startList, endList))
 
-  if (process.env.NODE_ENV == 'development' && data.length != filtered.length) {
-    const otherEvents = data.filter(o => !filterEvents(o))
+  if (isDevMode && data.length != filtered.length) {
+    const otherEvents = data.filter(o => !filterEventsV2(o, startList, endList))
     warnings.push(
       `SES events were filtered from ${data.length} to ${filtered.length}\n`,
-      'Other events:', otherEvents
+      'Other events:', uniqBy(otherEvents, 'name').map(o => o.name).join(', ')
     )
   }
 
@@ -274,8 +299,8 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
       hasStart = hasEnd = true
     } else if (events.length == 1) {
       const name = events[0].name
-      hasStart = name == startedSignal
-      hasEnd = endedSignals.includes(name)
+      hasStart = startList.includes(name)
+      hasEnd = endList.includes(name)
     } else {
       warnings.push(
         `parseEvents: wrong number of events for ${podName}.`,
@@ -304,7 +329,7 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
       item = {
         ...startObj,
         end: new Date().toISOString(),
-        status: 'running',
+        status: 'running', // startObj.name.split('.').pop(),
         runtime: new Date().getTime() - new Date(start).getTime()
       }
 
@@ -317,9 +342,12 @@ function aggregateEvents(data: PluginEvent[]) : ByTask {
       byTaskName[taskName] = [item]
   }
 
+  if (isDevMode) {
+    console.warn(warnings.join('\n'))
+  }
+
   return byTaskName
 }
-
 
 
 export type EventsByNode = {
@@ -331,12 +359,13 @@ export function reduceData(taskEvents: PluginEvent[]) : EventsByNode {
   // first group by vsn
   const groupedByNode = groupBy(taskEvents, 'meta.vsn')
 
-  // aggregate start/stops by vsn
+  // aggregate start/stops for each vsn
   const byNode = {}
   for (const [vsn, events] of Object.entries(groupedByNode)) {
-    const byApp = aggregateEvents(events)
+    const byApp = findEventsByApp(events, startSignals, endSignals)
     byNode[vsn] = byApp
   }
+
 
   // organize by orange/red statuses below 'complete'
   // High-level metrics could make this make this clear, in lieu of better design
@@ -344,7 +373,7 @@ export function reduceData(taskEvents: PluginEvent[]) : EventsByNode {
     for (const [app, objs] of Object.entries(byApp)) {
       byNode[vsn][app] = [
         ...objs.filter(obj => ['launched', 'running'].includes(obj.status)),
-        ...objs.filter(obj => obj.status == 'complete'),
+        ...objs.filter(obj => ['complete', 'completed'].includes(obj.status)),
         ...objs.filter(obj => obj.status == 'failed')
       ]
     }
@@ -352,6 +381,36 @@ export function reduceData(taskEvents: PluginEvent[]) : EventsByNode {
 
   return byNode
 }
+
+
+// todo(nc): work in progress for new scheduler events
+/*
+export function reduceDataV2(taskEvents: PluginEvent[]) : EventsByNode {
+  // first group by vsn
+  const groupedByNode = groupBy(taskEvents, 'meta.vsn')
+
+  // aggregate start/stops by vsn
+  const byNode = {}
+  for (const [vsn, events] of Object.entries(groupedByNode)) {
+    const byAppScheduled = findEventsByApp(events, selectedSignals, startSignals)
+    byNode[vsn] = byAppScheduled
+  }
+  
+  // organize by orange/red statuses below 'complete'
+  // High-level metrics could make this make this clear, in lieu of better design
+  for (const [vsn, byApp] of Object.entries(byNode)) {
+    for (const [app, objs] of Object.entries(byApp)) {
+      byNode[vsn][app] = [
+        ...objs.filter(obj => startStatuses.includes(obj.status)),
+        ...objs.filter(obj => ['complete', 'completed'].includes(obj.status)),
+        ...objs.filter(obj => obj.status == 'failed')
+      ]
+    }
+  }
+
+  return byNode
+}
+*/
 
 
 const parseESRecord = (data) : ESRecord[] =>
@@ -389,7 +448,6 @@ export function getEvents(args?: GetEventsArgs) : Promise<EventData> {
   }).then(data => parseESRecord(data) as PluginEvent[])
     .then(pluginEvents => {
       const errors = pluginEvents.filter(obj => obj.value.k3s_pod_status == 'Failed') as FailedEvent[]
-
       const errorsByGoalID = groupBy(errors, 'value.goal_id')
 
       return {

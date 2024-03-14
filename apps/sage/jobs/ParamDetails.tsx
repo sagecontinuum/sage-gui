@@ -35,7 +35,7 @@ export default function ParamDetails(props: Props) {
             className={classes.root}
             expanded={expanded == i}
             onChange={handleChange(i)}
-            key={goal_id}
+            key={i}
           >
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}

@@ -12,6 +12,7 @@ import type { PluginEvent, ErrorsByGoalID } from '/components/apis/ses'
 
 
 const colorMap = {
+  completed: color.green4,
   complete: color.green4,
   failed: color.red4,
   running: 'rgb(235, 172, 101, .6)',
@@ -23,7 +24,7 @@ type GroupedApps = {
   [app: string]: (
     PluginEvent &
     {
-      status: 'launched' | 'running' | 'complete' | 'failed'
+      status: 'launched' | 'running' | 'failed' | 'complete' | 'completed'
       runtime: string
     }
   )[]
@@ -73,7 +74,7 @@ export default function JobTimeline(props: Props) {
             <b>task:</b> ${obj.value.plugin_task}<br>
             <b>args:</b> ${obj.value.plugin_args}<br>
             <b>selector:</b> ${obj.value.plugin_selector}<br>
-            <b>${obj.status == 'running' ? 'status': 'end status'}:</b>
+            <b>status:</b>
               <b class="${obj.status}">${obj.status}</b><br>
           `}
           yFormat={(label: string) => {
