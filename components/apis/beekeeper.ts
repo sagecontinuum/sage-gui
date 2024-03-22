@@ -252,7 +252,7 @@ type Resource = {
 }
 
 type LorawanDevice = {
-  device_name: string
+  name: string
   dev_eui: string
   battery_level: number
 }

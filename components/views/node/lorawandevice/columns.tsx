@@ -6,7 +6,7 @@
 //   format: formatters.status,
 //   width: '1px'
 // },{
-//   id: 'device_name',
+//   id: 'name',
 //   label: 'Name'
 // }, {
 //   id: 'deveui',
@@ -22,7 +22,7 @@
 // }]
 
 const lorawandeviceCols_temp = [{
-  id: 'device_name',
+  id: 'name',
   label: 'Name'
 }, {
   id: 'deveui',
