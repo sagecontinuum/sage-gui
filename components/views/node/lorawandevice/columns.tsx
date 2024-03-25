@@ -6,7 +6,7 @@ const lorawandeviceCols = [{
   id: 'last_seen_at',
   label: 'Status',
   format: formatters.status,
-  width: '1px'
+  width: '70px'
 },{
   id: 'name',
   label: 'Name'
@@ -21,18 +21,40 @@ const lorawandeviceCols = [{
 {
   id: 'margin',
   label: (
-    <Tooltip title="Represents the difference between Max measured SNR at the gateway and
-     Min SNR needed to demodulate a message at a specific data rate. It indicates the 
-     quality of the received signal compared to background noise." placement="bottom">
+    <Tooltip
+      title={
+        <span>
+          Indicates the quality of the received signal compared to background noise using the 
+          difference between Max measured 
+          <a 
+            href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#snr" 
+            target="_blank" 
+            rel="noreferrer"> SNR </a>  
+          at the gateway and Min SNR needed to demodulate a message at a specific data rate.
+        </span>
+      }
+      placement="bottom"
+    >
       <span>Margin<InfoOutlinedIcon fontSize="small" /></span>
     </Tooltip>
-  )
+  ),
 },
 {
   id: 'rssi',
   label: (
-    <Tooltip title="Signal strength calculated from RSSI. 
-    Column disabled if no RSSI values are sent." placement="bottom">
+    <Tooltip
+      title={
+        <span>
+          Determined by 
+          <a 
+            href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#rssi" 
+            target="_blank" 
+            rel="noreferrer"> RSSI</a>. 
+          Column disabled if no RSSI values are sent. 
+        </span>
+      }
+      placement="bottom"
+    >
       <span>Signal Strength<InfoOutlinedIcon fontSize="small" /></span>
     </Tooltip>
   ),
