@@ -253,13 +253,13 @@ type Resource = {
 
 type LorawanDevice = {
   name: string
-  dev_eui: string
+  deveui: string
   battery_level: number
 }
 
 type LorawanConnection = {
   connection_name: string
-  dev_eui: string
+  deveui: string
   last_seen_at: string
   margin: number
   expected_uplink: number
