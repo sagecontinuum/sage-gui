@@ -2,6 +2,10 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import QuestionIcon from '@mui/icons-material/HelpOutline'
+import SignalCellularConnectedNoInternet0BarIcon from '@mui/icons-material/SignalCellularConnectedNoInternet0Bar'
+import SignalCellularAlt1BarIcon from '@mui/icons-material/SignalCellularAlt1Bar'
+import SignalCellularAlt2BarIcon from '@mui/icons-material/SignalCellularAlt2Bar'
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -55,6 +59,39 @@ export function status(val,obj) {
           {interval_tooltip}
         </>
       }
+      componentsProps={{tooltip: { sx: { background: '#000' }}}}
+      placement="top"
+    >
+      {icon}
+    </Tooltip>
+  )
+}
+
+export function signal(val) {
+  if(!val){
+    return
+  }
+
+  let icon
+  let title
+
+  if(val >= -30) {
+    title = 'Strong Signal'
+    icon = <SignalCellularAltIcon />
+  } else if(val < -30 || val >= -75) {
+    title = 'Moderate Signal'
+    icon = <SignalCellularAlt2BarIcon />
+  } else if(val < -75 || val >= -120) {
+    title = 'Weak Signal'
+    icon = <SignalCellularAlt1BarIcon />
+  } else {
+    title = 'No Signal'
+    icon = <SignalCellularConnectedNoInternet0BarIcon />
+  }
+
+  return (
+    <Tooltip
+      title={title}
       componentsProps={{tooltip: { sx: { background: '#000' }}}}
       placement="top"
     >
