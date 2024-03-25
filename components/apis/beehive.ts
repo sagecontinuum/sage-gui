@@ -517,3 +517,9 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
   const data = await getData(params)
   return data
 }
+
+export async function getRssi(vsn: string, devEui: string) : Promise<Record> {
+  const params = {start: NODE_STATUS_RANGE, filter: {name: 'signal.rssi', vsn, devEui}, tail: 1}
+  const metrics = await getData(params)
+  return metrics[1]
+}
