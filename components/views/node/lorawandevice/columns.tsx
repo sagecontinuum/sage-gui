@@ -50,7 +50,7 @@ const lorawandeviceCols = [{
             href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#rssi" 
             target="_blank" 
             rel="noreferrer"> RSSI</a>. 
-          Column disabled if no RSSI values are sent. 
+          Column disabled if signal.rssi values are not being collected. 
         </span>
       }
       placement="bottom"
