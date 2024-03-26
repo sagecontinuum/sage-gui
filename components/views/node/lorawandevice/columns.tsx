@@ -10,7 +10,9 @@ const lorawandeviceCols = [{
   label: 'Name'
 }, {
   id: 'deveui',
-  label: 'DevEUI'
+  label: formatters.LabelWithTooltip(
+    'DevEUI',
+    'A unique 64 bit device identifier assigned by the manufacturer.'),
 },
 {
   id: 'battery_level',
