@@ -15,6 +15,8 @@ import Battery50Icon from '@mui/icons-material/Battery50'
 import Battery30Icon from '@mui/icons-material/Battery30'
 import Battery20Icon from '@mui/icons-material/Battery20'
 import Battery0BarRoundedIcon from '@mui/icons-material/Battery0BarRounded'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import { ReactNode } from 'react'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -155,6 +157,17 @@ export function power(val) {
       placement="top"
     >
       {icon}
+    </Tooltip>
+  )
+}
+
+export function LabelWithTooltip(label: string, tooltip: ReactNode) {
+  return (
+    <Tooltip
+      title={tooltip}
+      placement="bottom"
+    >
+      <span>{label}<InfoOutlinedIcon fontSize="small" /></span>
     </Tooltip>
   )
 }
