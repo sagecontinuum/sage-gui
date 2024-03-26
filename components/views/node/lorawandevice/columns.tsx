@@ -16,7 +16,8 @@ const lorawandeviceCols = [{
 },
 {
   id: 'battery_level',
-  label: 'Battery Level'
+  label: 'Battery Level',
+  format: formatters.power
 },
 {
   id: 'margin',
