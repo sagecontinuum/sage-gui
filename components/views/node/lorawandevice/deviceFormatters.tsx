@@ -6,6 +6,15 @@ import SignalCellularConnectedNoInternet0BarIcon from '@mui/icons-material/Signa
 import SignalCellularAlt1BarIcon from '@mui/icons-material/SignalCellularAlt1Bar'
 import SignalCellularAlt2BarIcon from '@mui/icons-material/SignalCellularAlt2Bar'
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt'
+import PowerIcon from '@mui/icons-material/Power'
+import BatteryFullIcon from '@mui/icons-material/BatteryFull'
+import Battery90Icon from '@mui/icons-material/Battery90'
+import Battery80Icon from '@mui/icons-material/Battery80'
+import Battery60Icon from '@mui/icons-material/Battery60'
+import Battery50Icon from '@mui/icons-material/Battery50'
+import Battery30Icon from '@mui/icons-material/Battery30'
+import Battery20Icon from '@mui/icons-material/Battery20'
+import Battery0BarRoundedIcon from '@mui/icons-material/Battery0BarRounded'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -69,7 +78,7 @@ export function status(val,obj) {
 
 export function signal(val) {
   if(!val){
-    return
+    return '-'
   }
 
   let icon
@@ -78,15 +87,65 @@ export function signal(val) {
   if(val >= -30) {
     title = 'Strong Signal'
     icon = <SignalCellularAltIcon />
-  } else if(val < -30 || val >= -75) {
+  } else if(val < -30 && val >= -75) {
     title = 'Moderate Signal'
     icon = <SignalCellularAlt2BarIcon />
-  } else if(val < -75 || val >= -120) {
+  } else if(val < -75 && val >= -120) {
     title = 'Weak Signal'
     icon = <SignalCellularAlt1BarIcon />
   } else {
     title = 'No Signal'
     icon = <SignalCellularConnectedNoInternet0BarIcon />
+  }
+
+  return (
+    <Tooltip
+      title={title}
+      componentsProps={{tooltip: { sx: { background: '#000' }}}}
+      placement="top"
+    >
+      {icon}
+    </Tooltip>
+  )
+}
+
+export function power(val) {
+  if(!val && val != 0){
+    return '-'
+  }
+
+  let icon
+  let title
+
+  if(val == -1) {
+    title = 'External Power-Source'
+    icon = <PowerIcon />
+  } else if(val == 100) {
+    title = val + '%'
+    icon = <BatteryFullIcon />
+  } else if(val < 100 && val >= 90) {
+    title = val + '%'
+    icon = <Battery90Icon />
+  } else if(val < 90 && val >= 80) {
+    title = val + '%'
+    icon = <Battery80Icon />
+  } else if(val < 80 && val >= 60) {
+    title = val + '%'
+    icon = <Battery60Icon />
+  } else if(val < 60 && val >= 50) {
+    title = val + '%'
+    icon = <Battery50Icon />
+  } else if(val < 50 && val >= 30) {
+    title = val + '%'
+    icon = <Battery30Icon />
+  } else if(val < 30 && val > 0) {
+    title = val + '%'
+    icon = <Battery20Icon />
+  } else if(val == 0) {
+    title = val + '%'
+    icon = <Battery0BarRoundedIcon />
+  } else {
+    return '-'
   }
 
   return (
