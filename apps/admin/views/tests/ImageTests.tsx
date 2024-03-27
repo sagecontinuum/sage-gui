@@ -112,6 +112,7 @@ export default function ImageTests() {
         ]
       },
       options: {
+        // @ts-ignore
         title: {
           display: false,
           text: 'Chart.js Word Cloud'
