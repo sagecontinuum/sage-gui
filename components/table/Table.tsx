@@ -29,6 +29,9 @@ import selectedReducer, { SelectedState, getInitSelectedState } from './selected
 import useClickOutside from '../hooks/useClickOutside'
 import TableSkeleton from './TableSkeleton'
 
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+
 export { SelectedState, TableSkeleton }
 
 /*
@@ -106,6 +109,7 @@ type RowProps = {
   onDoubleClick: (evt: MouseEvent, row: object) => void
   onMore?: () => void
   greyRow?: (row: object) => boolean
+  collapsible?: boolean
 }
 
 const Row = (props: RowProps) => {
@@ -119,10 +123,16 @@ const Row = (props: RowProps) => {
     onSelect,
     onDoubleClick,
     onMore,
-    greyRow
+    greyRow,
+    collapsible
   } = props
 
   const {rowID} = row
+  const [open, setOpen] = useState(false)
+
+  const handleCollapseToggle = () => {
+    setOpen(!open)
+  }
 
   return (
     <TableRowComponent hover
@@ -156,6 +166,18 @@ const Row = (props: RowProps) => {
           </IconButton>
         </More>
       }
+
+      {collapsible && (
+        <Cell key={id + '-collapse'} style={{padding: 0, width: 1}}>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={handleCollapseToggle}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </Cell>
+      )}
     </TableRowComponent>
   )
 }
@@ -370,6 +392,7 @@ type Props = {
   leftComponent?: JSX.Element
   middleComponent?: JSX.Element
   rightComponent?: JSX.Element
+  collapsible?: boolean
 }
 
 
@@ -387,7 +410,8 @@ export default function TableComponent(props: Props) {
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
-    disableRowSelect = () => false
+    disableRowSelect = () => false,
+    collapsible
   } = props
 
   if (pagination && (props.page === undefined || props.limit === undefined)) {
@@ -656,6 +680,7 @@ export default function TableComponent(props: Props) {
               onMore={props.onMore}
               greyRow={greyRow}
               disableRowSelect={disableRowSelect}
+              collapsible={collapsible}
             />
           </TableBody>
         </Table>
