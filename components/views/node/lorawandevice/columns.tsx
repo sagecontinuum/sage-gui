@@ -1,7 +1,31 @@
 import * as formatters from '/components/views/node/lorawandevice/deviceFormatters'
 import {Link} from 'react-router-dom'
 
-const lorawandeviceCols = [{
+export const hardwareCols = [{
+  id: 'name',
+  label: 'Name'
+}, {
+  id: 'hw_model',
+  label: 'Model',
+  format: (val) =>
+    <Link to={`/sensors/${val}`}>
+      {val}
+    </Link>
+}, {
+  id: 'deveui',
+  label: formatters.LabelWithTooltip(
+    'DevEUI',
+    'A unique 64 bit device identifier assigned by the manufacturer.'),
+}, {
+  id: 'manufacturer',
+  label: 'Manufacturer'
+}, {
+  id: 'datasheet',
+  label: 'Datasheet',
+  format: formatters.datasheet
+}]
+
+export const deviceCols = [{
   id: 'last_seen_at',
   label: 'Status',
   format: formatters.status,
@@ -56,6 +80,3 @@ const lorawandeviceCols = [{
   format: formatters.signal,
   width: '200px'
 }]
-
-
-export default lorawandeviceCols
