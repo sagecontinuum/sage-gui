@@ -16,6 +16,7 @@ import Battery30Icon from '@mui/icons-material/Battery30'
 import Battery20Icon from '@mui/icons-material/Battery20'
 import Battery0BarRoundedIcon from '@mui/icons-material/Battery0BarRounded'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
 import { ReactNode } from 'react'
 
 import Tooltip from '@mui/material/Tooltip'
@@ -170,4 +171,8 @@ export function LabelWithTooltip(label: string, tooltip: ReactNode) {
       <span>{label}<InfoOutlinedIcon fontSize="small" /></span>
     </Tooltip>
   )
+}
+
+export function datasheet(val) {
+  return (val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-')
 }
