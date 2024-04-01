@@ -179,7 +179,7 @@ const Row = (props: RowProps) => {
         )}
       </TableRowComponent>
       {collapsible && (
-        <TableRow>
+        <TableRowComponent style={{ backgroundColor: 'initial' }}>
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={columns.length + 1}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
@@ -187,7 +187,7 @@ const Row = (props: RowProps) => {
               </Box>
             </Collapse>
           </TableCell>
-        </TableRow>
+        </TableRowComponent>
       )}
     </>
   )
