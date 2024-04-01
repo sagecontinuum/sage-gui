@@ -34,13 +34,6 @@ export const deviceCols = [{
   id: 'name',
   label: 'Name'
 },{
-  id: 'hw_model',
-  label: 'Model',
-  format: (val) =>
-    <Link to={`/sensors/${val}`}>
-      {val}
-    </Link>
-},{
   id: 'deveui',
   label: formatters.LabelWithTooltip(
     'DevEUI',
