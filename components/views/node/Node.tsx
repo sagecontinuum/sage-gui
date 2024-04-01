@@ -38,6 +38,7 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
+// import KeyTable from './lorawandevice/collapsible'
 import {deviceCols, hardwareCols} from './lorawandevice/columns'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
@@ -766,6 +767,7 @@ export default function NodeView(props: Props) {
                   columns={deviceCols}
                   rows={loraDataWithRssi}
                   enableSorting
+                  // collapsible={<KeyTable row={loraDataWithRssi} />}
                 />
               </TableContainer>
             </Card>
