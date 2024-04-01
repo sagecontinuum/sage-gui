@@ -1,3 +1,4 @@
+import styled from 'styled-components'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
@@ -168,7 +169,7 @@ export function LabelWithTooltip(label: string, tooltip: ReactNode) {
       title={tooltip}
       placement="bottom"
     >
-      <span>{label}<InfoOutlinedIcon fontSize="small" /></span>
+      <span>{label}<InfoIcon /></span>
     </Tooltip>
   )
 }
@@ -176,3 +177,7 @@ export function LabelWithTooltip(label: string, tooltip: ReactNode) {
 export function datasheet(val) {
   return (val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-')
 }
+
+const InfoIcon = styled(InfoOutlinedIcon)`
+  width: 15px;
+`
