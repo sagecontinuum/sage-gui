@@ -1,4 +1,5 @@
 import * as formatters from '/components/views/node/lorawandevice/deviceFormatters'
+import {Link} from 'react-router-dom'
 
 const lorawandeviceCols = [{
   id: 'last_seen_at',
@@ -8,7 +9,14 @@ const lorawandeviceCols = [{
 },{
   id: 'name',
   label: 'Name'
-}, {
+},{
+  id: 'hw_model',
+  label: 'Model',
+  format: (val) =>
+    <Link to={`/sensors/${val}`}>
+      {val}
+    </Link>
+},{
   id: 'deveui',
   label: formatters.LabelWithTooltip(
     'DevEUI',
