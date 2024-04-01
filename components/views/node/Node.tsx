@@ -38,7 +38,8 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
-import lorawandeviceCols from './lorawandevice/columns'
+import {deviceCols, hardwareCols} from './lorawandevice/columns'
+import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 // todo(nc): promote/refactor into component lib
 import DataOptions from '/components/input/DataOptions'
@@ -574,7 +575,7 @@ export default function NodeView(props: Props) {
               <TableContainer>
                 <Table
                   primaryKey='deveui'
-                  columns={lorawandeviceCols}
+                  columns={hardwareCols}
                   rows={loraDataWithRssi}
                   enableSorting
                 />
@@ -749,6 +750,26 @@ export default function NodeView(props: Props) {
             }
           </Card>
 
+          {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&
+            <Card>
+              <h2>
+                LoRaWAN
+                <Tooltip title='' placement="left">
+                  <Link to={`${config.docs}/about/architecture#lorawan`}> 
+                    <HelpIcon/>
+                  </Link>
+                </Tooltip>
+              </h2>
+              <TableContainer>
+                <Table
+                  primaryKey='deveui'
+                  columns={deviceCols}
+                  rows={loraDataWithRssi}
+                  enableSorting
+                />
+              </TableContainer>
+            </Card>
+          }
 
           <Card>
             <h2>Images</h2>
@@ -937,4 +958,9 @@ const NodeInfo = styled.div`
   &:hover .MuiIconButton-root:hover {
     color: #222;
   }
+`
+
+const HelpIcon = styled(QuestionMark)`
+  width: 15px;
+  color: #1c8cc9;
 `
