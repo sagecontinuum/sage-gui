@@ -255,6 +255,7 @@ type LorawanDevice = {
   name: string
   deveui: string
   battery_level: number
+  hardware: SensorHardware
 }
 
 type LorawanConnection = {
@@ -290,7 +291,8 @@ export type FlattenedManifest = Omit<Manifest, 'sensors'> & {
   computes: (Omit<Compute, 'hardware'> & ComputeHardware)[]
   sensors: (Omit<Sensor, 'hardware'> & SensorHardware)[]
   resources: (Omit<Resource, 'hardware'> & ResourceHardware)[]
-  lorawanconnections: (Omit<LorawanConnection, 'lorawandevice'> & LorawanDevice)[]
+  lorawanconnections: (Omit<LorawanConnection, 'lorawandevice'> & {
+    lorawandevice: Omit<LorawanDevice, 'hardware'> & SensorHardware})[]
 }
 
 
@@ -350,7 +352,9 @@ const flattenManifest = o => ({
   address: o.address,
   lorawanconnections: o.lorawanconnections.map(({lorawandevice, ...rest}) => ({
     ...rest,
-    ...lorawandevice
+    ...lorawandevice,
+    ...(lorawandevice.hardware && {
+      ...lorawandevice.hardware })
   })),
   computes: o.computes.map(({hardware, ...rest}) => ({
     ...rest,
