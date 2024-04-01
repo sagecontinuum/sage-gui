@@ -29,6 +29,8 @@ import selectedReducer, { SelectedState, getInitSelectedState } from './selected
 import useClickOutside from '../hooks/useClickOutside'
 import TableSkeleton from './TableSkeleton'
 
+import Box from '@mui/material/Box'
+import Collapse from '@mui/material/Collapse'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
@@ -109,7 +111,7 @@ type RowProps = {
   onDoubleClick: (evt: MouseEvent, row: object) => void
   onMore?: () => void
   greyRow?: (row: object) => boolean
-  collapsible?: boolean
+  collapsible?: JSX.Element
 }
 
 const Row = (props: RowProps) => {
@@ -130,55 +132,64 @@ const Row = (props: RowProps) => {
   const {rowID} = row
   const [open, setOpen] = useState(false)
 
-  const handleCollapseToggle = () => {
-    setOpen(!open)
-  }
-
   return (
-    <TableRowComponent hover
-      className={greyRow(row) && 'grey'}
-      tabIndex={-1}
-      key={id}
-      onClick={evt => onSelect(evt, rowID, row)}
-      onDoubleClick={evt => onDoubleClick(evt, row)}
-      selected={selected.ids.includes(rowID)}
-    >
-      {emptyCell && <Cell></Cell>}
+    <>
+      <TableRowComponent hover
+        className={greyRow(row) && 'grey'}
+        tabIndex={-1}
+        key={id}
+        onClick={evt => onSelect(evt, rowID, row)}
+        onDoubleClick={evt => onDoubleClick(evt, row)}
+        selected={selected.ids.includes(rowID)}
+      >
+        {emptyCell && <Cell></Cell>}
 
-      {checkboxes &&
-        <Cell key={id + '-checkbox'} style={{padding: 0, width: 1}}>
-          <Checkbox
-            checked={selected.ids.includes(rowID)}
-            onClick={evt => onSelect(evt, rowID, row)}
-          />
-        </Cell>
-      }
+        {checkboxes &&
+          <Cell key={id + '-checkbox'} style={{padding: 0, width: 1}}>
+            <Checkbox
+              checked={selected.ids.includes(rowID)}
+              onClick={evt => onSelect(evt, rowID, row)}
+            />
+          </Cell>
+        }
 
-      <RowCells
-        columns={columns}
-        row={row}
-      />
+        <RowCells
+          columns={columns}
+          row={row}
+        />
 
-      {onMore &&
-        <More className="more-btn">
-          <IconButton>
-            <MoreIcon />
-          </IconButton>
-        </More>
-      }
+        {onMore &&
+          <More className="more-btn">
+            <IconButton>
+              <MoreIcon />
+            </IconButton>
+          </More>
+        }
 
+        {collapsible && (
+          <TableCell key={id + '-collapse'} style={{padding: 0, width: 1}}>
+            <IconButton
+              aria-label="expand row"
+              size="small"
+              onClick={() => setOpen(!open)}
+            >
+              {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          </TableCell>
+        )}
+      </TableRowComponent>
       {collapsible && (
-        <Cell key={id + '-collapse'} style={{padding: 0, width: 1}}>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={handleCollapseToggle}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </Cell>
+        <TableRow>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={columns.length + 1}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{ margin: 1 }}>
+                {collapsible}
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
       )}
-    </TableRowComponent>
+    </>
   )
 }
 
@@ -392,7 +403,7 @@ type Props = {
   leftComponent?: JSX.Element
   middleComponent?: JSX.Element
   rightComponent?: JSX.Element
-  collapsible?: boolean
+  collapsible?: JSX.Element
 }
 
 
