@@ -248,7 +248,8 @@ export const initialState = {
   city: [],
   state: [],
   focus: [],
-  sensor: []
+  sensor: [],
+  vsn: []
 }
 
 export function getFilterState(params) {
