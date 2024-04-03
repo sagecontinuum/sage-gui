@@ -18,10 +18,8 @@ const BatteryEmptyIcon = styled(BatteryFullIcon)({
 })
 
 const BatteryIcon = ({ batteryPerc }) => {
-  const title = batteryPerc + '%'
-
   return (
-    <Tooltip title={title} componentsProps={{ tooltip: { sx: { background: '#000' } } }} placement="top">
+    <Tooltip title={batteryPerc + '%'} componentsProps={{ tooltip: { sx: { background: '#000' } } }} placement="top">
       <IconWrapper>
         {batteryPerc == 100 && <BatteryFullIcon />}
         {batteryPerc < 100 && batteryPerc >= 90 && <Battery90Icon />}
