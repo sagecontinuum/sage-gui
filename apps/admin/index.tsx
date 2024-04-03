@@ -15,6 +15,7 @@ import Tests from './views/tests/Tests'
 import SuryaStatus from './views/factory/Factory'
 // import AudioTests from './views/tests/AudioTests'
 import ImageTests from './views/tests/ImageTests'
+import DescriptionTests from './views/tests/DescriptionTests'
 
 
 import Timeline from './fiddle/TimelineFiddle'
@@ -69,6 +70,7 @@ export default function App() {
 
                     {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                     <Route path="tests/images" element={<ImageTests />} />
+                    <Route path="tests/llm" element={<DescriptionTests />} />
 
                     <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                     <Route path="surya/:phase" element={<SuryaStatus />} />

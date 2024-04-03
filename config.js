@@ -1,9 +1,10 @@
 // no trailing slashes in API endpoints, please
 
 const prod = {
-  home: 'https://sagecontinuum.org',
-  portal: 'https://portal.sagecontinuum.org',
+  home: 'https://sagecontinuum.org',           // used for "home" of other apps
+  portal: 'https://portal.sagecontinuum.org',  // uised for PortalLink component
 
+  // endpoints
   beehive: 'https://data.sagecontinuum.org/api/v1',
   beekeeper: 'https://api.sagecontinuum.org',
   ecr: 'https://ecr.sagecontinuum.org/api',
@@ -11,7 +12,9 @@ const prod = {
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   auth: 'https://auth.sagecontinuum.org',
   deviceRegistration:'https://registration.sagecontinuum.org',
+  experimentalData:'https://portal.sagecontinuum.org/experimental-data',
 
+  // links
   dockerRegistry: 'registry.sagecontinuum.org',
   influxDashboard: 'https://influxdb.sagecontinuum.org/orgs/6aa7e344b342bea3/dashboards',
   adminURL: 'https://admin.sagecontinuum.org',
