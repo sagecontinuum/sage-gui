@@ -670,6 +670,28 @@ export default function NodeView(props: Props) {
             <AdminNodeHealth />
           }
 
+          {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&
+            <Card>
+              <h2>
+                LoRaWAN
+                <Tooltip title='' placement="left">
+                  <Link to={`${config.docs}/about/architecture#lorawan`}> 
+                    <HelpIcon/>
+                  </Link>
+                </Tooltip>
+              </h2>
+              <TableContainer>
+                <Table
+                  primaryKey='deveui'
+                  columns={deviceCols}
+                  rows={loraDataWithRssi}
+                  enableSorting
+                  // collapsible={<KeyTable row={loraDataWithRssi} />}
+                />
+              </TableContainer>
+            </Card>
+          }
+
           {/* timeline card */}
           <Card>
             <div className="timeline-title flex items-start gap">
@@ -750,28 +772,6 @@ export default function NodeView(props: Props) {
               </p>
             }
           </Card>
-
-          {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&
-            <Card>
-              <h2>
-                LoRaWAN
-                <Tooltip title='' placement="left">
-                  <Link to={`${config.docs}/about/architecture#lorawan`}> 
-                    <HelpIcon/>
-                  </Link>
-                </Tooltip>
-              </h2>
-              <TableContainer>
-                <Table
-                  primaryKey='deveui'
-                  columns={deviceCols}
-                  rows={loraDataWithRssi}
-                  enableSorting
-                  // collapsible={<KeyTable row={loraDataWithRssi} />}
-                />
-              </TableContainer>
-            </Card>
-          }
 
           <Card>
             <h2>Images</h2>
