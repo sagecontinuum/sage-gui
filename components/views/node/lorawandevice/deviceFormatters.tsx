@@ -5,14 +5,7 @@ import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import QuestionIcon from '@mui/icons-material/HelpOutline'
 import SignalIcon from '/components/views/node/lorawandevice/SignalIcon'
 import PowerIcon from '@mui/icons-material/Power'
-import BatteryFullIcon from '@mui/icons-material/BatteryFull'
-import Battery90Icon from '@mui/icons-material/Battery90'
-import Battery80Icon from '@mui/icons-material/Battery80'
-import Battery60Icon from '@mui/icons-material/Battery60'
-import Battery50Icon from '@mui/icons-material/Battery50'
-import Battery30Icon from '@mui/icons-material/Battery30'
-import Battery20Icon from '@mui/icons-material/Battery20'
-import Battery0BarRoundedIcon from '@mui/icons-material/Battery0BarRounded'
+import BatteryIcon from '/components/views/node/lorawandevice/BatteryIcon'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
 import { ReactNode } from 'react'
@@ -97,49 +90,21 @@ export function power(val) {
     return '-'
   }
 
-  let icon
-  let title
-
-  if(val == -1) {
-    title = 'External Power-Source'
-    icon = <PowerIcon />
-  } else if(val == 100) {
-    title = val + '%'
-    icon = <BatteryFullIcon />
-  } else if(val < 100 && val >= 90) {
-    title = val + '%'
-    icon = <Battery90Icon />
-  } else if(val < 90 && val >= 80) {
-    title = val + '%'
-    icon = <Battery80Icon />
-  } else if(val < 80 && val >= 60) {
-    title = val + '%'
-    icon = <Battery60Icon />
-  } else if(val < 60 && val >= 50) {
-    title = val + '%'
-    icon = <Battery50Icon />
-  } else if(val < 50 && val >= 30) {
-    title = val + '%'
-    icon = <Battery30Icon />
-  } else if(val < 30 && val > 0) {
-    title = val + '%'
-    icon = <Battery20Icon />
-  } else if(val == 0) {
-    title = val + '%'
-    icon = <Battery0BarRoundedIcon />
+  if (val === -1) {
+    return (
+      <Tooltip
+        title='External Power-Source'
+        componentsProps={{ tooltip: { sx: { background: '#000' } } }}
+        placement="top"
+      >
+        <PowerIcon />
+      </Tooltip>
+    )
+  } else if (val >= 0 && val <= 100) {
+    return <BatteryIcon batteryPerc={val} />
   } else {
     return '-'
   }
-
-  return (
-    <Tooltip
-      title={title}
-      componentsProps={{tooltip: { sx: { background: '#000' }}}}
-      placement="top"
-    >
-      {icon}
-    </Tooltip>
-  )
 }
 
 export function LabelWithTooltip(label: string, tooltip: ReactNode) {
