@@ -3,10 +3,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import QuestionIcon from '@mui/icons-material/HelpOutline'
-import SignalCellularConnectedNoInternet0BarIcon from '@mui/icons-material/SignalCellularConnectedNoInternet0Bar'
-import SignalCellularAlt1BarIcon from '@mui/icons-material/SignalCellularAlt1Bar'
-import SignalCellularAlt2BarIcon from '@mui/icons-material/SignalCellularAlt2Bar'
-import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt'
+import SignalIcon from '/components/views/node/lorawandevice/SignalIcon'
 import PowerIcon from '@mui/icons-material/Power'
 import BatteryFullIcon from '@mui/icons-material/BatteryFull'
 import Battery90Icon from '@mui/icons-material/Battery90'
@@ -85,31 +82,13 @@ export function signal(val) {
     return '-'
   }
 
-  let icon
-  let title
-
-  if(val >= -30) {
-    title = 'Strong Signal'
-    icon = <SignalCellularAltIcon />
-  } else if(val < -30 && val >= -75) {
-    title = 'Moderate Signal'
-    icon = <SignalCellularAlt2BarIcon />
-  } else if(val < -75 && val >= -120) {
-    title = 'Weak Signal'
-    icon = <SignalCellularAlt1BarIcon />
-  } else {
-    title = 'No Signal'
-    icon = <SignalCellularConnectedNoInternet0BarIcon />
-  }
+  const bars =
+    val >= -30 ? 3 :
+      val < -30 && val >= -75 ? 2 :
+        val < -75 && val >= -120 ? 1 : 0
 
   return (
-    <Tooltip
-      title={title}
-      componentsProps={{tooltip: { sx: { background: '#000' }}}}
-      placement="top"
-    >
-      {icon}
-    </Tooltip>
+    <SignalIcon bars={bars}/>
   )
 }
 
