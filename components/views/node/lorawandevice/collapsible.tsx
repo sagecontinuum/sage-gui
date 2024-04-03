@@ -5,6 +5,7 @@ import TableRow from '@mui/material/TableRow'
 import TableBody from '@mui/material/TableBody'
 import Typography from '@mui/material/Typography'
 
+// todo(FL): try using MetaTable for this
 const KeyTable = ({ row }) => {
   return (
     <>
