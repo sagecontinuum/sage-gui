@@ -258,7 +258,7 @@ type LorawanDevice = {
   hardware: SensorHardware
 }
 
-type LorawanConnection = {
+export type LorawanConnection = {
   connection_name: string
   deveui: string
   last_seen_at: string

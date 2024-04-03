@@ -427,23 +427,9 @@ export default function NodeView(props: Props) {
 
   // fetch rssi
   useEffect(() => {
-    const fetchDataWithRssi = async () => {
-      if (manifest && manifest.lorawanconnections) {
-        const dataWithRssiPromises = manifest.lorawanconnections.map(async (row) => {
-          const rssiDict = await BH.getRssi(manifest.vsn, row.deveui)
-          let rssiValue
-          if(rssiDict) {
-            rssiValue = rssiDict['value']
-          } else {
-            rssiValue = null
-          }
-          return { ...row, rssi: rssiValue }
-        })
-        const updatedDataWithRssi = await Promise.all(dataWithRssiPromises)
-        setDataWithRssi(updatedDataWithRssi)
-      }
-    }
-    fetchDataWithRssi()
+    (async () => {
+      setDataWithRssi(await BH.fetchDataWithRssi(manifest))
+    })()
   }, [manifest])
 
   const onOver = (id) => {
