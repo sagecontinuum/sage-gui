@@ -2,15 +2,16 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { Autocomplete, TextField, Popper, FormControlLabel, Button } from '@mui/material'
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+
 import * as BK from '/components/apis/beekeeper'
 import * as DA from './description-api'
+import Checkbox from '/components/input/Checkbox'
 import { Card, CardViewStyle } from '/components/layout/Layout'
-
-import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
-import { Autocomplete, TextField, Popper, FormControlLabel, Button } from '@mui/material'
+import { bytesToSizeSI } from '/components/utils/units'
 
 import { WordCloudChart } from 'chartjs-chart-wordcloud'
-import Checkbox from '/components/input/Checkbox'
 
 
 const ITEMS_INITIALLY = 10
@@ -19,25 +20,26 @@ const ITEMS_PER_PAGE = 5
 
 type ImageProps = {
   title: string
-  path: string
+  url: string
+  size: number
 }
 
 function Image(props: ImageProps) {
-  const {title, path} = props
+  const {title, url, size} = props
 
-  const epochTime = path.slice(path.lastIndexOf('/') + 1, path.lastIndexOf('-'))
-  const timestamp = new Date(epochTime / 1000).toLocaleString()
+  const epoch = Number(url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-')))
+  const timestamp = new Date(epoch / 1000000).toLocaleString()
 
   return (
     <ImageRoot>
       <h3><Link to={`/node/${title}`}>{title}</Link></h3>
-      <img src={path} />
+      <img src={url} />
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div>{timestamp}</div>
         </div>
-        <Button startIcon={<DownloadIcon />} size="small" href={path}>
-          Download
+        <Button startIcon={<DownloadIcon />} size="small" href={url}>
+          {bytesToSizeSI(size)}
         </Button>
       </div>
     </ImageRoot>
@@ -51,15 +53,8 @@ const ImageRoot = styled.div`
 `
 
 
-type Description = {
-  label: string
-  vsns: BK.VSN[]
-  paths: string[]
-  text_was_extracted?: boolean
-}
-
 type ImagesProps = {
-  descriptions: Description[]
+  descriptions: DA.Description[]
 }
 
 function Images(props: ImagesProps) {
@@ -97,17 +92,21 @@ function Images(props: ImagesProps) {
   return (
     <div>
       {descriptions?.slice(0, getInfiniteEnd(page)).map(description => {
-        const {label, vsns, paths} = description
+        const {label, vsns, urls, file_sizes} = description
 
         return (
           <Card key={label} className="card">
             <h2 className="flex justify-between no-margin">
               {label}
-              <small className="muted">{vsns.length} node{vsns.length > 1 ? 's' : ''}</small>
+              <small className="muted">
+                <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
+                  {pluralify(vsns, 'node')}
+                </Link>
+              </small>
             </h2>
             <div className="flex gap flex-wrap">
-              {paths.map((path, i) =>
-                <Image path={path} title={vsns[i]} key={path} />
+              {urls.map((url, i) =>
+                <Image url={url} title={vsns[i]} size={file_sizes[i]} key={url} />
               )}
             </div>
           </Card>
@@ -121,8 +120,9 @@ function Images(props: ImagesProps) {
 
 
 export default function ImageTests() {
+  const [vsns, setVSNs] = useState<BK.VSN[]>()
+  const [images, setImages] = useState<string[]>()
 
-  const [vsns, setVSNs] = useState([])
   const [selected, setSelected] = useState([])
   const [descriptions, setDescriptions] = useState([])
   const [options, setOptions] = useState([])
@@ -133,21 +133,25 @@ export default function ImageTests() {
   useEffect(() => {
     DA.getDescriptions()
       .then(data => {
+        // sort?
+        // data = data.sort((a, b) => b.vsns.length - a.vsns.length)
         setDescriptions(data)
 
         const options = data
           .map(o => ({
             id: o.label,
             label: o.label,
-            count: o.vsns.length
+            vsns: o.vsns
           }))
         setOptions(options)
+
+        updateCounts(data)
       })
   }, [])
 
 
   useEffect(() => {
-    if (!options || !wordCloud)
+    if (!options || !wordCloud || !descriptions)
       return
 
     const labels = descriptions.filter(d => d.label.length <= 20)
@@ -166,7 +170,7 @@ export default function ImageTests() {
         // @ts-ignore
         title: {
           display: false,
-          text: 'Chart.js Word Cloud'
+          text: 'Word Cloud'
         },
         plugins: {
           legend: {
@@ -181,18 +185,27 @@ export default function ImageTests() {
         }
       }
     })
-  }, [options, wordCloud])
+  }, [options, wordCloud, descriptions])
 
 
   const handleFilterChange = (vals) => {
-    const ids = vals.map(o => o.id)
-    const descript_metas = descriptions.filter(o => ids.includes(o.label))
-    const vsns = descript_metas.flatMap(o => o.vsns)
-
     const selected = vals.map(o => typeof o == 'string' ? o : o.id)
-    console.log('selected', selected)
     setSelected(selected)
-    setVSNs(vsns)
+    updateCounts(descriptions, selected)
+  }
+
+  const updateCounts = (descriptions: DA.Description[], selected?: string[]) => {
+    console.log('here', selected, selected?.length)
+    if (selected?.length) {
+      console.log('HERE@')
+      const descript_metas = descriptions.filter(o => selected.includes(o.label))
+      setVSNs([...new Set(descript_metas.flatMap(o => o.vsns))])
+      setImages([...new Set(descript_metas.flatMap(o => o.urls))])
+    } else {
+      console.log('all counts', descriptions)
+      setVSNs([...new Set(descriptions.flatMap(o => o.vsns))])
+      setImages([...new Set(descriptions.flatMap(o => o.urls))])
+    }
   }
 
 
@@ -202,10 +215,10 @@ export default function ImageTests() {
   return (
     <Root>
       <CardViewStyle />
-      <h1>LLM Generated Descriptions</h1>
+      <h1>Descriptions Generated with LLaVA:34b</h1>
       <Card>
-        <div className="flex items-center space-between gap">
-          {!wordCloud &&
+        <div className="flex items-center justify-between">
+          <div className="flex gap">
             <Autocomplete
               freeSolo={false}
               options={options}
@@ -213,17 +226,17 @@ export default function ImageTests() {
                 <TextField {...props} label="Search descriptions..." />}
               renderOption={(props, option, { selected }) => (
                 <li {...props}>
-                  <div >
+                  <div>
                     <Checkbox checked={selected}/>
                     {option.label}{' '}
                     <span className="muted">
-                      ({option.count} node{option.count > 1 ? 's' : ''})
+                      ({pluralify(option.vsns, 'node')})
                     </span>
                   </div>
                 </li>
               )}
               PopperComponent={(props) =>
-                <Popper {...props} style={{zIndex: 9999}} />}
+                <Popper {...props} style={{zIndex: 9999}} sx={{width: 500}}/>}
               onChange={(evt, val) => handleFilterChange(val)}
               value={selected}
               disableCloseOnSelect={true}
@@ -232,9 +245,6 @@ export default function ImageTests() {
               limitTags={4}
               sx={{width: 500}}
             />
-          }
-          <div>
-
             <FormControlLabel
               control={
                 <Checkbox
@@ -245,6 +255,15 @@ export default function ImageTests() {
               label="WordCloud"
             />
           </div>
+
+          {images && vsns &&
+            <div className="flex gap">
+              {pluralify(images, 'image')}
+              <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
+                {pluralify(vsns, 'node')}
+              </Link>
+            </div>
+          }
         </div>
 
         {wordCloud &&
@@ -267,5 +286,9 @@ const Root = styled.div`
   canvas {
     height: 800px;
   }
-
 `
+
+
+const pluralify = (items: any[], name: string) =>
+  <>{items?.length} {name}{items?.length > 1 ? 's' : ''}</>
+

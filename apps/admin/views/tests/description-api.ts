@@ -4,9 +4,12 @@ import * as BK from '/components/apis/beekeeper'
 
 const url = config.experimentalData
 
-type Description = {
+export type Description = {
   label: string
-  vsns: BK.VSN
+  vsns: BK.VSN[]
+  urls: string[]
+  file_sizes: number[]
+  text_was_extracted?: boolean
 }
 
 export function getDescriptions() : Promise<Description[]> {

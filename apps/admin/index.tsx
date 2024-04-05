@@ -8,6 +8,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import MetaRoute from '/components/Meta'
 import { AdminLogo } from '/components/nav-bar/SageLogo'
 import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
+import { Item } from '/components/nav-bar/NavItem'
 import NodeTabs from '/components/views/nodes/NodeTabsBinned'
 import Node from '/components/views/node/Node'
 import Status from './views/status/Status'
@@ -17,6 +18,9 @@ import SuryaStatus from './views/factory/Factory'
 import ImageTests from './views/tests/ImageTests'
 import DescriptionTests from './views/tests/DescriptionTests'
 
+import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
+import ImageIcon from '@mui/icons-material/ImageOutlined'
+import Description from '@mui/icons-material/DescriptionOutlined'
 
 import Timeline from './fiddle/TimelineFiddle'
 
@@ -32,7 +36,29 @@ import TestSignIn from '/components/TestSignIn'
 const NavMenu = () =>
   <NavItems>
     <NavItem label="Nodes" to="/nodes?phase=deployed" />
-    <NavItem label="Tests" to="/tests?phase=deployed" />
+    <NavItem
+      label="Tests"
+      root="/tests"
+      menu={
+        <>
+          <Item
+            icon={<MonitorIcon/>}
+            to="/tests/?phase=deployed"
+            label="Health/Sanity"
+          />
+          <Item
+            icon={<ImageIcon/>}
+            to="/tests/images"
+            label="Images"
+          />
+          <Item
+            icon={<Description/>}
+            to="/tests/llm"
+            label="Descriptions"
+          />
+        </>
+      }
+    />
     <NavItem label="Factory" to="/surya" />
   </NavItems>
 
