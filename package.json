@@ -34,8 +34,5 @@
   ],
   "alias": {
     "d3": "d3/dist/d3.js"
-  },
-  "dependencies": {
-    "chartjs-chart-wordcloud": "^4.4.0"
   }
 }
