@@ -38,7 +38,9 @@ import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
-import lorawandeviceCols from './lorawandevice/columns'
+// import KeyTable from './lorawandevice/collapsible'
+import {deviceCols, hardwareCols} from './lorawandevice/columns'
+import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 // todo(nc): promote/refactor into component lib
 import DataOptions from '/components/input/DataOptions'
@@ -355,6 +357,7 @@ export default function NodeView(props: Props) {
   // note: endtime is not currently an option
   const [end] = useState<Date>(endOfHour(new Date()))
 
+  const [loraDataWithRssi, setDataWithRssi] = useState([])
 
   useEffect(() => {
     setLoading(true)
@@ -421,6 +424,13 @@ export default function NodeView(props: Props) {
     ECR.listApps('public')
       .then(ecr => setECR(ecr))
   }, [])
+
+  // fetch rssi
+  useEffect(() => {
+    (async () => {
+      setDataWithRssi(await BH.fetchDataWithRssi(manifest))
+    })()
+  }, [manifest])
 
   const onOver = (id) => {
     const cls = `.hover-${id}`
@@ -552,8 +562,8 @@ export default function NodeView(props: Props) {
               <TableContainer>
                 <Table
                   primaryKey='deveui'
-                  columns={lorawandeviceCols}
-                  rows={manifest.lorawanconnections}
+                  columns={hardwareCols}
+                  rows={loraDataWithRssi}
                   enableSorting
                 />
               </TableContainer>
@@ -646,6 +656,28 @@ export default function NodeView(props: Props) {
             <AdminNodeHealth />
           }
 
+          {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&
+            <Card>
+              <h2>
+                LoRaWAN
+                <Tooltip title='' placement="left">
+                  <Link to={`${config.docs}/about/architecture#lorawan`}> 
+                    <HelpIcon/>
+                  </Link>
+                </Tooltip>
+              </h2>
+              <TableContainer>
+                <Table
+                  primaryKey='deveui'
+                  columns={deviceCols}
+                  rows={loraDataWithRssi}
+                  enableSorting
+                  // collapsible={<KeyTable row={loraDataWithRssi} />}
+                />
+              </TableContainer>
+            </Card>
+          }
+
           {/* timeline card */}
           <Card>
             <div className="timeline-title flex items-start gap">
@@ -726,7 +758,6 @@ export default function NodeView(props: Props) {
               </p>
             }
           </Card>
-
 
           <Card>
             <h2>Images</h2>
@@ -915,4 +946,9 @@ const NodeInfo = styled.div`
   &:hover .MuiIconButton-root:hover {
     color: #222;
   }
+`
+
+const HelpIcon = styled(QuestionMark)`
+  width: 15px;
+  color: #1c8cc9;
 `

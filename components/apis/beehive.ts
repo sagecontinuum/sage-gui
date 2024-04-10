@@ -6,6 +6,7 @@ import { groupBy, mapValues, flatten } from 'lodash'
 
 
 import * as BK from '/components/apis/beekeeper'
+import {FlattenedManifest, LorawanConnection} from '/components/apis/beekeeper'
 
 let _controller
 
@@ -516,4 +517,24 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
 
   const data = await getData(params)
   return data
+}
+
+async function getRssi(vsn: string, devEui: string) : Promise<Record> {
+  const params = {start: NODE_STATUS_RANGE, filter: {name: 'signal.rssi', vsn, devEui}, tail: 1}
+  const metrics = await getData(params)
+  return metrics[1]
+}
+
+export const fetchDataWithRssi = async (manifest: FlattenedManifest): Promise<LorawanConnection[]> => {
+  const dataWithRssi: LorawanConnection[] = []
+  if (manifest && manifest.lorawanconnections) {
+    const dataWithRssiPromises = manifest.lorawanconnections.map(async (row) => {
+      const rssiDict = await getRssi(manifest.vsn, row.deveui)
+      const rssiValue = rssiDict ? rssiDict['value'] : null
+      return { ...row, rssi: rssiValue } as LorawanConnection
+    })
+    const updatedDataWithRssi = await Promise.all(dataWithRssiPromises)
+    dataWithRssi.push(...updatedDataWithRssi)
+  }
+  return dataWithRssi
 }

@@ -1,7 +1,14 @@
+import styled from 'styled-components'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import InactiveIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import QuestionIcon from '@mui/icons-material/HelpOutline'
+import SignalIcon from '/components/views/node/lorawandevice/SignalIcon'
+import PowerIcon from '@mui/icons-material/Power'
+import BatteryIcon from '/components/views/node/lorawandevice/BatteryIcon'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
+import { ReactNode } from 'react'
 
 import Tooltip from '@mui/material/Tooltip'
 
@@ -62,3 +69,59 @@ export function status(val,obj) {
     </Tooltip>
   )
 }
+
+export function signal(val) {
+  if(!val){
+    return '-'
+  }
+
+  const bars =
+    val >= -30 ? 3 :
+      val < -30 && val >= -75 ? 2 :
+        val < -75 && val >= -120 ? 1 : 0
+
+  return (
+    <SignalIcon bars={bars}/>
+  )
+}
+
+export function power(val) {
+  if(!val && val != 0){
+    return '-'
+  }
+
+  if (val === -1) {
+    return (
+      <Tooltip
+        title='External Power-Source'
+        componentsProps={{ tooltip: { sx: { background: '#000' } } }}
+        placement="top"
+      >
+        <PowerIcon />
+      </Tooltip>
+    )
+  } else if (val >= 0 && val <= 100) {
+    return <BatteryIcon batteryPerc={val} />
+  } else {
+    return '-'
+  }
+}
+
+export function LabelWithTooltip(label: string, tooltip: ReactNode) {
+  return (
+    <Tooltip
+      title={tooltip}
+      placement="bottom"
+    >
+      <span>{label}<InfoIcon /></span>
+    </Tooltip>
+  )
+}
+
+export function datasheet(val) {
+  return (val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-')
+}
+
+const InfoIcon = styled(InfoOutlinedIcon)`
+  width: 15px;
+`
