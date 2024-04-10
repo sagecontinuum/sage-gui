@@ -21,17 +21,26 @@ import DescriptionTests from './views/tests/DescriptionTests'
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
 import Description from '@mui/icons-material/DescriptionOutlined'
+import LoginIcon from '@mui/icons-material/LoginRounded'
 
 import Timeline from './fiddle/TimelineFiddle'
 
-import NotFound from '/components/404'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
 import theme from '/components/theme'
 import '/assets/styles.scss'
 
+import Account from '/components/account/Account'
+import UserProfile from '/components/account/UserProfile'
+import MyNodes from '/components/account/MyNodes'
+import Devices from '/components/account/Devices'
+import DevAccess from '/components/account/DevAccess'
+
 import RequireAuth from '/components/auth/RequireAuthAdmin'
 import TestSignIn from '/components/TestSignIn'
+import NotFound from '/components/404'
+
+import config from '/config'
 
 const NavMenu = () =>
   <NavItems>
@@ -60,6 +69,10 @@ const NavMenu = () =>
       }
     />
     <NavItem label="Factory" to="/surya" />
+    <NavItem
+      label={<div className="flex items-center">Portal<LoginIcon /></div>}
+      href={config.portal}
+    />
   </NavItems>
 
 
@@ -78,7 +91,7 @@ export default function App() {
               </a>
             }
             hasSignIn
-            isAdmin
+            hasDocsLink
           />
 
           <Container>
@@ -104,6 +117,13 @@ export default function App() {
                     <Route path="fiddle/timeline" element={<Timeline />} />
 
                     <Route path="*" element={<NotFound />} />
+                  </Route>
+
+                  <Route path="account" element={<Account />}>
+                    <Route path="profile" element={<UserProfile />} />
+                    <Route path="nodes" element={<MyNodes />} />
+                    <Route path="dev-devices" element={<Devices />} />
+                    <Route path="access" element={<DevAccess />} />
                   </Route>
 
                   <Route path="login" element={<TestSignIn />} />

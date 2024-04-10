@@ -17,7 +17,6 @@ type Props = {
   logo?: JSX.Element
   hasSignIn?: boolean
   hasDocsLink?: boolean
-  isAdmin?: boolean
 }
 
 const isDev = () =>
@@ -25,7 +24,7 @@ const isDev = () =>
 
 
 export default function NavBar(props: Props) {
-  const { menu, hasSignIn, isAdmin, hasDocsLink, logo } = props
+  const { menu, hasSignIn, hasDocsLink, logo } = props
 
   return (
     <Root>
@@ -73,7 +72,7 @@ export default function NavBar(props: Props) {
           </NavItems>
         }
 
-        {hasSignIn && <SignInButton isAdmin={isAdmin} />}
+        {hasSignIn && <SignInButton />}
       </div>
 
     </Root>

@@ -8,7 +8,7 @@ import CheckCircleRounded from '@mui/icons-material/CheckCircleRounded'
 import Table from '/components/table/Table'
 import * as User from '/components/apis/user'
 import * as BK from '/components/apis/beekeeper'
-import ErrorMsg from '../ErrorMsg'
+import ErrorMsg from '../../apps/sage/ErrorMsg'
 
 import config from '/config'
 const { contactUs } = config
