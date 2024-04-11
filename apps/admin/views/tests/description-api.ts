@@ -7,8 +7,11 @@ const url = config.experimentalData
 export type Description = {
   label: string
   vsns: BK.VSN[]
-  urls: string[]
-  file_sizes: number[]
+  files: {
+    vsn: BK.VSN
+    url: string
+    file_size: number
+  }[]
   text_was_extracted?: boolean
 }
 

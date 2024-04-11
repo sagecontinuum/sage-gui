@@ -2,17 +2,20 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { Autocomplete, TextField, Popper, FormControlLabel, Button } from '@mui/material'
+import { FormControlLabel, Button, Tooltip } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import AutoIcon from '@mui/icons-material/AutoFixHighOutlined'
 
 import * as BK from '/components/apis/beekeeper'
 import * as DA from './description-api'
 import Checkbox from '/components/input/Checkbox'
 import { Card, CardViewStyle } from '/components/layout/Layout'
+import { Sidebar, Top, Controls, Divider } from '/components/layout/Layout'
 import { bytesToSizeSI } from '/components/utils/units'
 
-import { WordCloudChart } from 'chartjs-chart-wordcloud'
+import Filter from '/apps/sage/common/FacetFilter'
 
+import { WordCloudChart } from 'chartjs-chart-wordcloud'
 
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
@@ -92,12 +95,18 @@ function Images(props: ImagesProps) {
   return (
     <div>
       {descriptions?.slice(0, getInfiniteEnd(page)).map(description => {
-        const {label, vsns, urls, file_sizes} = description
+        const {label, files, vsns, text_was_extracted} = description
 
         return (
           <Card key={label} className="card">
             <h2 className="flex justify-between no-margin">
-              {label}
+              <div className="flex items-center gap">
+                {label} {text_was_extracted &&
+                  <Tooltip title="This text was extracted from a longer description">
+                    <AutoIcon />
+                  </Tooltip>
+                }
+              </div>
               <small className="muted">
                 <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
                   {pluralify(vsns, 'node')}
@@ -105,8 +114,17 @@ function Images(props: ImagesProps) {
               </small>
             </h2>
             <div className="flex gap flex-wrap">
-              {urls.map((url, i) =>
-                <Image url={url} title={vsns[i]} size={file_sizes[i]} key={url} />
+              {files.map(file => {
+                const {vsn, url, file_size} = file
+                return (
+                  <Image
+                    key={url}
+                    url={url}
+                    title={vsn}
+                    size={file_size}
+                  />
+                )
+              }
               )}
             </div>
           </Card>
@@ -118,6 +136,12 @@ function Images(props: ImagesProps) {
 }
 
 
+type Option = {
+  name: string
+  label: string
+  vsns: BK.VSN[]
+  count: number
+}
 
 export default function ImageTests() {
   const [vsns, setVSNs] = useState<BK.VSN[]>()
@@ -125,7 +149,7 @@ export default function ImageTests() {
 
   const [selected, setSelected] = useState([])
   const [descriptions, setDescriptions] = useState([])
-  const [options, setOptions] = useState([])
+  const [options, setOptions] = useState<Option[]>([])
   const [wordCloud, setWordCloud] = useState(false)
   const ref = useRef()
 
@@ -140,8 +164,10 @@ export default function ImageTests() {
         const options = data
           .map(o => ({
             id: o.label,
+            name: o.label,
             label: o.label,
-            vsns: o.vsns
+            vsns: o.vsns,
+            count: o.vsns.length
           }))
         setOptions(options)
 
@@ -188,23 +214,29 @@ export default function ImageTests() {
   }, [options, wordCloud, descriptions])
 
 
-  const handleFilterChange = (vals) => {
-    const selected = vals.map(o => typeof o == 'string' ? o : o.id)
-    setSelected(selected)
-    updateCounts(descriptions, selected)
+  const handleFilter = (evt, val) => {
+    const checked = evt.target.checked
+
+    setSelected(prev => {
+      const selected = checked ? [...prev, val] : prev.filter(v => v !== val)
+      updateCounts(descriptions, selected)
+      return selected
+    })
+  }
+
+  const handleSelectAll = (evt, vals) => {
+    const checked = evt.target.checked
+    setSelected(checked ? vals : [])
   }
 
   const updateCounts = (descriptions: DA.Description[], selected?: string[]) => {
-    console.log('here', selected, selected?.length)
     if (selected?.length) {
-      console.log('HERE@')
       const descript_metas = descriptions.filter(o => selected.includes(o.label))
       setVSNs([...new Set(descript_metas.flatMap(o => o.vsns))])
-      setImages([...new Set(descript_metas.flatMap(o => o.urls))])
+      setImages([...new Set(descript_metas.flatMap(o => o.files.flatMap(o => o.url)))])
     } else {
-      console.log('all counts', descriptions)
       setVSNs([...new Set(descriptions.flatMap(o => o.vsns))])
-      setImages([...new Set(descriptions.flatMap(o => o.urls))])
+      setImages([...new Set(descriptions.flatMap(o => o.files.flatMap(o => o.url)))])
     }
   }
 
@@ -213,38 +245,30 @@ export default function ImageTests() {
     descriptions.filter(obj => selected.includes(obj.label)) : descriptions
 
   return (
-    <Root>
+    <Root className="flex">
       <CardViewStyle />
-      <h1>Descriptions Generated with LLaVA:34b</h1>
-      <Card>
-        <div className="flex items-center justify-between">
-          <div className="flex gap">
-            <Autocomplete
-              freeSolo={false}
-              options={options}
-              renderInput={(props) =>
-                <TextField {...props} label="Search descriptions..." />}
-              renderOption={(props, option, { selected }) => (
-                <li {...props}>
-                  <div>
-                    <Checkbox checked={selected}/>
-                    {option.label}{' '}
-                    <span className="muted">
-                      ({pluralify(option.vsns, 'node')})
-                    </span>
-                  </div>
-                </li>
-              )}
-              PopperComponent={(props) =>
-                <Popper {...props} style={{zIndex: 9999}} sx={{width: 500}}/>}
-              onChange={(evt, val) => handleFilterChange(val)}
-              value={selected}
-              disableCloseOnSelect={true}
-              multiple={true}
-              isOptionEqualToValue={(opt, val) => val ? opt.id == val : false}
-              limitTags={4}
-              sx={{width: 500}}
-            />
+
+      <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
+        {/* <FilterTitle>Filters</FilterTitle>*/}
+        <Filter
+          title="Descriptions"
+          checked={selected}
+          onCheck={(evt, val) => handleFilter(evt, val)}
+          onSelectAll={(evt, vals) => handleSelectAll(evt, vals)}
+          defaultShown={25}
+          data={options}
+        />
+      </Sidebar>
+
+      <Main>
+        <Top>
+          <Controls className="flex items-center" style={{paddingLeft: 35}}>
+            <div className="flex column">
+              <h2 className="title no-margin">LLaVA:34b</h2>
+            </div>
+
+            <Divider />
+
             <FormControlLabel
               control={
                 <Checkbox
@@ -254,38 +278,50 @@ export default function ImageTests() {
               }
               label="WordCloud"
             />
-          </div>
 
-          {images && vsns &&
-            <div className="flex gap">
-              {pluralify(images, 'image')}
-              <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
-                {pluralify(vsns, 'node')}
-              </Link>
+
+            <div className="flex-grow">
+              {images && vsns &&
+                <div className="flex gap">
+                  {pluralify(images, 'image')}
+                  <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
+                    {pluralify(vsns, 'node')}
+                  </Link>
+                </div>
+              }
+            </div>
+          </Controls>
+        </Top>
+
+        <ImageListing>
+          {wordCloud &&
+            <div>
+              <canvas id="canvas" ref={ref}></canvas>
             </div>
           }
-        </div>
-
-        {wordCloud &&
-          <div>
-            <canvas id="canvas" ref={ref}></canvas>
-          </div>
-        }
-      </Card>
-      <Images descriptions={filtered}/>
+          <Images descriptions={filtered}/>
+        </ImageListing>
+      </Main>
     </Root>
   )
 }
 
 
 const Root = styled.div`
-  margin: 20px;
-
   .card { margin: 1rem 0; }
 
   canvas {
     height: 800px;
+    width: calc(100% - 300px);
   }
+`
+
+const Main = styled.div`
+  width: 100%;
+`
+
+const ImageListing = styled.div`
+  margin: 0 20px;
 `
 
 
