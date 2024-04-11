@@ -15,8 +15,8 @@ export type Description = {
   text_was_extracted?: boolean
 }
 
-export function getDescriptions() : Promise<Description[]> {
-  return fetch(`${url}/descriptions.json`)
+export function getDescriptions(file) : Promise<Description[]> {
+  return fetch(`${url}/${file}`)
     .then(handleErrors)
     .then(res => res.json())
 }

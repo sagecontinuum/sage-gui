@@ -27,9 +27,10 @@ type Props = {
   title: string
   data: {name: string, count: number}[]
   checked: string[]
-  hideSearch?: boolean
+  hideSearchIcon?: boolean
   hideSelectAll?: boolean
   defaultShown?: number
+  showSearchBox?: boolean
   onCheck: (evt: ChangeEvent<HTMLInputElement>, val: string) => void
   onSelectAll: (evt: ChangeEvent<HTMLInputElement>, val: string[]) => void
 }
@@ -37,9 +38,10 @@ type Props = {
 export default function Filter(props: Props) {
   const {
     title,
-    hideSearch,
+    hideSearchIcon,
     hideSelectAll,
     defaultShown,
+    showSearchBox = false,
     onCheck,
     onSelectAll
   } = props
@@ -49,7 +51,7 @@ export default function Filter(props: Props) {
 
   const [checked, setChecked] = useState(props.checked)
   const [showAll, setShowAll] = useState(false)
-  const [showSearch, setShowSearch] = useState(false)
+  const [showSearch, setShowSearch] = useState(showSearchBox)
   const [selectAll, setSelectAll] = useState(false)
   const [showUndo, setShowUndo] = useState(false)
 
@@ -105,9 +107,9 @@ export default function Filter(props: Props) {
     onSelectAll(evt, props.data.map(o => o.name))
   }
 
-  const onSubmitRange = (evt) => {
-    evt.preventDefault()
-  }
+  // const onSubmitRange = (evt) => {
+  //   evt.preventDefault()
+  //
 
 
   // only render if there's actually facet data
@@ -132,7 +134,7 @@ export default function Filter(props: Props) {
           </b>
         </Title>
 
-        {!hideSearch &&
+        {!hideSearchIcon &&
           <SearchBtn onClick={() => setShowSearch(!showSearch)} size="small" autoFocus disableRipple>
             <SearchIcon/>
           </SearchBtn>

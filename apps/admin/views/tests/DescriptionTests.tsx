@@ -2,13 +2,14 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { FormControlLabel, Button, Tooltip } from '@mui/material'
+import { FormControlLabel, Button, Tooltip, RadioGroup, FormLabel, FormControl } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import AutoIcon from '@mui/icons-material/AutoFixHighOutlined'
 
 import * as BK from '/components/apis/beekeeper'
 import * as DA from './description-api'
 import Checkbox from '/components/input/Checkbox'
+import Radio from '/components/input/Radio'
 import { Card, CardViewStyle } from '/components/layout/Layout'
 import { Sidebar, Top, Controls, Divider } from '/components/layout/Layout'
 import { bytesToSizeSI } from '/components/utils/units'
@@ -19,6 +20,23 @@ import { WordCloudChart } from 'chartjs-chart-wordcloud'
 
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
+
+
+type Model = {
+  name: string
+  file: string
+  date: string
+}
+
+const DATASETS: Model[] = [{
+  name: 'LLaVa:7b',
+  file: 'summary-llava7b-4-11-2024.json',
+  date: '4-11-2024'
+}, {
+  name: 'LLaVa:34b',
+  file: 'summary-llava34b-3-21-2024.json',
+  date: '3-21-2024'
+}]
 
 
 type ImageProps = {
@@ -147,6 +165,8 @@ export default function ImageTests() {
   const [vsns, setVSNs] = useState<BK.VSN[]>()
   const [images, setImages] = useState<string[]>()
 
+  const [selectedModel, setSelectedModel] = useState<Model['file']>(DATASETS[0].file)
+
   const [selected, setSelected] = useState([])
   const [descriptions, setDescriptions] = useState([])
   const [options, setOptions] = useState<Option[]>([])
@@ -155,7 +175,7 @@ export default function ImageTests() {
 
 
   useEffect(() => {
-    DA.getDescriptions()
+    DA.getDescriptions(selectedModel)
       .then(data => {
         // sort?
         // data = data.sort((a, b) => b.vsns.length - a.vsns.length)
@@ -173,7 +193,7 @@ export default function ImageTests() {
 
         updateCounts(data)
       })
-  }, [])
+  }, [selectedModel])
 
 
   useEffect(() => {
@@ -240,16 +260,29 @@ export default function ImageTests() {
     }
   }
 
-
   const filtered = selected.length  ?
     descriptions.filter(obj => selected.includes(obj.label)) : descriptions
+
 
   return (
     <Root className="flex">
       <CardViewStyle />
 
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
-        {/* <FilterTitle>Filters</FilterTitle>*/}
+        <ModelSelector>
+          <FormControl>
+            <FormLabel id="model-selector"><b>LLM Model:</b></FormLabel>
+            <RadioGroup
+              aria-labelledby="model-selector"
+              value={selectedModel}
+              onChange={(evt, val) => setSelectedModel(val)}
+            >
+              <FormControlLabel value={DATASETS[0].file} label={DATASETS[0].name} control={<Radio />}  />
+              <FormControlLabel value={DATASETS[1].file} label={DATASETS[1].name} control={<Radio />} />
+            </RadioGroup>
+          </FormControl>
+        </ModelSelector>
+
         <Filter
           title="Descriptions"
           checked={selected}
@@ -278,7 +311,6 @@ export default function ImageTests() {
               }
               label="WordCloud"
             />
-
 
             <div className="flex-grow">
               {images && vsns &&
@@ -324,6 +356,9 @@ const ImageListing = styled.div`
   margin: 0 20px;
 `
 
+const ModelSelector = styled.div`
+  padding: 20px;
+`
 
 const pluralify = (items: any[], name: string) =>
   <>{items?.length} {name}{items?.length > 1 ? 's' : ''}</>
