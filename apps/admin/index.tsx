@@ -20,7 +20,6 @@ import DescriptionTests from './views/tests/DescriptionTests'
 
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
-import Description from '@mui/icons-material/DescriptionOutlined'
 import LoginIcon from '@mui/icons-material/LoginRounded'
 
 import Timeline from './fiddle/TimelineFiddle'
@@ -40,11 +39,15 @@ import RequireAuth from '/components/auth/RequireAuthAdmin'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
-import config from '/config'
 
 const NavMenu = () =>
   <NavItems>
     <NavItem label="Nodes" to="/nodes?phase=deployed" />
+    <NavItem
+      label="AI Experiments"
+      to="/ai/descriptions"
+    />
+    <NavItem label="Factory" to="/surya" />
     <NavItem
       label="Tests"
       root="/tests"
@@ -60,18 +63,8 @@ const NavMenu = () =>
             to="/tests/images"
             label="Images"
           />
-          <Item
-            icon={<Description/>}
-            to="/tests/descriptions"
-            label="Descriptions"
-          />
         </>
       }
-    />
-    <NavItem label="Factory" to="/surya" />
-    <NavItem
-      label={<div className="flex items-center">Portal<LoginIcon /></div>}
-      href={config.portal}
     />
   </NavItems>
 
@@ -92,6 +85,7 @@ export default function App() {
             }
             hasSignIn
             hasDocsLink
+            hasPortalLink
           />
 
           <Container>
@@ -109,7 +103,7 @@ export default function App() {
 
                     {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                     <Route path="tests/images" element={<ImageTests />} />
-                    <Route path="tests/descriptions" element={<DescriptionTests />} />
+                    <Route path="ai/descriptions" element={<DescriptionTests />} />
 
                     <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                     <Route path="surya/:phase" element={<SuryaStatus />} />

@@ -17,6 +17,7 @@ type Props = {
   logo?: JSX.Element
   hasSignIn?: boolean
   hasDocsLink?: boolean
+  hasPortalLink?: boolean
 }
 
 const isDev = () =>
@@ -24,7 +25,7 @@ const isDev = () =>
 
 
 export default function NavBar(props: Props) {
-  const { menu, hasSignIn, hasDocsLink, logo } = props
+  const { menu, hasSignIn, hasDocsLink, hasPortalLink, logo } = props
 
   return (
     <Root>
@@ -41,9 +42,16 @@ export default function NavBar(props: Props) {
 
       <Spacer />
 
+
       <div className="flex items-center">
         {hasDocsLink &&
           <NavItems>
+            {hasPortalLink &&
+              <NavItem
+                label="Portal"
+                href={config.portal}
+              />
+            }
             <NavItem
               label="Docs"
               href={`${config.docs}/about/overview`}
