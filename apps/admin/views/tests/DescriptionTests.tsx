@@ -8,7 +8,6 @@ import AutoIcon from '@mui/icons-material/AutoFixHighOutlined'
 
 import * as BK from '/components/apis/beekeeper'
 import * as DA from './description-api'
-import Checkbox from '/components/input/Checkbox'
 import Radio from '/components/input/Radio'
 import { Card, CardViewStyle } from '/components/layout/Layout'
 import { Sidebar, Top, Controls, Divider } from '/components/layout/Layout'
@@ -34,9 +33,18 @@ const DATASETS: Model[] = [{
   date: '4-11-2024'
 }, {
   name: 'LLaVa:34b',
+  file: 'summary-llava34b-4-11-2024.json',
+  date: '4-11-2024'
+}, /* {
+  name: 'bakllava:7b',
+  file: 'summary-bakllava7b-4-11-2024.json',
+  date: '4-11-2024'
+},{
+  name: 'LLaVa:34b (legacy)',
   file: 'summary-llava34b-3-21-2024.json',
   date: '3-21-2024'
-}]
+} */
+]
 
 
 type ImageProps = {
@@ -113,17 +121,13 @@ function Images(props: ImagesProps) {
   return (
     <div>
       {descriptions?.slice(0, getInfiniteEnd(page)).map(description => {
-        const {label, files, vsns, text_was_extracted} = description
+        const {label, files, vsns, text_was_extracted, unextracted_text} = description
 
         return (
           <Card key={label} className="card">
             <h2 className="flex justify-between no-margin">
               <div className="flex items-center gap">
-                {label} {text_was_extracted &&
-                  <Tooltip title="This text was extracted from a longer description">
-                    <AutoIcon />
-                  </Tooltip>
-                }
+                {label} {text_was_extracted && extractedTextIcon(unextracted_text)}
               </div>
               <small className="muted">
                 <Link to={`/nodes?vsn="${vsns.join('","')}"`}>
@@ -153,6 +157,17 @@ function Images(props: ImagesProps) {
   )
 }
 
+const extractedTextIcon = (text: string) =>
+  <Tooltip
+    title={<>
+      This text was extracted from a longer description.<br/><br/>
+      <i>"{text}</i>"
+    </>}
+    placement="right"
+  >
+    <AutoIcon fontSize="small"/>
+  </Tooltip>
+
 
 type Option = {
   name: string
@@ -170,7 +185,7 @@ export default function ImageTests() {
   const [selected, setSelected] = useState([])
   const [descriptions, setDescriptions] = useState([])
   const [options, setOptions] = useState<Option[]>([])
-  const [wordCloud, setWordCloud] = useState(false)
+  const [wordCloud] = useState(false)
   const ref = useRef()
 
 
@@ -187,11 +202,11 @@ export default function ImageTests() {
             name: o.label,
             label: o.label,
             vsns: o.vsns,
-            count: o.vsns.length
+            count: o.vsns.length,
+            ...(o.text_was_extracted && {icon: extractedTextIcon(o.unextracted_text)})
           }))
         setOptions(options)
-
-        updateCounts(data)
+        updateCounts(data, selected)
       })
   }, [selectedModel])
 
@@ -271,14 +286,18 @@ export default function ImageTests() {
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <ModelSelector>
           <FormControl>
-            <FormLabel id="model-selector"><b>LLM Model:</b></FormLabel>
+            <FormLabel id="model-selector"><b>Selected Model:</b></FormLabel>
             <RadioGroup
               aria-labelledby="model-selector"
               value={selectedModel}
               onChange={(evt, val) => setSelectedModel(val)}
             >
-              <FormControlLabel value={DATASETS[0].file} label={DATASETS[0].name} control={<Radio />}  />
-              <FormControlLabel value={DATASETS[1].file} label={DATASETS[1].name} control={<Radio />} />
+              {DATASETS.map(dataset => {
+                const {file, name} = dataset
+                return (
+                  <FormControlLabel value={file} label={name} control={<Radio />} key={file}/>
+                )
+              })}
             </RadioGroup>
           </FormControl>
         </ModelSelector>
@@ -289,6 +308,8 @@ export default function ImageTests() {
           onCheck={(evt, val) => handleFilter(evt, val)}
           onSelectAll={(evt, vals) => handleSelectAll(evt, vals)}
           defaultShown={25}
+          showSearchBox={true}
+          hideSearchIcon={true}
           data={options}
         />
       </Sidebar>
@@ -297,11 +318,13 @@ export default function ImageTests() {
         <Top>
           <Controls className="flex items-center" style={{paddingLeft: 35}}>
             <div className="flex column">
-              <h2 className="title no-margin">LLaVA:34b</h2>
+              <h2 className="title no-margin">
+                {DATASETS.find(o => o.file == selectedModel).name}
+              </h2>
             </div>
 
             <Divider />
-
+            {/* todo(nc): revise
             <FormControlLabel
               control={
                 <Checkbox
@@ -311,6 +334,7 @@ export default function ImageTests() {
               }
               label="WordCloud"
             />
+            */}
 
             <div className="flex-grow">
               {images && vsns &&

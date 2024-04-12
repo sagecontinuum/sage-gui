@@ -198,7 +198,7 @@ export default function Filter(props: Props) {
 
       <Filters>
         {data.slice(0, showAll ? data.length : shownCount)
-          .map(({name, count}) =>
+          .map(({name, count, icon}) =>
             <div key={name}>
               <CBContainer
                 control={
@@ -211,6 +211,7 @@ export default function Filter(props: Props) {
                   <>
                     <FacetLabel>
                       {highlightText(name, query)}
+                      {icon}
                     </FacetLabel>
                     <Count>
                       {count.toLocaleString()}

@@ -13,6 +13,7 @@ export type Description = {
     file_size: number
   }[]
   text_was_extracted?: boolean
+  unextracted_text?: string
 }
 
 export function getDescriptions(file) : Promise<Description[]> {

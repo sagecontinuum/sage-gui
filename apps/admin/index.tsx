@@ -62,7 +62,7 @@ const NavMenu = () =>
           />
           <Item
             icon={<Description/>}
-            to="/tests/llm"
+            to="/tests/descriptions"
             label="Descriptions"
           />
         </>
@@ -109,7 +109,7 @@ export default function App() {
 
                     {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                     <Route path="tests/images" element={<ImageTests />} />
-                    <Route path="tests/llm" element={<DescriptionTests />} />
+                    <Route path="tests/descriptions" element={<DescriptionTests />} />
 
                     <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                     <Route path="surya/:phase" element={<SuryaStatus />} />
