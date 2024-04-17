@@ -19,8 +19,6 @@ import {
   type ChartConfiguration
 } from 'chart.js'
 
-import 'chartjs-adapter-date-fns'
-
 ChartJS.register(
   Tooltip, Legend, LineController, BarController, LineElement, PointElement,
   LinearScale, TimeScale, CategoryScale, BarElement, Title, Decimation
