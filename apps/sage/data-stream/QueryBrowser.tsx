@@ -345,7 +345,7 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
   const init = includeDefaultApp ?
     {...initFilterState} : {...initFilterState, apps: []}
   for (const [key, val] of params) {
-    if (key == 'start')
+    if (['start', 'page'].includes(key))
       continue
     init[key] = val.split('|')
   }
@@ -371,6 +371,8 @@ export default function QueryBrowser() {
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
 
+  const page = Number(params.get('page')) || 0
+
   // update the UI if dates are changed, but not times
   const [timeIsFocused, setTimeIsFocused] = useState<boolean>()
   const [pendingRange, setPendingRange] = useState<[Date, Date]>()
@@ -385,7 +387,6 @@ export default function QueryBrowser() {
 
   const {loading, setLoading} = useProgress()
   const [cols, setCols] = useState<Column[]>(columns)
-  const [page, setPage] = useState(0)
 
   const [checked, setChecked] = useState({
     relativeTime: true,
@@ -405,11 +406,12 @@ export default function QueryBrowser() {
   const [filters, setFilters] = useState<FilterState>(initFilterState)
 
 
-  // update selected filters whenever url param changes
+  // update selected filters whenever url param changes and set page to 0
   useEffect(() => {
     const includeDefaultApp = ['apps'].includes(type)
     const filterState = getFilterState(params, includeDefaultApp)
     setFilters(filterState)
+    handlePage(0)
   }, [app, name, node, sensor, task, type, mimeType])
 
 
@@ -520,8 +522,6 @@ export default function QueryBrowser() {
 
           setData(data)
 
-          // reset page any time more data is fetched
-          setPage(0)
           setLoading(false)
         }).catch(error => {
           if (error.name == 'AbortError') return
@@ -560,7 +560,6 @@ export default function QueryBrowser() {
 
 
   const clearParams = () => {
-    setPage(0)
     Array.from(params.keys())
       .forEach(key => params.delete(key))
   }
@@ -602,6 +601,7 @@ export default function QueryBrowser() {
     setPendingRange(null)
     params.delete('end')
     params.set('start', val)
+    handlePage(0)
     setParams(params, {replace: true})
   }
 
@@ -674,10 +674,17 @@ export default function QueryBrowser() {
   }
 
 
+  const handlePage = (val) => {
+    params.set('page', val)
+    setParams(params, {replace: true})
+  }
+
+
   const handleRefresh = () => {
     if (loading) {
       setParams(prevQuery, {replace: true})
     } else if (pendingRange) {
+      handlePage(0)
       handleDateUpdate(pendingRange)
       setPendingRange(null)
     } else {
@@ -900,6 +907,7 @@ export default function QueryBrowser() {
               pagination
               page={page}
               rowsPerPage={getRowsPerPage(app, type)}
+              onPage={handlePage}
               limit={data.length} // todo(nc): "limit" is fairly confusing
               emptyNotice={
                 <span className="flex">
