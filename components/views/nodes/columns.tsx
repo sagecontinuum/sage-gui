@@ -44,7 +44,8 @@ const columns = [{
 }, {
   id: 'gps',
   label: 'GPS',
-  format: formatters.gps
+  format: formatters.gps,
+  dlFormat: (_, obj) => (obj.lat && obj.lng) ? `${obj.lat}, ${obj.lng}` : ''
 }, {
   id: 'alt',
   label: 'Elevation (m)',
@@ -55,7 +56,8 @@ const columns = [{
 }, {
   id: 'sensors',
   label: 'Sensors',
-  format: (val) => <formatters.Sensors data={val} />
+  format: (val) => <formatters.Sensors data={val} />,
+  dlFormat: (val) => val.map(v => v.hw_model).join(', ')
 }, {
   id: 'commission_date',
   label: 'Commission Date',

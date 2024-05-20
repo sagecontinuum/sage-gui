@@ -21,6 +21,8 @@ import InfoIcon from '@mui/icons-material/InfoOutlined'
 import ArrowDown from '@mui/icons-material/ArrowDropDown'
 import ArrowUp from '@mui/icons-material/ArrowDropUp'
 
+
+import DownloadTableBtn, { formatDownloadCol } from './DownloadTableBtn'
 import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
 import Checkbox from '/components/input/Checkbox'
@@ -28,6 +30,7 @@ import Checkbox from '/components/input/Checkbox'
 import selectedReducer, { SelectedState, getInitSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
 import TableSkeleton from './TableSkeleton'
+
 
 import Box from '@mui/material/Box'
 import Collapse from '@mui/material/Collapse'
@@ -383,6 +386,7 @@ type Props = {
   searchPlaceholder?: string
   stripes?: boolean
   enableSorting?: boolean
+  enableDownload?: boolean
   disableClickOutside?: boolean
   selected?: number[]             // ids
   onSearch?: (val: {query: string}) => void
@@ -418,6 +422,7 @@ export default function TableComponent(props: Props) {
     emptyNotice,
     stripes = true,
     enableSorting = false,
+    enableDownload = false,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
@@ -603,6 +608,23 @@ export default function TableComponent(props: Props) {
     if (onShowDetails) onShowDetails()
   }
 
+  const handleDLOption = () => {
+    // todo(nc): could add support for other options/formats if needed.
+
+    const header = columns.map(o => o.label).join(', ')
+
+    const rows = data.map(row =>
+      columns.map(col => {
+        const val = row[col.id]
+        return col.dlFormat ? `"${col.dlFormat(val, row)}"` : formatDownloadCol(val)
+      })
+    )
+
+    const csvStr = `data:text/csv;charset=utf-8,` +
+      `${header}\n${rows.map(v => v ? v.join(',') : '').join('\n')}`
+    window.open(encodeURI(csvStr))
+  }
+
   return (
     <Root>
       <CtrlContainer>
@@ -635,13 +657,20 @@ export default function TableComponent(props: Props) {
           />
         }
 
+        {enableDownload &&
+          <TableOption>
+            <DownloadTableBtn onDownload={handleDLOption} />
+          </TableOption>
+        }
+
+
         {onColumnMenuChange &&
-          <ColumnMenuContainer>
+          <TableOption>
             <ColumnMenu
               options={props.columns} // all columns
               onChange={onColumnChange}
             />
-          </ColumnMenuContainer>
+          </TableOption>
         }
 
         {props.rightComponent &&
@@ -797,7 +826,7 @@ const Container = styled(TableContainer)<StylingProps>`
   }
 `
 
-const ColumnMenuContainer = styled.div`
+const TableOption = styled.div`
   display: flex;
   margin-left: auto;
 `
