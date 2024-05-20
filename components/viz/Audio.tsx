@@ -88,6 +88,9 @@ export default function Audio(props: Props) {
       container: audioRef.current,
       waveColor: 'violet',
       progressColor: 'purple',
+      xhr: {
+        credentials: 'include'
+      },
       plugins: [
         SpectrogramPlugin.create({
           container: spectroGramRef.current,
