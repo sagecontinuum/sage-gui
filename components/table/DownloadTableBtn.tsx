@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 
-import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
-import Tooltip from '@material-ui/core/Tooltip'
-import IconButton from '@material-ui/core/IconButton'
-
 import Menu from './Menu'
-import MenuItem from '@material-ui/core/MenuItem/MenuItem'
+
+import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
+import Tooltip from '@mui/material/Tooltip'
+import IconButton from '@mui/material/IconButton'
+import MenuItem from '@mui/material/MenuItem'
 
 
 export default function DownloadTableBtn({onDownload}) {
