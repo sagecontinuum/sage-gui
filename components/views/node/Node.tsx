@@ -21,7 +21,6 @@ import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
 import MetaTable from '/components/table/MetaTable'
-import Clipboard from '/components/utils/Clipboard'
 import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
@@ -32,6 +31,7 @@ import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 import Hotspot from './Hotspot'
 import ManifestTabs from './ManifestTabs'
+import GpsClipboard from './GpsClipboard'
 
 import * as nodeFormatters from '/components/views/nodes/nodeFormatters'
 import AdminNodeHealth from './AdminNodeHealth'
@@ -592,13 +592,16 @@ export default function NodeView(props: Props) {
                       id: 'gps',
                       label: <>GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
                       format: () =>
-                        <div className="gps">
-                          {hasStaticGPS(manifest) &&
-                            <Clipboard content={`${manifest.gps_lat},\n${manifest.gps_lon}`} />
+                        <>
+                          {hasStaticGPS(manifest) && !liveGPS &&
+                            <GpsClipboard data={{lat: manifest.gps_lat, lng: manifest.gps_lon, hasStaticGPS: true}} />
+                          }
+                          {hasStaticGPS(manifest) && liveGPS &&
+                            <GpsClipboard data={{lat: manifest.gps_lat, lng: manifest.gps_lon, hasStaticGPS: true, hasLiveGPS: true}} />
                           }
                           {!hasStaticGPS(manifest) && liveGPS &&
                             <>
-                              <Clipboard content={`${liveGPS.lat},\n${liveGPS.lon}`} />
+                              <GpsClipboard data={{lat: liveGPS.lat, lng: liveGPS.lon, hasStaticGPS: false, hasLiveGPS: true}} /><br/>
                               <Tooltip title="Last available GPS timestamp">
                                 <small className="muted">
                                   {new Date(liveGPS.timestamp).toLocaleString()}
@@ -612,7 +615,7 @@ export default function NodeView(props: Props) {
                           {!hasStaticGPS(manifest) && !liveGPS && loading &&
                             <span className="muted">loading...</span>
                           }
-                        </div>
+                        </>
                     }
                   ]}
                   data={{...nodeMeta, ...bkMeta}}

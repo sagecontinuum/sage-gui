@@ -8,8 +8,7 @@ import Map, {
 } from 'react-map-gl'
 import type { MapRef, MapProps, SymbolLayer, MapboxEvent } from 'react-map-gl'
 
-import Clipboard from './utils/Clipboard'
-
+import GpsClipboard from './views/node/GpsClipboard'
 import config from '/config'
 import settings from './settings'
 
@@ -122,7 +121,7 @@ function PopupInfo(props: PopupProps) {
 
   // todo(nc): use new manifests endpoint when avail
   // @ts-ignore; use new manifests endpoint when avail
-  const {vsn, focus, location, state, status, lng, lat} = data || {}  
+  const {vsn, focus, location, state, status, lng, lat} = data || {}
 
   return (
     <Popup
@@ -143,7 +142,7 @@ function PopupInfo(props: PopupProps) {
           {formatters.vsnLink(vsn)}
         </div>
       </h2>
-      
+
       <div className="flex gap-2 items-center node-meta">
         {showUptime &&
           <div className="flex column status">
@@ -155,7 +154,7 @@ function PopupInfo(props: PopupProps) {
         {focus &&
           <div>
             <small className="muted font-bold">Focus</small>
-            <div>                 
+            <div>
               <Link to={`/nodes/?focus="${encodeURIComponent(focus)}"`}>
                 {focus}
               </Link>
@@ -174,7 +173,7 @@ function PopupInfo(props: PopupProps) {
           </div>
         }
 
-        {state && 
+        {state &&
           <div>
             <small className="muted font-bold">State</small>
             <div>
@@ -182,14 +181,12 @@ function PopupInfo(props: PopupProps) {
                 <Link to={`/nodes/?state="${encodeURIComponent(state)}"`}>
                   {state.split(' (')[0]}
                 </Link>
-              }            
+              }
             </div>
           </div>
-        }        
+        }
 
-        <div className="gps">
-          <Clipboard content={formatters.gps(null, data, true)} tooltip="Copy coordinates" />          
-        </div>
+        <GpsClipboard data={data} />
       </div>
     </Popup>
   )
@@ -334,15 +331,6 @@ const Root = styled.div`
     .node-meta {
       white-space: nowrap;
       font-size: 1.2em;
-    }
-    
-    .gps pre {
-      margin: 0;
-      padding-top: 20px;
-
-      .gps-icon {
-        padding-right: 5px;
-      }
     }
 
     .status {
