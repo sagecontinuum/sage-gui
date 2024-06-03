@@ -14,7 +14,6 @@ import {
   type Rule,
   type Op,
   type AggFunc,
-  type CronUnit  // deprecate?
 } from './ses-types.d'
 
 import * as SES from '/components/apis/ses'
@@ -115,9 +114,12 @@ export const parseCondition = (str: string) : ConditionRule => {
   }
 
   return {
+    // @ts-ignore: revisit types if this component is used
     func,
     name,
+    // @ts-ignore: revisit types if this component is used
     op,
+    // @ts-ignore: revisit types if this component is used
     value: Number.isNaN(value) ? value : Number(value)
   }
 }

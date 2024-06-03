@@ -1,11 +1,9 @@
 /* eslint-disable react/display-name */
-import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
-
 const PROJECT = settings.project.toLowerCase()
+
 
 const columns = [{
   id: 'status',
@@ -13,7 +11,7 @@ const columns = [{
   format: formatters.statusWithPhase,
   width: '1px'
 }, {
-  id: 'node_type',
+  id: 'type',
   label: 'Type',
   hide: PROJECT != 'sage'
 }, {
@@ -21,9 +19,23 @@ const columns = [{
   label: 'Node',
   width: '60px',
   format: formatters.vsnLink
-}, {
+}, /* {
+  id: 'edit-btn',
+  label: 'edit',
+  width: '100px',
+  format: (_, row) =>
+    <>
+      <a href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${row.id}`} target="_blank" rel="noreferrer">
+        Edit
+      </a> |{' '}
+      <a onClick={() => getDetails(row.vsn)}>
+        details
+      </a>
+    </>
+}, */ {
   id: 'focus',
-  label: 'Focus'
+  label: 'Focus',
+  format: (val, o) => (val ? val : '-') + (o.partner ? ` (${o.partner})` : '')
 }, {
   id: 'elapsedTimes',
   label: 'Last Reported Metrics',
@@ -37,7 +49,7 @@ const columns = [{
 }, {
   id: 'city',
   label: 'City',
-  hide: true
+//  hide: true
 }, {
   id: 'state',
   label: 'State'
@@ -58,21 +70,19 @@ const columns = [{
   label: 'Sensors',
   format: (val) => <formatters.Sensors data={val} />,
   dlFormat: (val) => val.map(v => v.hw_model).join(', ')
-}, {
-  id: 'commission_date',
+},
+/* todo: update db
+{
+  id: 'commissioned_at',
   label: 'Commission Date',
-}, {
-  id: 'shield',
-  label: 'Stevenson Shield',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
-  hide: true,
-}, {
-  id: 'modem_hw_model',
+},
+*/ {
+  id: 'modem_model',
   label: 'Modem',
   format: formatters.modem,
   hide: true
 }, {
-  id: 'modem_carrier_name',
+  id: 'modem_sim',
   label: 'Modem Sim',
   format: formatters.modemSim,
   hide: true
@@ -81,7 +91,7 @@ const columns = [{
 
 if (PROJECT != 'sage') {
   columns.splice(4, 0, {
-    id: 'node_phase_v3',
+    id: 'phase',
     label: 'Phase',
     hide: true
   })

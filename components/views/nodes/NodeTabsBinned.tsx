@@ -34,9 +34,9 @@ type PhaseCounts = {
 type Counts =  PhaseCounts & {'Show All': number}
 
 
-function getPhaseCounts(data: BK.NodeMeta[], filterState: FilterState) : PhaseCounts {
-  data = filterData(data, filterState) as BK.NodeMeta[]
-  return countBy(data, 'node_phase_v3') as PhaseCounts
+function getPhaseCounts(data: BK.Node[], filterState: FilterState) : PhaseCounts {
+  data = filterData(data, filterState) as BK.Node[]
+  return countBy(data, 'phase') as PhaseCounts
 }
 
 
@@ -74,12 +74,12 @@ export default function NodeTabs(props: Props) {
   const [params] = useSearchParams()
   const tab = params.get('phase') || 'all'
 
-  const [production, setProduction] = useState<BK.NodeMeta[]>()
+  const [production, setProduction] = useState<BK.Node[]>()
   const [counts, setCounts] = useState<Counts>()
 
 
   useEffect(() => {
-    BK.getProduction()
+    BK.getNodes()
       .then(data => {
         setProduction(data)
       })
@@ -95,7 +95,7 @@ export default function NodeTabs(props: Props) {
   }, [params, production])
 
 
-  const updateCounts = (data: BK.NodeMeta[]) => {
+  const updateCounts = (data: BK.Node[]) => {
     if (settings.project && !isAdmin) {
       data = data.filter(obj => obj.project.toLowerCase() == settings.project.toLowerCase())
     }

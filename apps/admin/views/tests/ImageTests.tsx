@@ -25,7 +25,7 @@ function RecentImgs(props: RecentImgsProps) {
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    BK.getRawManifests()
+    BK.getNodes()
       .then(data => {
         const node_vsns = data
           .filter(o => o.phase == 'Deployed')

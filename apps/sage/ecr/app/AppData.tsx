@@ -29,8 +29,8 @@ const getStartTime = (str) => {
   if (str.includes('d'))
     return subDays(new Date(), str.replace(/-|d/g, ''))
   else if (str.includes('y'))
-    return subYears(new Date(), str.replace(/-|y/g, ''))  
-  else 
+    return subYears(new Date(), str.replace(/-|y/g, ''))
+  else
     throw new Error(`getStartTime: relative start time '%{string}' not supported.`)
 }
 
@@ -49,7 +49,7 @@ type Props = {
 export default function AppData(props: Props) {
   const {plugin} = props
 
-  const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
+  const [nodes, setNodes] = useState<BK.Node[]>()
 
   const [{data, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
@@ -72,22 +72,22 @@ export default function AppData(props: Props) {
 
 
   useEffect(() => {
-    BK.getNodeMeta()
-      .then(data => {
-        setNodeMetas(Object.values(data))
+    BK.getNodes()
+      .then(nodes => {
+        setNodes(nodes)
       }).catch(error => dispatch({type: 'ERROR', error}))
   }, [])
 
 
   useEffect(() => {
-    if (!nodeMetas) return
+    if (!nodes) return
 
     setLoadingTL(true)
     fetchRollup({...opts, plugin: `${registry}/${plugin}.*`})
-      .then(data => dispatch({type: 'INIT_DATA', data, nodeMetas}))
+      .then(data => dispatch({type: 'INIT_DATA', data, nodes}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [plugin, nodeMetas, opts])
+  }, [plugin, nodes, opts])
 
 
   const handleOptionChange = (name, val) => {

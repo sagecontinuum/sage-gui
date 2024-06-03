@@ -43,25 +43,25 @@ const getOptions = (data: object[], field: string) : Option[] =>
 
 
 // helper to filter against project/focuses in setting file
-const filterOn = (data: BK.State[], key: string) =>
+const filterOn = (data: BK.Node[], key: string) =>
   data.filter(o => o[key]?.toLowerCase() == settings[key]?.toLowerCase())
 
 
 function getProjectNodes() {
-  const {project, focus, nodes} = settings
+  const {project, focus, vsns} = settings
 
-  return BK.getState()
+  return BK.getNodes()
     .then((data) => {
       if (project)
         data = filterOn(data, 'project')
       if (focus)
         data = filterOn(data, 'focus')
-      if (nodes)
-        data = data.filter(o => settings.nodes.includes(o.vsn))
+      if (vsns)
+        data = data.filter(o => settings.vsns.includes(o.vsn))
 
       if (project == 'SAGE') {
         data = data.filter(obj =>
-          ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.node_phase_v3)
+          ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.phase)
         )
       }
 
@@ -91,7 +91,7 @@ export default function Nodes() {
   const { setLoading } = useProgress()
   const [data, setData] = useState<ReturnType<typeof mergeMetrics>>(null)
   const [error, setError] = useState(null)
-  const [filtered, setFiltered] = useState<BK.State[]>(null)
+  const [filtered, setFiltered] = useState<BK.NodeState[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
 
   // filter options
@@ -104,7 +104,7 @@ export default function Nodes() {
   const [updateID, setUpdateID] = useState(0)
   const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
-  const [selected, setSelected] = useState<BK.State[]>([])
+  const [selected, setSelected] = useState<BK.NodeState[]>([])
   const [lastUpdate, setLastUpdate] = useState<Date>(null)
 
   const dataRef = useRef(null)
@@ -172,7 +172,7 @@ export default function Nodes() {
     setFilterState(filterState)
 
     if (phase)
-      filteredData = filteredData.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
+      filteredData = filteredData.filter(obj => obj.phase == BK.phaseMap[phase])
 
     if (!show_all)
       filteredData = filteredData.filter(obj => obj.status == 'reporting')
@@ -278,6 +278,7 @@ export default function Nodes() {
             rows={filtered}
             columns={columns}
             enableSorting
+            enableDownload
             sort='-vsn'
             search={query}
             onSearch={handleQuery}

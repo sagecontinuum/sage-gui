@@ -21,3 +21,14 @@ export function handleErrors(res) {
     throw Error(errorObj.error)
   })
 }
+
+
+export function handleDjangoErrors(res) {
+  if (res.ok) {
+    return res
+  }
+
+  return res.json().then(errorObj => {
+    throw Error(errorObj.detail)
+  })
+}

@@ -112,7 +112,7 @@ export default function StatusView() {
     }
 
     setLoading(true)
-    const proms = [BK.getState(), ...pingRequests()]
+    const proms = [BK.getNodes(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
         if (done) return
@@ -158,7 +158,7 @@ export default function StatusView() {
 
     let filteredData = d
     if (phase)
-      filteredData = d.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
+      filteredData = d.filter(obj => obj.phase == BK.phaseMap[phase])
 
     filteredData = queryData(filteredData, query)
     filteredData = filterData(filteredData, filterState)

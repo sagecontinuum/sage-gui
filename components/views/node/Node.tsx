@@ -94,6 +94,7 @@ const sanitizeLabel = (obj: {name: string}) => {
 }
 
 
+// todo(nc): refactor into generic beekeeper request which inclused live gps
 const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
   !!meta?.gps_lat && !!meta?.gps_lat
 
@@ -123,15 +124,25 @@ const metaRows1 = [{
   id: 'focus',
   format: (val) => <a href={`/nodes?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
 }, {
-  id: 'location',
-  format: (val) => <a href={`/nodes?city="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
-}, {
+  id: 'cityAndState',
+  label: 'City & State',
+  format: (_, obj) =>
+    <>
+      <a href={`/nodes?city="${encodeURIComponent(obj.city)}"`} target="_blank" rel="noreferrer">
+        {obj.cityStr}
+      </a>,{' '}
+      <a href={`/nodes?state="${encodeURIComponent(obj.state)}"`} target="_blank" rel="noreferrer">
+        {obj.state}
+      </a>
+    </>
+},
+/* todo: add, if needed
+{
   id: 'build_date',
   label: 'Built'
-}, {
-  id: 'commission_date',
-  label: 'Commissioned'
-}, {
+},
+*/
+{
   id: 'registration_event',
   label: 'Registration',
   format: (val) => {
@@ -142,6 +153,10 @@ const metaRows1 = [{
     else
       return new Date(val).toLocaleString()
   }
+},
+{
+  id: 'commission_date', // todo: update db
+  label: 'Commissioned'
 }]
 
 
@@ -228,6 +243,9 @@ const computeOverview = [{
 }]
 
 
+const hasShield = (computes: BK.FlattenedManifest['computes']) =>
+  !!computes.some(o => o.zone == 'shield')
+
 
 const hardwareMeta = [{
   id: 'all',
@@ -238,7 +256,7 @@ const hardwareMeta = [{
       <Grid container>
         <Grid xs={3}>
           <small className="muted font-bold">Stevenson Shield</small>
-          <div>{computes.some(o => o.zone == 'shield') ? 'yes' : 'no'}</div>
+          <div>{hasShield(computes) ? 'yes' : 'no'}</div>
         </Grid>
 
         <Grid xs={3}>
@@ -324,7 +342,7 @@ export default function NodeView(props: Props) {
 
   const { loading, setLoading } = useProgress()
 
-  const [nodeMeta, setNodeMeta] = useState<BK.NodeMeta>()
+  const [node, setNode] = useState<BK.Node>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
   const [bkMeta, setBKMeta] = useState<BK.BKState | {registration_event: null}>()
 
@@ -362,14 +380,11 @@ export default function NodeView(props: Props) {
   useEffect(() => {
     setLoading(true)
 
-    const p1 = BK.getNodeMeta(vsn)
-      .then((data: BK.NodeMeta) => {
-        setNodeMeta(data)
-
-        if (!data) {
+    const p1 = BK.getNode(vsn)
+      .then((data: BK.Node) => setNode(data))
+      .catch((err) => {
+        if (err.message == 'Not found.')
           setVsnNotFound(true)
-          return
-        }
       })
 
     const p2 = BK.getManifest(vsn)
@@ -378,11 +393,8 @@ export default function NodeView(props: Props) {
 
         const id = data.name
 
-        // todo(nc): move host id to table?
-        // setNodeID(id)
-
         // fetch the registration time from beekeeper
-        BK.getNode(id)
+        BK.getBKState(id)
           .then(data => setBKMeta(data))
           .catch(err => {
             setError({message: `Beekeeper ${err.message}. Hence, the node registration time for ${vsn} was not found.`})
@@ -410,13 +422,13 @@ export default function NodeView(props: Props) {
 
   // data timeline
   useEffect(() => {
-    if (!nodeMeta) return
+    if (!node) return
     setLoadingTL(true)
     fetchRollup({...opts, vsn})
-      .then(data => dispatch({type: 'INIT_DATA', data, nodeMetas: [nodeMeta]}))
+      .then(data => dispatch({type: 'INIT_DATA', data, nodes: [node]}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [vsn, nodeMeta, opts])
+  }, [vsn, node, opts])
 
 
   // fetch public ECR apps to determine if apps are indeed public
@@ -480,10 +492,8 @@ export default function NodeView(props: Props) {
   }
 
 
-  const {
-    node_type, shield, top_camera, bottom_camera,
-    left_camera, right_camera
-  } = nodeMeta || {}
+  const { type, top_camera, bottom_camera, left_camera, right_camera } = node || {}
+  const shield = manifest?.computes ? hasShield(manifest.computes) : false
 
   if (vsnNotFound)
     return <NodeNotFound />
@@ -501,8 +511,8 @@ export default function NodeView(props: Props) {
           <Card>
             <div className="flex items-center justify-between">
               <h1 className="no-margin">
-                {node_type == 'WSN' ?
-                  'Wild Sage Node' : node_type
+                {type == 'WSN' ?
+                  'Wild Sage Node' : type
                 } {nodeFormatters.vsnToDisplayName(vsn)}
               </h1>
 
@@ -513,7 +523,7 @@ export default function NodeView(props: Props) {
                 }
               >
                 <Button
-                  href={nodeMeta ? `${config.adminURL}/node/${vsn}?tab=health` : ''}
+                  href={node ? `${config.adminURL}/node/${vsn}?tab=health` : ''}
                   {...(admin ? {} : {target: '_blank'})}
                 >
                   <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
@@ -618,7 +628,7 @@ export default function NodeView(props: Props) {
                         </>
                     }
                   ]}
-                  data={{...nodeMeta, ...bkMeta}}
+                  data={{...node, ...bkMeta}}
                 />
               </Card>
 
@@ -640,12 +650,12 @@ export default function NodeView(props: Props) {
                         data={manifest}
                       />
                     </div>
-                    {node_type == 'WSN' &&
+                    {type == 'WSN' &&
                       <div className="summary-table">
                         <MetaTable
                           title="Hardware"
                           rows={hardwareMeta}
-                          data={manifest}
+                          data={{...node, ...manifest}}
                         />
                       </div>
                     }
@@ -664,7 +674,7 @@ export default function NodeView(props: Props) {
               <h2>
                 LoRaWAN
                 <Tooltip title='' placement="left">
-                  <Link to={`${config.docs}/about/architecture#lorawan`}> 
+                  <Link to={`${config.docs}/about/architecture#lorawan`}>
                     <HelpIcon/>
                   </Link>
                 </Tooltip>
@@ -730,7 +740,7 @@ export default function NodeView(props: Props) {
 
           <Card>
             <h2>Sensors</h2>
-            {vsn && 
+            {vsn &&
               <div className="flex data-tables">
                 {hasSensor(manifest, 'BME680') &&
                   <RecentDataTable
@@ -756,7 +766,7 @@ export default function NodeView(props: Props) {
             }
             {!hasSensor(manifest, COMMON_SENSORS) &&
               <p className="muted">
-                No configuration was found for  
+                No configuration was found for
                 common sensors ({COMMON_SENSORS.slice(0, -1).join(', ')}, or {COMMON_SENSORS.slice(-1)})
               </p>
             }
@@ -788,7 +798,7 @@ export default function NodeView(props: Props) {
                   lat: manifest.gps_lat,
                   lng: manifest.gps_lon,
                   status,
-                  ...nodeMeta,
+                  ...node,
                 }]} />
             }
             {!hasStaticGPS(manifest) && liveGPS && status &&
@@ -800,7 +810,7 @@ export default function NodeView(props: Props) {
                   lat: liveGPS.lat,
                   lng: liveGPS.lon,
                   status,
-                  ...nodeMeta
+                  ...node
                 }]}
               />
             }
@@ -813,15 +823,15 @@ export default function NodeView(props: Props) {
             <WSNView>
               <img src={wsnode} width={WSN_VIEW_WIDTH} />
               <VSN>{vsn}</VSN>
-              {nodeMeta &&
+              {node &&
                 <>
-                  {shield                   && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
-                  {shield                   && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
-                  {                            <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
-                  {top_camera != 'none'     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
-                  {bottom_camera != 'none'  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
-                  {left_camera != 'none'    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
-                  {right_camera != 'none'   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
+                  {shield         && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
+                  {shield         && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
+                  {                  <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
+                  {top_camera     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
+                  {bottom_camera  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
+                  {left_camera    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
+                  {right_camera   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
                 </>
               }
             </WSNView>
@@ -860,20 +870,6 @@ const Root = styled.div`
   .data-tables div {
     width: 100%;
     margin-right: 3em
-  }
-
-  .gps {
-    width: 150px;
-    margin-bottom: 1em;
-
-    pre {
-      margin-bottom: 0;
-    }
-
-    .clipboard-content {
-      // less padding since scroll not needed
-      padding-bottom: 8px;
-    }
   }
 
   .timeline-title {

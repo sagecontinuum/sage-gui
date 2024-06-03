@@ -95,7 +95,7 @@ const phaseNotes = {
 }
 
 export function statusWithPhase(val, obj) {
-  const phase = obj.node_phase_v3
+  const phase = obj.phase
   const phaseTitle = phaseNotes[phase] || phase
 
   let icon
@@ -194,7 +194,7 @@ export function gps(_, obj, newline = false) {
   return <div className="flex items-center">
     <span className="gps-icon">{gpsIcon(obj)}</span>
 
-    {(!obj.lat || !obj.lng) ? 
+    {(!obj.lat || !obj.lng) ?
       '-' :
       `${obj.lat},` + (newline ? '\n' : '') + `${obj.lng}`
     }
@@ -220,12 +220,12 @@ export function uptimes(val) {
 
 // todo(nc): use new /nodes endpoint?
 export function modem(_, obj) {
-  const hwModel = obj.modem_hw_model
+  const hwModel = obj.modem_model
   return (
     <>
       <small className="muted font-bold">
-        {obj.modem_carrier ? 
-          'Cellular Connected' : 
+        {obj.modem_carrier ?
+          'Cellular Connected' :
           (hwModel ? <i>No Sim Configured</i> : '-')
         }
       </small>
@@ -237,13 +237,13 @@ export function modem(_, obj) {
 }
 
 // details on a sim card for a node
-export function modemSim(_, obj: BK.SimpleManifest) {
+export function modemSim(_, obj: BK.Node) {
   return (
     <>
       <small className="muted"><b>{obj.modem_carrier_name}</b></small>
       <div>
         {obj.modem_carrier || '-'}{' '}
-        {obj.modem_sim_type && <span className="muted">{obj.modem_sim_type}</span>}
+        {obj.modem_sim && <span className="muted">{obj.modem_sim}</span>}
       </div>
     </>
   )
@@ -263,10 +263,10 @@ export function Sensors(props: SensorsProps) {
   return (
     <SensorList>
       {data.map((sensor, i) => {
-        const {hw_model, hardware, name} = sensor
+        const {hw_model, name} = sensor
         return (
           <span key={i}>
-            <Tooltip placement="top" title={name == hardware ? name : `${hardware} | ${name}`}>
+            <Tooltip placement="top" title={name}>
               <Link to={`/sensors/${hw_model}`}>
                 {hw_model}
               </Link>

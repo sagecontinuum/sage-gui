@@ -23,7 +23,8 @@ let yamlLanguage
 
 
 self.MonacoEnvironment = {
-  getWorkerUrl: function (moduleId, label: String) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getWorkerUrl: function (moduleId, label: string) {
     /* todo(nc): enable (see notes below)
     if (label === 'yaml') {
       return YamlWorker
@@ -121,8 +122,8 @@ export default function TextEditor(props: Props) {
 export function registerAutoComplete(
   keywords: string[],
   apps: ECR.AppDetails[],
-  nodes: BK.NodeMeta[],
-  availNodes: BK.NodeMeta[]
+  nodes: BK.Node[],
+  availNodes: BK.Node[]
 ) {
   const isLegit = (_, key) => !['none', 'undefined'].includes(key)
 
@@ -143,6 +144,7 @@ export function registerAutoComplete(
   }
 
   yamlLanguage = languages.registerCompletionItemProvider('yaml', {
+    // @ts-ignore-next-line
     provideCompletionItems: () => {
 
       const snippetConfig = {

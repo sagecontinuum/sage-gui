@@ -193,11 +193,7 @@ function PopupInfo(props: PopupProps) {
 }
 
 
-type Data = BK.State & {
-  vsn: BK.VSN,
-  lng: number,
-  lat: number,
-  status?: string
+type Data = BK.NodeState & {
   elapsedTimes: {[device: string]: number }
 }
 

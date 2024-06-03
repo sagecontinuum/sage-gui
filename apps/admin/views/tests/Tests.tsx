@@ -160,10 +160,10 @@ export default function TestView() {
     setVSNs(null)
     setLoading(true)
 
-    BK.getNodeMeta()
-      .then((meta) => {
-        const vsns: BK.VSN[] = Object.values(meta)
-          .filter(o => phase ? o.node_phase_v3 == BK.phaseMap[phase] : true)
+    BK.getNodes()
+      .then((nodes) => {
+        const vsns = nodes
+          .filter(o => phase ? o.phase == BK.phaseMap[phase] : true)
           .map(o => o.vsn)
         setVSNs(vsns)
       }).finally(() => setLoading(false))
