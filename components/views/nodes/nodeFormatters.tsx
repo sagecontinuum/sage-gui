@@ -38,7 +38,10 @@ export function gpsIcon(obj) {
     )
   } else if (!hasStaticGPS && hasLiveGPS) {
     return (
-      <Tooltip title={<>Live GPS<br/>(no static gps found)</>}>
+      <Tooltip
+        placement="top"
+        title={<>Live GPS<br/>(no static gps found)</>}
+      >
         <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
       </Tooltip>
     )
