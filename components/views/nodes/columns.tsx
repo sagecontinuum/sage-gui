@@ -2,6 +2,7 @@
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 
+
 const PROJECT = settings.project.toLowerCase()
 
 
@@ -18,21 +19,8 @@ const columns = [{
   id: 'vsn',
   label: 'Node',
   width: '60px',
-  format: formatters.vsnLink
-}, /* {
-  id: 'edit-btn',
-  label: 'edit',
-  width: '100px',
-  format: (_, row) =>
-    <>
-      <a href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${row.id}`} target="_blank" rel="noreferrer">
-        Edit
-      </a> |{' '}
-      <a onClick={() => getDetails(row.vsn)}>
-        details
-      </a>
-    </>
-}, */ {
+  format: formatters.vsnLink // vsnLinkWithEdit is used if permissions are found
+}, {
   id: 'focus',
   label: 'Focus',
   format: (val, o) => (val ? val : '-') + (o.partner ? ` (${o.partner})` : '')
@@ -49,7 +37,7 @@ const columns = [{
 }, {
   id: 'city',
   label: 'City',
-//  hide: true
+  hide: true
 }, {
   id: 'state',
   label: 'State'

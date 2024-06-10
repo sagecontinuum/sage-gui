@@ -1,11 +1,14 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
+import IconButton from '@mui/material/IconButton'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import InactiveIcon from '@mui/icons-material/ReportProblemOutlined'
 import PendingIcon from '@mui/icons-material/PendingOutlined'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import MapIcon from '@mui/icons-material/RoomOutlined'
+import EditIcon from '@mui/icons-material/Edit'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 import Badge from '@mui/material/Badge'
 import Tooltip from '@mui/material/Tooltip'
@@ -151,6 +154,27 @@ export function vsnLink(val) {
     {displayName || val} <small className="muted">{displayName && `${val}` }</small>
   </Link>
 }
+
+export function vsnLinkWithEdit(val, row) {
+  const displayName = config.nodeSites[val]
+  return <div className="flex items-center">
+    <Tooltip
+      placement="top"
+      title={<>Edit node meta <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+    >
+      <IconButton
+        href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${row.id}`}
+        onClick={(evt) => evt.stopPropagation()}
+        target="_blank" rel="noreferrer" size="small">
+        <EditIcon fontSize="small"/>
+      </IconButton>
+    </Tooltip>
+    <Link to={`/node/${val}`}>
+      {displayName || val} <small className="muted">{displayName && `${val}` }</small>
+    </Link>
+  </div>
+}
+
 
 export function vsnLinkNameOnly(val) {
   const displayName = config.nodeSites[val]

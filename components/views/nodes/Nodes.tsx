@@ -26,12 +26,14 @@ import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { queryData } from '/components/data/queryData'
+import useIsSuper from '/components/hooks/useIsSuper'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
 import settings from '/components/settings'
 import Checkbox from '/components/input/Checkbox'
+import { vsnLinkWithEdit } from './nodeFormatters'
 
 
 const TIME_OUT = 5000
@@ -77,6 +79,7 @@ type Option = {
 
 export default function Nodes() {
   const [params, setParams] = useSearchParams()
+  const {isSuper} = useIsSuper()
 
   const phase = params.get('phase') as BK.PhaseTabs
 
@@ -149,6 +152,22 @@ export default function Nodes() {
   }, [])
 
 
+  useEffect(() => {
+    if (!isSuper) return
+
+    const idx = columns.findIndex(o => o.id == 'vsn')
+    const {id, label} = columns[idx]
+
+    columns.splice(idx, 1, {
+      id,
+      label,
+      width: '100px', // wider column for btn
+      format: vsnLinkWithEdit
+    })
+
+  }, [isSuper])
+
+
   // updating on state changes
   useEffect(() => {
     if (!data) return
@@ -164,6 +183,7 @@ export default function Nodes() {
     if (!data) return
     updateAll(data, phase)
   }, [data, phase])
+
 
 
   // filter data (todo: this can probably be done more efficiently)
