@@ -15,6 +15,7 @@ type Props = {
 
 const GpsClipboard = (props: Props) => {
   const {data} = props
+
   return (
     <Root>
       <Clipboard content={formatters.gps(null, data, true)} tooltip="Copy coordinates" />

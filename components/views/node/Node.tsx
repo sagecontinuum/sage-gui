@@ -94,12 +94,6 @@ const sanitizeLabel = (obj: {name: string}) => {
 }
 
 
-// todo(nc): refactor into generic beekeeper request which inclused live gps
-const hasStaticGPS = (meta: BK.FlattenedManifest) : boolean =>
-  !!meta?.gps_lat && !!meta?.gps_lat
-
-
-
 // todo(nc): refactor more into a general config
 const COMMON_SENSORS = ['BME680', 'RG-15', 'ES-642']
 
@@ -600,16 +594,16 @@ export default function NodeView(props: Props) {
                     ...metaRows1,
                     {
                       id: 'gps',
-                      label: <>GPS ({hasStaticGPS(manifest) ? 'static' : 'from stream'})</>,
+                      label: <>GPS ({node?.hasStaticGPS ? 'static' : 'from stream'})</>,
                       format: () =>
                         <>
-                          {hasStaticGPS(manifest) && !liveGPS &&
-                            <GpsClipboard data={{lat: manifest.gps_lat, lng: manifest.gps_lon, hasStaticGPS: true}} />
+                          {node?.hasStaticGPS && !liveGPS &&
+                            <GpsClipboard data={{lat: node.gps_lat, lng: node.gps_lon, hasStaticGPS: true}} />
                           }
-                          {hasStaticGPS(manifest) && liveGPS &&
-                            <GpsClipboard data={{lat: manifest.gps_lat, lng: manifest.gps_lon, hasStaticGPS: true, hasLiveGPS: true}} />
+                          {node?.hasStaticGPS && liveGPS &&
+                            <GpsClipboard data={{lat: node.gps_lat, lng: node.gps_lon, hasStaticGPS: true, hasLiveGPS: true}} />
                           }
-                          {!hasStaticGPS(manifest) && liveGPS &&
+                          {!node?.hasStaticGPS && liveGPS &&
                             <>
                               <GpsClipboard data={{lat: liveGPS.lat, lng: liveGPS.lon, hasStaticGPS: false, hasLiveGPS: true}} /><br/>
                               <Tooltip title="Last available GPS timestamp">
@@ -619,10 +613,10 @@ export default function NodeView(props: Props) {
                               </Tooltip>
                             </>
                           }
-                          {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+                          {!node?.hasStaticGPS && !liveGPS && !loading &&
                             <span className="muted">not available</span>
                           }
-                          {!hasStaticGPS(manifest) && !liveGPS && loading &&
+                          {!node?.hasStaticGPS && !liveGPS && loading &&
                             <span className="muted">loading...</span>
                           }
                         </>
@@ -789,32 +783,30 @@ export default function NodeView(props: Props) {
 
         <RightSide className="justify-end">
           <Card noPad>
-            {hasStaticGPS(manifest) && status && vsn &&
+            {node?.hasStaticGPS && status &&
               <Map
                 showUptime={false}
                 // @ts-ignore; todo: map does not actually need manifest info since showUptime == false
                 data={[{
-                  vsn,
-                  lat: manifest.gps_lat,
-                  lng: manifest.gps_lon,
-                  status,
                   ...node,
+                  hasLiveGPS: !!liveGPS,
+                  status
                 }]} />
             }
-            {!hasStaticGPS(manifest) && liveGPS && status &&
+            {!node?.hasStaticGPS && !!liveGPS && status &&
               <Map
                 showUptime={false}
                 // @ts-ignore; todo: map does not actually need manifest info since showUptime == false
                 data={[{
-                  vsn,
+                  ...node,
                   lat: liveGPS.lat,
                   lng: liveGPS.lon,
-                  status,
-                  ...node
+                  hasLiveGPS: true,
+                  status
                 }]}
               />
             }
-            {!hasStaticGPS(manifest) && !liveGPS && !loading &&
+            {!node?.hasStaticGPS && !liveGPS && !loading &&
               <div className="muted" style={{margin: 18}}>(Map not available)</div>
             }
           </Card>

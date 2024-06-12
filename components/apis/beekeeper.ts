@@ -97,6 +97,8 @@ export type Node = {
   }[]
 
   // added client-side convenience
+  lat: number,
+  lng: number,
   hasStaticGPS: boolean
   modem_carrier_name: 'AT&T' | string // todo(nc): move to backend
   top_camera: string                  // hw_model
