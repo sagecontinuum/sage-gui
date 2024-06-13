@@ -19,7 +19,6 @@ import Dot from '/components/utils/Dot'
 
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
-import config from '/config'
 
 
 export function gpsIcon(obj) {
@@ -142,62 +141,61 @@ export function statusWithPhase(val, obj) {
 }
 
 
-export function vsn(val) {
-  return <Link to={`/node/${val}`}>
-    {config.nodeSites[val] || val}
+export function vsn(vsn, node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn}
   </Link>
 }
 
-export function vsnLink(val) {
-  const displayName = config.nodeSites[val]
-  return <Link to={`/node/${val}`}>
-    {displayName || val} <small className="muted">{displayName && `${val}` }</small>
+export function vsnLink(vsn, node: BK.Node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
   </Link>
 }
 
-export function vsnLinkWithEdit(val, row) {
-  const displayName = config.nodeSites[val]
+export function vsnLinkWithEdit(vsn, node: BK.Node) {
+  const {site_id} = node
   return <div className="flex items-center">
     <Tooltip
       placement="top"
       title={<>Edit node meta <LaunchIcon style={{fontSize: '1.1em'}}/></>}
     >
       <IconButton
-        href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${row.id}`}
+        href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${node.id}`}
         onClick={(evt) => evt.stopPropagation()}
         target="_blank" rel="noreferrer" size="small">
         <EditIcon fontSize="small"/>
       </IconButton>
     </Tooltip>
-    <Link to={`/node/${val}`}>
-      {displayName || val} <small className="muted">{displayName && `${val}` }</small>
+    <Link to={`/node/${vsn}`}>
+      {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
     </Link>
   </div>
 }
 
 
-export function vsnLinkNameOnly(val) {
-  const displayName = config.nodeSites[val]
-  return <Link to={`/node/${val}`}>
-    {displayName || val}
+export function vsnLinkNameOnly(vsn, node: BK.Node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn}
   </Link>
 }
 
-export function vsnToDisplayName(val) {
-  const displayName = config.nodeSites[val]
+export function vsnToDisplayName(vsn, node: BK.Node) {
+  const {site_id} = node
   return <>
-    {displayName || val}&nbsp;<small className="muted">{displayName && val}</small>
+    {site_id || vsn}&nbsp;<small className="muted">{site_id && vsn}</small>
   </>
 }
 
-export function vsnToDisplayStr(val) {
-  const displayName = config.nodeSites[val]
-  return `${displayName || val} ${displayName ? `| ${val}` : ''}`
+export function vsnToDisplayStr(vsn, site_id) {
+  return `${site_id || vsn}${site_id ? ` | ${vsn}` : ''}`
 }
 
-export function vsnToDisplayStrAlt(val) {
-  const displayName = config.nodeSites[val]
-  return `${displayName || val} ${displayName ? `(${val})` : ''}`
+export function vsnToDisplayStrAlt(vsn, site_id) {
+  return `${site_id || vsn}${site_id ? ` (${vsn})` : ''}`
 }
 
 export function vsnWithGPS(val, obj) {

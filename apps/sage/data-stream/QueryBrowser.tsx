@@ -4,6 +4,7 @@ import { useSearchParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import * as BH from '/components/apis/beehive'
+import * as BK from '/components/apis/beekeeper'
 
 import { Sidebar } from '/components/layout/Layout'
 import Table, { type Column } from '/components/table/Table'
@@ -144,10 +145,10 @@ const getUniqueOpts = (data: string[]) =>
     .filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: v}))
 
-const getUniqueNodeOpts = (data: string[]) =>
+const getUniqueNodeOpts = (data: string[], siteIDs: BK.SiteIDs) =>
   data.sort()
     .filter((v, i, self) => v && self.indexOf(v) == i)
-    .map(v => ({id: v, label: vsnToDisplayStr(v)}))
+    .map(v => ({id: v, label: vsnToDisplayStr(v, siteIDs[v])}))
 
 const getUniqueAppOpts = (data: string[]) =>
   data.sort()
@@ -203,7 +204,7 @@ function getAppMenus() {
 
 
 async function getFilterMenus({plugin, task}) {
-  const data = await BH.getData({
+  const prom1 = BH.getData({
     start: `-1d`,
     tail: 1,
     filter: {
@@ -212,14 +213,17 @@ async function getFilterMenus({plugin, task}) {
     }
   })
 
-  return {
-    nodes: getUniqueNodeOpts(data.map(o => o.meta.vsn)),
+  const prom2 = BK.getSiteIDs()
+  const [data, siteIDs] = await Promise.all([prom1, prom2])
+
+  return [{
+    nodes: getUniqueNodeOpts(data.map(o => o.meta.vsn), siteIDs),
     names: getUniqueOpts(data.map(o => o.name)),
     sensors: getUniqueOpts(data.map(o => o.meta.sensor)),
     ...(plugin ? {} : {
       tasks: getUniqueOpts(data.map(o => o.meta.task))
     })
-  }
+  }, siteIDs]
 }
 
 
@@ -398,6 +402,7 @@ export default function QueryBrowser() {
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
   const [chart, setChart] = useState<BH.Record[]>()
+  const [siteIDs, setSiteIDs] = useState<BK.SiteIDs>()
 
   // contents of dropdowns
   const [menus, setMenus] = useState<MenuState>(initMenuState)
@@ -420,7 +425,10 @@ export default function QueryBrowser() {
     if (!app) return
 
     getFilterMenus({plugin: app, task})
-      .then((menuItems) => setMenus(prev => ({...prev, ...menuItems})))
+      .then(([menuItems, siteIDs]) => {
+        setMenus(prev => ({...prev, ...menuItems}))
+        setSiteIDs(siteIDs)
+      })
   }, [app, task])
 
 
@@ -876,8 +884,8 @@ export default function QueryBrowser() {
 
           <br />
 
-          {chart &&
-            <TimeSeries data={chart} />
+          {chart && siteIDs &&
+            <TimeSeries data={chart} siteIDs={siteIDs}/>
           }
 
           {lastN &&

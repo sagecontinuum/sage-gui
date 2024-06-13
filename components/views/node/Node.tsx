@@ -507,7 +507,7 @@ export default function NodeView(props: Props) {
               <h1 className="no-margin">
                 {type == 'WSN' ?
                   'Wild Sage Node' : type
-                } {nodeFormatters.vsnToDisplayName(vsn)}
+                } {node && nodeFormatters.vsnToDisplayName(vsn, node)}
               </h1>
 
               <Tooltip

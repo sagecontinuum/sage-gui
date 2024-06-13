@@ -333,7 +333,7 @@ export default function Data(props: Props) {
                     <div className="flex title-row">
                       <div className="flex column">
                         <div>
-                          <h2>{vsnLink(vsn)}</h2>
+                          <h2>{vsnLink(vsn, nodeDict[vsn])}</h2>
                         </div>
                         <div>{location}</div>
                       </div>
