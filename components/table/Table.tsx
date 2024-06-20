@@ -63,6 +63,7 @@ export type Column = {
   id: string
   label?: string
   format?: (any, object) => string | number | JSX.Element | JSX.Element[]
+  dlFormat?: (any, object) => string
   hide?: boolean
   width?: string
   type?: 'number'
