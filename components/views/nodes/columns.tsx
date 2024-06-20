@@ -1,25 +1,24 @@
 /* eslint-disable react/display-name */
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
-
+import type { Column } from '/components/table/Table'
 
 const PROJECT = settings.project.toLowerCase()
 
 
-const columns = [{
+const columns: Column[] = [{
   id: 'status',
   label: 'Status',
   format: formatters.statusWithPhase,
   width: '1px'
 }, {
+  id: 'vsn',
+  label: 'Node',
+  format: formatters.vsnLink // vsnLinkWithEdit is used if permissions are found
+}, {
   id: 'type',
   label: 'Type',
   hide: PROJECT != 'sage'
-}, {
-  id: 'vsn',
-  label: 'Node',
-  width: '60px',
-  format: formatters.vsnLink // vsnLinkWithEdit is used if permissions are found
 }, {
   id: 'focus',
   label: 'Focus',

@@ -24,7 +24,7 @@ const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ||
   'FNVNhHfEIZ2qjy8mqFQmQw'
 
 
-const dotSize = 10
+const markerSize = 10
 
 const mapSettings = {
   ...(initialViewState ? {initialViewState} : {
@@ -124,7 +124,7 @@ type PopupProps = {
 }
 
 function PopupInfo(props: PopupProps) {
-  const {onClose, data, showUptime} = props
+  const {data, onClose, showUptime} = props
 
   // todo(nc): use new manifests endpoint when avail
   // @ts-ignore; use new manifests endpoint when avail
@@ -206,6 +206,7 @@ type Data = BK.NodeState & {
 
 type Props = {
   data: Data[]
+  markerClass?: 'blue-dot'
   updateID?: number
   showUptime?: boolean
 }
@@ -214,6 +215,7 @@ type Props = {
 export default function MapGL(props: Props) {
   const {
     data = null,
+    markerClass,
     updateID,
     showUptime = true
   } = props
@@ -279,7 +281,13 @@ export default function MapGL(props: Props) {
                 latitude={lat}
                 onClick={(evt) => handleClick(evt, obj)}
               >
-                <div className={`marker-dot marker-${(status || '').replace(/ /g, '-')}`}></div>
+                <div
+                  className={
+                    `marker-dot ${
+                      markerClass ? `marker-${markerClass}` : `marker-${(status || '').replace(/ /g, '-')}`
+                    }`
+                  }>
+                </div>
               </Marker>
             )
           })}
@@ -305,8 +313,8 @@ const Root = styled.div`
   }
 
   .marker-dot {
-    height: ${dotSize}px;
-    width: ${dotSize}px;
+    height: ${markerSize}px;
+    width: ${markerSize}px;
     border: 1px solid #666;
     // background: #d8d8d8;
     border-radius: 50%;
@@ -326,6 +334,12 @@ const Root = styled.div`
   .marker-not-reporting {
     background: #d72020;
     border: 1px solid #992727;
+    opacity: .65;
+  }
+
+  .marker-blue-dot {
+    background: rgb(31, 119, 180);
+    border: 1px solid rgb(24, 99, 152);
     opacity: .65;
   }
 

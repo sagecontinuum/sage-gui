@@ -174,6 +174,9 @@ export default function Sage() {
                         path="nodes"
                         element={<Nodes />} />
                       <Route
+                        path="all-nodes"
+                        element={<Nodes />} />
+                      <Route
                         path="sensors"
                         element={<SensorList project={project} />} />
                     </Route>

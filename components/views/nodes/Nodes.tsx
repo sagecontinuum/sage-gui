@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useLocation } from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -72,6 +72,7 @@ function getProjectNodes() {
 }
 
 
+
 type Option = {
   id: string,
   label: string
@@ -79,12 +80,14 @@ type Option = {
 
 export default function Nodes() {
   const [params, setParams] = useSearchParams()
+  const {pathname} = useLocation()
   const {isSuper} = useIsSuper()
 
   const phase = params.get('phase') as BK.PhaseTabs
 
   const query = params.get('query') || ''
   const show_all = params.get('show_all') ? true : false
+  const all_nodes = pathname == '/all-nodes'
   const focus = params.get('focus')
   const city = params.get('city')
   const state = params.get('state')
@@ -96,6 +99,7 @@ export default function Nodes() {
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState<BK.NodeState[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
+  const [cols, setCols] = useState(columns || [])
 
   // filter options
   const [focuses, setFocuses] = useState<Option[]>()
@@ -105,7 +109,7 @@ export default function Nodes() {
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
-  const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
+  // const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
   const [selected, setSelected] = useState<BK.NodeState[]>([])
   const [lastUpdate, setLastUpdate] = useState<Date>(null)
@@ -151,21 +155,17 @@ export default function Nodes() {
     }
   }, [])
 
-
   useEffect(() => {
     if (!isSuper) return
 
-    const idx = columns.findIndex(o => o.id == 'vsn')
-    const {id, label} = columns[idx]
-
-    columns.splice(idx, 1, {
-      id,
-      label,
-      width: '100px', // wider column for btn
-      format: vsnLinkWithEdit
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'vsn')
+      prev.splice(idx, 1, {...columns[idx], format: vsnLinkWithEdit})
+      return [...prev]
     })
 
   }, [isSuper])
+
 
 
   // updating on state changes
@@ -175,7 +175,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, focus, city, state, sensor, nodeType, phase, show_all])
+  }, [query, focus, city, state, sensor, phase, show_all, all_nodes])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -186,6 +186,17 @@ export default function Nodes() {
 
 
 
+  useEffect(() => {
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'status')
+      prev.splice(idx, 1, {...prev[idx], hide: all_nodes})
+      return [...prev]
+    })
+
+    // force mapbox rerender and avoid unnecessary rerenders
+    setUpdateID(prev => prev + 1)
+  }, [all_nodes])
+
   // filter data (todo: this can probably be done more efficiently)
   const updateAll = (filteredData, phase) => {
     const filterState = getFilterState(params)
@@ -194,7 +205,7 @@ export default function Nodes() {
     if (phase)
       filteredData = filteredData.filter(obj => obj.phase == BK.phaseMap[phase])
 
-    if (!show_all)
+    if (!show_all && !all_nodes)
       filteredData = filteredData.filter(obj => obj.status == 'reporting')
 
 
@@ -242,8 +253,8 @@ export default function Nodes() {
     setParams(params, {replace: true})
   }
 
+
   const handleRemoveFilters = () => {
-    setNodeType('all')
     setParams(phase ? {phase} : {}, {replace: true})
   }
 
@@ -282,6 +293,7 @@ export default function Nodes() {
         {filtered &&
           <Map
             data={selected.length ? getSubset(selected, filtered) : filtered}
+            markerClass={all_nodes ? 'blue-dot' : null}
             updateID={updateID}
           />
         }
@@ -296,7 +308,7 @@ export default function Nodes() {
           <Table
             primaryKey="id"
             rows={filtered}
-            columns={columns}
+            columns={cols}
             enableSorting
             enableDownload
             sort='-vsn'
@@ -340,23 +352,25 @@ export default function Nodes() {
                     onChange={vals => handleFilterChange('sensor', vals as Option[])}
                   />
                 }
-                <Tooltip
-                  sx={{mx: 1}}
-                  placement="top"
-                  title={
-                    <>Show nodes which are in maintenance, pending deployment, or not reporting.</>
-                  }
-                >
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={show_all}
-                        onChange={(evt) => handleShowAll(evt)}
-                      />
+                {!all_nodes &&
+                  <Tooltip
+                    sx={{mx: 1}}
+                    placement="top"
+                    title={
+                      <>Show nodes which are in maintenance, pending deployment, or not reporting.</>
                     }
-                    label="Show all"
-                  />
-                </Tooltip>
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={show_all}
+                          onChange={(evt) => handleShowAll(evt)}
+                        />
+                      }
+                      label="Show all"
+                    />
+                  </Tooltip>
+                }
                 {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
                   <>
                     <VertDivider />

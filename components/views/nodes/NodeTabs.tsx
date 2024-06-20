@@ -1,17 +1,18 @@
 import styled from 'styled-components'
-import { Outlet, useLocation, useSearchParams, Link } from 'react-router-dom'
+import { Outlet, useLocation, Link } from 'react-router-dom'
 
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { TabProps } from '@mui/material'
 
 import HubIcon from '@mui/icons-material/HubOutlined'
+import LocationIcon from '@mui/icons-material/LocationOnOutlined'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
 
 
 
 const label = (
   icon: JSX.Element,
-  label: 'Nodes' | 'Sensors'
+  label: 'Node Status' | 'All Nodes' | 'Sensors'
 ) =>
   <div className="flex items-center">
     {icon}&nbsp;{label}
@@ -30,13 +31,10 @@ type Props = {
 }
 
 export default function NodeTabs(props: Props) {
-  const {includeSensors = true, isAdmin = false} = props
+  const {includeSensors = true} = props
 
-  const path = useLocation().pathname
-  const [params] = useSearchParams()
-
-  const defaultPath = path === '/sensors' ? '/nodes' : path
-  const tab = params.get('phase') || path
+  const {pathname, search} = useLocation()
+  const tab = `${pathname}${search}`
 
   return (
     <Root>
@@ -45,10 +43,18 @@ export default function NodeTabs(props: Props) {
         aria-label="node tabs by node phase"
       >
         <Tab
-          label={label(<HubIcon />, 'Nodes')}
+          label={label(<HubIcon />, 'Node Status')}
           component={Link}
-          value={defaultPath}
-          to={defaultPath}
+          value={`/nodes${search}`}
+          to={`/nodes${search}`}
+          replace
+        />
+
+        <Tab
+          label={label(<LocationIcon />, 'All Nodes')}
+          component={Link}
+          value={`/all-nodes${search}`}
+          to={`/all-nodes${search}`}
           replace
         />
 
