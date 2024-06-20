@@ -105,6 +105,13 @@ const layerStyle: SymbolLayer = {
     'text-radial-offset': 0.5,
     'text-justify': 'auto',
     'icon-image': ['get', 'icon'],
+    'text-font': [
+      'Open Sans Semibold',
+      'Arial Unicode MS Bold'
+    ],
+  },
+  paint: {
+    'text-color': '#444'
   }
 }
 
