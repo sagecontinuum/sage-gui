@@ -276,37 +276,41 @@ export function modemSim(_, obj: BK.Node) {
 }
 
 type SensorsProps = {
-  data: BK.FlattenedManifest['sensors']
+  data: BK.Node['sensors'] | BK.Node['computes']
+  path?: string  // url path if avail; e.g., /sesnors/
 }
 
-export function Sensors(props: SensorsProps) {
-  const {data} = props
+export function HardwareList(props: SensorsProps) {
+  const {data, path} = props
 
-  if (!data) return <></>
+  if (!data.length) return <>-</>
 
   const len = data.length
 
   return (
-    <SensorList>
+    <HardwareRoot>
       {data.map((sensor, i) => {
         const {hw_model, name} = sensor
         return (
           <span key={i}>
             <Tooltip placement="top" title={name}>
-              <Link to={`/sensors/${hw_model}`}>
-                {hw_model}
-              </Link>
+              {path ?
+                <Link to={`${path}${hw_model}`}>
+                  {hw_model}
+                </Link> :
+                <span>{hw_model}</span>
+              }
             </Tooltip>
             {i < len - 1  && ', '}
           </span>
         )
       })
       }
-    </SensorList>
+    </HardwareRoot>
   )
 }
 
-const SensorList = styled.ul`
+const HardwareRoot = styled.ul`
   padding: 0;
   font-size: 9pt;
   list-style: none;
@@ -316,17 +320,20 @@ const SensorList = styled.ul`
 `
 
 
-
 const TT = (props) =>
   <Tooltip placement="right" {...props}><span>{props.children}</span></Tooltip>
 
 
 
+/**
+ * helpers for admin listing of sensors by typical WSN positions; todo(nc): remove
+ */
+
 export function topSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/top|raingauge/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -334,7 +341,7 @@ export function topSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -343,7 +350,7 @@ export function bottomSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/bottom/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -351,7 +358,7 @@ export function bottomSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -360,7 +367,7 @@ export function leftSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/left/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -368,7 +375,7 @@ export function leftSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -379,7 +386,7 @@ export function rightSensors(v, obj) {
     (name.match(/right/gi) || scope.match(/^rpi$/i)) && !name.match(/raingauge/gi)
   )
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -387,7 +394,7 @@ export function rightSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -398,7 +405,7 @@ export function additionalSensors(v, obj) {
     !name.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
   )
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -406,6 +413,6 @@ export function additionalSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 

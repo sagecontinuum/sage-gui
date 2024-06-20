@@ -55,8 +55,15 @@ const columns: Column[] = [{
 }, {
   id: 'sensors',
   label: 'Sensors',
-  format: (val) => <formatters.Sensors data={val} />,
+  format: (val) => <formatters.HardwareList data={val} path="/sensors/" />,
   dlFormat: (val) => val.map(v => v.hw_model).join(', ')
+}, {
+  id: 'computes',
+  label: 'Computes',
+  format: (val) => <formatters.HardwareList data={val} />,
+  dlFormat: (val) => val.map(v => v.hw_model).join(', '),
+  width: '200px',
+  hide: true
 },
 /* todo: update db
 {
