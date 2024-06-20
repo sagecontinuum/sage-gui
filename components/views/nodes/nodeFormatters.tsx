@@ -158,9 +158,13 @@ export function vsnLink(vsn, node: BK.Node) {
 export function vsnLinkWithEdit(vsn, node: BK.Node) {
   const {site_id} = node
   return <div className="flex items-center">
+    <Link to={`/node/${vsn}`}>
+      {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
+    </Link>
     <Tooltip
       placement="top"
       title={<>Edit node meta <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+      className="edit-btn" // show/hide on hover with css
     >
       <IconButton
         href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${node.id}`}
@@ -169,9 +173,6 @@ export function vsnLinkWithEdit(vsn, node: BK.Node) {
         <EditIcon fontSize="small"/>
       </IconButton>
     </Tooltip>
-    <Link to={`/node/${vsn}`}>
-      {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
-    </Link>
   </div>
 }
 

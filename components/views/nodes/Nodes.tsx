@@ -416,6 +416,15 @@ const TableContainer = styled.div`
   .gps-icon {
     margin-right: 10px;
   }
+
+  .edit-btn {
+    margin-left: .5em;
+    visibility: hidden;
+  }
+
+  tr:hover .edit-btn {
+    visibility: visible;
+  }
 `
 
 const FilterControls = styled.div`
