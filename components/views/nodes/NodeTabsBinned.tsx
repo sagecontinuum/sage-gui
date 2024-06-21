@@ -25,13 +25,13 @@ import { filterData, type FilterState, initialState } from '../statusDataUtils'
 import { parseQueryStr } from '/components/utils/queryString'
 
 
-type Label = BK.Phase | 'Show All' | 'Sensors'
+type Label = BK.Phase | 'All Nodes' | 'Sensors'
 
 type PhaseCounts = {
   [phase in BK.Phase]: number
 }
 
-type Counts =  PhaseCounts & {'Show All': number}
+type Counts =  PhaseCounts & {'All Nodes': number}
 
 
 function getPhaseCounts(data: BK.Node[], filterState: FilterState) : PhaseCounts {
@@ -105,7 +105,7 @@ export default function NodeTabs(props: Props) {
 
     setCounts({
       ...counts,
-      'Show All': sum(Object.values(counts))
+      'All Nodes': sum(Object.values(counts))
     })
   }
 
@@ -151,7 +151,7 @@ export default function NodeTabs(props: Props) {
           value="retired"
         />
         <Tab
-          label={label(<ShowAllIcon />, 'Show All', counts)}
+          label={label(<ShowAllIcon />, 'All Nodes', counts)}
           value="all"
         />
 

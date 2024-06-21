@@ -4,9 +4,11 @@ import { Outlet, useLocation, Link } from 'react-router-dom'
 import { Tabs, Tab } from '/components/tabs/Tabs'
 import { TabProps } from '@mui/material'
 
-import HubIcon from '@mui/icons-material/HubOutlined'
-import LocationIcon from '@mui/icons-material/LocationOnOutlined'
+
+import CheckIcon from '@mui/icons-material/CheckRounded'
+import RuleIcon from '@mui/icons-material/RuleRounded'
 import SensorIcon from '@mui/icons-material/SensorsRounded'
+import ShowAllIcon from '@mui/icons-material/SelectAll'
 
 
 
@@ -43,7 +45,7 @@ export default function NodeTabs(props: Props) {
         aria-label="node tabs by node phase"
       >
         <Tab
-          label={label(<HubIcon />, 'Node Status')}
+          label={label(search.includes('show_all') ? <RuleIcon/> : <CheckIcon /> , 'Node Status')}
           component={Link}
           value={`/nodes${search}`}
           to={`/nodes${search}`}
@@ -51,7 +53,7 @@ export default function NodeTabs(props: Props) {
         />
 
         <Tab
-          label={label(<LocationIcon />, 'All Nodes')}
+          label={label(<ShowAllIcon />, 'All Nodes')}
           component={Link}
           value={`/all-nodes${search}`}
           to={`/all-nodes${search}`}
