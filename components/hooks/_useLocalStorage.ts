@@ -1,3 +1,8 @@
+/**
+ * an unused, untested implmentation of storing some settings
+ */
+
+
 import {useState, useEffect, useMemo} from 'react'
 
 
