@@ -20,7 +20,7 @@ import {
   type FilterState
 } from '/components/views/statusDataUtils'
 
-import Table from '/components/table/Table'
+import Table, { type Column } from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
 import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
@@ -99,7 +99,7 @@ export default function Nodes() {
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState<BK.NodeState[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
-  const [cols, setCols] = useState(columns || [])
+  const [cols, setCols] = useState<Column[]>(columns)
 
   // filter options
   const [focuses, setFocuses] = useState<Option[]>()
@@ -155,19 +155,6 @@ export default function Nodes() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!isSuper) return
-
-    setCols(prev => {
-      const idx = prev.findIndex(o => o.id == 'vsn')
-      prev.splice(idx, 1, {...columns[idx], format: vsnLinkWithEdit})
-      return [...prev]
-    })
-
-  }, [isSuper])
-
-
-
   // updating on state changes
   useEffect(() => {
     if (!data) return
@@ -185,6 +172,16 @@ export default function Nodes() {
   }, [data, phase])
 
 
+  useEffect(() => {
+    if (!isSuper) return
+
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'vsn')
+      prev.splice(idx, 1, {...prev[idx], format: vsnLinkWithEdit})
+      return [...prev]
+    })
+
+  }, [isSuper])
 
   useEffect(() => {
     setCols(prev => {
@@ -311,8 +308,9 @@ export default function Nodes() {
             columns={cols}
             enableSorting
             enableDownload
-            sort='-vsn'
+            sort="-vsn"
             search={query}
+            storageKey={pathname}
             onSearch={handleQuery}
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}

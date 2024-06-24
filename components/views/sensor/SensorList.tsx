@@ -129,6 +129,7 @@ export default function SensorList(props: Props) {
       {data &&
         <Table
           primaryKey="id"
+          storageKey="/sensors"
           columns={columns}
           rows={data}
           enableSorting

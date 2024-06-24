@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import { useState, useMemo, type MouseEvent } from 'react'
 import { useTheme, alpha } from '@mui/material/styles'
 
 import { styled } from '@mui/material/styles'
 
 import Popper from '@mui/material/Popper'
 import SettingsIcon from '@mui/icons-material/SettingsOutlined'
+import ResetIcon from '@mui/icons-material/ManageHistoryRounded'
 import DoneIcon from '@mui/icons-material/Done'
 
 import Autocomplete from '@mui/material/Autocomplete'
@@ -69,115 +70,120 @@ type Option = {
 
 type Props = {
   options: Option[]
-  ButtonComponent?: JSX.Element
-  header?: boolean
+  value: Option[]
+  onChange: (opt: (string | Option)[]) => void
+  onRestoreDefaults: () => void
   headerText?: string
   noOptionsText?: string
-  onChange: (opt: (string | Option)[]) => void
 }
 
 export default function ColumnMenu(props: Props) {
   const {
     options,
-    onChange,
-    ButtonComponent,
-    header = true,
+    value,
     headerText,
+    onRestoreDefaults,
+    onChange,
     ...rest
   } = props
 
   const [anchorEl, setAnchorEl] = useState(null)
   const theme = useTheme()
 
-  const [value, setValue] = useState(options.filter(obj => !obj.hide))
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = (event, reason) => {
-    if (reason === 'toggleInput') {
-      return
-    }
-
-    // setValue(pendingValue)
-    if (anchorEl) {
-      anchorEl.focus()
-    }
-    setAnchorEl(null)
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget)
   }
 
   const open = Boolean(anchorEl)
   const id = open ? 'column-search' : undefined
 
+  const defaultShownCount = useMemo(() =>
+    options.filter(o => !o.hide).length
+  , [options])
+
   return (
     <div>
-      {ButtonComponent ?
-        React.cloneElement(ButtonComponent, {onClick: handleClick}) :
-        <Tooltip title="Show/hide columns" placement="top">
+      {defaultShownCount != value.length &&
+        <Tooltip
+          title="Restore default columns"
+          placement="top"
+        >
           <IconButton
             size="small"
-            onClick={handleClick}
-            disableRipple
+            onClick={onRestoreDefaults}
           >
-            <SettingsIcon  />
+            <ResetIcon />
           </IconButton>
         </Tooltip>
       }
+      <Tooltip
+        title="Show/hide columns..."
+        placement="top"
+      >
+        <IconButton
+          size="small"
+          onClick={handleClick}
+          disableRipple
+        >
+          <SettingsIcon  />
+        </IconButton>
+      </Tooltip>
 
       <StyledPopper id={id} open={open} anchorEl={anchorEl} placement="bottom-start">
-        {header && (
-          <DivHeader>{headerText ? headerText : 'Show/hide columns'}</DivHeader>
-        )}
-        <Autocomplete
-          open
-          onClose={handleClose}
-          multiple
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue)
-            onChange(newValue)
-          }}
-          disableCloseOnSelect
-          disablePortal
-          renderTags={() => null}
-          noOptionsText="No labels"
-          renderOption={(props, option, { selected }) => {
-            return (
-              <li {...props}>
-                <Box
-                  component={DoneIcon}
-                  sx={{ width: 17, height: 17, mr: '5px', ml: '-2px' }}
-                  style={{
-                    visibility: selected ? 'visible' : 'hidden',
-                  }}
-                />
+        <div>
+          <DivHeader className="flex items-center justify-between">
+            {headerText ? headerText : 'Select table columns'}
+          </DivHeader>
 
-                <Box
-                  sx={{
-                    flexGrow: 1,
-                    '& span': {
-                      color: theme.palette.mode === 'light' ? '#586069' : '#8b949e',
-                    },
-                    fontSize: '.9em'
-                  }}
-                >
-                  {option.label || option.id}
-                </Box>
-              </li>
-            )
-          }}
-          options={options}
-          getOptionLabel={(option) => option.label || option.id}
-          renderInput={(params) => (
-            <StyledInputBase
-              ref={params.InputProps.ref}
-              inputProps={params.inputProps}
-              autoFocus
-            />
-          )}
-          {...rest}
-        />
+          <Autocomplete
+            open
+            onClose={handleClick}
+            multiple
+            value={value}
+            onChange={(event, newValue) => {
+              onChange(newValue)
+            }}
+            disableCloseOnSelect
+            disablePortal
+            renderTags={() => null}
+            noOptionsText="No labels"
+            renderOption={(props, option, { selected }) => {
+              return (
+                <li {...props}>
+                  <Box
+                    component={DoneIcon}
+                    sx={{ width: 17, height: 17, mr: '5px', ml: '-2px' }}
+                    style={{
+                      visibility: selected ? 'visible' : 'hidden',
+                    }}
+                  />
+
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      '& span': {
+                        color: theme.palette.mode === 'light' ? '#586069' : '#8b949e',
+                      },
+                      fontSize: '.9em'
+                    }}
+                  >
+                    {option.label || option.id}
+                  </Box>
+                </li>
+              )
+            }}
+            options={options}
+            getOptionLabel={(option) => option.label || option.id}
+            renderInput={(params) => (
+              <StyledInputBase
+                ref={params.InputProps.ref}
+                inputProps={params.inputProps}
+                autoFocus
+              />
+            )}
+            {...rest}
+          />
+        </div>
       </StyledPopper>
     </div>
   )
