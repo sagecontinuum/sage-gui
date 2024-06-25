@@ -1,5 +1,6 @@
 
 const keys = [
+  'sage_username',
   'sage-table-columns-/nodes',
   'sage-table-columns-/all-nodes',
   'sage-table-columns-/sensors'
@@ -21,6 +22,17 @@ function rm(key: string) {
 }
 
 
+function onChange(key: string, callback: () => void) {
+  window.addEventListener('storage', event => {
+    if (event.key !== key)
+      return
+
+    if (event.newValue == null)
+      callback()
+  })
+}
+
+
 // todo(nc): clean based on routes, or something like that
 function _clean() {
   for (const key in localStorage){
@@ -34,5 +46,6 @@ _clean()
 export {
   get,
   set,
-  rm
+  rm,
+  onChange
 }
