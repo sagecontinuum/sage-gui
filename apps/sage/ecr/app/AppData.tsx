@@ -13,13 +13,15 @@ import config from '/config'
 const registry = config.dockerRegistry
 
 // todo(nc): promote/refactor into component lib
+import ErrorMsg from '/apps/sage/ErrorMsg'
 import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
-import ErrorMsg from '/apps/sage/ErrorMsg'
 import { vsnLinkNameOnly } from '/components/views/nodes/nodeFormatters'
+
+import { keyBy } from 'lodash'
 
 const TIMELINE_LABEL_WIDTH = 40
 const TAIL_DAYS = '-7d'
@@ -50,6 +52,7 @@ export default function AppData(props: Props) {
   const {plugin} = props
 
   const [nodes, setNodes] = useState<BK.Node[]>()
+  const [nodeDict, setNodeDict] = useState<BK.NodeDict>()
 
   const [{data, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
@@ -75,6 +78,7 @@ export default function AppData(props: Props) {
     BK.getNodes()
       .then(nodes => {
         setNodes(nodes)
+        setNodeDict(keyBy(nodes, 'vsn'))
       }).catch(error => dispatch({type: 'ERROR', error}))
   }, [])
 
@@ -155,7 +159,7 @@ export default function AppData(props: Props) {
                       ${item.meta.plugin}<br>
                       ${item.value.toLocaleString()} records`
                     }
-                    yFormat={vsn => vsnLinkNameOnly(vsn)}
+                    yFormat={vsn => vsnLinkNameOnly(vsn, nodeDict[vsn])}
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta
