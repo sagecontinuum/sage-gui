@@ -36,8 +36,10 @@ export function formatDownloadCol(item: string | object | (string | number | obj
       return item.map(o => JSON.stringify(o)).join(', ')
     else
       return item.join(', ')
-  } else if (typeof item == 'object')
-    return JSON.stringify(item)
+  } else if (item && typeof item == 'object')
+    return `"${Object.entries(item).map(([k, v]) => `${k}: ${v}`).join(', ')}"`
+  else
+    return item
 }
 
 
