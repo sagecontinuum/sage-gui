@@ -3,7 +3,7 @@ import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 import type { Column } from '/components/table/Table'
 
-const PROJECT = settings.project.toLowerCase()
+const PROJECT = settings.project?.toLowerCase()
 
 
 const columns: Column[] = [{

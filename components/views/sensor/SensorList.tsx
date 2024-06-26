@@ -101,13 +101,12 @@ export const columns = [{
 
 type Props = {
   project?: string
-  focus?: string
-  nodes?: BK.VSN[]
+  vsns?: BK.VSN[]
 }
 
 
 export default function SensorList(props: Props) {
-  const {project, focus, nodes} = props
+  const {project, vsns} = props
 
   const [data, setData] = useState<BK.SensorListRow[]>()
   const [error, setError] = useState()
@@ -122,7 +121,7 @@ export default function SensorList(props: Props) {
       .then(data => setData(data))
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
-  }, [setLoading, project, focus, nodes])
+  }, [setLoading, project, vsns])
 
   return (
     <Root>
@@ -145,7 +144,7 @@ export default function SensorList(props: Props) {
 }
 
 const Root = styled.div`
-  margin: 1em;
+  margin-top: 1em;
 
   h1 {
     margin: 0;

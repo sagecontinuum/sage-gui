@@ -330,7 +330,7 @@ export default function Data(props: Props) {
 
                 return (
                   <TimelineContainer key={vsn}>
-                    <div className="flex title-row">
+                    <div className="flex title-row gap">
                       <div className="flex column">
                         <div>
                           <h2>{vsnLink(vsn, nodeDict[vsn])}</h2>
@@ -339,7 +339,7 @@ export default function Data(props: Props) {
                       </div>
 
                       {DATA_PRODUCT_PATH &&
-                        <div className="data-opts">
+                        <div>
                           {getDownloadLink(DATA_PRODUCT_PATH)}
                         </div>
                       }

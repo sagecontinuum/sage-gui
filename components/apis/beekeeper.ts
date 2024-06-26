@@ -386,7 +386,7 @@ export async function getSensors() : Promise<SensorListRow[]> {
 
   const params = [
     project ? `project=${project}` : '',
-    project.toLowerCase() == 'sage' ?
+    project?.toLowerCase() == 'sage' ?
       `phase=${['Deployed', 'Awaiting Deployment', 'Maintenance'].join(',')}` : ''
   ]
 
@@ -423,7 +423,12 @@ type GetNodeArgs = {
 }
 
 export async function getNodes(args?: GetNodeArgs) : Promise<Node[]> {
-  const nodes = await _getNodeMetas(args)
+  const {vsns} = args || {}
+
+  let nodes = await _getNodeMetas(args)
+
+  if (vsns)
+    nodes = nodes.filter(o => vsns.includes(o.vsn))
 
   return nodes
     .filter(o => !!o.computes.length)

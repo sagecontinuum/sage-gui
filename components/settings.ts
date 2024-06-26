@@ -7,9 +7,9 @@ const SAGE_UI_PROJECT = process.env.SAGE_UI_PROJECT || 'sage'
 
 type Configs = {
   [key: string]: {
-    project: Node['project']
+    project?: Node['project']
     focus?: string    // case insensitive for data/api purposes
-    logo?: string     // full path of logo (see imports above)
+    logo?: string     // resolves to a full url of logo (see imports above)
     alt?: string      // logo alt text
     url?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
@@ -39,7 +39,6 @@ const configs : Configs = {
     initialViewState: { latitude: 41.88, longitude: -87.65, zoom: 8.7 }
   },
   'neon-mdp': {
-    project: 'SAGE',
     vsns: ['W038', 'W01D', 'W01F', 'V008'],
     dataStart: new Date('2022-04-05T12:00:00Z'),
     dataEnd: new Date('2022-05-05T12:00:00Z'),

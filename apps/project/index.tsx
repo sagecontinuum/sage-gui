@@ -28,7 +28,7 @@ import '/assets/styles.scss'
 import theme from '/components/theme'
 import settings from '/components/settings'
 
-const {logo, alt, url, project, focus, vsns} = settings
+const {logo, alt, url, project, vsns} = settings
 
 
 const NavMenu = () =>
@@ -97,13 +97,14 @@ export default function App() {
                 <Route path='/' element={<MetaRoute />}>
                   <Route path="/" element={<NodeTabs />}>
                     <Route path="nodes" element={<Nodes />} />
-                    <Route path="sensors" element={<SensorList {...{project, focus, vsns}} />} />
+                    <Route path="all-nodes" element={<Nodes />} />
+                    <Route path="sensors" element={<SensorList {...{project, vsns}} />} />
                   </Route>
 
                   <Route path="node/:vsn" element={<Node />} />
                   <Route path="sensors/:name" element={<Sensor />} />
 
-                  <Route path="data" element={<Data {...{project, focus, vsns}} />} />
+                  <Route path="data" element={<Data {...{project, vsns}}  />} />
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
                   <Route path="query-browser" element={<QueryBrowser />} />
