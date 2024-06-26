@@ -170,15 +170,9 @@ export default function Sage() {
                   <Route path='/' element={<MetaRoute />}>
 
                     <Route path="/" element={<NodeTabs />}>
-                      <Route
-                        path="nodes"
-                        element={<Nodes />} />
-                      <Route
-                        path="all-nodes"
-                        element={<Nodes />} />
-                      <Route
-                        path="sensors"
-                        element={<SensorList project={project} />} />
+                      <Route path="nodes" element={<Nodes />} />
+                      <Route path="all-nodes" element={<Nodes />} />
+                      <Route path="sensors" element={<SensorList project={project} />} />
                     </Route>
                     <Route path="sensors/:name" element={<Sensor />} />
 
