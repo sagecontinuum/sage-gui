@@ -14,11 +14,11 @@ function AllAudios() {
   // todo(nc): investigate api rate limitation issue!
   useEffect(() => {
     let i = 0
-    function addChart(nodeList) {
-      if (i >= nodeList.length)
+    function addChart(vsns: BK.VSN[]) {
+      if (i >= vsns.length)
         return
 
-      const vsn = nodeList[i]
+      const vsn = vsns[i]
 
       const ele = (
         <Chart key={vsn}>
@@ -31,14 +31,13 @@ function AllAudios() {
       i = i + 1
 
       setTimeout(() => {
-        addChart(nodeList)
+        addChart(vsns)
       }, 0)
     }
 
-    BK.getNodeMeta()
-      .then(meta => {
-        const nodeList = Object.keys(meta)
-        addChart(nodeList)
+    BK.getNodes()
+      .then(nodes => {
+        addChart(nodes.map(o => o.vsn))
       })
   }, [])
 

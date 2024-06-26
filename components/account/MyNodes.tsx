@@ -39,8 +39,8 @@ export default function MyNodes() {
   useEffect(() => {
     setLoading(true)
 
-    Promise.all([User.listMyNodes(), BK.getNodeMeta()])
-      .then(([nodes, nodeMetas]) => setData(nodes.map(o => ({...o, ...nodeMetas[o.vsn]}))))
+    Promise.all([User.listMyNodes(), BK.getNodeDict()])
+      .then(([myNodes, nodeDict]) =>  setData(myNodes.map(o => ({...o, ...nodeDict[o.vsn]}))))
       .catch(error => setError(error))
       .finally(() => setLoading(false))
 

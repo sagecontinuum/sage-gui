@@ -1,8 +1,10 @@
 import { useState, memo } from 'react'
 import styled from 'styled-components'
-import SearchIcon from '@mui/icons-material/SearchOutlined'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
+import IconButton from '@mui/material/IconButton'
+import SearchIcon from '@mui/icons-material/SearchOutlined'
+import ClearIcon from '@mui/icons-material/ClearOutlined'
 
 import useDebounce from '/components/hooks/useDebounce'
 
@@ -36,6 +38,14 @@ export default memo(function TableSearch(props: Props) {
         InputProps={{
           style: { width: width || '275px'},
           startAdornment: <InputAdornment position="start"><SearchIcon/></InputAdornment>,
+          endAdornment:
+            query.length > 0 &&
+              <IconButton
+                size="small"
+                onClick={() => { debouncedOnChange(); setQuery('') }}
+              >
+                <ClearIcon fontSize="small"/>
+              </IconButton>
         }}
         size="small"
         variant="outlined"

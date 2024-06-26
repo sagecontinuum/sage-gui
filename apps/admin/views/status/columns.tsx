@@ -142,7 +142,7 @@ const columns = [{
 
     const {health, sanity} = obj
 
-    if (row.node_type == 'Blade') {
+    if (row.type == 'Blade') {
       return <Tooltip title={`Health/sanity tests need to be configured for blades`} placement="right">
         <span className="font-bold muted flex justify-center">n/a</span>
       </Tooltip>
@@ -168,7 +168,7 @@ const columns = [{
     </Link>
   }
 }, {
-  id: 'node_type',
+  id: 'type',
   label: 'Type',
   hide: true
 }, {
@@ -188,7 +188,7 @@ const columns = [{
   id: 'focus',
   label: 'Focus'
 }, {
-  id: 'node_phase_v3',
+  id: 'phase',
   label: 'Phase',
   hide: true
 }, {

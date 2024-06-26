@@ -13,13 +13,15 @@ import config from '/config'
 const registry = config.dockerRegistry
 
 // todo(nc): promote/refactor into component lib
+import ErrorMsg from '/apps/sage/ErrorMsg'
 import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
-import ErrorMsg from '/apps/sage/ErrorMsg'
 import { vsnLinkNameOnly } from '/components/views/nodes/nodeFormatters'
+
+import { keyBy } from 'lodash'
 
 const TIMELINE_LABEL_WIDTH = 40
 const TAIL_DAYS = '-7d'
@@ -29,8 +31,8 @@ const getStartTime = (str) => {
   if (str.includes('d'))
     return subDays(new Date(), str.replace(/-|d/g, ''))
   else if (str.includes('y'))
-    return subYears(new Date(), str.replace(/-|y/g, ''))  
-  else 
+    return subYears(new Date(), str.replace(/-|y/g, ''))
+  else
     throw new Error(`getStartTime: relative start time '%{string}' not supported.`)
 }
 
@@ -49,7 +51,8 @@ type Props = {
 export default function AppData(props: Props) {
   const {plugin} = props
 
-  const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
+  const [nodes, setNodes] = useState<BK.Node[]>()
+  const [nodeDict, setNodeDict] = useState<BK.NodeDict>()
 
   const [{data, rawData, byApp, error}, dispatch] = useReducer(
     dataReducer,
@@ -72,22 +75,23 @@ export default function AppData(props: Props) {
 
 
   useEffect(() => {
-    BK.getNodeMeta()
-      .then(data => {
-        setNodeMetas(Object.values(data))
+    BK.getNodes()
+      .then(nodes => {
+        setNodes(nodes)
+        setNodeDict(keyBy(nodes, 'vsn'))
       }).catch(error => dispatch({type: 'ERROR', error}))
   }, [])
 
 
   useEffect(() => {
-    if (!nodeMetas) return
+    if (!nodes) return
 
     setLoadingTL(true)
     fetchRollup({...opts, plugin: `${registry}/${plugin}.*`})
-      .then(data => dispatch({type: 'INIT_DATA', data, nodeMetas}))
+      .then(data => dispatch({type: 'INIT_DATA', data, nodes}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
-  }, [plugin, nodeMetas, opts])
+  }, [plugin, nodes, opts])
 
 
   const handleOptionChange = (name, val) => {
@@ -155,7 +159,7 @@ export default function AppData(props: Props) {
                       ${item.meta.plugin}<br>
                       ${item.value.toLocaleString()} records`
                     }
-                    yFormat={vsn => vsnLinkNameOnly(vsn)}
+                    yFormat={vsn => vsnLinkNameOnly(vsn, nodeDict[vsn])}
                     onCellClick={(data) => {
                       const {timestamp, meta} = data
                       const {vsn, plugin} = meta

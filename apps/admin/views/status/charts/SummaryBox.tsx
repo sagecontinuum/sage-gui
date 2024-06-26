@@ -1,12 +1,10 @@
-
-import React from 'react'
 import styled from 'styled-components'
 
 import Check from '@mui/icons-material/CheckCircleRounded'
 
 type StatusProps = {
   label: string
-  value: number | string
+  value: number
 }
 
 export default function SummaryBox(props: StatusProps) {
@@ -19,7 +17,7 @@ export default function SummaryBox(props: StatusProps) {
       <div>
         {value ?
           <div className="flex items-center">
-            <span className="status-value">{value}</span>&nbsp;{value != 'n/a' &&
+            <span className="status-value">{value}</span>&nbsp;{value &&
                <div className="sub-text"><div>recent</div>issue{value > 1 ? 's' : ''}</div>
             }
           </div> :

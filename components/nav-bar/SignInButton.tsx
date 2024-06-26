@@ -26,7 +26,7 @@ type Props = {
 }
 
 export default function SignInButton(props: Props) {
-  const {pathname} = useLocation()
+  const {pathname, search} = useLocation()
   const {isAdmin} = props
 
   const [signingOut, setSigningOut] = useState(false)
@@ -96,7 +96,7 @@ export default function SignInButton(props: Props) {
 
       {!username && pathname != '/login' &&
         <Button
-          href={isDev() ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}`}
+          href={isDev() ? '/login' : `${Auth.url}/?callback=${webOrigin}${pathname}${search}`}
           variant="outlined"
           color="primary"
           sx={{marginLeft: '20px'}}

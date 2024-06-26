@@ -26,7 +26,7 @@ const cameraTags =  BH.cameraOrientations.map(pos =>
 
 // todo(nc): note: we need nodeMetas for some of this
 const tags = [{
-  id: 'node_type',
+  id: 'type',
   tag: 'WSN'
 }, {
   id: 'raingauge',
@@ -68,17 +68,13 @@ const columns = [{
 }]
 
 
+// add in camera meta for use in auto-complete;
 export const parseNodeMeta = (data) => data.map(o => ({
   ...o,
-  lat: o.gps_lat,
-  lng: o.gps_lon,
-  id: o.vsn,
-  status: 'not reporting',
-  camera_top: o.top_camera != 'none' ? 'camera_top' : false,
-  camera_bottom: o.bottom_camera != 'none' ? 'camera_bottom' : false,
-  camera_left: o.left_camera != 'none' ? 'camera_left' : false,
-  camera_right: o.right_camera != 'none' ? 'camera_right' : false,
-  rainguage: 'raingauge'
+  top_camera: o.sensors.find(o => o.name == 'top_camera')?.hw_model,
+  bottom_camera: o.sensors.find(o => o.name == 'bottom_camera')?.hw_model,
+  left_camera: o.sensors.find(o => o.name == 'left_camera')?.hw_model,
+  right_camera: o.sensors.find(o => o.name == 'right_camera')?.hw_model
 }))
 
 
@@ -90,7 +86,7 @@ type Props = {
 export default function NodeSelector(props: Props) {
   const { selected = [], onSelected } = props
 
-  const [data, setData] = useState<BK.NodeDetails>()
+  const [data, setData] = useState<BK.Node[]>()
   const [query, setQuery] = useState<string>('')
   const [filtered, setFiltered] = useState<object[]>()
   const [page] = useState(0)
@@ -98,14 +94,12 @@ export default function NodeSelector(props: Props) {
 
   const [tagState, setTagState] = useState<string[]>([])
 
-  const [bucket] = useState<BK.NodeMeta['bucket']>(BK.Buckets[0])
-
   const [schedulable, setSchedulable] = useState<BK.VSN[]>()
   const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
 
 
   useEffect(() => {
-    const p1 = BK.getNodeDetails()
+    const p1 = BK.getNodes()
     const p2 = User.listNodesWithPerm('schedule')
 
     Promise.all(([p1, p2]))
@@ -121,7 +115,7 @@ export default function NodeSelector(props: Props) {
         setFiltered(objs)
       })
 
-  }, [bucket, isSchedulable])
+  }, [isSchedulable])
 
 
   useEffect(() => {
@@ -224,6 +218,7 @@ export default function NodeSelector(props: Props) {
               rowsPerPage={10}
               onSearch={({query}) => setQuery(query || '')}
               middleComponent={<div className="flex-grow"></div>}
+              // @ts-ignore: revisit "selected" and MapData types if this component is used
               selected={selected}
               onSelect={handleSelection}
               {...tableProps}
@@ -232,6 +227,7 @@ export default function NodeSelector(props: Props) {
         }
         <MapWrap>
           {filtered &&
+            // @ts-ignore: revisit "selected" and MapData types if these component is used
             <Map data={filtered} updateID={updateID} />
           }
         </MapWrap>

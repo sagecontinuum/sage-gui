@@ -231,15 +231,15 @@ export default function StatusView() {
     }
 
     setLoading(true)
-    const proms = [BK.getState(), BK.getFactory(), ...pingRequests()]
+    const proms = [BK.getNodes(), BK.getFactory(), ...pingRequests()]
     Promise.allSettled(proms)
       .then((results) => {
         if (done) return
-        let [state, factory, metrics, health, sanity] = results.map(r => r.value)
+        const [state, factory, metrics, health, sanity] = results.map(r => r.value)
 
         // join in factory data
-        state = state.map(o => ({...o, factory: factory[o.vsn]}))
-        setData(state)
+        const data = state.map(o => ({...o, factory: factory[o.vsn]}))
+        setData(data)
 
         const allData = mergeMetrics(state, metrics, health, sanity)
         setData(allData)

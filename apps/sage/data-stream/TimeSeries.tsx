@@ -4,6 +4,7 @@ import { schemeCategory10 } from 'd3-scale-chromatic'
 import { chain, groupBy, sumBy } from 'lodash'
 
 import * as BH from '/components/apis/beehive'
+import * as BK from '/components/apis/beekeeper'
 import { vsnToDisplayStr } from '/components/views/nodes/nodeFormatters'
 
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -91,7 +92,7 @@ const barConfig = {
 }
 
 
-function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
+function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs: BK.SiteIDs) {
   const datasets = []
 
   const byName = groupBy(records, 'name')
@@ -102,7 +103,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts) {
     const grouped = groupBy(namedData, o => {
       const {sensor, zone, vsn} = o.meta
 
-      const node = vsnToDisplayStr(vsn)
+      const node = vsnToDisplayStr(vsn, siteIDs[vsn])
       if (sensor && zone) {
         return `${node}; ${sensor}; ${zone}`
       } else if (sensor) {
@@ -202,8 +203,13 @@ const chartOpts = {
 }
 
 
-export default function TimeSeries(props) {
-  const {data} = props
+type Props = {
+  data: BH.Record[]
+  siteIDs: BK.SiteIDs
+}
+
+export default function TimeSeries(props: Props) {
+  const {data, siteIDs} = props
 
   const [opts, setOpts] = useState<ChartOpts>(chartOpts)
 
@@ -219,7 +225,7 @@ export default function TimeSeries(props) {
     else if (opts.chartType == 'sum')
       datasets = getSumData(data)
     else
-      datasets = getLineDatasets(data, opts)
+      datasets = getLineDatasets(data, opts, siteIDs)
 
     let config
     if (opts.chartType == 'frequency') {

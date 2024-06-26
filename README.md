@@ -94,3 +94,10 @@ docker build --build-arg MAPBOX_TOKEN=<token_string> -t sage-ui .
 docker run -dp 8080:80 sage-ui
 ``````
 
+
+## Developer notes
+
+### Recommended plugins for [vscode](https://code.visualstudio.com)
+
+- [styled-components syntax highlighting](https://marketplace.visualstudio.com/items?itemName=styled-components.vscode-styled-components)
+

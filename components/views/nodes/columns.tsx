@@ -1,29 +1,31 @@
 /* eslint-disable react/display-name */
-import CheckIcon from '@mui/icons-material/CheckCircleRounded'
-
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
+import type { Column } from '/components/table/Table'
+
+const PROJECT = settings.project?.toLowerCase()
 
 
-const PROJECT = settings.project.toLowerCase()
-
-const columns = [{
+const columns: Column[] = [{
   id: 'status',
   label: 'Status',
   format: formatters.statusWithPhase,
   width: '1px'
 }, {
-  id: 'node_type',
+  id: 'vsn',
+  label: 'Node',
+  format: formatters.vsnLink // vsnLinkWithEdit is used if permissions are found
+}, {
+  id: 'type',
   label: 'Type',
   hide: PROJECT != 'sage'
 }, {
-  id: 'vsn',
-  label: 'Node',
-  width: '60px',
-  format: formatters.vsnLink
-}, {
   id: 'focus',
-  label: 'Focus'
+  label: 'Focus',
+  format: (focus, {partner}) => {
+    return (!focus && !partner) ? '-' :
+      `${focus ? focus : ''}${partner ? ` (${partner})` : ''}`
+  }
 }, {
   id: 'elapsedTimes',
   label: 'Last Reported Metrics',
@@ -44,7 +46,8 @@ const columns = [{
 }, {
   id: 'gps',
   label: 'GPS',
-  format: formatters.gps
+  format: formatters.gps,
+  dlFormat: (_, obj) => (obj.lat && obj.lng) ? `${obj.lat}, ${obj.lng}` : ''
 }, {
   id: 'alt',
   label: 'Elevation (m)',
@@ -55,22 +58,28 @@ const columns = [{
 }, {
   id: 'sensors',
   label: 'Sensors',
-  format: (val) => <formatters.Sensors data={val} />
+  format: (val) => <formatters.HardwareList data={val} path="/sensors/" />,
+  dlFormat: (val) => val.map(v => v.hw_model).join(', ')
 }, {
-  id: 'commission_date',
+  id: 'computes',
+  label: 'Computes',
+  format: (val) => <formatters.HardwareList data={val} />,
+  dlFormat: (val) => val.map(v => v.hw_model).join(', '),
+  width: '200px',
+  hide: true
+},
+/* todo: update db
+{
+  id: 'commissioned_at',
   label: 'Commission Date',
-}, {
-  id: 'shield',
-  label: 'Stevenson Shield',
-  format: (val) => val ? <CheckIcon className="success" /> : 'no',
-  hide: true,
-}, {
-  id: 'modem_hw_model',
+},
+*/ {
+  id: 'modem_model',
   label: 'Modem',
   format: formatters.modem,
   hide: true
 }, {
-  id: 'modem_carrier_name',
+  id: 'modem_sim',
   label: 'Modem Sim',
   format: formatters.modemSim,
   hide: true
@@ -79,7 +88,7 @@ const columns = [{
 
 if (PROJECT != 'sage') {
   columns.splice(4, 0, {
-    id: 'node_phase_v3',
+    id: 'phase',
     label: 'Phase',
     hide: true
   })

@@ -1,6 +1,7 @@
 import config from '/config'
-const webOrigin = window.location.origin
+import * as LS from '/components/apis/localStorage'
 
+const webOrigin = window.location.origin
 
 
 class Auth {
@@ -16,14 +17,7 @@ class Auth {
     this.isSignedIn = this.hasToken()
     this.token = this.getToken()
 
-    // sign out of all tabs
-    window.addEventListener('storage', event => {
-      if (event.key !== 'sage_token')
-        return
-
-      if (event.newValue == null)
-        this.signOut()
-    })
+    LS.onChange('sage_username', () => this.signOut())
   }
 
 
@@ -47,7 +41,7 @@ class Auth {
     document.cookie = `sage_token=${token};path=/`
 
     // for signing out of all tabs
-    window.localStorage.setItem('sage_token', token)
+    LS.set('sage_username', token)
   }
 
 
@@ -57,7 +51,7 @@ class Auth {
     document.cookie = `sage_username=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
     document.cookie = `sage_token=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=${domain}`
 
-    window.localStorage.removeItem('sage_token')
+    LS.rm('sage_username')
 
     const signOutUrl = `${this.url}/portal-logout`
     window.location.href = `${signOutUrl}/?callback=${webOrigin}`

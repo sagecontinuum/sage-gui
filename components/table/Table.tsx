@@ -21,9 +21,11 @@ import InfoIcon from '@mui/icons-material/InfoOutlined'
 import ArrowDown from '@mui/icons-material/ArrowDropDown'
 import ArrowUp from '@mui/icons-material/ArrowDropUp'
 
+import DownloadTableBtn, { formatDownloadCol } from './DownloadTableBtn'
 import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
 import Checkbox from '/components/input/Checkbox'
+import * as LS from '/components/apis/localStorage'
 
 import selectedReducer, { SelectedState, getInitSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
@@ -34,7 +36,12 @@ import Collapse from '@mui/material/Collapse'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 
+
 export { SelectedState, TableSkeleton }
+
+// prefix for saving table state in localstorage
+const STORAGE_PREFEX = 'sage-table-columns-'
+
 
 /*
 const exampleColumns = [
@@ -60,6 +67,7 @@ export type Column = {
   id: string
   label?: string
   format?: (any, object) => string | number | JSX.Element | JSX.Element[]
+  dlFormat?: (any, object) => string
   hide?: boolean
   width?: string
   type?: 'number'
@@ -355,7 +363,19 @@ const decodeSort = (sortObj) => {
 }
 
 
-// initial state of columns includes "hide", then shown columns
+function getActiveTableCols(key: string, allCols: Column[]) : Column[] {
+  const shownCols = allCols.filter(o => !o.hide)
+  if (!key)
+    return shownCols
+
+  const cols = LS.get(`${STORAGE_PREFEX}${key}`)
+
+  return !cols ? shownCols : allCols.filter(o => cols.includes(o.id))
+}
+
+
+
+// initial state of columns includes "hide". we'll manage hidden columns with "activeColumns"
 const getVisibleColumns = (columns, activeColumns = null) => {
   if (activeColumns) {
     const activeIDs = activeColumns.map(o => o.id)
@@ -369,7 +389,7 @@ const getVisibleColumns = (columns, activeColumns = null) => {
 type Props = {
   primaryKey: string
   rows: object[]
-  columns: object[]
+  columns: Column[]
   page?: number | string
   limit?: number
   rowsPerPage?: number
@@ -383,8 +403,10 @@ type Props = {
   searchPlaceholder?: string
   stripes?: boolean
   enableSorting?: boolean
+  enableDownload?: boolean
   disableClickOutside?: boolean
   selected?: number[]             // ids
+  storageKey?: string             // store column state in localstorage, if provided
   onSearch?: (val: {query: string}) => void
   onSort?: (string) => void       // for ajax pagination
   onPage?: (number) => void       // for ajax pagination
@@ -418,6 +440,8 @@ export default function TableComponent(props: Props) {
     emptyNotice,
     stripes = true,
     enableSorting = false,
+    enableDownload = false,
+    storageKey,
     onSearch, onSort, onSelect, onDoubleClick, onColumnMenuChange,
     onShowDetails,
     greyRow = () => false,
@@ -448,7 +472,7 @@ export default function TableComponent(props: Props) {
 
   // keep state on shown/hidden columns
   // initial columns are defined in `columns` spec.
-  const [activeColumns, setActiveColumns] = useState(null)
+  const [activeColumns, setActiveColumns] = useState(getActiveTableCols(storageKey, props.columns))
 
   // disable user-select when shift+click is happening
   const [userSelect, setUserSelect] = useState(true)
@@ -478,10 +502,15 @@ export default function TableComponent(props: Props) {
     setRows(newRows)
   }, [props.rows, page, rowsPerPage])
 
-  // listen to columns
+  // listen to column configs
   useEffect(() => {
     setColumns(getVisibleColumns(props.columns, activeColumns))
-  }, [activeColumns, props.columns])
+  }, [activeColumns, props.columns, storageKey])
+
+  // if column config, or storageKey changes, we need to reset the active columns
+  useEffect(() => {
+    setActiveColumns(getActiveTableCols(storageKey, props.columns))
+  }, [props.columns, storageKey])
 
   // listen to page changes
   useEffect(() => {
@@ -592,6 +621,8 @@ export default function TableComponent(props: Props) {
 
   const onColumnChange = (activeCols) => {
     setActiveColumns(activeCols)
+    if (storageKey)
+      LS.set(`${STORAGE_PREFEX}${storageKey}`, activeCols.map(o => o.id))
     onColumnMenuChange(activeCols)
   }
 
@@ -601,6 +632,23 @@ export default function TableComponent(props: Props) {
 
   const handleShowDetails = () => {
     if (onShowDetails) onShowDetails()
+  }
+
+  const handleDLOption = () => {
+    // todo(nc): could add support for other options/formats if needed.
+
+    const header = columns.map(o => o.label).join(', ')
+
+    const rows = data.map(row =>
+      columns.map(col => {
+        const val = row[col.id]
+        return col.dlFormat ? `"${col.dlFormat(val, row)}"` : formatDownloadCol(val)
+      })
+    )
+
+    const csvStr = `data:text/csv;charset=utf-8,` +
+      `${header}\n${rows.map(v => v ? v.join(',') : '').join('\n')}`
+    window.open(encodeURI(csvStr))
   }
 
   return (
@@ -635,13 +683,27 @@ export default function TableComponent(props: Props) {
           />
         }
 
+        {enableDownload &&
+          <TableOption>
+            <DownloadTableBtn onDownload={handleDLOption} />
+          </TableOption>
+        }
+
+
         {onColumnMenuChange &&
-          <ColumnMenuContainer>
+          <TableOption>
             <ColumnMenu
               options={props.columns} // all columns
+              value={activeColumns}
               onChange={onColumnChange}
+              onRestoreDefaults={() => {
+                if (storageKey)
+                  LS.rm(`${STORAGE_PREFEX}${storageKey}`)
+                setColumns(getVisibleColumns(props.columns))
+                setActiveColumns(getActiveTableCols(storageKey, props.columns))
+              }}
             />
-          </ColumnMenuContainer>
+          </TableOption>
         }
 
         {props.rightComponent &&
@@ -797,7 +859,7 @@ const Container = styled(TableContainer)<StylingProps>`
   }
 `
 
-const ColumnMenuContainer = styled.div`
+const TableOption = styled.div`
   display: flex;
   margin-left: auto;
 `

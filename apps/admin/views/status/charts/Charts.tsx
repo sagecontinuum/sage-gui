@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import SummaryBar from './SummaryBar'
-import SummaryBox from './SummaryBox'
 
 import * as BK from '/components/apis/beekeeper'
 
@@ -14,24 +13,6 @@ const barColors = {
 }
 
 
-type Issues = {
-  tests: number
-  temps: number
-}
-
-function getIssues(data) : Issues {
-  const tests = data.reduce((acc, obj) =>
-    acc + (obj?.health?.sanity?.failed || 0)
-  , 0)
-
-  const temps = data.reduce((acc, obj) =>
-    acc + (obj?.temp >= 70 ? 1 : 0)
-  , 0)
-
-  return {tests, temps}
-}
-
-
 type Status = {
   'reporting': number,
   'not reporting': number
@@ -39,7 +20,7 @@ type Status = {
 }
 
 
-function getStatus(data: BK.State[]) : Status {
+function getStatus(data: BK.NodeState[]) : Status {
   const statuses = data.reduce((acc, o) => {
     acc['reporting'] += o.status == 'reporting' ? 1 : 0,
     acc['not reporting'] += o.status == 'not reporting' ? 1 : 0
@@ -52,25 +33,20 @@ function getStatus(data: BK.State[]) : Status {
 
 
 type Props = {
-  data: {id: string}[]
+  data: BK.NodeState[]
   column?: boolean
-  charts?: ('tests' | 'plugins' | 'temps' | 'fsutil')[]
 }
 
 
 export default function Charts(props: Props) {
   const {
     data,
-    column,
-    charts
+    column
   } = props
 
-  const [statuses, setStatuses] = useState<Status>({})
-
-  // highlevel stats
-  const [issues, setIssues] = useState<Issues>({
-    tests: null,
-    temps: null
+  const [statuses, setStatuses] = useState<Status>({
+    'reporting': null,
+    'not reporting': null
   })
 
   useEffect(() => {
@@ -82,14 +58,8 @@ export default function Charts(props: Props) {
       'not reporting': status['not reporting'],
       // 'not reporting (30d+)': status['not reporting (30d+)']
     })
-
-    const issues = getIssues(data)
-    setIssues(issues)
   }, [data])
 
-
-  const showChart = (name) =>
-    typeof charts == 'undefined' ? true : charts?.includes(name)
 
   if (!data) return <></>
 
@@ -101,13 +71,6 @@ export default function Charts(props: Props) {
           color={barColors}
         />
       </div>
-
-      {/*
-        <div className="flex gap summary-boxes">
-          {showChart('tests') && <SummaryBox label="Sanity" value={issues.tests}/>}
-          {showChart('temps') && <SummaryBox label="Temps" value={issues.temps}/>}
-        </div>
-      */}
     </Root>
   )
 }

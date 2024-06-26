@@ -87,7 +87,7 @@ export default function DevAccess() {
             </div>
             <div>
               <Alert severity="warning">
-                <b>Note:</b> Treat this token as your username & password.
+                <b>Note:</b> Treat this token as sensitive information, similar to a username and password.
                 Please <b><a href={contactUs}>contact us</a></b> if you have any questions.
               </Alert>
             </div>

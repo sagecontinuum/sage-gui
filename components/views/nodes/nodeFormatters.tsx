@@ -1,11 +1,14 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
+import IconButton from '@mui/material/IconButton'
 import CheckIcon from '@mui/icons-material/CheckCircleRounded'
 import InactiveIcon from '@mui/icons-material/ReportProblemOutlined'
 import PendingIcon from '@mui/icons-material/PendingOutlined'
 import ErrorIcon from '@mui/icons-material/ErrorOutlineRounded'
 import MapIcon from '@mui/icons-material/RoomOutlined'
+import EditIcon from '@mui/icons-material/Edit'
+import LaunchIcon from '@mui/icons-material/LaunchRounded'
 
 import Badge from '@mui/material/Badge'
 import Tooltip from '@mui/material/Tooltip'
@@ -16,7 +19,6 @@ import Dot from '/components/utils/Dot'
 
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
-import config from '/config'
 
 
 export function gpsIcon(obj) {
@@ -38,7 +40,10 @@ export function gpsIcon(obj) {
     )
   } else if (!hasStaticGPS && hasLiveGPS) {
     return (
-      <Tooltip title={<>Live GPS<br/>(no static gps found)</>}>
+      <Tooltip
+        placement="top"
+        title={<>Live GPS<br/>(no static gps found)</>}
+      >
         <MapIcon fontSize="small" style={{color: '#36b8ff'}}/>
       </Tooltip>
     )
@@ -95,7 +100,7 @@ const phaseNotes = {
 }
 
 export function statusWithPhase(val, obj) {
-  const phase = obj.node_phase_v3
+  const phase = obj.phase
   const phaseTitle = phaseNotes[phase] || phase
 
   let icon
@@ -136,41 +141,62 @@ export function statusWithPhase(val, obj) {
 }
 
 
-export function vsn(val) {
-  return <Link to={`/node/${val}`}>
-    {config.nodeSites[val] || val}
+export function vsn(vsn, node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn}
   </Link>
 }
 
-export function vsnLink(val) {
-  const displayName = config.nodeSites[val]
-  return <Link to={`/node/${val}`}>
-    {displayName || val} <small className="muted">{displayName && `${val}` }</small>
+export function vsnLink(vsn, node: BK.Node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
   </Link>
 }
 
-export function vsnLinkNameOnly(val) {
-  const displayName = config.nodeSites[val]
-  return <Link to={`/node/${val}`}>
-    {displayName || val}
+export function vsnLinkWithEdit(vsn, node: BK.Node) {
+  const {site_id} = node
+  return <div className="flex items-center">
+    <Link to={`/node/${vsn}`}>
+      {site_id || vsn} <small className="muted">{site_id && `${vsn}` }</small>
+    </Link>
+    <Tooltip
+      placement="top"
+      title={<>Edit node meta <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+      className="edit-btn" // show/hide on hover with css
+    >
+      <IconButton
+        href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${node.id}`}
+        onClick={(evt) => evt.stopPropagation()}
+        target="_blank" rel="noreferrer" size="small">
+        <EditIcon fontSize="small"/>
+      </IconButton>
+    </Tooltip>
+  </div>
+}
+
+
+export function vsnLinkNameOnly(vsn, node: BK.Node) {
+  const {site_id} = node
+  return <Link to={`/node/${vsn}`}>
+    {site_id || vsn}
   </Link>
 }
 
-export function vsnToDisplayName(val) {
-  const displayName = config.nodeSites[val]
+export function vsnToDisplayName(vsn, node: BK.Node) {
+  const {site_id} = node
   return <>
-    {displayName || val}&nbsp;<small className="muted">{displayName && val}</small>
+    {site_id || vsn}&nbsp;<small className="muted">{site_id && vsn}</small>
   </>
 }
 
-export function vsnToDisplayStr(val) {
-  const displayName = config.nodeSites[val]
-  return `${displayName || val} ${displayName ? `| ${val}` : ''}`
+export function vsnToDisplayStr(vsn, site_id) {
+  return `${site_id || vsn}${site_id ? ` | ${vsn}` : ''}`
 }
 
-export function vsnToDisplayStrAlt(val) {
-  const displayName = config.nodeSites[val]
-  return `${displayName || val} ${displayName ? `(${val})` : ''}`
+export function vsnToDisplayStrAlt(vsn, site_id) {
+  return `${site_id || vsn}${site_id ? ` (${vsn})` : ''}`
 }
 
 export function vsnWithGPS(val, obj) {
@@ -194,7 +220,7 @@ export function gps(_, obj, newline = false) {
   return <div className="flex items-center">
     <span className="gps-icon">{gpsIcon(obj)}</span>
 
-    {(!obj.lat || !obj.lng) ? 
+    {(!obj.lat || !obj.lng) ?
       '-' :
       `${obj.lat},` + (newline ? '\n' : '') + `${obj.lng}`
     }
@@ -220,12 +246,12 @@ export function uptimes(val) {
 
 // todo(nc): use new /nodes endpoint?
 export function modem(_, obj) {
-  const hwModel = obj.modem_hw_model
+  const hwModel = obj.modem_model
   return (
     <>
       <small className="muted font-bold">
-        {obj.modem_carrier ? 
-          'Cellular Connected' : 
+        {obj.modem_carrier ?
+          'Cellular Connected' :
           (hwModel ? <i>No Sim Configured</i> : '-')
         }
       </small>
@@ -237,50 +263,54 @@ export function modem(_, obj) {
 }
 
 // details on a sim card for a node
-export function modemSim(_, obj: BK.SimpleManifest) {
+export function modemSim(_, obj: BK.Node) {
   return (
     <>
       <small className="muted"><b>{obj.modem_carrier_name}</b></small>
       <div>
         {obj.modem_carrier || '-'}{' '}
-        {obj.modem_sim_type && <span className="muted">{obj.modem_sim_type}</span>}
+        {obj.modem_sim && <span className="muted">{obj.modem_sim}</span>}
       </div>
     </>
   )
 }
 
 type SensorsProps = {
-  data: BK.FlattenedManifest['sensors']
+  data: BK.Node['sensors'] | BK.Node['computes']
+  path?: string  // url path if avail; e.g., /sesnors/
 }
 
-export function Sensors(props: SensorsProps) {
-  const {data} = props
+export function HardwareList(props: SensorsProps) {
+  const {data, path} = props
 
-  if (!data) return <></>
+  if (!data.length) return <>-</>
 
   const len = data.length
 
   return (
-    <SensorList>
+    <HardwareRoot>
       {data.map((sensor, i) => {
-        const {hw_model, hardware, name} = sensor
+        const {hw_model, name} = sensor
         return (
           <span key={i}>
-            <Tooltip placement="top" title={name == hardware ? name : `${hardware} | ${name}`}>
-              <Link to={`/sensors/${hw_model}`}>
-                {hw_model}
-              </Link>
+            <Tooltip placement="top" title={name}>
+              {path ?
+                <Link to={`${path}${hw_model}`}>
+                  {hw_model}
+                </Link> :
+                <span>{hw_model}</span>
+              }
             </Tooltip>
             {i < len - 1  && ', '}
           </span>
         )
       })
       }
-    </SensorList>
+    </HardwareRoot>
   )
 }
 
-const SensorList = styled.ul`
+const HardwareRoot = styled.ul`
   padding: 0;
   font-size: 9pt;
   list-style: none;
@@ -290,17 +320,20 @@ const SensorList = styled.ul`
 `
 
 
-
 const TT = (props) =>
   <Tooltip placement="right" {...props}><span>{props.children}</span></Tooltip>
 
 
 
+/**
+ * helpers for admin listing of sensors by typical WSN positions; todo(nc): remove
+ */
+
 export function topSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/top|raingauge/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -308,7 +341,7 @@ export function topSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -317,7 +350,7 @@ export function bottomSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/bottom/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -325,7 +358,7 @@ export function bottomSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -334,7 +367,7 @@ export function leftSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) => name.match(/left/gi))
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -342,7 +375,7 @@ export function leftSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -353,7 +386,7 @@ export function rightSensors(v, obj) {
     (name.match(/right/gi) || scope.match(/^rpi$/i)) && !name.match(/raingauge/gi)
   )
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -361,7 +394,7 @@ export function rightSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 
 
@@ -372,7 +405,7 @@ export function additionalSensors(v, obj) {
     !name.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
   )
 
-  return <SensorList>
+  return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
       <li key={i}>
         <TT title={`${name} | ${hardware}`}>
@@ -380,6 +413,6 @@ export function additionalSensors(v, obj) {
         </TT>
       </li>
     )}
-  </SensorList>
+  </HardwareRoot>
 }
 

@@ -8,8 +8,7 @@ import Map, {
 } from 'react-map-gl'
 import type { MapRef, MapProps, SymbolLayer, MapboxEvent } from 'react-map-gl'
 
-import Clipboard from './utils/Clipboard'
-
+import GpsClipboard from './views/node/GpsClipboard'
 import config from '/config'
 import settings from './settings'
 
@@ -25,7 +24,7 @@ const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ||
   'FNVNhHfEIZ2qjy8mqFQmQw'
 
 
-const dotSize = 10
+const markerSize = 10
 
 const mapSettings = {
   ...(initialViewState ? {initialViewState} : {
@@ -79,7 +78,7 @@ const getGeoSpec = (data: Data[]) => {
         coordinates: [obj.lng, obj.lat]
       },
       properties: {
-        title: formatters.vsnToDisplayStrAlt(obj.vsn),
+        title: formatters.vsnToDisplayStrAlt(obj.vsn, obj.site_id),
         description: '',
         data: obj
       },
@@ -106,6 +105,13 @@ const layerStyle: SymbolLayer = {
     'text-radial-offset': 0.5,
     'text-justify': 'auto',
     'icon-image': ['get', 'icon'],
+    'text-font': [
+      'Open Sans Semibold',
+      'Arial Unicode MS Bold'
+    ],
+  },
+  paint: {
+    'text-color': '#444'
   }
 }
 
@@ -118,11 +124,11 @@ type PopupProps = {
 }
 
 function PopupInfo(props: PopupProps) {
-  const {onClose, data, showUptime} = props
+  const {data, onClose, showUptime} = props
 
   // todo(nc): use new manifests endpoint when avail
   // @ts-ignore; use new manifests endpoint when avail
-  const {vsn, focus, location, state, status, lng, lat} = data || {}  
+  const {vsn, focus, city, cityStr, state, status, lng, lat} = data || {}
 
   return (
     <Popup
@@ -140,10 +146,10 @@ function PopupInfo(props: PopupProps) {
           {vsn.charAt(0) == 'W' &&
             'Wild Sage Node'
           }&nbsp;
-          {formatters.vsnLink(vsn)}
+          {formatters.vsnLink(vsn, data)}
         </div>
       </h2>
-      
+
       <div className="flex gap-2 items-center node-meta">
         {showUptime &&
           <div className="flex column status">
@@ -155,7 +161,7 @@ function PopupInfo(props: PopupProps) {
         {focus &&
           <div>
             <small className="muted font-bold">Focus</small>
-            <div>                 
+            <div>
               <Link to={`/nodes/?focus="${encodeURIComponent(focus)}"`}>
                 {focus}
               </Link>
@@ -163,49 +169,38 @@ function PopupInfo(props: PopupProps) {
           </div>
         }
 
-        {location &&
+
+        <div>
+          <small className="muted font-bold">City</small>
           <div>
-            <small className="muted font-bold">City</small>
-            <div>
-              <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
-                {location.split(',')[0]}
+            {city && cityStr &&
+              <Link to={`/nodes?city="${encodeURIComponent(city)}"`}>
+                {cityStr}
               </Link>
-            </div>
+            }
+            {state && <>,{' '}
+              <Link to={`/nodes?state="${encodeURIComponent(state)}"`}>
+                {state}
+              </Link>
+            </>}
+            {!(city && state) && '-'}
           </div>
-        }
-
-        {state && 
-          <div>
-            <small className="muted font-bold">State</small>
-            <div>
-              {location &&
-                <Link to={`/nodes/?state="${encodeURIComponent(state)}"`}>
-                  {state.split(' (')[0]}
-                </Link>
-              }            
-            </div>
-          </div>
-        }        
-
-        <div className="gps">
-          <Clipboard content={formatters.gps(null, data, true)} tooltip="Copy coordinates" />          
         </div>
+
+        <GpsClipboard data={data} />
       </div>
     </Popup>
   )
 }
 
 
-type Data = BK.State & {
-  vsn: BK.VSN,
-  lng: number,
-  lat: number,
-  status?: string
+type Data = BK.NodeState & {
   elapsedTimes: {[device: string]: number }
 }
 
 type Props = {
   data: Data[]
+  markerClass?: 'blue-dot'
   updateID?: number
   showUptime?: boolean
 }
@@ -214,6 +209,7 @@ type Props = {
 export default function MapGL(props: Props) {
   const {
     data = null,
+    markerClass,
     updateID,
     showUptime = true
   } = props
@@ -279,7 +275,13 @@ export default function MapGL(props: Props) {
                 latitude={lat}
                 onClick={(evt) => handleClick(evt, obj)}
               >
-                <div className={`marker-dot marker-${(status || '').replace(/ /g, '-')}`}></div>
+                <div
+                  className={
+                    `marker-dot ${
+                      markerClass ? `marker-${markerClass}` : `marker-${(status || '').replace(/ /g, '-')}`
+                    }`
+                  }>
+                </div>
               </Marker>
             )
           })}
@@ -305,8 +307,8 @@ const Root = styled.div`
   }
 
   .marker-dot {
-    height: ${dotSize}px;
-    width: ${dotSize}px;
+    height: ${markerSize}px;
+    width: ${markerSize}px;
     border: 1px solid #666;
     // background: #d8d8d8;
     border-radius: 50%;
@@ -329,20 +331,17 @@ const Root = styled.div`
     opacity: .65;
   }
 
+  .marker-blue-dot {
+    background: rgb(31, 119, 180);
+    border: 1px solid rgb(24, 99, 152);
+    opacity: .65;
+  }
+
   .mapboxgl-popup {
     max-width: 100% !important;
     .node-meta {
       white-space: nowrap;
       font-size: 1.2em;
-    }
-    
-    .gps pre {
-      margin: 0;
-      padding-top: 20px;
-
-      .gps-icon {
-        padding-right: 5px;
-      }
     }
 
     .status {

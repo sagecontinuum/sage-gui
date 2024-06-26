@@ -5,8 +5,10 @@ const API_URL = `${url}/api`
 import settings from '/components/settings'
 const PROJECT = settings.project
 
-import { handleErrors } from '../fetch-utils'
+import { keyBy } from 'lodash'
+import { handleErrors, handleDjangoErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
+import parseAddress from 'parse-address/address'
 import USStates from './us-states'
 import { getCarrierName } from './carrier-codes'
 
@@ -61,33 +63,60 @@ export type PhaseTabs = keyof typeof phaseMap
 export type Phase = typeof phaseMap[PhaseTabs]
 
 
-export type NodeMeta = {
+export type Node = {
+  id: number,
   vsn: VSN
-  node_phase_v3: Phase
-  project: string
-  focus: string
-  gps_lat: number // static gps
-  gps_lon: number // static gps
-  lng?: number    // live longitude (if avail)
-  lat?: number    // live latitude (if avail)
-  left_camera: string
+  name: string
+  project: 'SAGE' | 'CROCUS' | 'APIARY' | 'VTO' | 'DAWN'
+  focus: 'Rural' | 'Urban' | 'Training and Development' | string
+  type: 'WSN' | 'Blade'
+  site_id: string
+  gps_lat: number
+  gps_lon: number
+  gps_alt: number
+  address: string
   location: string
-  node_id: string
-  node_type: 'WSN' | 'Blade'
-  notes: string
-  nx_agent: boolean
-  retire_date: string
-  bottom_camera: string
-  right_camera: string
-  top_camera: string
-  shield: boolean
-  build_date: string
-  shipping_address: string
-  bucket?: typeof Buckets[number]
-  commission_date: string
-  sensor: string[]    // added client-side for joining data
+  phase: Phase
+  commissioned_at: `${string}Z`
+  registered_at: `${string}Z`
+  modem_sim: string
+  modem_model: string
+  modem_carrier: string
+  sensors: {
+      name: string
+      hw_model: string
+      manufacturer: string
+      capabilities: string[]
+  }[]
+  computes: {
+    name: string
+    serial_no: string
+    hw_model: string
+    manufacturer: string
+    capabilities: string[]
+  }[]
+
+  // added client-side convenience
+  lat: number,
+  lng: number,
+  hasStaticGPS: boolean
+  modem_carrier_name: 'AT&T' | string // todo(nc): move to backend
+  top_camera: string                  // hw_model
+  bottom_camera: string               // hw_model
+  right_camera: string                // hw_model
+  left_camera: string                 // hw_model
 }
 
+
+export type NodeState = Node & {
+  sensor: string[]    // added client-side for joining data
+
+  // determined from the data stream
+  status: string
+  hasLiveGPS: boolean
+  lat: number
+  lng: number
+}
 
 
 export type OntologyObj = {
@@ -102,6 +131,13 @@ export type OntologyObj = {
 function get(endpoint: string, opts={}) {
   return fetch(endpoint, opts)
     .then(handleErrors)
+    .then(res => res.json())
+}
+
+// special django error handling
+function getDjangoData(endpoint: string, opts={}) {
+  return fetch(endpoint, opts)
+    .then(handleDjangoErrors)
     .then(res => res.json())
 }
 
@@ -122,70 +158,18 @@ function put(endpoint: string, data) {
 }
 
 
-export async function getNodes() {
+export async function getBKStates() {
   const data = await get(`${API_URL}/state`)
   return data.data
 }
 
 
-export async function getNode(id: string) : Promise<BKState> {
+export async function getBKState(id: string) : Promise<BKState> {
   const data = await get(`${API_URL}/state/${id}`)
   return data.data
 }
 
-
-type FilteringArgs = {
-  project?: string,
-  focus?: string,
-  nodes?: VSN[]
-}
-
-export type NodeMetaMap = {[id_or_vsn: string]: NodeMeta}
-
-
-// to be deprecated
-export async function getNodeMeta(args?: FilteringArgs) : Promise<NodeMetaMap>
-export async function getNodeMeta(vsn?: VSN) : Promise<NodeMeta>
-export async function getNodeMeta(args?: VSN | FilteringArgs) : Promise<NodeMeta | NodeMetaMap> {
-  let data = await get(`${url}/production`)
-
-  const isSingleNode = typeof args === 'string'
-
-  if (!isSingleNode) {
-    const {project, focus, nodes} = args || {}
-    if (nodes)
-      data = data.filter(o => nodes.includes(o.vsn))
-    else {
-      if (project)
-        data = data.filter(o => o.project.toLowerCase() == project.toLowerCase())
-      if (focus)
-        data = data.filter(o => o.focus.toLowerCase() == focus.toLowerCase())
-    }
-  }
-
-  data = data.map(obj => {
-    const {location: loc} = obj
-    const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
-    const state = part in USStates ? `${USStates[part]} (${part})` : part
-
-    return {
-      ...obj,
-      state,
-      city: loc,
-    }
-  })
-
-  const mapping: NodeMetaMap = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
-
-  return isSingleNode ? (mapping[args] || null) : mapping
-}
-
-
-export async function getFactory(vsn?: VSN) {
-  const data = await get(`${url}/factory`)
-  const mapping = data.reduce((acc, node) => ({...acc, [node.vsn]: node}), {})
-  return vsn ? data.find(o => o.vsn == vsn) : mapping
-}
+export type NodeDict = {[vsn: VSN]: Node}
 
 
 export type ComputeHardware = {
@@ -369,26 +353,6 @@ const flattenManifest = o => ({
 })
 
 
-export async function getRawManifests() : Promise<Manifest[]> {
-  const p1 = getNodeMeta()
-  const p2 = await get(`${config.auth}/manifests/`)
-
-  const [nodeMetas, data] = await Promise.all([p1, p2])
-
-  const vsns = Object.values(nodeMetas).map(o => o.vsn)
-  const manifests = data.filter(o => vsns.includes(o.vsn))
-
-  return manifests
-}
-
-
-export async function getManifests() : Promise<FlattenedManifest[]> {
-  let data = await get(`${config.auth}/manifests/`)
-  data = data.map(flattenManifest)
-
-  return data
-}
-
 
 export async function getManifest(vsn: VSN) : Promise<FlattenedManifest> {
   let data = await get(`${config.auth}/manifests/${vsn}`)
@@ -422,7 +386,7 @@ export async function getSensors() : Promise<SensorListRow[]> {
 
   const params = [
     project ? `project=${project}` : '',
-    project.toLowerCase() == 'sage' ?
+    project?.toLowerCase() == 'sage' ?
       `phase=${['Deployed', 'Awaiting Deployment', 'Maintenance'].join(',')}` : ''
   ]
 
@@ -448,71 +412,47 @@ export function saveSensor(state: SensorHardware) : Promise<SensorHardware> {
 // 0000456789abcdef.<suffix> (in beehive) 456789abcdef (in manifest)
 export function findHostWithSerial(hosts: string[], serial_no: string) : string {
   return hosts.find(host =>
-    host.split('.')[0].slice(4).toUpperCase() == serial_no.toUpperCase()
+    host.split('.')[0].slice(4).toUpperCase() == serial_no?.toUpperCase()
   )
 }
 
 
+type GetNodeArgs = {
+  project?: Node['project']
+  vsns?: VSN[]
+}
 
-export type State = SimpleManifest & {
-  node_phase_v3: NodeMeta['node_phase_v3']
-  project: NodeMeta['project']
-  focus: NodeMeta['focus']
-  location: NodeMeta['location']
-  node_type: NodeMeta['node_type']
-  nx_agent: NodeMeta['nx_agent']
-  shield: NodeMeta['shield']
-  build_date: string
-  commission_date: string
-  sensor?: string[]    // added client-side for joining data
+export async function getNodes(args?: GetNodeArgs) : Promise<Node[]> {
+  const {vsns} = args || {}
 
-  status: string
-  hasStaticGPS: boolean
-  lat: number
-  lng: number
+  let nodes = await _getNodeMetas(args)
+
+  if (vsns)
+    nodes = nodes.filter(o => vsns.includes(o.vsn))
+
+  return nodes
+    .filter(o => !!o.computes.length)
+    .map(obj => _sanitizeMeta(obj))
 }
 
 
-export async function getState() : Promise<State[]> {
-  const res = await Promise.all([getNodeMeta(), getSimpleManifests()])
-  const nodeMeta = res[0]
-  let data = res[1]
-
-  // join manifests to meta
-  data = data
-    .filter(o => !!o.computes.length && o.vsn in nodeMeta)
-    .map(obj => {
-      const meta = nodeMeta[obj.vsn]
-      const {location: loc} = meta
-
-      // allow "<city>, <state_abbrev>", "<city>, <country>",
-      // "<state>", or "<country>", etc., for now.
-      const part = loc?.includes(',') ? loc?.split(',').pop().trim() : loc
-      const state = part in USStates ? `${USStates[part]} (${part})` : part
-
-      return {
-        ...obj,
-        node_phase_v3: meta.node_phase_v3,
-        project: meta.project,
-        focus: meta.focus,
-        state,
-        city: loc,
-        location: loc,  // same as city for now
-        node_type: meta.node_type,
-        nx_agent: meta.nx_agent,
-        shield: meta.shield,
-        build_date: meta.build_date,
-        commission_date: meta.commission_date,
-        status: null,
-        hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
-        lat: obj.gps_lat,
-        lng: obj.gps_lon,
-        sensor: obj.sensors.map(o => o.hw_model)
-      }
-    })
+export async function getNodeDict(args?: GetNodeArgs) : Promise<NodeDict> {
+  const nodes = await getNodes(args)
+  return keyBy(nodes, 'vsn')
+}
 
 
-  return data as State[]
+export async function getNode(vsn: VSN) : Promise<Node> {
+  const node = await _getNodeMeta(vsn)
+  return _sanitizeMeta(node)
+}
+
+
+export type SiteIDs = {[node: VSN]: string}
+
+export async function getSiteIDs() : Promise<SiteIDs> {
+  const nodes = await getNodes({project: PROJECT})
+  return nodes.reduce((acc, n) => n.site_id ? {...acc, [n.vsn]: n.site_id} : acc, {})
 }
 
 
@@ -528,19 +468,101 @@ export async function getOntology(name: string) : Promise<OntologyObj> {
 }
 
 
-export type NodeDetails = (State & NodeMeta)[]
-
-export async function getNodeDetails() : Promise<NodeDetails> {
-  const [bkData, details] = await Promise.all([getNodes(), getNodeMeta()])
-  const nodeDetails = bkData
-    .filter(o => !!o.vsn)
-    .map(obj => ({...obj, ...details[obj.vsn]}))
-
-  return nodeDetails
+export async function getFactory() {
+  const data = await get(`${url}/factory`)
+  return keyBy(data, 'vsn')
 }
 
 
-export async function getProduction() {
-  return await get(`${url}/production`)
+
+async function _getNodeMetas(args: GetNodeArgs) : Promise<Node[]>{
+  const {project, vsns} = args || {}
+
+  let url = `${config.auth}/api/v-beta/nodes/`
+
+  if (project)
+    url += `?project__name=${project}`
+
+  let meta = await getDjangoData(url)
+
+  if (vsns)
+    meta = meta.filter(o => vsns.includes(o.vsn))
+
+  return meta
 }
+
+
+function _getNodeMeta(vsn: VSN) : Promise<Node>{
+  return getDjangoData(`${config.auth}/api/v-beta/nodes/${vsn}`)
+}
+
+
+function _sanitizeMeta(obj: Node) {
+  const {city, state} = parseAddr(obj.address)
+
+  const stateAbbrev = state?.toUpperCase()
+
+  return {
+    ...obj,
+    state: stateAbbrev in USStates ? `${USStates[state]} (${stateAbbrev})` : stateAbbrev,
+    city: `${city}, ${state}`,
+    stateStr: state,
+    cityStr: city,
+    hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
+    lat: obj.gps_lat,
+    lng: obj.gps_lon,
+    modem_carrier_name: obj.modem_carrier ? getCarrierName(obj.modem_carrier) : null,
+    top_camera: obj.sensors.find(o => o.name == 'top_camera')?.hw_model,
+    bottom_camera: obj.sensors.find(o => o.name == 'bottom_camera')?.hw_model,
+    left_camera: obj.sensors.find(o => o.name == 'left_camera')?.hw_model,
+    right_camera: obj.sensors.find(o => o.name == 'right_camera')?.hw_model,
+    // todo(nc) -- for filtering, but should remove/improve
+    sensor: obj.sensors.map(o => o.hw_model)
+
+  }
+}
+
+
+function parseAddr(addressStr: string) {
+
+  // ignore possible names, support 1 or 2 line addresses
+  const lines = addressStr.split(/\r?\n/)
+
+  let address
+  // if one line, assume only address
+  if (lines.length == 1) {
+    address = lines[0]
+    // if one line, assume address
+  } else if (lines.length == 2 || lines.length == 3) {
+    address = lines.slice(1).join(', ')
+  } else {
+    console.error('address format not recognized:\n\n', address)
+    return
+  }
+
+  let parts = address.split(', ')
+  let city, state
+
+  // if 4 parts, reduce to `<city>, <state> <zip?>`
+  if (parts.length == 4) {
+    parts = parts.slice(2)
+  }
+
+  const stateZip = parts[1]?.split(' ') // last part of address may or may not include zip
+
+  if (parts.length == 2 && stateZip.length == 2)
+    [city, state] = [parts[0], ...stateZip]
+  // if one comma without zip, assume `<city>, <state>`
+  else if (parts.length == 2 && stateZip.length == 1)
+    [city, state] = parts
+  // if 2 commas, as <place, city, state>, we extract the <city, state>
+  else if (parts[0].split(' ').length == 1)
+    [city, state] = parts.slice(1)
+  // otherwise, use address parser
+  else
+    ({city, state} = parseAddress.parseLocation(address) || {})
+
+  return {city, state}
+}
+
 

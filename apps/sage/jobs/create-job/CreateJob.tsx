@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import styled from 'styled-components'
 
 import { TextField, Button, Alert, Tooltip, Autocomplete, Popper, Box } from '@mui/material'
-import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
+// import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
 import EditorIcon from '@mui/icons-material/DataObjectRounded'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import HelpOutlineRounded from '@mui/icons-material/HelpOutlineRounded'
@@ -142,7 +142,7 @@ export default function CreateJob() {
 
     // meta for auto complete
     const p1 = ECR.listApps('public')
-    const p2 = BK.getNodeDetails()
+    const p2 = BK.getNodes()
     const p3 = User.listNodesWithPerm('schedule')
 
     Promise.allSettled([p1, p2, p3])
@@ -427,6 +427,7 @@ export default function CreateJob() {
           onChange={(_, val) => handleTabChange(val)}
           sx={{borderBottom: '1px solid #cfcfcf'}}
         >
+          {/* hide form-based submission for now
           <Tab
             label={<div className="flex items-center"><FormEditorIcon/>&nbsp;Form</div>}
             value="form"
@@ -434,6 +435,7 @@ export default function CreateJob() {
             to={`/create-job?tab=form${jobID ? `&start_with_job=${jobID}` : ''}`}
             replace
           />
+          */}
           <Tab
             label={
               <div className="flex items-center">

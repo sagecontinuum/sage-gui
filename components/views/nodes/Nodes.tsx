@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useLocation } from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -20,18 +20,20 @@ import {
   type FilterState
 } from '/components/views/statusDataUtils'
 
-import Table from '/components/table/Table'
+import Table, { type Column } from '/components/table/Table'
 import FilterMenu from '/components/FilterMenu'
 import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { queryData } from '/components/data/queryData'
+import useIsSuper from '/components/hooks/useIsSuper'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
 
 import settings from '/components/settings'
 import Checkbox from '/components/input/Checkbox'
+import { vsnLinkWithEdit } from './nodeFormatters'
 
 
 const TIME_OUT = 5000
@@ -43,31 +45,32 @@ const getOptions = (data: object[], field: string) : Option[] =>
 
 
 // helper to filter against project/focuses in setting file
-const filterOn = (data: BK.State[], key: string) =>
+const filterOn = (data: BK.Node[], key: string) =>
   data.filter(o => o[key]?.toLowerCase() == settings[key]?.toLowerCase())
 
 
 function getProjectNodes() {
-  const {project, focus, nodes} = settings
+  const {project, focus, vsns} = settings
 
-  return BK.getState()
+  return BK.getNodes()
     .then((data) => {
       if (project)
         data = filterOn(data, 'project')
       if (focus)
         data = filterOn(data, 'focus')
-      if (nodes)
-        data = data.filter(o => settings.nodes.includes(o.vsn))
+      if (vsns)
+        data = data.filter(o => settings.vsns.includes(o.vsn))
 
       if (project == 'SAGE') {
         data = data.filter(obj =>
-          ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.node_phase_v3)
+          ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.phase)
         )
       }
 
       return data
     })
 }
+
 
 
 type Option = {
@@ -77,11 +80,14 @@ type Option = {
 
 export default function Nodes() {
   const [params, setParams] = useSearchParams()
+  const {pathname} = useLocation()
+  const {isSuper} = useIsSuper()
 
   const phase = params.get('phase') as BK.PhaseTabs
 
   const query = params.get('query') || ''
   const show_all = params.get('show_all') ? true : false
+  const all_nodes = pathname == '/all-nodes'
   const focus = params.get('focus')
   const city = params.get('city')
   const state = params.get('state')
@@ -91,8 +97,9 @@ export default function Nodes() {
   const { setLoading } = useProgress()
   const [data, setData] = useState<ReturnType<typeof mergeMetrics>>(null)
   const [error, setError] = useState(null)
-  const [filtered, setFiltered] = useState<BK.State[]>(null)
+  const [filtered, setFiltered] = useState<BK.NodeState[]>(null)
   const [filterState, setFilterState] = useState<FilterState>({})
+  const [cols, setCols] = useState<Column[]>(columns)
 
   // filter options
   const [focuses, setFocuses] = useState<Option[]>()
@@ -102,9 +109,9 @@ export default function Nodes() {
 
   // filter state
   const [updateID, setUpdateID] = useState(0)
-  const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
+  // const [nodeType, setNodeType] = useState<'all' | 'WSN' | 'Blade'>('all')
 
-  const [selected, setSelected] = useState<BK.State[]>([])
+  const [selected, setSelected] = useState<BK.NodeState[]>([])
   const [lastUpdate, setLastUpdate] = useState<Date>(null)
 
   const dataRef = useRef(null)
@@ -148,7 +155,6 @@ export default function Nodes() {
     }
   }, [])
 
-
   // updating on state changes
   useEffect(() => {
     if (!data) return
@@ -156,7 +162,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, focus, city, state, sensor, nodeType, phase, show_all])
+  }, [query, focus, city, state, sensor, phase, show_all, all_nodes])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -166,15 +172,37 @@ export default function Nodes() {
   }, [data, phase])
 
 
+  useEffect(() => {
+    if (!isSuper) return
+
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'vsn')
+      prev.splice(idx, 1, {...prev[idx], format: vsnLinkWithEdit})
+      return [...prev]
+    })
+
+  }, [isSuper])
+
+  useEffect(() => {
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'status')
+      prev.splice(idx, 1, {...prev[idx], hide: all_nodes})
+      return [...prev]
+    })
+
+    // force mapbox rerender and avoid unnecessary rerenders
+    setUpdateID(prev => prev + 1)
+  }, [all_nodes])
+
   // filter data (todo: this can probably be done more efficiently)
   const updateAll = (filteredData, phase) => {
     const filterState = getFilterState(params)
     setFilterState(filterState)
 
     if (phase)
-      filteredData = filteredData.filter(obj => obj.node_phase_v3 == BK.phaseMap[phase])
+      filteredData = filteredData.filter(obj => obj.phase == BK.phaseMap[phase])
 
-    if (!show_all)
+    if (!show_all && !all_nodes)
       filteredData = filteredData.filter(obj => obj.status == 'reporting')
 
 
@@ -222,8 +250,8 @@ export default function Nodes() {
     setParams(params, {replace: true})
   }
 
+
   const handleRemoveFilters = () => {
-    setNodeType('all')
     setParams(phase ? {phase} : {}, {replace: true})
   }
 
@@ -262,6 +290,7 @@ export default function Nodes() {
         {filtered &&
           <Map
             data={selected.length ? getSubset(selected, filtered) : filtered}
+            markerClass={all_nodes ? 'blue-dot' : null}
             updateID={updateID}
           />
         }
@@ -276,10 +305,12 @@ export default function Nodes() {
           <Table
             primaryKey="id"
             rows={filtered}
-            columns={columns}
+            columns={cols}
             enableSorting
-            sort='-vsn'
+            enableDownload
+            sort="-vsn"
             search={query}
+            storageKey={pathname}
             onSearch={handleQuery}
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
@@ -319,23 +350,25 @@ export default function Nodes() {
                     onChange={vals => handleFilterChange('sensor', vals as Option[])}
                   />
                 }
-                <Tooltip
-                  sx={{mx: 1}}
-                  placement="top"
-                  title={
-                    <>Show nodes which are in maintenance, pending deployment, or not reporting.</>
-                  }
-                >
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={show_all}
-                        onChange={(evt) => handleShowAll(evt)}
-                      />
+                {!all_nodes &&
+                  <Tooltip
+                    sx={{mx: 1}}
+                    placement="top"
+                    title={
+                      <>Show nodes which are in maintenance, pending deployment, or not reporting.</>
                     }
-                    label="Show all"
-                  />
-                </Tooltip>
+                  >
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={show_all}
+                          onChange={(evt) => handleShowAll(evt)}
+                        />
+                      }
+                      label="Show all"
+                    />
+                  </Tooltip>
+                }
                 {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
                   <>
                     <VertDivider />
@@ -394,6 +427,15 @@ const TableContainer = styled.div`
 
   .gps-icon {
     margin-right: 10px;
+  }
+
+  .edit-btn {
+    margin-left: .5em;
+    visibility: hidden;
+  }
+
+  tr:hover .edit-btn {
+    visibility: visible;
   }
 `
 

@@ -112,20 +112,20 @@ export type Options = {
 
 
 type Props = {
-  project?: string
+  project?: BK.Node['project']
   focus?: string
-  nodes?: BK.VSN[]
+  vsns?: BK.VSN[]
 }
 
 export default function Data(props: Props) {
   // alter init data state if project/focus is provided
-  const {project, focus, nodes} = props
+  const {project, focus, vsns} = props
 
   if (project) initDataState.filters.project = [project]
   if (focus) initDataState.filters.focus = [focus]
 
-  const [nodeMetaByVSN, setNodeMetaByVSN] = useState<BK.NodeMetaMap>()
-  const [nodeMetas, setNodeMetas] = useState<BK.NodeMeta[]>()
+  const [nodeDict, setNodeDict] = useState<BK.NodeDict>()
+  const [nodes, setNodes] = useState<BK.Node[]>()
   const [ecr, setECR] = useState<ECR.AppDetails[]>()
 
   // infinite scroll
@@ -157,20 +157,17 @@ export default function Data(props: Props) {
 
   useEffect(() => {
     setLoading(true)
-    const mProm = BK.getNodeMeta({project, focus, nodes})
+    const mProm = BK.getNodeDict({project, vsns})
       .then(data => {
-        setNodeMetaByVSN(data) // todo(nc): remove
+        setNodeDict(data)
+        const nodes = Object.values(data)
+        setNodes(nodes)
 
-        const nodeMetas = Object.values(data)
-
-
-        setNodeMetas(nodeMetas)
-
-        const projects = getFacets(nodeMetas, 'project')
-        const focuses = getFacets(nodeMetas, 'focus')
-        const cities = getFacets(nodeMetas, 'city')
-        const states = getFacets(nodeMetas, 'state')
-        const vsns = getFacets(nodeMetas, 'vsn')
+        const projects = getFacets(data, 'project')
+        const focuses = getFacets(data, 'focus')
+        const cities = getFacets(data, 'city')
+        const states = getFacets(data, 'state')
+        const vsns = getFacets(data, 'vsn')
 
         setFacets({
           project: {title: 'Project', items: projects, hide: !!project},
@@ -180,13 +177,13 @@ export default function Data(props: Props) {
           vsn: {title: 'Node', items: vsns}
         })
 
-        return nodeMetas
+        return nodes
       }).catch(error => dispatch({type: 'ERROR', error}))
 
     const dProm = fetchRollup(opts)
 
     Promise.all([mProm, dProm])
-      .then(([nodeMetas, data]) => dispatch({type: 'INIT_DATA', data, nodeMetas}))
+      .then(([nodes, data]) => dispatch({type: 'INIT_DATA', data, nodes}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoading(false))
 
@@ -224,15 +221,15 @@ export default function Data(props: Props) {
 
   const handleFilter = (evt, facet: string, val: string) => {
     const checked = evt.target.checked
-    if (checked) dispatch({type: 'ADD_FILTER', nodeMetas, facet, val})
-    else dispatch({type: 'RM_FILTER', nodeMetas, facet, val})
+    if (checked) dispatch({type: 'ADD_FILTER', nodes, facet, val})
+    else dispatch({type: 'RM_FILTER', nodes, facet, val})
   }
 
 
   const handleSelectAll = (evt, facet: string, vals: string[]) => {
     const checked = evt.target.checked
-    if (checked) dispatch({type: 'SELECT_ALL', nodeMetas, facet, vals})
-    else dispatch({type: 'CLEAR_CATEGORY', nodeMetas, facet})
+    if (checked) dispatch({type: 'SELECT_ALL', nodes, facet, vals})
+    else dispatch({type: 'CLEAR_CATEGORY', nodes, facet})
   }
 
   // todo(nc): refactor into provider
@@ -324,25 +321,25 @@ export default function Data(props: Props) {
         </Top>
 
         <Items>
-          {opts.display == 'nodes' && filtered && nodeMetaByVSN && ecr &&
+          {opts.display == 'nodes' && filtered && ecr &&
             filtered
               .slice(0, getInfiniteEnd(page))
               .map(vsn => {
                 const timelineData = data[vsn]
-                const {location} = nodeMetaByVSN[vsn]
+                const {location} = nodeDict[vsn]
 
                 return (
                   <TimelineContainer key={vsn}>
-                    <div className="flex title-row">
+                    <div className="flex title-row gap">
                       <div className="flex column">
                         <div>
-                          <h2>{vsnLink(vsn)}</h2>
+                          <h2>{vsnLink(vsn, nodeDict[vsn])}</h2>
                         </div>
                         <div>{location}</div>
                       </div>
 
                       {DATA_PRODUCT_PATH &&
-                        <div className="data-opts">
+                        <div>
                           {getDownloadLink(DATA_PRODUCT_PATH)}
                         </div>
                       }

@@ -33,6 +33,7 @@
     "mapbox-gl": "^2.10.0",
     "marked": "^4.0.16",
     "parcel": "^2.9.3",
+    "parse-address": "^1.1.2",
     "process": "^0.11.10",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

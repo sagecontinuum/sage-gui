@@ -80,7 +80,7 @@ function getNxMetric<R extends string | number>(
 
 function getMetricsByHost(
   metrics: BH.MetricsByHost,
-  computes: BK.SimpleManifest['computes'],
+  computes: BK.Node['computes'],
   metricName: string,
   latestOnly = true
 ) {
@@ -143,8 +143,8 @@ export function countNodeSanity(data) {
 
 
 
-const determineStatus = (nodeObj: BK.State, elapsedTimes: {[host: string]: number}) => {
-  const {computes, node_phase_v3: phase} = nodeObj
+const determineStatus = (nodeObj: BK.Node, elapsedTimes: {[host: string]: number}) => {
+  const {computes, phase} = nodeObj
 
   if (phase == 'Maintenance') {
     return 'degraded'
@@ -172,7 +172,7 @@ const determineStatus = (nodeObj: BK.State, elapsedTimes: {[host: string]: numbe
 
 // join beehive and beekeeper data, basically
 export function mergeMetrics(
-  data: BK.State[], records: BH.Record[], health, sanity
+  data: BK.Node[], records: BH.Record[], health, sanity
 ) {
   // If a VSN is changed, the data api will return latest records for each VSN.
   // So, we only consider metrics with VSNs which are known by "beekeeper"

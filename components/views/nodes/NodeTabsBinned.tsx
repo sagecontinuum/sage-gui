@@ -25,18 +25,18 @@ import { filterData, type FilterState, initialState } from '../statusDataUtils'
 import { parseQueryStr } from '/components/utils/queryString'
 
 
-type Label = BK.Phase | 'Show All' | 'Sensors'
+type Label = BK.Phase | 'All Nodes' | 'Sensors'
 
 type PhaseCounts = {
   [phase in BK.Phase]: number
 }
 
-type Counts =  PhaseCounts & {'Show All': number}
+type Counts =  PhaseCounts & {'All Nodes': number}
 
 
-function getPhaseCounts(data: BK.NodeMeta[], filterState: FilterState) : PhaseCounts {
-  data = filterData(data, filterState) as BK.NodeMeta[]
-  return countBy(data, 'node_phase_v3') as PhaseCounts
+function getPhaseCounts(data: BK.Node[], filterState: FilterState) : PhaseCounts {
+  data = filterData(data, filterState) as BK.Node[]
+  return countBy(data, 'phase') as PhaseCounts
 }
 
 
@@ -74,12 +74,12 @@ export default function NodeTabs(props: Props) {
   const [params] = useSearchParams()
   const tab = params.get('phase') || 'all'
 
-  const [production, setProduction] = useState<BK.NodeMeta[]>()
+  const [production, setProduction] = useState<BK.Node[]>()
   const [counts, setCounts] = useState<Counts>()
 
 
   useEffect(() => {
-    BK.getProduction()
+    BK.getNodes()
       .then(data => {
         setProduction(data)
       })
@@ -95,7 +95,7 @@ export default function NodeTabs(props: Props) {
   }, [params, production])
 
 
-  const updateCounts = (data: BK.NodeMeta[]) => {
+  const updateCounts = (data: BK.Node[]) => {
     if (settings.project && !isAdmin) {
       data = data.filter(obj => obj.project.toLowerCase() == settings.project.toLowerCase())
     }
@@ -105,7 +105,7 @@ export default function NodeTabs(props: Props) {
 
     setCounts({
       ...counts,
-      'Show All': sum(Object.values(counts))
+      'All Nodes': sum(Object.values(counts))
     })
   }
 
@@ -151,7 +151,7 @@ export default function NodeTabs(props: Props) {
           value="retired"
         />
         <Tab
-          label={label(<ShowAllIcon />, 'Show All', counts)}
+          label={label(<ShowAllIcon />, 'All Nodes', counts)}
           value="all"
         />
 
