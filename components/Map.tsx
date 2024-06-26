@@ -128,7 +128,7 @@ function PopupInfo(props: PopupProps) {
 
   // todo(nc): use new manifests endpoint when avail
   // @ts-ignore; use new manifests endpoint when avail
-  const {vsn, focus, location, state, status, lng, lat} = data || {}
+  const {vsn, focus, city, cityStr, state, status, lng, lat} = data || {}
 
   return (
     <Popup
@@ -169,29 +169,23 @@ function PopupInfo(props: PopupProps) {
           </div>
         }
 
-        {location &&
-          <div>
-            <small className="muted font-bold">City</small>
-            <div>
-              <Link to={`/nodes/?city="${encodeURIComponent(location)}"`}>
-                {location.split(',')[0]}
-              </Link>
-            </div>
-          </div>
-        }
 
-        {state &&
+        <div>
+          <small className="muted font-bold">City</small>
           <div>
-            <small className="muted font-bold">State</small>
-            <div>
-              {location &&
-                <Link to={`/nodes/?state="${encodeURIComponent(state)}"`}>
-                  {state.split(' (')[0]}
-                </Link>
-              }
-            </div>
+            {city && cityStr &&
+              <Link to={`/nodes?city="${encodeURIComponent(city)}"`}>
+                {cityStr}
+              </Link>
+            }
+            {state && <>,{' '}
+              <Link to={`/nodes?state="${encodeURIComponent(state)}"`}>
+                {state}
+              </Link>
+            </>}
+            {!(city && state) && '-'}
           </div>
-        }
+        </div>
 
         <GpsClipboard data={data} />
       </div>
