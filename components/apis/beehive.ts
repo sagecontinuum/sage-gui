@@ -517,7 +517,7 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
 async function getRssi(vsn: string, devEui: string) : Promise<Record> {
   const params = {start: NODE_STATUS_RANGE, filter: {name: 'signal.rssi', vsn, devEui}, tail: 1}
   const metrics = await getData(params)
-  return metrics[1]
+  return metrics[metrics.length - 1]
 }
 
 export const fetchDataWithRssi = async (manifest: FlattenedManifest): Promise<LorawanConnection[]> => {
