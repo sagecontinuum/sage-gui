@@ -52,7 +52,7 @@ export default memo(function TableSearch(props: Props) {
       />
     </>
   )
-}, (prev, next) => prev.value == next.value)
+}, (prev, next) => prev.value == next.value && prev.onSearch == next.onSearch)
 
 
 const Search = styled(TextField)`
