@@ -717,7 +717,7 @@ export default function NodeView(props: Props) {
                   const {vsn, origPluginName} = meta
                   const date = new Date(timestamp)
                   const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
-                  window.open(`${config.portal}/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank')
+                  window.open(`/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank')
                 }}
                 yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
                 labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}

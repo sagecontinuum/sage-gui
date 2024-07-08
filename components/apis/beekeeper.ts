@@ -451,7 +451,7 @@ export async function getNode(vsn: VSN) : Promise<Node> {
 export type SiteIDs = {[node: VSN]: string}
 
 export async function getSiteIDs() : Promise<SiteIDs> {
-  const nodes = await getNodes({project: PROJECT})
+  const nodes = await getNodes()
   return nodes.reduce((acc, n) => n.site_id ? {...acc, [n.vsn]: n.site_id} : acc, {})
 }
 
