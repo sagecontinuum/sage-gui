@@ -22,10 +22,7 @@ const columns: Column[] = [{
 }, {
   id: 'focus',
   label: 'Focus',
-  format: (focus, {partner}) => {
-    return (!focus && !partner) ? '-' :
-      `${focus ? focus : ''}${partner ? ` (${partner})` : ''}`
-  }
+  format: formatters.focus
 }, {
   id: 'elapsedTimes',
   label: 'Last Reported Metrics',

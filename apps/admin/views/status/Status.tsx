@@ -9,20 +9,23 @@ import UndoIcon from '@mui/icons-material/UndoRounded'
 import Alert from '@mui/material/Alert'
 
 import columns from './columns'
-import Table from '/components/table/Table'
-import FilterMenu from '/components/FilterMenu'
-import Map from '/components/Map'
-// import Charts from './charts/Charts'
-import QueryViewer from '/components/QueryViewer'
-import { useProgress } from '/components/progress/ProgressProvider'
-import { queryData } from '/components/data/queryData'
-
 import {
   filterData,
   getFilterState,
   mergeMetrics,
   type FilterState
 } from '/components/views/statusDataUtils'
+
+import Table, { type Column } from '/components/table/Table'
+import FilterMenu from '/components/FilterMenu'
+import Map from '/components/Map'
+// import Charts from './charts/Charts'
+import QueryViewer from '/components/QueryViewer'
+import { useProgress } from '/components/progress/ProgressProvider'
+import { queryData } from '/components/data/queryData'
+import useIsSuper from '/components/hooks/useIsSuper'
+import { vsnLinkWithEdit } from '/components/views/nodes/nodeFormatters'
+
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'
@@ -54,6 +57,7 @@ type Option = {
 
 export default function StatusView() {
   const [params, setParams] = useSearchParams()
+  const {isSuper} = useIsSuper()
 
   const phase = params.get('phase') as BK.PhaseTabs
 
@@ -70,6 +74,7 @@ export default function StatusView() {
   const [error, setError] = useState(null)
   const [filtered, setFiltered] = useState(null)
   const [filterState, setFilterState] = useState<FilterState>({})
+  const [cols, setCols] = useState<Column[]>(columns)
 
   // filter options
   const [statuses, setStatuses] = useState<Option[]>()
@@ -101,7 +106,7 @@ export default function StatusView() {
       handle = setTimeout(async () => {
         if (done) return
         const results = await Promise.allSettled(pingRequests())
-        const [ metrics, health, sanity] = results.map(r => r.value)
+        const [metrics, health, sanity] = results.map(r => r.value)
 
         setData(mergeMetrics(dataRef.current, metrics, health, sanity))
         setLastUpdate(new Date().toLocaleTimeString('en-US'))
@@ -172,6 +177,18 @@ export default function StatusView() {
     setCities(getOptions(data, 'city'))
     setStates(getOptions(data, 'state'))
   }
+
+
+  useEffect(() => {
+    if (!isSuper) return
+
+    setCols(prev => {
+      const idx = prev.findIndex(o => o.id == 'vsn')
+      prev.splice(idx, 1, {...prev[idx], format: vsnLinkWithEdit})
+      return [...prev]
+    })
+
+  }, [isSuper])
 
 
   const handleQuery = ({query}) => {
@@ -277,7 +294,9 @@ export default function StatusView() {
           <Table
             primaryKey="id"
             rows={filtered}
-            columns={columns}
+            columns={cols}
+            storageKey="/nodes"
+            enableDownload
             enableSorting
             search={query}
             onSearch={handleQuery}
@@ -389,6 +408,15 @@ const TableContainer = styled.div`
 
   .status-icon {
     margin: 0 10px;
+  }
+
+  .edit-btn {
+    margin-left: .5em;
+    visibility: hidden;
+  }
+
+  tr:hover .edit-btn {
+    visibility: visible;
   }
 `
 

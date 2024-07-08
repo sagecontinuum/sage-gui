@@ -199,7 +199,8 @@ export function vsnToDisplayStrAlt(vsn, site_id) {
   return `${site_id || vsn}${site_id ? ` (${vsn})` : ''}`
 }
 
-export function vsnWithGPS(val, obj) {
+// deprecated
+export function __vsnWithGPS(val, obj) {
   return (
     <NodeCell className="flex items-center justify-between">
       <Link to={`/node/${val}`}>{val}</Link>
@@ -215,6 +216,11 @@ const NodeCell = styled.div`
   }
 `
 
+
+export function focus(focus, {partner}) {
+  return (!focus && !partner) ? '-' :
+    `${focus ? focus : ''}${partner ? ` (${partner})` : ''}`
+}
 
 export function gps(_, obj, newline = false) {
   return <div className="flex items-center">

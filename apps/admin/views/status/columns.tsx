@@ -26,7 +26,6 @@ import * as formatters from '/components/views/nodes/nodeFormatters'
 
 
 const TEMP_DASH = `${config.influxDashboard}/08dca67bee0d9000?lower=now%28%29%20-%2024h`
-// const SENSOR_DASH = `${config.influxDashboard}/07b179572e436000?lower=now%28%29%20-%2024h`
 
 
 
@@ -174,8 +173,7 @@ const columns = [{
 }, {
   id: 'vsn',
   label: 'Node',
-  width: '50px',
-  format: formatters.vsnWithGPS
+  format: formatters.vsnLink // vsnLinkWithEdit is used if permissions are found
 }, {
   id: 'name',
   label: 'ID',
@@ -186,7 +184,8 @@ const columns = [{
   label: 'Project'
 }, {
   id: 'focus',
-  label: 'Focus'
+  label: 'Focus',
+  format: formatters.focus
 }, {
   id: 'phase',
   label: 'Phase',
@@ -203,7 +202,7 @@ const columns = [{
   id: 'gps',
   label: 'GPS',
   format: formatters.gps,
-  hide: true
+  hide: false
 }, {
   id: 'staticGPS',
   label: 'Static GPS',
@@ -229,37 +228,21 @@ const columns = [{
   id: 'data',
   label: 'Data',
   format: (val, obj) =>
-    <>
-      {/*
-      <Tooltip
-        title={<>View sensors <LaunchIcon style={{fontSize: '1.1em'}}/></>}
-        placement="top"
+    <Tooltip
+      title={<>View thermals <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+      placement="top"
+    >
+      <IconButton
+        size="small"
+        href={`${TEMP_DASH}&vars%5BVSN%5D=${obj.vsn}`}
+        className="no-style"
+        target="_blank"
+        rel="noreferrer"
       >
-        <IconButton
-          size="small"
-          href={`${SENSOR_DASH}&vars%5BVSN%5D=${obj.vsn}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <ChartsIcon />
-        </IconButton>
-      </Tooltip>
-      */}
-      <Tooltip
-        title={<>View thermals <LaunchIcon style={{fontSize: '1.1em'}}/></>}
-        placement="top"
-      >
-        <IconButton
-          size="small"
-          href={`${TEMP_DASH}&vars%5BVSN%5D=${obj.vsn}`}
-          className="no-style"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <ThermoIcon />
-        </IconButton>
-      </Tooltip>
-    </>
+        <ThermoIcon />
+      </IconButton>
+    </Tooltip>,
+  hide: true
 }, {
   id: 'temp',
   label: 'Temp',
@@ -417,7 +400,7 @@ const columns = [{
   id: 'modem_hw_model',
   label: 'Modem',
   format: formatters.modem,
-  hide: false
+  hide: true
 }, {
   id: 'modem_carrier_name',
   label: 'Modem Sim',
