@@ -1,7 +1,7 @@
 import { cloneElement, useState } from 'react'
-import IconButton from '@material-ui/core/IconButton'
+import IconButton from '@mui/material/IconButton'
 
-import Menu from '@material-ui/core/Menu'
+import Menu from '@mui/material/Menu'
 
 
 
@@ -42,7 +42,6 @@ export default function MenuComponent(props: Props) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'left',
