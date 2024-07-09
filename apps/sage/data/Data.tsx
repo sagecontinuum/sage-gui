@@ -52,8 +52,10 @@ const getStartTime = (str) =>
 
 const getFacets = (data, name) =>
   chain(data)
-    .countBy(name)
-    .map((count, name) => ({name: name.length ? name : NO_ASSIGNMENT, count}))
+    .countBy(name) // returns string 'undefined' if undefined
+    .map((count, name) =>
+      ({name: name == 'undefined' || !name || !name.length ? NO_ASSIGNMENT : name, count})
+    )
     .value()
 
 

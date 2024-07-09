@@ -505,7 +505,7 @@ function _sanitizeMeta(obj: Node) {
   return {
     ...obj,
     state: stateAbbrev in USStates ? `${USStates[state]} (${stateAbbrev})` : stateAbbrev,
-    city: `${city}, ${state}`,
+    city: city && state ? `${city}, ${state}` : undefined,
     stateStr: state,
     cityStr: city,
     hasStaticGPS: !!obj.gps_lat && !!obj.gps_lon,
