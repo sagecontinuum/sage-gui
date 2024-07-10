@@ -11,3 +11,7 @@ beekeeper-keys/
 *.log
 *token*
 *Token*
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
