@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { useSearchParams, useLocation } from 'react-router-dom'
+import { useSearchParams, useLocation, Link } from 'react-router-dom'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -314,7 +314,14 @@ export default function Nodes() {
             onSearch={handleQuery}
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
-            emptyNotice="No nodes found"
+            emptyNotice={
+              show_all ?
+                'No nodes found' :
+                <span>
+                  No recently reporting nodes for this query.  <Link to="/all-nodes">View All Nodes</Link> or
+                  check "Show all" for more details.
+                </span>
+            }
             middleComponent={
               <FilterControls className="flex items-center">
                 {focuses &&
