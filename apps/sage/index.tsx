@@ -228,5 +228,23 @@ const Container = styled.div`
   width: 100%;
 `
 
+/* mocking data example, using msw
+async function enableMocking() {
+  if (process.env.NODE_ENV !== 'development') {
+    return
+  }
+
+  const { worker } = await import('/mocks/browser')
+
+  // `worker.start()` returns a Promise that resolves
+  // once the Service Worker is up and ready to intercept requests.
+  await worker.start()
+}
+
+enableMocking().then(() => {
+  ReactDom.render(<Sage />, document.getElementById('app'))
+})
+*/
+
 
 ReactDom.render(<Sage />, document.getElementById('app'))

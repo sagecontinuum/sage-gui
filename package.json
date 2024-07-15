@@ -5,9 +5,10 @@
   "scripts": {
     "start": "npm start -w sage",
     "build": "npm run build -w sage",
-    "test": "jest",
+    "test": "npx playwright test",
     "clean": "npm run clean --workspaces --if-present && rm -rf .parcel-cache/",
-    "release": "standard-version"
+    "release": "standard-version",
+    "old-tests": "jest"
   },
   "repository": {
     "type": "git",
