@@ -178,7 +178,7 @@ export default function DevAccess() {
       <Clipboard content={
         <div>
           Host waggle-dev-sshd<br/>
-          {'    '}HostName 192.5.86.5<br/>
+          {'    '}HostName beekeeper.sagecontinuum.org<br/>
           {'    '}Port 49190<br/>
           {'    '}User waggle<br/>
           {'    '}IdentityFile ~/.ssh/sage_key # &lt;---- your private key<br/>

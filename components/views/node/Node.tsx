@@ -65,7 +65,10 @@ const labelDict = {
   gps: 'GPS',
   bme280: 'T·P·H',
   bme680: 'T·P·H·G',
+  aqt: 'AQT',
+  wxt: 'WXT',
   nxcore: 'NX',
+  nxagent: 'NXagent',
   rpi: 'RPi',
   sbcore: 'Sage Blade'
 }
