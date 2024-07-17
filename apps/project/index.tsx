@@ -18,6 +18,13 @@ import QueryBrowser from '../sage/data-stream/QueryBrowser'
 import Ontology from '/apps/sage/data-commons/Ontology'
 import DataProduct from '/apps/sage/data-commons/DataProduct'
 
+import Account from '/components/account/Account'
+import UserProfile from '/components/account/UserProfile'
+import MyNodes from '/components/account/MyNodes'
+import Devices from '/components/account/Devices'
+import DevAccess from '/components/account/DevAccess'
+
+import RequireAuth from '/components/auth/RequireAuth'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
@@ -108,6 +115,13 @@ export default function App() {
                   <Route path="data/ontology/:name" element={<Ontology />} />
                   <Route path="data/product/:name" element={<DataProduct />} />
                   <Route path="query-browser" element={<QueryBrowser />} />
+
+                  <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                    <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                    <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                    <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                    <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                  </Route>
 
                   <Route path="login" element={<TestSignIn />} />
                   <Route path="*" element={<NotFound />} />
