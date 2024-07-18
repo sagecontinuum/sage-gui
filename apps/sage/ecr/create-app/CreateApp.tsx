@@ -59,6 +59,12 @@ const getRepoPath = (url: string) =>
   url.replace('https://github.com/', '').replace('.git', '')
 
 
+const invalidCommit = (gitCommit: string) =>
+  gitCommit && gitCommit.length != 40
+
+
+const invalidCommitMsg = 'Invalid Git commit hash.  String must be 40 chars long.'
+
 
 const initialState = {
   namespace: user,
@@ -88,6 +94,7 @@ export default function CreateApp() {
   // app repo
   const [repoURL, setRepoURL] = useState('')
   const [branch, setBranch] = useState('main')
+  const [gitCommit, setGitCommit] = useState(null)
   const [branchList, setBranchList] = useState<{id: string, label: string}[]>([])
 
   // app config state
@@ -106,12 +113,12 @@ export default function CreateApp() {
   // debug settings
   const [devMode, setDevMode] = useState(false)
 
-  const fetchSageConfig = useCallback((branch) => {
-    if (!repoURL || !branch) return
+  const fetchSageConfig = useCallback((branchOrCommit) => {
+    if (!repoURL || !branchOrCommit) return
 
     const path = getRepoPath(repoURL)
 
-    fetch(`${GITHUB_STATIC_URL}/${path}/${branch}/sage.yaml`)
+    fetch(`${GITHUB_STATIC_URL}/${path}/${branchOrCommit}/sage.yaml`)
       .then(res => {
         // set config type
         const type = res.status == 404 ?
@@ -120,23 +127,33 @@ export default function CreateApp() {
 
         // set form/config
         res.text().then(text => {
+          if (text == '404: Not Found') {
+            setError(true)
+            return
+          }
+
           let obj = YAML.parse(text)
           obj = sanitizeForm(obj)
 
-          // update config with repo url and tag (just branch for now)
+          // update config with repo url and branch (or commit)
           obj.source.url = repoURL
-          obj.source.branch = obj.source.branch || branch
+          if (gitCommit) {
+            obj.source.git_commit = gitCommit
+          } else {
+            obj.source.branch = obj.source.branch || branchOrCommit
+          }
 
           setForm(obj)
           setConfig(YAML.stringify(obj))
         })
       }).catch(() => setConfigType('none'))
-  }, [repoURL])
+  }, [repoURL, gitCommit])
 
 
   // remove all verification/error state on changes
   useEffect(() => {
     setError(null)
+    setGitCommit(null)
   }, [repoURL, config])
 
 
@@ -144,6 +161,14 @@ export default function CreateApp() {
   useEffect(() => {
     setIsValid(null)
   }, [repoURL])
+
+
+  useEffect(() => {
+    if (invalidCommit(gitCommit))
+      return
+
+    fetchSageConfig(gitCommit)
+  }, [gitCommit, fetchSageConfig])
 
 
   const onRepoVerify = (evt = null) => {
@@ -186,6 +211,15 @@ export default function CreateApp() {
     setBranch(tagObj.id)
     setIsValid(true)
     fetchSageConfig(tagObj.id)
+  }
+
+  const onGitCommitChange = (evt) => {
+    if (invalidCommit(gitCommit)) {
+      setError(invalidCommitMsg)
+    }
+
+    const hash = evt.target.value
+    setGitCommit(hash)
   }
 
 
@@ -233,7 +267,7 @@ export default function CreateApp() {
 
   const disableRegister = () =>
     !form.namespace || !form.name || !isValid ||
-    configType == 'none' || isRegistering || isBuilding || error
+    configType == 'none' || isRegistering || isBuilding || error || invalidCommit(gitCommit)
 
 
   const disableBuild = () =>
@@ -246,47 +280,70 @@ export default function CreateApp() {
         <h1>Create App</h1>
 
         <StepTitle icon="1" label="Repo URL"/>
-        <StepForm className="repo-step flex items-center gap" onSubmit={onRepoVerify}>
-          <TextField
-            label="GitHub Repo URL"
-            placeholder="https://github.com/me/my-edge-app"
-            value={repoURL}
-            onChange={evt => setRepoURL(evt.target.value)}
-            error={isValid == false}
-            helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
-            style={{width: 500}}
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-
-          {isValid &&
-            <FilterMenu
-              options={branchList}
-              multiple={false}
-              onChange={onRepoBranchChange}
-              value={{id: branch, label: branch}}
-              headerText="Select a different branch"
-              ButtonComponent={
-                <Button style={{marginLeft: 10}} startIcon={<TagIcon/>}>
-                  {branch}
-                  <CaretIcon />
-                </Button>
-              }
+        <StepForm className="repo-step flex column gap" onSubmit={onRepoVerify}>
+          <div className="flex items-center gap">
+            <TextField
+              label="GitHub Repo URL"
+              placeholder="https://github.com/me/my-edge-app"
+              value={repoURL}
+              onChange={evt => setRepoURL(evt.target.value)}
+              error={isValid == false}
+              helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
+              style={{width: 500}}
+              InputLabelProps={{ shrink: true }}
+              required
             />
-          }
 
-          {repoURL && !isValid &&
-            <Button
-              onClick={onRepoVerify}
-              variant="contained"
-              color="primary"
-            >
-              {validating ? 'Validating...' : 'Verify'}
-            </Button>
-          }
+            {repoURL && !isValid &&
+              <Button
+                onClick={onRepoVerify}
+                variant="contained"
+                color="primary"
+              >
+                {validating ? 'Validating...' : 'Verify'}
+              </Button>
+            }
+
+            {isValid &&
+              <>
+                <FilterMenu
+                  options={branchList}
+                  multiple={false}
+                  onChange={onRepoBranchChange}
+                  value={{id: branch, label: branch}}
+                  headerText="Select a different branch"
+                  ButtonComponent={
+                    <Button style={{marginLeft: 10}} startIcon={<TagIcon/>}>
+                      {branch}
+                      <CaretIcon />
+                    </Button>
+                  }
+                  disabled={gitCommit}
+                />
+              </>
+            }
+
+            {isValid &&
+              <CheckIcon className="success" />
+            }
+          </div>
+
 
           {isValid &&
-            <CheckIcon className="success" />
+            <div className="flex items-center gap">
+              <TextField
+                label="Commit Hash (optional) *"
+                name="git_commit"
+                value={gitCommit}
+                onChange={onGitCommitChange}
+                style={{width: 375}}
+                inputProps={{maxLength: 40}}
+                InputLabelProps={{ shrink: true}}
+                placeholder="e.g., ca82a6dff817ec66f44342007202690a93763949"
+                error={invalidCommit(gitCommit)}
+                helperText={invalidCommit(gitCommit) ? invalidCommitMsg : ''}
+              />
+            </div>
           }
         </StepForm>
 

@@ -111,7 +111,7 @@ type Option = {
 
 type Props = {
   options: Option[]
-  value: string[] | Option[]
+  value: string[] | Option[] | Option
   ButtonComponent?: JSX.Element
   label?: string
   multiple?: boolean    // default: true
@@ -119,6 +119,7 @@ type Props = {
   noOptionsText?: string
   noSelectedSort?: boolean
   disableCloseOnSelect?: boolean
+  disabled?: boolean
   onChange: (opt: (string | Option)[]) => void,
 } & ({
   ButtonComponent: JSX.Element
@@ -137,7 +138,8 @@ export default function FilterMenu(props: Props) {
     headerText,
     noOptionsText,
     noSelectedSort = false,
-    disableCloseOnSelect
+    disableCloseOnSelect,
+    disabled = false
   } = props
 
   const [anchorEl, setAnchorEl] = useState(null)
@@ -168,7 +170,7 @@ export default function FilterMenu(props: Props) {
     <>
       <Box>
         {ButtonComponent ?
-          cloneElement(ButtonComponent, {onClick: handleClick}) :
+          cloneElement(ButtonComponent, {onClick: handleClick, disabled}) :
           <Button size="medium" onClick={handleClick}>{label}<CaretIcon /></Button>
         }
       </Box>

@@ -24,7 +24,7 @@ export function Step(props: StepProps) {
   const {className, ...rest} = props
   return (
     <div className={className}>
-      {props.label && <StepTitle {...rest} />}
+      {props.label && <StepTitle label={rest.label} icon={rest.icon} {...rest} />}
       <StepContent className="step-content">
         {props.children}
       </StepContent>

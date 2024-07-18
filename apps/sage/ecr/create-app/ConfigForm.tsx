@@ -1,10 +1,10 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import styled from 'styled-components'
 
 import FormControl from '@mui/material/FormControl'
 import TextField from '@mui/material/TextField'
 import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
+import Select, { type SelectChangeEvent } from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 
 import { AppMeta } from '/components/apis/ecr'
@@ -16,7 +16,7 @@ const user = Auth.user
 
 type Props = {
   form: AppMeta
-  onChange: (evt: ChangeEvent | ChangeEvent<{name?: string, value: unknown}>) => void
+  onChange: (evt: SelectChangeEvent | ChangeEvent<{name?: string, value: unknown}>) => void
 }
 
 export default function ConfigForm(props: Props) {
