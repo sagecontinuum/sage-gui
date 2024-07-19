@@ -139,6 +139,7 @@ export default function CreateApp() {
           obj.source.url = repoURL
           if (gitCommit) {
             obj.source.git_commit = gitCommit
+            delete obj.source.branch
           } else {
             obj.source.branch = obj.source.branch || branchOrCommit
           }
