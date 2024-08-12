@@ -94,6 +94,7 @@ export type Node = {
     hw_model: string
     manufacturer: string
     capabilities: string[]
+    is_active: boolean
   }[]
 
   // added client-side convenience
@@ -193,6 +194,7 @@ export type Compute = {
   serial_no: string       // most likely 12 digit, uppercase hex
   zone: 'shield' | 'core'
   hardware: ComputeHardware
+  is_active: boolean
 }
 
 
@@ -208,13 +210,14 @@ export type SensorHardware = {
 }
 
 
-type Sensor = {
+export type Sensor = {
   name: 'top' | 'bottom' | 'left' | 'right' | string
   scope: 'global' | 'nxcore' | 'rpi-shield'
   labels: string[],
   serial_no: string,
   uri: string,
   hardware: SensorHardware
+  is_active: boolean
 }
 
 

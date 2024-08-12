@@ -150,7 +150,13 @@ const determineStatus = (nodeObj: BK.Node, elapsedTimes: {[host: string]: number
     return 'degraded'
   }
 
-  const notReporting = computes.some(({serial_no}) => {
+
+  const notReporting = computes.some(({serial_no, is_active}) => {
+    // skip any inactive computes
+    if (!is_active) {
+      return false
+    }
+
     const host = BK.findHostWithSerial(Object.keys(elapsedTimes), serial_no)
     return !(host in elapsedTimes) || elapsedTimes[host] > ELAPSED_FAIL_THRES
   })

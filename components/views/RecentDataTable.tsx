@@ -23,6 +23,11 @@ type SparkLine = {timestamp: string, value: number}[]
 const getStartTime = () =>
   subDays(new Date(), 1).toISOString()
 
+const getClassName = (timestamp, inactive) =>
+  inactive ? 'inactive font-bold nowrap' :
+    (isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap')
+
+
 
 type Props = {
   items: {
@@ -38,10 +43,11 @@ type Props = {
   }[]
   showSparkline?: boolean
   className?: string
+  inactive?: boolean
 }
 
 export default memo(function RecentDataTable(props: Props) {
-  const {items, showSparkline = true, className} = props
+  const {items, showSparkline = true, className, inactive = false} = props
 
   const {setLoading} = useProgress()
   const [recentData, setRecentData] = useState<{[label: string]: BH.Record}>(
@@ -167,7 +173,7 @@ export default memo(function RecentDataTable(props: Props) {
                       </Portal>
                     </Tooltip>
                   </td>
-                  <td className={isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap'}>
+                  <td className={getClassName(timestamp, inactive)}>
                     {data &&
                       <Tooltip title={new Date(timestamp).toLocaleString()} placement="right">
                         <span>

@@ -26,6 +26,7 @@ import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import Table from '/components/table/Table'
+import { prettyList } from '/components/utils/units'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
@@ -243,6 +244,12 @@ const computeOverview = [{
 const hasShield = (computes: BK.FlattenedManifest['computes']) =>
   !!computes.some(o => o.zone == 'shield')
 
+// todo(nc): solution assumes compute/sensor names are uniqu
+const getInActive = (data: BK.FlattenedManifest) => [
+  ...data.computes.reduce((acc, o) => !o.is_active ? [...acc, o.name] : acc, []),
+  ...data.sensors.reduce((acc, o) => !o.is_active ? [...acc, o.hw_model] : acc, [])
+]
+
 
 const hardwareMeta = [{
   id: 'all',
@@ -341,6 +348,7 @@ export default function NodeView(props: Props) {
 
   const [node, setNode] = useState<BK.Node>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
+  const [inactive, setInactive] = useState<(BK.Compute['name'] | BK.SensorHardware['hw_model'])[]>()
   const [bkMeta, setBKMeta] = useState<BK.BKState | {registration_event: null}>()
 
   const [status, setStatus] = useState<string>()
@@ -387,6 +395,8 @@ export default function NodeView(props: Props) {
     const p2 = BK.getManifest(vsn)
       .then(data => {
         setManifest(data)
+        console.log(getInActive(data))
+        setInactive(getInActive(data))
 
         const id = data.name
 
@@ -737,29 +747,39 @@ export default function NodeView(props: Props) {
 
           <Card>
             <h2>Sensors</h2>
-            {vsn &&
-              <div className="flex data-tables">
-                {hasSensor(manifest, 'BME680') &&
-                  <RecentDataTable
-                    items={format(['temp', 'humidity', 'pressure'], vsn)}
-                    className="hover-bme"
-                  />
+            {vsn && inactive &&
+              <>
+                {!!inactive.length &&
+                  <Alert severity="info" sx={{marginBottom: '1em'}}>
+                    {prettyList(inactive)} {inactive.length > 1 ? 'are' : 'is'} marked as inactive
+                  </Alert>
                 }
+                <div className="flex data-tables">
+                  {hasSensor(manifest, 'BME680') &&
+                    <RecentDataTable
+                      items={format(['temp', 'humidity', 'pressure'], vsn)}
+                      className="hover-bme"
+                      inactive={inactive.some(name => /rpi|bme680/i.test(name))}
+                    />
+                  }
 
-                <div>
-                  {hasSensor(manifest, 'RG-15') &&
-                    <RecentDataTable
-                      items={format(['raingauge'], vsn)}
-                      className="hover-rain"
-                    />
-                  }
-                  {hasSensor(manifest, 'ES-642') &&
-                    <RecentDataTable
-                      items={format(['es642AirQuality'], vsn)}
-                    />
-                  }
+                  <div>
+                    {hasSensor(manifest, 'RG-15') &&
+                      <RecentDataTable
+                        items={format(['raingauge'], vsn)}
+                        className="hover-rain"
+                        inactive={inactive.some(name => /rpi|RG-15|/i.test(name))}
+                      />
+                    }
+                    {hasSensor(manifest, 'ES-642') &&
+                      <RecentDataTable
+                        items={format(['es642AirQuality'], vsn)}
+                        inactive={inactive.some(name => /ES-642/i.test(name))}
+                      />
+                    }
+                  </div>
                 </div>
-              </div>
+              </>
             }
             {!hasSensor(manifest, COMMON_SENSORS) &&
               <p className="muted">

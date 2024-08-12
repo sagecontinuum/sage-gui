@@ -97,3 +97,9 @@ export function isOldData(timestamp, grain = 'hours', amount = 2) {
   return date < d
 }
 
+
+export function prettyList(l: string[]) {
+  return l.length
+    ? `${l.slice(0, -1).join(', ')} and ${l.slice(-1)}`
+    : l[0]
+}
