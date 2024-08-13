@@ -395,7 +395,6 @@ export default function NodeView(props: Props) {
     const p2 = BK.getManifest(vsn)
       .then(data => {
         setManifest(data)
-        console.log(getInActive(data))
         setInactive(getInActive(data))
 
         const id = data.name

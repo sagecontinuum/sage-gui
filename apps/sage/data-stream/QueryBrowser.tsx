@@ -203,27 +203,25 @@ function getAppMenus() {
 }
 
 
-async function getFilterMenus({plugin, task}) {
-  const prom1 = BH.getData({
+async function getFilterMenus({plugin, task, name}, siteIDs) {
+  const data = await BH.getData({
     start: `-1d`,
     tail: 1,
     filter: {
       ...(plugin ? {plugin} : {}),
-      ...(task ? {task} : {})
+      ...(task ? {task} : {}),
+      ...(name ? {name} : {})
     }
   })
 
-  const prom2 = BK.getSiteIDs()
-  const [data, siteIDs] = await Promise.all([prom1, prom2])
-
-  return [{
+  return {
     nodes: getUniqueNodeOpts(data.map(o => o.meta.vsn), siteIDs),
     names: getUniqueOpts(data.map(o => o.name)),
     sensors: getUniqueOpts(data.map(o => o.meta.sensor)),
     ...(plugin ? {} : {
       tasks: getUniqueOpts(data.map(o => o.meta.task))
     })
-  }, siteIDs]
+  }
 }
 
 
@@ -422,14 +420,13 @@ export default function QueryBrowser() {
 
   // update filter menus whenever app or task changes
   useEffect(() => {
-    if (!app) return
+    if (!siteIDs || (!app && !task)) return
 
-    getFilterMenus({plugin: app, task})
-      .then(([menuItems, siteIDs]) => {
+    getFilterMenus({plugin: app, task, name: null}, siteIDs)
+      .then(menuItems => {
         setMenus(prev => ({...prev, ...menuItems}))
-        setSiteIDs(siteIDs)
       })
-  }, [app, task])
+  }, [app, task, siteIDs])
 
 
   // show/hide sensor column if needed
@@ -462,13 +459,18 @@ export default function QueryBrowser() {
     }
 
     function fetchFilterMenus() {
-      if (!plugin && !task)
+      if (!plugin && !task && !name) {
+        // don't bother fetching filter menus if there's no filter at all
         return
+      }
 
-      getFilterMenus({plugin, task})
-        .then((menuItems) => {
-          setMenus(prev => ({...prev, ...menuItems}))
-        })
+      BK.getSiteIDs().then(siteIDs => {
+        setSiteIDs(siteIDs)
+        getFilterMenus({plugin, task, name}, siteIDs)
+          .then(menuItems => {
+            setMenus(prev => ({...prev, ...menuItems}))
+          })
+      })
     }
 
     function fetchData() {
@@ -494,15 +496,11 @@ export default function QueryBrowser() {
         .then((data) => {
           data = (data || [])
 
-          // simple charts for plugin-based or ontology listing
-          if (
-            ['apps', 'names'].includes(type)
+          // simple charts for plugin-based or by-name listings
+          const showChart = ['apps', 'names'].includes(type)
             && node && !isMediaApp(app) && data.length > 0
-          ) {
-            setChart(data)
-          } else {
-            setChart(null)
-          }
+
+          setChart(showChart ? data : null)
 
           // limit amount of data for table
           const total = data.length
