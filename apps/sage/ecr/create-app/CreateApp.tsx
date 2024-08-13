@@ -63,7 +63,7 @@ const invalidCommit = (gitCommit: string) =>
   gitCommit && gitCommit.length != 40
 
 
-const invalidCommitMsg = 'Invalid Git commit hash.  String must be 40 chars long.'
+// const invalidCommitMsg = 'Invalid Git commit hash.  String must be 40 chars long.'
 
 
 const initialState = {
@@ -214,6 +214,7 @@ export default function CreateApp() {
     fetchSageConfig(tagObj.id)
   }
 
+  /*
   const onGitCommitChange = (evt) => {
     if (invalidCommit(gitCommit)) {
       setError(invalidCommitMsg)
@@ -222,6 +223,7 @@ export default function CreateApp() {
     const hash = evt.target.value
     setGitCommit(hash)
   }
+  */
 
 
   const sanitizeForm = (obj) => {
@@ -330,7 +332,7 @@ export default function CreateApp() {
           </div>
 
 
-          {isValid &&
+          {/* isValid &&
             <div className="flex items-center gap">
               <TextField
                 label="Commit Hash (optional) *"
@@ -345,7 +347,7 @@ export default function CreateApp() {
                 helperText={invalidCommit(gitCommit) ? invalidCommitMsg : ''}
               />
             </div>
-          }
+          */}
         </StepForm>
 
 
