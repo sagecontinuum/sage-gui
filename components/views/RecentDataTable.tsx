@@ -28,6 +28,16 @@ const getClassName = (timestamp, inactive) =>
     (isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap')
 
 
+const renderValue = (value, format) => {
+  if (value == 'loading')
+    return <span className="muted">loading...</span>
+  else if (value != 'loading' && format)
+    return format(value as number)
+  else if (value == null)
+    return <span className="muted">Not available</span>
+  return value
+}
+
 
 type Props = {
   items: {
@@ -184,15 +194,7 @@ export default memo(function RecentDataTable(props: Props) {
                     {!timestamp && '-'}
                   </td>
                   <td>
-                    {value == 'loading' &&
-                      <span className="muted">loading...</span>
-                    }
-                    {(value && value != 'loading' && format)
-                      ? format(value as number) : (value != 'loading' && value)
-                    }
-                    {value == null &&
-                      <span className="muted">Not available</span>
-                    }
+                    {renderValue(value, format)}
                   </td>
                   {!showSparkline &&
                     <td>
