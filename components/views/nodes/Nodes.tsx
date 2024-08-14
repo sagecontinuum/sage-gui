@@ -26,7 +26,7 @@ import Map from '/components/Map'
 import QueryViewer from '/components/QueryViewer'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { queryData } from '/components/data/queryData'
-import useIsSuper from '/components/hooks/useIsSuper'
+import { useIsSuper } from '/components/auth/PermissionProvider'
 
 import * as BK from '/components/apis/beekeeper'
 import * as BH from '/components/apis/beehive'

@@ -28,6 +28,7 @@ import RequireAuth from '/components/auth/RequireAuth'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
+import { PermissionProvider } from '/components/auth/PermissionProvider'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
 import '/assets/styles.scss'
@@ -96,39 +97,41 @@ export default function App() {
             hasSignIn
           />
 
-          <Container>
-            <ProgressProvider>
-              <Routes>
-                <Route path="/" element={<Navigate to="nodes" replace />} />
+          <PermissionProvider>
+            <Container>
+              <ProgressProvider>
+                <Routes>
+                  <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                <Route path='/' element={<MetaRoute />}>
-                  <Route path="/" element={<NodeTabs />}>
-                    <Route path="nodes" element={<Nodes />} />
-                    <Route path="all-nodes" element={<Nodes />} />
-                    <Route path="sensors" element={<SensorList {...{project, vsns}} />} />
+                  <Route path='/' element={<MetaRoute />}>
+                    <Route path="/" element={<NodeTabs />}>
+                      <Route path="nodes" element={<Nodes />} />
+                      <Route path="all-nodes" element={<Nodes />} />
+                      <Route path="sensors" element={<SensorList {...{project, vsns}} />} />
+                    </Route>
+
+                    <Route path="node/:vsn" element={<Node />} />
+                    <Route path="sensors/:name" element={<Sensor />} />
+
+                    <Route path="data" element={<Data {...{project, vsns}}  />} />
+                    <Route path="data/ontology/:name" element={<Ontology />} />
+                    <Route path="data/product/:name" element={<DataProduct />} />
+                    <Route path="query-browser" element={<QueryBrowser />} />
+
+                    <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                      <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                      <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                      <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                      <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                    </Route>
+
+                    <Route path="login" element={<TestSignIn />} />
+                    <Route path="*" element={<NotFound />} />
                   </Route>
-
-                  <Route path="node/:vsn" element={<Node />} />
-                  <Route path="sensors/:name" element={<Sensor />} />
-
-                  <Route path="data" element={<Data {...{project, vsns}}  />} />
-                  <Route path="data/ontology/:name" element={<Ontology />} />
-                  <Route path="data/product/:name" element={<DataProduct />} />
-                  <Route path="query-browser" element={<QueryBrowser />} />
-
-                  <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
-                    <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
-                    <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                    <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                    <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
-                  </Route>
-
-                  <Route path="login" element={<TestSignIn />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </ProgressProvider>
-          </Container>
+                </Routes>
+              </ProgressProvider>
+            </Container>
+          </PermissionProvider>
         </BrowserRouter>
       </ThemeProvider>
     </StyledEngineProvider>

@@ -3,13 +3,7 @@ import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
-import { Alert, Button, Tooltip, IconButton } from '@mui/material'
-import LaunchIcon from '@mui/icons-material/LaunchRounded'
-import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
-import InfoIcon from '@mui/icons-material/InfoOutlined'
-import Grid from '@mui/material/Unstable_Grid2'
-
-import wsnode from 'url:/assets/wsn-closed.png'
+import { Alert, Tooltip } from '@mui/material'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
@@ -20,7 +14,6 @@ import { CardViewStyle, Card } from '/components/layout/Layout'
 import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
-import MetaTable from '/components/table/MetaTable'
 import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
@@ -30,17 +23,12 @@ import { prettyList } from '/components/utils/units'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
-import Hotspot from './Hotspot'
-import ManifestTabs from './ManifestTabs'
-import GpsClipboard from './GpsClipboard'
 
-import * as nodeFormatters from '/components/views/nodes/nodeFormatters'
-import AdminNodeHealth from './AdminNodeHealth'
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
 // import KeyTable from './lorawandevice/collapsible'
-import {deviceCols, hardwareCols} from './lorawandevice/columns'
+import { deviceCols } from './lorawandevice/columns'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
 // todo(nc): promote/refactor into component lib
@@ -50,52 +38,16 @@ import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
-import { startCase } from 'lodash'
 
 import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
-import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
+import NodeOverview from './NodeOverview'
+import NodeGraphic from './NodeGraphic'
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
 const TL_LABEL_WIDTH = 175 // default timeline label width
 const TAIL_DAYS = '-7d'
-
-
-const labelDict = {
-  gps: 'GPS',
-  bme280: 'T·P·H',
-  bme680: 'T·P·H·G',
-  aqt: 'AQT',
-  wxt: 'WXT',
-  nxcore: 'NX',
-  nxagent: 'NXagent',
-  rpi: 'RPi',
-  sbcore: 'Sage Blade'
-}
-
-
-const getConfigTable = (o) => {
-  const {description, datasheet, ...rest} = o
-  return (
-    <div style={{width: '300px'}}>
-      <MetaTable
-        title="Configuration Details"
-        rows={Object.keys(rest).map(k => ({id: k, label: k}))}
-        data={rest}
-      />
-    </div>
-  )
-}
-
-const sanitizeLabel = (obj: {name: string}) => {
-  const {name} = obj
-  return (
-    <>
-      {name in labelDict ? labelDict[name] : startCase(name.replace(/-|_/, ' '))}
-    </>
-  )
-}
 
 
 // todo(nc): refactor more into a general config
@@ -115,133 +67,7 @@ const getStartTime = (str) =>
     subDays(new Date(), str.replace(/-|d/g, ''))
 
 
-const metaRows1 = [{
-  id: 'project',
-  format: (val) => <a href={`/nodes?project="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
-}, {
-  id: 'focus',
-  format: (val) => <a href={`/nodes?focus="${encodeURIComponent(val)}"`} target="_blank" rel="noreferrer">{val}</a>
-}, {
-  id: 'cityAndState',
-  label: 'City & State',
-  format: (_, obj) =>
-    <>
-      <a href={`/nodes?city="${encodeURIComponent(obj.city)}"`} target="_blank" rel="noreferrer">
-        {obj.cityStr}
-      </a>,{' '}
-      <a href={`/nodes?state="${encodeURIComponent(obj.state)}"`} target="_blank" rel="noreferrer">
-        {obj.state}
-      </a>
-    </>
-},
-/* todo: add, if needed
-{
-  id: 'build_date',
-  label: 'Built'
-},
-*/
-{
-  id: 'registration_event',
-  label: 'Registration',
-  format: (val) => {
-    if (val === null)
-      return <span className="muted">Not found</span>
-    else if (!val)
-      return <span className="muted">loading...</span>
-    else
-      return new Date(val).toLocaleString()
-  }
-},
-{
-  id: 'commission_date', // todo: update db
-  label: 'Commissioned'
-}]
-
-
-type NodeDetailsProps = {
-  data: BK.SensorHardware[] | BK.ComputeHardware[]
-  linkPath?: '/sensors'  // just sensors for now
-}
-
-function NodeDetails(props: NodeDetailsProps) {
-  const {data, linkPath} = props
-
-  const [details, setDetails] = useState<typeof data[0]>(null)
-
-  const handleCloseDetails = () => setDetails(null)
-
-  return (
-    <Grid container>
-      {data.map((o, i) =>
-        <Grid xs={3} key={i}>
-          <NodeInfo>
-            <small className="muted font-bold">
-              {sanitizeLabel(o)}
-
-              <Tooltip title="Show config">
-                <IconButton onClick={() => setDetails(o)} size="small">
-                  <InfoIcon />
-                </IconButton>
-              </Tooltip>
-            </small>
-            <div>
-              {linkPath ?
-                <Link to={`${linkPath}/${o.hw_model}`}>{o.hw_model}</Link> :
-                o.hw_model
-              }
-            </div>
-          </NodeInfo>
-        </Grid>
-      )}
-
-      {details &&
-        <ConfirmationDialog
-          title={details.hw_model}
-          content={getConfigTable(details)}
-          onClose={handleCloseDetails}
-          onConfirm={handleCloseDetails}
-          maxWidth="xl"
-        />
-      }
-    </Grid>
-  )
-
-}
-
-const sensorOverview = [{
-  id: 'cameras',
-  format: (val, obj) => {
-    const cameras = obj.sensors
-      .filter(o => o.name.match(/camera/gi))
-
-    if (!obj.sensors.length) {
-      return <span className="muted">No sensors configured</span>
-    }
-
-    return <NodeDetails data={cameras} linkPath="/sensors" />
-  }
-}, {
-  id: 'sensors',
-  label: 'Sensors',
-  format: (val, obj) => {
-    const sensors = obj.sensors
-      .filter(o => !o.name.match(/camera/gi))
-
-    return <NodeDetails data={sensors} linkPath="/sensors" />
-  }
-}]
-
-const computeOverview = [{
-  id: 'computes',
-  format: (val, obj) => {
-    const {computes} = obj
-
-    return <NodeDetails data={computes} />
-  },
-}]
-
-
-const hasShield = (computes: BK.FlattenedManifest['computes']) =>
+export const hasShield = (computes: BK.FlattenedManifest['computes']) =>
   !!computes.some(o => o.zone == 'shield')
 
 // todo(nc): solution assumes compute/sensor names are uniqu
@@ -251,86 +77,6 @@ const getInActive = (data: BK.FlattenedManifest) => [
 ]
 
 
-const hardwareMeta = [{
-  id: 'all',
-  format: (val, obj) => {
-    const {modem, computes} = obj
-
-    return (
-      <Grid container>
-        <Grid xs={3}>
-          <small className="muted font-bold">Stevenson Shield</small>
-          <div>{hasShield(computes) ? 'yes' : 'no'}</div>
-        </Grid>
-
-        <Grid xs={3}>
-          {nodeFormatters.modem(modem, obj)}
-        </Grid>
-
-        <Grid xs={3}>
-          {nodeFormatters.modemSim(modem, obj)}
-        </Grid>
-      </Grid>
-    )
-  }
-}]
-
-/**
- * column config for sensor/compute/peripherals table details
- */
-const sensorCols = [{
-  id: 'name',
-  label: 'Name'
-}, {
-  id: 'hw_model',
-  label: 'Model',
-  format: (val) =>
-    <Link to={`/sensors/${val}`}>
-      {val}
-    </Link>
-}, {
-  id: 'manufacturer',
-  label: 'Manufacturer'
-}, {
-  id: 'datasheet',
-  label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
-}]
-
-
-const computeCols = [{
-  id: 'name',
-  label: 'Name'
-}, {
-  id: 'hw_model',
-  label: 'Model'
-}, {
-  id: 'manufacturer',
-  label: 'Manufacturer'
-}, /* {
-  id: 'serial_no',
-  label: 'Serial No.'
-}*/ {
-  id: 'datasheet',
-  label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
-}]
-
-
-const resourceCols = [{
-  id: 'name',
-  label: 'Name'
-}, {
-  id: 'hw_model',
-  label: 'Model'
-}, {
-  id: 'manufacturer',
-  label: 'Manufacturer'
-}, {
-  id: 'datasheet',
-  label: 'Datasheet',
-  format: (val) => val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-'
-}]
 
 type Props = {
   admin?: boolean
@@ -342,7 +88,6 @@ export default function NodeView(props: Props) {
 
   const [params] = useSearchParams()
   const tab = params.get('tab') || 'overview'
-
 
   const { loading, setLoading } = useProgress()
 
@@ -357,8 +102,6 @@ export default function NodeView(props: Props) {
 
   const [error, setError] = useState(null)
   const [vsnNotFound, setVsnNotFound] = useState(null)
-
-  const [hover, setHover] = useState<string>('')
 
   // todo(nc): refactor into provider?
   const [{data, rawData}, dispatch] = useReducer(
@@ -450,23 +193,6 @@ export default function NodeView(props: Props) {
     })()
   }, [manifest])
 
-  const onOver = (id) => {
-    const cls = `.hover-${id}`
-    const ele: HTMLElement = document.querySelector(cls)
-    if (!ele) return
-
-    ele.style.outline = '3px solid #1a779c'
-    setHover(cls)
-  }
-
-  const onOut = () => {
-    if (!hover) return
-
-    const ele: HTMLElement = document.querySelector(hover)
-    ele.style.outline = 'none'
-  }
-
-  const mouse = {onMouseOver: onOver, onMouseOut: onOut}
 
   const handleOptionChange = (name, val) => {
     setError(null)
@@ -497,8 +223,6 @@ export default function NodeView(props: Props) {
     }
   }
 
-
-  const { type, top_camera, bottom_camera, left_camera, right_camera } = node || {}
   const shield = manifest?.computes ? hasShield(manifest.computes) : false
 
   if (vsnNotFound)
@@ -514,166 +238,16 @@ export default function NodeView(props: Props) {
 
       <div className="flex">
         <LeftSide className="flex column gap">
-          <Card>
-            <div className="flex items-center justify-between">
-              <h1 className="no-margin">
-                {type == 'WSN' ?
-                  'Wild Sage Node' : type
-                } {node && nodeFormatters.vsnToDisplayName(vsn, node)}
-              </h1>
-
-              <Tooltip
-                placement="top"
-                title={
-                  admin ? 'Node health' : <>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>
-                }
-              >
-                <Button
-                  href={node ? `${config.adminURL}/node/${vsn}?tab=health` : ''}
-                  {...(admin ? {} : {target: '_blank'})}
-                >
-                  <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
-                    {status}
-                  </span>
-                </Button>
-              </Tooltip>
-            </div>
-          </Card>
-
-          <Card noPad style={{marginBotton: 0}}>
-            <ManifestTabs
-              counts={{
-                'Sensors': manifest?.sensors.length,
-                'Computes': manifest?.computes.length,
-                'Peripherals': manifest?.resources.length,
-                'LoRaWAN Devices': manifest?.lorawanconnections.length
-              }}
-              admin={admin}
-              lorawan= {manifest?.sensors.some(item => item.capabilities.includes('lorawan'))}
-            />
-
-            {tab == 'sensors' && manifest &&
-              <TableContainer>
-                <Table
-                  primaryKey='name'
-                  columns={sensorCols}
-                  rows={manifest.sensors}
-                  enableSorting
-                />
-              </TableContainer>
-            }
-
-            {tab == 'computes' && manifest &&
-              <TableContainer>
-                <Table
-                  primaryKey='name'
-                  columns={computeCols}
-                  rows={manifest.computes}
-                  enableSorting
-                />
-              </TableContainer>
-            }
-
-            {tab == 'lorawandevices' && manifest &&
-              <TableContainer>
-                <Table
-                  primaryKey='deveui'
-                  columns={hardwareCols}
-                  rows={loraDataWithRssi}
-                  enableSorting
-                />
-              </TableContainer>
-            }
-
-            {tab == 'peripherals' && manifest &&
-              <TableContainer>
-                <Table
-                  primaryKey='name'
-                  columns={resourceCols}
-                  rows={manifest.resources}
-                  enableSorting
-                />
-              </TableContainer>
-            }
-          </Card>
-
-          {tab == 'overview' &&
-            <div className="flex gap">
-              <Card noPad className="meta-left">
-                <MetaTable
-                  title="Overview"
-                  rows={[
-                    ...metaRows1,
-                    {
-                      id: 'gps',
-                      label: <>GPS ({node?.hasStaticGPS ? 'static' : 'from stream'})</>,
-                      format: () =>
-                        <>
-                          {node?.hasStaticGPS && !liveGPS &&
-                            <GpsClipboard data={{lat: node.gps_lat, lng: node.gps_lon, hasStaticGPS: true}} />
-                          }
-                          {node?.hasStaticGPS && liveGPS &&
-                            <GpsClipboard data={{lat: node.gps_lat, lng: node.gps_lon, hasStaticGPS: true, hasLiveGPS: true}} />
-                          }
-                          {!node?.hasStaticGPS && liveGPS &&
-                            <>
-                              <GpsClipboard data={{lat: liveGPS.lat, lng: liveGPS.lon, hasStaticGPS: false, hasLiveGPS: true}} /><br/>
-                              <Tooltip title="Last available GPS timestamp">
-                                <small className="muted">
-                                  {new Date(liveGPS.timestamp).toLocaleString()}
-                                </small>
-                              </Tooltip>
-                            </>
-                          }
-                          {!node?.hasStaticGPS && !liveGPS && !loading &&
-                            <span className="muted">not available</span>
-                          }
-                          {!node?.hasStaticGPS && !liveGPS && loading &&
-                            <span className="muted">loading...</span>
-                          }
-                        </>
-                    }
-                  ]}
-                  data={{...node, ...bkMeta}}
-                />
-              </Card>
-
-              <Card noPad className="meta-right">
-                {manifest &&
-                  <>
-                    <div className="summary-table">
-                      <MetaTable
-                        title="Sensors"
-                        rows={sensorOverview}
-                        data={manifest}
-                      />
-                    </div>
-
-                    <div className="summary-table">
-                      <MetaTable
-                        title="Computes"
-                        rows={computeOverview}
-                        data={manifest}
-                      />
-                    </div>
-                    {type == 'WSN' &&
-                      <div className="summary-table">
-                        <MetaTable
-                          title="Hardware"
-                          rows={hardwareMeta}
-                          data={{...node, ...manifest}}
-                        />
-                      </div>
-                    }
-                  </>
-                }
-              </Card>
-            </div>
-          }
-
-          {admin && tab == 'health' &&
-            <AdminNodeHealth />
-          }
+          <NodeOverview
+            node={node}
+            manifest={manifest}
+            bkMeta={bkMeta}
+            loraDataWithRssi={loraDataWithRssi}
+            tab={tab}
+            admin={admin}
+            liveGPS={liveGPS}
+            loading={loading}
+          />
 
           {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&
             <Card>
@@ -758,7 +332,7 @@ export default function NodeView(props: Props) {
                     <RecentDataTable
                       items={format(['temp', 'humidity', 'pressure'], vsn)}
                       className="hover-bme"
-                      inactive={inactive.some(name => /rpi|bme680/i.test(name))}
+                      inactive={inactive.some(name => /BME680/i.test(name))}
                     />
                   }
 
@@ -767,7 +341,7 @@ export default function NodeView(props: Props) {
                       <RecentDataTable
                         items={format(['raingauge'], vsn)}
                         className="hover-rain"
-                        inactive={inactive.some(name => /rpi|RG-15|/i.test(name))}
+                        inactive={inactive.some(name => /RG-15|/i.test(name))}
                       />
                     }
                     {hasSensor(manifest, 'ES-642') &&
@@ -833,25 +407,7 @@ export default function NodeView(props: Props) {
             }
           </Card>
 
-          {vsn?.charAt(0) == 'W' ?
-            <WSNView>
-              <img src={wsnode} width={WSN_VIEW_WIDTH} />
-              <VSN>{vsn}</VSN>
-              {node &&
-                <>
-                  {shield         && <Hotspot top="62%" left="10%" label="ML1-WS" title="Microphone" pos="left" {...mouse} hoverid="audio" />}
-                  {shield         && <Hotspot top="40%" left="10%" label="BME680" title="Temp, humidity, pressure, and gas sesnor" pos="left" {...mouse} hoverid="bme" />}
-                  {                  <Hotspot top="15%" left="68%" label="RG-15" title="Raingauge" pos="right" {...mouse} hoverid="rain" />}
-                  {top_camera     && <Hotspot top="7%"  left="61%" label={top_camera} title="Top camera" pos="left" {...mouse} hoverid="top-camera" />}
-                  {bottom_camera  && <Hotspot top="87%" left="61%" label={bottom_camera} title="Bottom camera" pos="bottom" {...mouse} hoverid="bottom-camera" />}
-                  {left_camera    && <Hotspot top="49%" left="90%" label={left_camera} title="Left camera" {...mouse} hoverid="left-camera" />}
-                  {right_camera   && <Hotspot top="49%" left="8%"  label={right_camera} title="Right camera" {...mouse} hoverid="right-camera" />}
-                </>
-              }
-            </WSNView>
-            :
-            <div style={{width: WSN_VIEW_WIDTH}} />
-          }
+          <NodeGraphic node={node} shield={shield} />
         </RightSide>
       </div>
     </Root>
@@ -912,54 +468,10 @@ const RightSide = styled.div`
   margin: 20px 20px 20px 15px;
 `
 
-const WSN_VIEW_WIDTH = 400
-
-const WSNView = styled.div`
-  position: sticky;
-  top: 60px;
-
-  img {
-    padding: 50px;
-    -webkit-filter: drop-shadow(2px 2px 2px #ccc);
-    filter: drop-shadow(2px 2px 2px #ccc);
-  }
-`
-
-const VSN = styled.div`
-  position: absolute;
-  width: 33%;
-  height: 12%;
-  top: 51%;
-  left: 48%;
-  font-size: 3.5em;
-  padding: 0;
-  background: #b3b3b3;
-`
-
-const TableContainer = styled.div`
+export const TableContainer = styled.div`
   padding: 0 1rem 1rem 1rem;
 `
 
-
-const NodeInfo = styled.div`
-  position: relative;
-
-  & .MuiIconButton-root  {
-    visibility: hidden;
-    position: absolute;
-    top: -2px;
-    margin-left: 5px;
-    .MuiSvgIcon-root { font-size: 1rem;}
-  }
-
-  &:hover .MuiIconButton-root  {
-    visibility: visible;
-  }
-
-  &:hover .MuiIconButton-root:hover {
-    color: #222;
-  }
-`
 
 const HelpIcon = styled(QuestionMark)`
   width: 15px;

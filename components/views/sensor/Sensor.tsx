@@ -16,16 +16,16 @@ import { columns } from './SensorList'
 
 import * as BK from '/components/apis/beekeeper'
 import { marked } from 'marked'
-import useIsSuper from '/components/hooks/useIsSuper'
+import { useIsSuper } from '/components/auth/PermissionProvider'
 
 import { flatten, uniq } from 'lodash'
 
 
 const fieldSpec: Field[] = [
   {id: 'hardware', label: 'Hardware'},
-  {id: 'hw_model', label: 'Model', 
-    helpText: 'The model number of your sensor, without the manufacturer name.'}, 
-  /* hide capabilities until updates are supported 
+  {id: 'hw_model', label: 'Model',
+    helpText: 'The model number of your sensor, without the manufacturer name.'},
+  /* hide capabilities until updates are supported
     {id: 'capabilities', label: 'Capabilities',  multiple: true,
       helpText: 'Search or type a new capability', placeholder: 'Search...'}, */
   {id: 'hw_version', label: 'Hardware Version'},
@@ -78,7 +78,7 @@ export default function Sensor() {
         const options = uniq(flatList)
 
         const i = fields.findIndex(o => o.id == 'capabilities')
-        if (i < 0) 
+        if (i < 0)
           return
 
         fields.splice(i, 1, {...fields[i], options})
@@ -146,7 +146,7 @@ export default function Sensor() {
             </ul>
           }
         </Sidebar>
-      } 
+      }
 
       <Main className="flex gap">
         <Details className="flex column gap">
@@ -166,7 +166,7 @@ export default function Sensor() {
                 startIcon={<CancelIcon/>}
               >
                 Cancel
-              </Button> 
+              </Button>
             }
           </Card>
 
@@ -190,9 +190,9 @@ export default function Sensor() {
                     startIcon={<CancelIcon/>}
                   >
                     Cancel
-                  </Button> 
+                  </Button>
                 </div>
-              }            
+              }
             </Card>
           }
 
@@ -222,7 +222,7 @@ export default function Sensor() {
 
         {error &&
           <ErrorMsg>{error.message}</ErrorMsg>
-        }        
+        }
       </Main>
     </Root>
   )

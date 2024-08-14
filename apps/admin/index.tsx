@@ -20,10 +20,10 @@ import DescriptionTests from './views/tests/DescriptionTests'
 
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
-import LoginIcon from '@mui/icons-material/LoginRounded'
 
 import Timeline from './fiddle/TimelineFiddle'
 
+import { PermissionProvider } from '/components/auth/PermissionProvider'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 
 import theme from '/components/theme'
@@ -88,43 +88,45 @@ export default function App() {
             hasPortalLink
           />
 
-          <Container>
-            <ProgressProvider>
-              <Routes>
-                <Route path='/' element={<MetaRoute />}>
-                  <Route element={<RequireAuth />}>
-                    <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
+          <PermissionProvider>
+            <Container>
+              <ProgressProvider>
+                <Routes>
+                  <Route path='/' element={<MetaRoute />}>
+                    <Route element={<RequireAuth />}>
+                      <Route path="/" element={<Navigate to="nodes?phase=deployed" replace />} />
 
-                    <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
-                      <Route path="nodes" element={<Status />} />
-                      <Route path="tests" element={<Tests />} />
+                      <Route path="/" element={<NodeTabs includeSensors={false} isAdmin />}>
+                        <Route path="nodes" element={<Status />} />
+                        <Route path="tests" element={<Tests />} />
+                      </Route>
+                      <Route path="/node/:vsn" element={<Node admin />} />
+
+                      {/* <Route path="tests/audio" element={<AudioTests />} />*/}
+                      <Route path="tests/images" element={<ImageTests />} />
+                      <Route path="ai/descriptions" element={<DescriptionTests />} />
+
+                      <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
+                      <Route path="surya/:phase" element={<SuryaStatus />} />
+
+                      <Route path="fiddle/timeline" element={<Timeline />} />
+
+                      <Route path="*" element={<NotFound />} />
                     </Route>
-                    <Route path="/node/:vsn" element={<Node admin />} />
 
-                    {/* <Route path="tests/audio" element={<AudioTests />} />*/}
-                    <Route path="tests/images" element={<ImageTests />} />
-                    <Route path="ai/descriptions" element={<DescriptionTests />} />
+                    <Route path="account" element={<Account />}>
+                      <Route path="profile" element={<UserProfile />} />
+                      <Route path="nodes" element={<MyNodes />} />
+                      <Route path="dev-devices" element={<Devices />} />
+                      <Route path="access" element={<DevAccess />} />
+                    </Route>
 
-                    <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
-                    <Route path="surya/:phase" element={<SuryaStatus />} />
-
-                    <Route path="fiddle/timeline" element={<Timeline />} />
-
-                    <Route path="*" element={<NotFound />} />
+                    <Route path="login" element={<TestSignIn />} />
                   </Route>
-
-                  <Route path="account" element={<Account />}>
-                    <Route path="profile" element={<UserProfile />} />
-                    <Route path="nodes" element={<MyNodes />} />
-                    <Route path="dev-devices" element={<Devices />} />
-                    <Route path="access" element={<DevAccess />} />
-                  </Route>
-
-                  <Route path="login" element={<TestSignIn />} />
-                </Route>
-              </Routes>
-            </ProgressProvider>
-          </Container>
+                </Routes>
+              </ProgressProvider>
+            </Container>
+          </PermissionProvider>
         </BrowserRouter>
       </ThemeProvider>
     </StyledEngineProvider>

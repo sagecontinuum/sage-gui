@@ -48,6 +48,7 @@ import RequireAuth from '/components/auth/RequireAuth'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
+import { PermissionProvider } from '/components/auth/PermissionProvider'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
 import { SnackbarProvider } from 'notistack'
 
@@ -161,62 +162,64 @@ export default function Sage() {
         <BrowserRouter>
           <NavBar menu={<NavMenu />} hasSignIn hasDocsLink />
 
-          <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
-            <Container>
-              <ProgressProvider>
-                <Routes>
-                  <Route path="/" element={<Navigate to="nodes" replace />} />
+          <PermissionProvider>
+            <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
+              <Container>
+                <ProgressProvider>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                  <Route path='/' element={<MetaRoute />}>
+                    <Route path='/' element={<MetaRoute />}>
 
-                    <Route path="/" element={<NodeTabs />}>
-                      <Route path="nodes" element={<Nodes />} />
-                      <Route path="all-nodes" element={<Nodes />} />
-                      <Route path="sensors" element={<SensorList project={project} />} />
+                      <Route path="/" element={<NodeTabs />}>
+                        <Route path="nodes" element={<Nodes />} />
+                        <Route path="all-nodes" element={<Nodes />} />
+                        <Route path="sensors" element={<SensorList project={project} />} />
+                      </Route>
+                      <Route path="sensors/:name" element={<Sensor />} />
+
+                      <Route path="node/:vsn" element={<Node />} />
+
+                      <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
+                      <Route path="apps" element={<Apps />}>
+                        <Route path="explore" element={<AppList />} />
+                        <Route path="app/*" element={<App />} />
+                        <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
+                        <Route  path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
+                      </Route>
+
+                      <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
+                      <Route path="jobs" element={<JobStatus />}>
+                        <Route path=":view" element={<JobStatus />} />
+                      </Route>
+
+                      <Route path="create-job" element={
+                        <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
+                      }/>
+
+                      <Route path="data" element={<Data project={project} />} />
+                      <Route path="data/ontology/:name" element={<Ontology />} />
+                      <Route path="data/product/:name" element={<DataProduct />} />
+                      <Route path="query-browser" element={<QueryBrowser />} />
+
+                      <Route path="data-commons-demo" element={<DataProductSearch />} />
+
+                      <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                        <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                        <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                        <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                        <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                      </Route>
+
+                      <Route path="login" element={<TestSignIn />} />
+                      <Route path="*" element={<NotFound />} />
+
                     </Route>
-                    <Route path="sensors/:name" element={<Sensor />} />
-
-                    <Route path="node/:vsn" element={<Node />} />
-
-                    <Route path="/apps" element={<Navigate to="/apps/explore" replace />} />
-                    <Route path="apps" element={<Apps />}>
-                      <Route path="explore" element={<AppList />} />
-                      <Route path="app/*" element={<App />} />
-                      <Route path="my-apps" element={<RequireAuth><AppList /></RequireAuth>} />
-                      <Route  path="create-app" element={<RequireAuth><CreateApp /></RequireAuth>} />
-                    </Route>
-
-                    <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
-                    <Route path="jobs" element={<JobStatus />}>
-                      <Route path=":view" element={<JobStatus />} />
-                    </Route>
-
-                    <Route path="create-job" element={
-                      <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
-                    }/>
-
-                    <Route path="data" element={<Data project={project} />} />
-                    <Route path="data/ontology/:name" element={<Ontology />} />
-                    <Route path="data/product/:name" element={<DataProduct />} />
-                    <Route path="query-browser" element={<QueryBrowser />} />
-
-                    <Route path="data-commons-demo" element={<DataProductSearch />} />
-
-                    <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
-                      <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
-                      <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                      <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                      <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
-                    </Route>
-
-                    <Route path="login" element={<TestSignIn />} />
-                    <Route path="*" element={<NotFound />} />
-
-                  </Route>
-                </Routes>
-              </ProgressProvider>
-            </Container>
-          </SnackbarProvider>
+                  </Routes>
+                </ProgressProvider>
+              </Container>
+            </SnackbarProvider>
+          </PermissionProvider>
         </BrowserRouter>
       </ThemeProvider>
     </StyledEngineProvider>
