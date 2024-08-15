@@ -41,7 +41,7 @@ export function status(val,obj) {
 
   if(obj.expected_uplink_interval_sec === null || obj.expected_uplink_interval_sec === undefined){
     interval_tooltip = 'Expected Interval: Not set'
-    icon = <QuestionIcon className="QuestionIcon status-icon" /> 
+    icon = <QuestionIcon className="QuestionIcon status-icon" />
   } else {
     const expectedLastSeenTime = new Date(currentTime - obj.expected_uplink_interval_sec * 1000)
 
@@ -110,7 +110,7 @@ export function power(val) {
 export function LabelWithTooltip(label: string, tooltip: ReactNode) {
   return (
     <Tooltip
-      title={tooltip}
+      title={<TooltipTitle>{tooltip}</TooltipTitle>}
       placement="bottom"
     >
       <span>{label}<InfoIcon /></span>
@@ -118,10 +118,22 @@ export function LabelWithTooltip(label: string, tooltip: ReactNode) {
   )
 }
 
-export function datasheet(val) {
-  return (val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-')
-}
+const TooltipTitle = styled.div`
+  a {
+    color: #4ed6ff;
+    font-weight: bold;
+  }
+  a:hover {
+    color: #f2f2f2;
+    text-decoration: underline
+  }
+`
 
 const InfoIcon = styled(InfoOutlinedIcon)`
   width: 15px;
 `
+
+
+export function datasheet(val) {
+  return (val ? <a href={val} target="_blank" rel="noreferrer"><DescriptionIcon/></a> : '-')
+}

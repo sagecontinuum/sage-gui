@@ -282,7 +282,7 @@ type Props = {
   node: BK.Node
   manifest: BK.FlattenedManifest
   bkMeta: BK.BKState | {registration_event: null}
-  loraDataWithRssi
+  loraDataWithRssi: BK.LorawanConnection[]
   tab: string
   liveGPS: BH.GPS
   loading: boolean
@@ -356,7 +356,7 @@ export default function NodeOverview(props: Props) {
           </TableContainer>
         }
 
-        {tab == 'lorawandevices' && manifest &&
+        {tab == 'lorawandevices' && loraDataWithRssi &&
           <TableContainer>
             <Table
               primaryKey='deveui'

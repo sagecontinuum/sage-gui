@@ -521,12 +521,12 @@ async function getRssi(vsn: string, devEui: string) : Promise<Record> {
 }
 
 export const fetchDataWithRssi = async (manifest: FlattenedManifest): Promise<LorawanConnection[]> => {
-  const dataWithRssi: LorawanConnection[] = []
-  if (manifest && manifest.lorawanconnections) {
+  const dataWithRssi: LorawanConnection[]= []
+  if (manifest?.lorawanconnections) {
     const dataWithRssiPromises = manifest.lorawanconnections.map(async (row) => {
       const rssiDict = await getRssi(manifest.vsn, row.deveui)
       const rssiValue = rssiDict ? rssiDict['value'] : null
-      return { ...row, rssi: rssiValue } as LorawanConnection
+      return { ...row, rssi: rssiValue, foo: 'bah'}
     })
     const updatedDataWithRssi = await Promise.all(dataWithRssiPromises)
     dataWithRssi.push(...updatedDataWithRssi)

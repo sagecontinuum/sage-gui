@@ -49,13 +49,12 @@ export const deviceCols = [{
   label: formatters.LabelWithTooltip(
     'Margin',
     <span>
-      Indicates the quality of the received signal compared to background noise using the 
-      difference between Max measured 
-      <a 
-        href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#snr" 
-        target="_blank" 
-        rel="noreferrer"> SNR </a>  
-      at the gateway and Min SNR needed to demodulate a message at a specific data rate.
+      Indicates the quality of the received signal compared to background
+      noise using the difference between Max measured <a
+        href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#snr"
+        target="_blank"
+        rel="noreferrer">SNR</a> at
+      the gateway and Min SNR needed to demodulate a message at a specific data rate.
     </span> )
 },
 {
@@ -63,12 +62,11 @@ export const deviceCols = [{
   label: formatters.LabelWithTooltip(
     'Signal Strength',
     <span>
-      Determined by 
-      <a 
-        href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#rssi" 
-        target="_blank" 
-        rel="noreferrer"> RSSI</a>. 
-      Column disabled if signal.rssi values are not being collected. 
+      Determined by <a
+        href="https://www.thethingsnetwork.org/docs/lorawan/rssi-and-snr/#rssi"
+        target="_blank"
+        rel="noreferrer">RSSI</a>.
+      Column disabled if signal.rssi values are not being collected.
     </span> ),
   format: formatters.signal,
   width: '200px'

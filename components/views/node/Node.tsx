@@ -3,7 +3,7 @@ import { useEffect, useState, useReducer } from 'react'
 import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
-import { Alert, Tooltip } from '@mui/material'
+import { Alert } from '@mui/material'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
@@ -123,7 +123,7 @@ export default function NodeView(props: Props) {
   // note: endtime is not currently an option
   const [end] = useState<Date>(endOfHour(new Date()))
 
-  const [loraDataWithRssi, setDataWithRssi] = useState([])
+  const [loraDataWithRssi, setDataWithRssi] = useState<BK.LorawanConnection[]>([])
 
   useEffect(() => {
     setLoading(true)
@@ -253,21 +253,17 @@ export default function NodeView(props: Props) {
             <Card>
               <h2>
                 LoRaWAN
-                <Tooltip title='' placement="left">
-                  <Link to={`${config.docs}/about/architecture#lorawan`}>
-                    <HelpIcon/>
-                  </Link>
-                </Tooltip>
+                <Link to={`${config.docs}/about/architecture#lorawan`}>
+                  <HelpIcon/>
+                </Link>
               </h2>
-              <TableContainer>
-                <Table
-                  primaryKey='deveui'
-                  columns={deviceCols}
-                  rows={loraDataWithRssi}
-                  enableSorting
-                  // collapsible={<KeyTable row={loraDataWithRssi} />}
-                />
-              </TableContainer>
+              <Table
+                primaryKey='deveui'
+                columns={deviceCols}
+                rows={loraDataWithRssi}
+                enableSorting
+                // collapsible={<KeyTable row={loraDataWithRssi} />}
+              />
             </Card>
           }
 

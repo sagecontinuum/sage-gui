@@ -66,8 +66,8 @@ const exampleColumns = [
 export type Column = {
   id: string
   label?: string
-  format?: (any, object) => string | number | JSX.Element | JSX.Element[]
-  dlFormat?: (any, object) => string
+  format?: (val: any, row: object) => string | number | JSX.Element | JSX.Element[]
+  dlFormat?: (val: any, row: object) => string
   hide?: boolean
   width?: string
   type?: 'number'
