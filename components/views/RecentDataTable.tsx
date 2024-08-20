@@ -16,6 +16,7 @@ import SparkLine from '/components/viz/SparkLine'
 import Portal from '/components/PortalLink'
 
 import { subDays } from 'date-fns'
+import { shortUnits } from '/components/measurement.config'
 
 
 type SparkLine = {timestamp: string, value: number}[]
@@ -28,14 +29,14 @@ const getClassName = (timestamp, inactive) =>
     (isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap')
 
 
-const renderValue = (value, format) => {
+const renderValue = (value, format, meta) => {
   if (value == 'loading')
     return <span className="muted">loading...</span>
   else if (value != 'loading' && format)
     return format(value as number)
   else if (value == null)
     return <span className="muted">Not available</span>
-  return value
+  return `${value}${shortUnits[meta.units] || meta.units || ''}`
 }
 
 
@@ -43,7 +44,6 @@ type Props = {
   items: {
     label: string
     query: {
-      node?: string // todo(nc): remove; only allow vsns
       vsn?: string
       name: string
       sensor?: string
@@ -76,7 +76,7 @@ export default memo(function RecentDataTable(props: Props) {
     for (const item of items) {
       const {label, query} = item
 
-      const q = start ? {...query, start} : query
+      const q = start ? {start, ...query} : query
       const p = BH.getRecentRecord(q)
         .then(data => {
           // take latest record for latest value
@@ -164,7 +164,7 @@ export default memo(function RecentDataTable(props: Props) {
               const {label, format, linkParams} = item
 
               const data = recentData[label]
-              const {value, timestamp} = data || {}
+              const {value, timestamp, meta} = data || {}
 
               return (
                 <tr key={label}>
@@ -194,7 +194,7 @@ export default memo(function RecentDataTable(props: Props) {
                     {!timestamp && '-'}
                   </td>
                   <td>
-                    {renderValue(value, format)}
+                    {renderValue(value, format, meta)}
                   </td>
                   {!showSparkline &&
                     <td>

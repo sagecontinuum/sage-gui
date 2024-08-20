@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { useEffect, useState, useReducer } from 'react'
+import { useEffect, useState, useReducer, useMemo } from 'react'
 import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
@@ -24,8 +24,6 @@ import { prettyList } from '/components/utils/units'
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 
-import adminSettings from '/apps/admin/settings'
-import config from '/config'
 
 // import KeyTable from './lorawandevice/collapsible'
 import { deviceCols } from './lorawandevice/columns'
@@ -42,6 +40,12 @@ import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
 import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
 import NodeOverview from './NodeOverview'
 import NodeGraphic from './NodeGraphic'
+
+import adminSettings from '/apps/admin/settings'
+import config from '/config'
+import settings from '/components/settings'
+
+import { measurements } from '/components/measurement.config'
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
@@ -75,6 +79,21 @@ const getInActive = (data: BK.FlattenedManifest) => [
   ...data.computes.reduce((acc, o) => !o.is_active ? [...acc, o.name] : acc, []),
   ...data.sensors.reduce((acc, o) => !o.is_active ? [...acc, o.hw_model] : acc, [])
 ]
+
+const SENSOR_PREVIEW_IGNORE = [
+  'microphone',
+  'gps',
+  'bme280'
+]
+
+const getSensorList = (data: BK.FlattenedManifest) => {
+  const sensors = data?.sensors.filter(o =>
+    !o.capabilities.includes('camera') &&
+    !SENSOR_PREVIEW_IGNORE.includes(o.name)
+  ).map(o => o.hw_model)
+
+  return sensors
+}
 
 
 
@@ -225,6 +244,35 @@ export default function NodeView(props: Props) {
 
   const shield = manifest?.computes ? hasShield(manifest.computes) : false
 
+
+  const sensors = useMemo(() => {
+    if (!manifest || !vsn) return
+
+    return getSensorList(manifest)
+      .map(hw_model => {
+
+        const items = measurements[hw_model]?.names.map(name => {
+          const start = measurements[hw_model].start
+          return {
+            label: name,
+            query: {vsn, name, start},
+            linkParams: ({name, meta}) => `type=names&nodes=${meta.vsn}&names=${name}&start=${start || '-1d'}`
+          }
+        })
+
+        if (!items) return <div key={hw_model}></div>
+
+        return (
+          <RecentDataTable
+            key={hw_model}
+            items={items}
+          />
+        )
+      })
+  }, [manifest, vsn])
+
+
+
   if (vsnNotFound)
     return <NodeNotFound />
 
@@ -324,12 +372,18 @@ export default function NodeView(props: Props) {
                   </Alert>
                 }
                 <div className="flex data-tables">
-                  {hasSensor(manifest, 'BME680') &&
-                    <RecentDataTable
-                      items={format(['temp', 'humidity', 'pressure'], vsn)}
-                      className="hover-bme"
-                      inactive={inactive.some(name => /BME680/i.test(name))}
-                    />
+                  {sensors}
+
+                  {settings.project != 'CROCUS' &&
+                    <>
+                      {hasSensor(manifest, 'BME680') &&
+                        <RecentDataTable
+                          items={format(['temp', 'humidity', 'pressure'], vsn)}
+                          className="hover-bme"
+                          inactive={inactive.some(name => /BME680/i.test(name))}
+                        />
+                      }
+                    </>
                   }
 
                   <div>
