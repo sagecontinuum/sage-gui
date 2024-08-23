@@ -1,0 +1,316 @@
+[
+    {
+        "timestamp": "2024-03-27T05:30:06.252589619Z",
+        "name": "sys.scheduler.status.plugin.queued",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "triggered by cronjob('mysecondapp', '*/10 * * * *')"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:06.252730644Z",
+        "name": "sys.scheduler.status.plugin.selected",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Fit to resource"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:06.298704339Z",
+        "name": "sys.scheduler.status.plugin.scheduled",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "k3s_pod_instance": "mysecondapp-RNARqg",
+            "k3s_pod_name": "mysecondapp-42",
+            "k3s_pod_node_name": "",
+            "k3s_pod_status": "Pending",
+            "k3s_pod_uid": "2b9009f0-20e6-4a57-9408-d883095e11a7",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:06.320430358Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Successfully assigned ses/mysecondapp-42 to 0000dca632a3058b.ws-rpi",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Scheduled"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:06.329333319Z",
+        "name": "sys.scheduler.status.plugin.initializing",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "k3s_pod_instance": "mysecondapp-RNARqg",
+            "k3s_pod_name": "mysecondapp-42",
+            "k3s_pod_node_name": "0000dca632a3058b.ws-rpi",
+            "k3s_pod_status": "Pending",
+            "k3s_pod_uid": "2b9009f0-20e6-4a57-9408-d883095e11a7",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:08.088470747Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Container image \"waggle/app-meta-cache:0.1.2\" already present on machine",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Pulled"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:08.326910048Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Created container init-app-meta-cache",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Created"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:09.200235043Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Started container init-app-meta-cache",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Started"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:10.066176995Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Container image \"registry.sagecontinuum.org/theone/imagesampler:0.3.0\" already present on machine",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Pulled"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:10.493336879Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Created container mysecondapp",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Created"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:11.293903554Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Started container mysecondapp",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Started"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:11.544191059Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Container image \"waggle/plugin-controller:0.2.0\" already present on machine",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Pulled"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:11.814354167Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Created container plugin-controller",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Created"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:12.497317959Z",
+        "name": "sys.scheduler.status.plugin.event",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "message": "Started container plugin-controller",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+            "reason": "Started"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:13.326276059Z",
+        "name": "sys.scheduler.status.plugin.running",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "k3s_pod_instance": "mysecondapp-RNARqg",
+            "k3s_pod_name": "mysecondapp-42",
+            "k3s_pod_node_name": "0000dca632a3058b.ws-rpi",
+            "k3s_pod_status": "Running",
+            "k3s_pod_uid": "2b9009f0-20e6-4a57-9408-d883095e11a7",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    },
+    {
+        "timestamp": "2024-03-27T05:30:44.684442894Z",
+        "name": "sys.scheduler.status.plugin.completed",
+        "value": {
+            "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+            "k3s_pod_instance": "mysecondapp-RNARqg",
+            "k3s_pod_name": "mysecondapp-42",
+            "k3s_pod_node_name": "0000dca632a3058b.ws-rpi",
+            "k3s_pod_status": "Succeeded",
+            "k3s_pod_uid": "2b9009f0-20e6-4a57-9408-d883095e11a7",
+            "plugin_args": "-c echo hello world; sleep 30; echo bye",
+            "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+            "plugin_name": "mysecondapp",
+            "plugin_selector": "null",
+            "plugin_task": "mysecondapp-42",
+            "pluginruntime_pod_instance": "mysecondapp-RNARqg"
+        },
+        "meta": {
+            "node": "000048b02d15bc7c",
+            "vsn": "W023"
+        }
+    }
+]

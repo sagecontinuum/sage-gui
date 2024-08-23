@@ -248,7 +248,6 @@ const startStatuses = ['launched', 'initializing']
 
 const startSignals = [
   'sys.scheduler.status.plugin.launched',
-//  'sys.scheduler.status.plugin.initializing'
 ]
 
 

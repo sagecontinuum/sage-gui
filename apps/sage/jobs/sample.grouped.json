@@ -1,0 +1,68 @@
+{
+    "node": "000048b02d15bc7c",
+    "vsn": "W023",
+    "goal_id": "e8dfbf73-8d87-41b4-7129-c8710c8cf21e",
+    "plugin_task": "mysecondapp-42",
+    "plugin_name": "mysecondapp",
+    "plugin_selector": "null",        // what is this again?
+    "pluginruntime_pod_instance": "mysecondapp-RNARqg",
+    "plugin_args": "-c echo hello world; sleep 30; echo bye",
+    "plugin_image": "registry.sagecontinuum.org/theone/imagesampler:0.3.0",
+
+    "queued_reason": "triggered by cronjob('mysecondapp', '*/10 * * * *')", // or null
+    "selected_reason": "Fit to resource",                  // or null
+    "k3s_pod_uid": "2b9009f0-20e6-4a57-9408-d883095e11a7", // or null
+
+    "queued_start": "2024-03-27T05:30:06.252589619Z",
+    "selected_start": "2024-03-27T05:30:06.252730644Z",
+    "scheduled_start": "2024-03-27T05:30:06.298704339Z",
+    "initializing_start": "2024-03-27T05:30:06.329333319Z",
+    "running_start": "2024-03-27T05:30:06.329333319Z",
+    "end": "2024-03-27T05:30:44.684442894Z",    // from "sys.scheduler.status.plugin.completed"
+
+    // is some k3s_pod_status debugging needed?
+    "initializing_k3s_pod_status": "pending",
+    "running_k3s_pod_status": "Running",
+    "completed_k3s_pod_status": "Succeeded",
+
+    "events": [{
+            "timestamp": "2024-03-27T05:30:08.088470747Z",
+            "message": "Container image \"waggle/app-meta-cache:0.1.2\" already present on machine",
+            "reason": "Pulled"
+        }, {
+            "timestamp": "2024-03-27T05:30:08.326910048Z",
+            "message": "Created container init-app-meta-cache",
+            "reason": "Created"
+        }, {
+            "timestamp": "2024-03-27T05:30:09.200235043Z",
+            "message": "Started container init-app-meta-cache",
+            "reason": "Started"
+        }, {
+            "timestamp": "2024-03-27T05:30:10.066176995Z",
+            "message": "Container image \"registry.sagecontinuum.org/theone/imagesampler:0.3.0\" already present on machine",
+            "reason": "Pulled"
+        }, {
+            "timestamp": "2024-03-27T05:30:10.493336879Z",
+            "message": "Created container mysecondapp",
+            "reason": "Created"
+        }, {
+            "timestamp": "2024-03-27T05:30:11.293903554Z",
+            "message": "Started container mysecondapp",
+            "reason": "Started"
+        }, {
+            "timestamp": "2024-03-27T05:30:11.544191059Z",
+            "message": "Container image \"waggle/plugin-controller:0.2.0\" already present on machine",
+            "reason": "Pulled"
+        }, {
+            "timestamp": "2024-03-27T05:30:11.814354167Z",
+            "message": "Created container plugin-controller",
+            "reason": "Created"
+        }, {
+            "timestamp": "2024-03-27T05:30:12.497317959Z",
+            "message": "Started container plugin-controller",
+            "reason": "Started"
+        }
+    ]
+
+    // todo? Could add some metrics.  "queued_time", "runtime"?  What else?
+}
