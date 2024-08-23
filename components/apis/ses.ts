@@ -59,7 +59,7 @@ const pluginEventTypes = [
   'sys.scheduler.status.plugin.scheduled',      // created a Pod for the plugin
   'sys.scheduler.status.plugin.initializing',   // initContainer is running or plugin container image is being pulled
   'sys.scheduler.status.plugin.running',
-  'sys.scheduler.status.plugin.completed',  
+  'sys.scheduler.status.plugin.completed',
   'sys.scheduler.plugin.lastexecution',
   'sys.scheduler.status.plugin.failed',
   'sys.scheduler.status.plugin.complete',       // "deprecated"
@@ -91,7 +91,7 @@ export type PluginEvent = Event & {
     plugin_status_by_scheduler: string
     plugin_task: string
   }
-  status: 'failed' | 'launched' | 'running' | 'complete' | 'completed' 
+  status: 'failed' | 'launched' | 'running' | 'complete' | 'completed'
   // computed client-side
   end?: number
   runtime?: number
@@ -247,8 +247,8 @@ const startStatuses = ['launched', 'initializing']
 
 
 const startSignals = [
-  'sys.scheduler.status.plugin.launched', // deprecated in favor of "initializing"
-  'sys.scheduler.status.plugin.initializing'
+  'sys.scheduler.status.plugin.launched',
+//  'sys.scheduler.status.plugin.initializing'
 ]
 
 
@@ -395,7 +395,7 @@ export function reduceDataV2(taskEvents: PluginEvent[]) : EventsByNode {
     const byAppScheduled = findEventsByApp(events, selectedSignals, startSignals)
     byNode[vsn] = byAppScheduled
   }
-  
+
   // organize by orange/red statuses below 'complete'
   // High-level metrics could make this make this clear, in lieu of better design
   for (const [vsn, byApp] of Object.entries(byNode)) {
