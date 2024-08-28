@@ -3,7 +3,8 @@ const keys = [
   'sage_username',
   'sage-table-columns-/nodes',
   'sage-table-columns-/all-nodes',
-  'sage-table-columns-/sensors'
+  'sage-table-columns-/sensors',
+  'sage-table-columns-task-listing'
 ]
 
 

@@ -228,6 +228,10 @@ button.delete:hover, button.cancel:hover {
 .font-semibold { font-weight: 600; }
 .font-bold { font-weight: 700; }
 
+.hover-font-bold:hover {
+  font-weight: 700;
+}
+
 .clearfix {
   content: "";
   clear: both;

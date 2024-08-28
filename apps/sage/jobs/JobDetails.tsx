@@ -18,7 +18,12 @@ import Checkbox from '/components/input/Checkbox'
 import { useProgress } from '/components/progress/ProgressProvider'
 
 import { formatters } from './JobStatus'
+
+import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
+import ListIcon from '@mui/icons-material/ListAltRounded'
+import { Tabs, Tab } from '/components/tabs/Tabs'
 import JobTimeline from './JobTimeline'
+import ListTasks from './ListTasks'
 
 import * as ES from '/components/apis/ses'
 // import { type NodeMeta } from '/components/apis/beekeeper' // todo(nc)
@@ -64,6 +69,8 @@ export default function JobDetails(props: Props) {
   const [events, setEvents] = useState<ES.EventsByNode>()
 
   const [showAllTasks, setShowAllTasks] = useState<boolean>(false)
+
+  const [tab, setTab] = useState<'timeline' | 'tasks'>('timeline')
 
   const [opts, setOpts] = useState<Options>({
     start: getStartTime(TAIL_DAYS),
@@ -214,6 +221,30 @@ export default function JobDetails(props: Props) {
             }
           </JobMetaContainer>
 
+          <br/>
+
+          <Tabs
+            value={tab}
+            aria-label="timeline or table"
+            onChange={(evt, val) => setTab(val)}
+          >
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <TimelineIcon/>&nbsp;Timeline
+                </div>
+              }
+              value="timeline"
+            />
+            <Tab
+              label={
+                <div className="flex items-center">
+                  <ListIcon/>&nbsp;Task Listing
+                </div>
+              }
+              value="tasks"
+            />
+          </Tabs>
 
           <div className="timeline-title flex items-center gap">
             <h2 className="no-margin">
@@ -224,22 +255,28 @@ export default function JobDetails(props: Props) {
               onChange={handleOptionChange}
               opts={opts}
             />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showAllTasks}
-                  onChange={(evt) => setShowAllTasks(evt.target.checked)}
-                />
-              }
-              label="Show all tasks"
-            />
+            {tab == 'timelines' &&
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={showAllTasks}
+                    onChange={(evt) => setShowAllTasks(evt.target.checked)}
+                  />
+                }
+                label="Show all tasks"
+              />
+            }
           </div>
 
-          {!events &&
+          {tab == 'tasks' &&
+            <ListTasks job={job} start={opts.start} />
+          }
+
+          {tab == 'timeline' && !events &&
             <TimelineSkeleton />
           }
 
-          {events &&
+          {tab == 'timeline' && events &&
             Object.keys(events)
               .map((vsn) => {
                 const {address} = nodeMetaByVSN[vsn]

@@ -28,7 +28,7 @@ const StyledPopper = styled(Popper)(() => ({
   boxShadow: '0 3px 12px rgba(27,31,35,.15)',
   borderRadius: 3,
   width: 300,
-  zIndex: 100,
+  zIndex: 9999,
   fontSize: 13,
   color: '#586069',
   backgroundColor: '#f6f8fa',

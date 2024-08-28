@@ -31,6 +31,27 @@ export function prettyTime(secs: number) {
   return time
 }
 
+export function prettyTimeMS(secs: number) {
+  if (!secs && secs != 0) return
+  const days = Math.floor(secs / (24*60*60))
+  const d = new Date(secs * 1000)
+  const parts = d.toISOString().slice(11, 19).split(':')
+
+  const h = parseInt(parts[0]),
+    m = parseInt(parts[1]),
+    s = parseInt(parts[2])
+
+  const ms = d.getMilliseconds()
+
+  const time = `${days > 0 ? days + 'd ' : ''}` +
+    (h > 0 ? `${h}h ` : '') +
+    (m > 0 ? `${m}m ` : '') +
+    (s > 0 ? `${s}s ` : '') +
+    (ms > 0 ? `${ms}ms` : '')
+
+  return time
+}
+
 
 export function bytesToSizeIEC(bytes: number) {
   if (!bytes && bytes != 0) return

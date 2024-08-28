@@ -28,7 +28,7 @@ const prod = {
 
 const dev = {
   ...prod,
-  es: 'https://es-dev.sagecontinuum.org/api/v1',
+  // es: 'https://es-dev.sagecontinuum.org/api/v1',
   // ecr: 'https://sage-ecr-dev.sagecontinuum.org/api',
   // jenkins: 'https://jenkins-dev.sagecontinuum.org'
 }
