@@ -116,11 +116,6 @@ export type ErrorsByGoalID = {
 }
 
 
-type GetEventsArgs = {
-  start?: Date | string
-  vsns?: VSN[]
-}
-
 type Event = {
   timestamp: string
   message: string
@@ -188,8 +183,15 @@ type TasksByApp = {
   [app_name: string]: Task[]
 }
 
-export function getTasksByApp(args?: GetEventsArgs) : Promise<TasksByApp> {
-  const {start, vsns} = args || {}
+type getTasksArgs = {
+  job: Job
+  includeAllTasks?: boolean
+  start?: Date | string
+  vsns?: VSN[]
+}
+
+export function getTasksByApp(args?: getTasksArgs) : Promise<TasksByApp> {
+  const {start, vsns, job, includeAllTasks} = args || {}
 
   return BH.getData({
     start: start || '-24h',
@@ -199,14 +201,21 @@ export function getTasksByApp(args?: GetEventsArgs) : Promise<TasksByApp> {
     }
   }).then(data => parseESRecord(data) as PluginEvent[])
     .then(pluginEvents => {
-      return reduceData(pluginEvents)
+      return reduceData(pluginEvents, job, includeAllTasks)
     })
 }
 
 
 
 // O(p*t*s) where p:= number of plugins, t:= number of tasks, s:= number of status messages
-function reduceData(pluginEvents) {
+function reduceData(pluginEvents, job, includeAllTasks) {
+
+  // filter to related plugins if needed
+  if (!includeAllTasks) {
+    const taskNames = job.plugins.map(o => o.name)
+    pluginEvents = pluginEvents.filter(obj => taskNames.includes(obj.value.plugin_name))
+  }
+
   const oldRecords = pluginEvents.filter(obj => !obj.value.pluginruntime_pod_instance)
   const oldCount = oldRecords.length
 

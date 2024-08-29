@@ -255,21 +255,19 @@ export default function JobDetails(props: Props) {
               onChange={handleOptionChange}
               opts={opts}
             />
-            {tab == 'timelines' &&
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showAllTasks}
-                    onChange={(evt) => setShowAllTasks(evt.target.checked)}
-                  />
-                }
-                label="Show all tasks"
-              />
-            }
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showAllTasks}
+                  onChange={(evt) => setShowAllTasks(evt.target.checked)}
+                />
+              }
+              label="Show all tasks"
+            />
           </div>
 
           {tab == 'tasks' &&
-            <ListTasks job={job} start={opts.start} />
+            <ListTasks job={job} start={opts.start} showAllTasks={showAllTasks} />
           }
 
           {tab == 'timeline' && !events &&

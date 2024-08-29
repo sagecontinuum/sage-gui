@@ -13,6 +13,7 @@ import { queryData } from '/components/data/queryData'
 import * as Units from '/components/utils/units'
 
 import config from '/config'
+import { useProgress } from '/components/progress/ProgressProvider'
 const { contactUs } = config
 
 
@@ -95,12 +96,15 @@ const cols = [{
 
 type Props = {
   job: Job
-  start: string
+  start?: string
+  showAllTasks?: boolean
 }
 
 export default function ListTasks(props: Props) {
-  const {job, start} = props
+  const {job, start, showAllTasks} = props
   const {nodes} = job
+
+  const {setLoading} = useProgress()
 
   const [data, setData] = useState(null)
   const [qData, setQData] = useState(null)
@@ -108,16 +112,17 @@ export default function ListTasks(props: Props) {
   const [page] = useState(0)
 
   useEffect(() => {
-    getTasksByApp({vsns: nodes, start})
+    setLoading(true)
+    getTasksByApp({vsns: nodes, start, job, includeAllTasks: showAllTasks})
       .then(byApp => {
-        const allTasks = [].concat(...Object.values(byApp))
+        const tasks = [].concat(...Object.values(byApp))
 
-        setData(allTasks)
-        setQData(allTasks)
+        setData(tasks)
+        setQData(tasks)
       }).catch(error =>
         setError(error)
-      )
-  }, [start])
+      ).finally(() => setLoading(false))
+  }, [start, showAllTasks])
 
 
   const handleQuery = ({query}) => {
