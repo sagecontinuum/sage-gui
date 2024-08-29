@@ -207,6 +207,14 @@ export function getTasksByApp(args?: GetEventsArgs) : Promise<TasksByApp> {
 
 // O(p*t*s) where p:= number of plugins, t:= number of tasks, s:= number of status messages
 function reduceData(pluginEvents) {
+  const oldRecords = pluginEvents.filter(obj => !obj.value.pluginruntime_pod_instance)
+  const oldCount = oldRecords.length
+
+  if (oldCount)
+    throw `${oldCount.toLocaleString()} records out
+    of ${pluginEvents.length.toLocaleString()} are incompatible
+    with the task viewer for this selected range, and so this task view is not yet compatible.`
+
   const data = groupBy(pluginEvents, 'value.plugin_name')
 
   const taskByPluginName = {}

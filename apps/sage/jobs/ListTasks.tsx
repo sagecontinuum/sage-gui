@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
-import { Tooltip } from '@mui/material'
+import { Alert, Tooltip } from '@mui/material'
 import ErrorIcon from '@mui/icons-material/ErrorOutline'
 
 import type { Job } from '/components/apis/ses'
@@ -11,6 +11,10 @@ import Table, { TableSkeleton } from '/components/table/Table'
 import { queryData } from '/components/data/queryData'
 
 import * as Units from '/components/utils/units'
+
+import config from '/config'
+const { contactUs } = config
+
 
 
 const prettyTime = (d: string) => {
@@ -100,6 +104,7 @@ export default function ListTasks(props: Props) {
 
   const [data, setData] = useState(null)
   const [qData, setQData] = useState(null)
+  const [error, setError] = useState()
   const [page] = useState(0)
 
   useEffect(() => {
@@ -109,7 +114,9 @@ export default function ListTasks(props: Props) {
 
         setData(allTasks)
         setQData(allTasks)
-      })
+      }).catch(error =>
+        setError(error)
+      )
   }, [start])
 
 
@@ -138,8 +145,15 @@ export default function ListTasks(props: Props) {
             middleComponent={<div></div>}
           />
         }
-        {!data &&
+        {!data && !error &&
           <TableSkeleton />
+        }
+
+        {error &&
+          <Alert severity="info">
+            {error}<br/>
+            Please <b><a href={contactUs}>contact us</a></b> if you think this could be a mistake.
+          </Alert>
         }
       </TableContainer>
     </>

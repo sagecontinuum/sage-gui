@@ -239,7 +239,7 @@ export default function JobDetails(props: Props) {
             <Tab
               label={
                 <div className="flex items-center">
-                  <ListIcon/>&nbsp;Task Listing
+                  <ListIcon/>&nbsp;Task List
                 </div>
               }
               value="tasks"

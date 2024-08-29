@@ -23,7 +23,7 @@ export default function RequireAuthAdmin() {
       <Notice className="flex items-center justify-center">
         <p>
           This view is intended for Sage/Waggle staff.
-          Please <b><a href={contactUs}>contact us</a></b> contact us if you think this is a mistake.
+          Please <b><a href={contactUs}>contact us</a></b> if you think this is a mistake.
         </p>
       </Notice>
     )
