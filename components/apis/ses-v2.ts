@@ -4,27 +4,6 @@ import type { VSN } from './beekeeper'
 import type { Job } from './ses'
 
 import { groupBy } from 'lodash'
-import { handleErrors } from '../fetch-utils'
-
-import config from '/config'
-const url = config.es
-
-import Auth from '/components/auth/auth'
-const __token = Auth.token
-
-
-const options = {
-  headers: __token ? {
-    Authorization: `Sage ${__token}`
-  } : {}
-}
-
-function get(endpoint: string, opts = options) {
-  return fetch(endpoint, opts)
-    .then(handleErrors)
-    .then(res => res.json())
-}
-
 
 
 const pluginEventTypes = [
@@ -33,7 +12,6 @@ const pluginEventTypes = [
   'sys.scheduler.status.plugin.scheduled',      // created a Pod for the plugin
   'sys.scheduler.status.plugin.initializing',   // initContainer is running or plugin container image is being pulled
   'sys.scheduler.status.plugin.running',
-  'sys.scheduler.plugin.lastexecution',
   'sys.scheduler.status.plugin.failed',
   'sys.scheduler.status.plugin.complete',
   'sys.scheduler.status.plugin.launched',
@@ -222,7 +200,7 @@ function reduceData(pluginEvents, job, includeAllTasks) {
   if (oldCount)
     throw `${oldCount.toLocaleString()} records out
     of ${pluginEvents.length.toLocaleString()} are incompatible
-    with the task viewer for this selected range, and so this task view is not yet compatible.`
+    with the task viewer for this selected range, and so this task list is not currently available.`
 
   const data = groupBy(pluginEvents, 'value.plugin_name')
 
@@ -282,35 +260,3 @@ const timeDiff = (start: string , end: string) =>
   (new Date(end).getTime() - new Date(start).getTime()) / 1000
 
 
-
-export async function getJobs() : Promise<Job[]> {
-  const jobs = await listJobs()
-
-  let jobData
-  try {
-    jobData = jobs.map((obj) => {
-      const {name, job_id, nodes, nodeTags} = obj
-
-      return {
-        ...obj,
-        ...obj.state,
-        id: Number(job_id),
-        name,
-        nodes: nodes ?
-          Object.keys(nodes) :
-          (nodeTags ? nodeTags : [])
-      }
-    })
-  } catch(error) {
-    console.error('error', error)
-  }
-
-  return jobData
-}
-
-
-
-async function listJobs() : Promise<Job[]> {
-  const data = await get(`${url}/jobs/list`, options)
-  return data
-}

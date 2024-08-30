@@ -1,7 +1,7 @@
 // @ts-nocheck -- type checking for timeline is still a todo
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 import { Button, Divider, FormControlLabel, IconButton, Tooltip } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
@@ -59,6 +59,7 @@ type Props = {
 export default function JobDetails(props: Props) {
   const {job, nodeMetaByVSN, handleCloseDialog} = props
 
+  const {pathname} = useLocation()
   const {loading, setLoading} = useProgress()
   const [yaml, setYaml] = useState<string>()
 
@@ -235,6 +236,9 @@ export default function JobDetails(props: Props) {
                 </div>
               }
               value="timeline"
+              component={Link}
+              to={`${pathname}?job=${job.job_id}&tab=timeline`}
+              replace
             />
             <Tab
               label={
@@ -243,6 +247,9 @@ export default function JobDetails(props: Props) {
                 </div>
               }
               value="tasks"
+              component={Link}
+              to={`${pathname}?job=${job.job_id}&tab=tasks`}
+              replace
             />
           </Tabs>
 

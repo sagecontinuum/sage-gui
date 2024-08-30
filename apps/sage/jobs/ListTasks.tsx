@@ -146,6 +146,7 @@ export default function ListTasks(props: Props) {
             onSearch={handleQuery}
             sort="-running_start"
             onColumnMenuChange={() => { /* do nothing */ }}
+            emptyNotice="No tasks found"
             // onSelect={handleSelect}
             middleComponent={<div></div>}
           />
