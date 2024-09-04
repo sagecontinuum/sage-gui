@@ -293,8 +293,10 @@ export default function CreateApp() {
               error={isValid == false}
               helperText={isValid == false ? 'Sorry, we could not verify github repo url' : ''}
               style={{width: 500}}
-              InputLabelProps={{ shrink: true }}
               required
+              slotProps={{
+                inputLabel: { shrink: true }
+              }}
             />
 
             {repoURL && !isValid &&
@@ -413,8 +415,6 @@ export default function CreateApp() {
           }
         </Step>
       </Main>
-
-
       <Help>
         <h3>Help</h3>
         <hr/>

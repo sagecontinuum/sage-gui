@@ -5,7 +5,7 @@ import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import GithubIcon from '@mui/icons-material/GitHub'
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import Button from '@mui/material/Button'
-import Grid from '@mui/material/Unstable_Grid2'
+import Grid from '@mui/material/Grid2'
 
 import { Item, Title } from '/components/layout/Layout'
 import { formatters, Thumb, Dot } from '../formatters'
@@ -46,7 +46,7 @@ function AppBox(props) {
   }
 
   return (
-    <Grid xs={12} md={6} lg={4} xl={3}>
+    <Grid size={{xs: 12, md: 6, lg: 4, xl: 3}}>
       <Item
         className="large-click-target flex no-margin h-full"
         onClick={handleClick}

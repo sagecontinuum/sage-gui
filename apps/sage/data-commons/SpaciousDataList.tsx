@@ -52,20 +52,17 @@ function Row(props) {
     // @ts-ignore; DataProductSearch is actually deprecated
     <Item className="flex column" to={`data/product/${name}`}>
       <Title>{formatter.title(title, data)}</Title>
-
       {notes &&
         <Notes>
           {highlightText(notes.slice(0, 250), query ? query : '')}
           {notes.length > 250 ? <>... <Link to={`data/product/${name}`}>read more</Link></> : ''}
         </Notes>
       }
-
       <div className="flex items-center">
         {notes &&
           <Keywords>{formatter.tags(tags)}</Keywords>
         }
       </div>
-
       <div className="flex items-center gap muted">
         <Type className="flex">{formatter.resources(resources)}</Type>
         <div>Updated {formatter.time(metadata_modified+'Z')}</div>

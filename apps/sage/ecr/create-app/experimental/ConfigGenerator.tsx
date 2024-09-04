@@ -44,10 +44,11 @@ export default function ConfigGenerator(props: Props) {
         fullWidth
         multiline
         rows={3}
-        InputLabelProps={{ shrink: true }}
         placeholder="A description about my app"
+        slotProps={{
+          inputLabel: { shrink: true }
+        }}
       />
-
       <FormControl className="flex column">
         <FormLabel component="legend">Architecture</FormLabel>
         {architectures.map((arch) =>

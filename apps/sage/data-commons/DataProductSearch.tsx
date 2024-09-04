@@ -146,7 +146,6 @@ export default function Search() {
         is made available solely for <b>demonstration purposes</b>.  You might consider
         checking out the <Link to="/data">Data Browser</Link>.
       </Alert>
-
       <div className="flex">
         <Sidebar>
           <FilterTitle>Filters</FilterTitle>
@@ -161,8 +160,7 @@ export default function Search() {
                 // @ts-ignore; DataProductSearch is actually deprecated
                 type="text"
                 data={items}
-              />
-            )
+              />)
           })}
         </Sidebar>
 
@@ -240,7 +238,6 @@ export default function Search() {
         </Main>
 
       </div>
-
     </Root>
   )
 }

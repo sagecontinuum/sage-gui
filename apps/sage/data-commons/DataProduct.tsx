@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -123,8 +123,8 @@ export default function Product() {
             <div className="flex column items-end">
               {doi &&
                 <>
-                  <a href={doi} target="_blank"><img src={wifireLogo} height="50" /></a>
-                  <a href={doi} target="_blank"><b>{doi}</b></a>
+                  <a href={doi} target="_blank" rel="noreferrer"><img src={wifireLogo} height="50" /></a>
+                  <a href={doi} target="_blank" rel="noreferrer"><b>{doi}</b></a>
                 </>
               }
             </div>

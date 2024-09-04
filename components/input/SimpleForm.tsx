@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import styled from 'styled-components'
 
-import { 
-  FormHelperText, FormControl, useFormControl, 
+import {
+  FormHelperText, FormControl, useFormControl,
   Autocomplete, TextField
 } from '@mui/material'
 
@@ -45,20 +45,20 @@ export default function SimpleForm<T>(props: Props<T>) {
     <Root>
       {fields.map(obj => {
         const {
-          id, label, edit, type, helpText, maxLength, 
-          multiple, options, width, placeholder, 
+          id, label, edit, type, helpText, maxLength,
+          multiple, options, width, placeholder,
         } = obj
-        
+
         const value = data[id]
 
         return (
           <div key={id}>
-            {(edit == false || !isEditing) && 
+            {(edit == false || !isEditing) &&
               <h2>{label}</h2>
             }
             {isEditing && edit != false ?
               <FormControl margin="normal">
-                {multiple ? 
+                {multiple ?
                   <Autocomplete
                     multiple
                     freeSolo
@@ -73,7 +73,9 @@ export default function SimpleForm<T>(props: Props<T>) {
                         {...params}
                         label={label}
                         placeholder={placeholder}
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{
+                          inputLabel: { shrink: true }
+                        }}
                       />
                     )}
                   />
@@ -87,12 +89,13 @@ export default function SimpleForm<T>(props: Props<T>) {
                     value={state[id]}
                     multiline={type == 'textarea'}
                     minRows={type == 'textarea' ? 4 : 0}
-                    inputProps={{maxLength}}
-                    InputLabelProps={{shrink: true}}
                     sx={{ width: width || (type == 'textarea' ?  500 : 300) }}
-                  />
+                    slotProps={{
+                      htmlInput: {maxLength},
+                      inputLabel: {shrink: true}
+                    }} />
                 }
-                {helpText && 
+                {helpText &&
                   <FormHelperText>{helpText}</FormHelperText>
                 }
                 {maxLength &&

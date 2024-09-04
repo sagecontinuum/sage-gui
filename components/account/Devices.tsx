@@ -36,11 +36,13 @@ export default function DeviceRegistration() {
           id="nano-id"
           placeholder="Nano ID"
           style={{ width: 500 }}
-          inputProps={{ maxlength: idLength }}
           value={form.deviceID}
           onChange={evt => setForm(prev => ({...prev, deviceID: evt.target.value}))}
           required={true}
           disabled={gotKey}
+          slotProps={{
+            htmlInput: { maxlength: idLength }
+          }}
         />
 
         <div>

@@ -60,6 +60,7 @@ const { dockerRegistry, docs, contactUs } = config
 type View = 'form' |'editor'
 
 // todo(nc): actually use State/Action types
+/*
 type State = {
   name: ''
   apps: ECR.App[]
@@ -71,8 +72,9 @@ type State = {
     }
   }
 }
+*/
 
-type Action = {type: 'SET', name: string, value: string | ECR.App[] | BK.NodeMeta[] }
+// type Action = {type: 'SET', name: string, value: string | ECR.App[] | BK.NodeMeta[] }
 
 
 function reducer(state, action) {
@@ -466,14 +468,17 @@ export default function CreateJob() {
                       return `${opt.name} (${opt.job_id})`
                     }}
                     renderInput={(props) =>
-                      <TextField {...props}
+                      <TextField
+                        {...props}
                         label="Start with job"
                         placeholder="Search jobs..."
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{
-                          ...props.inputProps
-                        }}
-                      />
+                        slotProps={{
+                          htmlInput: {
+                            ...props.inputProps
+                          },
+
+                          inputLabel: { shrink: true }
+                        }} />
                     }
                     renderOption={(props, opt) => {
                       const status = (opt.state.last_state.toLowerCase() || '-')
@@ -677,8 +682,6 @@ export default function CreateJob() {
           </div>
         }
       </main>
-
-
       {initError &&
         <ConfirmationDialog
           title=""
@@ -693,7 +696,6 @@ export default function CreateJob() {
           onConfirm={() => setInitError(null)}
           onClose={() => setInitError(null)} />
       }
-
       {viewTips &&
         <ConfirmationDialog
           title="Tips for using the editor"
@@ -717,7 +719,6 @@ export default function CreateJob() {
           onConfirm={() => setViewTips(false)}
           onClose={() => setViewTips(false)} />
       }
-
       {confirmOverwrite &&
         <ConfirmationDialog
           title={<div>Overwrite job "{getJobName(jobID)}"?</div>}

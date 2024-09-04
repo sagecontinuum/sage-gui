@@ -13,7 +13,6 @@
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.10.6",
     "@mui/icons-material": "^5.5.0",
-    "@mui/lab": "^5.0.0-alpha.64",
     "@mui/material": "^5.12.0",
     "@mui/styles": "^5.12.0",
     "@parcel/transformer-image": "^2.9.3",

@@ -953,6 +953,7 @@ export default function QueryBrowser() {
       </div>
     </Root>
   )
+
 }
 
 const Root = styled.div<{isMedia: boolean}>`

@@ -7,7 +7,7 @@ import { Button, Tooltip, IconButton } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
-import Grid from '@mui/material/Unstable_Grid2'
+import Grid from '@mui/material/Grid2'
 
 import { Card } from '/components/layout/Layout'
 import MetaTable from '/components/table/MetaTable'
@@ -58,11 +58,9 @@ const getConfigTable = (o) => {
 
 const sanitizeLabel = (obj: {name: string}) => {
   const {name} = obj
-  return (
-    <>
-      {name in labelDict ? labelDict[name] : startCase(name.replace(/-|_/, ' '))}
-    </>
-  )
+  return <>
+    {name in labelDict ? labelDict[name] : startCase(name.replace(/-|_/, ' '))}
+  </>
 }
 
 
@@ -125,16 +123,16 @@ const hardwareMeta = [{
 
     return (
       <Grid container>
-        <Grid xs={3}>
+        <Grid size={{xs: 3}}>
           <small className="muted font-bold">Stevenson Shield</small>
           <div>{hasShield(computes) ? 'yes' : 'no'}</div>
         </Grid>
 
-        <Grid xs={3}>
+        <Grid size={{xs: 3}}>
           {nodeFormatters.modem(modem, obj)}
         </Grid>
 
-        <Grid xs={3}>
+        <Grid size={{xs: 3}}>
           {nodeFormatters.modemSim(modem, obj)}
         </Grid>
       </Grid>
@@ -241,7 +239,7 @@ function NodeDetails(props: NodeDetailsProps) {
   return (
     <Grid container>
       {data.map((o, i) =>
-        <Grid xs={3} key={i}>
+        <Grid size={{xs: 3}} key={i}>
           <NodeInfo>
             <small className="muted font-bold">
               {sanitizeLabel(o)}

@@ -147,11 +147,13 @@ export default function Filter(props: Props) {
             autoFocus
             placeholder={`Filter ${title}`}
             onChange={evt => setQuery(evt.target.value)}
-            InputProps={{
-              style: {height: 26}
-            }}
             fullWidth
             variant="outlined"
+            slotProps={{
+              input: {
+                style: {height: 26}
+              }
+            }}
           />
         </div>
       }

@@ -279,11 +279,9 @@ export default function NodeView(props: Props) {
   return (
     <Root>
       <CardViewStyle />
-
       {error &&
         <Alert severity="info">{error.message}</Alert>
       }
-
       <div className="flex">
         <LeftSide className="flex column gap">
           <NodeOverview

@@ -39,6 +39,9 @@
     "d3": "d3/dist/d3.js"
   },
   "dependencies": {
+    "@mui/icons-material": "^6.0.2",
+    "@mui/material": "^6.0.2",
+    "@mui/styles": "^6.0.2",
     "chart.js": "^4.4.2",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.0.1"

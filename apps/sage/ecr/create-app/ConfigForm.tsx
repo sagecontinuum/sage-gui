@@ -54,11 +54,13 @@ export default function ConfigForm(props: Props) {
           name="name"
           value={form.name}
           onChange={handleNameChange}
-          InputLabelProps={{ shrink: true }}
           placeholder="my-app"
           error={!isValid}
           helperText={!isValid && 'Only lowercase letters, numbers, "-", or "_" allowed'}
           required
+          slotProps={{
+            inputLabel: { shrink: true }
+          }}
         />
         <TextField
           label="Version"
@@ -66,8 +68,10 @@ export default function ConfigForm(props: Props) {
           value={form.version}
           onChange={onChange}
           style={{width: 125, marginLeft: 10}}
-          InputLabelProps={{ shrink: true }}
           placeholder="1.x (optional)"
+          slotProps={{
+            inputLabel: { shrink: true }
+          }}
         />
       </div>
     </Form>
