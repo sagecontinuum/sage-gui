@@ -49,8 +49,7 @@ npm run build -w sage
 The [config](./components/settings.ts) for a project page is controlled with the env variable `SAGE_UI_PROJECT`.  I.e.,
 
 ```
-export SAGE_UI_PROJECT=CROCUS
-npm start -w project
+SAGE_UI_PROJECT=crocus npm start -w project
 ```
 
 #### Third-party tokens
@@ -94,6 +93,7 @@ docker build --build-arg MAPBOX_TOKEN=<token_string> -t sage-ui .
 docker run -dp 8080:80 sage-ui
 ``````
 
+> Similarly, for project pages `SAGE_UI_PROJECT=<project>` can be used.
 
 ## Developer notes
 
