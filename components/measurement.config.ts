@@ -1,4 +1,4 @@
-// default start time ("start") is '-24h'
+import settings from '/components/settings'
 
 const measurements = {
   'AQT530': {
@@ -22,7 +22,7 @@ const measurements = {
     names: [
       {name: 'wxt.env.temp', label: 'Temperature'},
       {name: 'wxt.env.humidity', label: 'Humidity'},
-      {name: 'wxt.env.presure', label: 'Presure'},
+      {name: 'wxt.env.pressure', label: 'Pressure'},
       {name: 'wxt.rain.accumulation', label: 'Rain'},
       {name: 'wxt.hail.accumulation', label: 'Hail'},
       {name: 'wxt.wind.direction', label: 'Wind Direction'},
@@ -49,7 +49,7 @@ const measurements = {
       {name: 'env.temperature', label: 'Temperature', units: '°C'},
       {name: 'env.relative_humidity', label: 'Humidity', units: '%'},
       {name: 'env.pressure', label: 'Pressure', units: 'Pa'},
-      {name: 'env.air_quality.conc', label: 'Air Quality', units: 'μg/m³'},
+      {name: 'env.air_quality.conc', label: 'Air Quality', units: 'mg/m³'},
       {name: 'env.air_quality.flow', label: 'Air Flow'}
     ],
     sensor: 'es642'
@@ -66,13 +66,18 @@ const shortUnits = {
   'degrees': '°',
   'milimeters': 'mm',
   'meters per second': 'm/s',
+  'hits per square centimeter': 'hits / cm²',
+  'hectoPascal': 'hPa'
 }
 
-const skipSensorPreview = [
+let skipSensorPreview = [
   'microphone',
   'gps',
   'bme280',
 ]
+
+if (settings.project == 'CROCUS')
+  skipSensorPreview = [...skipSensorPreview, 'bme680']
 
 
 export {
