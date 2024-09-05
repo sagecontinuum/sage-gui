@@ -334,13 +334,13 @@ type Option = {id: string, label: string}
 
 const facetInputs: Facets = {
   'apps': ['apps', 'nodes', 'names', 'sensors'],
-  'names': ['names', 'nodes'],
+  'names': ['names', 'nodes', 'sensors'],
   'images': ['tasks', 'nodes'],
   'audio': ['tasks', 'nodes']
 }
 
 const allowMultiSelect = (field: Facet) =>
-  ['nodes', 'names', 'tasks'].includes(field)
+  ['nodes', 'names', 'tasks', 'sensors'].includes(field)
 
 
 export function getFilterState(params, includeDefaultApp=true) : FilterState {
