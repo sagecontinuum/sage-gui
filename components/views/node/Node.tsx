@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { Alert } from '@mui/material'
+import Masonry from '@mui/lab/Masonry'
+
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
@@ -14,18 +16,16 @@ import { CardViewStyle, Card } from '/components/layout/Layout'
 import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
-import format from '/components/data/dataFormatter'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import Table from '/components/table/Table'
-import { prettyList } from '/components/utils/units'
+import { prettyList, quickRanges } from '/components/utils/units'
 
 import RecentDataTable from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 
-
-// import KeyTable from './lorawandevice/collapsible'
+// import KeyTable from './lorawandevice/collapsible' // (alternate design)
 import { deviceCols } from './lorawandevice/columns'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
@@ -43,9 +43,8 @@ import NodeGraphic from './NodeGraphic'
 
 import adminSettings from '/apps/admin/settings'
 import config from '/config'
-import settings from '/components/settings'
 
-import { measurements } from '/components/measurement.config'
+import { measurements, skipSensorPreview } from '/components/measurement.config'
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
@@ -80,17 +79,13 @@ const getInActive = (data: BK.FlattenedManifest) => [
   ...data.sensors.reduce((acc, o) => !o.is_active ? [...acc, o.hw_model] : acc, [])
 ]
 
-const SENSOR_PREVIEW_IGNORE = [
-  'microphone',
-  'gps',
-  'bme280'
-]
 
 const getSensorList = (data: BK.FlattenedManifest) => {
   const sensors = data?.sensors.filter(o =>
     !o.capabilities.includes('camera') &&
-    !SENSOR_PREVIEW_IGNORE.includes(o.name)
+    !skipSensorPreview.includes(o.name)
   ).map(o => o.hw_model)
+    .reverse() // reverse to put rainfall first
 
   return sensors
 }
@@ -250,22 +245,39 @@ export default function NodeView(props: Props) {
 
     return getSensorList(manifest)
       .map(hw_model => {
+        const config = measurements[hw_model]
+        const start = config?.start || '-1d'
+        const {sensor} = config || {}
 
-        const items = measurements[hw_model]?.names.map(name => {
-          const start = measurements[hw_model].start
+        const items = config?.names.map(obj => {
+          const {name, label, units} = obj
+
           return {
-            label: name,
-            query: {vsn, name, start},
-            linkParams: ({name, meta}) => `type=names&nodes=${meta.vsn}&names=${name}&start=${start || '-1d'}`
+            label: label || name,
+            query: {vsn, name, start, sensor},
+            units,
+            linkParams: ({name, meta}) => [
+              `type=names`,
+              `nodes=${meta.vsn}`,
+              `names=${name}`,
+              `start=${start}`,
+              ...sensor ? [`&sensors=${sensor}`] : []
+            ].join('&')
           }
         })
 
-        if (!items) return <div key={hw_model}></div>
+        if (!items) {
+          // todo(nc): add note about no configuration
+          return <></>
+        }
 
         return (
           <RecentDataTable
             key={hw_model}
+            title={hw_model}
             items={items}
+            previewLabel={quickRanges[start]}
+            className={`hover-${hw_model}`}
           />
         )
       })
@@ -369,37 +381,9 @@ export default function NodeView(props: Props) {
                     {prettyList(inactive)} {inactive.length > 1 ? 'are' : 'is'} marked as inactive
                   </Alert>
                 }
-                <div className="flex data-tables">
+                <Masonry columns={2} spacing={2}>
                   {sensors}
-
-                  {settings.project != 'CROCUS' &&
-                    <>
-                      {hasSensor(manifest, 'BME680') &&
-                        <RecentDataTable
-                          items={format(['temp', 'humidity', 'pressure'], vsn)}
-                          className="hover-bme"
-                          inactive={inactive.some(name => /BME680/i.test(name))}
-                        />
-                      }
-                    </>
-                  }
-
-                  <div>
-                    {hasSensor(manifest, 'RG-15') &&
-                      <RecentDataTable
-                        items={format(['raingauge'], vsn)}
-                        className="hover-rain"
-                        inactive={inactive.some(name => /RG-15|/i.test(name))}
-                      />
-                    }
-                    {hasSensor(manifest, 'ES-642') &&
-                      <RecentDataTable
-                        items={format(['es642AirQuality'], vsn)}
-                        inactive={inactive.some(name => /ES-642/i.test(name))}
-                      />
-                    }
-                  </div>
-                </div>
+                </Masonry>
               </>
             }
             {!hasSensor(manifest, COMMON_SENSORS) &&
@@ -485,18 +469,9 @@ const Root = styled.div`
     }
   }
 
-  .data-tables div {
-    width: 100%;
-    margin-right: 3em
-  }
-
   .timeline-title {
     float: left;
     h2 { margin-right: 1em; }
-  }
-
-  table {
-    width: 100%;
   }
 `
 

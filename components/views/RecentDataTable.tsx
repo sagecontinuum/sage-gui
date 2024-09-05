@@ -1,4 +1,5 @@
 import { useEffect, useState, memo } from 'react'
+import { Link } from 'react-router-dom'
 
 import styled from 'styled-components'
 
@@ -6,41 +7,45 @@ import Tooltip from '@mui/material/Tooltip'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 import ZoomInIcon from '@mui/icons-material/ZoomInRounded'
 
-import ErrorMsg from '../../apps/sage/ErrorMsg'
+import ErrorMsg from '/apps/sage/ErrorMsg'
 import { relativeTime, isOldData } from '/components/utils/units'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import * as BH from '/components/apis/beehive'
 
 import SparkLine from '/components/viz/SparkLine'
-import Portal from '/components/PortalLink'
 
-import { subDays } from 'date-fns'
 import { shortUnits } from '/components/measurement.config'
+
+
+// import { subDays } from 'date-fns'
+// todo(nc): use computed static start time
+// const getStartTime = () =>
+//  subDays(new Date(), 1).toISOString()
 
 
 type SparkLine = {timestamp: string, value: number}[]
 
-const getStartTime = () =>
-  subDays(new Date(), 1).toISOString()
 
 const getClassName = (timestamp, inactive) =>
   inactive ? 'inactive font-bold nowrap' :
     (isOldData(timestamp) ? 'failed font-bold nowrap' : 'muted nowrap')
 
 
-const renderValue = (value, format, meta) => {
+const renderValue = (value, format, meta, item) => {
   if (value == 'loading')
     return <span className="muted">loading...</span>
   else if (value != 'loading' && format)
     return format(value as number)
   else if (value == null)
-    return <span className="muted">Not available</span>
-  return `${value}${shortUnits[meta.units] || meta.units || ''}`
+    return <span className="muted">n/a</span>
+  return `${value}${shortUnits[meta.units] || meta.units || item.units || ''}`
 }
 
 
 type Props = {
+  title?: string
+  previewLabel?: string
   items: {
     label: string
     query: {
@@ -57,7 +62,7 @@ type Props = {
 }
 
 export default memo(function RecentDataTable(props: Props) {
-  const {items, showSparkline = true, className, inactive = false} = props
+  const {title, previewLabel, items, showSparkline = true, className, inactive = false} = props
 
   const {setLoading} = useProgress()
   const [recentData, setRecentData] = useState<{[label: string]: BH.Record}>(
@@ -67,8 +72,6 @@ export default memo(function RecentDataTable(props: Props) {
 
   const [error, setError] = useState(null)
 
-  const start = showSparkline ? getStartTime() : null
-
   useEffect(() => {
     setLoading(true)
 
@@ -76,8 +79,7 @@ export default memo(function RecentDataTable(props: Props) {
     for (const item of items) {
       const {label, query} = item
 
-      const q = start ? {start, ...query} : query
-      const p = BH.getRecentRecord(q)
+      const p = BH.getRecentRecord(query)
         .then(data => {
           // take latest record for latest value
           const d = data.pop()
@@ -153,10 +155,10 @@ export default memo(function RecentDataTable(props: Props) {
         <table className={`simple key-value ${className}`}>
           <thead>
             <tr>
-              <th></th>
-              <th>Latest Time</th>
-              <th>Value</th>
-              <th>Last 24 Hours</th>
+              <th>{title || ''}</th>
+              <th>latest time</th>
+              <th>{previewLabel || 'Last 24 Hours'}</th>
+              <th className="value">value</th>
             </tr>
           </thead>
           <tbody>
@@ -177,10 +179,10 @@ export default memo(function RecentDataTable(props: Props) {
                         <small>(click for description)</small></>}
                       placement="left"
                     >
-                      <Portal to={`/data/ontology/${item.query.name}`}
+                      <Link to={`/data/ontology/${item.query.name}`}
                         target="_blank" rel="noreferrer">
                         <HelpIcon />
-                      </Portal>
+                      </Link>
                     </Tooltip>
                   </td>
                   <td className={getClassName(timestamp, inactive)}>
@@ -193,13 +195,11 @@ export default memo(function RecentDataTable(props: Props) {
                     }
                     {!timestamp && '-'}
                   </td>
-                  <td>
-                    {renderValue(value, format, meta)}
-                  </td>
+
                   {!showSparkline &&
                     <td>
                       {data && linkParams && data.value != 'loading' &&
-                        <Portal to={`/query-browser?${linkParams(data)}`}>more...</Portal>
+                        <Link to={`/query-browser?${linkParams(data)}`}>more...</Link>
                       }
                     </td>
                   }
@@ -208,14 +208,17 @@ export default memo(function RecentDataTable(props: Props) {
                     <td>
                       {data && linkParams && data.value != 'loading' &&
                         <SparkLineLink>
-                          <Portal href={`/query-browser?${linkParams(data)}`} target="_blank">
+                          <Link to={`/query-browser?${linkParams(data)}`} target="_blank">
                             <SparkLine data={sparkLines[label]}/>
                             <ZoomInIcon />
-                          </Portal>
+                          </Link>
                         </SparkLineLink>
                       }
                     </td>
                   }
+                  <td className="value">
+                    {renderValue(value, format, meta, item)}
+                  </td>
                 </tr>
               )
             })}
@@ -231,7 +234,20 @@ export default memo(function RecentDataTable(props: Props) {
 }, (prev, next) => prev.items != next.items)
 
 const Root = styled.div`
+  thead th {
+    color: #fff;
+    background: #4e2a84;
+    :first-child { border-radius: 4px 0 0 0; }
+    :last-child { border-radius: 0px 4px 0 0; }
+  }
 
+  table thead th:not(:first-child) {
+    color: #e9dbff;
+  }
+
+  .value {
+    text-align: right;
+  }
 `
 
 const HelpIcon = styled(QuestionMark)`
