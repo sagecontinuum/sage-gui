@@ -17,6 +17,7 @@ const measurements = {
       {name: 'aqt.particle.pm10', label: 'pm10'}
     ]
   },
+
   'WXT536': {
     start: '-1h',
     names: [
@@ -38,6 +39,7 @@ const measurements = {
     ],
     sensor: 'bme680'
   },
+
   'RG-15': {
     names: [
       {name: 'env.raingauge.event_acc', label: 'Rainfall', units: 'mm'}
@@ -53,6 +55,41 @@ const measurements = {
       {name: 'env.air_quality.flow', label: 'Air Flow'}
     ],
     sensor: 'es642'
+  },
+
+  'LI-7500DS': {
+    start: '-1h',
+    names: [
+      {name: 'co2.absolute_water', },
+      {name: 'co2.absolute_water_offset', },
+      {name: 'co2.density', },
+      {name: 'co2.mg_per_m3', },
+      {name: 'co2.mole_fraction', },
+      {name: 'co2.raw', },
+      {name: 'co2.signal_strength', },
+      {name: 'dew_point', },
+      {name: 'h2o.absolute_water', },
+      {name: 'h2o.absolute_water_offset', },
+      {name: 'h2o.density', },
+      {name: 'h2o.g_per_m3', },
+      {name: 'h2o.mole_fraction', },
+      {name: 'h2o.raw', },
+      {name: 'pressure', },
+      {name: 'sonic.speed_of_sound', },
+      {name: 'sonic.temperature', },
+      {name: 'sonic.u', },
+      {name: 'sonic.v', },
+      {name: 'sonic.w', },
+      {name: 'temperature', },
+      // {name: 'index', },
+      // {name: 'cooler', },
+      // {name: 'date', },
+      // {name: 'index', },
+      // {name: 'time', label: '____'},
+      // {name: 'time.nanoseconds', label: '____'},
+      // {name: 'time.seconds', label: '____'},
+    ],
+    sensor: 'LI7500DS/uSonic-3'
   }
 }
 
