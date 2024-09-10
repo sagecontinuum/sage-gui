@@ -101,13 +101,15 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs: BK.Site
   Object.keys(byName).forEach((name) => {
     const namedData = byName[name]
     const grouped = groupBy(namedData, o => {
-      const {sensor, zone, vsn} = o.meta
+      const {sensor, zone, deviceName, vsn} = o.meta
 
       const node = vsnToDisplayStr(vsn, siteIDs[vsn])
       if (sensor && zone) {
         return `${node}; ${sensor}; ${zone}`
       } else if (sensor) {
         return `${node}; ${sensor}`
+      } else if (deviceName) {
+        return `${node}; ${deviceName};`
       } else {
         return node
       }

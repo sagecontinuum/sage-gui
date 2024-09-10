@@ -116,6 +116,9 @@ const columns = [{
 }, {
   id: 'sensor',
   label: 'Sensor',
+}, {
+  id: 'deviceName',
+  label: 'Device',
 }, /* {
   id: 'job',
   label: 'Job',
@@ -218,6 +221,7 @@ async function getFilterMenus({plugin, task, name}, siteIDs) {
     nodes: getUniqueNodeOpts(data.map(o => o.meta.vsn), siteIDs),
     names: getUniqueOpts(data.map(o => o.name)),
     sensors: getUniqueOpts(data.map(o => o.meta.sensor)),
+    deviceNames: getUniqueOpts(data.map(o => o.meta.deviceName)),
     ...(plugin ? {} : {
       tasks: getUniqueOpts(data.map(o => o.meta.task))
     })
@@ -302,7 +306,8 @@ const initMenuState = {
   tasks: [],
   nodes: [],
   names: [],
-  sensors: []
+  sensors: [],
+  deviceNames: []
 }
 
 const initFilterState = {
@@ -310,7 +315,8 @@ const initFilterState = {
   tasks: [],
   nodes: [],
   names: [],
-  sensors: []
+  sensors: [],
+  deviceNames: []
 }
 
 
@@ -334,13 +340,13 @@ type Option = {id: string, label: string}
 
 const facetInputs: Facets = {
   'apps': ['apps', 'nodes', 'names', 'sensors'],
-  'names': ['names', 'nodes', 'sensors'],
+  'names': ['names', 'nodes', 'sensors', 'deviceNames'],
   'images': ['tasks', 'nodes'],
   'audio': ['tasks', 'nodes']
 }
 
 const allowMultiSelect = (field: Facet) =>
-  ['nodes', 'names', 'tasks', 'sensors'].includes(field)
+  ['nodes', 'names', 'tasks', 'sensors', 'deviceNames'].includes(field)
 
 
 export function getFilterState(params, includeDefaultApp=true) : FilterState {
@@ -365,6 +371,7 @@ export default function QueryBrowser() {
   const name = params.get('names')
   const node = params.get('nodes')
   const sensor = params.get('sensors')
+  const deviceName = params.get('deviceNames') // for lorawan
   const task = params.get('tasks')
   const type = params.get('type') as DataTypes || 'apps'  // for tabs
   const mimeType = isMedia(type) ?
@@ -415,7 +422,7 @@ export default function QueryBrowser() {
     const filterState = getFilterState(params, includeDefaultApp)
     setFilters(filterState)
     handlePage(0)
-  }, [app, name, node, sensor, task, type, mimeType])
+  }, [app, name, node, sensor, deviceName, task, type, mimeType])
 
 
   // update filter menus whenever app or task changes
@@ -445,6 +452,24 @@ export default function QueryBrowser() {
       })
     }
   }, [menus.sensors])
+
+
+  // show/hide deviceName column if needed
+  useEffect(() => {
+    if (menus.deviceNames.length) {
+      setCols(prev => {
+        const idx = findColumn(prev, 'deviceName')
+        prev[idx] = {...prev[idx], hide: false}
+        return prev.slice(0)
+      })
+    } else {
+      setCols(prev => {
+        const idx = findColumn(prev, 'deviceName')
+        prev[idx] = {...prev[idx], hide: true}
+        return prev.slice(0)
+      })
+    }
+  }, [menus.deviceNames])
 
 
   // initial loading of everything
@@ -482,7 +507,8 @@ export default function QueryBrowser() {
           ...(node ? {vsn: node} : {}),
           ...(name ? {name} : {}),
           ...(sensor ? {sensor} : {}),
-          ...(task ? {task} : {})
+          ...(task ? {task} : {}),
+          ...(deviceName ? {deviceName} : {})
         }
       }
 
@@ -540,7 +566,7 @@ export default function QueryBrowser() {
     fetchData()
     fetchFilterMenus()
   }, [
-    app, node, name, sensor, task, type, mimeType,
+    app, node, name, sensor, task, deviceName, type, mimeType,
     start, end, queryCount, setLoading
   ])
 
@@ -732,8 +758,8 @@ export default function QueryBrowser() {
           <h3>{capitalize(type.replace(/s$/, ''))} Filters</h3>
 
           {menus && facetInputs[type].map(facet => {
-            // if no sensors are associated with the data, don't show sensor input
-            if (facet == 'sensors' && !menus[facet].length) {
+            // if no sensors/deviceNames are associated with the data, don't show sensor input
+            if (['sensors', 'deviceNames'].includes(facet) && !menus[facet].length) {
               return <></>
             }
 
