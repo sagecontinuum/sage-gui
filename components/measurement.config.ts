@@ -24,8 +24,8 @@ const measurements = {
       {name: 'wxt.env.temp', label: 'Temperature'},
       {name: 'wxt.env.humidity', label: 'Humidity'},
       {name: 'wxt.env.pressure', label: 'Pressure'},
-      {name: 'wxt.rain.accumulation', label: 'Rain'},
-      {name: 'wxt.hail.accumulation', label: 'Hail'},
+      {name: 'wxt.rain.accumulation', label: 'Rain Accum.'},
+      {name: 'wxt.hail.accumulation', label: 'Hail Accum.'},
       {name: 'wxt.wind.direction', label: 'Wind Direction'},
       {name: 'wxt.wind.speed', label: 'Wind Speed'}
     ]
@@ -104,7 +104,9 @@ const shortUnits = {
   'milimeters': 'mm',
   'meters per second': 'm/s',
   'hits per square centimeter': 'hits / cm²',
-  'hectoPascal': 'hPa'
+  'hectoPascal': 'hPa',
+  'mg/m^3': 'mg/m²',
+  'unit': ' '  // don't show "unit"; artifact of LI-7500DS
 }
 
 let skipSensorPreview = [
