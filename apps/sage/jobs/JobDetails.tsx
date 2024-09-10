@@ -1,7 +1,7 @@
 // @ts-nocheck -- type checking for timeline is still a todo
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 
 import { Button, Divider, FormControlLabel, IconButton, Tooltip } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
@@ -49,6 +49,8 @@ type Options = {
 }
 
 
+type Tabs = 'timeline' | 'tasks'
+
 
 type Props = {
   job: ES.Job
@@ -60,7 +62,9 @@ export default function JobDetails(props: Props) {
   const {job, nodeMetaByVSN, handleCloseDialog} = props
 
   const {pathname} = useLocation()
-  const {loading, setLoading} = useProgress()
+  const [params] = useSearchParams()
+  const tab = params.get('tab') || 'timeline'
+
   const [yaml, setYaml] = useState<string>()
 
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
@@ -68,16 +72,14 @@ export default function JobDetails(props: Props) {
 
   // all events related to the job being looked at (by node)
   const [events, setEvents] = useState<ES.EventsByNode>()
-
   const [showAllTasks, setShowAllTasks] = useState<boolean>(false)
-
-  const [tab, setTab] = useState<'timeline' | 'tasks'>('timeline')
 
   const [opts, setOpts] = useState<Options>({
     start: getStartTime(TAIL_DAYS),
     window: TAIL_DAYS
   })
 
+  const {loading, setLoading} = useProgress()
 
   useEffect(() => {
     if (!job) return
@@ -227,7 +229,6 @@ export default function JobDetails(props: Props) {
           <Tabs
             value={tab}
             aria-label="timeline or table"
-            onChange={(evt, val) => setTab(val)}
           >
             <Tab
               label={
