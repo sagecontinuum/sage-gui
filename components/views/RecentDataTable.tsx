@@ -278,3 +278,32 @@ const SparkLineLink = styled.div`
   }
 `
 
+
+type EmptyTableProps = {
+  title: string
+  content?: string | JSX.Element
+}
+
+export function EmptyTable(props: EmptyTableProps) {
+  const {title, content} = props
+  return (
+    <Root>
+      <table className={`simple key-value`}>
+        <thead>
+          <tr>
+            <th>{title}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span className="muted text-center">
+                {content || 'Not available'}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Root>
+  )
+}

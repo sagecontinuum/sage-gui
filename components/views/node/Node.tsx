@@ -267,8 +267,13 @@ export default function NodeView(props: Props) {
         })
 
         if (!items) {
-          // todo(nc): add note about no configuration
-          return <></>
+          return (
+            <EmptyTable
+              key={i}
+              title={hw_model}
+              content="Sensor preview not configured"
+            />
+          )
         }
 
         return (
