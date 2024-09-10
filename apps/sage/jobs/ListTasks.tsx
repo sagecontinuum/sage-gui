@@ -25,6 +25,7 @@ const prettyTime = (d: string) => {
 
 const prettyDiff = (ms: number) => {
   if (ms == 0) return '~0'
+  if (!ms) return '-'
   return Units.prettyTimeMS(ms)
 }
 

@@ -90,7 +90,13 @@ const measurements = {
       // {name: 'time.seconds', label: '____'},
     ],
     sensor: 'LI7500DS/uSonic-3'
-  }
+  },
+
+  'SFM1x': { // lora device
+    names: [
+      {name: 'uncorrected_inner|uncorrected_outer', label: 'Uncorrected Inner/Outer'},
+    ]
+  },
 }
 
 const shortUnits = {
@@ -113,6 +119,10 @@ let skipSensorPreview = [
   'microphone',
   'gps',
   'bme280',
+  'Lorawan Antenna',
+  'lorawan',
+  'Device_2',
+  'MFR_node_MNLA4O102'
 ]
 
 if (settings.project == 'CROCUS')

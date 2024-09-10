@@ -195,7 +195,7 @@ function getSumData(records: BH.Record[]) {
 type ChartOpts = {
   showLines: boolean
   showPoints: boolean
-  chartType: 'timeseries' | 'frequency' | 'sum'
+  chartType?: 'timeseries' | 'frequency' | 'sum'
 }
 
 const chartOpts = {

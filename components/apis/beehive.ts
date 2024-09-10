@@ -44,6 +44,7 @@ export type Meta = {
   plugin?: string
   task?: string
   zone?: string
+  deviceName?: string // for lorawan
 }
 
 // standard, most common SDR record
@@ -442,12 +443,13 @@ type RecentRecArgs = {
   vsn?: string
   name?: string
   sensor?: string
+  deviceName?: string
   start?: string // default: '-4d'
   tail?: number  // default: 1
 }
 
 export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
-  const {node, vsn, name, sensor, start = '-4d', tail = null} = args
+  const {node, vsn, name, sensor, deviceName, start = '-4d', tail = null} = args
 
   const data = await getData({
     start,
@@ -455,7 +457,8 @@ export async function getRecentRecord(args: RecentRecArgs) : Promise<Record[]> {
       ...(node && {node}),
       ...(vsn && {vsn}),
       ...(name && {name}),
-      ...(sensor && {sensor})
+      ...(sensor && {sensor}),
+      ...(deviceName && {deviceName}) // lora
     },
     ...(tail && {tail})
   })

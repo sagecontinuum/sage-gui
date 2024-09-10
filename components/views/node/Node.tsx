@@ -22,7 +22,7 @@ import AppLabel from '/components/viz/TimelineAppLabel'
 import Table from '/components/table/Table'
 import { prettyList, quickRanges } from '/components/utils/units'
 
-import RecentDataTable from '../RecentDataTable'
+import RecentDataTable, { EmptyTable } from '../RecentDataTable'
 import RecentImages from '../RecentImages'
 
 // import KeyTable from './lorawandevice/collapsible' // (alternate design)
@@ -56,7 +56,7 @@ const TAIL_DAYS = '-7d'
 // todo(nc): refactor more into a general config
 const COMMON_SENSORS = ['BME680', 'RG-15', 'ES-642']
 
-const hasSensor = (meta: BK.FlattenedManifest, sensors: string | string[]) : boolean =>
+const hasSensor = (meta: BK.Node, sensors: string | string[]) : boolean =>
   meta?.sensors.some(({hw_model}) => {
     sensors = Array.isArray(sensors) ? sensors : [sensors]
     const re = new RegExp(sensors.join('|'), 'gi')
@@ -74,18 +74,17 @@ export const hasShield = (computes: BK.FlattenedManifest['computes']) =>
   !!computes.some(o => o.zone == 'shield')
 
 // todo(nc): solution assumes compute/sensor names are uniqu
-const getInActive = (data: BK.FlattenedManifest) => [
+const getInActive = (data: BK.Node) => [
   ...data.computes.reduce((acc, o) => !o.is_active ? [...acc, o.name] : acc, []),
   ...data.sensors.reduce((acc, o) => !o.is_active ? [...acc, o.hw_model] : acc, [])
 ]
 
 
-const getSensorList = (data: BK.FlattenedManifest) => {
+const getSensorList = (data: BK.Node) => {
   const sensors = data?.sensors.filter(o =>
     !o.capabilities.includes('camera') &&
     !skipSensorPreview.includes(o.name)
-  ).map(o => o.hw_model)
-    .reverse() // reverse to put rainfall first
+  )
 
   return sensors
 }
@@ -143,19 +142,11 @@ export default function NodeView(props: Props) {
     setLoading(true)
 
     const p1 = BK.getNode(vsn)
-      .then((data: BK.Node) => setNode(data))
-      .catch((err) => {
-        if (err.message == 'Not found.')
-          setVsnNotFound(true)
-      })
-
-    const p2 = BK.getManifest(vsn)
-      .then(data => {
-        setManifest(data)
+      .then((data: BK.Node) => {
+        setNode(data)
         setInactive(getInActive(data))
 
         const id = data.name
-
         // fetch the registration time from beekeeper
         BK.getBKState(id)
           .then(data => setBKMeta(data))
@@ -163,7 +154,15 @@ export default function NodeView(props: Props) {
             setError({message: `Beekeeper ${err.message}. Hence, the node registration time for ${vsn} was not found.`})
             setBKMeta({registration_event: null})
           })
-      }).catch(() => { /* do nothing for now */ })
+      })
+      .catch((err) => {
+        if (err.message == 'Not found.')
+          setVsnNotFound(true)
+      })
+
+    const p2 = BK.getManifest(vsn)
+      .then(data => setManifest(data))
+      .catch(() => { /* do nothing for now */ })
 
     const p3 = BH.getSimpleNodeStatus(vsn)
       .then((records) => {
@@ -241,27 +240,39 @@ export default function NodeView(props: Props) {
 
 
   const sensors = useMemo(() => {
-    if (!manifest || !vsn) return
+    if (!node || !vsn) return
 
-    return getSensorList(manifest)
-      .map(hw_model => {
+    return getSensorList(node)
+      .map((obj, i) => {
+        const {hw_model, name, capabilities} = obj
+
         const config = measurements[hw_model]
         const start = config?.start || '-1d'
         const {sensor} = config || {}
+
+        const isLora = capabilities.includes('lorawan')
+        const deviceName = isLora ? name.replace(/_/g , ' ') : null
 
         const items = config?.names.map(obj => {
           const {name, label, units} = obj
 
           return {
             label: label || name,
-            query: {vsn, name, start, sensor},
+            query: {
+              vsn,
+              name,
+              start,
+              sensor,
+              deviceName // for lorawan sensor
+            },
             units,
-            linkParams: ({name, meta}) => [
+            linkParams: ({meta}) => [
               `type=names`,
               `nodes=${meta.vsn}`,
               `names=${name}`,
               `start=${start}`,
-              ...sensor ? [`&sensors=${sensor}`] : []
+              ...sensor ? [`&sensors=${sensor}`] : [],
+              ...deviceName ? [`&deviceNames=${deviceName}`] : []
             ].join('&')
           }
         })
@@ -271,22 +282,22 @@ export default function NodeView(props: Props) {
             <EmptyTable
               key={i}
               title={hw_model}
-              content="Sensor preview not configured"
+              content="Preview not configured"
             />
           )
         }
 
         return (
           <RecentDataTable
-            key={hw_model}
-            title={hw_model}
+            key={i}
+            title={deviceName ? deviceName : hw_model}
             items={items}
             previewLabel={quickRanges[start]}
             className={`hover-${hw_model}`}
           />
         )
       })
-  }, [manifest, vsn])
+  }, [node, vsn])
 
 
 
@@ -391,7 +402,7 @@ export default function NodeView(props: Props) {
                 </Masonry>
               </>
             }
-            {!hasSensor(manifest, COMMON_SENSORS) &&
+            {!hasSensor(node, COMMON_SENSORS) &&
               <p className="muted">
                 No configuration was found for
                 common sensors ({COMMON_SENSORS.slice(0, -1).join(', ')}, or {COMMON_SENSORS.slice(-1)})
