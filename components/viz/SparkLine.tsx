@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { schemeCategory10 } from 'd3-scale-chromatic'
+
+import type { Record } from '/components/apis/beehive'
 
 import {
   Chart as ChartJS,
@@ -18,6 +19,7 @@ import {
   Decimation,
   type ChartConfiguration
 } from 'chart.js'
+import { getLineDatasets } from '/apps/sage/data-stream/TimeSeries'
 
 ChartJS.register(
   Tooltip, Legend, LineController, BarController, LineElement, PointElement,
@@ -25,20 +27,8 @@ ChartJS.register(
 )
 
 
-const config: ChartConfiguration = {
+const lineConfig: ChartConfiguration = {
   type: 'line',
-  data: {
-    labels: [],
-    datasets: [
-      {
-        fill: true,
-        pointRadius: 0,
-        borderWidth: 1,
-        borderColor: schemeCategory10[0],
-        data: []
-      }
-    ]
-  },
   options: {
     events: [],
     animation: false,
@@ -49,10 +39,11 @@ const config: ChartConfiguration = {
     },
     scales: {
       x: {
-        display: false
+        type: 'time',
+        display: false,
       },
       y: {
-        display: false
+        display: false,
       }
     },
     plugins: {
@@ -73,7 +64,7 @@ const config: ChartConfiguration = {
 
 
 type Props = {
-  data: {timestamp: string, value: number }[]
+  data: Record[]
 }
 
 export default function SparkLine(props: Props) {
@@ -88,10 +79,13 @@ export default function SparkLine(props: Props) {
       chart.destroy()
     }
 
-    const d = data.map(o => o.value)
+    const datasets = getLineDatasets(data, {showLines: true, showPoints: false})
 
-    config.data.labels = data.map(o => o.timestamp)
-    config.data.datasets[0].data = d
+    const config = {
+      ...lineConfig,
+      data: {datasets}
+    }
+
     const c = new ChartJS(ref.current, config)
 
     setChart(c)

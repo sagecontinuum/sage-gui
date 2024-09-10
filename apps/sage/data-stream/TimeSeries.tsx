@@ -92,7 +92,7 @@ const barConfig = {
 }
 
 
-function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs: BK.SiteIDs) {
+export function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs?: BK.SiteIDs) {
   const datasets = []
 
   const byName = groupBy(records, 'name')
@@ -103,7 +103,7 @@ function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs: BK.Site
     const grouped = groupBy(namedData, o => {
       const {sensor, zone, deviceName, vsn} = o.meta
 
-      const node = vsnToDisplayStr(vsn, siteIDs[vsn])
+      const node = siteIDs ? vsnToDisplayStr(vsn, siteIDs[vsn]) : vsn
       if (sensor && zone) {
         return `${node}; ${sensor}; ${zone}`
       } else if (sensor) {

@@ -61,6 +61,7 @@ type Props = {
   inactive?: boolean
 }
 
+
 export default memo(function RecentDataTable(props: Props) {
   const {title, previewLabel, items, showSparkline = true, className, inactive = false} = props
 
@@ -68,7 +69,7 @@ export default memo(function RecentDataTable(props: Props) {
   const [recentData, setRecentData] = useState<{[label: string]: BH.Record}>(
     items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
   )
-  const [sparkLines, setSparkLines] = useState<{[label: string]: SparkLine}>({})
+  const [sparkLines, setSparkLines] = useState<{[label: string]: BH.Record[]}>({})
 
   const [error, setError] = useState(null)
 
@@ -84,12 +85,26 @@ export default memo(function RecentDataTable(props: Props) {
           // take latest record for latest value
           const d = data.pop()
           if (!d) {
-            setRecentData(prev => ({...prev, [label]: null}))
+            // find for latest record
+            const q = {...query, tail: 1, start: '-999y'}
+            BH.getRecentRecord(q)
+              .then(data => {
+                const d = data.pop()
+                if (!d) {
+                  setRecentData(prev => ({...prev, [label]: null}))
+                  return
+                }
+
+                setRecentData(prev => ({...prev, [label]: d}))
+              }).catch((err) => {
+                setRecentData(prev => ({...prev, [label]: null}))
+                setError(err)
+              })
             return
           }
 
           setRecentData(prev => ({...prev, [label]: d}))
-          setSparkLines(prev => ({...prev, [label]: data as SparkLine}))
+          setSparkLines(prev => ({...prev, [label]: data}))
         }).catch((err) => {
           setRecentData(prev => ({...prev, [label]: null}))
           setError(err)
@@ -99,54 +114,7 @@ export default memo(function RecentDataTable(props: Props) {
 
     Promise.allSettled(proms)
       .finally(() => setLoading(false))
-  }, [items])
-
-
-  // this is a somewhat crude deeper search for latest data,
-  // once other queries are completely finished
-  useEffect(() => {
-    // stop searching if there's an error
-    if (error)
-      return
-
-    // if actually all done
-    const stillLoading = (Object.values(recentData) || []).filter(o => o?.value == 'loading').length
-    if (stillLoading) return
-
-    // if no missing data, we are done
-    const noUnavailData = Object.values(recentData).filter(o => o != null).length
-    if (noUnavailData)
-      return
-
-    // kick off the search for the tail
-    setLoading(true)
-    const proms = []
-    for (const item of items) {
-      const {label, query} = item
-
-      if (recentData[label] != null)
-        continue
-
-      const q = {...query, tail: 1, start: '-999y'}
-      const p = BH.getRecentRecord(q)
-        .then(data => {
-          const d = data.pop()
-          if (!d) {
-            setRecentData(prev => ({...prev, [label]: null}))
-            return
-          }
-
-          setRecentData(prev => ({...prev, [label]: d}))
-        }).catch((err) => {
-          setRecentData(prev => ({...prev, [label]: null}))
-          setError(err)
-        })
-      proms.push(p)
-    }
-
-    Promise.allSettled(proms)
-      .finally(() => setLoading(false))
-  }, [recentData, error])
+  }, [])
 
 
   return (
