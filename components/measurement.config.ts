@@ -111,7 +111,8 @@ const shortUnits = {
   'meters per second': 'm/s',
   'hits per square centimeter': 'hits / cm²',
   'hectoPascal': 'hPa',
-  'mg/m^3': 'mg/m²',
+  'mg/m^2': 'mg/m²',
+  'mg/m^3': 'mg/m³',
   'unit': ' '  // don't show "unit"; artifact of LI-7500DS
 }
 
