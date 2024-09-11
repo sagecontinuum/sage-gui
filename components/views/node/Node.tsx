@@ -341,7 +341,7 @@ export default function NodeView(props: Props) {
                 />
               }
               {!loraDataWithRssi &&
-                <TableSkeleton />
+                <TableSkeleton noSearch rows={5} />
               }
             </Card>
           }
