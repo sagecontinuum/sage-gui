@@ -517,22 +517,30 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
   return data
 }
 
-async function getRssi(vsn: string, devEui: string) : Promise<Record> {
+async function getRssis(vsn: string, devEuis: string | string[]) : Promise<{[devEui: string]: Record}> {
+  const devEui = Array.isArray(devEuis) ? devEuis.join('|') : devEuis
   const params = {start: NODE_STATUS_RANGE, filter: {name: 'signal.rssi', vsn, devEui}, tail: 1}
   const metrics = await getData(params)
-  return metrics[metrics.length - 1]
+
+  const byDevEui = groupBy<Record[]>(metrics, 'meta.devEui')
+  const rssiDict = Object.keys(byDevEui).reduce((acc, eui) =>
+    ({...acc, [eui]: byDevEui[eui].pop()})
+  , {})
+
+  return rssiDict
 }
 
-export const fetchDataWithRssi = async (manifest: FlattenedManifest): Promise<LorawanConnection[]> => {
-  const dataWithRssi: LorawanConnection[]= []
-  if (manifest?.lorawanconnections) {
-    const dataWithRssiPromises = manifest.lorawanconnections.map(async (row) => {
-      const rssiDict = await getRssi(manifest.vsn, row.deveui)
-      const rssiValue = rssiDict ? rssiDict['value'] : null
-      return { ...row, rssi: rssiValue, foo: 'bah'}
-    })
-    const updatedDataWithRssi = await Promise.all(dataWithRssiPromises)
-    dataWithRssi.push(...updatedDataWithRssi)
-  }
+export async function getLoraWithRssi(manifest: FlattenedManifest): Promise<LorawanConnection[]> {
+  const {vsn, lorawanconnections} = manifest
+
+  const devEuis = lorawanconnections.map(row => row.deveui)
+  const rssiByDevEui = await getRssis(vsn, devEuis)
+
+  const dataWithRssi = lorawanconnections.map(row => {
+    const rssiDict = rssiByDevEui[row.deveui]
+    const value = rssiDict ? rssiDict.value : null
+    return {...row, rssi: value}
+  })
+
   return dataWithRssi
 }

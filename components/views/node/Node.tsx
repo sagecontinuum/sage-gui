@@ -19,7 +19,7 @@ import Map from '/components/Map'
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
-import Table from '/components/table/Table'
+import Table, { TableSkeleton } from '/components/table/Table'
 import { prettyList, quickRanges } from '/components/utils/units'
 
 import RecentDataTable, { EmptyTable } from '../RecentDataTable'
@@ -136,7 +136,7 @@ export default function NodeView(props: Props) {
   // note: endtime is not currently an option
   const [end] = useState<Date>(endOfHour(new Date()))
 
-  const [loraDataWithRssi, setDataWithRssi] = useState<BK.LorawanConnection[]>([])
+  const [loraDataWithRssi, setDataWithRssi] = useState<BK.LorawanConnection[]>()
 
   useEffect(() => {
     setLoading(true)
@@ -201,9 +201,9 @@ export default function NodeView(props: Props) {
 
   // fetch rssi
   useEffect(() => {
-    (async () => {
-      setDataWithRssi(await BH.fetchDataWithRssi(manifest))
-    })()
+    if (!manifest) return
+    BH.getLoraWithRssi(manifest)
+      .then(data => setDataWithRssi(data))
   }, [manifest])
 
 
@@ -331,13 +331,18 @@ export default function NodeView(props: Props) {
                   <HelpIcon/>
                 </Link>
               </h2>
-              <Table
-                primaryKey='deveui'
-                columns={deviceCols}
-                rows={loraDataWithRssi}
-                enableSorting
-                // collapsible={<KeyTable row={loraDataWithRssi} />}
-              />
+              {loraDataWithRssi &&
+                <Table
+                  primaryKey='deveui'
+                  columns={deviceCols}
+                  rows={loraDataWithRssi}
+                  enableSorting
+                  // collapsible={<KeyTable row={loraDataWithRssi} />}
+                />
+              }
+              {!loraDataWithRssi &&
+                <TableSkeleton />
+              }
             </Card>
           }
 
