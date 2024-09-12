@@ -80,7 +80,7 @@ const getInActive = (data: BK.Node) => [
 ]
 
 
-const getSensorList = (data: BK.Node) => {
+const getSensorList = (data: BK.FlattenedManifest) => {
   const sensors = data?.sensors.filter(o =>
     !o.capabilities.includes('camera') &&
     !skipSensorPreview.includes(o.name)
@@ -240,11 +240,11 @@ export default function NodeView(props: Props) {
 
 
   const sensors = useMemo(() => {
-    if (!node || !vsn) return
+    if (!manifest || !vsn || !inactive) return
 
-    return getSensorList(node)
+    return getSensorList(manifest)
       .map((obj, i) => {
-        const {hw_model, name, capabilities} = obj
+        const {hw_model, name, capabilities, is_active, scope} = obj
 
         const config = measurements[hw_model]
         const start = config?.start || '-1d'
@@ -287,6 +287,26 @@ export default function NodeView(props: Props) {
           )
         }
 
+        if (!admin && !is_active) {
+          return (
+            <EmptyTable
+              key={i}
+              title={hw_model}
+              content={`The ${hw_model} sensor is marked as inactive`}
+            />
+          )
+        }
+
+        if (!admin && inactive.includes(scope)) {
+          return (
+            <EmptyTable
+              key={i}
+              title={hw_model}
+              content={`The ${scope} is marked as inactive`}
+            />
+          )
+        }
+
         return (
           <RecentDataTable
             key={i}
@@ -297,7 +317,7 @@ export default function NodeView(props: Props) {
           />
         )
       })
-  }, [node, vsn])
+  }, [manifest, inactive, vsn])
 
 
 
@@ -396,9 +416,9 @@ export default function NodeView(props: Props) {
 
           <Card>
             <h2>Sensors</h2>
-            {vsn && inactive &&
+            {inactive &&
               <>
-                {!!inactive.length &&
+                {admin && !!inactive.length &&
                   <Alert severity="info" sx={{marginBottom: '1em'}}>
                     {prettyList(inactive)} {inactive.length > 1 ? 'are' : 'is'} marked as inactive
                   </Alert>
