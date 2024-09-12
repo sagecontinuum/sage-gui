@@ -87,6 +87,7 @@ export type Node = {
       hw_model: string
       manufacturer: string
       capabilities: string[]
+      is_active: boolean
   }[]
   computes: {
     name: string

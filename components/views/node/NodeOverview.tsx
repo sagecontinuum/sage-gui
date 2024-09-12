@@ -284,11 +284,22 @@ type Props = {
   tab: string
   liveGPS: BH.GPS
   loading: boolean
+  status: string
   admin?: boolean
 }
 
 export default function NodeOverview(props: Props) {
-  const {node, manifest, bkMeta, loraDataWithRssi, tab, liveGPS, loading, admin} = props
+  const {
+    node,
+    manifest,
+    bkMeta,
+    loraDataWithRssi,
+    tab,
+    liveGPS,
+    loading,
+    status,
+    admin
+  } = props
 
   const {type, vsn} = node || {}
 

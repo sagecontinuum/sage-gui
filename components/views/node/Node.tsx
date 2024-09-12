@@ -321,6 +321,7 @@ export default function NodeView(props: Props) {
             admin={admin}
             liveGPS={liveGPS}
             loading={loading}
+            status={status}
           />
 
           {manifest?.sensors.some(item => item.capabilities.includes('lorawan')) &&

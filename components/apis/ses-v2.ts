@@ -256,7 +256,13 @@ function reduceData(pluginEvents, job, includeAllTasks) {
 
 
 
-const timeDiff = (start: string , end: string) =>
-  (new Date(end).getTime() - new Date(start).getTime()) / 1000
+const timeDiff = (start: string , end: string) => {
+  const e = new Date(end).getTime()
+  const s = new Date(start).getTime()
+
+  if (s > e) return
+
+  return (e - s) / 1000
+}
 
 
