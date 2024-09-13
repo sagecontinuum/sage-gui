@@ -45,6 +45,8 @@ import adminSettings from '/apps/admin/settings'
 import config from '/config'
 
 import { measurements, skipSensorPreview } from '/components/measurement.config'
+import NodeEditBtn from './NodeEditBtn'
+
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
@@ -102,7 +104,7 @@ export default function NodeView(props: Props) {
   const [params] = useSearchParams()
   const tab = params.get('tab') || 'overview'
 
-  const { loading, setLoading } = useProgress()
+  const {loading, setLoading} = useProgress()
 
   const [node, setNode] = useState<BK.Node>()
   const [manifest, setManifest] = useState<BK.FlattenedManifest>()
@@ -240,7 +242,7 @@ export default function NodeView(props: Props) {
 
 
   const sensors = useMemo(() => {
-    if (!manifest || !vsn || !inactive) return
+    if (!manifest || !node || !vsn || !inactive) return
 
     return getSensorList(manifest)
       .map((obj, i) => {
@@ -292,7 +294,9 @@ export default function NodeView(props: Props) {
             <EmptyTable
               key={i}
               title={hw_model}
-              content={`The ${hw_model} sensor is marked as inactive`}
+              content={<div className="flex items-center justify-between">
+                The {hw_model} sensor is marked as inactive {<NodeEditBtn id={node.id}/>}
+              </div>}
             />
           )
         }
@@ -317,7 +321,7 @@ export default function NodeView(props: Props) {
           />
         )
       })
-  }, [manifest, inactive, vsn])
+  }, [manifest, node, inactive, vsn])
 
 
 
@@ -358,6 +362,7 @@ export default function NodeView(props: Props) {
                   columns={deviceCols}
                   rows={loraDataWithRssi}
                   enableSorting
+                  emptyNotice="No devices found"
                   // collapsible={<KeyTable row={loraDataWithRssi} />}
                 />
               }
@@ -415,11 +420,13 @@ export default function NodeView(props: Props) {
           </Card>
 
           <Card>
-            <h2>Sensors</h2>
+            <h2 className="flex justify-between">
+              Sensors
+            </h2>
             {inactive &&
               <>
                 {admin && !!inactive.length &&
-                  <Alert severity="info" sx={{marginBottom: '1em'}}>
+                  <Alert severity="info" sx={{marginBottom: '1em'}} action={<NodeEditBtn id={node?.id} />}>
                     {prettyList(inactive)} {inactive.length > 1 ? 'are' : 'is'} marked as inactive
                   </Alert>
                 }

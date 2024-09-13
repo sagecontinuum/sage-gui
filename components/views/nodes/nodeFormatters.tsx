@@ -19,7 +19,7 @@ import Dot from '/components/utils/Dot'
 
 import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
-
+import config from '/config'
 
 export function gpsIcon(obj) {
   const {hasLiveGPS, hasStaticGPS} = obj
@@ -167,7 +167,7 @@ export function vsnLinkWithEdit(vsn, node: BK.Node) {
       className="edit-btn" // show/hide on hover with css
     >
       <IconButton
-        href={`https://auth.sagecontinuum.org/admin/manifests/nodedata/${node.id}`}
+        href={`${config.auth}/admin/manifests/nodedata/${node.id}`}
         onClick={(evt) => evt.stopPropagation()}
         target="_blank" rel="noreferrer" size="small">
         <EditIcon fontSize="small"/>

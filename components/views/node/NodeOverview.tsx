@@ -7,6 +7,8 @@ import { Button, Tooltip, IconButton } from '@mui/material'
 import LaunchIcon from '@mui/icons-material/LaunchRounded'
 import DescriptionIcon from '@mui/icons-material/DescriptionOutlined'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
+import { LoginRounded } from '@mui/icons-material'
+
 import Grid from '@mui/material/Grid2'
 
 import { Card } from '/components/layout/Layout'
@@ -28,6 +30,7 @@ import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
 
 import { hasShield, TableContainer } from './Node'
+import NodeEditBtn from './NodeEditBtn'
 
 
 const labelDict = {
@@ -286,6 +289,7 @@ type Props = {
   loading: boolean
   status: string
   admin?: boolean
+  isSuper?: boolean
 }
 
 export default function NodeOverview(props: Props) {
@@ -301,33 +305,44 @@ export default function NodeOverview(props: Props) {
     admin
   } = props
 
-  const {type, vsn} = node || {}
+  const {type, vsn, id} = node || {}
 
   return (
     <>
       <Card>
         <div className="flex items-center justify-between">
-          <h1 className="no-margin">
-            {type == 'WSN' ?
-              'Wild Sage Node' : type
-            } {node && nodeFormatters.vsnToDisplayName(vsn, node)}
-          </h1>
-
-          <Tooltip
-            placement="top"
-            title={
-              admin ? 'Node health' : <>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>
+          <div className="flex items-center gap">
+            <h1 className="no-margin">
+              {type == 'WSN' ?
+                'Wild Sage Node' : type
+              } {node && nodeFormatters.vsnToDisplayName(vsn, node)}
+            </h1>
+            {admin &&
+              <Button
+                href={`${config.portal}/node/${vsn}`}
+                endIcon={<LoginRounded />}
+              >
+                view portal
+              </Button>
             }
-          >
-            <Button
-              href={node ? `${config.adminURL}/node/${vsn}?tab=health` : ''}
-              {...(admin ? {} : {target: '_blank'})}
+          </div>
+
+          <div className="flex gap">
+            <NodeEditBtn id={id}/>
+            <Tooltip
+              placement="top"
+              title={
+                admin ? 'Node health' : <>Admin page <LaunchIcon style={{fontSize: '1.1em'}}/></>
+              }
             >
-              <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
-                {status}
-              </span>
-            </Button>
-          </Tooltip>
+              <Button href={node ? `${config.adminURL}/node/${vsn}?tab=health` : ''}>
+                <span className={`${status == 'reporting' ? 'success font-bold' : 'failed font-bold'}`}>
+                  {status}
+                </span>
+              </Button>
+            </Tooltip>
+          </div>
+
         </div>
       </Card>
 
