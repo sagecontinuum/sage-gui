@@ -45,6 +45,7 @@ export type Meta = {
   task?: string
   zone?: string
   deviceName?: string // for lorawan
+  units?: string
 }
 
 // standard, most common SDR record
