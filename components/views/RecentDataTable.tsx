@@ -66,10 +66,10 @@ export default memo(function RecentDataTable(props: Props) {
   const {title, previewLabel, items, showSparkline = true, className, inactive = false} = props
 
   const {setLoading} = useProgress()
-  const [recentData, setRecentData] = useState<{[label: string]: BH.Record}>(
-    items.reduce((acc, o) => ({...acc, [o.label]: {value: 'loading'}}), {})
+  const [recentData, setRecentData] = useState<{[name: string]: BH.Record}>(
+    items.reduce((acc, o) => ({...acc, [o.query.name]: {value: 'loading'}}), {})
   )
-  const [sparkLines, setSparkLines] = useState<{[label: string]: BH.Record[]}>({})
+  const [sparkLines, setSparkLines] = useState<{[name: string]: BH.Record[]}>({})
 
   const [error, setError] = useState(null)
 
@@ -78,7 +78,8 @@ export default memo(function RecentDataTable(props: Props) {
 
     const proms = []
     for (const item of items) {
-      const {label, query} = item
+      const {query} = item
+      const {name} = query
 
       const p = BH.getRecentRecord(query)
         .then(data => {
@@ -91,22 +92,22 @@ export default memo(function RecentDataTable(props: Props) {
               .then(data => {
                 const d = data.pop()
                 if (!d) {
-                  setRecentData(prev => ({...prev, [label]: null}))
+                  setRecentData(prev => ({...prev, [name]: null}))
                   return
                 }
 
-                setRecentData(prev => ({...prev, [label]: d}))
+                setRecentData(prev => ({...prev, [name]: d}))
               }).catch((err) => {
-                setRecentData(prev => ({...prev, [label]: null}))
+                setRecentData(prev => ({...prev, [name]: null}))
                 setError(err)
               })
             return
           }
 
-          setRecentData(prev => ({...prev, [label]: d}))
-          setSparkLines(prev => ({...prev, [label]: data}))
+          setRecentData(prev => ({...prev, [name]: d}))
+          setSparkLines(prev => ({...prev, [name]: data}))
         }).catch((err) => {
-          setRecentData(prev => ({...prev, [label]: null}))
+          setRecentData(prev => ({...prev, [name]: null}))
           setError(err)
         })
       proms.push(p)
@@ -131,23 +132,24 @@ export default memo(function RecentDataTable(props: Props) {
           </thead>
           <tbody>
             {items.map(item => {
-              const {label, format, linkParams} = item
+              const {query, label, format, linkParams} = item
+              const {name, sensor} = query
 
-              const data = recentData[label]
+              const data = recentData[name]
               const {value, timestamp, meta} = data || {}
 
               return (
-                <tr key={label}>
+                <tr key={name}>
                   <td>
-                    {label}
+                    {label || name}
                     <Tooltip
-                      title={<>{item.query.name}<br/>
-                        {item.query.sensor ?
-                          <div>{item.query.sensor}</div> : ''}
+                      title={<>{name}<br/>
+                        {sensor ?
+                          <div>{sensor}</div> : ''}
                         <small>(click for description)</small></>}
                       placement="left"
                     >
-                      <Link to={`/data/ontology/${item.query.name}`}
+                      <Link to={`/data/ontology/${name}`}
                         target="_blank" rel="noreferrer">
                         <HelpIcon />
                       </Link>
@@ -177,7 +179,7 @@ export default memo(function RecentDataTable(props: Props) {
                       {data && linkParams && data.value != 'loading' &&
                         <SparkLineLink>
                           <Link to={`/query-browser?${linkParams(data)}`} target="_blank">
-                            <SparkLine data={sparkLines[label]}/>
+                            <SparkLine data={sparkLines[name]}/>
                             <ZoomInIcon />
                           </Link>
                         </SparkLineLink>
