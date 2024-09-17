@@ -82,7 +82,7 @@ const getInActive = (data: BK.Node) => [
 ]
 
 
-const getSensorList = (data: BK.FlattenedManifest) => {
+const getSensorList = (data: BK.Node) => {
   const sensors = data?.sensors.filter(o =>
     !o.capabilities.includes('camera') &&
     !skipSensorPreview.includes(o.name)
@@ -244,9 +244,9 @@ export default function NodeView(props: Props) {
   const sensors = useMemo(() => {
     if (!manifest || !node || !vsn || !inactive) return
 
-    return getSensorList(manifest)
+    return getSensorList(node)
       .map((obj, i) => {
-        const {hw_model, name, capabilities, is_active, scope} = obj
+        const {hw_model, name, capabilities, is_active} = obj
 
         const config = measurements[hw_model]
         const start = config?.start || '-1d'
@@ -254,6 +254,12 @@ export default function NodeView(props: Props) {
 
         const isLora = capabilities.includes('lorawan')
         const deviceName = isLora ? name.replace(/_/g , ' ') : null
+
+        let scope
+        if (!isLora) {
+          // todo(nc): scope is only available in manifests, add to nodes endpoint
+          scope = manifest.sensors.find(obj => obj.name == name).scope
+        }
 
         const items = config?.names.map(obj => {
           const {name, label, units} = obj
@@ -421,7 +427,7 @@ export default function NodeView(props: Props) {
 
           <Card>
             <h2 className="flex justify-between">
-              Sensors
+              Sensors <NodeEditBtn id={node?.id} />
             </h2>
             {inactive &&
               <>

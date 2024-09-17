@@ -97,6 +97,39 @@ const measurements = {
       {name: 'uncorrected_inner|uncorrected_outer', label: 'Uncorrected Inner/Outer'},
     ]
   },
+
+  'MPU6050': {
+    names: [
+      {name: 'env.pitch.hut', label: 'Hut Pitch'},
+      {name: 'env.roll.hut', label: 'Hut Roll'},
+      {name: 'env.yaw.hut', label: 'Hut Yaw'}
+    ]
+  },
+
+  'AHT21': {
+    names: [
+      {name: 'env.humidity.hut', label: 'Hut Humidity'},
+      {name: 'env.temperature.hut', label: 'Hut Temperature'}
+    ]
+  },
+
+  'GS-MPPT-60': {
+    names: [
+      {name:'env.solar.current.array', label: 'array'},
+      {name:'env.solar.current.load', label: 'load'},
+      {name:'env.solar.current.system.battery', label: 'system.battery'},
+      {name:'env.solar.current.system.charging', label: 'system.charging'},
+      {name:'env.solar.current.system.load', label: 'system.load'},
+      {name:'env.solar.state.charging', label: 'state.charging'},
+      {name:'env.solar.state.load', label: 'state.load'},
+      {name:'env.solar.temperature.battery', label: 'temperature.battery'},
+      {name:'env.solar.temperature.heatsink', label: 'temperature.heatsink'},
+      {name:'env.solar.voltage.array', label: 'voltage.array'},
+      {name:'env.solar.voltage.battery', label: 'voltage.battery'},
+      {name:'env.solar.voltage.battery.sense', label: 'voltage.battery.sense'},
+      {name:'env.solar.voltage.load', label: 'voltage.load'}
+    ]
+  }
 }
 
 const shortUnits = {
@@ -107,14 +140,30 @@ const shortUnits = {
   'degrees Celsius': '°C', // AQT530 `meta.units`
   'degree Celsius': '°C',  // WXT536 `meta.units`
   'degrees': '°',
+  'degree': '°',           // pluginhut
   'milimeters': 'mm',
   'meters per second': 'm/s',
   'hits per square centimeter': 'hits / cm²',
   'hectoPascal': 'hPa',
   'mg/m^2': 'mg/m²',
   'mg/m^3': 'mg/m³',
-  'unit': ' '  // don't show "unit"; artifact of LI-7500DS
+  'unit': ' ',  // don't show "unit"; artifact of LI-7500DS
 }
+
+/* other recent units
+  'hPa'
+  'UTC time'
+  'seconds'
+  'YYYY-MM-DD'
+  '°C'
+  'g/m^3'
+  'kPa'
+  'm/s'
+  'HH:MM:SS'
+  'ns'
+  's'
+  'volts'
+*/
 
 let skipSensorPreview = [
   'microphone',

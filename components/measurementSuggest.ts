@@ -15,7 +15,13 @@ async function main() {
   }
 
   // get args
-  const [vsn, sensor] = args.slice(2)
+  const [vsn, search] = args.slice(2)
+
+  let field, query
+  if (search.includes('='))
+    [field, query] = search.split('=')
+  else
+    [field, query] = ['sensor', search]
 
 
   // fetch
@@ -23,7 +29,7 @@ async function main() {
     start: '-30d',
     filter: {
       vsn,
-      sensor
+      [field]: query
     },
     tail: 1
   })
@@ -34,12 +40,12 @@ async function main() {
 
   // measurement.config.ts format
   const d = {
-    [sensor]: {
+    [query]: {
       names: names.map(name => getLabel(name))
     }
   }
 
-  console.log(JSON.stringify(d, null, 2))
+  console.log(JSON.stringify(d))
 }
 
 
