@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Tooltip from '@mui/material/Tooltip'
-import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
+import InfoIcon from '@mui/icons-material/InfoOutlined'
 import ZoomInIcon from '@mui/icons-material/ZoomInRounded'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
@@ -55,6 +55,7 @@ type Props = {
     },
     format?: (val: number) => string
     linkParams?: (data: BH.Record) => string
+    units?: string
   }[]
   showSparkline?: boolean
   className?: string
@@ -143,10 +144,14 @@ export default memo(function RecentDataTable(props: Props) {
                   <td>
                     {label || name}
                     <Tooltip
-                      title={<>{name}<br/>
-                        {sensor ?
-                          <div>{sensor}</div> : ''}
-                        <small>(click for description)</small></>}
+                      title={
+                        <>
+                          <div><code>name</code>: {name}</div>
+                          {sensor && <div><code>sensor</code>: {sensor}</div>}
+                          {meta?.units && <div><code>meta.units</code>: {meta.units}</div>}
+                          {item.units && <div>configured units: {item.units}</div>}
+                        </>
+                      }
                       placement="left"
                     >
                       <Link to={`/data/ontology/${name}`}
@@ -220,7 +225,7 @@ const Root = styled.div`
   }
 `
 
-const HelpIcon = styled(QuestionMark)`
+const HelpIcon = styled(InfoIcon)`
   position: absolute;
   width: 12px;
   top: 0;
