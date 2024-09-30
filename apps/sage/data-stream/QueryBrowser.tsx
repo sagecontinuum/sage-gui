@@ -38,6 +38,9 @@ import StopIcon from '@mui/icons-material/StopCircle'
 import { capitalize } from 'lodash'
 
 import config from '/config'
+import QueryBuilder, { Rules } from '/components/data/QueryBuilder'
+import { filterData } from '/components/data/queryData'
+
 const registry = config.dockerRegistry
 
 // default app for initial view of data
@@ -376,6 +379,7 @@ export default function QueryBrowser() {
   const type = params.get('type') as DataTypes || 'apps'  // for tabs
   const mimeType = isMedia(type) ?
     params.get('mimeType') as MimeType : null             // for filtering on ext
+  const clientSideFilters = params.get('client-side-filters')
 
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
@@ -404,6 +408,7 @@ export default function QueryBrowser() {
 
   const [query, setQuery] = useState<BH.Params>()
   const [data, setData] = useState<BH.Record[]>()
+  const [rules, setRules] = useState(clientSideFilters ? JSON.parse(clientSideFilters) : {rules: [], logics: []})
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
   const [chart, setChart] = useState<BH.Record[]>()
@@ -725,6 +730,15 @@ export default function QueryBrowser() {
   }
 
 
+  const handleClientSideFilter = (rules, logics) => {
+
+    params.set('client-side-filters', JSON.stringify({rules, logics}))
+    setParams(params, {replace: true})
+    const d = filterData(data, rules, logics)
+    console.log('data', data, d)
+    setData(d)
+  }
+
   return (
     <Root isMedia={isMediaApp(app) || isMedia(type)}>
       <div className="flex">
@@ -927,6 +941,7 @@ export default function QueryBrowser() {
             <Alert severity="info">No recent data found for the selected period.</Alert>
           }
 
+
           {/* todo(nc): here we have to check data.length because of bug
            in table component when pagination is used */}
           {data && data?.length > 0 &&
@@ -972,7 +987,34 @@ export default function QueryBrowser() {
                   </div>
                 </div>
               }
-              middleComponent={<></>}
+              middleComponent={
+                <QueryBuilderContainer className="flex justify-between">
+                  <div>
+
+                    {rules.rules.length > 0 &&
+                      <Alert
+                        severity="info"
+                        action={
+                          <Button onClick={() => setRules({rules: [], logics: []})} variant="contained" size="small">
+                            Remove filters
+                          </Button>
+                        }
+                      >
+                        The data has been filtered using {rules.rules.length} rule{rules.rules.length > 1 ? 's' : ''}
+                      </Alert>
+                    }
+
+                  </div>
+                  <div></div>
+                  {data &&
+                    <QueryBuilder
+                      rules={[]}
+                      names={['value', ...Object.keys(data[0].meta).map(n => `meta.${n}`)]}
+                      onSubmit={handleClientSideFilter}
+                    />
+                  }
+                </QueryBuilderContainer>
+              }
             />
           }
         </Main>
@@ -1037,6 +1079,10 @@ const Main = styled.div`
   .MuiAlert-root {
     margin-bottom: 1em;
   }
+
+  .MuiTablePagination-root {
+    border-bottom: 0;
+  }
 `
 
 const Menu = styled.div`
@@ -1055,4 +1101,8 @@ const Snippets = styled.div`
     border: none;
     background: #fff !important;
   }
+`
+
+const QueryBuilderContainer = styled.div`
+  margin-right: 2rem;
 `
