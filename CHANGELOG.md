@@ -3,6 +3,74 @@
 The following are some notable changes to the UI
 
 
+## [3.2.0](https://github.com/sagecontinuum/sage-gui/compare/v3.0.0...v3.2.0) (2024-09-30)
+
+
+### Features
+
+* add "all nodes" tab concept ([fb300cc](https://github.com/sagecontinuum/sage-gui/commit/fb300cce0b003798ae19fa5512026ae5331c8665))
+* add a toggleable (simple) computes column ([c3366a2](https://github.com/sagecontinuum/sage-gui/commit/c3366a2665c5df00b40da9808fc8157649066778))
+* add basic table download ([69fe410](https://github.com/sagecontinuum/sage-gui/commit/69fe410eda41a30a07e96e6d79bd9f07c4d349cd))
+* add lorawan sensors  ([a5e9356](https://github.com/sagecontinuum/sage-gui/commit/a5e935663739799edc9e7a6aaf21070e5848517d))
+* add sensor/compute configuration details popup; label tweaks; waggle-sensor/tickets[#115](https://github.com/sagecontinuum/sage-gui/issues/115) ([e3c292f](https://github.com/sagecontinuum/sage-gui/commit/e3c292ffe995884a5d684794705a9b9b88281f77))
+* add some compute/sensor "is_active" checks and messaging ([84a6837](https://github.com/sagecontinuum/sage-gui/commit/84a68377be685f4c610aee5e483e299f1a2c66a0))
+* add some support for persistent table columns; waggle-sensor/tickets[#60](https://github.com/sagecontinuum/sage-gui/issues/60) ([710f4cb](https://github.com/sagecontinuum/sage-gui/commit/710f4cb35d3f242c16c96f2db4b319de4628610b))
+* additional support for editable meta ([e6c2059](https://github.com/sagecontinuum/sage-gui/commit/e6c20595d4cb70fff95b013594ca6cb1eee9c7e0))
+* **admin:** add simple model selector to description browser ([e697580](https://github.com/sagecontinuum/sage-gui/commit/e697580a11eeb0da066d4a8e6b9be8999abf2260))
+* **admin:** revise description layout and filtering ([4469621](https://github.com/sagecontinuum/sage-gui/commit/4469621f98ef04134dfef8031ec174f7d939a5d3))
+* **data:** add (beta) support for preserving pagination page (via urls) when a static range is used; waggle-sensor/tickets[#100](https://github.com/sagecontinuum/sage-gui/issues/100) ([335aa36](https://github.com/sagecontinuum/sage-gui/commit/335aa36de40c9e32503e36838327a519a5c4b157))
+* **data:** add device name filtering for lorawan ([d7a994f](https://github.com/sagecontinuum/sage-gui/commit/d7a994fd3045da4802053be16a401026023be950))
+* **data:** add li-cor stream preview ([24d990c](https://github.com/sagecontinuum/sage-gui/commit/24d990c99972bcfaf38909803099a44e5cf09385))
+* **data:** add placeholders for sensor previews ([139c7a7](https://github.com/sagecontinuum/sage-gui/commit/139c7a7903dfedd0619d68b145fdc6fdc77a3102))
+* **data:** add sensor filter to query-by-name view, with multi-select; waggle-sensor/tickets[#196](https://github.com/sagecontinuum/sage-gui/issues/196) ([4bfc109](https://github.com/sagecontinuum/sage-gui/commit/4bfc109e4e3bec78e8085f74033e7b2ab424f517))
+* **data:** add support for lorawan sensor previews; include stream for SFM1x; ([e96c025](https://github.com/sagecontinuum/sage-gui/commit/e96c025fed22c686b36a3f2b9bfcbe5f9ef7e12b))
+* **data:** beta version of additional sensor data previews; link to same site query browser (instead of portal); waggle-sensor/tickets[#197](https://github.com/sagecontinuum/sage-gui/issues/197) ([abe81e2](https://github.com/sagecontinuum/sage-gui/commit/abe81e207bce7946bb4656d3fb491688b6714d60))
+* **data:** don't require labels sensor sparklines ([4dba3ce](https://github.com/sagecontinuum/sage-gui/commit/4dba3cecb433cdca51a20932755d5a249b7bd82f))
+* **data:** prototype of additional sensor previews ([047c0d5](https://github.com/sagecontinuum/sage-gui/commit/047c0d5b280fa7c18872347238ad9fd92bbec8b6))
+* **data:** support multiple sparklines ([0d018e9](https://github.com/sagecontinuum/sage-gui/commit/0d018e9a654e50010d01a19fcdf54424a1153f59))
+* **ecr:** add some support for git_commit submissions; (might not be public-facing) ([45399df](https://github.com/sagecontinuum/sage-gui/commit/45399df0dcaeccba7c7500c96e33310a2d58d5f8))
+* edit meta link ([ce6670a](https://github.com/sagecontinuum/sage-gui/commit/ce6670a77f3b0ad68664d4eb641f47e2cf12abe8))
+* improved "is_active" handling ([4f89c9c](https://github.com/sagecontinuum/sage-gui/commit/4f89c9c153ecb4b1793ad628c95e112ae0cde086))
+* initial support/refactoring for site ids ([ec1d5d5](https://github.com/sagecontinuum/sage-gui/commit/ec1d5d5a5ae4e33dd6e7188c6c603c12178d1319))
+* **jobs:** add "show all" button to task list ([4430519](https://github.com/sagecontinuum/sage-gui/commit/44305193d34c85e1b8bf4c7e21c99714cf4ac81d))
+* **jobs:** add task listing to job details ([b5f9353](https://github.com/sagecontinuum/sage-gui/commit/b5f935336dffb5fee3c87115fe4b8279182eaa18))
+* minor styling: update node tabs/icons ([1ac9ed7](https://github.com/sagecontinuum/sage-gui/commit/1ac9ed7e17db7ef5bb78ef7f29b48d1aa7c2e76f))
+* **projects:** additional project related config and branding support ([7ed395f](https://github.com/sagecontinuum/sage-gui/commit/7ed395f812e6ac23a4a827c3f44eae897552f96e))
+* prototype of sensor meta editing ([69601ee](https://github.com/sagecontinuum/sage-gui/commit/69601eeec1c3fbbead52020553479b4c8be08453))
+
+
+### Bug Fixes
+
+* consistent gps tooltip position ([951e7ac](https://github.com/sagecontinuum/sage-gui/commit/951e7acf7b90c3619b28314154d4525c7e225ec0))
+* **data, jobs:** simply reload timeline charts when clicking the currently selected quick range ([3c92e68](https://github.com/sagecontinuum/sage-gui/commit/3c92e68caa8420efd1570c6f127db903c0516840))
+* **data:** add node filter and charts back to query browser > names view ([5e89a9b](https://github.com/sagecontinuum/sage-gui/commit/5e89a9bcfd54f4b6327792371db88140a416e77b))
+* **data:** allow arbitrary inputs in query-browser; waggle-sensor/tickets[#100](https://github.com/sagecontinuum/sage-gui/issues/100) ([8e14b98](https://github.com/sagecontinuum/sage-gui/commit/8e14b98b67fba934b7c509944c29ab70cb7c8913))
+* **data:** fix "unassigned" filter (due to nodes endpoint migration) ([1a18f5e](https://github.com/sagecontinuum/sage-gui/commit/1a18f5e916245906a10b7ffe5cd6d7ad80a18e3a))
+* **data:** fix timeline app tooltip; add app links; rm old link handling ([20b6c78](https://github.com/sagecontinuum/sage-gui/commit/20b6c780c24e35ba176082a3aca332f1bad3e8dd))
+* **data:** remove freesolo for app filter and add tasks ([0907cb0](https://github.com/sagecontinuum/sage-gui/commit/0907cb0f91dfd46ca24a03233481b1482e16a5de))
+* don't change tabs on table query ([75bc32c](https://github.com/sagecontinuum/sage-gui/commit/75bc32cb5bf761b342c20e37a781c3fe629c2ff9))
+* **ecr:** fix -1y timeline quick range filter ([732f4ac](https://github.com/sagecontinuum/sage-gui/commit/732f4acdbb170caf888efdb8d0a629e81ea6f19d))
+* explain when a node hasn\'t been registered yet with beehive; minor messaging improvements ([85cf071](https://github.com/sagecontinuum/sage-gui/commit/85cf071270218e0a25ac3dbd8f060cebaddfccea))
+* fix "undefined" in node view tabs ([85adb80](https://github.com/sagecontinuum/sage-gui/commit/85adb80278f79055726fc5eec45ba71698c24f09))
+* fix missing units when last value is non-truthy in node > recent sensor data tables; waggle-sensor/tickets[#196](https://github.com/sagecontinuum/sage-gui/issues/196) ([727810a](https://github.com/sagecontinuum/sage-gui/commit/727810afca16c717955648cee4b7f9f07ab30f0a))
+* fix object encoding for csv downloads ([81add3e](https://github.com/sagecontinuum/sage-gui/commit/81add3e5ce2543f40f61c2ce9781c48bc7566a0f))
+* fix sensor filtering on node list; use revised sensors endpoint; waggle-sensor/tickets[#115](https://github.com/sagecontinuum/sage-gui/issues/115) ([6c68571](https://github.com/sagecontinuum/sage-gui/commit/6c68571f0dea027f7509f6724e5be889953dc941))
+* fix sensor list node counts (by using project config) ([086caab](https://github.com/sagecontinuum/sage-gui/commit/086caab5b40a8d35036cc95450f213472eb1869e))
+* fix status link; minor time fix ([b5febac](https://github.com/sagecontinuum/sage-gui/commit/b5febac3bab882a83d93fc121dc7ffc7244463c8))
+* improve sign-in flow (by including query params); waggle-sensor/tickets[#87](https://github.com/sagecontinuum/sage-gui/issues/87) ([60a75a9](https://github.com/sagecontinuum/sage-gui/commit/60a75a974c78763e6975be9af60b16becc989fd8))
+* improved map tooltip design ([8e44615](https://github.com/sagecontinuum/sage-gui/commit/8e446155db82531704bb65e1d680ca73ce1caea9))
+* improving gps clipboard styling (by refactoring component); todo: refactor requests ([da60130](https://github.com/sagecontinuum/sage-gui/commit/da6013022316f2607d3f342d34c56f560ab29c85))
+* **jobs:** add job state compatibility note ([bcba2cb](https://github.com/sagecontinuum/sage-gui/commit/bcba2cb26e26d6b35dad9ac438cbdbc58db07492))
+* **jobs:** fix task table url handling ([b07896a](https://github.com/sagecontinuum/sage-gui/commit/b07896a9630ed9e10608797aa37a8a3564ed5cb4))
+* migrating data scources to new nodes endpoint; refactoring api calls, better consistency in naming, etc; improves support for additional meta,  page load times, etc. ([ee5258c](https://github.com/sagecontinuum/sage-gui/commit/ee5258c298e1117f6bdde9d1199a6be6c62bcb08))
+* optimize and fix query input debouncing, along with "query" url param; fixes waggle-sensor/tickets[#160](https://github.com/sagecontinuum/sage-gui/issues/160) ([413bc57](https://github.com/sagecontinuum/sage-gui/commit/413bc57f9a4a4720ee1a1cb947a5b492b3fd2696))
+* **portal:** add crocus ids to data browser in portal; link to project query browser in timelines ([c7046d7](https://github.com/sagecontinuum/sage-gui/commit/c7046d722bdf59c6924da0fc092483425468cfe7))
+* **projects:** add missing account links ([1f8426a](https://github.com/sagecontinuum/sage-gui/commit/1f8426a9c61ccf385aad607ef5fc890b0841d45f))
+* renaming vsn -> node on user facing views; minor formatting; waggle-sensor/tickets[#115](https://github.com/sagecontinuum/sage-gui/issues/115) ([7f9b1b5](https://github.com/sagecontinuum/sage-gui/commit/7f9b1b581c4251191354e129e97a532c0947ca11))
+* temp fix to ignore project/focus if node list is provided (for project views) ([06371b3](https://github.com/sagecontinuum/sage-gui/commit/06371b309d9597c383320aa699f47325e1358e9c))
+* use checkbox for "show all nodes"; fix default node filtering; type fixes; minor styling ([0d15699](https://github.com/sagecontinuum/sage-gui/commit/0d156995a8f3789d9bcb78b4c46de559e94716c7))
+* use single request for lora signal data; wait for all data before rendering table ([3f3c57a](https://github.com/sagecontinuum/sage-gui/commit/3f3c57afb276a4e19db030481d1d444feecc0484))
+
 ## [3.1.0](https://github.com/sagecontinuum/sage-gui/compare/v3.0.0...v3.1.0) (2024-08-28)
 
 
