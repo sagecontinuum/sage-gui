@@ -271,10 +271,7 @@ export default function TimeSeries(props: Props) {
 
   return (
     <Root>
-      <ChartContainer>
-        <canvas ref={chartRef}></canvas>
-      </ChartContainer>
-
+      <canvas ref={chartRef}></canvas>
 
       <Ctrls className="flex items-center justify-between">
         <div className="flex items-centern gap">
@@ -352,10 +349,6 @@ export default function TimeSeries(props: Props) {
 const Root = styled.div`
   border-bottom: 1px solid #f1f1f1;
   padding-bottom: 1em;
-`
-
-const ChartContainer = styled.div`
-
 `
 
 const DownsampleOpts = styled.div`
