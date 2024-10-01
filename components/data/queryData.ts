@@ -1,4 +1,4 @@
-import { Rule, BooleanLogic } from './types.d'
+import { Rule } from './types.d'
 import { get } from 'lodash'
 
 
@@ -20,12 +20,19 @@ const operation = {
   '<': (a, b) => a < b,
 }
 
-export function filterData(data, rules: Rule[], logics: BooleanLogic[]) {
-  let d
+export function filterData(data, rules: Rule[]) {
+  let d = data
   for (const rule of rules) {
-    const {name, op, value} = rule
-    console.log('rule', rule)
-    d = data.filter(row => operation[op](get(row, name), value))
+    const {name, value} = rule
+
+    if ('op' in rule)
+      d = data.filter(row => operation[rule['op']](get(row, name), value))
+    else {
+      // assume range (value = [start, end])
+      d = data.filter(row => operation['>='](get(row, name), value[0]))
+        .filter(row => operation['<='](get(row, name), value[1]))
+    }
+
   }
 
   return d

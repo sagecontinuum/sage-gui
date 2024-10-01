@@ -38,7 +38,7 @@ import StopIcon from '@mui/icons-material/StopCircle'
 import { capitalize } from 'lodash'
 
 import config from '/config'
-import QueryBuilder, { Rules } from '/components/data/QueryBuilder'
+import QueryBuilder from '/components/data/QueryBuilder'
 import { filterData } from '/components/data/queryData'
 
 const registry = config.dockerRegistry
@@ -379,7 +379,9 @@ export default function QueryBrowser() {
   const type = params.get('type') as DataTypes || 'apps'  // for tabs
   const mimeType = isMedia(type) ?
     params.get('mimeType') as MimeType : null             // for filtering on ext
-  const clientSideFilters = params.get('client-side-filters')
+
+  const cFilters = params.get('client-side-filters')
+  const rules = cFilters ? JSON.parse(cFilters) : []
 
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
@@ -408,7 +410,7 @@ export default function QueryBrowser() {
 
   const [query, setQuery] = useState<BH.Params>()
   const [data, setData] = useState<BH.Record[]>()
-  const [rules, setRules] = useState(clientSideFilters ? JSON.parse(clientSideFilters) : {rules: [], logics: []})
+  const [filtered, setFiltered] = useState<BH.Record[]>()
   const [error, setError] = useState()
   const [lastN, setLastN] = useState<{total: number, limit: number}>()
   const [chart, setChart] = useState<BH.Record[]>()
@@ -527,12 +529,6 @@ export default function QueryBrowser() {
         .then((data) => {
           data = (data || [])
 
-          // simple charts for plugin-based or by-name listings
-          const showChart = ['apps', 'names'].includes(type)
-            && node && !isMediaApp(app) && data.length > 0
-
-          setChart(showChart ? data : null)
-
           // limit amount of data for table
           const total = data.length
           const limit = 100000
@@ -559,6 +555,8 @@ export default function QueryBrowser() {
 
           setData(data)
 
+          updateData(data, rules)
+
           setLoading(false)
         }).catch(error => {
           if (error.name == 'AbortError') return
@@ -572,8 +570,20 @@ export default function QueryBrowser() {
     fetchFilterMenus()
   }, [
     app, node, name, sensor, task, deviceName, type, mimeType,
-    start, end, queryCount, setLoading
+    start, end, queryCount, setLoading // ignore "rules" since done on client side
   ])
+
+
+  const updateData = (data, rules) => {
+    const d = filterData(data, rules)
+    setFiltered(d)
+
+    // simple charts for plugin-based or by-name listings
+    const showChart = ['apps', 'names'].includes(type)
+      && node && !isMediaApp(app) && d.length > 0
+
+    setChart(showChart ? d : null)
+  }
 
 
   // relative time and show meta checkbox events
@@ -730,13 +740,17 @@ export default function QueryBrowser() {
   }
 
 
-  const handleClientSideFilter = (rules, logics) => {
-
-    params.set('client-side-filters', JSON.stringify({rules, logics}))
+  const handleClientSideFilter = (rules) => {
+    params.set('client-side-filters', JSON.stringify(rules))
     setParams(params, {replace: true})
-    const d = filterData(data, rules, logics)
-    console.log('data', data, d)
-    setData(d)
+
+    updateData(data, rules)
+  }
+
+  const handleClearClientSideFilters = () => {
+    params.delete('client-side-filters')
+    setParams(params, {replace: true})
+    updateData(data, [])
   }
 
   return (
@@ -862,7 +876,7 @@ export default function QueryBrowser() {
               <QueryViewer
                 filterState={
                   Object.keys(filters)
-                    .filter(k => !['start', 'end', 'type'].includes(k))
+                    .filter(k => !['start', 'end', 'type', 'client-side-filters'].includes(k))
                     .reduce((acc, k) => ({
                       ...acc,
                       [k]: filters[k].map(s => s.replace(`${registry}/`, ''))
@@ -933,34 +947,42 @@ export default function QueryBrowser() {
             </Alert>
           }
 
-          {error &&
-            <ErrorMsg>{error}</ErrorMsg>
+          {filtered && rules.length > 0 &&
+            <Alert
+              sx={{width: '50%', margin: '0 auto'}}
+              severity="info"
+              action={
+                <Button onClick={handleClearClientSideFilters} startIcon={<UndoIcon />}>
+                  Clear Filters
+                </Button>
+              }
+            >
+              Data has been filtered
+              from {data.length.toLocaleString()} to {filtered.length.toLocaleString()} records
+              {/* with {rules.length} filter{rules.length > 1 ? 's' : ''} */}
+            </Alert>
           }
 
-          {data?.length == 0 &&
-            <Alert severity="info">No recent data found for the selected period.</Alert>
+          {error &&
+            <ErrorMsg>{error}</ErrorMsg>
           }
 
 
           {/* todo(nc): here we have to check data.length because of bug
            in table component when pagination is used */}
-          {data && data?.length > 0 &&
+          {filtered &&
             <Table
               primaryKey="rowID"
               enableSorting
               sort="-timestamp"
               columns={cols}
-              rows={data}
+              rows={filtered}
               pagination
               page={page}
               rowsPerPage={getRowsPerPage(app, type)}
               onPage={handlePage}
-              limit={data.length} // todo(nc): "limit" is fairly confusing
-              emptyNotice={
-                <span className="flex">
-                  <span>No records found from the selected period</span>
-                </span>
-              }
+              limit={filtered.length} // todo(nc): "limit" is fairly confusing
+              emptyNotice="No recent data found with the selected filters"
               disableRowSelect={() => true}
               leftComponent={
                 <div className="flex">
@@ -989,30 +1011,17 @@ export default function QueryBrowser() {
               }
               middleComponent={
                 <QueryBuilderContainer className="flex justify-between">
-                  <div>
-
-                    {rules.rules.length > 0 &&
-                      <Alert
-                        severity="info"
-                        action={
-                          <Button onClick={() => setRules({rules: [], logics: []})} variant="contained" size="small">
-                            Remove filters
-                          </Button>
-                        }
-                      >
-                        The data has been filtered using {rules.rules.length} rule{rules.rules.length > 1 ? 's' : ''}
-                      </Alert>
-                    }
-
-                  </div>
                   <div></div>
-                  {data &&
-                    <QueryBuilder
-                      rules={[]}
-                      names={['value', ...Object.keys(data[0].meta).map(n => `meta.${n}`)]}
-                      onSubmit={handleClientSideFilter}
-                    />
-                  }
+                  <div>
+                    {filtered &&
+                      <QueryBuilder
+                        data={filtered}
+                        rules={rules}
+                        onClear={handleClearClientSideFilters}
+                        onSubmit={handleClientSideFilter}
+                      />
+                    }
+                  </div>
                 </QueryBuilderContainer>
               }
             />

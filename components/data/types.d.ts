@@ -27,11 +27,20 @@ type Op = keyof typeof ops
 type BooleanLogic = typeof booleanLogics[number]
 
 // a rule can be multiple things, but let's support basic conditions first
-export type Rule = Condition
+export type Rule = Condition | Range
+export type RuleType = 'condition' | 'range'
+
 
 type Condition = {
   name: string
   op: Op
   value: number | string
+}
+
+export type Range = {
+  name: string
+  value: [number, number]
+  min: number
+  max: number
 }
 
