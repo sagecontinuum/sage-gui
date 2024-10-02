@@ -40,6 +40,7 @@ import { capitalize } from 'lodash'
 import config from '/config'
 import QueryBuilder from '/components/data/QueryBuilder'
 import { filterData } from '/components/data/queryData'
+import { shortUnits } from '/components/measurement.config'
 
 const registry = config.dockerRegistry
 
@@ -68,9 +69,9 @@ const columns = [{
 }, {
   id: 'value',
   label: 'Value',
-  format: (val) => {
+  format: (val, {meta}) => {
     const isInOSN = /^https:\/\/storage.sagecontinuum.org/i.test(val)
-    if (!isInOSN) return val
+    if (!isInOSN) return `${val} ${shortUnits[meta.units] || meta.units || ''}`
 
     const suffix = val.slice(val.lastIndexOf('.'))
 
