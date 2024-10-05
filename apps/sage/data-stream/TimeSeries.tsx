@@ -32,6 +32,7 @@ import { Chart as ChartJS,
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
 import zoomPlugin from 'chartjs-plugin-zoom'
+import { shortUnits } from '/components/measurement.config'
 
 ChartJS.register(
   Tooltip, Legend, LineController, BarController, LineElement, PointElement,
@@ -76,6 +77,23 @@ const lineConfig = {
           mode: 'x',
           onZoomComplete: () => { /* do nothing? */ }
         },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            console.log('context', context)
+            let label = context.dataset.label || ''
+
+            if (label) {
+              label += ': '
+            }
+            if (context.parsed.y !== null) {
+              const {y, meta} = context.parsed
+              label += `${y} ${shortUnits[meta.units] || meta.units || ''}`
+            }
+            return label
+          }
+        }
       }
     }
   }
@@ -121,7 +139,8 @@ export function getLineDatasets(records: BH.Record[], opts: ChartOpts, siteIDs?:
       .forEach((key) => {
         const d = grouped[key].map(o => ({
           x: new Date(o.timestamp).getTime(),
-          y: o.value
+          y: o.value,
+          meta: o.meta
         })).sort((a, b) => a.x - b.x)
 
 
@@ -271,10 +290,7 @@ export default function TimeSeries(props: Props) {
 
   return (
     <Root>
-      <ChartContainer>
-        <canvas ref={chartRef}></canvas>
-      </ChartContainer>
-
+      <canvas ref={chartRef}></canvas>
 
       <Ctrls className="flex items-center justify-between">
         <div className="flex items-centern gap">
@@ -352,10 +368,6 @@ export default function TimeSeries(props: Props) {
 const Root = styled.div`
   border-bottom: 1px solid #f1f1f1;
   padding-bottom: 1em;
-`
-
-const ChartContainer = styled.div`
-
 `
 
 const DownsampleOpts = styled.div`

@@ -5,6 +5,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
+import type {DialogProps} from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import IconButton from '@mui/icons-material/Close'
 import type { Breakpoint } from '@mui/material/'
@@ -22,10 +23,10 @@ type Props = {
   onClose: () => void
   onConfirm: () => void | Promise<any>
   maxWidth?: false | Breakpoint
-}
+} & Omit<DialogProps, 'open'>
 
 
-export default function CreateDialog(props: Props) {
+export default function ConfirmationDialog(props: Props) {
   const {
     title = 'Are you sure you want to do that?',
     contentTitle,
