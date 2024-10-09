@@ -45,7 +45,7 @@ async function main() {
     }
   }
 
-  console.log(JSON.stringify(d))
+  console.log(JSON.stringify(d).slice(1, -1))
 }
 
 
