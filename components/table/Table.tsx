@@ -15,6 +15,7 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import Tooltip from '@mui/material/Tooltip'
 import IconButton from '@mui/material/IconButton'
+import Divider from '@mui/material/Divider'
 
 import MoreIcon from '@mui/icons-material/MoreVert'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -673,22 +674,24 @@ export default function TableComponent(props: Props) {
         }
 
 
-        {pagination &&
-          <Pagination
-            rowsPerPageOptions={[rowsPerPage]}
-            count={props.total || props.limit || rows?.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handlePageChange}
-          />
-        }
-
         {enableDownload &&
           <TableOption>
             <DownloadTableBtn onDownload={handleDLOption} />
+            <Divider orientation="vertical" flexItem sx={{margin: '5px 15px' }} />
           </TableOption>
         }
 
+        {pagination &&
+          <>
+            <Pagination
+              rowsPerPageOptions={[rowsPerPage]}
+              count={props.total || props.limit || rows?.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handlePageChange}
+            />
+          </>
+        }
 
         {onColumnMenuChange &&
           <TableOption>
