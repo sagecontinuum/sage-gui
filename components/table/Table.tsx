@@ -639,8 +639,7 @@ export default function TableComponent(props: Props) {
     // todo(nc): could add support for other options/formats if needed.
 
     const header = columns.map(o => o.label).join(', ')
-
-    const rows = data.map(row =>
+    const rows = props.rows.map(row =>
       columns.map(col => {
         const val = row[col.id]
         return col.dlFormat ? `"${col.dlFormat(val, row)}"` : formatDownloadCol(val)
