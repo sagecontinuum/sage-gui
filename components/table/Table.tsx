@@ -27,6 +27,7 @@ import ColumnMenu from './ColumnMenu'
 import TableSearch from './TableSearch'
 import Checkbox from '/components/input/Checkbox'
 import * as LS from '/components/apis/localStorage'
+import { strToBlob } from '/components/utils/strToBlob'
 
 import selectedReducer, { SelectedState, getInitSelectedState } from './selectedReducer'
 import useClickOutside from '../hooks/useClickOutside'
@@ -637,7 +638,6 @@ export default function TableComponent(props: Props) {
 
   const handleDLOption = () => {
     // todo(nc): could add support for other options/formats if needed.
-
     const header = columns.map(o => o.label).join(', ')
     const rows = props.rows.map(row =>
       columns.map(col => {
@@ -646,9 +646,11 @@ export default function TableComponent(props: Props) {
       })
     )
 
-    const csvStr = `data:text/csv;charset=utf-8,` +
-      `${header}\n${rows.map(v => v ? v.join(',') : '').join('\n')}`
-    window.open(encodeURI(csvStr))
+    const csvStr = `${header}\n${rows.map(v => v ? v.join(',') : '').join('\n')}`
+
+    const blob = strToBlob(csvStr, 'text/csv')
+    const blobUrl = URL.createObjectURL(blob)
+    window.open(blobUrl)
   }
 
   return (
