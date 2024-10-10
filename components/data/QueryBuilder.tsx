@@ -17,7 +17,7 @@ import {
 import { minBy, maxBy } from 'lodash'
 import * as BH from '/components/apis/beehive'
 
-
+const VALUE_INPUT_STEP = 0.00000001
 
 type RulesProps = {
   data: BH.Record[]
@@ -38,7 +38,7 @@ export function Rules(props: RulesProps) {
 
   const handleUpdateRule = (i, type: RuleType, name, value) => {
     setRules(prev => {
-      const newRule = {...prev[i], [name]: value}
+      const newRule = {...prev[i], [name]: [Number(value[0]), Number(value[1])]}
       return prev.map((rule, k) => k == i ? newRule : rule)
     })
   }
@@ -83,10 +83,12 @@ export function Rules(props: RulesProps) {
                   <OutlinedInput
                     value={rule.value[0]}
                     size="small"
-                    onChange={(evt) => handleUpdateRule(i, 'range', rule.name, [evt.target.value, rule.value[1]])}
+                    onChange={(evt) =>
+                      handleUpdateRule(i, 'range', rule.name, [evt.target.value, rule.value[1]])
+                    }
                     // onBlur={handleBlur}
                     inputProps={{
-                      step: 10,
+                      step: VALUE_INPUT_STEP,
                       min: rule.min,
                       max: rule.max,
                       type: 'number',
@@ -101,15 +103,17 @@ export function Rules(props: RulesProps) {
                     valueLabelDisplay="on"
                     min={rule.min}
                     max={rule.max}
-                    step={0.00000001}
+                    step={VALUE_INPUT_STEP}
                   />
                   <OutlinedInput
                     value={rule.value[1]}
                     size="small"
-                    onChange={(evt) => handleUpdateRule(i, 'range', rule.name,  [rule.value[0], evt.target.value])}
+                    onChange={(evt) =>
+                      handleUpdateRule(i, 'range', rule.name,  [rule.value[0], evt.target.value])
+                    }
                     // onBlur={handleBlur}
                     inputProps={{
-                      step: 10,
+                      step: VALUE_INPUT_STEP,
                       min: rule.min,
                       max: rule.max,
                       type: 'number',
@@ -236,7 +240,7 @@ export default function QueryBuilder(props: Props) {
   const names = ['value']
 
   return (
-    <>
+    <div className="flex">
       <Button aria-describedby={id} onClick={handleClick} className={className} startIcon={<TuneRounded />}>
         Filter Values
       </Button>
@@ -256,13 +260,11 @@ export default function QueryBuilder(props: Props) {
 
           <div className="flex justify-between">
             <Button
-              className=""
               onClick={handleClear}
             >
               Clear Filters
             </Button>
             <Button
-              className=""
               onClick={handleClose}
               variant="contained"
             >
@@ -271,6 +273,6 @@ export default function QueryBuilder(props: Props) {
           </div>
         </Typography>
       </Popover>
-    </>
+    </div>
   )
 }

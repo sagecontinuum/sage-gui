@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef} from 'react'
+import { useState, useEffect, useRef, memo} from 'react'
 import styled from 'styled-components'
 import { schemeCategory10 } from 'd3-scale-chromatic'
 import { chain, groupBy, sumBy } from 'lodash'
@@ -81,7 +81,6 @@ const lineConfig = {
       tooltip: {
         callbacks: {
           label: (context) => {
-            console.log('context', context)
             let label = context.dataset.label || ''
 
             if (label) {
@@ -211,28 +210,22 @@ function getSumData(records: BH.Record[]) {
 }
 
 
-type ChartOpts = {
+export type ChartOpts = {
   showLines: boolean
   showPoints: boolean
   chartType?: 'timeseries' | 'frequency' | 'sum'
 }
 
-const chartOpts = {
-  showLines: true,
-  showPoints: false,
-  chartType: 'timeseries' as const
-}
-
 
 type Props = {
   data: BH.Record[]
+  chartOpts: ChartOpts
   siteIDs: BK.SiteIDs
+  onChange?: (opts: ChartOpts) => void
 }
 
-export default function TimeSeries(props: Props) {
-  const {data, siteIDs} = props
-
-  const [opts, setOpts] = useState<ChartOpts>(chartOpts)
+export default memo(function TimeSeries(props: Props) {
+  const {data, chartOpts: opts, siteIDs, onChange} = props
 
   const chartRef = useRef()
   const [chart, setChart] = useState(null)
@@ -280,7 +273,7 @@ export default function TimeSeries(props: Props) {
   const handleOpts = (evt, option: string) => {
     const target = evt.target
     const val = 'checked' in target ? target.checked : target.value
-    setOpts(prev => ({...prev, [option]: val}))
+    onChange({...opts, ...{[option]: val}})
   }
 
   const handleZoomReset = () => {
@@ -361,8 +354,10 @@ export default function TimeSeries(props: Props) {
       </Ctrls>
     </Root>
   )
-
-}
+}, (prev, next) =>
+  prev.data === next.data &&
+  JSON.stringify(prev.chartOpts) === JSON.stringify(next.chartOpts)
+)
 
 
 const Root = styled.div`

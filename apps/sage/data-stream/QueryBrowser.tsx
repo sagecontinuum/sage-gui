@@ -12,7 +12,7 @@ import Checkbox from '/components/input/Checkbox'
 import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
-import TimeSeries from './TimeSeries'
+import TimeSeries, { type ChartOpts } from './TimeSeries'
 import DateRangePicker from '/components/input/DatetimeRangePicker'
 import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
@@ -366,6 +366,13 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 }
 
 
+const defaultChartConfig: ChartOpts = {
+  chartType: 'timeseries',
+  showLines: true,
+  showPoints: false
+}
+
+
 type DateStr = `${string}T${string}Z`
 
 
@@ -383,6 +390,9 @@ export default function QueryBrowser() {
 
   const cFilters = params.get('client-side-filters')
   const rules = cFilters ? JSON.parse(cFilters) : []
+
+  const chartConfig = params.get('chart')  // chart config string
+  const chartOpts = (chartConfig ? JSON.parse(chartConfig) : defaultChartConfig) as ChartOpts
 
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
@@ -530,16 +540,6 @@ export default function QueryBrowser() {
         .then((data) => {
           data = (data || [])
 
-          // limit amount of data for table
-          const total = data.length
-          const limit = 100000
-          if (total > limit) {
-            data = data.slice(-limit)
-            setLastN({total, limit})
-          } else {
-            setLastN(null)
-          }
-
           // filter image/audio further based on extension if needed
           if (task && mimeType) {
             data = data.filter(o => {
@@ -549,14 +549,13 @@ export default function QueryBrowser() {
             })
           }
 
-          // flatten data, add row id, and sort
+          // flatten data, and sort
           data = data
-            .map((o, i) => ({...o, ...o.meta, rowID: i}))
+            .map((o) => ({...o, ...o.meta}))
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
           setData(data)
-
-          updateData(data, rules)
+          updateFilteredData(data, rules)
 
           setLoading(false)
         }).catch(error => {
@@ -575,15 +574,26 @@ export default function QueryBrowser() {
   ])
 
 
-  const updateData = (data, rules) => {
-    const d = filterData(data, rules)
-    setFiltered(d)
+  const updateFilteredData = (data, rules) => {
+    let d = filterData(data, rules)
 
     // simple charts for plugin-based or by-name listings
     const showChart = ['apps', 'names'].includes(type)
       && node && !isMediaApp(app) && d.length > 0
 
     setChart(showChart ? d : null)
+
+    // limit amount of data for table
+    const total = data.length
+    const limit = 100000
+    if (total > limit) {
+      d = d.slice(-limit)
+      setLastN({total, limit})
+    } else {
+      setLastN(null)
+    }
+
+    setFiltered(d)
   }
 
 
@@ -745,13 +755,19 @@ export default function QueryBrowser() {
     params.set('client-side-filters', JSON.stringify(rules))
     setParams(params, {replace: true})
 
-    updateData(data, rules)
+    updateFilteredData(data, rules)
   }
 
   const handleClearClientSideFilters = () => {
     params.delete('client-side-filters')
     setParams(params, {replace: true})
-    updateData(data, [])
+
+    updateFilteredData(data, rules)
+  }
+
+  const handleChartOptsChange = (val) => {
+    params.set('chart', JSON.stringify(val))
+    setParams(params, {replace: true})
   }
 
   return (
@@ -938,7 +954,11 @@ export default function QueryBrowser() {
           <br />
 
           {chart && siteIDs &&
-            <TimeSeries data={chart} siteIDs={siteIDs}/>
+            <TimeSeries data={chart}
+              chartOpts={chartOpts}
+              siteIDs={siteIDs}
+              onChange={handleChartOptsChange}
+            />
           }
 
           {lastN &&
@@ -950,7 +970,7 @@ export default function QueryBrowser() {
 
           {filtered && rules.length > 0 &&
             <Alert
-              sx={{width: '50%', margin: '0 auto'}}
+              sx={{width: '70%', margin: '0 auto'}}
               severity="info"
               action={
                 <Button onClick={handleClearClientSideFilters} startIcon={<UndoIcon />}>
@@ -960,6 +980,7 @@ export default function QueryBrowser() {
             >
               Data has been filtered
               from {data.length.toLocaleString()} to {filtered.length.toLocaleString()} records
+              (via the "Filter Values" button below)
               {/* with {rules.length} filter{rules.length > 1 ? 's' : ''} */}
             </Alert>
           }
@@ -971,7 +992,7 @@ export default function QueryBrowser() {
 
           {/* todo(nc): here we have to check data.length because of bug
            in table component when pagination is used */}
-          {filtered &&
+          {filtered && data &&
             <Table
               primaryKey="rowID"
               enableSorting
@@ -985,6 +1006,7 @@ export default function QueryBrowser() {
               limit={filtered.length} // todo(nc): "limit" is fairly confusing
               emptyNotice="No recent data found with the selected filters"
               disableRowSelect={() => true}
+              enableDownload={data}
               leftComponent={
                 <div className="flex">
                   <div className="flex items-center">
