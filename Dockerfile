@@ -1,5 +1,5 @@
 # build
-FROM node:18.17 AS build
+FROM node:20.18-alpine AS build
 ARG SAGE_UI_APP=sage
 ARG SAGE_UI_PROJECT
 ARG SAGE_UI_SERVICE_CONFIG
@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build -w ${SAGE_UI_APP}
 
 # server
-FROM nginx:1.24-alpine
+FROM nginx:1.27.2-alpine
 ARG SAGE_UI_APP=sage
 
 WORKDIR /usr/share/nginx/html
