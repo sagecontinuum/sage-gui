@@ -16,6 +16,7 @@
   "dependencies": {
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.10.6",
+    "@jsonurl/jsonurl": "^1.1.8",
     "@mui/icons-material": "^6.0.2",
     "@mui/lab": "^6.0.0-beta.9",
     "@mui/material": "^6.0.2",
@@ -47,6 +48,7 @@
     "react-datetime-picker": "^5.5.1",
     "react-dom": "^17.0.1",
     "react-map-gl": "^7.0.19",
+    "react-router": "^6.27.0",
     "react-router-dom": "^6.12.1",
     "styled-components": "^5.2.1",
     "wavesurfer.js": "^5.2.0",
