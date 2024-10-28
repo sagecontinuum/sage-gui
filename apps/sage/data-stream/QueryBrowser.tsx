@@ -12,7 +12,8 @@ import Checkbox from '/components/input/Checkbox'
 import Clipboard from '/components/utils/Clipboard'
 import Audio from '/components/viz/Audio'
 import QueryViewer from '/components/QueryViewer'
-import TimeSeries, { type ChartOpts } from './TimeSeries'
+import TimeSeries from './TimeSeries'
+import type { ChartOpts } from './charts'
 import DateRangePicker from '/components/input/DatetimeRangePicker'
 import ErrorMsg from '../ErrorMsg'
 import { quickRanges, relativeTime } from '/components/utils/units'
@@ -41,6 +42,8 @@ import config from '/config'
 import QueryBuilder from '/components/data/QueryBuilder'
 import { filterData } from '/components/data/queryData'
 import { shortUnits } from '/components/measurement.config'
+
+import JsonURL from '@jsonurl/jsonurl'
 
 const registry = config.dockerRegistry
 
@@ -366,11 +369,44 @@ export function getFilterState(params, includeDefaultApp=true) : FilterState {
 }
 
 
+const parseOpts = (str: string) =>
+  JsonURL.parse(str)
+
+
+const encodeOpts = (obj: object) =>
+  JsonURL.stringify(obj)
+
+
 const defaultChartConfig: ChartOpts = {
-  chartType: 'timeseries',
+  type: 'timeseries',
   showLines: true,
   showPoints: false
 }
+
+
+function parseClientSideFilterParams(paramStr: string) {
+  let rules
+  try {
+    rules = paramStr ? parseOpts(paramStr) : []
+  } catch {
+    alert('Could not parse the "client-side-filters" params.  Using an empty list instead')
+    rules = []
+  }
+  return rules
+}
+
+
+function parseChartParams(paramStr: string) {
+  let chartOpts
+  try {
+    chartOpts = (paramStr ? parseOpts(paramStr) : defaultChartConfig) as ChartOpts
+  } catch {
+    alert('Could not parse the "chart" params.  Using an default chart settings.')
+    chartOpts = defaultChartConfig
+  }
+  return chartOpts
+}
+
 
 
 type DateStr = `${string}T${string}Z`
@@ -389,10 +425,10 @@ export default function QueryBrowser() {
     params.get('mimeType') as MimeType : null             // for filtering on ext
 
   const cFilters = params.get('client-side-filters')
-  const rules = cFilters ? JSON.parse(cFilters) : []
+  const rules = useMemo(() => parseClientSideFilterParams(cFilters), [cFilters])
 
   const chartConfig = params.get('chart')  // chart config string
-  const chartOpts = (chartConfig ? JSON.parse(chartConfig) : defaultChartConfig) as ChartOpts
+  const chartOpts = useMemo(() => parseChartParams(chartConfig), [chartConfig])
 
   const start = (params.get('start') || '-30m') as DateStr | RelativeTimeStr
   const end = params.get('end') as DateStr | RelativeTimeStr
@@ -752,7 +788,7 @@ export default function QueryBrowser() {
 
 
   const handleClientSideFilter = (rules) => {
-    params.set('client-side-filters', JSON.stringify(rules))
+    params.set('client-side-filters', encodeOpts(rules))
     setParams(params, {replace: true})
 
     updateFilteredData(data, rules)
@@ -762,12 +798,12 @@ export default function QueryBrowser() {
     params.delete('client-side-filters')
     setParams(params, {replace: true})
 
-    updateFilteredData(data, rules)
+    updateFilteredData(data, [])
   }
 
   const handleChartOptsChange = (val) => {
-    params.set('chart', JSON.stringify(val))
-    setParams(params, {replace: true})
+    params.set('chart', encodeOpts(val))
+    setParams(params)
   }
 
   return (
@@ -1006,7 +1042,8 @@ export default function QueryBrowser() {
               limit={filtered.length} // todo(nc): "limit" is fairly confusing
               emptyNotice="No recent data found with the selected filters"
               disableRowSelect={() => true}
-              enableDownload={data}
+              enableDownload
+              getDownloadableData={() => filterData(data, rules)}
               leftComponent={
                 <div className="flex">
                   <div className="flex items-center">
