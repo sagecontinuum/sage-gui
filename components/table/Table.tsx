@@ -405,7 +405,8 @@ type Props = {
   searchPlaceholder?: string
   stripes?: boolean
   enableSorting?: boolean
-  enableDownload?: boolean | object[]
+  enableDownload?: boolean
+  getDownloadableData?: () => object[]
   disableClickOutside?: boolean
   selected?: number[]             // ids
   storageKey?: string             // store column state in localstorage, if provided
@@ -636,10 +637,10 @@ export default function TableComponent(props: Props) {
     if (onShowDetails) onShowDetails()
   }
 
-  const handleDLOption = (data: boolean | object[]) => {
+  const handleDLOption = (getData: () => object[]) => {
     // todo(nc): could add support for other options/formats if needed.
     const header = columns.map(o => o.label).join(', ')
-    const rows = (typeof data == 'boolean' ? props.rows : data).map(row =>
+    const rows = (getData ? getData() : props.rows).map(row =>
       columns.map(col => {
         const val = row[col.id]
         return col.dlFormat ? `"${col.dlFormat(val, row)}"` : formatDownloadCol(val)
@@ -677,7 +678,7 @@ export default function TableComponent(props: Props) {
 
         {enableDownload &&
           <TableOption>
-            <DownloadTableBtn onDownload={() => handleDLOption(enableDownload)} />
+            <DownloadTableBtn onDownload={() => handleDLOption(props.getDownloadableData)} />
             <Divider orientation="vertical" flexItem sx={{margin: '5px 15px' }} />
           </TableOption>
         }
