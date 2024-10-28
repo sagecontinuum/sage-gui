@@ -103,6 +103,11 @@ const theme = createTheme({
         variant: 'outlined'
       }
     },
+    MuiRadio: {
+      defaultProps: {
+        size: 'small'
+      }
+    },
     MuiMenu: {
       defaultProps: {
         transitionDuration: 50
