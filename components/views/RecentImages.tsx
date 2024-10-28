@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import Button from '@mui/material/Button'
 import Tooltip from '@mui/material/Tooltip'
@@ -14,22 +15,24 @@ import { type VSN } from '/components/apis/beekeeper'
 
 type Props = {
   vsn: VSN,
+  cameras: string[]
   horizontal?: boolean
 }
 
 export default function RecentImages(props: Props) {
-  const {vsn, horizontal} = props
+  const {vsn, cameras, horizontal} = props
 
   const [loading, setLoading] = useState(false)
-  const [images, setImages] = useState<{[pos: string]: BH.OSNRecord}>()
+  const [images, setImages] = useState<{[name: string]: BH.OSNRecord}>()
   const [error, setError] = useState<{message: string}>()
 
-  const [total, setTotal] = useState<{[pos: string]: number}>()
-  const [progress, setProgress] = useState<{[pos: string]: number}>()
+  const [total, setTotal] = useState<{[name: string]: number}>()
+  const [progress, setProgress] = useState<{[name: string]: number}>()
 
   useEffect(() => {
+    console.log('here', cameras)
     setLoading(true)
-    BH.getRecentImages(vsn, onStart, onProgress)
+    BH.getRecentImagesV2(vsn, cameras, onStart, onProgress)
       .then(images => {
         const hasData = !!Object.keys(images).filter(k => images[k]).length
         setImages(hasData ? images : null)
@@ -37,48 +40,61 @@ export default function RecentImages(props: Props) {
       }).catch((err) => {
         setError(err)
       }).finally(() => setLoading(false))
-  }, [vsn])
+  }, [vsn, cameras])
 
 
-  const onStart = (position, total) => {
-    setTotal(prev => ({...prev, [position]: total}))
+  const onStart = (name, total) => {
+    setTotal(prev => ({...prev, [name]: total}))
   }
 
-  const onProgress = (position, count) => {
-    setProgress(prev => ({...prev, [position]: count}))
+  const onProgress = (name, count) => {
+    setProgress(prev => ({...prev, [name]: count}))
   }
 
 
   return (
     <Root className={horizontal ? 'flex horizontal flex-wrap' : ''}>
       {images &&
-        BH.cameraOrientations.map(pos => {
-          if (!images[pos])
-            return
+        cameras.map(name => {
+          const title = `${name.charAt(0).toUpperCase()}${name.slice(1)}`
+          if (!images[name])
+            return (
+              <div key={name}>
+                <h3>{title}</h3>
+              </div>
+            )
 
-          const title = `${pos.charAt(0).toUpperCase()}${pos.slice(1)}`
-          const {timestamp, size, value} = images[pos]
+          const {timestamp, size, value, meta} = images[name]
+          const {task} = meta
 
           return (
-            <div key={pos}>
+            <div key={name}>
               <h3>{title}</h3>
               <img
-                className={`hover-${pos}-camera`}
+                className={`hover-${name}-camera`}
                 src={value}
               />
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div>
-                    {isOldData(timestamp) && <WarningIcon className="failed"/>}
+                <div className="flex items-center gap">
+                  <div className="flex items-center">
+                    {isOldData(timestamp)  &&
+                      <div><WarningIcon className="failed"/></div>
+                    }
+                    <Tooltip title={new Date(timestamp).toLocaleString()} placement="top">
+                      <b className={isOldData(timestamp) ? 'failed' : 'muted'}>
+                        {relativeTime(timestamp)}
+                      </b>
+                    </Tooltip>
                   </div>
 
-                  <Tooltip title={new Date(timestamp).toLocaleString()} placement="top">
-                    <b className={isOldData(timestamp) ? 'failed' : 'muted'}>
-                      {relativeTime(timestamp)}
-                    </b>
-                  </Tooltip>
+                  <Button
+                    component={Link}
+                    to={`/query-browser?type=images&tasks=${task}&start=-12h&mimeType=image&page=0&nodes=${vsn}`}
+                  >
+                    View more...
+                  </Button>
                 </div>
-                <Button startIcon={<DownloadIcon />} size="small" href={value}>
+                <Button startIcon={<DownloadIcon />} href={value}>
                   {bytesToSizeSI(size)}
                 </Button>
               </div>
@@ -88,9 +104,9 @@ export default function RecentImages(props: Props) {
       }
 
       {loading && total && progress &&
-        BH.cameraOrientations.map(pos => {
-          return total[pos] > 0 && total[pos] != progress[pos] &&
-            <div key={pos}><b>{pos}</b>: Searching {progress[pos]} of {total[pos]}</div>
+        cameras.map(name => {
+          return total[name] > 0 && total[name] != progress[name] &&
+            <div key={name}><b>{name}</b>: Searching {progress[name]} of {total[name]}</div>
         })
       }
 

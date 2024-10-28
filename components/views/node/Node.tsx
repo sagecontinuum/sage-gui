@@ -452,7 +452,13 @@ export default function NodeView(props: Props) {
           <Card>
             <h2>Images</h2>
             <Imgs>
-              <RecentImages vsn={vsn} horizontal />
+              {node &&
+                <RecentImages
+                  vsn={vsn}
+                  cameras={node.sensors.filter(o => o.capabilities.includes('camera')).map(o => o.name)}
+                  horizontal
+                />
+              }
             </Imgs>
           </Card>
 

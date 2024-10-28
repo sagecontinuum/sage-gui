@@ -422,6 +422,56 @@ export async function getRecentImages(
 }
 
 
+export async function getRecentImagesV2(
+  vsn: BK.VSN,
+  cameras: string[],
+  onStart?: (position: string, total: number) => void,
+  onProgress?: (position: string, num: number) => void,
+) : Promise<{[position: string]: OSNRecord}> {
+  // requests for each orientation
+  const reqs = cameras.map(camera => {
+    const params = {
+      start: '-1d',
+      filter: {
+        name: 'upload',
+        vsn,
+        camera
+      }
+    }
+
+    return getData(params)
+  })
+
+
+  // find latest in storage for each position
+  const mapping = Promise.all(reqs)
+    .then(async (data) => {
+      if (onStart) {
+        cameraOrientations.forEach((pos, i) => {
+          onStart(pos, data[i]?.length)
+        })
+      }
+
+      const proms = data.map((d, i) => {
+        const position = cameraOrientations[i]
+        d = d.filter(o => /\.jpg$/g.test(o.value as string)) // need to only consider images
+        return _findLatestAvail(d, position, onProgress)
+      })
+      const dataList = await Promise.all(proms)
+
+      // reduce into mapping: {top: {...}, left, {...}, ... ,}
+      const dataByPos = cameras.reduce((acc, name, i) => ({
+        ...acc,
+        [name]: dataList[i]
+      }), {})
+
+      return dataByPos
+    })
+
+  return mapping
+}
+
+
 
 export async function getLatestAudio(vsn: BK.VSN) {
   const data = await getData({
