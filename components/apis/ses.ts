@@ -1,5 +1,5 @@
 import * as BH from './beehive'
-import type { VSN } from './beekeeper'
+import * as BK from './beekeeper'
 
 import { groupBy } from 'lodash'
 import { handleErrors } from '../fetch-utils'
@@ -192,7 +192,7 @@ type JobRecord = {
 // Job type for UI
 export type Job = JobRecord & {
   job_id: number   // converted from string to number
-  nodes: VSN[]
+  nodes: BK.VSN[]
 }
 
 
@@ -210,6 +210,7 @@ export type Goal = {
 
 
 type ListJobsParams = {
+  project?: BK.Node['project']
   user?: string
 }
 
@@ -426,7 +427,7 @@ export type ErrorsByGoalID = {
 
 type GetEventsArgs = {
   start?: Date | string
-  vsns?: VSN[]
+  vsns?: BK.VSN[]
 }
 
 type EventData = {
@@ -458,9 +459,11 @@ export function getEvents(args?: GetEventsArgs) : Promise<EventData> {
 
 
 export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
-  const {user} = params || {}
+  const {user, project} = params || {}
 
-  const jobs = await listJobs({user})
+  const prom1 = project ? BK.getNodes({project}) : null
+
+  const [nodes, jobs] = await Promise.all([prom1, listJobs({user})])
 
   let jobData
   try {
@@ -480,6 +483,12 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
   } catch(error) {
     console.error('error', error)
   }
+
+  if (nodes) {
+    const vsns = nodes.map(obj => obj.vsn)
+    jobData = jobData.filter(job => job.nodes.filter(vsn => vsns.includes(vsn)).length)
+  }
+
 
   return jobData
 }

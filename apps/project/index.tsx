@@ -5,13 +5,25 @@ import styled from 'styled-components'
 import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 
+/* todo
+import { lazy, Suspense } from 'react'
+import JobsIcon from '@mui/icons-material/ListRounded'
+import MyJobsIcon from '@mui/icons-material/Engineering'
+import AddIcon from '@mui/icons-material/AddRounded'
+*/
+
 import MetaRoute from '/components/Meta'
-import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
+import NavBar, { NavItems } from '/components/nav-bar/NavBar'
+import NavItem from '/components/nav-bar/NavItem'
+// import Progress from '/components/progress/LazyLoading'
+
 import NodeTabs from '/components/views/nodes/NodeTabs'
 import Nodes from '/components/views/nodes/Nodes'
 import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
+// import JobStatus from '../sage/jobs/JobStatus'
+// const CreateJob = lazy(() => import('../sage/jobs/create-job/CreateJob'))
 
 import Data from '/apps/sage/data/Data'
 import QueryBrowser from '../sage/data-stream/QueryBrowser'
@@ -30,10 +42,11 @@ import NotFound from '/components/404'
 
 import { PermissionProvider } from '/components/auth/PermissionProvider'
 import { ProgressProvider } from '/components/progress/ProgressProvider'
-
-import '/assets/styles.scss'
+import { SnackbarProvider } from 'notistack'
 
 import theme from '/components/theme'
+import '/assets/styles.scss'
+
 import settings from '/components/settings'
 
 const {logo, alt, url, project, vsns} = settings
@@ -43,6 +56,7 @@ const NavMenu = () =>
   <NavItems>
     <NavItem label="Nodes" to="nodes" />
     <NavItem label="Data" to="data" />
+    {/* <NavItem label="Job Status" to="jobs" /> */}
   </NavItems>
 
 
@@ -98,39 +112,52 @@ export default function App() {
           />
 
           <PermissionProvider>
-            <Container>
-              <ProgressProvider>
-                <Routes>
-                  <Route path="/" element={<Navigate to="nodes" replace />} />
+            <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
+              <Container>
+                <ProgressProvider>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="nodes" replace />} />
 
-                  <Route path='/' element={<MetaRoute />}>
-                    <Route path="/" element={<NodeTabs />}>
-                      <Route path="nodes" element={<Nodes />} />
-                      <Route path="all-nodes" element={<Nodes />} />
-                      <Route path="sensors" element={<SensorList {...{project, vsns}} />} />
+                    <Route path='/' element={<MetaRoute />}>
+                      <Route path="/" element={<NodeTabs />}>
+                        <Route path="nodes" element={<Nodes />} />
+                        <Route path="all-nodes" element={<Nodes />} />
+                        <Route path="sensors" element={<SensorList {...{project, vsns}} />} />
+                      </Route>
+
+                      <Route path="node/:vsn" element={<Node />} />
+                      <Route path="sensors/:name" element={<Sensor />} />
+
+                      {/*
+                      <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
+                      <Route path="jobs" element={<JobStatus />}>
+                        <Route path=":view" element={<JobStatus />} />
+                      </Route>
+
+                      <Route path="create-job" element={
+                        <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
+                      }/>
+                      */}
+
+                      <Route path="data" element={<Data {...{project, vsns}}  />} />
+                      <Route path="data/ontology/:name" element={<Ontology />} />
+                      <Route path="data/product/:name" element={<DataProduct />} />
+                      <Route path="query-browser" element={<QueryBrowser />} />
+
+                      <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
+                        <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+                        <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
+                        <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
+                        <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
+                      </Route>
+
+                      <Route path="login" element={<TestSignIn />} />
+                      <Route path="*" element={<NotFound />} />
                     </Route>
-
-                    <Route path="node/:vsn" element={<Node />} />
-                    <Route path="sensors/:name" element={<Sensor />} />
-
-                    <Route path="data" element={<Data {...{project, vsns}}  />} />
-                    <Route path="data/ontology/:name" element={<Ontology />} />
-                    <Route path="data/product/:name" element={<DataProduct />} />
-                    <Route path="query-browser" element={<QueryBrowser />} />
-
-                    <Route path="account" element={<RequireAuth><Account /></RequireAuth>}>
-                      <Route path="profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
-                      <Route path="nodes" element={<RequireAuth><MyNodes /></RequireAuth>} />
-                      <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
-                      <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
-                    </Route>
-
-                    <Route path="login" element={<TestSignIn />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Route>
-                </Routes>
-              </ProgressProvider>
-            </Container>
+                  </Routes>
+                </ProgressProvider>
+              </Container>
+            </SnackbarProvider>
           </PermissionProvider>
         </BrowserRouter>
       </ThemeProvider>

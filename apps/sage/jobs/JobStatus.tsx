@@ -30,6 +30,10 @@ import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
 
+// todo(nc): support jobs view for multiple projects
+// import settings from '/components/settings'
+// const PROJECT = settings.project
+
 const user = Auth.user
 
 
@@ -298,7 +302,7 @@ export default function JobStatus() {
     const filterUser = view == 'my-jobs' && user
 
     // fetch aggregated scheduler data
-    const p1 = ES.getJobs()
+    const p1 = ES.getJobs() // {project: PROJECT}
 
     // also fetch gps for map
     const p2 = BK.getNodes()
