@@ -30,7 +30,6 @@ export default function RecentImages(props: Props) {
   const [progress, setProgress] = useState<{[name: string]: number}>()
 
   useEffect(() => {
-    console.log('here', cameras)
     setLoading(true)
     BH.getRecentImagesV2(vsn, cameras, onStart, onProgress)
       .then(images => {
@@ -56,11 +55,11 @@ export default function RecentImages(props: Props) {
     <Root className={horizontal ? 'flex horizontal flex-wrap' : ''}>
       {images &&
         cameras.map(name => {
-          const title = `${name.charAt(0).toUpperCase()}${name.slice(1)}`
+          // const title = `${name.charAt(0).toUpperCase()}${name.slice(1)}`
           if (!images[name])
             return (
               <div key={name}>
-                <h3>{title}</h3>
+                <h3>{name}</h3>
               </div>
             )
 
@@ -69,7 +68,7 @@ export default function RecentImages(props: Props) {
 
           return (
             <div key={name}>
-              <h3>{title}</h3>
+              <h3>{name}</h3>
               <img
                 className={`hover-${name}-camera`}
                 src={value}

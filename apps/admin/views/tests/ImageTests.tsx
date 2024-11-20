@@ -18,7 +18,7 @@ type RecentImgsProps = {
 function RecentImgs(props: RecentImgsProps) {
   const {vsns} = props
 
-  const [nodes, setNodes] = useState<BK.VSN[]>()
+  const [nodes, setNodes] = useState<BK.Node[]>()
   const [project] = useState('sage')
 
   const loader = useRef(null)
@@ -30,7 +30,6 @@ function RecentImgs(props: RecentImgsProps) {
         const node_vsns = data
           .filter(o => o.phase == 'Deployed')
           .filter(o => vsns?.length ? vsns.includes(o.vsn) : true)
-          .map(o => o.vsn)
           .reverse()
         setNodes(node_vsns)
       })
@@ -64,12 +63,17 @@ function RecentImgs(props: RecentImgsProps) {
 
   return (
     <div>
-      {nodes?.slice(0, getInfiniteEnd(page)).map(vsn => {
+      {nodes?.slice(0, getInfiniteEnd(page)).map(node => {
+        const {vsn} = node
         return (
           <Card key={vsn} className="card">
             <h3><Link to={`/node/${vsn}`}>{vsn}</Link></h3>
             <Imgs>
-              <RecentImages vsn={vsn} horizontal />
+              <RecentImages
+                vsn={vsn}
+                cameras={node.sensors.filter(o => o.capabilities.includes('camera')).map(o => o.name)}
+                horizontal
+              />
             </Imgs>
           </Card>
         )

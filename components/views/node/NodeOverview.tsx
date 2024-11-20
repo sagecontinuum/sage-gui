@@ -105,8 +105,9 @@ const metaRows1 = [{
   }
 },
 {
-  id: 'commission_date', // todo: update db
-  label: 'Commissioned'
+  id: 'commissioned_at',
+  label: 'Commissioned',
+  format: (val) => val ? new Date(val).toLocaleString() : '-'
 }]
 
 

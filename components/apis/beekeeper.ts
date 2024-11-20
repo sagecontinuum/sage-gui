@@ -69,6 +69,7 @@ export type Node = {
   name: string
   project: 'SAGE' | 'CROCUS' | 'APIARY' | 'VTO' | 'DAWN'
   focus: 'Rural' | 'Urban' | 'Training and Development' | string
+  partner: string
   type: 'WSN' | 'Blade'
   site_id: string
   gps_lat: number

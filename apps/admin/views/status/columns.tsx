@@ -388,9 +388,10 @@ const columns = [{
   },
   hide: true
 }, {
-  id: 'commission_date',
-  label: 'Commission Date',
-  hide: true
+  id: 'commissioned_at',
+  label: 'Commission Time',
+  hide: true,
+  format: (val) => val ? new Date(val).toLocaleString() : '-'
 }, {
   id: 'shield',
   label: 'Has Shield',

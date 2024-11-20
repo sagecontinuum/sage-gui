@@ -3,10 +3,13 @@ import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 import type { Column } from '/components/table/Table'
 
+
+import type { Node } from '/components/apis/beekeeper'
+
 const PROJECT = settings.project?.toLowerCase()
 
 
-const columns: Column[] = [{
+const columns: Column<Node>[] = [{
   id: 'status',
   label: 'Status',
   format: formatters.statusWithPhase,
@@ -64,13 +67,12 @@ const columns: Column[] = [{
   dlFormat: (val) => val.map(v => v.hw_model).join(', '),
   width: '200px',
   hide: true
-},
-/* todo: update db
-{
+}, {
   id: 'commissioned_at',
-  label: 'Commission Date',
-},
-*/ {
+  label: 'Commission Time',
+  hide: true,
+  format: (val) => val ? new Date(val).toLocaleString() : '-'
+}, {
   id: 'modem_model',
   label: 'Modem',
   format: formatters.modem,
