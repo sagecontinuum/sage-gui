@@ -205,6 +205,7 @@ export default function Filter(props: Props) {
               <CBContainer
                 control={
                   <Checkbox
+                    name={name}
                     checked={checked.includes(name)}
                     onChange={(evt) => handleCheck(evt, name)}
                   />
