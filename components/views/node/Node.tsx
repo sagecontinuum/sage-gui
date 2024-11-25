@@ -20,7 +20,7 @@ import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import Table, { TableSkeleton } from '/components/table/Table'
-import { prettyList, quickRanges } from '/components/utils/units'
+import { prettyList, quickRanges, getRangeTitle } from '/components/utils/units'
 
 import RecentDataTable, { EmptyTable } from '../RecentDataTable'
 import RecentImages from '../RecentImages'
@@ -381,7 +381,7 @@ export default function NodeView(props: Props) {
           {/* timeline card */}
           <Card>
             <div className="timeline-title flex items-start gap">
-              <h2>Last {opts.window.replace(/-|d/g, '')} days of data</h2>
+              <h2>{getRangeTitle(opts.window)}</h2>
               <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
             </div>
 

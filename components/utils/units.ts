@@ -31,6 +31,7 @@ export function prettyTime(secs: number) {
   return time
 }
 
+
 export function prettyTimeMS(secs: number) {
   if (!secs && secs != 0) return
   const days = Math.floor(secs / (24*60*60))
@@ -84,6 +85,7 @@ export function msToTime(ms: number) {
   else return days + ' days ago'
 }
 
+
 export function msToTimeApprox(ms: number) {
   if (!ms && ms != 0) return
   const secs = Math.floor( (ms / 1000))
@@ -123,4 +125,19 @@ export function prettyList(l: string[]) {
   return l.length > 1
     ? `${l.slice(0, -1).join(', ')} and ${l.slice(-1)}`
     : l[0]
+}
+
+/**
+ * Util functions related to displaying time from a query
+ */
+
+type QuickRange = keyof typeof quickRanges
+
+export function getRangeTitle(str: QuickRange | '-1y') {
+  if (str.includes('d'))
+    return `Last ${str.replace(/-|d/g, '')} days of data`
+  else if (str.includes('y'))
+    return `Last ${str.replace(/-|y/g, '')} year of data`
+
+  return str
 }

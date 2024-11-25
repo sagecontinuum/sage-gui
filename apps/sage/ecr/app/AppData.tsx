@@ -19,6 +19,8 @@ import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
+import { getRangeTitle } from '/components/utils/units'
+
 import { vsnLinkNameOnly } from '/components/views/nodes/nodeFormatters'
 
 import { keyBy } from 'lodash'
@@ -34,13 +36,6 @@ const getStartTime = (str) => {
     return subYears(new Date(), str.replace(/-|y/g, ''))
   else
     throw new Error(`getStartTime: relative start time '%{string}' not supported.`)
-}
-
-const getRangeTitle = (str) => {
-  if (str.includes('d'))
-    return `Last ${str.replace(/-|d/g, '')} days of data`
-  else if (str.includes('y'))
-    return `Last ${str.replace(/-|y/g, '')} year of data`
 }
 
 
