@@ -39,34 +39,43 @@ import RequireAuth from '/components/auth/RequireAuthAdmin'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
 
+import Auth from '/components/auth/auth'
 
-const NavMenu = () =>
-  <NavItems>
-    <NavItem label="Nodes" to="/nodes?phase=deployed" />
-    <NavItem
-      label="AI Experiments"
-      to="/ai/descriptions"
-    />
-    <NavItem label="Factory" to="/surya" />
-    <NavItem
-      label="Tests"
-      root="/tests"
-      menu={
-        <>
-          <Item
-            icon={<MonitorIcon/>}
-            to="/tests/?phase=deployed"
-            label="Health/Sanity"
-          />
-          <Item
-            icon={<ImageIcon/>}
-            to="/tests/images"
-            label="Images"
-          />
-        </>
-      }
-    />
-  </NavItems>
+
+const NavMenu = () => {
+  if (!Auth.user)
+    return <></>
+
+  return (
+    <NavItems>
+      <NavItem label="Nodes" to="/nodes?phase=deployed" />
+      <NavItem
+        label="AI Experiments"
+        to="/ai/descriptions"
+      />
+      <NavItem label="Factory" to="/surya" />
+      <NavItem label="Metrics" to="/metrics" />
+      <NavItem
+        label="Tests"
+        root="/tests"
+        menu={
+          <>
+            <Item
+              icon={<MonitorIcon/>}
+              to="/tests/?phase=deployed"
+              label="Health/Sanity"
+            />
+            <Item
+              icon={<ImageIcon/>}
+              to="/tests/images"
+              label="Images"
+            />
+          </>
+        }
+      />
+    </NavItems>
+  )
+}
 
 
 
