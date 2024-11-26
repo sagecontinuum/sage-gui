@@ -17,6 +17,7 @@ import SuryaStatus from './views/factory/Factory'
 // import AudioTests from './views/tests/AudioTests'
 import ImageTests from './views/tests/ImageTests'
 import DescriptionTests from './views/tests/DescriptionTests'
+import Metrics from './views/metrics/Metrics'
 
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
@@ -49,10 +50,7 @@ const NavMenu = () => {
   return (
     <NavItems>
       <NavItem label="Nodes" to="/nodes?phase=deployed" />
-      <NavItem
-        label="AI Experiments"
-        to="/ai/descriptions"
-      />
+      {/* <NavItem label="AI Experiments" to="/ai/descriptions" /> */}
       <NavItem label="Factory" to="/surya" />
       <NavItem label="Metrics" to="/metrics" />
       <NavItem
@@ -114,6 +112,8 @@ export default function App() {
                       {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                       <Route path="tests/images" element={<ImageTests />} />
                       <Route path="ai/descriptions" element={<DescriptionTests />} />
+
+                      <Route path="metrics" element={<Metrics />} />
 
                       <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                       <Route path="surya/:phase" element={<SuryaStatus />} />

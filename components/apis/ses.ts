@@ -193,7 +193,7 @@ type JobRecord = {
 export type Job = JobRecord & {
   job_id: number   // converted from string to number
   nodes: BK.VSN[]
-}
+} & JobRecord['state']
 
 
 export type ESRecord = PluginEvent | GoalEvent
