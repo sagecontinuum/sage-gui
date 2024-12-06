@@ -194,7 +194,7 @@ export default function JobDetails(props: Props) {
                     id: 'user',
                     label: 'User'
                   }, {
-                    id: 'plugins',
+                    id: 'apps',
                     label: `Apps (${job.plugins.length})`,
                     format: formatters.apps
                   }, {

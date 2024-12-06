@@ -92,6 +92,14 @@ const getSensorList = (data: BK.Node) => {
 }
 
 
+const getVisibleCameras = (node: BK.Node, isAdmin?: boolean) => {
+  const {sensors} = node
+
+  const visibleSensors = isAdmin ? sensors : sensors.filter(o => o.is_active)
+  const cameras = visibleSensors.filter(o => o.capabilities.includes('camera'))
+
+  return cameras.map(o => o.name)
+}
 
 type Props = {
   admin?: boolean
@@ -455,7 +463,7 @@ export default function NodeView(props: Props) {
               {node &&
                 <RecentImages
                   vsn={vsn}
-                  cameras={node.sensors.filter(o => o.capabilities.includes('camera')).map(o => o.name)}
+                  cameras={getVisibleCameras(node, admin)}
                   horizontal
                 />
               }
