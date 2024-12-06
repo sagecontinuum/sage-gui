@@ -39,32 +39,34 @@ const user = Auth.user
 
 
 export const formatters = {
-  apps: (objs) => <>
-    {objs?.map((obj, i) => {
-      const {name, plugin_spec} = obj
-      const {image = ''} = plugin_spec || {}
-
-      // todo(nc): ignore docker registry component for now?
-      const app = image.replace('registry.sagecontinuum.org/', '').split(':')[0]
-
-      const l = objs.length - 1
+  appNames: (appNames: string[], apps: string[]) =>
+    appNames?.map((name, i) => {
+      const l = apps.length - 1
       return <span key={i}>
-        <Link to={`/apps/app/${app}`}>
+        <Link to={`/apps/app/${apps[i].split(':')[0]}`}>
           {name}
         </Link>{i < l ? ', '  : ''}
       </span>
-    })}
-  </>,
-  nodes: (vsns) => <>
-    {vsns.map((vsn, i) => {
+    }),
+  apps: (apps: string[]) =>
+    apps?.map((app, i) => {
+      const [namespace, nameWithVer] = app.split('/')
+      const l = apps.length - 1
+      return <span key={i}>
+        <Link to={`/apps/app/${namespace}/${nameWithVer.split(':')[0]}`}>
+          {nameWithVer}
+        </Link>{i < l ? ', '  : ''}
+      </span>
+    }),
+  nodes: (vsns) =>
+    vsns.map((vsn, i) => {
       const l = vsns.length - 1
       return <span key={vsn}>
         <Link to={`/node/${vsn}`}>
           {vsn}
         </Link>{i < l ? ', '  : ''}
       </span>
-    })}
-  </>
+    })
 }
 
 const jobCols = [{
@@ -99,9 +101,14 @@ const jobCols = [{
   format: (_, obj) =>
     <b className="muted">{obj.nodes.length}</b>
 }, {
-  id: 'plugins',
-  label: 'Apps',
-  format: formatters.apps
+  id: 'appNames',
+  label: 'App Names',
+  format: (appNames, obj) => formatters.appNames(appNames, obj.apps)
+}, {
+  id: 'apps',
+  label: 'ECR App Names',
+  format: formatters.apps,
+  hide: true
 }, {
   id: 'appCount',
   label: 'App count',

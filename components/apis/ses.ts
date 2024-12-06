@@ -130,7 +130,7 @@ export type QueuedState = 'Created' | 'Submitted'
 
 type PluginSpec = {
   name: string
-  pluginSpec: {
+  plugin_spec: {
     image: string     // image ref
     args: string[]
   }
@@ -468,7 +468,7 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
   let jobData
   try {
     jobData = jobs.map((obj) => {
-      const {name, job_id, nodes, nodeTags} = obj
+      const {name, job_id, nodes, plugins, nodeTags} = obj
 
       return {
         ...obj,
@@ -477,7 +477,14 @@ export async function getJobs(params?: ListJobsParams) : Promise<Job[]> {
         name,
         nodes: nodes ?
           Object.keys(nodes) :
-          (nodeTags ? nodeTags : [])
+          (nodeTags ? nodeTags : []),
+        // list user-defined, "plugin" (app) names in object as well
+        appNames: (plugins || []).map(o => o.name),
+        // list full ECR app names in object as well
+        apps: (plugins || []).map(o => {
+          return !o.plugin_spec ?
+            null : o.plugin_spec.image.replace('registry.sagecontinuum.org/', '')
+        })
       }
     })
   } catch(error) {
