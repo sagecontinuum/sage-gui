@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { useEffect, useState, useReducer, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import styled from 'styled-components'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
@@ -9,18 +9,14 @@ import Masonry from '@mui/lab/Masonry'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
-import * as ECR from '/components/apis/ecr'
 
 import { useProgress } from '/components/progress/ProgressProvider'
 import { CardViewStyle, Card } from '/components/layout/Layout'
 import NodeNotFound from './NodeNotFound'
 import Audio from '/components/viz/Audio'
 import Map from '/components/Map'
-import Timeline from '/components/viz/Timeline'
-import TimelineSkeleton from '/components/viz/TimelineSkeleton'
-import AppLabel from '/components/viz/TimelineAppLabel'
 import Table, { TableSkeleton } from '/components/table/Table'
-import { prettyList, quickRanges, getRangeTitle } from '/components/utils/units'
+import { prettyList, quickRanges } from '/components/utils/units'
 
 import RecentDataTable, { EmptyTable } from '../RecentDataTable'
 import RecentImages from '../RecentImages'
@@ -29,15 +25,7 @@ import RecentImages from '../RecentImages'
 import { deviceCols } from './lorawandevice/columns'
 import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
-// todo(nc): promote/refactor into component lib
-import DataOptions from '/components/input/DataOptions'
-import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
-import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
-import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
-import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
-
-import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
 import NodeOverview from './NodeOverview'
 import NodeGraphic from './NodeGraphic'
 
@@ -46,13 +34,12 @@ import config from '/config'
 
 import { measurements, skipSensorPreview } from '/components/measurement.config'
 import NodeEditBtn from './NodeEditBtn'
+import NodeTimeline from './NodeTimeline'
 
 
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
-const TL_LABEL_WIDTH = 175 // default timeline label width
-const TAIL_DAYS = '-7d'
 
 
 // todo(nc): refactor more into a general config
@@ -65,11 +52,6 @@ const hasSensor = (meta: BK.Node, sensors: string | string[]) : boolean =>
     return hw_model.match(re)
   })
 
-
-const getStartTime = (str) =>
-  str.includes('y') ?
-    subYears(new Date(), str.replace(/-|y/g, '')) :
-    subDays(new Date(), str.replace(/-|d/g, ''))
 
 
 export const hasShield = (computes: BK.FlattenedManifest['computes']) =>
@@ -121,30 +103,10 @@ export default function NodeView(props: Props) {
 
   const [status, setStatus] = useState<string>()
   const [liveGPS, setLiveGPS] = useState<BH.GPS>()
-  const [ecr, setECR] = useState<ECR.AppDetails[]>()
 
   const [error, setError] = useState(null)
   const [vsnNotFound, setVsnNotFound] = useState(null)
 
-  // todo(nc): refactor into provider?
-  const [{data, rawData}, dispatch] = useReducer(
-    dataReducer,
-    initDataState,
-  )
-
-  const [loadingTL, setLoadingTL] = useState(false)
-
-  const [opts, setOpts] = useState<Options>({
-    display: 'nodes',
-    density: true,
-    versions: false,
-    time: 'hourly',
-    start: getStartTime(TAIL_DAYS),
-    window: TAIL_DAYS
-  })
-
-  // note: endtime is not currently an option
-  const [end] = useState<Date>(endOfHour(new Date()))
 
   const [loraDataWithRssi, setDataWithRssi] = useState<BK.LorawanConnection[]>()
 
@@ -192,22 +154,6 @@ export default function NodeView(props: Props) {
   }, [vsn, setLoading])
 
 
-  // data timeline
-  useEffect(() => {
-    if (!node) return
-    setLoadingTL(true)
-    fetchRollup({...opts, vsn})
-      .then(data => dispatch({type: 'INIT_DATA', data, nodes: [node]}))
-      .catch(error => dispatch({type: 'ERROR', error}))
-      .finally(() => setLoadingTL(false))
-  }, [vsn, node, opts])
-
-
-  // fetch public ECR apps to determine if apps are indeed public
-  useEffect(() => {
-    ECR.listApps('public')
-      .then(ecr => setECR(ecr))
-  }, [])
 
   // fetch rssi
   useEffect(() => {
@@ -217,34 +163,7 @@ export default function NodeView(props: Props) {
   }, [manifest])
 
 
-  const handleOptionChange = (name, val) => {
-    setError(null)
-    if (['nodes', 'apps'].includes(name)) {
-      setOpts(prev => ({...prev, display: name}))
-      return
-    } else  if (name == 'time') {
-      const time = val
-      const data = parseData({data: rawData, time})
-      dispatch({type: 'SET_DATA', data})
-      setOpts(prev => ({...prev, [name]: time}))
-      return
-    } else if (name == 'versions') {
-      const versions = val
-      const data = parseData({data: rawData, time: opts.time, versions})
-      dispatch({type: 'SET_DATA', data})
-      setOpts(prev => ({...prev, [name]: versions}))
-      return
-    } else if (name == 'density') {
-      setOpts(prev => ({...prev, [name]: val}))
-    } else if (name == 'window') {
-      setOpts(prev => ({
-        ...prev,
-        ...(val && {window: val, start: getStartTime(val)})
-      }))
-    } else {
-      throw `unhandled option state change name=${name}`
-    }
-  }
+
 
   const shield = manifest?.computes ? hasShield(manifest.computes) : false
 
@@ -386,51 +305,8 @@ export default function NodeView(props: Props) {
             </Card>
           }
 
-          {/* timeline card */}
           <Card>
-            <div className="timeline-title flex items-start gap">
-              <h2>{getRangeTitle(opts.window)}</h2>
-              <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
-            </div>
-
-            {loadingTL &&
-              <div className="clearfix w-full">
-                <TimelineSkeleton includeHeader={false} />
-              </div>
-            }
-
-            {data && !!Object.keys(data).length && ecr && !loadingTL &&
-              <Timeline
-                data={data[vsn]}
-                cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                colorCell={opts.density ? colorDensity : stdColor}
-                startTime={opts.start}
-                endTime={end}
-                tooltip={(item) => `
-                  <div style="margin-bottom: 5px;">
-                    ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
-                  </div>
-                  ${item.meta.plugin}<br>
-                  ${item.value.toLocaleString()} records`
-                }
-                onCellClick={(data) => {
-                  const {timestamp, meta} = data
-                  const {vsn, origPluginName} = meta
-                  const date = new Date(timestamp)
-                  const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
-                  window.open(`/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank')
-                }}
-                yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
-                labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
-              />
-            }
-
-            {data && !Object.keys(data).length && !loadingTL &&
-              <div>
-                <div className="clearfix"></div>
-                <p className="muted">No data available</p>
-              </div>
-            }
+            <NodeTimeline node={node} />
           </Card>
 
           <Card>
