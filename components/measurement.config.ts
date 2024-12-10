@@ -131,13 +131,16 @@ const measurements = {
     ]
   },
 
+
+
+
   'MFR_node': {
     'names': [
       {'name': 'air_temperature', 'label': 'Air Temp'},
+      {'name': 'barometric_pressure', 'label': 'Barometric Pressure'},
       {'name': 'water_conductivity', 'label': 'Water Conductivity'},
       {'name': 'water_depth', 'label': 'Water Depth'},
       {'name': 'water_temperature', 'label': 'Water Temp'},
-      {'name': 'barometric_pressure', 'label': 'Barometric Pressure'},
       {'name': 'heat_flux', 'label': 'Heat Flux'},
       {'name': 'relative_humidity', 'label': 'Relative Humidity'},
       {'name': 'signal.spreadingfactor', 'label': 'Spreadingfactor'},
@@ -170,6 +173,28 @@ const measurements = {
       {'name': 'temp_d4', 'label': 'Temp_d4'},
       */
     ]
+
+    /** todo: support per-node MFR_node configs(?), and organize:
+      air temp,
+      barometric press,
+      battery,
+      heat flux,
+      net longwave,
+      net shortwave,
+      relative humidity,
+      solar voltage,
+      temp d1,
+      tempd2,
+      tempd3,
+      tempd4,
+      total net radiation,
+      vapour pressure,
+      voltage ac,
+      vwc_d1 to d4,
+      water conductivity,
+      water depth,
+      water temp,
+    */
   }
 }
 
