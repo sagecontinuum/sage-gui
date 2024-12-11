@@ -1,17 +1,18 @@
 
 /* eslint-disable max-len */
 import { useEffect, useState, useReducer } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import styled from 'styled-components'
 
+import { QueryStatsRounded, ImageSearchOutlined } from '@mui/icons-material'
 
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
 import { getRangeTitle } from '/components/utils/units'
 
-
 import DataOptions from '/components/input/DataOptions'
-import { fetchRollup, parseData } from '/apps/sage/data/rollupUtils'
+import { fetchRollup, fetchUploadRollup, parseData } from '/apps/sage/data/rollupUtils'
 import { dataReducer, initDataState } from '/apps/sage/data/dataReducer'
 import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
@@ -21,6 +22,7 @@ import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
 
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
+import { Tab, Tabs, tabLabel } from '/components/tabs/Tabs'
 
 
 const TL_LABEL_WIDTH = 175 // default timeline label width
@@ -42,6 +44,9 @@ export default function NodeTimeline(props: Props) {
   const { node, admin } = props
 
   const vsn = useParams().vsn as BK.VSN
+
+  const [params] = useSearchParams()
+  const tab = params.get('timeline') || 'apps'
 
 
   // todo(nc): refactor into provider?
@@ -68,15 +73,29 @@ export default function NodeTimeline(props: Props) {
 
   // data timelines
   useEffect(() => {
-    if (!node) return
+    if (!node || tab != 'apps') return
     setLoadingTL(true)
     fetchRollup({...opts, vsn})
       .then(data => dispatch({type: 'INIT_DATA', data, nodes: [node]}))
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
+  }, [vsn, node, opts, tab])
 
-  }, [vsn, node, opts])
 
+  // data timelines
+  useEffect(() => {
+    if (!node || tab != 'images') return
+
+    setLoadingTL(true)
+    fetchUploadRollup({...opts, vsn})
+      .then(data => {
+        console.log('data', data)
+        dispatch({type: 'INIT_DATA', data, nodes: [node]})
+
+      })
+      .catch(error => dispatch({type: 'ERROR', error}))
+      .finally(() => setLoadingTL(false))
+  }, [vsn, node, opts, tab])
 
   // fetch public ECR apps to determine if apps are indeed public
   useEffect(() => {
@@ -116,49 +135,91 @@ export default function NodeTimeline(props: Props) {
 
   return (
     <>
-      <div className="timeline-title flex items-start gap">
-        <h2>{getRangeTitle(opts.window)}</h2>
-        <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
-      </div>
+      <Tabs
+        value={tab}
+        aria-label="timeline view tabs"
+      >
+        <Tab
+          label={tabLabel(<QueryStatsRounded fontSize="small" />, 'Published Records')}
+          value="apps"
+          component={Link}
+          to="?timeline=apps"
+          replace
+        />
+        <Tab
+          label={tabLabel(<ImageSearchOutlined />, 'Uploaded Files')}
+          value="images"
+          component={Link}
+          to="?timeline=images"
+          replace
+        />
+      </Tabs>
+      <br/>
 
-      {loadingTL &&
+
+      <TimelineContainer>
+        <div className="timeline-title flex items-start gap">
+          <h2>{getRangeTitle(opts.window)}</h2>
+          <DataOptions
+            onChange={handleOptionChange}
+            opts={opts}
+            quickRanges={['-5y', '-1y', '-90d', '-30d', '-7d', '-2d']}
+            condensed
+            density
+            aggregation
+          />
+        </div>
+
+        {loadingTL &&
           <div className="clearfix w-full">
             <TimelineSkeleton includeHeader={false} />
           </div>
-      }
+        }
 
-      {data && !!Object.keys(data).length && ecr && !loadingTL &&
-        <Timeline
-          data={data[vsn]}
-          cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-          colorCell={opts.density ? colorDensity : stdColor}
-          startTime={opts.start}
-          endTime={end}
-          tooltip={(item) => `
-            <div style="margin-bottom: 5px;">
-            ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
-            </div>
-            ${item.meta.plugin}<br>
-            ${item.value.toLocaleString()} records`
-          }
-          onCellClick={(data) => {
-            const {timestamp, meta} = data
-            const {vsn, origPluginName} = meta
-            const date = new Date(timestamp)
-            const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
-            window.open(`/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank')
-          }}
-          yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
-          labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
-        />
-      }
+        {data && !!Object.keys(data).length && ecr && !loadingTL &&
+          <Timeline
+            data={data[vsn]}
+            cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
+            colorCell={opts.density ? colorDensity : stdColor}
+            startTime={opts.start}
+            endTime={end}
+            tooltip={(item) => `
+              <div style="margin-bottom: 5px;">
+              ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
+              </div>
+              ${item.meta.plugin}<br>
+              ${item.value.toLocaleString()} records`
+            }
+            onCellClick={(data) => {
+              const {timestamp, meta} = data
+              const {vsn, origPluginName} = meta
+              const date = new Date(timestamp)
+              const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
 
-      {data && !Object.keys(data).length && !loadingTL &&
+              let url
+              if (tab == 'images')
+                url = `/query-browser?type=images&tasks=${meta.task}&nodes=${vsn}&names=upload&start=${timestamp}&end=${end}`
+              else if (tab == 'apps')
+                url = `/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank'
+
+              window.open(url, '_blank')
+            }}
+            yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
+            labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
+          />
+        }
+
+        {data && !Object.keys(data).length && !loadingTL &&
           <div>
             <div className="clearfix"></div>
             <p className="muted">No data available</p>
           </div>
-      }
+        }
+      </TimelineContainer>
     </>
   )
 }
+
+const TimelineContainer = styled.div`
+  margin: 0 16px 16px 16px;
+`

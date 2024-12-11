@@ -568,6 +568,33 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
   return data
 }
 
+type MediaCountProps = {
+  start?: string | Date,
+  end?: string | Date,
+  vsn?: string,
+  plugin?: string
+  tail?: number
+}
+
+export async function getMediaCounts(props: MediaCountProps) : Promise<Record[]> {
+  const {start, end, vsn, tail} = props
+
+  const params = {
+    bucket: 'upload-stats',
+    start: start || '-30d',
+    ...(end && {end}),
+    ...(tail && {tail}),
+    filter: {
+      ...(vsn && {vsn}),
+    }
+  }
+
+  const data = await getData(params)
+  console.log('data', data, start)
+  return data
+}
+
+
 async function getRssis(vsn: string, devEuis: string | string[]) : Promise<{[devEui: string]: Record}> {
   const devEui = Array.isArray(devEuis) ? devEuis.join('|') : devEuis
   const params = {start: NODE_STATUS_RANGE, filter: {name: 'signal.rssi', vsn, devEui}, tail: 1}

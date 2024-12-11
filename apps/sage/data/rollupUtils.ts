@@ -23,6 +23,15 @@ export function fetchRollup(props: FetchRollupProps) {
     })
 }
 
+export function fetchUploadRollup(props: FetchRollupProps) {
+  const {start, end, vsn, plugin} = props
+  return BH.getMediaCounts({start, end, vsn, plugin})
+    .then(d => {
+      const data = parseUploadData({data: d, ...props})
+      return {rawData: d, data}
+    })
+}
+
 
 type ParseDataProps = {data: BH.Record[]} & FetchRollupProps
 
@@ -70,6 +79,35 @@ export function parseData(props: ParseDataProps) {
 
   throw `parseData: grain='${time}' not valid`
 }
+
+
+
+export function parseUploadData(props: ParseDataProps) {
+  const {
+    data,
+    versions = false,
+    groupName = 'meta.vsn',
+    time = 'hourly'
+  } = props
+
+  let d = data
+
+  const hourlyByVsn = groupBy(d, groupName)
+
+  if (time == 'hourly') {
+    const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
+      ...acc,
+      [vsn]: groupBy(hourlyByVsn[vsn], 'meta.task')
+    }), {})
+
+    return hourly
+  } else if (time == 'daily') {
+    return hourlyToDailyRollup(hourlyByVsn)
+  }
+
+  throw `parseData: grain='${time}' not valid`
+}
+
 
 
 

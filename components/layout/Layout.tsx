@@ -1,6 +1,8 @@
+import { type ReactElement } from 'react'
+
 import styled from 'styled-components'
 import MuiDivider from '@mui/material/Divider'
-import { Card as MuiCard } from '@mui/material'
+import { Card as MuiCard, type CardProps } from '@mui/material'
 
 import { createGlobalStyle } from 'styled-components'
 
@@ -85,11 +87,16 @@ export const CardViewStyle: any = createGlobalStyle`
   }
 `
 
-export const Card = (props) => {
+type Props = {
+  noPad?: boolean
+  children: ReactElement | ReactElement[]
+} & CardProps
+
+export const Card = (props: Props) => {
   const {children, noPad, ...rest} = props
 
   return (
-    <MuiCard {...rest} style={{padding: noPad ? 0 : '16px 16px 20px 16px'}}>
+    <MuiCard sx={{padding: noPad ? 0 : '16px 16px 20px 16px'}} {...rest}>
       {children}
     </MuiCard>
   )

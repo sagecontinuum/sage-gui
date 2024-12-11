@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { useSearchParams, Link } from 'react-router-dom'
 
-import { Tabs, Tab } from '/components/tabs/Tabs'
+import { Tabs, Tab, tabLabel } from '/components/tabs/Tabs'
 import { TabProps } from '@mui/material'
 
 import OverviewIcon from '@mui/icons-material/ListAltRounded'
@@ -13,19 +13,6 @@ import CellTowerIcon from '@mui/icons-material/CellTower'
 
 
 
-const label = (
-  icon: JSX.Element,
-  label: string,
-  counts: {[tab: string]: number} = {}
-) =>
-  <div className="flex items-center">
-    {icon}&nbsp;{label}&nbsp;
-    {label in counts && counts[label] === undefined && '(…)'}
-    {counts[label] !== undefined && `(${counts[label]})`}
-  </div>
-
-
-
 // a tab is rendered with react.clone, so we must explicity pass TabProps
 const ConditionalTab = (props: TabProps & {show: boolean, component, to, replace}) =>
   props.show ? <Tab {...props} /> : <></>
@@ -33,7 +20,7 @@ const ConditionalTab = (props: TabProps & {show: boolean, component, to, replace
 
 type Props = {
   admin: boolean
-  counts: {[tabLabel: string]: number}
+  counts: {[label: string]: number}
   lorawan: boolean
 }
 
@@ -50,28 +37,28 @@ export default function ManifestTabs(props: Props) {
         aria-label="node details tabs"
       >
         <Tab
-          label={label(<OverviewIcon fontSize="small" />, 'Overview')}
+          label={tabLabel(<OverviewIcon fontSize="small" />, 'Overview')}
           component={Link}
           value="overview"
           to="?tab=overview"
           replace
         />
         <Tab
-          label={label(<SensorIcon />, 'Sensors', counts)}
+          label={tabLabel(<SensorIcon />, 'Sensors', counts)}
           component={Link}
           value="sensors"
           to="?tab=sensors"
           replace
         />
         <Tab
-          label={label(<ComputesIcon fontSize="small" />, 'Computes', counts)}
+          label={tabLabel(<ComputesIcon fontSize="small" />, 'Computes', counts)}
           component={Link}
           value="computes"
           to="?tab=computes"
           replace
         />
         <Tab
-          label={label(<PeripheralsIcon fontSize="small"/>, 'Peripherals', counts)}
+          label={tabLabel(<PeripheralsIcon fontSize="small"/>, 'Peripherals', counts)}
           component={Link}
           value="peripherals"
           to="?tab=peripherals"
@@ -79,7 +66,7 @@ export default function ManifestTabs(props: Props) {
         />
         <ConditionalTab
           show={lorawan}
-          label={label(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
+          label={tabLabel(<CellTowerIcon />, 'LoRaWAN Devices', counts)}
           component={Link}
           value="lorawandevices"
           to="?tab=lorawandevices"
@@ -87,7 +74,7 @@ export default function ManifestTabs(props: Props) {
         />
         <ConditionalTab
           show={admin}
-          label={label(<HealthIcon fontSize="small" />, 'Health')}
+          label={tabLabel(<HealthIcon fontSize="small" />, 'Health')}
           component={Link}
           value="health"
           to="?tab=health"

@@ -305,7 +305,7 @@ export default function NodeView(props: Props) {
             </Card>
           }
 
-          <Card>
+          <Card noPad>
             <NodeTimeline node={node} />
           </Card>
 
