@@ -44,6 +44,7 @@ import { filterData } from '/components/data/queryData'
 import { shortUnits } from '/components/measurement.config'
 
 import JsonURL from '@jsonurl/jsonurl'
+import PortalLink from '/components/PortalLink'
 
 const registry = config.dockerRegistry
 
@@ -160,9 +161,19 @@ const getUniqueNodeOpts = (data: string[], siteIDs: BK.SiteIDs) =>
     .filter((v, i, self) => v && self.indexOf(v) == i)
     .map(v => ({id: v, label: vsnToDisplayStr(v, siteIDs[v])}))
 
+
+const sortApps = (apps: string[]) => {
+  const ecrApps = apps.filter(str => !(/\d+\.\d+\.\d+\.\d+:\d+/.test(str)))
+  const localApps = apps.filter(str => /\d+\.\d+\.\d+\.\d+:\d+/.test(str))
+
+  const sortedApps = [...ecrApps.sort(), ...localApps.sort()]
+  return sortedApps
+}
+
+
 const getUniqueAppOpts = (data: string[]) =>
-  data.sort()
-    .filter((v, i, self) => v && self.indexOf(v) == i)
+  sortApps(data.filter((v, i, self) => v && self.indexOf(v) == i))
+    .filter(name => !name.includes('registry.gitlab.com'))
     .map(v => {
       const path = v.replace(`${registry}`, '')
       const label = path.slice(path.lastIndexOf('/') + 1)
@@ -201,15 +212,10 @@ const getPythonSnippet = (query: BH.Params)  => {
 
 
 function getAppMenus() {
-  return BH.getData({
-    start: `-2h`,
+  return BH.getPluginCounts({
+    start: `-90d`,
     tail: 1,
-    filter: {
-      plugin: `.*`
-    }
-  }).then((data) =>
-    getUniqueAppOpts(data.map(o => o.meta.plugin))
-  )
+  }).then((data) => getUniqueAppOpts(data.map(o => o.meta.plugin)))
 }
 
 
@@ -1040,7 +1046,18 @@ export default function QueryBrowser() {
               rowsPerPage={getRowsPerPage(app, type)}
               onPage={handlePage}
               limit={filtered.length} // todo(nc): "limit" is fairly confusing
-              emptyNotice="No recent data found with the selected filters"
+              emptyNotice={
+                <div className="flex column items-center gap">
+                  No recent data found with the selected filters
+                  {type == 'apps' && app &&
+                    <div>
+                      <PortalLink to={`/apps/app/${app.replace(`${registry}/`, '').split(':')[0]}?tab=data`}>
+                        View data availability for {app.replace(`${registry}/`, '')}
+                      </PortalLink>
+                    </div>
+                  }
+                </div>
+              }
               disableRowSelect={() => true}
               enableDownload
               getDownloadableData={() => filterData(data, rules)}
