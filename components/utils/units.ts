@@ -134,9 +134,9 @@ export function prettyList(l: string[]) {
 type QuickRange = keyof typeof quickRanges
 
 export function getRangeTitle(str: Omit<'custom', QuickRange | '-1y'>) {
-  if (str.includes('d'))
+  if (str.match(/-[0-9]+d/))
     return `Last ${str.replace(/-|d/g, '')} days of data`
-  else if (str.includes('y'))
+  else if (str.match(/-[0-9]+y/))
     return `Last ${str.replace(/-|y/g, '')} year of data`
 
   return str

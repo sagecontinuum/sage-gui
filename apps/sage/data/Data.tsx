@@ -105,7 +105,8 @@ type Facets = {
 export type Options = {
   display: 'nodes' | 'apps'
   time: 'hourly' | 'daily'
-  density: boolean
+  colorType: 'density' | 'availability'
+  viewType: 'timeline' | 'table'
   versions: boolean
   window: `-${number}d`
   start: Date

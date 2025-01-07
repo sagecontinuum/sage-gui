@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import {
-  FormControlLabel, ToggleButtonGroup, ToggleButton, Button,
+  ToggleButtonGroup, ToggleButton, Button,
   CircularProgress, Tooltip
 } from '@mui/material'
 
-import RefreshIcon from '@mui/icons-material/RefreshRounded'
-import StopIcon from '@mui/icons-material/StopCircle'
+import {
+  RefreshRounded,
+  StopCircle,
+} from '@mui/icons-material'
 
-import Checkbox from '/components/input/Checkbox'
 import RangePicker from '/components/input/DatetimeRangePicker'
 
 import { quickRanges as quickRangeLabels } from '/components/utils/units'
@@ -25,6 +26,8 @@ type Props = {
   density?: boolean
   hideQuickRanges?: boolean
   quickRanges?: string[]
+  showAll?: boolean
+  showViewType?: boolean   // curently unused
   onChange: (name: string, val?: string | boolean) => void
   onDateChange?: (val: [Date, Date]) => void
 }
@@ -38,6 +41,8 @@ export default function DataOptions(props: Props) {
     density = false,
     hideQuickRanges = false,
     quickRanges = ['-1y', '-90d', '-30d', '-7d', '-2d'],
+    showAll,
+    // showViewType, // curently unused
     onChange,
     onDateChange
   } = props
@@ -114,6 +119,27 @@ export default function DataOptions(props: Props) {
           </div>
         }
 
+        <div>
+          {!condensed &&
+            <h5 className="subtitle no-margin muted">Color type</h5>
+          }
+          {density &&
+            <ToggleButtonGroup
+              value={opts.colorType}
+              onChange={(_evt, val) => onChange('colorType', val)}
+              aria-label="type of coloring: number of records (density) or availability"
+              exclusive
+            >
+              <ToggleButton value="density" aria-label="density">
+                density
+              </ToggleButton>
+              <ToggleButton value="availability" aria-label="availability">
+                availability
+              </ToggleButton>
+            </ToggleButtonGroup>
+          }
+        </div>
+
         {aggregation &&
           <div>
             {!condensed &&
@@ -135,20 +161,6 @@ export default function DataOptions(props: Props) {
           </div>
         }
 
-
-        <div className="flex">
-          {density &&
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={opts.density}
-                  onChange={(evt) => onChange('density', evt.target.checked)}
-                />
-              }
-              label="density"
-            />
-          }
-        </div>
       </div>
 
 
@@ -161,6 +173,11 @@ export default function DataOptions(props: Props) {
               aria-label="change last x days"
               exclusive
             >
+              {showAll &&
+                <ToggleButton value="showAll" aria-label="show all, daily by default">
+                  -<InfIcon>∞</InfIcon> {opts.time == 'hourly' && opts.window != 'showAll' ? ` (daily)` : ''}
+                </ToggleButton>
+              }
               {quickRanges.map(v => {
                 return (
                   <ToggleButton value={v} aria-label={quickRangeLabels[v]} key={v}>
@@ -171,6 +188,27 @@ export default function DataOptions(props: Props) {
             </ToggleButtonGroup>
           </div>
         }
+
+
+        <div className="flex">
+          {/* todo: Should we consider tables?  showViewType &&
+            <div>
+              <ToggleButtonGroup
+                value={opts.viewType}
+                onChange={(_evt, val) => onChange('viewType', val)}
+                aria-label="view type, timeline or table"
+                exclusive
+              >
+                <ToggleButton value="timeline" aria-label="show timeline">
+                  <ViewTimelineOutlined/>
+                </ToggleButton>
+                <ToggleButton value="table" aria-label="show table">
+                  <ListAltOutlined />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
+           */ }
+        </div>
 
         {onDateChange &&
           <TimeOpts >
@@ -194,11 +232,11 @@ export default function DataOptions(props: Props) {
                 {loading ?
                   <>
                     <CircularProgress size={25}/>
-                    <StopIcon color="action" />
+                    <StopCircle color="action" />
                   </> :
                   (pendingRange ?
                     'Go' :
-                    <RefreshIcon color="action" sx={pendingRange && {color: '#f2f2f2'}} />
+                    <RefreshRounded color="action" sx={pendingRange && {color: '#f2f2f2'}} />
                   )
                 }
               </Button>
@@ -220,6 +258,10 @@ const Root = styled.div`
   .MuiToggleButtonGroup-root {
     height: 27px;
   }
+`
+
+const InfIcon = styled.div`
+  font-size: 1.75em;
 `
 
 

@@ -568,6 +568,26 @@ export async function getPluginCounts(props: PluginCountsProps) : Promise<Record
   return data
 }
 
+export async function getPluginCountStart(props) : Promise<Record[]> {
+  const {vsn, plugin} = props
+
+  const params = {
+    bucket: 'plugin-stats',
+    start: '-999y',
+    head: 1,
+    filter: {
+      ...(vsn && {vsn}),
+      ...(plugin && {plugin})
+    }
+  }
+
+  const data = await getData(params)
+  console.log('data', data)
+  return data
+}
+
+
+
 type MediaCountProps = {
   start?: string | Date,
   end?: string | Date,

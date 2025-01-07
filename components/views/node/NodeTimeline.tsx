@@ -18,8 +18,6 @@ import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 
 import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
 
-import { LABEL_WIDTH as ADMIN_TL_LABEL_WIDTH } from './AdminNodeHealth'
-
 import * as BK from '/components/apis/beekeeper'
 import * as ECR from '/components/apis/ecr'
 import { Tab, Tabs, tabLabel } from '/components/tabs/Tabs'
@@ -35,13 +33,30 @@ const getStartTime = (str) =>
     subDays(new Date(), str.replace(/-|d/g, ''))
 
 
+/* Todo: WIP -- if needed for tables
+function getTableData(data, vsn) {
+  const byItem = data[vsn]
+
+  let table = []
+  for (let [name, list] of Object.entries(byItem)) {
+    const records = list.map( obj => ({...obj, 'taskWithCamera': `${obj.meta.task} (${obj.meta.camera})` }) )
+    table = [...table, ...records]
+  }
+
+  table = groupBy(table, 'timestamp')
+
+  return table
+}
+*/
+
+
 type Props = {
   node: BK.Node
   admin?: boolean
 }
 
 export default function NodeTimeline(props: Props) {
-  const { node, admin } = props
+  const { node } = props
 
   const vsn = useParams().vsn as BK.VSN
 
@@ -59,15 +74,19 @@ export default function NodeTimeline(props: Props) {
 
   const [opts, setOpts] = useState<Options>({
     display: 'nodes',
-    density: true,
+    colorType: 'density',
+    viewType: 'timeline',
     versions: false,
     time: 'hourly',
     start: getStartTime(TAIL_DAYS),
     window: TAIL_DAYS
   })
 
+  const [showAll, setShowAll] = useState(false)
+
   // note: endtime is not currently an option
   const [end] = useState<Date>(endOfHour(new Date()))
+
 
   const [ecr, setECR] = useState<ECR.AppDetails[]>()
 
@@ -84,14 +103,12 @@ export default function NodeTimeline(props: Props) {
 
   // data timelines
   useEffect(() => {
-    if (!node || tab != 'images') return
+    if (!node || tab != 'uploads') return
 
     setLoadingTL(true)
     fetchUploadRollup({...opts, vsn})
       .then(data => {
-        console.log('data', data)
         dispatch({type: 'INIT_DATA', data, nodes: [node]})
-
       })
       .catch(error => dispatch({type: 'ERROR', error}))
       .finally(() => setLoadingTL(false))
@@ -120,12 +137,19 @@ export default function NodeTimeline(props: Props) {
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: versions}))
       return
-    } else if (name == 'density') {
+    } else if (['colorType', 'viewType'].includes(name)) {
       setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'window') {
+      if (!val) return
+
+      const showAll = val == 'showAll'
+      setShowAll(showAll)
+      const start = getStartTime(showAll ? '-20y' : val)
+
       setOpts(prev => ({
         ...prev,
-        ...(val && {window: val, start: getStartTime(val)})
+        ...(val && {window: val, start}),
+        ...(showAll && {time: 'daily'})
       }))
     } else {
       throw `unhandled option state change name=${name}`
@@ -148,9 +172,9 @@ export default function NodeTimeline(props: Props) {
         />
         <Tab
           label={tabLabel(<ImageSearchOutlined />, 'Uploaded Files')}
-          value="images"
+          value="uploads"
           component={Link}
-          to="?timeline=images"
+          to="?timeline=uploads"
           replace
         />
       </Tabs>
@@ -163,9 +187,11 @@ export default function NodeTimeline(props: Props) {
           <DataOptions
             onChange={handleOptionChange}
             opts={opts}
-            quickRanges={['-5y', '-1y', '-90d', '-30d', '-7d', '-2d']}
-            condensed
+            quickRanges={['-1y', '-90d', '-30d', '-7d', '-2d']}
             density
+            showAll
+            condensed
+            showViewType
             aggregation
           />
         </div>
@@ -176,19 +202,19 @@ export default function NodeTimeline(props: Props) {
           </div>
         }
 
-        {data && !!Object.keys(data).length && ecr && !loadingTL &&
+        {data && opts.viewType == 'timeline' && !!Object.keys(data).length && ecr && !loadingTL &&
           <Timeline
             data={data[vsn]}
             cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-            colorCell={opts.density ? colorDensity : stdColor}
-            startTime={opts.start}
+            colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
+            startTime={!showAll ? opts.start : null}
             endTime={end}
             tooltip={(item) => `
               <div style="margin-bottom: 5px;">
-              ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
+                ${new Date(item.timestamp).toDateString()} ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})} (${opts.time})
               </div>
               ${item.meta.plugin}<br>
-              ${item.value.toLocaleString()} records`
+              ${item.value.toLocaleString()} ${tab == 'uploads' ? 'uploads' : 'records'}`
             }
             onCellClick={(data) => {
               const {timestamp, meta} = data
@@ -197,17 +223,28 @@ export default function NodeTimeline(props: Props) {
               const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
 
               let url
-              if (tab == 'images')
+              if (tab == 'apps')
+                url = `/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`
+              else if (tab == 'uploads')
                 url = `/query-browser?type=images&tasks=${meta.task}&nodes=${vsn}&names=upload&start=${timestamp}&end=${end}`
-              else if (tab == 'apps')
-                url = `/query-browser?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`, '_blank'
 
               window.open(url, '_blank')
             }}
             yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
-            labelWidth={admin ? ADMIN_TL_LABEL_WIDTH : TL_LABEL_WIDTH}
+            labelWidth={tab == 'uploads' ? TL_LABEL_WIDTH + 100 : TL_LABEL_WIDTH}
           />
         }
+
+        {/* data && opts.viewType == 'table' && !!Object.keys(data).length && ecr && !loadingTL && vsn &&
+          <Table
+            primaryKey="taskWithCamera"
+            columns={[{
+              id: 'taskWithCamera',
+              label: 'Task'
+            }]}
+            rows={getTableData(data, vsn)}
+          />
+        */}
 
         {data && !Object.keys(data).length && !loadingTL &&
           <div>

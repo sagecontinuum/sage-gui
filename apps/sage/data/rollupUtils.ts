@@ -85,24 +85,34 @@ export function parseData(props: ParseDataProps) {
 export function parseUploadData(props: ParseDataProps) {
   const {
     data,
-    versions = false,
     groupName = 'meta.vsn',
     time = 'hourly'
   } = props
 
-  let d = data
-
-  const hourlyByVsn = groupBy(d, groupName)
+  const hourlyByVsn = groupBy(data, groupName)
 
   if (time == 'hourly') {
     const hourly = Object.keys(hourlyByVsn).reduce((acc, vsn) => ({
       ...acc,
-      [vsn]: groupBy(hourlyByVsn[vsn], 'meta.task')
+      [vsn]: groupBy(
+        hourlyByVsn[vsn].map(obj => {
+          const {meta} = obj
+          const {task, camera} = meta
+
+          return {
+            ...obj,
+            meta: {
+              ...meta,
+              'taskWithCamera': camera ? `${task} (${camera})` : task
+            }
+          }
+        })
+        , 'meta.taskWithCamera')
     }), {})
 
     return hourly
   } else if (time == 'daily') {
-    return hourlyToDailyRollup(hourlyByVsn)
+    return hourlyToDailyRollup(hourlyByVsn, 'meta.task')
   }
 
   throw `parseData: grain='${time}' not valid`
@@ -124,15 +134,15 @@ type ByVSNDailyMap = {
 }
 
 // todo(nc): write test and refactor
-export function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps) : ByVSNDailyMap {
+export function hourlyToDailyRollup(hourlyByVSN: HourlyToDailyProps, grouping='meta.plugin') : ByVSNDailyMap {
   const daily = {}
 
   // for each vsn
   for (const vsn of Object.keys(hourlyByVSN)) {
     const items = hourlyByVSN[vsn]
-    const byPlugin = groupBy(items, 'meta.plugin')
+    const byPlugin = groupBy(items, grouping)
 
-    // convert byBlugin (of hour recrods) to byDay for each
+    // convert byPlugin (of hour records) to byDay for each
     const byPluginHourly = Object.keys(byPlugin).reduce((acc, plugin) => {
       const items = byPlugin[plugin]
       return {
