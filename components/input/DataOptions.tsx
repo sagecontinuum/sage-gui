@@ -175,7 +175,7 @@ export default function DataOptions(props: Props) {
             >
               {showAll &&
                 <ToggleButton value="showAll" aria-label="show all, daily by default">
-                  -<InfIcon>∞</InfIcon> {opts.time == 'hourly' && opts.window != 'showAll' ? ` (daily)` : ''}
+                  <InfIcon>-∞</InfIcon> {opts.time == 'hourly' && opts.window != 'showAll' ? ` (daily)` : ''}
                 </ToggleButton>
               }
               {quickRanges.map(v => {
@@ -261,7 +261,7 @@ const Root = styled.div`
 `
 
 const InfIcon = styled.div`
-  font-size: 1.75em;
+  font-size: 1.2em;
 `
 
 

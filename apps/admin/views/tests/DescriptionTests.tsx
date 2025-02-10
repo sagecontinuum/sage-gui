@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { FormControlLabel, Button, Tooltip, RadioGroup, FormLabel, FormControl } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/CloudDownloadOutlined'
 import AutoIcon from '@mui/icons-material/AutoFixHighOutlined'
+import { Image as ImageIcon } from '@mui/icons-material'
 
 import * as BK from '/components/apis/beekeeper'
 import * as DA from './description-api'
@@ -16,6 +17,7 @@ import { bytesToSizeSI } from '/components/utils/units'
 import Filter from '/apps/sage/common/FacetFilter'
 
 import { WordCloudChart } from 'chartjs-chart-wordcloud'
+import ErrorMsg from '/apps/sage/ErrorMsg'
 
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
@@ -28,6 +30,18 @@ type Model = {
 }
 
 const DATASETS: Model[] = [{
+  name: 'Florence-2-Large:0.77B (hugging face)',
+  file: 'summary-florence-2-5-2025.json',
+  date: '2-05-2025'
+}, {
+  name: 'llama3.2-vision (ollama)',
+  file: 'summary-llama3.2-vision-2-13-2025.json',
+  date: '2-13-2025'
+}, {
+  name: 'Moondream2 (ollama)',
+  file: 'summary-moondream2-ollama-2-13-2025.json',
+  date: '2-13-2025'
+}, {
   name: 'LLaVa:7b',
   file: 'summary-llava7b-4-11-2024.json',
   date: '4-11-2024'
@@ -63,6 +77,7 @@ function Image(props: ImageProps) {
     <ImageRoot>
       <h3><Link to={`/node/${title}`}>{title}</Link></h3>
       <img src={url} />
+
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div>{timestamp}</div>
@@ -80,6 +95,26 @@ const ImageRoot = styled.div`
     max-width: 350px;
   }
 `
+
+/*
+const ImagePlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 250px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+
+  & svg {
+    color: #aaa;
+    width: 50px;
+    height: 50px;
+  }
+`
+*/
 
 
 type ImagesProps = {
@@ -179,6 +214,7 @@ type Option = {
 export default function ImageTests() {
   const [vsns, setVSNs] = useState<BK.VSN[]>()
   const [images, setImages] = useState<string[]>()
+  const [error, setError] = useState()
 
   const [selectedModel, setSelectedModel] = useState<Model['file']>(DATASETS[0].file)
 
@@ -208,6 +244,7 @@ export default function ImageTests() {
         setOptions(options)
         updateCounts(data, selected)
       })
+      .catch((err) => setError(err))
   }, [selectedModel])
 
 
@@ -350,6 +387,9 @@ export default function ImageTests() {
         </Top>
 
         <ImageListing>
+          {error &&
+            <ErrorMsg>{error.message}</ErrorMsg>
+          }
           {wordCloud &&
             <div>
               <canvas id="canvas" ref={ref}></canvas>

@@ -50,9 +50,9 @@ const NavMenu = () => {
   return (
     <NavItems>
       <NavItem label="Nodes" to="/nodes?phase=deployed" />
-      {/* <NavItem label="AI Experiments" to="/ai/descriptions" /> */}
       <NavItem label="Factory" to="/surya" />
       <NavItem label="Metrics" to="/metrics" />
+      <NavItem label="Experiments" to="/ai/experiments" />
       <NavItem
         label="Tests"
         root="/tests"
@@ -111,7 +111,7 @@ export default function App() {
 
                       {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                       <Route path="tests/images" element={<ImageTests />} />
-                      <Route path="ai/descriptions" element={<DescriptionTests />} />
+                      <Route path="ai/experiments" element={<DescriptionTests />} />
 
                       <Route path="metrics" element={<Metrics />} />
 
