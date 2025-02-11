@@ -106,7 +106,7 @@ export type Options = {
   display: 'nodes' | 'apps'
   time: 'hourly' | 'daily'
   colorType: 'density' | 'availability'
-  viewType: 'timeline' | 'table'
+  viewType?: 'timeline' | 'table'
   versions: boolean
   window: `-${number}d`
   start: Date
@@ -150,7 +150,7 @@ export default function Data(props: Props) {
   const [opts, setOpts] = useState<Options>({
     display: 'nodes',
     time: 'hourly',
-    density: true,
+    colorType: 'density',
     versions: false,
     window: `-${DAYS}d`,
     start: DATA_START || subDays(new Date(), DAYS),
@@ -253,7 +253,7 @@ export default function Data(props: Props) {
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: versions}))
       return
-    } else if (name == 'density') {
+    } else if (name == 'colorType') {
       setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'window') {
       setOpts(prev => ({
@@ -350,7 +350,7 @@ export default function Data(props: Props) {
                     <TimelineChart
                       data={timelineData}
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.density ? colorDensity : stdColor}
+                      colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
                       startTime={opts.start}
                       endTime={opts.end}
                       tooltip={(item) => `
@@ -393,7 +393,7 @@ export default function Data(props: Props) {
                       data={timelineData}
                       limitRowCount={10}
                       cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.density ? colorDensity : stdColor}
+                      colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
                       startTime={opts.start}
                       endTime={opts.end}
                       tooltip={(item) =>

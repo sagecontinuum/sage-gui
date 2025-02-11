@@ -159,6 +159,7 @@ export default function NodeTimeline(props: Props) {
 
   return (
     <>
+      {/*
       <Tabs
         value={tab}
         aria-label="timeline view tabs"
@@ -178,6 +179,7 @@ export default function NodeTimeline(props: Props) {
           replace
         />
       </Tabs>
+      */}
       <br/>
 
 

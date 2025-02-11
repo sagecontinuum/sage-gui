@@ -58,7 +58,7 @@ export default function AppData(props: Props) {
 
   const [opts, setOpts] = useState<Options>({
     display: 'nodes',
-    density: true,
+    colorType: 'density',
     versions: false,
     time: 'hourly',
     start: getStartTime(TAIL_DAYS),
@@ -94,7 +94,7 @@ export default function AppData(props: Props) {
       const data = parseData({data: rawData, time: val})
       dispatch({type: 'SET_DATA', data})
       setOpts(prev => ({...prev, [name]: val}))
-    } else if (name == 'density') {
+    } else if (['colorType'].includes(name)) {
       setOpts(prev => ({...prev, [name]: val}))
     } else if (name == 'window') {
       setOpts(prev => ({
@@ -116,7 +116,7 @@ export default function AppData(props: Props) {
       <Card>
         <div className="flex gap">
           <h2 className="no-margin">{getRangeTitle(opts.window)}</h2>
-          <DataOptions onChange={handleOptionChange} opts={opts} condensed density aggregation />
+          <DataOptions onChange={handleOptionChange} opts={opts} condensed aggregation />
         </div>
       </Card>
 
@@ -141,7 +141,7 @@ export default function AppData(props: Props) {
                   <TimelineChart
                     data={timelineData}
                     cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                    colorCell={opts.density ? colorDensity : stdColor}
+                    colorCell={opts.colorType == 'density'  ? colorDensity : stdColor}
                     startTime={opts.start}
                     endTime={end}
                     tooltip={(item) =>`

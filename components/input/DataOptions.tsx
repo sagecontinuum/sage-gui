@@ -23,7 +23,6 @@ type Props = {
   groupByToggle?: boolean
   condensed?: boolean
   aggregation?: boolean
-  density?: boolean
   hideQuickRanges?: boolean
   quickRanges?: string[]
   showAll?: boolean
@@ -38,7 +37,6 @@ export default function DataOptions(props: Props) {
     groupByToggle = false,
     condensed = false,
     aggregation = false,
-    density = false,
     hideQuickRanges = false,
     quickRanges = ['-1y', '-90d', '-30d', '-7d', '-2d'],
     showAll,
@@ -120,10 +118,10 @@ export default function DataOptions(props: Props) {
         }
 
         <div>
-          {!condensed &&
+          {opts.colorType && !condensed &&
             <h5 className="subtitle no-margin muted">Color type</h5>
           }
-          {density &&
+          {opts.colorType &&
             <ToggleButtonGroup
               value={opts.colorType}
               onChange={(_evt, val) => onChange('colorType', val)}
@@ -261,7 +259,8 @@ const Root = styled.div`
 `
 
 const InfIcon = styled.div`
-  font-size: 1.75em;
+  font-size: 1.1em;
+  padding-bottom: 1px;
 `
 
 
