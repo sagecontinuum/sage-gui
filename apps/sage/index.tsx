@@ -44,6 +44,8 @@ import MyNodes from '../../components/account/MyNodes'
 import Devices from '../../components/account/Devices'
 import DevAccess from '../../components/account/DevAccess'
 
+import TestDownload from './fiddle/test-download'
+
 import RequireAuth from '/components/auth/RequireAuth'
 import TestSignIn from '/components/TestSignIn'
 import NotFound from '/components/404'
@@ -210,6 +212,8 @@ export default function Sage() {
                         <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                         <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                       </Route>
+
+                      <Route path="fiddle/test-download" element={<TestDownload />} />
 
                       <Route path="login" element={<TestSignIn />} />
                       <Route path="*" element={<NotFound />} />
