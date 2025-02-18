@@ -16,6 +16,9 @@ import { bytesToSizeSI } from '/components/utils/units'
 import Filter from '/apps/sage/common/FacetFilter'
 
 import { WordCloudChart } from 'chartjs-chart-wordcloud'
+import ErrorMsg from '/apps/sage/ErrorMsg'
+import BoundingBoxOverlay from './BoundingBoxOverlay'
+import Checkbox from '/components/input/Checkbox'
 
 const ITEMS_INITIALLY = 10
 const ITEMS_PER_PAGE = 5
@@ -28,11 +31,23 @@ type Model = {
 }
 
 const DATASETS: Model[] = [{
-  name: 'LLaVa:7b',
+  name: 'Florence-2-Large:0.77B | hugging face',
+  file: 'summary-florence-2-5-2025.json',
+  date: '2-05-2025'
+}, {
+  name: 'llama3.2-vision | ollama',
+  file: 'summary-llama3.2-vision-2-13-2025.json',
+  date: '2-13-2025'
+}, /* {
+  name: 'Moondream2 | ollama',
+  file: 'summary-moondream2-ollama-2-13-2025.json',
+  date: '2-13-2025'
+}, */ {
+  name: 'LLaVa:7b | ollama',
   file: 'summary-llava7b-4-11-2024.json',
   date: '4-11-2024'
 }, {
-  name: 'LLaVa:34b',
+  name: 'LLaVa:34b | ollama',
   file: 'summary-llava34b-4-11-2024.json',
   date: '4-11-2024'
 }, /* {
@@ -47,22 +62,50 @@ const DATASETS: Model[] = [{
 ]
 
 
+/*
+
+const box = {
+  top: 50,
+  left: 30,
+  width: 100,
+  height: 150,
+};
+
+// Usage
+<BoundingBoxOverlay imageUrl="path/to/your/image.jpg" box={box} />
+*/
+
+
 type ImageProps = {
   title: string
   url: string
   size: number
+  showBoxes: boolean
+  bbox: DA.BBox
+  originalWidth: number
+  originalHeight: number
 }
 
 function Image(props: ImageProps) {
-  const {title, url, size} = props
+  const {title, url, size, showBoxes, bbox, originalWidth, originalHeight} = props
 
   const epoch = Number(url.slice(url.lastIndexOf('/') + 1, url.lastIndexOf('-')))
   const timestamp = new Date(epoch / 1000000).toLocaleString()
 
+
+  let bboxSpec
+  if (showBoxes && bbox)
+    bboxSpec = computeBoundingBox(bbox, originalWidth, originalHeight)
+
+
   return (
     <ImageRoot>
       <h3><Link to={`/node/${title}`}>{title}</Link></h3>
-      <img src={url} />
+      {bboxSpec ?
+        <BoundingBoxOverlay src={url} {...bboxSpec} /> :
+        <img src={url} />
+      }
+
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div>{timestamp}</div>
@@ -82,12 +125,70 @@ const ImageRoot = styled.div`
 `
 
 
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+function computeBoundingBox(
+  [x1, y1, x2, y2]: DA.BBox,
+  origWidth: number,
+  origHeight: number,
+  maxWidth = 350
+): BoundingBox {
+  const aspectRatio = origWidth / origHeight
+  const newHeight = maxWidth / aspectRatio
+
+  const scaleWidth = maxWidth / origWidth
+  const scaleHeight = newHeight / origHeight
+
+  const scaledX1 = x1 * scaleWidth
+  const scaledY1 = y1 * scaleHeight
+  const scaledX2 = x2 * scaleWidth
+  const scaledY2 = y2 * scaleHeight
+
+  const scaledWidth = scaledX2 - scaledX1
+  const scaledHeight = scaledY2 - scaledY1
+
+  return {
+    x: scaledX1,
+    y: scaledY1,
+    width: scaledWidth,
+    height: scaledHeight
+  }
+}
+
+
+/*
+const ImagePlaceholder = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 250px;
+  height: 250px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+
+  & svg {
+    color: #aaa;
+    width: 50px;
+    height: 50px;
+  }
+`
+*/
+
+
 type ImagesProps = {
   descriptions: DA.Description[]
+  showBoxes?: boolean
 }
 
 function Images(props: ImagesProps) {
-  const {descriptions} = props
+  const {descriptions, showBoxes} = props
 
   const loader = useRef(null)
   const [page, setPage] = useState(1)
@@ -136,14 +237,18 @@ function Images(props: ImagesProps) {
               </small>
             </h2>
             <div className="flex gap flex-wrap">
-              {files.map(file => {
-                const {vsn, url, file_size} = file
+              {files.map((file) => {
+                const {vsn, url, file_size, image_width, image_height, bbox} = file
                 return (
                   <Image
                     key={url}
                     url={url}
                     title={vsn}
                     size={file_size}
+                    bbox={bbox}
+                    originalWidth={image_width}
+                    originalHeight={image_height}
+                    showBoxes={showBoxes}
                   />
                 )
               }
@@ -156,6 +261,9 @@ function Images(props: ImagesProps) {
     </div>
   )
 }
+
+
+
 
 const extractedTextIcon = (text: string) =>
   <Tooltip
@@ -179,8 +287,10 @@ type Option = {
 export default function ImageTests() {
   const [vsns, setVSNs] = useState<BK.VSN[]>()
   const [images, setImages] = useState<string[]>()
+  const [error, setError] = useState(null)
 
   const [selectedModel, setSelectedModel] = useState<Model['file']>(DATASETS[0].file)
+  const [showBoxes, setShowBoxes] = useState<boolean>(false)
 
   const [selected, setSelected] = useState([])
   const [descriptions, setDescriptions] = useState([])
@@ -208,6 +318,7 @@ export default function ImageTests() {
         setOptions(options)
         updateCounts(data, selected)
       })
+      .catch((err) => setError(err))
   }, [selectedModel])
 
 
@@ -286,7 +397,7 @@ export default function ImageTests() {
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <ModelSelector>
           <FormControl>
-            <FormLabel id="model-selector"><b>Selected Model:</b></FormLabel>
+            <FormLabel id="model-selector"><b>Model</b></FormLabel>
             <RadioGroup
               aria-labelledby="model-selector"
               value={selectedModel}
@@ -295,12 +406,43 @@ export default function ImageTests() {
               {DATASETS.map(dataset => {
                 const {file, name} = dataset
                 return (
-                  <FormControlLabel value={file} label={name} control={<Radio />} key={file}/>
+                  <FormControlLabel value={file}
+                    label={<div style={{marginBottom: '2px'}}>
+                      <div style={{marginBottom: '-5px'}}>
+                        {name.split('|')[0]}
+                      </div>
+                      <small className="muted">
+                        {name.split('|')[1]}
+                      </small>
+                    </div>}
+                    control={<Radio />} key={file}
+                  />
                 )
               })}
             </RadioGroup>
           </FormControl>
+
+          {selectedModel == 'summary-florence-2-5-2025.json' &&
+            <FormControl>
+              <br/>
+              <FormLabel id="model-options"><b>Options</b></FormLabel><br/>
+              <FormControlLabel
+                control={
+                  <>
+                    <Checkbox
+                      checked={showBoxes}
+                      onChange={evt => setShowBoxes(evt.target.checked)}
+                    />
+                  </>
+                }
+                label={<>Show bounding boxes</>}
+              />
+            </FormControl>
+          }
+
         </ModelSelector>
+
+
 
         <Filter
           title="Descriptions"
@@ -312,6 +454,7 @@ export default function ImageTests() {
           hideSearchIcon={true}
           data={options}
         />
+
       </Sidebar>
 
       <Main>
@@ -350,12 +493,15 @@ export default function ImageTests() {
         </Top>
 
         <ImageListing>
+          {error &&
+            <ErrorMsg>{error.message}</ErrorMsg>
+          }
           {wordCloud &&
             <div>
               <canvas id="canvas" ref={ref}></canvas>
             </div>
           }
-          <Images descriptions={filtered}/>
+          <Images descriptions={filtered} showBoxes={showBoxes} />
         </ImageListing>
       </Main>
     </Root>
