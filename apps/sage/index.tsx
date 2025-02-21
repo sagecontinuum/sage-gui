@@ -38,11 +38,13 @@ import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
 import DataProduct from './data-commons/DataProduct'
 
-import Account from '../../components/account/Account'
-import UserProfile from '../../components/account/UserProfile'
-import MyNodes from '../../components/account/MyNodes'
-import Devices from '../../components/account/Devices'
-import DevAccess from '../../components/account/DevAccess'
+import Account from '/components/account/Account'
+import UserProfile from '/components/account/UserProfile'
+import MyNodes from '/components/account/MyNodes'
+import Devices from '/components/account/Devices'
+import DevAccess from '/components/account/DevAccess'
+
+import Assistant from './assist/Assistant'
 
 import TestDownload from './fiddle/test-download'
 
@@ -212,6 +214,8 @@ export default function Sage() {
                         <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                         <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                       </Route>
+
+                      <Route path="assistant" element={<Assistant />} />
 
                       <Route path="fiddle/test-download" element={<TestDownload />} />
 
