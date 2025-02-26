@@ -1,5 +1,6 @@
+import { type ReactNode } from 'react'
 import { type Node } from '/components/apis/beekeeper'
-import crocusLogo from 'url:./projects/logos/CROCUS-logo.png'
+import CrocusLogo from './projects/logos/CROCUS-logo.svg'
 
 
 // use env variable to load corresponding config below
@@ -9,7 +10,7 @@ type Configs = {
   [key: string]: {
     project?: Node['project']
     focus?: string    // case insensitive for data/api purposes
-    logo?: string     // resolves to a full url of logo (see imports above)
+    Logo?: ReactNode     // resolves to a full url of logo (see imports above)
     alt?: string      // logo alt text
     url?: string
     initialViewState?: { latitude: number, longitude: number, zoom: number }
@@ -32,8 +33,8 @@ const configs : Configs = {
     initialViewState: { latitude: 41.88, longitude: -87.66, zoom: 12.3 }
   },
   'crocus': {
-    logo: crocusLogo,
-    alt: 'CROCUS: Community Research on Climate and Urban Science',
+    Logo: () => <CrocusLogo />,
+    alt: 'CROCUS',
     project: 'CROCUS',
     url: 'https://crocus-urban.org',
     initialViewState: { latitude: 41.88, longitude: -87.65, zoom: 8.7 }

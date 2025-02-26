@@ -49,7 +49,7 @@ import '/assets/styles.scss'
 
 import settings from '/components/settings'
 
-const {logo, alt, url, project, vsns} = settings
+const {Logo, url, project, vsns} = settings
 
 
 const NavMenu = () =>
@@ -63,10 +63,11 @@ const NavMenu = () =>
 const LogoPlaceHolder = () => {
   return (
     <>
-      {logo ?
-        <a href={url} target="_blank" rel="noreferrer" className="no-style">
-          <LogoImg src={logo} alt={alt} />
-        </a> :
+      {Logo ?
+        <LogoContainer href={url} target="_blank" rel="noreferrer" className="no-style">
+          {/* @ts-ignore: call signature issue */}
+          <Logo />
+        </LogoContainer> :
         <LogoText>
           <Link to="/" className="no-style">
             {project || focus}
@@ -78,9 +79,9 @@ const LogoPlaceHolder = () => {
 }
 
 
-const LogoImg = styled.img`
-  height: 60px;
-  margin-right: 20px;
+const LogoContainer = styled.a`
+  width: 200px;
+  margin: 5px 20px 0 -5px;
 `
 
 const LogoText = styled.span`
@@ -105,7 +106,7 @@ export default function App() {
         <BrowserRouter>
           <CssBaseline/>
           <NavBar
-            logo={<LogoPlaceHolder/>}
+            logo={<LogoPlaceHolder />}
             menu={<NavMenu />}
             hasDocsLink
             hasSignIn

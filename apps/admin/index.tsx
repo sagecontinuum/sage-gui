@@ -11,6 +11,10 @@ import NavBar, { NavItems, NavItem } from '/components/nav-bar/NavBar'
 import { Item } from '/components/nav-bar/NavItem'
 import NodeTabs from '/components/views/nodes/NodeTabsBinned'
 import Node from '/components/views/node/Node'
+
+import QueryBrowser from '../sage/data-stream/QueryBrowser'
+import Ontology from '../sage/data-commons/Ontology'
+
 import Status from './views/status/Status'
 import Tests from './views/tests/Tests'
 import SuryaStatus from './views/factory/Factory'
@@ -108,6 +112,9 @@ export default function App() {
                         <Route path="tests" element={<Tests />} />
                       </Route>
                       <Route path="/node/:vsn" element={<Node admin />} />
+
+                      <Route path="data/ontology/:name" element={<Ontology />} />
+                      <Route path="query-browser" element={<QueryBrowser />} />
 
                       {/* <Route path="tests/audio" element={<AudioTests />} />*/}
                       <Route path="tests/images" element={<ImageTests />} />
