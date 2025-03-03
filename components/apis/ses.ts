@@ -547,12 +547,12 @@ type SuspendedJob = {
   state: 'Suspended'
 }
 
-async function suspendJob(id: number) : Promise<SuspendedJob> {
+export async function suspendJob(id: string) : Promise<SuspendedJob> {
   return await get(`${url}/jobs/${id}/rm?id=${id}&suspend=true`)
 }
 
 
-export async function suspendJobs(ids: number[]) : Promise<SuspendedJob[]> {
+export async function suspendJobs(ids: string[]) : Promise<SuspendedJob[]> {
   return Promise.all(ids.map(id => suspendJob(id)))
 }
 
@@ -563,7 +563,7 @@ type RemovedJob = {
   state: 'Removed'
 }
 
-async function removeJob(id: string) : Promise<RemovedJob> {
+export async function removeJob(id: string) : Promise<RemovedJob> {
   return await get(`${url}/jobs/${id}/rm?id=${id}&force=true`)
 }
 
@@ -573,3 +573,6 @@ export async function removeJobs(ids: string[]) : Promise<RemovedJob[]> {
 }
 
 
+export async function getJobStatus(id: string) : Promise<Job> {
+  return await get(`${url}/jobs/${id}/status`)
+}

@@ -43,17 +43,17 @@ export const formatters = {
     appNames?.map((name, i) => {
       const l = apps.length - 1
       return <span key={i}>
-        <Link to={`/apps/app/${apps[i].split(':')[0]}`}>
+        <Link to={`/apps/app/${(apps[i] || '').split(':')[0]}`}>
           {name}
         </Link>{i < l ? ', '  : ''}
       </span>
     }),
   apps: (apps: string[]) =>
     apps?.map((app, i) => {
-      const [namespace, nameWithVer] = app.split('/')
+      const [namespace, nameWithVer] = (app || '').split('/')
       const l = apps.length - 1
       return <span key={i}>
-        <Link to={`/apps/app/${namespace}/${nameWithVer.split(':')[0]}`}>
+        <Link to={`/apps/app/${namespace}/${(nameWithVer || '').split(':')[0]}`}>
           {nameWithVer}
         </Link>{i < l ? ', '  : ''}
       </span>
