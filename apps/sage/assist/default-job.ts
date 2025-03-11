@@ -14,6 +14,8 @@ plugins:
     - --model
     - moondream-0_5b-int8.mf.gz
     - ${prompt}
+    selector:
+      zone: core
     resource:
       limit.cpu: "2"
       limit.memory: 4Gi

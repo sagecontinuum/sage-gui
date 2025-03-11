@@ -108,10 +108,10 @@ export default function Assistant() {
   const handleSubmit = () => {
     setSubmitting(true)
 
-    const tasks = getTasks() || null
+    const tasks = getTasks() || []
 
     // consider single task for now
-    const id = tasks ? tasks[0].job_id : null
+    const id = tasks.length ? tasks[0].job_id : null
 
     // if job exists, restart it
     if (id) {
