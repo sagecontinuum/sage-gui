@@ -1,7 +1,9 @@
+import { useState } from 'react'
+
 import styled from 'styled-components'
 import { Card } from '/components/layout/Layout'
 import { type Task } from './Assistant'
-import { IconButton, Tooltip } from '@mui/material'
+import { IconButton, Popover, Tooltip } from '@mui/material'
 
 import {
   PauseCircleOutlineRounded, DeleteOutlineRounded, PlayCircleOutlineRounded,
@@ -14,6 +16,7 @@ import * as ES from '/components/apis/ses'
 import { useSnackbar } from 'notistack'
 import { useProgress } from '/components/progress/ProgressProvider'
 
+import { Highlight, themes } from 'prism-react-renderer'
 
 type Props = {
   value: Task[]
@@ -25,6 +28,9 @@ export default function Tasks(props: Props) {
 
   const {enqueueSnackbar} = useSnackbar()
   const {loading, setLoading} = useProgress()
+
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
 
   const handleChange = async (action: 'run' | 'remove' | 'suspend', task: Task) => {
     const {job_id, fullJobSpec} = task
@@ -100,19 +106,66 @@ export default function Tasks(props: Props) {
       })
   }
 
+  const handleOpenDetails = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const open = Boolean(anchorEl)
+  const id = open ? 'simple-popover' : undefined
 
   return (
     <TaskList className="list-none no-padding">
       {tasks.map(task => {
+        const {fullJobSpec} = task
+
         return (
           <li key={task.job_id}>
             <Card style={{paddingBottom: 5}}>
               <div className="flex justify-between items-center">
                 {task.prompt || 'No prompt specified'}
 
-                <Tooltip title={JSON.stringify(task)} placement="right">
-                  <InfoOutlined fontSize="small"/>
+                <Tooltip title="Show task details..." placement="right">
+                  <IconButton onClick={handleOpenDetails} size="small">
+                    <InfoOutlined fontSize="small" sx={{cursor: 'pointer'}}/>
+                  </IconButton>
                 </Tooltip>
+
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                  sx={{height: '75%'}}
+                >
+                  <Highlight theme={themes.dracula}
+                    language="json"
+                    code={JSON.stringify(fullJobSpec, null, 2)}
+                  >
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                      <pre className={className} style={{...style, fontSize: '.85em'}}>
+                        {tokens.map((line, i) => (
+                          <div key={i} {...getLineProps({ line, key: i })}>
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token, key })} />
+                            ))}
+                          </div>
+                        ))}
+                      </pre>
+                    )}
+                  </Highlight>
+                </Popover>
               </div>
               <br/>
               <div className="flex justify-between items-center">

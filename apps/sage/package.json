@@ -43,6 +43,7 @@
     "notistack": "^1.0.5",
     "parcel": "^2.9.3",
     "parse-address": "^1.1.2",
+    "prism-react-renderer": "^2.4.1",
     "process": "^0.11.10",
     "react": "^17.0.1",
     "react-datetime-picker": "^5.5.1",
