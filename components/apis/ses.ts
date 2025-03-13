@@ -536,7 +536,7 @@ export async function submitJobs(ids: number[]) {
 }
 
 
-export async function editJob(id: Job['job_id'], spec: string) {
+export async function editJob(id: string, spec: string) {
   const res = await post(`${url}/edit?id=${id}`, spec)
   return res
 }

@@ -35,7 +35,6 @@ export default function Prompt(props: Props) {
         sx={{marginLeft: '5px'}}
         color="primary"
         disabled={loading}
-        loading={loading.toString()}
       >
         <SendRounded />
       </IconButton>

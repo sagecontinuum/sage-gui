@@ -12,7 +12,8 @@ import DefaultPrompts from './DefaultPrompts'
 import Tasks from './Tasks'
 import { useSnackbar } from 'notistack'
 
-import { useProgress } from '/components/progress/ProgressProvider'
+import Feed from './Feed'
+import { CircularProgress } from '@mui/material'
 
 
 const storageKey = 'sage-assistant'
@@ -40,10 +41,9 @@ export default function Assistant() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
-  const [jobState, setJobState] = useState<SES.Job>(null)
   const [lastUpdate, setLastUpdate] = useState<Date>(null)
   const [tasks, setTasks] = useState<Task[]>([])
-  const {loading, setLoading} = useProgress()
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     let done = false
@@ -165,6 +165,7 @@ export default function Assistant() {
       <Sidebar>
         <h3 className="flex justify-between items-end">
           Tasks
+          {loading && <CircularProgress />}
           <small>{lastUpdate?.toLocaleTimeString('en-US')}</small>
         </h3>
         <Tasks
@@ -177,6 +178,8 @@ export default function Assistant() {
           Sage Assistant
           {error && <ErrorMsg>{error.message}</ErrorMsg>}
         </div>
+
+        <Feed tasks={tasks} />
 
         <PromptContainer className="flex items-center justify-center">
           <div className="flex column">
@@ -203,13 +206,14 @@ const Root = styled.div`
 
 const Main = styled.div`
   padding: 20px;
-  width: 100%;
-`
+  `
 
 const PromptContainer = styled.div`
   position: absolute;
   bottom: 0;
+  padding-top: 20px;
   width: 100%;
+  box-shadow: rgb(229 229 229) 2px 3px 9px 1px;
 `
 
 
