@@ -1,11 +1,12 @@
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 import styled from 'styled-components'
 
 import { type Task } from './Assistant'
 import * as BH from '/components/apis/beehive'
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ObjectRenderer from './ObjectRenderer'
 
 
 type ParsedRecord = BH.Record | (BH.Record & {value: {query: string, answer}})
@@ -39,7 +40,7 @@ function Response(props: ResponseProps) {
           <Typography component="span">Image</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {expanded && <img src={value} />}
+          {expanded && <ObjectRenderer url={value} retry={true} />}
         </AccordionDetails>
       </Accordion>
   } else {
@@ -58,7 +59,7 @@ type Props = {
   tasks: Task[]
 }
 
-export default function Feed(props: Props) {
+export default memo(function Feed(props: Props) {
   const {tasks} = props
 
 
@@ -68,14 +69,13 @@ export default function Feed(props: Props) {
     if (!tasks.length) return
 
     const {fullJobSpec} = tasks[0]
-
     const {nodes, plugins} = fullJobSpec
-
     const vsns = Object.keys(nodes)
 
     // assume one app, for now
     const task = plugins[0].name
 
+    // first, get previous data
     BH.getData({
       start: '-1d',
       filter: {
@@ -101,14 +101,52 @@ export default function Feed(props: Props) {
     })
   }, [tasks])
 
+
   useEffect(() => {
+    if (!tasks.length) return
+
     const objDiv = document.getElementById('responses')
     if (objDiv)
       objDiv.scrollTop = objDiv.scrollHeight
-  }, [data])
+
+    const {fullJobSpec} = tasks[0]
+    const {nodes, plugins}= fullJobSpec
+    const vsns = Object.keys(nodes)
+
+    // assume one app, for now
+    const task = plugins[0].name
+
+    const eventSource = BH.createEventSource({vsn: vsns.join('|'), task})
+
+    eventSource.onerror = function(e) {
+      console.log('err', e)
+    }
+
+    eventSource.onmessage = function(e) {
+      const obj = JSON.parse(e.data)
+
+      try {
+        obj.value = JSON.parse(obj.value as string)
+      } catch (e) {
+        // do nothing if not json
+      }
+
+      setData(prev => [...prev, obj])
+    }
+
+    return () => {
+      eventSource.close()
+    }
+  }, [data, tasks])
+
 
   return (
     <Root id="responses">
+      <div className="flex justify-end">
+        <PromptBubble>
+          {tasks[0]?.prompt}
+        </PromptBubble>
+      </div>
       {data?.map((record, i) => {
         return (
           <div key={i} className="response">
@@ -119,11 +157,14 @@ export default function Feed(props: Props) {
       }
     </Root>
   )
-}
+}, (prev, next) => JSON.stringify(prev.tasks) == JSON.stringify(next.tasks))
+
 
 const Root = styled.div`
   overflow-y: scroll;
+  width: 100%;
   padding: 40px;
+  margin-top: 100px;
   margin-bottom: 150px;
 
   .response {
@@ -133,4 +174,12 @@ const Root = styled.div`
       max-width: 800px;
     }
   }
+`
+
+const PromptBubble = styled.div`
+  background: #c6b9ff;
+  padding: 5px;
+  border-radius: 5px;
+  margin-left: auto;
+  font-weight: bold;
 `

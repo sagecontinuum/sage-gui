@@ -3,7 +3,7 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { Card } from '/components/layout/Layout'
 import { type Task } from './Assistant'
-import { IconButton, Popover, Tooltip } from '@mui/material'
+import { Icon, IconButton, Popover, Tooltip } from '@mui/material'
 
 import {
   PauseCircleOutlineRounded, DeleteOutlineRounded, PlayCircleOutlineRounded,
@@ -56,9 +56,10 @@ export default function Tasks(props: Props) {
 
     return ES.editJob(id, jobSpec)
       .then(() => {
+        console.log('jobSpec', jobSpec)
         ES.submitJob(jobSpec)
           .then(() => {
-            enqueueSnackbar(`Job resubmitted`, {variant: 'success'})
+            enqueueSnackbar(`Prompt restarted`, {variant: 'success'})
           })
       })
       .catch((err) => {
@@ -129,7 +130,7 @@ export default function Tasks(props: Props) {
                 {task.prompt || 'No prompt specified'}
 
                 <Tooltip title="Show task details..." placement="right">
-                  <IconButton onClick={handleOpenDetails} size="small">
+                  <IconButton onClick={handleOpenDetails} size="small" className="info-btn">
                     <InfoOutlined fontSize="small" sx={{cursor: 'pointer'}}/>
                   </IconButton>
                 </Tooltip>
@@ -219,5 +220,13 @@ export default function Tasks(props: Props) {
 const TaskList = styled.ul`
   li {
     margin: 0 0 10px 0;
+    position: relative;
+  }
+
+
+  .info-btn {
+    position: absolute;
+    right: 5px;
+    top: 5px;
   }
 `

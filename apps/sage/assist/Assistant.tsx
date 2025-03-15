@@ -13,7 +13,6 @@ import Tasks from './Tasks'
 import { useSnackbar } from 'notistack'
 
 import Feed from './Feed'
-import { CircularProgress } from '@mui/material'
 
 
 const storageKey = 'sage-assistant'
@@ -165,15 +164,16 @@ export default function Assistant() {
       <Sidebar>
         <h3 className="flex justify-between items-end">
           Tasks
-          {loading && <CircularProgress />}
-          <small>{lastUpdate?.toLocaleTimeString('en-US')}</small>
+          <small>
+            {lastUpdate?.toLocaleTimeString('en-US')}
+          </small>
         </h3>
         <Tasks
           value={tasks}
           onChange={handleTaskChange}
         />
       </Sidebar>
-      <Main className="flex column items-center">
+      <Main className="flex column items-center w-full">
         <div>
           Sage Assistant
           {error && <ErrorMsg>{error.message}</ErrorMsg>}
@@ -181,7 +181,7 @@ export default function Assistant() {
 
         <Feed tasks={tasks} />
 
-        <PromptContainer className="flex items-center justify-center">
+        <PromptContainer className="flex items-center justify-center w-full">
           <div className="flex column">
             <DefaultPrompts
               onClick={handleDefaultPrompt}
@@ -205,14 +205,13 @@ const Root = styled.div`
 `
 
 const Main = styled.div`
-  padding: 20px;
-  `
+  padding: 20px 0;
+`
 
 const PromptContainer = styled.div`
   position: absolute;
   bottom: 0;
   padding-top: 20px;
-  width: 100%;
   box-shadow: rgb(229 229 229) 2px 3px 9px 1px;
 `
 

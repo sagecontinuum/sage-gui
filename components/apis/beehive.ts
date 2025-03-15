@@ -642,3 +642,59 @@ export async function getLoraWithRssi(manifest: FlattenedManifest): Promise<Lora
 
   return dataWithRssi
 }
+
+
+
+type StreamDataProps = {
+  vsn: string,
+  task: string
+}
+
+export function createEventSource(props: StreamDataProps) {
+  const {vsn, task} = props
+
+  const eventSource = new EventSource(`https://data.sagecontinuum.org/api/v0/stream?vsn=${vsn}&task=${task}`)
+
+  return eventSource
+}
+
+
+type RetryOpts = {
+  retries?: number,
+  backoff?: number
+}
+
+export async function retryHead(
+  url: string, opts: RetryOpts = {}
+) : Promise<{url: string, size: number}> {
+  const {
+    retries = 5,
+    backoff = 1000 // milliseconds
+  } = opts
+
+  // sequentially attempt to fetch data until we get a 200 response (and include size)
+  let latest
+  for (let i = 0; i <= retries; i++) {
+    try{
+      const res = await fetch(url, {method: 'HEAD'})
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const size = parseInt(res.headers.get('x-object-content-length') || res.headers.get('content-length'))
+      return {url, size}
+
+    } catch (error) {
+      if (i < retries) {
+        // If not the last retry, wait for the backoff time
+        await new Promise((resolve) => setTimeout(resolve, backoff * (i + 1)))
+      } else {
+        // If it was the last retry, throw the error
+        throw error
+      }
+    }
+  }
+  return latest
+}
+
