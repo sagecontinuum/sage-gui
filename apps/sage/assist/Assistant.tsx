@@ -179,7 +179,7 @@ export default function Assistant() {
           {error && <ErrorMsg>{error.message}</ErrorMsg>}
         </div>
 
-        <Feed tasks={tasks} />
+        <Feed tasks={tasks} isRunning={!!tasks.find(task => task.state == 'Running')}/>
 
         <PromptContainer className="flex items-center justify-center w-full">
           <div className="flex column">

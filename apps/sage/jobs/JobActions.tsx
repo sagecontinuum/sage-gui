@@ -41,7 +41,7 @@ export default function JobActions(props: Props) {
   const handleRunJob = () => {
     setLoading(true)
     const ids = jobs.map(o => o.job_id)
-    return ES.submitJobs(ids)
+    return ES.reSubmitJobs(ids)
       .then(() => {
         const count = ids.length
         enqueueSnackbar(`${count} job${count > 1 ? 's' : ''} resubmitted`, {variant: 'success'})

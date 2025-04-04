@@ -531,8 +531,9 @@ export async function submitJob(spec: string) {
 
 
 // resubmit for multiple existing jobs
-export async function submitJobs(ids: number[]) {
-  return Promise.all(ids.map(id => get(`${url}/submit?id=${id}`)))
+export async function resubmitJobs(ids: string | string[]) {
+  const idList = Array.isArray(ids) ? ids : [ids]
+  return Promise.all(idList.map(id => get(`${url}/submit?id=${id}`)))
 }
 
 

@@ -3,14 +3,13 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import { Card } from '/components/layout/Layout'
 import { type Task } from './Assistant'
-import { Icon, IconButton, Popover, Tooltip } from '@mui/material'
+import { IconButton, Popover, Tooltip } from '@mui/material'
 
 import {
   PauseCircleOutlineRounded, DeleteOutlineRounded, PlayCircleOutlineRounded,
   InfoOutlined
 }  from '@mui/icons-material'
 
-import * as YAML from 'yaml'
 import * as ES from '/components/apis/ses'
 
 import { useSnackbar } from 'notistack'
@@ -33,11 +32,10 @@ export default function Tasks(props: Props) {
 
 
   const handleChange = async (action: 'run' | 'remove' | 'suspend', task: Task) => {
-    const {job_id, fullJobSpec} = task
-
+    const {job_id} = task
 
     if (action == 'run') {
-      await handleRunJob(job_id, YAML.stringify(fullJobSpec))
+      await handleRunJob(job_id)
       return tasks
     } else if (action == 'suspend') {
       await handleSuspendJob(job_id)
@@ -51,20 +49,16 @@ export default function Tasks(props: Props) {
   }
 
 
-  const handleRunJob = (id: string, jobSpec: string) => {
+  const handleRunJob = (id: string) => {
     setLoading(true)
 
-    return ES.editJob(id, jobSpec)
+    return ES.resubmitJobs(id)
       .then(() => {
-        console.log('jobSpec', jobSpec)
-        ES.submitJob(jobSpec)
-          .then(() => {
-            enqueueSnackbar(`Prompt restarted`, {variant: 'success'})
-          })
+        enqueueSnackbar(`Prompt restarted`, {variant: 'success'})
       })
       .catch((err) => {
         enqueueSnackbar(
-          <>Failed to resubmit at least one job<br/>{err.message}</>,
+          <>Failed to resubmit at least one prompt<br/>{err.message}</>,
           {variant: 'error', autoHideDuration: 7000}
         )
       })
@@ -121,6 +115,7 @@ export default function Tasks(props: Props) {
   return (
     <TaskList className="list-none no-padding">
       {tasks.map(task => {
+        console.log('task', task)
         const {fullJobSpec} = task
 
         return (
@@ -174,16 +169,18 @@ export default function Tasks(props: Props) {
                   {task.state}
                 </div>
                 <div>
-                  <Tooltip title={`Re-run Prompt`}>
-                    <IconButton
-                      onClick={() => handleChange('run', task)}
-                      className="running"
-                      size="small"
-                      disabled={loading}
-                    >
-                      <PlayCircleOutlineRounded />
-                    </IconButton>
-                  </Tooltip>
+                  {task.state != 'Running' &&
+                    <Tooltip title={`Re-run Prompt`}>
+                      <IconButton
+                        onClick={() => handleChange('run', task)}
+                        className="running"
+                        size="small"
+                        disabled={loading}
+                      >
+                        <PlayCircleOutlineRounded />
+                      </IconButton>
+                    </Tooltip>
+                  }
 
                   {task.state != 'Suspended' &&
                     <Tooltip title="Suspend">

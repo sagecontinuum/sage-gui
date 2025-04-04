@@ -8,6 +8,8 @@ import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ObjectRenderer from './ObjectRenderer'
 
+import Bee from 'url:./bee.gif'
+
 
 type ParsedRecord = BH.Record | (BH.Record & {value: {query: string, answer}})
 
@@ -57,10 +59,11 @@ function Response(props: ResponseProps) {
 
 type Props = {
   tasks: Task[]
+  isRunning: boolean
 }
 
 export default memo(function Feed(props: Props) {
-  const {tasks} = props
+  const {tasks, isRunning} = props
 
 
   const [data, setData] = useState<ParsedRecord[]>()
@@ -155,6 +158,12 @@ export default memo(function Feed(props: Props) {
         )
       })
       }
+      {isRunning &&
+        <LoadingBee className="flex column items-center justify-center">
+          <img src={Bee} />
+          <span>Working on a response...</span>
+        </LoadingBee>
+      }
     </Root>
   )
 }, (prev, next) => JSON.stringify(prev.tasks) == JSON.stringify(next.tasks))
@@ -182,4 +191,10 @@ const PromptBubble = styled.div`
   border-radius: 5px;
   margin-left: auto;
   font-weight: bold;
+`
+
+const LoadingBee = styled.div`
+  img {
+    max-width: 20%;
+  }
 `
