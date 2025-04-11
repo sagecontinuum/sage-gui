@@ -18,7 +18,7 @@ export default function TestSignIn() {
 
 
   const handleSignIn = () => {
-    const redirectPath = params.get('redirect')
+    const redirectPath = params.get('callback')
     setLoading(true)
 
     setTimeout(() => {
@@ -77,22 +77,22 @@ export default function TestSignIn() {
                 type="password"
               />
               <br/>
-              <Button 
-                variant="contained" 
-                color="primary" 
-                onClick={handleSignIn} 
-                disabled={loading || !isValid()} 
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSignIn}
+                disabled={loading || !isValid()}
                 type="submit"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </>
             :
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               color="primary"
-              onClick={handleSignOut} 
-              disabled={loading} 
+              onClick={handleSignOut}
+              disabled={loading}
               type="submit"
             >
               {loading ? 'Signing out...' : 'Sign Out'}
