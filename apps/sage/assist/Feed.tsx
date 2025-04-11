@@ -9,18 +9,20 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ObjectRenderer from './ObjectRenderer'
 
 import Bee from 'url:./bee.gif'
+import { sortResponses } from './sgUtils'
+import { relativeTime } from '/components/utils/units'
 
 
 type ParsedRecord = BH.Record | (BH.Record & {value: {query: string, answer}})
 
 type ResponseProps = {
-  data: ParsedRecord
+  record: ParsedRecord
   showImage?: boolean
 }
 
 function Response(props: ResponseProps) {
-  const {data, showImage} = props
-  const {value} = data
+  const {record, showImage} = props
+  const {value} = record
 
   const [expanded, setExpanded] = useState<boolean>(showImage)
 
@@ -30,10 +32,15 @@ function Response(props: ResponseProps) {
 
   let ele = 'loading...'
   if (typeof value == 'object' && value) {
-    ele = <p>{value.answer}</p>
+    ele = <div>
+      <p className="font-medium no-margin">
+        {value.answer}
+      </p>
+      <span className="muted text-xs">{relativeTime(record.timestamp)}</span>
+    </div>
   } else if (typeof value == 'string' && value.includes('https://')) {
     ele =
-      <Accordion expanded={expanded} onChange={handleChange}>
+      <Accordion expanded={expanded} onChange={handleChange} className="upload">
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1-content"
@@ -86,9 +93,7 @@ export default memo(function Feed(props: Props) {
         task
       }
     }).then(res => {
-      let d = res.sort((a, b) =>
-        b.timestamp.localeCompare(a.timestamp)
-      )
+      let d = res.sort(sortResponses)
 
       d = res.map(obj => {
         try {
@@ -134,7 +139,7 @@ export default memo(function Feed(props: Props) {
         // do nothing if not json
       }
 
-      setData(prev => [...prev, obj])
+      setData(prev => [...prev, obj].sort(sortResponses))
     }
 
     return () => {
@@ -153,7 +158,7 @@ export default memo(function Feed(props: Props) {
       {data?.map((record, i) => {
         return (
           <div key={i} className="response">
-            <Response data={record} showImage={i > data.length - 5 * 2} />
+            <Response record={record} showImage={i > data.length - 5 * 2} />
           </div>
         )
       })
@@ -171,25 +176,27 @@ export default memo(function Feed(props: Props) {
 
 const Root = styled.div`
   overflow-y: scroll;
-  width: 100%;
   padding: 40px;
-  margin-top: 100px;
-  margin-bottom: 150px;
+  margin-bottom: 170px;
 
   .response {
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 
     img {
       max-width: 800px;
     }
+  }
+
+  .response .upload {
+    margin-bottom: 40px;
   }
 `
 
 const PromptBubble = styled.div`
   background: #c6b9ff;
   padding: 5px;
+  margin: 1rem 0;
   border-radius: 5px;
-  margin-left: auto;
   font-weight: bold;
 `
 

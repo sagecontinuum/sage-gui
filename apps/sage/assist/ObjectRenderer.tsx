@@ -20,8 +20,9 @@ export default function ObjectRenderer(props: Props) {
 
     BH.retryHead(url)
       .then(res => {
-        console.log('res', res)
         setReady(true)
+      }).catch(() => {
+        // todo: fallback gracefully
       })
   }, [])
 

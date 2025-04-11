@@ -44,6 +44,6 @@ export default function Prompt(props: Props) {
 
 
 const InputRoot = styled.div`
-  margin: 25px 0 25px 0;
+  margin: 25px 0 15px 0;
 `
 

@@ -71,12 +71,12 @@ export default function Tasks(props: Props) {
     setLoading(true)
     return ES.suspendJob(id)
       .then(() => {
-        enqueueSnackbar(`One job suspended`, {variant: 'success'})
+        enqueueSnackbar(`One prompt suspended`, {variant: 'success'})
       })
       .catch((err) => {
         enqueueSnackbar(
-          <>Failed to suspend at least one job<br/>{err.message}</>,
-          {variant: 'error', autoHideDuration: 7000}
+          <>Failed to suspend prompt<br/>{err.message}</>,
+          {variant: 'error', autoHideDuration: 5000}
         )
       })
       .finally(() => {
@@ -88,11 +88,11 @@ export default function Tasks(props: Props) {
     setLoading(true)
     return ES.removeJob(id)
       .then(() => {
-        enqueueSnackbar(`One job removed`, {variant: 'success'})
+        enqueueSnackbar(`One prompt removed`, {variant: 'success'})
       })
       .catch((err) => {
         enqueueSnackbar(
-          <>Failed to remove at least one job<br/>{err.message}</>,
+          <>Failed to remove prompt<br/>{err.message}</>,
           {variant: 'error', autoHideDuration: 7000}
         )
       })
@@ -115,7 +115,6 @@ export default function Tasks(props: Props) {
   return (
     <TaskList className="list-none no-padding">
       {tasks.map(task => {
-        console.log('task', task)
         const {fullJobSpec} = task
 
         return (
@@ -220,10 +219,18 @@ const TaskList = styled.ul`
     position: relative;
   }
 
-
   .info-btn {
     position: absolute;
     right: 5px;
     top: 5px;
+  }
+
+  // todo: hover animations, etc
+  .btn-controls {
+    visibility: hidden;
+  }
+
+  &:hover .btn-controls {
+    visibility: visible;
   }
 `

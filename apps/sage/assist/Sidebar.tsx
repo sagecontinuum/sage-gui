@@ -9,7 +9,7 @@ const Sidebar = styled.div<{width: number}>`
   position: relative;
   display: flex;
   flex-direction: column;
-  background-color: #fafafa;
+  background-color: #fff;
   border-right: 1px solid #ddd;
   width: ${(props) => props.width}px;
   overflow-y: hidden;

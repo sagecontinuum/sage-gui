@@ -18,7 +18,7 @@ export default function DefaultPrompts(props: Props) {
   return (
     <Root className="flex gap">
       <Chip label={defaultPrompt} onClick={handleClick} />
-      <Chip label="What are the objects in the view?" onClick={handleClick} />
+      <Chip label="What objects are in the view?" onClick={handleClick} />
       <Chip label="Is there anything unusual or dangerous?" onClick={handleClick} />
     </Root>
   )

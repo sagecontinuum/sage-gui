@@ -582,7 +582,6 @@ export async function getPluginCountStart(props) : Promise<Record[]> {
   }
 
   const data = await getData(params)
-  console.log('data', data)
   return data
 }
 
@@ -610,7 +609,6 @@ export async function getMediaCounts(props: MediaCountProps) : Promise<Record[]>
   }
 
   const data = await getData(params)
-  console.log('data', data, start)
   return data
 }
 
@@ -679,7 +677,7 @@ export async function retryHead(
       const res = await fetch(url, {method: 'HEAD'})
 
       if (!res.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(`Could not fetch upload: ${res.status}`)
       }
 
       const size = parseInt(res.headers.get('x-object-content-length') || res.headers.get('content-length'))

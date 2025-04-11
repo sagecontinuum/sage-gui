@@ -173,15 +173,16 @@ export default function Assistant() {
           onChange={handleTaskChange}
         />
       </Sidebar>
-      <Main className="flex column items-center w-full">
-        <div>
-          Sage Assistant
+      <Main className="flex column w-full">
+        <Title>
+          <h3>SageChat</h3>
+
           {error && <ErrorMsg>{error.message}</ErrorMsg>}
-        </div>
+        </Title>
 
         <Feed tasks={tasks} isRunning={!!tasks.find(task => task.state == 'Running')}/>
 
-        <PromptContainer className="flex items-center justify-center w-full">
+        <PromptContainer >
           <div className="flex column">
             <DefaultPrompts
               onClick={handleDefaultPrompt}
@@ -202,17 +203,42 @@ export default function Assistant() {
 
 const Root = styled.div`
   height: 100%;
+  background: linear-gradient(0deg, #ece3ff 0%, #fefdff 100%);
+`
+
+const boxShadow = `
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0px 2px 4px -1px rgb(0 0 0 / 0%),
+    0px 4px 5px 0px rgb(0 0 0 / 0%),
+    0px 1px 10px 0px rgb(0 0 0 / 12%);
+`
+
+const Title = styled.div`
+  ${boxShadow}
+
+  background: #fff;
+
+  h3 {
+    margin: .5rem 1rem;
+  }
 `
 
 const Main = styled.div`
-  padding: 20px 0;
+  padding: 0 0;
 `
 
 const PromptContainer = styled.div`
+  ${boxShadow}
+
   position: absolute;
   bottom: 0;
-  padding-top: 20px;
-  box-shadow: rgb(229 229 229) 2px 3px 9px 1px;
+  left: 70%;
+  transform: translate(-70%);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  background: #fff;
 `
 
 
