@@ -23,8 +23,8 @@ const label = (
 
 
 // a tab is rendered with react.clone, so we must explicity pass TabProps
-const ConditionalTab = (props: TabProps & {show: boolean, component, to}) =>
-  props.show ? <Tab {...props} /> : <></>
+const ConditionalTab = ({show, ...props}: TabProps & {show: boolean, component, to}) =>
+  show ? <Tab {...props} /> : <></>
 
 
 type Props = {
