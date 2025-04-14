@@ -24,6 +24,7 @@
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "standard-version": "^9.3.0",
+    "svgo": "^3.3.2",
     "tsc-files": "^1.1.4"
   },
   "standard-version": {

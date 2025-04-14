@@ -9,11 +9,16 @@
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest"
   },
   "dependencies": {
+    "@parcel/transformer-image": "^2.14.4",
+    "@parcel/transformer-sass": "^2.14.4",
+    "@parcel/transformer-svg-react": "^2.14.4",
+    "@parcel/transformer-yaml": "^2.14.4",
     "archiver": "^5.3.1",
     "cors": "^2.8.5",
     "express": "^4.18.1",
     "morgan": "^1.10.0",
     "node-fetch": "^3.2.10",
+    "parcel": "^2.14.4",
     "tmp": "^0.2.1"
   },
   "devDependencies": {
