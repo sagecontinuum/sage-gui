@@ -465,7 +465,7 @@ export default function CreateJob() {
                   <Autocomplete
                     options={jobs || []}
                     getOptionLabel={(opt) =>  {
-                      return `${opt.name} (${opt.job_id})`
+                      return jobs ? `${opt.name} (${opt.job_id})` : 'loading...'
                     }}
                     renderInput={(props) =>
                       <TextField
@@ -497,9 +497,10 @@ export default function CreateJob() {
                       )
                     }}
                     PopperComponent={(props) => <Popper {...props} sx={{minWidth: 300}} />}
-                    value={jobs ? jobs.find(o => o.job_id == jobID) : null}
+                    value={jobs ? jobs.find(o => o.job_id == jobID) : {name: '', job_id: ''}}
                     onChange={(evt, val) => handleSelectJob(val)}
                     sx={{width: '200px'}}
+                    loading={!jobs}
                   />
                   <span className="nowrap">
                     or, <a onClick={handleUseSample}>use sample</a>
