@@ -3,6 +3,36 @@
 The following are some notable changes to the UI
 
 
+## [3.3.0](https://github.com/sagecontinuum/sage-gui/compare/v3.2.0...v3.3.0) (2025-04-15)
+
+
+### Features
+
+* **admin:** add basic job submission metrics/filtering ([0cc9cd2](https://github.com/sagecontinuum/sage-gui/commit/0cc9cd2eb8563ed7654392e19bca425634fadb4f))
+* **data:** add -inf/"show all" button to node > data timelines; improvements for "Uploaded Files" ([bc48e8b](https://github.com/sagecontinuum/sage-gui/commit/bc48e8b57599442fa86c7ec95219f4a3861f8eb4))
+* **data:** add uploaded files timeline to node pages ([b81c587](https://github.com/sagecontinuum/sage-gui/commit/b81c587dd861ac96170d6838489d67939b892d17))
+* **data:** add value range filtering; waggle-sensor/tickets[#192](https://github.com/sagecontinuum/sage-gui/issues/192) ([e704e52](https://github.com/sagecontinuum/sage-gui/commit/e704e5226aae9c043249fe7312a7df68e3de1ddb))
+* **data:** display meta.units in query-browser; waggle-sensor/tickets[#196](https://github.com/sagecontinuum/sage-gui/issues/196) ([92dc6a8](https://github.com/sagecontinuum/sage-gui/commit/92dc6a865a94cf71b9d578ba1626503bc3a29021))
+* **data:** support shareable query-browser chart configs via url state; (some cleanup) ([020fe1a](https://github.com/sagecontinuum/sage-gui/commit/020fe1a3141a0fa0f407792ab098720daf7fa9d4))
+* improved histogram/charting options ([caac155](https://github.com/sagecontinuum/sage-gui/commit/caac155a671bffa28d30ed4132ee66280ed5d6a5))
+* **jobs:** add toggleable ECR app names/links to table; fixes waggle-sensor/tickets[#99](https://github.com/sagecontinuum/sage-gui/issues/99) ([3eac1f2](https://github.com/sagecontinuum/sage-gui/commit/3eac1f2e92f8db75faa6afde87ef274dd2028c4e))
+
+
+### Bug Fixes
+
+* add support for downloading all data in query-browser (even if data is limited) ([9354192](https://github.com/sagecontinuum/sage-gui/commit/9354192b1eaeeed97320e9327898af0808e277f5))
+* **components:** add support for names on facet filter checkboxes ([d462acd](https://github.com/sagecontinuum/sage-gui/commit/d462acd60d56132e80ecd9a21ce3d71d6a1fa36a))
+* **data:** add an MFR_node sensor config for previews ([c621e09](https://github.com/sagecontinuum/sage-gui/commit/c621e098cb42e6d1f56e248cdf3eb6b4fbb13712))
+* **data:** fix -1y titles; refactor ([6bba08c](https://github.com/sagecontinuum/sage-gui/commit/6bba08c96c3f27678ab612d34e8dea893c171d17))
+* **data:** improve performance query-browser apps dropdown by using rollups; add help note for data availability ([c8602a5](https://github.com/sagecontinuum/sage-gui/commit/c8602a50e431aefdc34c16a594e8b02a12e9d8e8))
+* **data:** use blobs for downloading more query-browser data ([9bbafca](https://github.com/sagecontinuum/sage-gui/commit/9bbafcaa1d5ab6874f2330de1e83ace0d9fc59ed))
+* filter image previews; fix job details app listing ([eabcdb7](https://github.com/sagecontinuum/sage-gui/commit/eabcdb78c21e15e69a59c60bca7348140a1a3df6))
+* fix conditional tab warning ([9adbfe3](https://github.com/sagecontinuum/sage-gui/commit/9adbfe3a942a44733e5da3382878a58296378866))
+* fix query-browser chart auto-resizing; waggle-sensor/tickets[#196](https://github.com/sagecontinuum/sage-gui/issues/196) ([4be90de](https://github.com/sagecontinuum/sage-gui/commit/4be90defdebffa15288b0604d3388295dd9af3be))
+* support jsonurl for chart/filtering; better error handling ([5986b0c](https://github.com/sagecontinuum/sage-gui/commit/5986b0cdbe447e58a4250d27853725d4208a822e))
+* **tables:** download all data for displayed columns when pagination is used ([c41a692](https://github.com/sagecontinuum/sage-gui/commit/c41a6920d251dcc14f05ef0117cd3822dba721b0))
+* **tables:** move table download button ([61e1568](https://github.com/sagecontinuum/sage-gui/commit/61e15688c7fbabe478fd9450d247f24a391785ff))
+
 ## [3.2.0](https://github.com/sagecontinuum/sage-gui/compare/v3.0.0...v3.2.0) (2024-09-30)
 
 
