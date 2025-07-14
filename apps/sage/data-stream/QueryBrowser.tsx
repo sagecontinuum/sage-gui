@@ -394,8 +394,12 @@ function parseClientSideFilterParams(paramStr: string) {
   let rules
   try {
     rules = paramStr ? parseOpts(paramStr) : []
-  } catch {
-    alert('Could not parse the "client-side-filters" params.  Using an empty list instead')
+  } catch (error) {
+    alert(`
+      Could not parse the "client-side-filters" params.
+      Error: ${error}
+      Using an empty list instead`
+    )
     rules = []
   }
   return rules
@@ -619,9 +623,11 @@ export default function QueryBrowser() {
   const updateFilteredData = (data, rules) => {
     let d = filterData(data, rules)
 
-    // simple charts for plugin-based or by-name listings
-    const showChart = ['apps', 'names'].includes(type)
-      && node && !isMediaApp(app) && d.length > 0
+    // if first 10 values are numerical, then set hasNumericalValues to true
+    const hasNumericalValues = d.slice(0, 10).some(o => typeof o.value == 'number')
+
+    // conditions for showing chart:
+    const showChart = hasNumericalValues && d.length > 0
 
     setChart(showChart ? d : null)
 
@@ -761,7 +767,7 @@ export default function QueryBrowser() {
     } else if (val == 'images')
       goToTasks(val, 'imagesampler-.*')
     else if (val == 'audio')
-      goToTasks(val, 'audiosampler')
+      goToTasks(val, 'audio-sampler')
     else
       handleRemoveFilters()
   }
