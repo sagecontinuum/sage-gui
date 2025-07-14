@@ -15,6 +15,7 @@ import { useSnackbar } from 'notistack'
 import Feed from './Feed'
 
 
+
 const storageKey = 'sage-assistant'
 
 
@@ -42,7 +43,10 @@ export default function Assistant() {
 
   const [lastUpdate, setLastUpdate] = useState<Date>(null)
   const [tasks, setTasks] = useState<Task[]>([])
-  const [loading, setLoading] = useState(false)
+
+  // const [showNodeSelector, setShowNodeSelector] = useState(false)
+
+  // const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     let done = false
@@ -68,7 +72,7 @@ export default function Assistant() {
 
       let job
       try {
-        setLoading(true)
+        // setLoading(true)
         job = await SES.getJobStatus(id)
       } catch {
         console.log('err', job)
@@ -76,7 +80,7 @@ export default function Assistant() {
       }
 
       setLastUpdate(new Date())
-      setLoading(false)
+      // setLoading(false)
 
       const oldRecord = tasks.filter(obj => obj.job_id != job.job_id)
       const newRecord: Task = {
@@ -103,6 +107,29 @@ export default function Assistant() {
   }, [])
 
 
+  const handleFeedUpdate = () => {
+    function updateGradientHeight() {
+      const scrollableDiv = document.getElementById('main')
+      const gradientBg = document.getElementById('gradientBg')
+
+      // Set gradient height to the full scrollable content height
+      gradientBg.style.height = scrollableDiv.scrollHeight + 'px'
+    }
+
+    // Run on page load & whenever content changes
+    window.onload = updateGradientHeight
+    window.addEventListener('resize', updateGradientHeight)
+
+    new ResizeObserver(updateGradientHeight).observe(document.getElementById('main'))
+
+    function scrollToBottom () {
+      const objDiv = document.getElementById('main')
+      if (objDiv)
+        objDiv.scrollTop = objDiv.scrollHeight
+    }
+
+    new ResizeObserver(scrollToBottom).observe(document.getElementById('main'))
+  }
 
   const handleSubmit = () => {
     setSubmitting(true)
@@ -131,7 +158,7 @@ export default function Assistant() {
           )
         })
         .finally(() => {
-          setLoading(false)
+          // setLoading(false)
         })
     } else {
       // otherwise, start a new one
@@ -161,7 +188,7 @@ export default function Assistant() {
 
   return (
     <Root className="flex">
-      <Sidebar>
+      <Sidebar width={275}>
         <h3 className="flex justify-between items-end">
           Tasks
           <small>
@@ -171,17 +198,18 @@ export default function Assistant() {
         <Tasks
           value={tasks}
           onChange={handleTaskChange}
+          // onEditNode={() => setShowNodeSelector((prev => !prev))}
         />
       </Sidebar>
-      <Main className="flex column w-full">
+
+      <Main className="flex column items-center w-full" id="main">
         <Title>
           <h3>SageChat</h3>
 
           {error && <ErrorMsg>{error.message}</ErrorMsg>}
         </Title>
 
-        <Feed tasks={tasks} isRunning={!!tasks.find(task => task.state == 'Running')}/>
-
+        {/* stick prompt box at bottom */}
         <PromptContainer >
           <div className="flex column">
             <DefaultPrompts
@@ -195,6 +223,13 @@ export default function Assistant() {
             />
           </div>
         </PromptContainer>
+
+        <div className="gradient-bg" id="gradientBg"></div>
+
+        <Feed tasks={tasks}
+          onFeedUpdate={handleFeedUpdate}
+          isRunning={!!tasks.find(task => task.state == 'Running')}
+        />
       </Main>
     </Root>
   )
@@ -203,7 +238,7 @@ export default function Assistant() {
 
 const Root = styled.div`
   height: 100%;
-  background: linear-gradient(0deg, #ece3ff 0%, #fefdff 100%);
+//  background: linear-gradient(0deg, #ece3ff 0%, #fefdff 100%);
 `
 
 const boxShadow = `
@@ -217,6 +252,10 @@ const boxShadow = `
 const Title = styled.div`
   ${boxShadow}
 
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
   background: #fff;
 
   h3 {
@@ -226,15 +265,31 @@ const Title = styled.div`
 
 const Main = styled.div`
   padding: 0 0;
+  overflow-y: scroll;
+
+  position: relative; /* Needed for pseudo-element */
+
+  /* Gradient applied dynamically */
+  .gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(0deg, #faf8ff 0%, #ffffff 100%);
+    z-index: -1; /* Place behind content */
+  }
 `
 
 const PromptContainer = styled.div`
   ${boxShadow}
 
-  position: absolute;
-  bottom: 0;
-  left: 70%;
-  transform: translate(-70%);
+  position: sticky;
+  top: calc(100% - 200px);
+  z-index: 1;
+
+  background: #fff;
+
   padding: 20px;
   margin: 20px;
   border-radius: 10px;

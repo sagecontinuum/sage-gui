@@ -34,7 +34,7 @@ type Props = {
 const ResizableSidebar = (props: Props) => {
   const {children} = props
 
-  const [width, setWidth] = useState(250)
+  const [width, setWidth] = useState(330)
   const resizerRef = useRef(null)
   const sidebarRef = useRef(null)
 

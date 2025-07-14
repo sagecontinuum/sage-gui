@@ -75,6 +75,7 @@ export default memo(function Feed(props: Props) {
 
   const [data, setData] = useState<ParsedRecord[]>()
 
+  // get history of data
   useEffect(() => {
     if (!tasks.length) return
 
@@ -109,13 +110,9 @@ export default memo(function Feed(props: Props) {
     })
   }, [tasks])
 
-
+  // once we have historical data, start eventSource streaming
   useEffect(() => {
     if (!tasks.length) return
-
-    const objDiv = document.getElementById('responses')
-    if (objDiv)
-      objDiv.scrollTop = objDiv.scrollHeight
 
     const {fullJobSpec} = tasks[0]
     const {nodes, plugins}= fullJobSpec
@@ -175,7 +172,7 @@ export default memo(function Feed(props: Props) {
 
 
 const Root = styled.div`
-  overflow-y: scroll;
+  max-width: 960px;
   padding: 40px;
   margin-bottom: 170px;
 

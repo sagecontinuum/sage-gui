@@ -38,6 +38,7 @@ export default function Prompt(props: Props) {
       >
         <SendRounded />
       </IconButton>
+
     </InputRoot>
   )
 }
