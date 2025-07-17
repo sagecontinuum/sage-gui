@@ -4,12 +4,12 @@ import { useEffect, useState, useReducer } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
-import { QueryStatsRounded, ImageSearchOutlined } from '@mui/icons-material'
+import { QueryStatsRounded, ManageSearchRounded } from '@mui/icons-material'
 
 import Timeline from '/components/viz/Timeline'
 import TimelineSkeleton from '/components/viz/TimelineSkeleton'
 import AppLabel from '/components/viz/TimelineAppLabel'
-import { getRangeTitle } from '/components/utils/units'
+import { getRangeTitle, relativeTime } from '/components/utils/units'
 
 import DataOptions from '/components/input/DataOptions'
 import { fetchRollup, fetchUploadRollup, parseData } from '/apps/sage/data/rollupUtils'
@@ -19,8 +19,11 @@ import { type Options, colorDensity, stdColor } from '/apps/sage/data/Data'
 import { endOfHour, subDays, subYears, addHours, addDays } from 'date-fns'
 
 import * as BK from '/components/apis/beekeeper'
+import * as BH from '/components/apis/beehive'
 import * as ECR from '/components/apis/ecr'
 import { Tab, Tabs, tabLabel } from '/components/tabs/Tabs'
+import TableComponent from '/components/table/Table'
+import { queryData } from '/components/data/queryData'
 
 
 const TL_LABEL_WIDTH = 175 // default timeline label width
@@ -49,6 +52,20 @@ function getTableData(data, vsn) {
 }
 */
 
+
+
+const latestRecColumns = [
+  {id: 'name', label: 'Name'},
+  {id: 'timestamp', label: 'Timestamp', format: relativeTime },
+  {id: 'value', label: 'Value'},
+  {id: 'sensor', label: 'Sensor'},
+  {id: 'deviceName', label: 'LoRa Device Name'},
+]
+
+/*
+const findColumn = (cols, name) =>
+  cols.findIndex(o => o.id == name)
+*/
 
 type Props = {
   node: BK.Node
@@ -87,8 +104,43 @@ export default function NodeTimeline(props: Props) {
   // note: endtime is not currently an option
   const [end] = useState<Date>(endOfHour(new Date()))
 
-
   const [ecr, setECR] = useState<ECR.AppDetails[]>()
+
+  // recent measurements/records
+  const [recent, setRecent] = useState(null)
+  const [filteredRecent, setFilteredRecent] = useState(null)
+  const [query] = useState('')
+  const [latestRange, setLatestRange] = useState('-5m')
+  const [cols, setCols] = useState(null)
+
+  const [checked] = useState({
+    relativeTime: true,
+    showMeta: false,
+  })
+
+  // relative time and show meta checkbox events
+  useEffect(() => {
+    /*
+    setCols(prev => {
+      let idx
+      if (checked.relativeTime) {
+        idx = findColumn(prev, 'timestamp')
+        prev[idx] = {...prev[idx], format: (val) => relativeTime(val)}
+      } else {
+        idx = findColumn(prev, 'timestamp')
+        prev[idx] = {...prev[idx], format: (val) => val}
+      }
+
+      idx = findColumn(prev, 'meta')
+      prev[idx] = {...prev[idx], hide: !checked.showMeta}
+
+      return prev.slice(0)
+    })
+    */
+  }, [checked])
+
+
+
 
   // data timelines
   useEffect(() => {
@@ -119,6 +171,39 @@ export default function NodeTimeline(props: Props) {
     ECR.listApps('public')
       .then(ecr => setECR(ecr))
   }, [])
+
+
+  useEffect(() => {
+    if (tab != 'recent-records') return
+
+    BH.getData({
+      start: latestRange,
+      filter: {
+        vsn
+      },
+      tail: 1
+    }).then((data) => {
+      let allCols = []
+      const d = data.map(obj => {
+        const {meta, ...rest} = obj
+        allCols = [...allCols, ...Object.keys(meta)]
+
+
+        return {...rest, ...meta}
+      })
+      setRecent(d)
+      setFilteredRecent(d)
+
+      const uniqCols = [...new Set(allCols)]
+
+      setCols(() => (
+        [
+          ...latestRecColumns,
+          ...uniqCols.map(name => ({id: name, label: name, hide: true})).filter(o => !latestRecColumns.find(obj => o.id == obj.id))
+        ]
+      ))
+    })
+  }, [tab, latestRange, vsn])
 
 
   const handleOptionChange = (name, val) => {
@@ -157,20 +242,39 @@ export default function NodeTimeline(props: Props) {
   }
 
 
+  const handleQuery = ({query}) => {
+    const d = queryData(recent, query)
+    setFilteredRecent(d)
+  }
+
+  const handleLatestOpts = (name, val) => {
+    setLatestRange(val)
+  }
+
+
   return (
     <>
-      {/*
+
       <Tabs
         value={tab}
         aria-label="timeline view tabs"
       >
         <Tab
-          label={tabLabel(<QueryStatsRounded fontSize="small" />, 'Published Records')}
+          label={tabLabel(<QueryStatsRounded fontSize="small" />, 'App History')}
           value="apps"
           component={Link}
           to="?timeline=apps"
           replace
         />
+
+        <Tab
+          label={tabLabel(<ManageSearchRounded fontSize="small" />, 'Latest Records')}
+          value="recent-records"
+          component={Link}
+          to="?timeline=recent-records"
+          replace
+        />
+        {/*
         <Tab
           label={tabLabel(<ImageSearchOutlined />, 'Uploaded Files')}
           value="uploads"
@@ -178,25 +282,28 @@ export default function NodeTimeline(props: Props) {
           to="?timeline=uploads"
           replace
         />
+        */}
       </Tabs>
-      */}
+
       <br/>
 
 
       <TimelineContainer>
-        <div className="timeline-title flex items-start gap">
-          <h2>{getRangeTitle(opts.window)}</h2>
-          <DataOptions
-            onChange={handleOptionChange}
-            opts={opts}
-            quickRanges={['-1y', '-90d', '-30d', '-7d', '-2d']}
-            density
-            showAll
-            condensed
-            showViewType
-            aggregation
-          />
-        </div>
+        {tab == 'apps' &&
+          <div className="timeline-title flex items-start gap">
+            <h2>{getRangeTitle(opts.window)}</h2>
+            <DataOptions
+              onChange={handleOptionChange}
+              opts={opts}
+              quickRanges={['-1y', '-90d', '-30d', '-7d', '-2d']}
+              density
+              showAll
+              condensed
+              showViewType
+              aggregation
+            />
+          </div>
+        }
 
         {loadingTL &&
           <div className="clearfix w-full">
@@ -204,7 +311,7 @@ export default function NodeTimeline(props: Props) {
           </div>
         }
 
-        {data && opts.viewType == 'timeline' && !!Object.keys(data).length && ecr && !loadingTL &&
+        {tab == 'apps' && data && opts.viewType == 'timeline' && !!Object.keys(data).length && ecr && !loadingTL &&
           <Timeline
             data={data[vsn]}
             cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
@@ -237,6 +344,35 @@ export default function NodeTimeline(props: Props) {
           />
         }
 
+        {tab == 'recent-records' && filteredRecent && cols &&
+          <>
+            <TableComponent
+              primaryKey="rowID"
+              columns={cols}
+              rows={filteredRecent}
+              enableSorting
+              sort="-timestamp"
+              pagination
+              page={0}
+              rowsPerPage={25}
+              limit={filteredRecent.length} // todo(nc): "limit" is fairly confusing
+              search={query}
+              onSearch={handleQuery}
+              onColumnMenuChange={() => {/* do nothing */}}
+              middleComponent={
+                <Controls className="flex items-start gap">
+                  <DataOptions
+                    onChange={handleLatestOpts}
+                    opts={{colorType: null, window: latestRange}}
+                    quickRanges={['-10m', '-5m', '-1m']}
+                    condensed
+                  />
+                </Controls>
+              }
+            />
+          </>
+        }
+
         {/* data && opts.viewType == 'table' && !!Object.keys(data).length && ecr && !loadingTL && vsn &&
           <Table
             primaryKey="taskWithCamera"
@@ -261,4 +397,8 @@ export default function NodeTimeline(props: Props) {
 
 const TimelineContainer = styled.div`
   margin: 0 16px 16px 16px;
+`
+
+const Controls = styled.div`
+  margin-left: 2rem;
 `
