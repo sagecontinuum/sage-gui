@@ -43,6 +43,7 @@ import UserProfile from '/components/account/UserProfile'
 import MyNodes from '/components/account/MyNodes'
 import Devices from '/components/account/Devices'
 import DevAccess from '/components/account/DevAccess'
+import AllocationRequest from './allocations/AllocationRequest'
 
 import Assistant from './assist/Assistant'
 
@@ -214,6 +215,8 @@ export default function Sage() {
                         <Route path="dev-devices" element={<RequireAuth><Devices /></RequireAuth>} />
                         <Route path="access" element={<RequireAuth><DevAccess /></RequireAuth>} />
                       </Route>
+
+                      <Route path="request-allocation" element={<RequireAuth><AllocationRequest /></RequireAuth>} />
 
                       <Route path="assistant" element={<Assistant />} />
 

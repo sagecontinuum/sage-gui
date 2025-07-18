@@ -201,7 +201,7 @@ type Data = BK.NodeState & {
 type Props = {
   data: Data[]
   markerClass?: 'blue-dot'
-  updateID?: number
+  updateID?: number | string
   showUptime?: boolean
 }
 

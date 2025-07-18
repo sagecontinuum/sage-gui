@@ -53,12 +53,12 @@ const queryByTag = (data, tagState: string[]) => {
 const columns = [{
   id: 'vsn',
   label: 'Node'
-}, {
+}, /* todo(nc): ignore for now {
   id: 'project',
   label: 'Project'
-}, {
-  id: 'location',
-  label: 'Location'
+}, */ {
+  id: 'city',
+  label: 'City'
 }, {
   id: 'View',
   format: (_, obj) =>
@@ -81,10 +81,11 @@ export const parseNodeMeta = (data) => data.map(o => ({
 type Props = {
   selected: BK.VSN[]
   onSelected: (nodes: BK.VSN[]) => void
+  checkPerms?: boolean
 }
 
 export default function NodeSelector(props: Props) {
-  const { selected = [], onSelected } = props
+  const { selected = [], onSelected, checkPerms = false } = props
 
   const [data, setData] = useState<BK.Node[]>()
   const [query, setQuery] = useState<string>('')
@@ -94,23 +95,23 @@ export default function NodeSelector(props: Props) {
 
   const [tagState, setTagState] = useState<string[]>([])
 
-  const [schedulable, setSchedulable] = useState<BK.VSN[]>()
-  const [isSchedulable, setIsSchedulable] = useState<boolean>(false)
+  const [availNodes, setAvailNodes] = useState<BK.VSN[]>()
+  const [isSchedulable, setIsSchedulable] = useState<boolean>(checkPerms)
 
 
   useEffect(() => {
     const p1 = BK.getNodes()
-    const p2 = User.listNodesWithPerm('schedule')
+    const p2 = isSchedulable ? User.listNodesWithPerm('schedule') : null
 
-    Promise.all(([p1, p2]))
-      .then(([objs, schedulable]) => {
+    Promise.all(isSchedulable ? [p1, p2] : [p1])
+      .then(([objs, availNodes]) => {
         objs = parseNodeMeta(objs)
 
         if (isSchedulable) {
-          objs = objs.filter(o => schedulable.includes(o.vsn))
+          objs = objs.filter(o => availNodes.includes(o.vsn))
         }
 
-        setSchedulable(schedulable)
+        setAvailNodes(availNodes)
         setData(objs)
         setFiltered(objs)
       })
@@ -146,9 +147,9 @@ export default function NodeSelector(props: Props) {
     onSelected(selected.filter(selVSN => selVSN != vsn))
   }
 
-  const tableProps = Auth.user ? {
-    disableRowSelect: (row) => !schedulable.includes(row.vsn),
-    greyRow: (row) => !schedulable.includes(row.vsn),
+  const tableProps = Auth.user & isSchedulable ? {
+    disableRowSelect: (row) => !availNodes.includes(row.vsn),
+    greyRow: (row) => !availNodes.includes(row.vsn),
     stripe: false
   } : {}
 
@@ -156,20 +157,22 @@ export default function NodeSelector(props: Props) {
   return (
     <Root className="flex column">
       <div className="flex justify-between items-center">
-        <TagFilters>
-          {tags.map(({tag}) =>
-            <TagFilter
-              key={tag}
-              label={tag}
-              onClick={() => handleTagFilter(tag)}
-              color={tagState.includes(tag) ? 'primary' : 'default'}
-              variant={tagState.includes(tag) ? 'filled' : 'outlined'}
-            />
-          )}
-        </TagFilters>
+        {checkPerms &&
+          <TagFilters>
+            {tags.map(({tag}) =>
+              <TagFilter
+                key={tag}
+                label={tag}
+                onClick={() => handleTagFilter(tag)}
+                color={tagState.includes(tag) ? 'primary' : 'default'}
+                variant={tagState.includes(tag) ? 'filled' : 'outlined'}
+              />
+            )}
+          </TagFilters>
+        }
 
         <div>
-          {Auth.user &&
+          {Auth.user && checkPerms &&
             <FormControlLabel
               control={
                 <Checkbox
@@ -250,7 +253,7 @@ export default function NodeSelector(props: Props) {
 }
 
 const Root = styled.div`
-
+  width: 100%;
 `
 
 const TagFilters = styled.div``

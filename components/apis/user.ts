@@ -25,7 +25,7 @@ function handleErrors(res) {
 
   return res.json().then(errorObj => {
     // todo(nc): suggest a generic error handling on api
-    throw Error(errorObj.ssh_public_keys)
+    throw Error(errorObj.detail)
   })
 }
 
@@ -154,6 +154,18 @@ export async function hasCapability(perm: AccessPerm | AccessPerm[]) : Promise<b
   )
 
   return nodesWithSomePerm.length > 0
+}
+
+export async function listProjects() {
+  const data = await get(`${url}/projects`)
+  return data
+}
+
+
+export async function getAllocationFormData() {
+  const data = await get(`${url}/allocation-requests/form-data/`)
+
+  return data
 }
 
 
