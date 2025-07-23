@@ -21,7 +21,10 @@ import SuryaStatus from './views/factory/Factory'
 // import AudioTests from './views/tests/AudioTests'
 import ImageTests from './views/tests/ImageTests'
 import DescriptionTests from './views/tests/DescriptionTests'
+
 import Metrics from './views/metrics/Metrics'
+import MetricsOverview from './views/metrics/Overview'
+import MetricsByFilters from './views/metrics/ByFilter'
 
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
@@ -55,7 +58,7 @@ const NavMenu = () => {
     <NavItems>
       <NavItem label="Nodes" to="/nodes?phase=deployed" />
       <NavItem label="Factory" to="/surya" />
-      <NavItem label="Metrics" to="/metrics" />
+      <NavItem label="Metrics" to="/metrics/overview" />
       <NavItem label="Experiments" to="/ai/experiments" />
       <NavItem
         label="Tests"
@@ -120,7 +123,11 @@ export default function App() {
                       <Route path="tests/images" element={<ImageTests />} />
                       <Route path="ai/experiments" element={<DescriptionTests />} />
 
-                      <Route path="metrics" element={<Metrics />} />
+                      <Route path="metrics" element={<Metrics />}>
+                        <Route path="overview" element={<MetricsOverview />} />
+                        <Route path="filters" element={<MetricsByFilters />} />
+                      </Route>
+
 
                       <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                       <Route path="surya/:phase" element={<SuryaStatus />} />
