@@ -1,86 +1,86 @@
 import settings from '/components/settings'
 
 const measurements = {
-  'AQT530': {
+  AQT530: {
     names: [
-      {name: 'aqt.env.temp', label: 'Temperature'},
-      {name: 'aqt.env.humidity', label: 'Humidity'},
-      {name: 'aqt.env.pressure', label: 'Pressure'},
-      {name: 'aqt.gas.co', label: 'co'},
-      {name: 'aqt.gas.no', label: 'no'},
-      {name: 'aqt.gas.no2', label: 'no2'},
-      {name: 'aqt.gas.ozone', label: 'ozone'},
+      { name: 'aqt.env.temp', label: 'Temperature' },
+      { name: 'aqt.env.humidity', label: 'Humidity' },
+      { name: 'aqt.env.pressure', label: 'Pressure' },
+      { name: 'aqt.gas.co', label: 'co' },
+      { name: 'aqt.gas.no', label: 'no' },
+      { name: 'aqt.gas.no2', label: 'no2' },
+      { name: 'aqt.gas.ozone', label: 'ozone' },
       // {name: 'aqt.house.datetime'}
       // {name: 'aqt.house.uptime'}
-      {name: 'aqt.particle.pm1', label: 'pm1'},
-      {name: 'aqt.particle.pm2.5', label: 'pm2.5'},
-      {name: 'aqt.particle.pm10', label: 'pm10'}
-    ]
+      { name: 'aqt.particle.pm1', label: 'pm1' },
+      { name: 'aqt.particle.pm2.5', label: 'pm2.5' },
+      { name: 'aqt.particle.pm10', label: 'pm10' },
+    ],
   },
 
-  'WXT536': {
+  WXT536: {
     start: '-1h',
     names: [
-      {name: 'wxt.env.temp', label: 'Temperature'},
-      {name: 'wxt.env.humidity', label: 'Humidity'},
-      {name: 'wxt.env.pressure', label: 'Pressure'},
-      {name: 'wxt.rain.accumulation', label: 'Rain Accum.'},
-      {name: 'wxt.hail.accumulation', label: 'Hail Accum.'},
-      {name: 'wxt.wind.direction', label: 'Wind Direction'},
-      {name: 'wxt.wind.speed', label: 'Wind Speed'}
-    ]
+      { name: 'wxt.env.temp', label: 'Temperature' },
+      { name: 'wxt.env.humidity', label: 'Humidity' },
+      { name: 'wxt.env.pressure', label: 'Pressure' },
+      { name: 'wxt.rain.accumulation', label: 'Rain Accum.' },
+      { name: 'wxt.hail.accumulation', label: 'Hail Accum.' },
+      { name: 'wxt.wind.direction', label: 'Wind Direction' },
+      { name: 'wxt.wind.speed', label: 'Wind Speed' },
+    ],
   },
 
-  'BME680': {
+  BME680: {
     names: [
-      {name: 'env.temperature', label: 'Temperature', units: '°C'},
-      {name: 'env.relative_humidity', label: 'Humidity', units: '%'},
-      {name: 'env.pressure', label: 'Pressure', units: 'Pa'},
+      { name: 'env.temperature', label: 'Temperature', units: '°C' },
+      { name: 'env.relative_humidity', label: 'Humidity', units: '%' },
+      { name: 'env.pressure', label: 'Pressure', units: 'Pa' },
     ],
-    sensor: 'bme680'
+    sensor: 'bme680',
   },
 
   'RG-15': {
     names: [
-      {name: 'env.raingauge.event_acc', label: 'Rainfall', units: 'mm'}
-    ]
+      { name: 'env.raingauge.event_acc', label: 'Rainfall', units: 'mm' },
+    ],
   },
 
   'ES-642': {
     names: [
-      {name: 'env.temperature', label: 'Temperature', units: '°C'},
-      {name: 'env.relative_humidity', label: 'Humidity', units: '%'},
-      {name: 'env.pressure', label: 'Pressure', units: 'Pa'},
-      {name: 'env.air_quality.conc', label: 'Air Quality', units: 'mg/m³'},
-      {name: 'env.air_quality.flow', label: 'Air Flow'}
+      { name: 'env.temperature', label: 'Temperature', units: '°C' },
+      { name: 'env.relative_humidity', label: 'Humidity', units: '%' },
+      { name: 'env.pressure', label: 'Pressure', units: 'Pa' },
+      { name: 'env.air_quality.conc', label: 'Air Quality', units: 'mg/m³' },
+      { name: 'env.air_quality.flow', label: 'Air Flow' },
     ],
-    sensor: 'es642'
+    sensor: 'es642',
   },
 
   'LI-7500DS': {
     start: '-1h',
     names: [
-      {name: 'co2.absolute_water', },
-      {name: 'co2.absolute_water_offset', },
-      {name: 'co2.density', },
-      {name: 'co2.mg_per_m3', },
-      {name: 'co2.mole_fraction', },
-      {name: 'co2.raw', },
-      {name: 'co2.signal_strength', },
-      {name: 'dew_point', },
-      {name: 'h2o.absolute_water', },
-      {name: 'h2o.absolute_water_offset', },
-      {name: 'h2o.density', },
-      {name: 'h2o.g_per_m3', },
-      {name: 'h2o.mole_fraction', },
-      {name: 'h2o.raw', },
-      {name: 'pressure', },
-      {name: 'sonic.speed_of_sound', },
-      {name: 'sonic.temperature', },
-      {name: 'sonic.u', },
-      {name: 'sonic.v', },
-      {name: 'sonic.w', },
-      {name: 'temperature', },
+      { name: 'co2.absolute_water' },
+      { name: 'co2.absolute_water_offset' },
+      { name: 'co2.density' },
+      { name: 'co2.mg_per_m3' },
+      { name: 'co2.mole_fraction' },
+      { name: 'co2.raw' },
+      { name: 'co2.signal_strength' },
+      { name: 'dew_point' },
+      { name: 'h2o.absolute_water' },
+      { name: 'h2o.absolute_water_offset' },
+      { name: 'h2o.density' },
+      { name: 'h2o.g_per_m3' },
+      { name: 'h2o.mole_fraction' },
+      { name: 'h2o.raw' },
+      { name: 'pressure' },
+      { name: 'sonic.speed_of_sound' },
+      { name: 'sonic.temperature' },
+      { name: 'sonic.u' },
+      { name: 'sonic.v' },
+      { name: 'sonic.w' },
+      { name: 'temperature' },
       // {name: 'index', },
       // {name: 'cooler', },
       // {name: 'date', },
@@ -89,65 +89,113 @@ const measurements = {
       // {name: 'time.nanoseconds', label: '____'},
       // {name: 'time.seconds', label: '____'},
     ],
-    sensor: 'LI7500DS/uSonic-3'
+    sensor: 'LI7500DS/uSonic-3',
   },
 
-  'SFM1x': { // lora device
+  SFM1x: {
+    // lora device
     names: [
-      {name: 'uncorrected_inner|uncorrected_outer', label: 'Uncorrected Inner/Outer'},
-    ]
+      {
+        name: 'uncorrected_inner|uncorrected_outer',
+        label: 'Uncorrected Inner/Outer',
+      },
+    ],
   },
 
-  'MPU6050': {
+  MPU6050: {
     names: [
-      {name: 'env.pitch.hut', label: 'Hut Pitch'},
-      {name: 'env.roll.hut', label: 'Hut Roll'},
-      {name: 'env.yaw.hut', label: 'Hut Yaw'}
-    ]
+      { name: 'env.pitch.hut', label: 'Hut Pitch' },
+      { name: 'env.roll.hut', label: 'Hut Roll' },
+      { name: 'env.yaw.hut', label: 'Hut Yaw' },
+    ],
   },
 
-  'AHT21': {
+  AHT21: {
     names: [
-      {name: 'env.humidity.hut', label: 'Hut Humidity'},
-      {name: 'env.temperature.hut', label: 'Hut Temperature'}
-    ]
+      { name: 'env.humidity.hut', label: 'Hut Humidity' },
+      { name: 'env.temperature.hut', label: 'Hut Temperature' },
+    ],
   },
 
   'GS-MPPT-60': {
     names: [
-      {name:'env.solar.current.array', label: 'array'},
-      {name:'env.solar.current.load', label: 'load'},
-      {name:'env.solar.current.system.battery', label: 'system.battery'},
-      {name:'env.solar.current.system.charging', label: 'system.charging'},
-      {name:'env.solar.current.system.load', label: 'system.load'},
-      {name:'env.solar.state.charging', label: 'state.charging'},
-      {name:'env.solar.state.load', label: 'state.load'},
-      {name:'env.solar.temperature.battery', label: 'temperature.battery'},
-      {name:'env.solar.temperature.heatsink', label: 'temperature.heatsink'},
-      {name:'env.solar.voltage.array', label: 'voltage.array'},
-      {name:'env.solar.voltage.battery', label: 'voltage.battery'},
-      {name:'env.solar.voltage.battery.sense', label: 'voltage.battery.sense'},
-      {name:'env.solar.voltage.load', label: 'voltage.load'}
-    ]
+      { name: 'env.solar.current.array', label: 'array' },
+      { name: 'env.solar.current.load', label: 'load' },
+      { name: 'env.solar.current.system.battery', label: 'system.battery' },
+      { name: 'env.solar.current.system.charging', label: 'system.charging' },
+      { name: 'env.solar.current.system.load', label: 'system.load' },
+      { name: 'env.solar.state.charging', label: 'state.charging' },
+      { name: 'env.solar.state.load', label: 'state.load' },
+      { name: 'env.solar.temperature.battery', label: 'temperature.battery' },
+      { name: 'env.solar.temperature.heatsink', label: 'temperature.heatsink' },
+      { name: 'env.solar.voltage.array', label: 'voltage.array' },
+      { name: 'env.solar.voltage.battery', label: 'voltage.battery' },
+      {
+        name: 'env.solar.voltage.battery.sense',
+        label: 'voltage.battery.sense',
+      },
+      { name: 'env.solar.voltage.load', label: 'voltage.load' },
+    ],
   },
 
-
-
+  'EXO_sonde': {
+    names: [
+      // { name: 'battery', label: 'Battery' },
+      // { name: 'conductivity', label: 'Conductivity' },
+      { name: 'device_id' },
+      // { name: 'env_battery_v', label: 'Env_battery_v' },
+      // { name: 'env_conductivity_ms_cm', label: 'Env_conductivity_ms_cm' },
+      { name: 'env_conductivity_us_cm'},
+      { name: 'env_external_power_v' },
+      // { name: 'env_fdom_qsu', label: 'Env_fdom_qsu' },
+      { name: 'env_fdom_rfu' },
+      // { name: 'env_nlf_conductivity_ms_cm', label: 'Env_nlf_conductivity_ms_cm' },
+      // { name: 'env_nlf_conductivity_us_cm', label: 'Env_nlf_conductivity_us_cm' },
+      // { name: 'env_odo__sat', label: 'Env_odo__sat' },
+      // { name: 'env_odo__satlocal', label: 'Env_odo__satlocal' },
+      { name: 'env_odo_mg_l' },
+      // { name: 'env_salinity_ppt', label: 'Env_salinity_ppt' },
+      { name: 'env_sampling_period' },
+      // { name: 'env_specific_conductance_ms_cm', label: 'Env_specific_conductance_ms_cm' },
+      // { name: 'env_specific_conductance_us_cm', label: 'Env_specific_conductance_us_cm' },
+      { name: 'env_temperature_c' },
+      // { name: 'env_temperature_f', label: 'Env_temperature_f' },
+      // { name: 'env_temperature_k', label: 'Env_temperature_k' },
+      // { name: 'env_wiper_peak_current_ma', label: 'Env_wiper_peak_current_ma' },
+      // { name: 'env_wiper_position_v', label: 'Env_wiper_position_v' },
+      // { name: 'external_power', label: 'External_power' },
+      // { name: 'fdom', label: 'Fdom' },
+      // { name: 'nlf_conductivity', label: 'Nlf_conductivity' },
+      // { name: 'odo', label: 'Odo' },
+      // { name: 'raw_payload', label: 'Raw_payload' },  <!----- reporting recently, but hidden
+      // { name: 'salinity', label: 'Salinity' },
+      // { name: 'sampling_period', label: 'Sampling_period' },
+      // { name: 'signal.pl', label: 'Pl' },
+      // { name: 'signal.rssi', label: 'Rssi' },
+      // { name: 'signal.snr', label: 'Snr' },
+      // { name: 'signal.spreadingfactor', label: 'Spreadingfactor' },
+      // { name: 'specific_conductance', label: 'Specific_conductance' },
+      // { name: 'temperature', label: 'Temperature' },
+      { name: 'version' },
+      // { name: 'wiper_peak_current', label: 'Wiper_peak_current' },
+      // { name: 'wiper_position', label: 'Wiper_position' },
+    ],
+  },
 
   'MFR_node': {
-    'names': [
-      {'name': 'air_temperature', 'label': 'Air Temp'},
-      {'name': 'barometric_pressure', 'label': 'Barometric Pressure'},
-      {'name': 'water_conductivity', 'label': 'Water Conductivity'},
-      {'name': 'water_depth', 'label': 'Water Depth'},
-      {'name': 'water_temperature', 'label': 'Water Temp'},
-      {'name': 'heat_flux', 'label': 'Heat Flux'},
-      {'name': 'relative_humidity', 'label': 'Relative Humidity'},
-      {'name': 'signal.spreadingfactor', 'label': 'Spreadingfactor'},
-      {'name': 'solar_voltage', 'label': 'Solar Voltage'},
-      {'name': 'total_net_radiation', 'label': 'Total Net Radiation'},
-      {'name': 'vapour_pressure_deficit', 'label': 'Vapour Pressure Deficit'},
-      /*
+    names: [
+      { name: 'air_temperature', label: 'Air Temp' },
+      { name: 'barometric_pressure', label: 'Barometric Pressure' },
+      { name: 'water_conductivity', label: 'Water Conductivity' },
+      { name: 'water_depth', label: 'Water Depth' },
+      { name: 'water_temperature', label: 'Water Temp' },
+      { name: 'heat_flux', label: 'Heat Flux' },
+      { name: 'relative_humidity', label: 'Relative Humidity' },
+      { name: 'signal.spreadingfactor', label: 'Spreadingfactor' },
+      { name: 'solar_voltage', label: 'Solar Voltage' },
+      { name: 'total_net_radiation', label: 'Total Net Radiation' },
+      { name: 'vapour_pressure_deficit', label: 'Vapour Pressure Deficit' },
+
       {'name': 'frequency', 'label': 'Frequency'},
       {'name': 'header', 'label': 'Header'},
       {'name': 'signal.snr', 'label': 'Snr'},
@@ -171,8 +219,8 @@ const measurements = {
       {'name': 'temp_d2', 'label': 'Temp_d2'},
       {'name': 'temp_d3', 'label': 'Temp_d3'},
       {'name': 'temp_d4', 'label': 'Temp_d4'},
-      */
-    ]
+
+    ],
 
     /** todo: support per-node MFR_node configs(?), and organize:
       air temp,
@@ -195,7 +243,7 @@ const measurements = {
       water depth,
       water temp,
     */
-  }
+  },
 }
 
 const shortUnits = {
@@ -238,15 +286,10 @@ let skipSensorPreview = [
   'Lorawan Antenna',
   'lorawan',
   'Device_2',
-  'MFR_node_MNLA4O102'
+  'MFR_node_MNLA4O102',
 ]
 
 if (settings.project == 'CROCUS')
   skipSensorPreview = [...skipSensorPreview, 'bme680']
 
-
-export {
-  measurements,
-  shortUnits,
-  skipSensorPreview
-}
+export { measurements, shortUnits, skipSensorPreview }

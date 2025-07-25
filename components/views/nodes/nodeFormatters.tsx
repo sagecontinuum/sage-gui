@@ -371,7 +371,7 @@ export function bottomSensors(v, obj) {
 
 export function leftSensors(v, obj) {
   const {sensors} = obj
-  const sens = sensors.filter(({name}) => name.match(/left/gi))
+  const sens = sensors.filter(({name}) => name?.match(/left/gi))
 
   return <HardwareRoot>
     {sens.map(({name, hw_model, hardware}, i) =>
@@ -389,7 +389,7 @@ export function leftSensors(v, obj) {
 export function rightSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name, scope}) =>
-    (name.match(/right/gi) || scope.match(/^rpi$/i)) && !name.match(/raingauge/gi)
+    (name.match(/right/gi) || (scope || '').match(/^rpi$/i)) && !name.match(/raingauge/gi)
   )
 
   return <HardwareRoot>
@@ -408,7 +408,7 @@ export function rightSensors(v, obj) {
 export function additionalSensors(v, obj) {
   const {sensors} = obj
   const sens = sensors.filter(({name}) =>
-    !name.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
+    !name?.match(/top|bottom|left|right|gps|bme280|microphone|raingauge|bme680/gi)
   )
 
   return <HardwareRoot>

@@ -875,5 +875,5 @@ const NoneFoundNotice = styled.div`
   transform: translate(0%, 20%);
   color: #666;
   font-size: 1.5em;
-  margin: 100px 0;
+  margin: 50px 0;
 `

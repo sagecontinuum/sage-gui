@@ -23,8 +23,8 @@ import RecentImages from '../RecentImages'
 
 // import KeyTable from './lorawandevice/collapsible' // (alternate design)
 import { deviceCols } from './lorawandevice/columns'
-import QuestionMark from '@mui/icons-material/HelpOutlineRounded'
 
+import { HelpOutlineRounded} from '@mui/icons-material'
 
 import NodeOverview from './NodeOverview'
 import NodeGraphic from './NodeGraphic'
@@ -35,8 +35,6 @@ import config from '/config'
 import { measurements, skipSensorPreview } from '/components/measurement.config'
 import NodeEditBtn from './NodeEditBtn'
 import NodeTimeline from './NodeTimeline'
-
-
 
 const ELAPSED_FAIL_THRES = adminSettings.elapsedThresholds.fail
 
@@ -441,7 +439,7 @@ export const TableContainer = styled.div`
 `
 
 
-const HelpIcon = styled(QuestionMark)`
+const HelpIcon = styled(HelpOutlineRounded)`
   width: 15px;
   color: #1c8cc9;
 `
