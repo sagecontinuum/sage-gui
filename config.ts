@@ -28,16 +28,39 @@ const prod = {
 
 const dev = {
   ...prod,
+  auth: 'http://0.0.0.0:8000',
   // es: 'https://es-dev.sagecontinuum.org/api/v1',
   // ecr: 'https://sage-ecr-dev.sagecontinuum.org/api',
   // jenkins: 'https://jenkins-dev.sagecontinuum.org'
 }
 
 
-const config = {
+type Notice = {
+  message: string,
+  severity: 'info' | 'warning' | 'error' | 'success'
+}
+
+type Config = {
+  [key: string]: string | boolean | Notice
+  disableMaps: boolean
+  notice?: Notice
+  noticeURL?: string // optional URL to fetch notice from
+}
+
+const config: Config = {
   ...(process.env.SAGE_UI_SERVICE_CONFIG == 'dev' ? dev : prod),
   disableMaps: false,
+  noticeURL: 'https://raw.githubusercontent.com/waggle-sensor/portal-notice/main/notice.json'
+  /*
+  notice: {
+    message:
+      'Node measurements, system status, and the Data API may be intermittently ' +
+      'unavailable throughout Wednesday and Thursday, August 20th and 21st.',
+    severity: 'warning'
+  },
+  */
 }
 
 
 export default config
+export type { Notice }

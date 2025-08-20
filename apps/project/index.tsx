@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import ReactDom from 'react-dom'
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -48,6 +49,9 @@ import theme from '/components/theme'
 import '/assets/styles.scss'
 
 import settings from '/components/settings'
+import { Alert } from '@mui/material'
+import config, { Notice } from '/config'
+
 
 const {Logo, url, project, vsns} = settings
 
@@ -100,6 +104,26 @@ const LogoText = styled.span`
 
 
 export default function App() {
+
+  const [notice, setNotice] = useState<Notice>(null)
+
+  useEffect(() => {
+    if (config.notice) {
+      // Use notice from config if available
+      setNotice(config.notice)
+    } else if (config.noticeURL) {
+      // Fetch notice from external URL if provided
+      fetch(config.noticeURL)
+        .then(res => res.json())
+        .then(data => {
+          if (data.message) {
+            setNotice(data)
+          }
+        })
+        .catch(err => console.error('Error fetching notice:', err))
+    }
+  }, [])
+
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
@@ -115,6 +139,11 @@ export default function App() {
           <PermissionProvider>
             <SnackbarProvider autoHideDuration={3000} preventDuplicate maxSnack={2}>
               <Container>
+                {notice &&
+                  <Alert severity={notice?.severity || 'info'} onClose={() => setNotice(null)}>
+                    <b>{notice.message}</b>
+                  </Alert>
+                }
                 <ProgressProvider>
                   <Routes>
                     <Route path="/" element={<Navigate to="nodes" replace />} />

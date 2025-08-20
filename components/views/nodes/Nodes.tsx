@@ -276,6 +276,8 @@ export default function Nodes() {
   }
 
 
+  const hasActiveFilters = Object.values(filterState).some(fList => fList.length > 0)
+
   return (
     <Root>
       <Overview className="flex">
@@ -315,11 +317,33 @@ export default function Nodes() {
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
             emptyNotice={
-              show_all ?
+              show_all || all_nodes ?
                 'No nodes found' :
-                <span>
-                  No recently reporting nodes for this query.  <Link to="/all-nodes">View All Nodes</Link> or
-                  check "Show all" for more details.
+                <span className="text-center">
+                  {/* No recently reporting nodes {(query || hasActiveFilters) ? ' for this query' : ''}<br/>*/}
+                  <i>
+                    A recent issue has delayed node measurement publications and
+                    reporting status, <br/> resulting in data transfer delays and
+                    a “Not Reporting” status across all nodes.
+                    <br/><br/>
+                    We expect normal reporting to resume <b>this week</b>, as the system<br/>
+                    begins catching up with incoming measurements from nodes.  We thank you for your patience.
+                  </i>
+                  <br/>
+                  <br/>
+                  <small>
+                    Consider using the tab <Link to="/all-nodes">View All Nodes</Link>, or
+                    the checkbox ( <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={show_all}
+                          onChange={(evt) => handleShowAll(evt)}
+                        />
+                      }
+                      label="Show all"
+                      sx={{marginRight: 0}}
+                    /> ) to show nodes <br/> which are in maintenance, pending deployment, or not reporting.
+                  </small>
                 </span>
             }
             middleComponent={
@@ -376,7 +400,7 @@ export default function Nodes() {
                     />
                   </Tooltip>
                 }
-                {Object.values(filterState).reduce((acc, fList) => acc + fList.length, 0) as number > 0 &&
+                {hasActiveFilters  &&
                   <>
                     <VertDivider />
                     <Button variant="contained"
