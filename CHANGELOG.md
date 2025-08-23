@@ -3,6 +3,22 @@
 The following are some notable changes to the UI
 
 
+## [3.4.0](https://github.com/sagecontinuum/sage-gui/compare/v3.3.0...v3.4.0) (2025-09-22)
+
+
+### Features
+
+* **admin:** add job/plugin metrics tab; refactoring ([661ac3b](https://github.com/sagecontinuum/sage-gui/commit/661ac3b6369cbdd7a5ace57c42b47c4411a3bf51))
+* **data:** add "recent data" (concept) ([1272bb6](https://github.com/sagecontinuum/sage-gui/commit/1272bb63c1f62b832b592eafd46ac2b360f44598))
+* pull notices from GH ([aafe25d](https://github.com/sagecontinuum/sage-gui/commit/aafe25ddaeeb5eead8d02f059259a138101d40a8))
+* new allocation form and flow (prototype)
+
+
+### Bug Fixes
+
+* minor bug fixes
+
+
 ## [3.3.0](https://github.com/sagecontinuum/sage-gui/compare/v3.2.0...v3.3.0) (2025-04-15)
 
 
