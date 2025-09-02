@@ -1,5 +1,5 @@
 # build
-FROM node:22.15-alpine AS build
+FROM node:24.7-alpine AS build
 ARG SAGE_UI_APP=sage
 ARG SAGE_UI_PROJECT
 ARG SAGE_UI_SERVICE_CONFIG
