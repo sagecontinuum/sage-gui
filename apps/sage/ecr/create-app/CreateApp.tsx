@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import TextField from '@mui/material/TextField'
@@ -89,10 +89,12 @@ const initialState = {
 
 export default function CreateApp() {
   const navigate = useNavigate()
+  const [params] = useSearchParams() // {url: string, branch: string}
+
   const { enqueueSnackbar } = useSnackbar()
 
   // app repo
-  const [repoURL, setRepoURL] = useState('')
+  const [repoURL, setRepoURL] = useState(params.get('url') || '')
   const [branch, setBranch] = useState('main')
   const [gitCommit, setGitCommit] = useState(null)
   const [branchList, setBranchList] = useState<{id: string, label: string}[]>([])
@@ -112,6 +114,14 @@ export default function CreateApp() {
 
   // debug settings
   const [devMode, setDevMode] = useState(false)
+
+  useEffect(() => {
+    handleRepoVerify().then(() => {
+      if (params.get('branch')) {
+        setBranch(params.get('branch'))
+      }
+    })
+  }, [params])
 
   const fetchSageConfig = useCallback((branchOrCommit) => {
     if (!repoURL || !branchOrCommit) return
@@ -172,14 +182,14 @@ export default function CreateApp() {
   }, [gitCommit, fetchSageConfig])
 
 
-  const onRepoVerify = (evt = null) => {
+  const handleRepoVerify = (evt = null) => {
     if (evt) evt.preventDefault()
 
     const path = getRepoPath(repoURL)
 
     // todo: add rate limit notice, add branch?
     setValidating(true)
-    fetch(`${GITHUB_API}/repos/${path}`)
+    const prom = fetch(`${GITHUB_API}/repos/${path}`)
       .then(res => {
         setIsValid(res.ok)
         return res.json()
@@ -201,6 +211,8 @@ export default function CreateApp() {
       })
       .catch(() => setIsValid(false))
       .then(() => setValidating(false))
+
+    return prom
   }
 
 
@@ -283,7 +295,7 @@ export default function CreateApp() {
         <h1>Create App</h1>
 
         <StepTitle icon="1" label="Repo URL"/>
-        <StepForm className="repo-step flex column gap" onSubmit={onRepoVerify}>
+        <StepForm className="repo-step flex column gap" onSubmit={handleRepoVerify}>
           <div className="flex items-center gap">
             <TextField
               label="GitHub Repo URL"
@@ -301,7 +313,7 @@ export default function CreateApp() {
 
             {repoURL && !isValid &&
               <Button
-                onClick={onRepoVerify}
+                onClick={handleRepoVerify}
                 variant="contained"
                 color="primary"
               >

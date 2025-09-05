@@ -1,4 +1,5 @@
-import {useEffect, useState} from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 import withStyles from '@mui/styles/withStyles'
@@ -35,6 +36,7 @@ import * as ECR from '/components/apis/ecr'
 import Auth from '/components/auth/auth'
 
 import config from '/config'
+import { LibraryAddCheckOutlined } from '@mui/icons-material'
 const docker = config.dockerRegistry
 
 
@@ -174,6 +176,18 @@ export default function TagList(props: Props) {
                   {/* todo(nc): allow actions on write or appropriate access */}
                   {namespace == Auth.user &&
                     <div className="flex gap">
+                      <Tooltip title="Submit a new version of this app">
+                        <Button
+                          size="small" startIcon={<LibraryAddCheckOutlined />}
+                          variant="contained"
+                          color="primary"
+                          disabled={isBuilding || buildSubmitted}
+                          component={Link}
+                          to={`/apps/create-app?url=${ver.source.url}&branch=${ver.source.branch || ver.source.tag}`}
+                        >
+                          {buildSubmitted ? 'Submitting...' : 'New'}
+                        </Button>
+                      </Tooltip>
                       <Tooltip title="Rebuild this tagged version">
                         <Button
                           onClick={(evt) => onClickBuild(evt, ver)}
