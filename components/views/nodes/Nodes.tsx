@@ -317,17 +317,34 @@ export default function Nodes() {
             onColumnMenuChange={() => { /* do nothing */ }}
             onSelect={handleSelect}
             emptyNotice={
-              show_all || all_nodes ?
-                'No nodes found' :
+              show_all || all_nodes || query || hasActiveFilters ?
+                <div className="text-center">
+                  <p>No nodes found for this query</p>
+                  <small>
+                    If you think this is mistake, please try using the tab <Link to="/all-nodes">
+                      View All Nodes</Link>, or
+                    the checkbox ( <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={show_all}
+                          onChange={(evt) => handleShowAll(evt)}
+                        />
+                      }
+                      label="Show all"
+                      sx={{marginRight: 0}}
+                    /> ) to show nodes <br/> which are in maintenance, pending deployment, or not reporting.
+                  </small>
+
+                </div> :
                 <span className="text-center">
-                  {/* No recently reporting nodes {(query || hasActiveFilters) ? ' for this query' : ''}<br/>*/}
                   <i>
                     A recent issue has delayed node measurement publications and
                     reporting status, <br/> resulting in data transfer delays and
                     a “Not Reporting” status across all nodes.
                     <br/><br/>
-                    We expect normal reporting to resume <b>this week</b>, as the system<br/>
-                    begins catching up with incoming measurements from nodes.  We thank you for your patience.
+                    {/* We expect normal reporting to resume <b>_______</b>, as the system<br/>
+                    begins catching up with incoming measurements from nodes. */}
+                    Please check back later for updates. We thank you for your patience.
                   </i>
                   <br/>
                   <br/>

@@ -5,6 +5,7 @@
   "scripts": {
     "//prestart": "mkdir -p build && msw init build",
     "start": "parcel serve ./index.html --dist-dir build/ --port 3000",
+    "start-https": "parcel serve ./index.html --dist-dir build/ --host local.sagecontinuum.org --https",
     "build": "parcel build ./index.html",
     "test": "jest",
     "clean": "rm -rf build/ && rm -rf dist/"
