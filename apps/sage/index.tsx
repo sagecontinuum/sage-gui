@@ -33,6 +33,7 @@ import JobStatus from './jobs/JobStatus'
 const CreateJob = lazy(() => import('./jobs/create-job/CreateJob'))
 
 import QueryBrowser from './data-stream/QueryBrowser'
+import ImageSearch from './image-search/ImageSearch'
 import Ontology from './data-commons/Ontology'
 import Data from './data/Data'
 import DataProductSearch from './data-commons/DataProductSearch'
@@ -232,6 +233,7 @@ export default function Sage() {
                       <Route path="data" element={<Data project={project} />} />
                       <Route path="data/ontology/:name" element={<Ontology />} />
                       <Route path="data/product/:name" element={<DataProduct />} />
+                      <Route path="image-search" element={<ImageSearch />} />
                       <Route path="query-browser" element={<QueryBrowser />} />
 
                       <Route path="data-commons-demo" element={<DataProductSearch />} />

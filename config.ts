@@ -2,7 +2,7 @@
 
 const prod = {
   home: 'https://sagecontinuum.org',           // used for "home" of other apps
-  portal: 'https://portal.sagecontinuum.org',  // uised for PortalLink component
+  portal: 'https://portal.sagecontinuum.org',  // used for PortalLink component
 
   // endpoints
   beehive: 'https://data.sagecontinuum.org/api/v1',
@@ -11,6 +11,7 @@ const prod = {
   es: 'https://es.sagecontinuum.org/api/v1',
   jenkins: 'https://ecr.sagecontinuum.org/jenkins',
   auth: 'https://auth.sagecontinuum.org',
+  imageSearch: 'https://sage-hybrid-search.nrp-nautilus.io',
   deviceRegistration:'https://registration.sagecontinuum.org',
   experimentalData:'https://portal.sagecontinuum.org/experimental-data',
 

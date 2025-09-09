@@ -4,14 +4,14 @@ import sage from 'url:/assets/sage-drawing.png'
 import { version } from '/package.json'
 
 
-const SageLogo = () =>
-  <>
+const SageLogo = ({ beta = true}) =>
+  <div className="flex items-center logo">
     <LogoImg src={sage} height="35" />
     <Logo title={`Sage: v${version}`}>
-        Sage
-      <SageSup>(beta)</SageSup>
+      Sage
+      {beta && <SageSup>(beta)</SageSup>}
     </Logo>
-  </>
+  </div>
 
 
 const LogoImg = styled.img`

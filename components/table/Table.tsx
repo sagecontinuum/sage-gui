@@ -683,18 +683,6 @@ export default function TableComponent(props: Props) {
           </TableOption>
         }
 
-        {pagination &&
-          <>
-            <Pagination
-              rowsPerPageOptions={[rowsPerPage]}
-              count={props.total || props.limit || rows?.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handlePageChange}
-            />
-          </>
-        }
-
         {onColumnMenuChange &&
           <TableOption>
             <ColumnMenu
@@ -709,6 +697,18 @@ export default function TableComponent(props: Props) {
               }}
             />
           </TableOption>
+        }
+
+        {pagination &&
+          <>
+            <Pagination
+              rowsPerPageOptions={[rowsPerPage]}
+              count={props.total || props.limit || rows?.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handlePageChange}
+            />
+          </>
         }
 
         {props.rightComponent &&
