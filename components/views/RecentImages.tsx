@@ -35,7 +35,6 @@ export default function RecentImages(props: Props) {
       .then(images => {
         const hasData = !!Object.keys(images).filter(k => images[k]).length
         setImages(hasData ? images : null)
-        setLoading(false)
       }).catch((err) => {
         setError(err)
       }).finally(() => setLoading(false))

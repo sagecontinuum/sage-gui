@@ -447,13 +447,13 @@ export async function getRecentImagesV2(
   const mapping = Promise.all(reqs)
     .then(async (data) => {
       if (onStart) {
-        cameraOrientations.forEach((pos, i) => {
+        cameras.forEach((pos, i) => {
           onStart(pos, data[i]?.length)
         })
       }
 
       const proms = data.map((d, i) => {
-        const position = cameraOrientations[i]
+        const position = cameras[i]
         d = d.filter(o => /\.jpg$/g.test(o.value as string)) // need to only consider images
         return _findLatestAvail(d, position, onProgress)
       })
