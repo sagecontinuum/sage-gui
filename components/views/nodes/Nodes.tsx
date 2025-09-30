@@ -52,16 +52,14 @@ const filterOn = (data: BK.Node[], key: string) =>
 function getProjectNodes() {
   const {project, focus, vsns} = settings
 
-  return BK.getNodes()
+  return BK.getNodes({project})
     .then((data) => {
-      if (project)
-        data = filterOn(data, 'project')
       if (focus)
         data = filterOn(data, 'focus')
       if (vsns)
         data = data.filter(o => settings.vsns.includes(o.vsn))
 
-      if (project == 'SAGE') {
+      if (project.includes('SAGE')) {
         data = data.filter(obj =>
           ['Deployed', 'Awaiting Deployment', 'Maintenance'].includes(obj.phase)
         )
@@ -88,6 +86,7 @@ export default function Nodes() {
   const query = params.get('query') || ''
   const show_all = params.get('show_all') ? true : false
   const all_nodes = pathname == '/all-nodes'
+  const project = params.get('project')
   const focus = params.get('focus')
   const city = params.get('city')
   const state = params.get('state')
@@ -103,6 +102,7 @@ export default function Nodes() {
 
   // filter options
   const [focuses, setFocuses] = useState<Option[]>()
+  const [projects, setProjects] = useState<Option[]>()
   const [cities, setCities] = useState<Option[]>()
   const [states, setStates] = useState<Option[]>()
   const [sensors, setSensors] = useState<Option[]>()
@@ -162,7 +162,7 @@ export default function Nodes() {
 
     // force mapbox rerender and avoid unnecessary rerenders
     setUpdateID(prev => prev + 1)
-  }, [query, focus, city, state, sensor, phase, show_all, all_nodes])
+  }, [query, project, focus, city, state, sensor, phase, show_all, all_nodes])
 
 
   // re-apply updates in case of sorting or such (remove?)
@@ -211,6 +211,7 @@ export default function Nodes() {
 
     setFiltered(filteredData)
 
+    setProjects(getOptions(data, 'project'))
     setFocuses(getOptions(data, 'focus'))
     setCities(getOptions(data, 'city'))
     setStates(getOptions(data, 'state'))
@@ -365,6 +366,15 @@ export default function Nodes() {
             }
             middleComponent={
               <FilterControls className="flex items-center">
+                {projects &&
+                  <FilterMenu
+                    label="Project"
+                    options={projects}
+                    value={filterState.project}
+                    onChange={vals => handleFilterChange('project', vals as Option[])}
+                    noSelectedSort
+                  />
+                }
                 {focuses &&
                   <FilterMenu
                     label="Focus"

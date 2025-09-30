@@ -1,9 +1,5 @@
 import config from '/config'
-const url = config.beekeeper
-const API_URL = `${url}/api`
-
 import settings from '/components/settings'
-const PROJECT = settings.project
 
 import { keyBy } from 'lodash'
 import { handleErrors, handleDjangoErrors } from '../fetch-utils'
@@ -13,6 +9,11 @@ import USStates from './us-states'
 import { getCarrierName } from './carrier-codes'
 
 import Auth from '../auth/auth'
+
+const PROJECT = settings.project
+
+const url = config.beekeeper
+const API_URL = `${url}/api`
 
 const __token = Auth.token
 
@@ -428,9 +429,9 @@ type GetNodeArgs = {
 }
 
 export async function getNodes(args?: GetNodeArgs) : Promise<Node[]> {
-  const {vsns} = args || {}
+  const {vsns, project} = args || {}
 
-  let nodes = await _getNodeMetas(args)
+  let nodes = await _getNodeMetas({project, vsns})
 
   if (vsns)
     nodes = nodes.filter(o => vsns.includes(o.vsn))
@@ -489,6 +490,8 @@ async function _getNodeMetas(args: GetNodeArgs) : Promise<Node[]>{
     url += `?project__name=${project}`
 
   let meta = await getDjangoData(url)
+
+  console.log('meta', meta)
 
   if (vsns)
     meta = meta.filter(o => vsns.includes(o.vsn))

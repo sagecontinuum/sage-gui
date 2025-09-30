@@ -23,7 +23,7 @@ type Configs = {
 
 const configs : Configs = {
   'sage': {
-    project: 'SAGE'
+    project: 'SAGE,SGT'
   },
   'apiary': {
     project: 'APIARY'
