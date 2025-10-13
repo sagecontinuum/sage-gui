@@ -323,7 +323,7 @@ export default function NodeView(props: Props) {
                 </Masonry>
               </>
             }
-            {!hasSensor(node, COMMON_SENSORS) &&
+            {!hasSensor(node, COMMON_SENSORS) && vsn != 'X001' &&
               <p className="muted">
                 No configuration was found for
                 common sensors ({COMMON_SENSORS.slice(0, -1).join(', ')}, or {COMMON_SENSORS.slice(-1)})

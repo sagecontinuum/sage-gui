@@ -244,6 +244,15 @@ const measurements = {
       water temp,
     */
   },
+  'RAK10701': { // rak tester
+    'names':[
+      {'name':'signal.pl','label':'PL'},
+      {'name':'signal.plr','label':'PLR'},
+      {'name':'signal.rssi','label':'RSSI'},
+      {'name':'signal.snr','label':'SNR'},
+      {'name':'signal.spreadingfactor','label':'Spreading Factor'}
+    ]
+  }
 }
 
 const shortUnits = {

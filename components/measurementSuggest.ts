@@ -1,9 +1,22 @@
 import * as BH from './apis/beehive'
 import { capitalize } from 'lodash'
 
-const getLabel = (name: string) =>
-  ({name, label: capitalize(name.split('.').pop())})
+/**
+ * measurementSuggest — CLI helper to generate a `measurement.config.ts`
+ * fragment from recent beehive data.
+ *
+ * Usage: ts-node components/measurementSuggest.ts <VSN> <SEARCH>
+ * <SEARCH> may be `sensorName` or `field=value`.
+ */
 
+
+/**
+ * getLabel — create label from measurement series name
+ *
+ * @param name - full measurement series name
+ * @returns object with `name` and `label` fields. ex: if name is `ambient.temp`, then label is `Temp`.
+ */
+const getLabel = (name: string) => ({ name, label: capitalize(name.split('.').pop()) })
 
 
 
@@ -14,17 +27,14 @@ async function main() {
     process.exit(1)
   }
 
-  // get args
   const [vsn, search] = args.slice(2)
 
-  let field, query
-  if (search.includes('='))
-    [field, query] = search.split('=')
-  else
-    [field, query] = ['sensor', search]
+  // allow searching by `field=value` or default to `sensor=<search>`
+  let field: string, query: string
+  if (search.includes('=')) [field, query] = search.split('=')
+  else [field, query] = ['sensor', search]
 
-
-  // fetch
+  // fetch recent data from beehive
   const data = await BH.getData({
     start: '-30d',
     filter: {
@@ -34,11 +44,10 @@ async function main() {
     tail: 1
   })
 
-
-  // get unique names
+  // get unique series names
   const names = [...new Set(data.map(o => o.name))]
 
-  // measurement.config.ts format
+  // Format matches the shape used by measurement.config.ts
   const d = {
     [query]: {
       names: names.map(name => getLabel(name))
