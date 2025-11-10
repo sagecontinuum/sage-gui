@@ -623,8 +623,9 @@ export default function QueryBrowser() {
   const updateFilteredData = (data, rules) => {
     let d = filterData(data, rules)
 
-    // if first 10 values are numerical, then set hasNumericalValues to true
-    const hasNumericalValues = d.slice(0, 10).some(o => typeof o.value == 'number')
+    // if first 10 values are numerical-ish, then set hasNumericalValues to true
+    const hasNumericalValues = d.slice(0, 10)
+      .some(o => typeof o.value == 'number' || Number.isFinite(Number(o.value)))
 
     // conditions for showing chart:
     const showChart = hasNumericalValues && d.length > 0

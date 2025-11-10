@@ -233,8 +233,8 @@ export default function Sage() {
                       <Route path="data" element={<Data project={project} />} />
                       <Route path="data/ontology/:name" element={<Ontology />} />
                       <Route path="data/product/:name" element={<DataProduct />} />
-                      <Route path="image-search" element={<ImageSearch />} />
                       <Route path="query-browser" element={<QueryBrowser />} />
+                      <Route path="/labs/image-search" element={<ImageSearch />} />
 
                       <Route path="data-commons-demo" element={<DataProductSearch />} />
 
