@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import Table from '/components/table/Table'
@@ -10,6 +10,12 @@ import { formatters } from '/apps/sage/jobs/JobStatus'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
 import { marked } from 'marked'
+import { queryData } from '/components/data/queryData'
+import { Chip } from '@mui/material'
+import FilterMenu from '/components/FilterMenu'
+import { filterData, FilterState } from '../statusDataUtils'
+import { parseQueryStr } from '/components/utils/queryString'
+import QueryViewer from '/components/QueryViewer'
 
 
 const getTitle = (hardware: string, description: string) => {
@@ -19,7 +25,7 @@ const getTitle = (hardware: string, description: string) => {
 }
 
 
-const getDescriptionHTML = (description: string, hw_model: string) => {
+const getDescriptionHTML = (description: string) => {
   if (!description) return
 
   // ignore h1 titles since handled separately for links
@@ -33,7 +39,7 @@ const getDescriptionHTML = (description: string, hw_model: string) => {
     return (
       <>
         <span dangerouslySetInnerHTML={{__html: marked(intro)}}></span>
-        <Link to={`/sensors/${hw_model}`}>read more...</Link>
+        {/* <Link to={`/sensors/${hw_model}`}>read more...</Link> */}
       </>
     )
 
@@ -44,11 +50,11 @@ const getDescriptionHTML = (description: string, hw_model: string) => {
 export const columns = [{
   id: 'hw_model',
   label: 'Model',
-  width: '200px',
+  width: '250px',
   format: (val, obj) =>
     <div>
-      <small className="muted"><b>{obj.manufacturer}</b></small>
-      <div>{val}</div>
+      <div><small className="muted"><b>{obj.manufacturer}</b></small></div>
+      <Link to={`/sensors/${obj.hw_model}`}>{val}</Link>
     </div>
 
 }, {
@@ -66,11 +72,16 @@ export const columns = [{
     return (
       <div>
         <h3>
-          <Link to={`/sensors/${hw_model}`}>
+          <div className="flex justify-between">
             {getTitle(hardware, description)}
-          </Link>
+          </div>
         </h3>
         {getDescriptionHTML(description, hw_model)}
+        <Tags>
+          {obj.capabilities.map(v => (
+            <Chip key={v} label={v} />
+          ))}
+        </Tags>
       </div>
     )
   }
@@ -98,19 +109,49 @@ export const columns = [{
   hide: true
 }]
 
+const Tags = styled.div`
+  margin-bottom: 0.5em;
+  .MuiChip-root {
+    margin-right: 0.5em;
+  }
+
+`
+
+type Option = {
+  id: string,
+  label: string
+}
+
+const getCapabilities = (data: BK.SensorHardware[]) : Option[] =>
+  [...new Set(data.flatMap(obj => obj.capabilities)) ]
+    .map(name => ({id: name, label: name}))
+
+
+const initialState: FilterState = {
+  capabilities: []
+}
+
 
 type Props = {
   project?: string
   vsns?: BK.VSN[]
 }
 
-
 export default function SensorList(props: Props) {
   const {project, vsns} = props
 
+  const [params, setParams] = useSearchParams()
+  const query = params.get('query') || ''
+
   const [data, setData] = useState<BK.SensorListRow[]>()
-  const [error, setError] = useState()
+  const [filteredData, setFilteredData] = useState<BK.SensorListRow[]>()
+  const [error, setError] = useState<Error>()
+  const [capabilities, setCapabilities] = useState<Option[]>()
+  const [filterState, setFilterState] = useState<FilterState>(initialState)
+
+
   const {setLoading} = useProgress()
+
 
   const navigate = useNavigate()
 
@@ -118,23 +159,86 @@ export default function SensorList(props: Props) {
     setLoading(true)
 
     BK.getSensors()
-      .then(data => setData(data))
+      .then(data => {
+        setData(data)
+        setFilteredData(data)
+
+        const opts = getCapabilities(data)
+        setCapabilities(opts)
+      })
       .catch((err) => setError(err))
       .finally(() => setLoading(false))
+
   }, [setLoading, project, vsns])
+
+  useEffect(() => {
+    if (!data) return
+
+    const fs = parseQueryStr<FilterState>(params, {initialState, exclude: ['query']})
+    setFilterState(fs)
+
+    let d = queryData(data, query)
+    d = filterData(d, fs)
+    setFilteredData(d)
+  }, [query, data, params])
+
+
+  const handleQuery = ({query}) => {
+    if (query) params.set('query', query)
+    else params.delete('query')
+    setParams(params, {replace: true})
+  }
+
+
+  const handleFilterChange = (field: string, vals: Option[]) => {
+    // MUI seems to result in vals may be string or option; todo(nc): address this?
+    const newStr = vals.map(item =>
+      `"${typeof item == 'string' ? item : item.id}"`
+    ).join(',')
+
+    if (!newStr.length) params.delete(field)
+    else params.set(field, newStr)
+    setParams(params, {replace: true})
+  }
+
+  const handleQueryViewerChange = (field: string, next: string[]) => {
+    if (!next.length) params.delete(field)
+    else params.set(field, next.map(str => `"${str}"`).join(','))
+    setParams(params, {replace: true})
+  }
 
   return (
     <Root>
-      {data &&
+      <br/>
+      {filteredData &&
         <Table
           primaryKey="id"
           storageKey="/sensors"
           columns={columns}
-          rows={data}
+          rows={filteredData}
           enableSorting
           sort="+hw_model"
+          search={query}
+          onSearch={handleQuery}
           onColumnMenuChange={() => { /* do nothing */ }}
           onDoubleClick={(_, row: BK.SensorListRow) => navigate(`/sensors/${row.hw_model}`)}
+          middleComponent={
+            <FilterControls className="flex items-center">
+              {capabilities &&
+                <FilterMenu
+                  label="Capabilities"
+                  options={capabilities}
+                  value={filterState.capabilities}
+                  onChange={vals => handleFilterChange('capabilities', vals as Option[])}
+                />
+              }
+
+              <QueryViewer
+                filterState={filterState}
+                onDelete={handleQueryViewerChange}
+              />
+            </FilterControls>
+          }
         />
       }
 
@@ -153,4 +257,8 @@ const Root = styled.div`
   h3 {
     margin: 0 0 .5em 0;
   }
+`
+
+const FilterControls = styled.div`
+  margin-left: 1.5em;
 `

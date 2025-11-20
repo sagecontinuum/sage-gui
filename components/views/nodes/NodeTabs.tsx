@@ -63,8 +63,8 @@ export default function NodeTabs(props: Props) {
         <ConditionalTab
           label={label(<SensorIcon />, 'Sensors')}
           component={Link}
-          value={'/sensors'}
-          to={'/sensors'}
+          value={`/sensors${search}`}
+          to={`/sensors${search}`}
           show={includeSensors}
         />
       </Tabs>
