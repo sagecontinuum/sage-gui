@@ -286,7 +286,7 @@ type SensorsProps = {
   path?: string  // url path if avail; e.g., /sesnors/
 }
 
-export function HardwareList(props: SensorsProps) {
+export function HardwareListSimple(props: SensorsProps) {
   const {data, path} = props
 
   if (!data.length) return <>-</>
@@ -316,6 +316,8 @@ export function HardwareList(props: SensorsProps) {
   )
 }
 
+
+
 const HardwareRoot = styled.ul`
   padding: 0;
   font-size: 9pt;
@@ -324,6 +326,50 @@ const HardwareRoot = styled.ul`
     white-space: nowrap;
   }
 `
+
+const capabilityAbbrev = {
+  'Temperature': 'Temp',
+  'Humidity': 'RH',
+  'Pressure': 'Pa',
+  'Air Quality': 'AQ',
+  'Particulate Matter': 'PM',
+  'Wind Speed': 'Wind',
+  'Wind Direction': 'Dir',
+  'Precipitation': 'Precip',
+  'Solar Radiation': 'Solar',
+  'Microphone': 'Mic'
+}
+
+
+export function HardwareList(props: SensorsProps) {
+  const {data, path} = props
+
+  if (!data.length) return <>-</>
+
+  return (
+    <HardwareRoot style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+      {data.map((sensor, i) => {
+        const {hw_model, name, capabilities} = sensor
+        return (
+          <div key={i}>
+            <Tooltip placement="top" title={name}>
+              {path ?
+                <Link to={`${path}${hw_model}`}>
+                  {hw_model}
+                </Link> :
+                <span>{hw_model}</span>
+              }
+            </Tooltip><br/>
+            <span className="muted" style={{fontSize: '8pt'}}>
+              {capabilities.map(v => capabilityAbbrev[v] || v).join(', ')}
+            </span>
+          </div>
+        )
+      })
+      }
+    </HardwareRoot>
+  )
+}
 
 
 const TT = (props) =>

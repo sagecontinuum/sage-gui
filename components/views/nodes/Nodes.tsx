@@ -217,7 +217,7 @@ export default function Nodes() {
     setStates(getOptions(data, 'state'))
 
     const sensorOptions = uniqBy(data.flatMap(o => o.sensors), 'hw_model')
-      .map(o => ({id: o.hw_model, label: o.hw_model}))
+      .map(o => ({id: o.hw_model, label: o.hw_model, subText: o.capabilities.join(', ')}))
 
     setSensors(sensorOptions)
   }
@@ -272,7 +272,7 @@ export default function Nodes() {
 
   const handleQueryViewerChange = (field: string, next: string[]) => {
     if (!next.length) params.delete(field)
-    else params.set(field, next.join(','))
+    else params.set(field, next.map(str => `"${str}"`).join(','))
     setParams(params, {replace: true})
   }
 

@@ -2,9 +2,8 @@
 import settings from '/components/settings'
 import * as formatters from '/components/views/nodes/nodeFormatters'
 import type { Column } from '/components/table/Table'
-
-
 import type { Node } from '/components/apis/beekeeper'
+
 
 const PROJECT = settings.project?.toLowerCase()
 
@@ -60,6 +59,18 @@ const columns: Column<Node>[] = [{
   label: 'Sensors',
   format: (val) => <formatters.HardwareList data={val} path="/sensors/" />,
   dlFormat: (val) => val.map(v => v.hw_model).join(', ')
+}, {
+  id: 'sensorModels',
+  label: 'Sensor Models',
+  format: (_, obj) => <formatters.HardwareListSimple data={obj.sensors} path="/sensors/" />,
+  dlFormat: (_, obj) => obj.sensors.map(v => v.hw_model).join(', '),
+  hide: true
+},{
+  id: 'sensorCapabilities',
+  label: 'Sensor Capabilities',
+  format: (val) => val.join(', '),
+  dlFormat: (val) => val.join(', '),
+  hide: true
 }, {
   id: 'computes',
   label: 'Computes',

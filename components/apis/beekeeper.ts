@@ -1,7 +1,7 @@
 import config from '/config'
 import settings from '/components/settings'
 
-import { keyBy } from 'lodash'
+import { keyBy, uniq } from 'lodash'
 import { handleErrors, handleDjangoErrors } from '../fetch-utils'
 import { NodeStatus } from './node'
 import parseAddress from 'parse-address/address'
@@ -491,8 +491,6 @@ async function _getNodeMetas(args: GetNodeArgs) : Promise<Node[]>{
 
   let meta = await getDjangoData(url)
 
-  console.log('meta', meta)
-
   if (vsns)
     meta = meta.filter(o => vsns.includes(o.vsn))
 
@@ -524,9 +522,8 @@ function _sanitizeMeta(obj: Node) {
     bottom_camera: obj.sensors.find(o => o.name == 'bottom_camera')?.hw_model,
     left_camera: obj.sensors.find(o => o.name == 'left_camera')?.hw_model,
     right_camera: obj.sensors.find(o => o.name == 'right_camera')?.hw_model,
-    // todo(nc) -- for filtering, but should remove/improve
-    sensor: obj.sensors.map(o => o.hw_model)
-
+    sensor: obj.sensors.map(o => o.hw_model),     // todo(nc) -- for filtering, but should remove/improve
+    sensorCapabilities: uniq(obj.sensors.flatMap(o => o.capabilities))
   }
 }
 

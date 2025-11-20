@@ -9,7 +9,7 @@ import { aggregateMetrics } from '/components/apis/beehive'
 const ELAPSED_FAIL_THRES = settings.elapsedThresholds.fail
 
 
-export function filterData(data: object[], state: object) {
+export function filterData<T>(data: T[], state: object) {
   const filteredRows = data.filter(row => {
 
     let keep = true

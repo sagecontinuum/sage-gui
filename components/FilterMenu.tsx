@@ -105,6 +105,7 @@ type Option = {
   label?: string
   hide?: boolean
   type?: string
+  subText?: string
 }
 
 
@@ -226,6 +227,7 @@ export default function FilterMenu(props: Props) {
                       }}
                     >
                       {option.label || option.id}
+                      {option.subText ? <div><b className="muted">{option.subText}</b></div> : null}
                     </Box>
                   </li>
                 )
@@ -243,8 +245,9 @@ export default function FilterMenu(props: Props) {
                   :
                   options
               }
+              // used for filtering
               getOptionLabel={(option) => {
-                return option.label
+                return option.label + (option.subText || '')
               }}
               isOptionEqualToValue={(opt, val) => {
                 return multiple ? opt.id == val : opt.id == val.id
