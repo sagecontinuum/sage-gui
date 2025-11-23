@@ -34,6 +34,7 @@ import { quickRanges } from '/components/utils/units'
 
 import { pickBy } from 'lodash'
 import { subDays  } from 'date-fns'
+import ErrorMsg from '../ErrorMsg'
 
 
 const TAIL_DAYS = '-1d'
@@ -69,6 +70,7 @@ export default function JobDetails(props: Props) {
 
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
   const [errorsByGoalID, setErrorsByGoalID] = useState<ES.ErrorsByGoalID>()
+  const [error, setError] = useState<string>()
 
   // all events related to the job being looked at (by node)
   const [events, setEvents] = useState<ES.EventsByNode>()
@@ -92,6 +94,7 @@ export default function JobDetails(props: Props) {
         setEventsByNode(events)
         setErrorsByGoalID(errors)
       })
+      .catch(error => setError(error.message))
       .finally(() => setLoading(false))
   }, [job, setLoading, opts])
 
@@ -278,9 +281,11 @@ export default function JobDetails(props: Props) {
             <ListTasks job={job} start={opts.start} showAllTasks={showAllTasks} />
           }
 
-          {tab == 'timeline' && !events &&
+          {tab == 'timeline' && !events && loading &&
             <TimelineSkeleton />
           }
+
+          {error && <ErrorMsg>{error}</ErrorMsg>}
 
           {tab == 'timeline' && events &&
             Object.keys(events)

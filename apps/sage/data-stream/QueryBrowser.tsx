@@ -496,7 +496,7 @@ export default function QueryBrowser() {
     getFilterMenus({plugin: app, task, name: null}, siteIDs)
       .then(menuItems => {
         setMenus(prev => ({...prev, ...menuItems}))
-      })
+      }).catch(error => setError(error.message))
   }, [app, task, siteIDs])
 
 
@@ -544,7 +544,7 @@ export default function QueryBrowser() {
       getAppMenus()
         .then((data) => {
           setMenus(prev => ({...prev, apps: data}))
-        }).catch(error => setError(error))
+        }).catch(error => setError(error.message))
     }
 
     function fetchFilterMenus() {
@@ -558,7 +558,7 @@ export default function QueryBrowser() {
         getFilterMenus({plugin, task, name}, siteIDs)
           .then(menuItems => {
             setMenus(prev => ({...prev, ...menuItems}))
-          })
+          }).catch(error => setError(error.message))
       })
     }
 
