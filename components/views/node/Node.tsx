@@ -76,7 +76,7 @@ const getVisibleCameras = (node: BK.Node, isAdmin?: boolean) => {
   const {sensors} = node
 
   const visibleSensors = isAdmin ? sensors : sensors.filter(o => o.is_active)
-  const cameras = visibleSensors.filter(o => o.capabilities.includes('camera'))
+  const cameras = visibleSensors.filter(o => o.capabilities.includes('Camera'))
 
   return cameras.map(o => o.name)
 }

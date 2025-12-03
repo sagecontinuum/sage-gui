@@ -1,10 +1,22 @@
-import { useState } from 'react'
-import { Box, Typography, Chip, IconButton, Tooltip, Dialog, DialogContent, Popover } from '@mui/material'
+import { useState, forwardRef } from 'react'
+import { Box, Typography, Chip, IconButton, Tooltip, Dialog, DialogContent, Popover, Slide } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import FullscreenIcon from '@mui/icons-material/Fullscreen'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
+import { TransitionProps } from '@mui/material/transitions'
+
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement<any, any>;
+  },
+  ref: React.Ref<unknown>,
+) {
+  return <Slide direction="up" ref={ref} {...props} />
+})
+
+
 
 // Reusable component for caption and keywords
 export function CaptionWithKeywords({ caption, sx }: { caption: string, sx?: object }) {
@@ -43,7 +55,7 @@ export function ImageCard({ obj }) {
   }
 
   // For alt text, parse caption only
-  let altText = obj.caption
+  let altText = obj.caption || 'image'
   if (obj.caption) {
     const match = obj.caption.match(/^caption:\s*(.*?)\s*keywords:/)
     if (match) altText = match[1]
@@ -100,18 +112,21 @@ export function ImageCard({ obj }) {
             <DownloadIcon fontSize="small" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Show caption">
-          <IconButton
-            size="small"
-            onClick={() => {
-              setCaptionAnchor(imageContainerRef[0])
-              setShowCaption(true)
-            }}
-            sx={{ color: '#fff' }}
-          >
-            <ChatBubbleOutlineIcon fontSize="small" sx={{ color: '#fff' }} />
-          </IconButton>
-        </Tooltip>
+
+        {obj.caption &&
+          <Tooltip title="Show caption">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setCaptionAnchor(imageContainerRef[0])
+                setShowCaption(true)
+              }}
+              sx={{ color: '#fff' }}
+            >
+              <ChatBubbleOutlineIcon fontSize="small" sx={{ color: '#fff' }} />
+            </IconButton>
+          </Tooltip>
+        }
         <Tooltip title="Full screen">
           <IconButton size="small" onClick={() => setFullscreen(true)} sx={{ color: '#fff' }}>
             <FullscreenIcon fontSize="small" />
@@ -142,7 +157,7 @@ export function ImageCard({ obj }) {
       {showDetails && (
         <ConfirmationDialog
           title="Image Details"
-          fullScreen={true}
+          fullScreen={false}
           cancelBtn={false}
           confirmBtnText="Close"
           onClose={() => setShowDetails(false)}
@@ -168,7 +183,10 @@ export function ImageCard({ obj }) {
           }
         />
       )}
-      <Dialog open={fullscreen} onClose={() => setFullscreen(false)} maxWidth="lg">
+      <Dialog open={fullscreen}
+        onClose={() => setFullscreen(false)}
+        maxWidth="lg"
+      >
         <DialogContent sx={{ p: 0 }}>
           <img
             src={obj.link}

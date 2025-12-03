@@ -36,15 +36,19 @@ import NamesIcon from '@mui/icons-material/CategoryRounded'
 import RefreshIcon from '@mui/icons-material/RefreshRounded'
 import StopIcon from '@mui/icons-material/StopCircle'
 
-import { capitalize } from 'lodash'
+import { capitalize, set } from 'lodash'
 
 import config from '/config'
 import QueryBuilder from '/components/data/QueryBuilder'
 import { filterData } from '/components/data/queryData'
 import { shortUnits } from '/components/measurement.config'
 
+import { Highlight, themes } from 'prism-react-renderer'
+
 import JsonURL from '@jsonurl/jsonurl'
 import PortalLink from '/components/PortalLink'
+
+import CustomViewer from './CustomViewer'
 
 const registry = config.dockerRegistry
 
@@ -297,7 +301,7 @@ const isMedia = (type: DataTypes) =>
   ['images', 'audio'].includes(type)
 
 const isMediaApp = (app: string) =>
-  /image|audio|video|mobotix/g.test(app || '')
+  /image|audio|video|mobotix|ptzapp-yolo/g.test(app || '')
 
 const isAudioApp = (app: string) =>
   /audio/g.test(app || '')
@@ -451,6 +455,9 @@ export default function QueryBrowser() {
   const [queryCount, setQueryCount] = useState(0)
   const [prevQuery] = useState(params)
 
+  const [hasViewer, setHasViewer] = useState(false)
+  const [showCustomViewer, setShowCustomViewer] = useState(false)
+
   // only update the range when start, end, or 'refresh' is pressed
   const range = useMemo<[Date, Date]>(() =>
     [getStartTime(start), getEndTime(start, end)]
@@ -603,6 +610,11 @@ export default function QueryBrowser() {
           setData(data)
           updateFilteredData(data, rules)
 
+          // controlle whether to show custom viewer
+          const hasViewer = app?.includes('ptzapp-yolo')
+          setHasViewer(hasViewer)
+          setShowCustomViewer(hasViewer)
+
           setLoading(false)
         }).catch(error => {
           if (error.name == 'AbortError') return
@@ -611,6 +623,7 @@ export default function QueryBrowser() {
         })
     }
 
+    // fetch everything
     fetchAppMenu()
     fetchData()
     fetchFilterMenus()
@@ -819,6 +832,7 @@ export default function QueryBrowser() {
     setParams(params)
   }
 
+
   return (
     <Root isMedia={isMediaApp(app) || isMedia(type)}>
       <div className="flex">
@@ -903,9 +917,27 @@ export default function QueryBrowser() {
 
           <Snippets>
             <div>
+              <h3>API Snippets</h3>
               <h4>cURL download</h4>
               <Clipboard
-                content={getCurlCmd(query)}
+                content={
+                  <Highlight theme={themes.vsDark}
+                    language="cmd"
+                    code={getCurlCmd(query)}
+                  >
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                      <pre className={className} style={{...style, fontSize: '.85em'}}>
+                        {tokens.map((line, i) => (
+                          <div key={i} {...getLineProps({ line, key: i })}>
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token, key })} />
+                            ))}
+                          </div>
+                        ))}
+                      </pre>
+                    )}
+                  </Highlight>
+                }
                 tooltip="Copy curl CMD"
               />
             </div>
@@ -913,9 +945,27 @@ export default function QueryBrowser() {
             <div>
               <h4>Python snippet</h4>
               <Clipboard
-                content={getPythonSnippet(query)}
+                content={
+                  <Highlight theme={themes.vsDark}
+                    language="python"
+                    code={getPythonSnippet(query)}
+                  >
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                      <pre className={className} style={{...style, fontSize: '.85em'}}>
+                        {tokens.map((line, i) => (
+                          <div key={i} {...getLineProps({ line, key: i })}>
+                            {line.map((token, key) => (
+                              <span key={key} {...getTokenProps({ token, key })} />
+                            ))}
+                          </div>
+                        ))}
+                      </pre>
+                    )}
+                  </Highlight>
+                }
                 tooltip="Copy python snippet"
               />
+
               <div className="flex justify-between text-xs">
                 <a href="https://pypi.org/project/sage-data-client/"
                   target="_blank" rel="noreferrer">install client</a>
@@ -1039,9 +1089,19 @@ export default function QueryBrowser() {
           }
 
 
+          {hasViewer && data &&
+            <div>
+              <CustomViewer
+                data={data}
+                showViewer={showCustomViewer}
+                onViewModeChange={(val) => setShowCustomViewer(val)}
+              />
+            </div>
+          }
+
           {/* todo(nc): here we have to check data.length because of bug
            in table component when pagination is used */}
-          {filtered && data &&
+          {!showCustomViewer && filtered && data &&
             <Table
               primaryKey="rowID"
               enableSorting
@@ -1184,15 +1244,32 @@ const Menu = styled.div`
 `
 
 const Snippets = styled.div`
-  margin: 40px 0 100px 0;
+  margin: 40px 0 0px 0;
 
-  > div { margin: 0 0 30px 0; }
+  > div { margin: 30px 0 0px 0; }
   h4 { margin: 2px 0; }
 
+  /* adjust prism + clipboard styles */
   pre {
+    padding: 0;
     margin: 0;
-    border: none;
-    background: #fff !important;
+  }
+
+  .clipboard-content {
+    padding-bottom: 0;
+    pre {
+      padding: 10px;
+
+      border: none;
+      overflow-x: scroll;
+    }
+  }
+
+  .MuiButtonBase-root {
+    background: rgba(30, 30, 30) !important;
+    opacity: 0.8 !important;
+    color: #fff;
+
   }
 `
 

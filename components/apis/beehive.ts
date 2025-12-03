@@ -46,10 +46,19 @@ export type Meta = {
   zone?: string
   deviceName?: string // for lorawan
   units?: string
+  filename?: string   // for uploads
 }
 
 // standard, most common SDR record
 export type Record = {
+  timestamp: string
+  name: string
+  value: string | number
+  meta: Meta
+}
+
+// standard, most common SDR record
+export type UploadRecord = {
   timestamp: string
   name: string
   value: string | number
