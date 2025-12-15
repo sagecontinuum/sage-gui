@@ -84,9 +84,9 @@ export function parseFilename(filename: string): ParsedFilename {
     // debug_135_0_1_20251122_204023.jpg
     const [, pan, tilt, zoom] = parts
     return {
-      pan,
-      tilt,
-      zoom,
+      pan: Number(pan),
+      tilt: Number(tilt),
+      zoom: Number(zoom),
       datetime,
       isDebug: true,
       version: 'v3'
@@ -105,9 +105,9 @@ export function parseFilename(filename: string): ParsedFilename {
     const label = parts.slice(3, confIndex).join('_')
 
     return {
-      pan,
-      tilt,
-      zoom,
+      pan: Number(pan),
+      tilt: Number(tilt),
+      zoom: Number(zoom),
       label,
       confidence,
       datetime,
