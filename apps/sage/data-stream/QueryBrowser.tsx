@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Fragment } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -36,7 +36,7 @@ import NamesIcon from '@mui/icons-material/CategoryRounded'
 import RefreshIcon from '@mui/icons-material/RefreshRounded'
 import StopIcon from '@mui/icons-material/StopCircle'
 
-import { capitalize, set } from 'lodash'
+import { capitalize } from 'lodash'
 
 import config from '/config'
 import QueryBuilder from '/components/data/QueryBuilder'
@@ -868,7 +868,7 @@ export default function QueryBrowser() {
           {menus && facetInputs[type].map(facet => {
             // if no sensors/deviceNames are associated with the data, don't show sensor input
             if (['sensors', 'deviceNames'].includes(facet) && !menus[facet].length) {
-              return <></>
+              return <Fragment key={facet}></Fragment>
             }
 
             const label = capitalize(facet)

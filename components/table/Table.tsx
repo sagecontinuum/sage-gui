@@ -190,7 +190,7 @@ const Row = (props: RowProps) => {
       </TableRowComponent>
       {collapsible && (
         <TableRowComponent style={{ backgroundColor: 'initial' }}>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={columns.length + 1}>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={columns.length + (checkboxes ? 1 : 0) + 1}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
                 {collapsible}
