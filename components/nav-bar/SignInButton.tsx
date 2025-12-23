@@ -48,7 +48,6 @@ export default function SignInButton(props: Props) {
               <AccountIcon />&nbsp;{username}
             </div>
           }
-          style={{left: '-30px'}}
           menu={
             <div>
               <Item

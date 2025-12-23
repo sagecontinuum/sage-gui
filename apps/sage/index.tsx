@@ -79,6 +79,7 @@ const NavMenu = () => {
       <NavItem
         label="App Catalog"
         root="/apps"
+        to="/apps"
         menu={
           <>
             <Item
@@ -104,6 +105,7 @@ const NavMenu = () => {
       <NavItem
         label="Job Status"
         root="/jobs"
+        to="/jobs"
         menu={
           <>
             <Item
@@ -132,6 +134,7 @@ const NavMenu = () => {
       <NavItem
         label="Data"
         root="/data"
+        to="/data"
         menu={
           <>
             <Item

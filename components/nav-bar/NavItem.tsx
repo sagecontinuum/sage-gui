@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react'
+import { useRef } from 'react'
 import { NavLink, useMatch, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -7,8 +7,6 @@ import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListSubheader from '@mui/material/ListSubheader'
-
-import useClickOutside from '/components/hooks/useClickOutside'
 
 export { ListSubheader }
 
@@ -27,33 +25,25 @@ export default function NavItem(props: Props) {
   const ref = useRef()
   const path = useMatch('*').pathname
 
-  const [open, setOpen] = useState(false)
-
-  useClickOutside(ref, () => setOpen(false), [])
-
-  const handleClick = () => {
-    setOpen(prev => !prev)
-  }
-
   const isActive = path.includes(root)
 
   return (
     <Root ref={ref} className="flex items-center">
       {to &&
-        <NavLink to={to}>
-          {label}
+        <NavLink to={to} className={`flex ${isActive ? 'active' : ''}`}>
+          {label} {menu && <CaretIcon />}
         </NavLink>
       }
-      {menu &&
-        <a onClick={handleClick} className={`flex ${isActive ? 'active' : ''}`}>
+      {menu && !to &&
+        <a className={`flex ${isActive ? 'active' : ''}`}>
           {label} {menu && <CaretIcon />}
         </a>
       }
       {props.href &&
         <a href={props.href}>{label}</a>
       }
-      {open && menu &&
-        <MenuContainer onClick={handleClick} style={props.style}>
+      {menu &&
+        <MenuContainer style={props.style}>
           {menu}
         </MenuContainer>
       }
@@ -126,11 +116,26 @@ const Root = styled.div`
 const MenuContainer = styled.div`
   position: absolute;
   top: 59px;
-  left: -50px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  min-width: 150px;
   background: #fff;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, .05);
   border: solid #ccc;
   border-width: 0 1px 1px 1px;
+  z-index: 8999;
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+
+  /* Show on hover */
+  ${Root}:hover & {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
 `
 
 
@@ -167,4 +172,3 @@ export function Item(props: ItemProps) {
     </MenuItem>
   )
 }
-

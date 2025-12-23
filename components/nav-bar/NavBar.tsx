@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import SageLogo from './SageLogo'
@@ -28,56 +27,8 @@ const isDev = () =>
 export default function NavBar(props: Props) {
   const { menu, hasSignIn, hasDocsLink, hasPortalLink, logo } = props
 
-  const [notice, setNotice] = useState<string | null>(null)
-
-  useEffect(() => {
-    return
-    const fetchConfig = async () => {
-      const response = await fetch(
-        'https://raw.githubusercontent.com/waggle-sensor/sage-website/main/docusaurus.config.js'
-      )
-      const text = await response.text()
-      console.log('Fetched config:', text)
-
-      // parse the config to extract announcementBar
-      const match = text.match(/announcementBar:\s*{([^}]+)}/)
-      if (match) {
-        const configText = match[1].trim()
-        const lines = configText.split('\n').map(line => line.trim())
-        type AnnouncementBar = { [key: string]: string }
-        const announcementBar = lines.reduce<AnnouncementBar>((acc, line) => {
-          const kv = line.match(/^(\w+):\s*(.+)$/)
-          if (kv) {
-            const key = kv[1]
-            // Preserve everything after the first colon, including colons and HTML tags
-            const value = kv[2].trim().replace(/['",]$/g, '').replace(/^['"]|['"]$/g, '')
-            acc[key] = value
-          }
-          return acc
-        }, {})
-
-        setNotice(announcementBar)
-      } else {
-        // console.error('No announcementBar found in config')
-      }
-    }
-
-    fetchConfig()
-  }, [])
-  // console.log('NavBar rendered')
-
   return (
     <Root>
-      {notice &&
-        <div className="announcement-bar">
-          {/* Object.entries(notice).map(([key, value]) => (
-            <div key={key} className="announcement-item">
-              <strong>{key}:</strong> {value}
-            </div>
-          ))*/}
-        </div>
-      }
-
       <div className="flex items-center">
         {logo ? logo :
           <a href={isDev() ? '/' : config.home} className="no-style flex items-center">
@@ -106,7 +57,6 @@ export default function NavBar(props: Props) {
             />
             <NavItem
               label="Help"
-              style={{left: '-80px'}}
               menu={
                 <div>
                   <Item
