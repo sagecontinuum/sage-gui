@@ -1,21 +1,34 @@
 import styled from 'styled-components'
 import { NavLink } from 'react-router-dom'
 
-import PublicIcon from '@mui/icons-material/PublicRounded'
-import UserIcon from '@mui/icons-material/AccountCircleRounded'
 
+export type NavItem = {
+  to?: string
+  icon?: React.ReactNode
+  label?: string
+  divider?: boolean
+}
 
-export default function Sidebar() {
+type Props = {
+  items: NavItem[]
+}
+
+export default function Sidebar(props: Props) {
+  const { items } = props
+
   return (
     <Root className="flex-nowrap">
-      <Item to="explore">
-        <PublicIcon />
-        <div>Explore</div>
-      </Item>
-      <Item to="my-apps">
-        <UserIcon/>
-        <div>My Apps</div>
-      </Item>
+      {items.map((item, index) => {
+        if (item.divider) {
+          return <Divider key={`divider-${index}`} />
+        }
+        return (
+          <Item key={item.to} to={item.to!}>
+            {item.icon}
+            <div>{item.label}</div>
+          </Item>
+        )
+      })}
     </Root>
   )
 }
@@ -27,6 +40,11 @@ const Root = styled.div`
   max-width: 75px;
 `
 
+const Divider = styled.div`
+  height: 1px;
+  background: #ddd;
+  margin: 10px 0;
+`
 
 const primaryColor = 'rgb(28, 140, 201)'
 

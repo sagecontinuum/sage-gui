@@ -1,14 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams, useSearchParams, NavLink } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { Button, IconButton, Tooltip } from '@mui/material'
+import { ViewTimelineOutlined, AddRounded } from '@mui/icons-material'
 import { keyBy } from 'lodash'
-
-import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
-import PublicIcon from '@mui/icons-material/Public'
-import AddIcon from '@mui/icons-material/AddRounded'
-import MyJobsIcon from '@mui/icons-material/Engineering'
 
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
@@ -16,7 +12,6 @@ import Map from '/components/Map'
 import Table, { TableSkeleton } from '/components/table/Table'
 import { queryData } from '/components/data/queryData'
 import { relativeTime } from '/components/utils/units'
-import { Tabs, Tab } from '/components/tabs/Tabs'
 import { useProgress } from '/components/progress/ProgressProvider'
 import { Card } from '/components/layout/Layout'
 
@@ -29,6 +24,7 @@ import StateFilters from './StateFilters'
 import * as BK from '/components/apis/beekeeper'
 import * as ES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
+
 
 // todo(nc): support jobs view for multiple projects
 // import settings from '/components/settings'
@@ -233,7 +229,6 @@ const filterByState = (jobs: ES.Job[], states: ES.State[]) : ES.Job[] =>
 
 export type Views = 'all-jobs' | 'my-jobs' | 'timeline'
 
-
 export default function JobStatus() {
   const navigate = useNavigate()
 
@@ -411,124 +406,80 @@ export default function JobStatus() {
 
 
   return (
-    <Root>
-      <Main className="flex column">
-        <Tabs
-          value={view}
-          aria-label="job status tabs"
-        >
-          <Tab
-            label={
-              <div className="flex items-center">
-                <PublicIcon/>&nbsp;All Jobs ({loading ? '...' : counts.public})
-              </div>
-            }
-            value="all-jobs"
-            component={Link}
-            to={`/jobs/all-jobs`}
-            replace
-          />
-          {user &&
-            <Tab
-              label={
-                <div className="flex items-center">
-                  <MyJobsIcon/>&nbsp;My Jobs ({loading ? '...' : counts.mine})
-                </div>
-              }
-              value="my-jobs"
-              component={NavLink}
-              to="/jobs/my-jobs"
-              replace
-            />
-          }
+    <Root className="flex column">
 
-          {/* todo(nc): rendering all timelines isn't scalable;
-              possibly revist the concept later in a different form.
-            <Tab
-              label={<div className="flex items-center">
-                <TimelineIcon />&nbsp;Timelines
-              </div>}
-              value="timeline"
-              component={Link}
-              to={`/jobs/timeline`}
-              replace
-            />
-          */}
-        </Tabs>
-        <hr />
-
-        <MapContainer>
-          {geo &&
+      <MapContainer>
+        {geo &&
             <Map
               data={selectedNodes?.length ? getSubset(selectedNodes, geo) : geo}
               updateID={updateMap}
               showUptime={false}
             />
-          }
-        </MapContainer>
+        }
+      </MapContainer>
 
-        <StateFilters
-          counts={counts}
-          state={jobState}
-          onFilter={handleStatusFilter} />
+      <StateFilters
+        counts={counts}
+        state={jobState}
+        onFilter={handleStatusFilter} />
 
-        {view == 'all-jobs' && loading &&
+      {view == 'all-jobs' && loading &&
           <TableSkeleton />
-        }
+      }
 
-        {['all-jobs', 'my-jobs'].includes(view) && qJobs && !loading &&
-          <TableContainer>
-            <Table
-              primaryKey="id"
-              rows={qJobs}
-              columns={cols}
-              enableSorting
-              sort="-last_submitted"
-              onSearch={handleQuery}
-              onSelect={handleJobSelect}
-              onColumnMenuChange={() => { /* do nothing special */ }}
-              checkboxes={view == 'my-jobs'}
-              emptyNotice={
-                view == 'my-jobs' ?
-                  `No ${jobState || 'active'} jobs with your username were found` :
-                  `No ${jobState || 'active'} jobs found`
-              }
-              middleComponent={
-                <TableOptions className="flex">
-                  {view == 'my-jobs' && !selectedJobs?.length &&
-                    <Button
+      {['all-jobs', 'my-jobs'].includes(view) && qJobs && !loading &&
+        <TableContainer>
+          <Table
+            primaryKey="id"
+            rows={qJobs}
+            columns={cols}
+            enableSorting
+            sort="-last_submitted"
+            onSearch={handleQuery}
+            onSelect={handleJobSelect}
+            onColumnMenuChange={() => { /* do nothing special */ }}
+            checkboxes={view == 'my-jobs'}
+            emptyNotice={
+              view == 'my-jobs' ?
+                `No ${jobState || 'active'} jobs with your username were found` :
+                `No ${jobState || 'active'} jobs found`
+            }
+            middleComponent={
+              <TableOptions className="flex">
+                {view == 'my-jobs' && !selectedJobs?.length &&
+                  <Button
+                    component={Link}
+                    to="/jobs/create-job"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddRounded/>}
+                  >
+                    Create job
+                  </Button>
+                }
+
+                <JobActions
+                  view={view}
+                  jobs={selectedJobs}
+                  onDone={handleActionComplete}
+                />
+
+                {isFiltered &&
+                  <Tooltip title={`View timeline${selectedNodes?.length > 1 ? 's' : ''}`}>
+                    <IconButton
                       component={Link}
-                      to="/create-job"
-                      variant="contained"
-                      color="primary"
-                      startIcon={<AddIcon/>}
-                    >
-                      Create job
-                    </Button>
-                  }
+                      to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
+                      <ViewTimelineOutlined />
+                    </IconButton>
+                  </Tooltip>
+                }
+              </TableOptions>
+            }
+          />
+        </TableContainer>
+      }
 
-                  <JobActions
-                    view={view}
-                    jobs={selectedJobs}
-                    onDone={handleActionComplete}
-                  />
-
-                  {isFiltered &&
-                    <Tooltip title={`View timeline${selectedNodes?.length > 1 ? 's' : ''}`}>
-                      <IconButton
-                        component={Link}
-                        to={`timeline?nodes=${selectedNodes?.map(o => o.vsn).join(',')}`}>
-                        <TimelineIcon />
-                      </IconButton>
-                    </Tooltip>
-                  }
-                </TableOptions>
-              }
-            />
-          </TableContainer>
-        }
-
-        {view == 'timeline' && pluginEvents && nodeDict &&
+      {view == 'timeline' && pluginEvents && nodeDict &&
           <TimelineContainer>
             {Object.keys(pluginEvents)
               .filter(vsn => nodes ? nodes.includes(vsn) : true)
@@ -549,13 +500,11 @@ export default function JobStatus() {
               })
             }
           </TimelineContainer>
-        }
+      }
 
-        {error &&
+      {error &&
           <ErrorMsg>{error}</ErrorMsg>
-        }
-      </Main>
-
+      }
 
       {!!jobs.length && jobDetails &&
         <JobDetails
@@ -573,15 +522,6 @@ export default function JobStatus() {
 
 
 const Root = styled.div`
-  margin: 10px 20px;
-
-  hr {
-    margin-top: 2px;
-    margin-bottom: 0;
-  }
-`
-
-const Main = styled.div`
   width: 100%;
   margin-bottom: 20px;
 `

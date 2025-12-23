@@ -29,6 +29,7 @@ import Node from '/components/views/node/Node'
 import Sensor from '/components/views/sensor/Sensor'
 import SensorList from '/components/views/sensor/SensorList'
 import Apps from './ecr/apps/Apps'
+import Jobs from './jobs/Jobs'
 import JobStatus from './jobs/JobStatus'
 const CreateJob = lazy(() => import('./jobs/create-job/CreateJob'))
 
@@ -123,7 +124,7 @@ const NavMenu = () => {
                 />
                 <Item
                   icon={<AddIcon/>}
-                  to="/create-job"
+                  to="/jobs/create-job"
                   label="Create Job"
                 />
               </>
@@ -225,13 +226,10 @@ export default function Sage() {
                       </Route>
 
                       <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
-                      <Route path="jobs" element={<JobStatus />}>
+                      <Route path="jobs" element={<Jobs />}>
+                        <Route path="create-job" element={<Suspense fallback={<Progress/>}><CreateJob/></Suspense>} />
                         <Route path=":view" element={<JobStatus />} />
                       </Route>
-
-                      <Route path="create-job" element={
-                        <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
-                      }/>
 
                       <Route path="data" element={<Data project={project} />} />
                       <Route path="data/ontology/:name" element={<Ontology />} />

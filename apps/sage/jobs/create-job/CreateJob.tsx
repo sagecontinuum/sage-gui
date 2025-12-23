@@ -34,8 +34,8 @@ import {
 } from './createJobUtils'
 
 import {
-  type Rule,
-  type BooleanLogic,
+  // type Rule,
+  // type BooleanLogic,
   type ArgStyles,
   aggFuncs
 } from './ses-types.d'
@@ -86,13 +86,13 @@ function reducer(state, action) {
       ...state,
       [name]: value
     }
-  case 'SET_RULES':
+  case 'SET_RULES': {
     const {app, rules, logics} = value
     return {
       ...state,
       rules: {...state.rules, [app]: {rules, logics}}
     }
-  default:
+  } default:
     throw new Error(`formReducer: type "${type}" not valid`)
   }
 }
@@ -220,7 +220,7 @@ export default function CreateJob() {
               image: `${dockerRegistry}/${o.id}`,
               args: appParams[o.id] ?
                 Object.entries(appParams[o.id])
-                  .filter(([k, _]) => k != 'appName')
+                  .filter(([k]) => k != 'appName')
                   .map(([k, v]) => v == null ? `${argStyle}${k}` : [`${argStyle}${k}`, v]).flat()
                 : []
             }
@@ -434,7 +434,7 @@ export default function CreateJob() {
             label={<div className="flex items-center"><FormEditorIcon/>&nbsp;Form</div>}
             value="form"
             component={Link}
-            to={`/create-job?tab=form${jobID ? `&start_with_job=${jobID}` : ''}`}
+            to={`/jobs/create-job?tab=form${jobID ? `&start_with_job=${jobID}` : ''}`}
             replace
           />
           */}
@@ -446,7 +446,7 @@ export default function CreateJob() {
             }
             value="editor"
             component={Link}
-            to={`/create-job?tab=editor${jobID ? `&start_with_job=${jobID}` : ''}`}
+            to={`/jobs/create-job?tab=editor${jobID ? `&start_with_job=${jobID}` : ''}`}
             replace
           />
         </Tabs>

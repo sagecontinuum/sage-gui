@@ -1,22 +1,22 @@
 import styled from 'styled-components'
 import { Outlet } from 'react-router-dom'
 
-import { AccountCircle, AddCircleOutlineRounded, PublicRounded } from '@mui/icons-material'
+import { Public, ScheduleRounded, AddCircleOutlineRounded } from '@mui/icons-material'
 
-import Sidebar, { type NavItem } from '../Sidebar'
+import Sidebar, { type NavItem } from '/apps/sage/ecr/Sidebar'
 import Auth from '/components/auth/auth'
 
 const getNavItems = (): NavItem[] => {
   const items: NavItem[] = [
     {
-      to: 'explore',
-      icon: <PublicRounded />,
-      label: 'Explore'
+      to: 'all-jobs',
+      icon: <Public />,
+      label: 'All Jobs'
     },
     {
-      to: 'my-apps',
-      icon: <AccountCircle />,
-      label: 'My Apps'
+      to: 'my-jobs',
+      icon: <ScheduleRounded />,
+      label: 'My Jobs'
     }
   ]
 
@@ -24,9 +24,9 @@ const getNavItems = (): NavItem[] => {
     items.push(
       { divider: true },
       {
-        to: '/apps/create-app',
+        to: '/jobs/create-job',
         icon: <AddCircleOutlineRounded />,
-        label: 'Create App'
+        label: 'Create Job'
       }
     )
   }
@@ -34,7 +34,7 @@ const getNavItems = (): NavItem[] => {
   return items
 }
 
-export default function Apps() {
+export default function Jobs() {
   return (
     <Root>
       <Sidebar items={getNavItems()} />

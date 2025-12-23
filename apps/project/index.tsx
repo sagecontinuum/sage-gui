@@ -158,17 +158,6 @@ export default function App() {
                       <Route path="node/:vsn" element={<Node />} />
                       <Route path="sensors/:name" element={<Sensor />} />
 
-                      {/*
-                      <Route path="/jobs" element={<Navigate to="/jobs/all-jobs" replace />} />
-                      <Route path="jobs" element={<JobStatus />}>
-                        <Route path=":view" element={<JobStatus />} />
-                      </Route>
-
-                      <Route path="create-job" element={
-                        <Suspense fallback={<Progress/>}><CreateJob/></Suspense>
-                      }/>
-                      */}
-
                       <Route path="data" element={<Data {...{project, vsns}}  />} />
                       <Route path="data/ontology/:name" element={<Ontology />} />
                       <Route path="data/product/:name" element={<DataProduct />} />

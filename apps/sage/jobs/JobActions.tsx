@@ -106,7 +106,7 @@ export default function JobActions(props: Props) {
             variant="contained"
             startIcon={<EditIcon/>}
             size="small"
-            to={`/create-job?tab=editor&start_with_job=${jobs[0].job_id}`}>
+            to={`/jobs/create-job?tab=editor&start_with_job=${jobs[0].job_id}`}>
             Recreate or edit job
           </Button>
           <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
