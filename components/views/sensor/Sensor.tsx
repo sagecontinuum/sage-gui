@@ -115,7 +115,7 @@ export default function Sensor() {
 
   return (
     <Root className="flex">
-      <CardViewStyle />
+      {CardViewStyle}
 
       {!isEditing &&
         <Sidebar width="250px" style={{padding: '20px'}}>

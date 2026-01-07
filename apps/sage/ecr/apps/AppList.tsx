@@ -299,7 +299,7 @@ const NoneFound = styled('div')`
   img {
     width: 175px;
     margin-right: 20px;
-    filter: drop-shadow(0px 0px 0.3rem #ccc);
+    filter: ${props => props.theme.palette.mode === 'light' ? 'drop-shadow(0px 0px 0.3rem #ccc)' : 'none' };
   }
 `
 

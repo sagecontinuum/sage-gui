@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 
 import { Public, ScheduleRounded, AddCircleOutlineRounded } from '@mui/icons-material'
@@ -47,12 +47,12 @@ export default function Jobs() {
 }
 
 
-const Root = styled.div`
+const Root = styled('div')`
   display: flex;
   height: 100%;
 `
 
-const Main = styled.div`
+const Main = styled('div')`
   padding: 0 20px;
   flex-grow: 1;
   overflow-y: auto;

@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import CopyBtn from './CopyBtn'
 
@@ -31,7 +31,7 @@ export default function Clipboard(props: Props) {
   )
 }
 
-const Root = styled.pre`
+const Root = styled('pre')`
   position: relative;
   padding-bottom: 0px !important;
 
@@ -39,9 +39,11 @@ const Root = styled.pre`
     overflow-x: scroll;
     padding-bottom: 15px;
   }
+  background: ${({ theme }) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f8f8f8'};
+  border: 1px solid ${props => props.theme.palette.divider};
 `
 
-const BtnContainer = styled.div`
+const BtnContainer = styled('div')`
   position: absolute;
   right: 0;
   top: 0;

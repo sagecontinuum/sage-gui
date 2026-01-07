@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import { Button, Alert, FormControl, OutlinedInput, FormLabel } from '@mui/material'
 
@@ -230,7 +230,7 @@ export default function DevAccess() {
   )
 }
 
-const Root = styled.div`
+const Root = styled('div')`
   // todo(nc)
   .delete {
     border-color: #660000;
@@ -250,7 +250,7 @@ const Root = styled.div`
   }
 `
 
-const CopyToken = styled.div`
+const CopyToken = styled('div')`
   margin-bottom: 2em;
 `
 

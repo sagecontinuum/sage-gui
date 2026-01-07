@@ -20,7 +20,7 @@ export default function Metrics() {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Card>
         <Tabber

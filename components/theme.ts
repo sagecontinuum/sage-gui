@@ -9,7 +9,6 @@ declare module '@mui/styles/defaultTheme' {
 const theme = createTheme({
   defaultColorScheme: 'light',
   colorSchemes: {
-    dark: true,
     light: {
       palette: {
         primary: {
@@ -20,8 +19,24 @@ const theme = createTheme({
         },
         success: {
           main: '#3ac37e'
+        }
+      }
+    },
+    dark: {
+      palette: {
+        primary: {
+          main: 'rgb(28, 140, 201)'
         },
-      },
+        secondary: {
+          main: '#8166a0'
+        },
+        success: {
+          main: '#3ac37e'
+        },
+        background: {
+          default: '#121212',
+        }
+      }
     }
   },
   typography: {
@@ -80,6 +95,11 @@ const theme = createTheme({
       defaultProps: {
         size: 'small'
       },
+    },
+    MuiIconButton: {
+      defaultProps: {
+        disableRipple: true
+      }
     },
     MuiToggleButtonGroup: {
       defaultProps: {

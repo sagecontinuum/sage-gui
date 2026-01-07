@@ -88,7 +88,7 @@ function RecentImgs(props: RecentImgsProps) {
 export default function ImageTests() {
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
       <h1>Latest Sample Images from Deployed Nodes</h1>
       <br/>
       <RecentImgs />

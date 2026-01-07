@@ -1,5 +1,6 @@
 import { styled } from '@mui/material'
 import { NavLink } from 'react-router-dom'
+import { Divider } from '@mui/material'
 
 
 export type NavItem = {
@@ -20,7 +21,7 @@ export default function Sidebar(props: Props) {
     <Root className="flex-nowrap">
       {items.map((item, index) => {
         if (item.divider) {
-          return <Divider key={`divider-${index}`} />
+          return <Divider key={`divider-${index}`} sx={{borderWidth: 1}} />
         }
         return (
           <Item key={item.to} to={item.to!}>
@@ -40,11 +41,7 @@ const Root = styled('div')`
   max-width: 75px;
 `
 
-const Divider = styled('div')`
-  height: 1px;
-  background: #ddd;
-  margin: 10px 0;
-`
+
 
 const primaryColor = 'rgb(28, 140, 201)'
 

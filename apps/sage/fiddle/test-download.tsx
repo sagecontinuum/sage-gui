@@ -6,7 +6,7 @@ export default function TestDownload() {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Card >
         <h2>Object Storage Example (W06C)</h2>

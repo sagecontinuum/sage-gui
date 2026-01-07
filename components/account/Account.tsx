@@ -33,7 +33,7 @@ export default function Account() {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Card>
         <Tabber

@@ -135,9 +135,9 @@ export default function Filter(props: Props) {
         </Title>
 
         {!hideSearchIcon &&
-          <SearchBtn onClick={() => setShowSearch(!showSearch)} size="small" autoFocus disableRipple>
+          <IconButton onClick={() => setShowSearch(!showSearch)} size="small" autoFocus>
             <SearchOutlined />
-          </SearchBtn>
+          </IconButton>
         }
       </Header>
 
@@ -290,12 +290,6 @@ const FacetLabel = styled('div')`
 const Count = styled('div')`
   color: #888;
   font-size: .8rem;
-`
-
-const SearchBtn = styled(IconButton)`
-  &.MuiButtonBase-root {
-    margin-right: 5px;
-  }
 `
 
 const MoreBtn = styled('a')`

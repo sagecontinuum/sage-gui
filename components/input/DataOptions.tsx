@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import {
   ToggleButtonGroup, ToggleButton, Button,
   CircularProgress, Tooltip
@@ -129,10 +129,10 @@ export default function DataOptions(props: Props) {
               exclusive
             >
               <ToggleButton value="density" aria-label="density">
-                density
+                Density
               </ToggleButton>
               <ToggleButton value="availability" aria-label="availability">
-                availability
+                Availability
               </ToggleButton>
             </ToggleButtonGroup>
           }
@@ -150,10 +150,10 @@ export default function DataOptions(props: Props) {
               exclusive
             >
               <ToggleButton value="hourly" aria-label="hourly">
-                hourly
+                Hourly
               </ToggleButton>
               <ToggleButton value="daily" aria-label="daily">
-                daily
+                Daily
               </ToggleButton>
             </ToggleButtonGroup>
           </div>
@@ -248,7 +248,7 @@ export default function DataOptions(props: Props) {
 
 
 
-const Root = styled.div`
+const Root = styled('div')`
   [role=group] {
     margin-right: 10px;
   }
@@ -258,7 +258,7 @@ const Root = styled.div`
   }
 `
 
-const InfIcon = styled.div`
+const InfIcon = styled('div')`
   font-size: 1.1em;
   padding-bottom: 1px;
 `

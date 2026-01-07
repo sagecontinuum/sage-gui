@@ -23,7 +23,8 @@ const prod = {
   dataDownload: 'https://sage-commons.sdsc.edu/sageinterface/dump',
   docs: 'https://sagecontinuum.org/docs',
   contactUs: 'https://sagecontinuum.org/docs/contact-us',
-  ghDiscussions: 'https://github.com/orgs/waggle-sensor/discussions'
+  officeHours: 'https://sagecontinuum.org/docs/office-hours',
+  labs: 'https://sagecontinuum.org/labs'
 }
 
 

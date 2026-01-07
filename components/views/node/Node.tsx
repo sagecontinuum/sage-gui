@@ -261,7 +261,7 @@ export default function NodeView(props: Props) {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
       {error &&
         <Alert severity="info">{error.message}</Alert>
       }

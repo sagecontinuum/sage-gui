@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import { useEffect, useMemo, useState, Fragment } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import * as BH from '/components/apis/beehive'
 import * as BK from '/components/apis/beekeeper'
@@ -1177,12 +1177,8 @@ export default function QueryBrowser() {
 
 }
 
-const Root = styled.div<{isMedia: boolean}>`
+const Root = styled('div')<{isMedia: boolean}>`
   margin-left: 0;
-
-  h2, h3, h4 {
-    color: #444;
-  }
 
   .filter-title {
     margin: 20px 0px;
@@ -1194,6 +1190,10 @@ const Root = styled.div<{isMedia: boolean}>`
       display: none;
       font-size: .8em;
       line-height: 1em;
+    }
+
+    .MuiButtonBase-root  {
+      background: ${({ theme }) => theme.palette.mode === 'dark' ? '#272727' : '#fff'};
     }
 
     button:hover .help-text {
@@ -1217,7 +1217,7 @@ const Root = styled.div<{isMedia: boolean}>`
   }
 `
 
-const Main = styled.div`
+const Main = styled('div')`
   position: relative;
   height: 100%;
   margin: 30px 20px 30px 0;
@@ -1238,12 +1238,13 @@ const Main = styled.div`
   }
 `
 
-const Menu = styled.div`
+const Menu = styled('div')`
   margin-bottom: 15px;
-  background: #fff;
+  // todo(nc): configure more secondary light/dark colors
+  background: ${({ theme }) => theme.palette.mode === 'dark' ? '#272727' : '#fff'};
 `
 
-const Snippets = styled.div`
+const Snippets = styled('div')`
   margin: 40px 0 0px 0;
 
   > div { margin: 30px 0 0px 0; }
@@ -1266,13 +1267,12 @@ const Snippets = styled.div`
   }
 
   .MuiButtonBase-root {
-    background: rgba(30, 30, 30) !important;
+    background: rgba(30, 30, 30) !important; // text is behind button
     opacity: 0.8 !important;
     color: #fff;
-
   }
 `
 
-const QueryBuilderContainer = styled.div`
+const QueryBuilderContainer = styled('div')`
   margin-right: 2rem;
 `

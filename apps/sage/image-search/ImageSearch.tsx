@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ImageCard } from './ImageCard'
 import { useLocation } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import { Card, CardViewStyle } from '/components/layout/Layout'
 import {
@@ -152,7 +152,7 @@ export default function ImageSearch() {
 
   return (
     <Root className="flex column gap items-center">
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Box
         sx={{
@@ -353,7 +353,7 @@ export default function ImageSearch() {
 
 
 
-const Root = styled.div`
+const Root = styled('div')`
   margin: 1rem 5rem;
 
   // todo(nc): fix in table component
@@ -362,11 +362,11 @@ const Root = styled.div`
   }
 `
 
-const TableContainer = styled.div`
+const TableContainer = styled('div')`
   margin: 1rem;
 `
 
-const Title = styled.div`
+const Title = styled('div')`
   h2 {
     margin:0;
     padding: 1rem 1rem 0 1rem;
@@ -377,12 +377,12 @@ const Title = styled.div`
   }
 `
 
-const ScrollableWrapper = styled.div`
+const ScrollableWrapper = styled('div')`
   position: relative;
   padding-top: 16px;
 `
 
-const TopShadow = styled.div`
+const TopShadow = styled('div')`
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 16px;
@@ -401,17 +401,16 @@ const boxShadow = `
 `
 
 
-const PromptContainer = styled.div`
+const PromptContainer = styled('div')`
   ${boxShadow}
 
   position: sticky;
   z-index: 1;
-  background: #fff;
   border-radius: 10px;
-  background: #fff;
+  background: ${props => props.theme.palette.background.paper};
 `
 
-const Logo = styled.div`
+const Logo = styled('div')`
   .logo {
     font-size: 20pt;
   }
@@ -421,7 +420,7 @@ const Logo = styled.div`
   }
 `
 
-const ISLogo = styled.div`
+const ISLogo = styled('div')`
   font-size: 1.8em;
   font-family: 'Open sans', sans-serif;
   font-weight: 800;

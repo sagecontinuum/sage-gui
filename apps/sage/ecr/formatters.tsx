@@ -77,7 +77,7 @@ export const Thumb = styled('div')`
 
   svg {
     padding: 1em;
-    filter: drop-shadow(0px 0px 0.3rem #ccc);
+    filter: ${props => props.theme.palette.mode === 'light' ? 'drop-shadow(0px 0px 0.3rem #ccc)' : 'none' };
   }
 `
 

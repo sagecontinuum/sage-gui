@@ -830,7 +830,7 @@ const Container = styled(TableContainer)<StylingProps>`
   ${props => {
     return props.$stripes &&
     `& tr:nth-child(odd) {
-      background: ${props.theme.palette.mode === 'dark' ? '#151515' : '#fafafa'};
+      background: ${props.theme.palette.mode === 'dark' ? '#161616' : '#fafafa'};
     }`}}
 
   td.MuiTableCell-sizeSmall {

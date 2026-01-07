@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import { TextField, Button, Alert, Tooltip, Autocomplete, Popper, Box } from '@mui/material'
 // import FormEditorIcon from '@mui/icons-material/FormatListNumberedRounded'
@@ -404,7 +404,7 @@ export default function CreateJob() {
 
   return (
     <Root>
-      <CardViewStyle/>
+      {CardViewStyle}
       <main className="flex column gap">
         <div className="flex space-between gap">
           <h1>
@@ -454,12 +454,12 @@ export default function CreateJob() {
         {tab == 'editor' &&
           <>
             <EditorContainer className="flex gap">
-              <div className="flex" style={{width: '100%'}}>
+              <TextEditorContainer className="flex" style={{width: '100%'}}>
                 <TextEditor
                   value={editorState.content}
                   onChange={handleUpdateEditor}
                 />
-              </div>
+              </TextEditorContainer>
               <EditorOpts className="flex column gap">
                 <div className="flex items-center gap">
                   <Autocomplete
@@ -740,7 +740,7 @@ export default function CreateJob() {
 }
 
 
-const Root = styled.div`
+const Root = styled('div')`
   margin: 0 auto;
   max-width: 1200px;
   padding-bottom: 200px;
@@ -764,20 +764,24 @@ const Root = styled.div`
   }
 `
 
-const Notice = styled.div`
+const Notice = styled('div')`
   margin: 10px 0 0 200px;
 `
 
-const EditorContainer = styled.div`
+const EditorContainer = styled('div')`
   height: 60vh;
   width: 80vw;
 `
 
-const EditorOpts = styled.div`
+const TextEditorContainer = styled('div')`
+  border: 1px solid ${props => props.theme.palette.divider};
+`
+
+const EditorOpts = styled('div')`
   position: relative;
 `
 
-const CopyContainer = styled.div`
+const CopyContainer = styled('div')`
   position: absolute;
   bottom: 0;
 `

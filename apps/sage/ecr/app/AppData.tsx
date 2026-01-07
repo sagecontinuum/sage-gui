@@ -112,7 +112,7 @@ export default function AppData(props: Props) {
 
   return (
     <Root className="flex column gap">
-      {/* <CardViewStyle /> */}
+      {/* {CardViewStyle} */}
       <Card>
         <div className="flex gap">
           <h2 className="no-margin">{getRangeTitle(opts.window)}</h2>

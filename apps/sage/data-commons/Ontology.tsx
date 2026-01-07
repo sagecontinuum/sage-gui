@@ -34,7 +34,7 @@ export default function Ontology() {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Card>
         <h1 className="no-margin">Ontology</h1>

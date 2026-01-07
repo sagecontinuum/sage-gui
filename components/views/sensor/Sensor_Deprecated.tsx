@@ -66,7 +66,7 @@ export default function Sensor() {
 
   return (
     <Root>
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Main>
         <Sidebar>

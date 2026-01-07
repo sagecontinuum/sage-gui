@@ -1,6 +1,6 @@
 // @ts-nocheck -- type checking for timeline is still a todo
 import { useEffect, useState } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 
 import { Button, Divider, FormControlLabel, IconButton, Tooltip } from '@mui/material'
@@ -336,7 +336,7 @@ export default function JobDetails(props: Props) {
 
 
 
-const JobMetaContainer = styled.div`
+const JobMetaContainer = styled('div')`
   tbody td:first-child {
     width: 120px;
     text-align: right;
@@ -348,7 +348,7 @@ const JobMetaContainer = styled.div`
   }
 `
 
-const Content = styled.div`
+const Content = styled('div')`
   .timeline-title {
     margin-top: 2rem;
   }

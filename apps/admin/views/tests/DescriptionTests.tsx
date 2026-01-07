@@ -392,7 +392,7 @@ export default function ImageTests() {
 
   return (
     <Root className="flex">
-      <CardViewStyle />
+      {CardViewStyle}
 
       <Sidebar width="250px" style={{padding: '10px 0 100px 0'}}>
         <ModelSelector>

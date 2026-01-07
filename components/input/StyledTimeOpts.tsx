@@ -1,6 +1,6 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
-const TimeOpts = styled.div`
+const TimeOpts = styled('div')`
   display: flex;
 
   .MuiInputBase-root,
@@ -9,14 +9,17 @@ const TimeOpts = styled.div`
     border-radius: 5px;
   }
 
-  .MuiButtonBase-root {
+  .MuiButtonBase-root,
+  .react-datetimerange-picker__wrapper {
     min-width: 30px;
-    color: #fff;
-    border-color: #c4c4c4;
+    border-color: ${({theme}) =>  theme.palette.mode == 'dark' ?
+    theme.palette.grey[700] : theme.palette.grey[400]} !important;
   }
 
-  .MuiButtonBase-root:hover {
-    border-color: #212121
+  .MuiButtonBase-root:hover,
+  .react-datetimerange-picker__wrapper:hover {
+    border-color: ${({theme}) => theme.palette.mode == 'dark' ?
+    theme.palette.grey[100] : theme.palette.text.primary} !important;
   }
 
   .MuiCircularProgress-root {

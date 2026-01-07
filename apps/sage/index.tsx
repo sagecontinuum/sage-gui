@@ -187,7 +187,7 @@ export default function Sage() {
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider theme={theme} defaultMode="light">
+      <ThemeProvider theme={theme} defaultMode="light" noSsr>
         <CssBaseline/>
 
         <BrowserRouter>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback, useReducer } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import Button from '@mui/material/Button'
 import FileDownloadRounded from '@mui/icons-material/FileDownloadRounded'
@@ -323,108 +323,106 @@ export default function Data(props: Props) {
           </Controls>
         </Top>
 
-        <Items>
-          {opts.display == 'nodes' && filtered && ecr &&
-            filtered
-              .slice(0, getInfiniteEnd(page))
-              .map(vsn => {
-                const timelineData = data[vsn]
-                const {location} = nodeDict[vsn]
+        {opts.display == 'nodes' && filtered && ecr &&
+          filtered
+            .slice(0, getInfiniteEnd(page))
+            .map(vsn => {
+              const timelineData = data[vsn]
+              const {location} = nodeDict[vsn]
 
-                return (
-                  <TimelineContainer key={vsn}>
-                    <div className="flex title-row gap">
-                      <div className="flex column">
-                        <div>
-                          <h2>{vsnLink(vsn, nodeDict[vsn])}</h2>
-                        </div>
-                        <div>{location}</div>
+              return (
+                <TimelineContainer key={vsn}>
+                  <div className="flex title-row gap">
+                    <div className="flex column">
+                      <div>
+                        <h2>{vsnLink(vsn, nodeDict[vsn])}</h2>
                       </div>
-
-                      {DATA_PRODUCT_PATH &&
-                        <div>
-                          {getDownloadLink(DATA_PRODUCT_PATH)}
-                        </div>
-                      }
+                      <div>{location}</div>
                     </div>
-                    <TimelineChart
-                      data={timelineData}
-                      cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
-                      startTime={opts.start}
-                      endTime={opts.end}
-                      tooltip={(item) => `
-                        <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()}${' '}
-                          ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
-                          (${TIME_WINDOW})
-                        </div>
-                        ${item.meta.plugin}<br>
-                        ${item.value.toLocaleString()} records`
-                      }
-                      onCellClick={(data) => {
-                        const {timestamp, meta} = data
-                        const {vsn, origPluginName} = meta
-                        const date = new Date(timestamp)
-                        const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
-                        window.open(
-                          `${window.location.origin}/query-browser` +
-                          `?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`,
-                          '_blank'
-                        )
-                      }}
-                      yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
-                      labelWidth={TIMELINE_LABEL_WIDTH}
-                    />
-                  </TimelineContainer>
-                )
-              })
-          }
 
-          {opts.display == 'apps' && byApp &&
-            Object.keys(byApp)
-              .slice(0, getInfiniteEnd(page))
-              .map(name => {
-                const timelineData = byApp[name]
-                return (
-                  <TimelineContainer key={name}>
-                    <h2><AppLabel label={name} ecr={ecr} /></h2>
-                    <TimelineChart
-                      data={timelineData}
-                      limitRowCount={10}
-                      cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
-                      colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
-                      startTime={opts.start}
-                      endTime={opts.end}
-                      tooltip={(item) =>
-                        `
-                        <div style="margin-bottom: 5px;">
-                          ${new Date(item.timestamp).toDateString()}${' '}
-                          ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
-                          (${TIME_WINDOW})
-                        </div>
-                        ${item.meta.plugin}<br>
-                        ${item.value.toLocaleString()} records`
-                      }
-                      yFormat={vsn => <Link to={`/node/${vsn}`} target="_blank">{vsn}</Link>}
-                      onCellClick={(data) => {
-                        const {timestamp, meta} = data
-                        const {vsn, plugin} = meta
-                        const date = new Date(timestamp)
-                        const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
-                        window.open(window.location.origin +
-                          `/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&end=${end}`
-                        , '_blank')
-                      }}
-                      labelWidth={TIMELINE_LABEL_WIDTH}
-                    />
-                  </TimelineContainer>
-                )
-              })
-          }
+                    {DATA_PRODUCT_PATH &&
+                      <div>
+                        {getDownloadLink(DATA_PRODUCT_PATH)}
+                      </div>
+                    }
+                  </div>
+                  <TimelineChart
+                    data={timelineData}
+                    cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
+                    colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
+                    startTime={opts.start}
+                    endTime={opts.end}
+                    tooltip={(item) => `
+                      <div style="margin-bottom: 5px;">
+                        ${new Date(item.timestamp).toDateString()}${' '}
+                        ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
+                        (${TIME_WINDOW})
+                      </div>
+                      ${item.meta.plugin}<br>
+                      ${item.value.toLocaleString()} records`
+                    }
+                    onCellClick={(data) => {
+                      const {timestamp, meta} = data
+                      const {vsn, origPluginName} = meta
+                      const date = new Date(timestamp)
+                      const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
+                      window.open(
+                        `${window.location.origin}/query-browser` +
+                        `?nodes=${vsn}&apps=${origPluginName}.*&start=${timestamp}&end=${end}`,
+                        '_blank'
+                      )
+                    }}
+                    yFormat={(label) => <AppLabel label={label} ecr={ecr} />}
+                    labelWidth={TIMELINE_LABEL_WIDTH}
+                  />
+                </TimelineContainer>
+              )
+            })
+        }
 
-          <div ref={loader} />
-        </Items>
+        {opts.display == 'apps' && byApp &&
+          Object.keys(byApp)
+            .slice(0, getInfiniteEnd(page))
+            .map(name => {
+              const timelineData = byApp[name]
+              return (
+                <TimelineContainer key={name}>
+                  <h2><AppLabel label={name} ecr={ecr} /></h2>
+                  <TimelineChart
+                    data={timelineData}
+                    limitRowCount={10}
+                    cellUnit={opts.time == 'daily' ? 'day' : 'hour'}
+                    colorCell={opts.colorType == 'density' ? colorDensity : stdColor}
+                    startTime={opts.start}
+                    endTime={opts.end}
+                    tooltip={(item) =>
+                      `
+                      <div style="margin-bottom: 5px;">
+                        ${new Date(item.timestamp).toDateString()}${' '}
+                        ${new Date(item.timestamp).toLocaleTimeString([], {timeStyle: 'short'})}${' '}
+                        (${TIME_WINDOW})
+                      </div>
+                      ${item.meta.plugin}<br>
+                      ${item.value.toLocaleString()} records`
+                    }
+                    yFormat={vsn => <Link to={`/node/${vsn}`} target="_blank">{vsn}</Link>}
+                    onCellClick={(data) => {
+                      const {timestamp, meta} = data
+                      const {vsn, plugin} = meta
+                      const date = new Date(timestamp)
+                      const end = (opts.time == 'daily' ? addDays(date, 1) : addHours(date, 1)).toISOString()
+                      window.open(window.location.origin +
+                        `/query-browser?nodes=${vsn}&apps=${plugin}.*&start=${timestamp}&end=${end}`
+                      , '_blank')
+                    }}
+                    labelWidth={TIMELINE_LABEL_WIDTH}
+                  />
+                </TimelineContainer>
+              )
+            })
+        }
+
+        <div ref={loader} />
 
         {error &&
           <ErrorMsg>{error.message}</ErrorMsg>
@@ -449,24 +447,15 @@ export default function Data(props: Props) {
   )
 }
 
-const Root = styled.div`
-  .MuiCheckbox-root:not(.Mui-checked) span,
-  .MuiTextField-root {
-    background: #fff;
-  }
+const Root = styled('div')`
 `
 
-const Main = styled.div`
+const Main = styled('div')`
   margin: 0px 20px 30px 0;
   padding: 0 0 0 20px;
   width: 100%;
 `
 
-
-const Items = styled.div`
-
-`
-
-const LoadingMore = styled.div`
+const LoadingMore = styled('div')`
   font-size: 2em;
 `

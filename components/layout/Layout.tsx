@@ -1,10 +1,8 @@
 import { type ReactElement } from 'react'
 
-import { styled } from '@mui/material'
+import { styled, GlobalStyles } from '@mui/material'
 import MuiDivider from '@mui/material/Divider'
 import { Card as MuiCard, type CardProps } from '@mui/material'
-
-import { createGlobalStyle } from 'styled-components'
 
 export const Item = styled(MuiCard)`
   position: relative;
@@ -64,13 +62,8 @@ export const Sidebar = styled('div')<{width?: string}>`
   width: ${props => props.width || '250px'};
   min-width: ${props => props.width || '250px'};
   border-right: 1px solid ${props => props.theme.palette.divider};
-  background: ${props => props.theme.palette.background.paper};
+  background: ${({ theme }) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f8f8f8'};
   overflow-y: scroll;
-
-  .MuiInputBase-root,
-  .MuiButtonBase-root:not(.Mui-selected, .MuiCheckbox-root) {
-    background: #fff;
-  }
 `
 
 export const FilterTitle =  styled('h2')`
@@ -79,12 +72,16 @@ export const FilterTitle =  styled('h2')`
 
 
 // second version of card design (WIP)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- to be fixed with react 18 upgrade?
-export const CardViewStyle: any = createGlobalStyle`
-  body {
-    background: rgb(231, 235, 240) !important;
-  }
-`
+export const CardViewStyle =
+  <GlobalStyles
+    styles={(theme) => ({
+      body: {
+        // todo(nc): configure secondary light/dark mode background colors
+        background: theme.palette.mode === 'dark' ? 'rgb(30, 30, 30)' : 'rgb(231, 235, 240)',
+      }
+    })}
+  />
+
 
 type Props = {
   noPad?: boolean
