@@ -7,6 +7,23 @@ declare module '@mui/styles/defaultTheme' {
 }
 
 const theme = createTheme({
+  defaultColorScheme: 'light',
+  colorSchemes: {
+    dark: true,
+    light: {
+      palette: {
+        primary: {
+          main: 'rgb(28, 140, 201)'
+        },
+        secondary: {
+          main: '#8166a0'
+        },
+        success: {
+          main: '#3ac37e'
+        },
+      },
+    }
+  },
   typography: {
     fontFamily: [
       'Roboto'
@@ -24,18 +41,6 @@ const theme = createTheme({
       lg: 1200,
       xl: 1750,
     },
-  },
-  palette: {
-    mode: 'light',
-    primary: {
-      main: 'rgb(28, 140, 201)'
-    },
-    secondary: {
-      main: '#8166a0'
-    },
-    success: {
-      main: '#3ac37e'
-    }
   },
   components: {
     MuiCard: {

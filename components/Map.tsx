@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import Map, {
@@ -14,6 +14,7 @@ import settings from './settings'
 
 import * as formatters from '/components/views/nodes/nodeFormatters'
 import * as BK from '/components/apis/beekeeper'
+import { useColorScheme } from '@mui/material'
 
 const {initialViewState} = settings
 
@@ -36,7 +37,7 @@ const mapSettings = {
   }),
   mapboxAccessToken: MAPBOX_TOKEN,
   style: {height: '350px'},
-  mapStyle: 'mapbox://styles/mapbox/light-v9',
+  mapStyle: 'mapbox://styles/mapbox/dark-v9',
   cooperativeGestures: true,
   /* 3d view
   projection: 'globe',
@@ -214,6 +215,7 @@ export default function MapGL(props: Props) {
     showUptime = true
   } = props
 
+  const {mode, systemMode} = useColorScheme()
   const mapRef = useRef<MapRef>(null)
   const [popup, setPopup] = useState(null)
 
@@ -255,7 +257,11 @@ export default function MapGL(props: Props) {
 
   return (
     <Root>
-      <Map ref={mapRef} {...mapSettings}>
+      <Map ref={mapRef}
+        {...mapSettings}
+        mapStyle={
+          `mapbox://styles/mapbox/${(mode === 'system' ? systemMode : mode) === 'dark' ? 'dark-v10' : 'light-v9'}`
+        }>
         <FullscreenControl />
         <NavigationControl position="bottom-right" showCompass={false} />
 
@@ -295,7 +301,7 @@ export default function MapGL(props: Props) {
 }
 
 
-const Root = styled.div`
+const Root = styled('div')(({ theme }) => `
   width: 100%;
 
   .popup-title {
@@ -309,8 +315,7 @@ const Root = styled.div`
   .marker-dot {
     height: ${markerSize}px;
     width: ${markerSize}px;
-    border: 1px solid #666;
-    // background: #d8d8d8;
+    border: 1px solid ${theme.palette.mode === 'dark' ? '#999' : '#666'};
     border-radius: 50%;
     display: inline-block;
   }
@@ -339,6 +344,16 @@ const Root = styled.div`
 
   .mapboxgl-popup {
     max-width: 100% !important;
+
+    .mapboxgl-popup-content {
+      background: ${theme.palette.background.paper};
+      color: ${theme.palette.text.primary};
+    }
+
+    .mapboxgl-popup-tip {
+      border-top-color: ${theme.palette.background.paper};
+    }
+
     .node-meta {
       white-space: nowrap;
       font-size: 1.2em;
@@ -349,9 +364,13 @@ const Root = styled.div`
         font-size: 19px;
       }
     }
+
+    .muted {
+      color: ${theme.palette.text.secondary};
+    }
   }
 
   .clipboard-content {
     margin-right: 20px;
   }
-`
+`)

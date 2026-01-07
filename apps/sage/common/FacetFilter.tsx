@@ -1,11 +1,11 @@
 import { useState, useEffect, ChangeEvent } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import IconButton from '@mui/material/IconButton'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import TextField from '@mui/material/TextField'
 
-import SearchIcon from '@mui/icons-material/SearchOutlined'
+import { SearchOutlined } from '@mui/icons-material'
 
 import highlightText from '/components/utils/text'
 import Checkbox from '/components/input/Checkbox'
@@ -136,7 +136,7 @@ export default function Filter(props: Props) {
 
         {!hideSearchIcon &&
           <SearchBtn onClick={() => setShowSearch(!showSearch)} size="small" autoFocus disableRipple>
-            <SearchIcon/>
+            <SearchOutlined />
           </SearchBtn>
         }
       </Header>
@@ -244,26 +244,26 @@ export default function Filter(props: Props) {
 }
 
 
-const FilterRoot = styled.div`
+const FilterRoot = styled('div')`
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
   padding: 0 5px;
 `
 
-const Header = styled.div`
+const Header = styled('div')`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e9e9e9;
+  border-bottom: 1px solid ${props => props.theme.palette.divider};
   margin: 5px 0;
   padding-bottom: 5px;
 `
 
-const Title = styled.div`
+const Title = styled('div')`
 
 `
-const Filters = styled.div`
+const Filters = styled('div')`
 
 `
 const CBContainer = styled(FormControlLabel)`
@@ -283,11 +283,11 @@ const CBContainer = styled(FormControlLabel)`
   }
 `
 
-const FacetLabel = styled.div`
+const FacetLabel = styled('div')`
   font-size: .9rem;
 `
 
-const Count = styled.div`
+const Count = styled('div')`
   color: #888;
   font-size: .8rem;
 `
@@ -298,19 +298,19 @@ const SearchBtn = styled(IconButton)`
   }
 `
 
-const MoreBtn = styled.a`
+const MoreBtn = styled('a')`
   display: flex;
   margin-left: auto;
   margin-right: 10px;
   font-size: .9em;
 `
 
-const NoneFound = styled.div`
+const NoneFound = styled('div')`
   margin: 0 20px;
 `
 
 /* ranges are not currently supported
-const RangeForm = styled.form`
+const RangeForm = styled('form')`
   margin-bottom: 5px;
 `
 

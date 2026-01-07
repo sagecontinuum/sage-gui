@@ -15,6 +15,7 @@ import { truncate } from 'lodash'
 
 import config from '/config'
 import { type AppDetails } from '/components/apis/ecr'
+import { IconButton } from '@mui/material'
 
 
 function AppBox(props) {
@@ -66,13 +67,14 @@ function AppBox(props) {
               placement="top"
               className="external-link hover"
             >
-              <a href={data.source.url}
+              <IconButton
+                href={data.source.url}
                 target="_blank"
                 rel="noreferrer"
-                onClick={e => e.stopPropagation()}
+                onClick={(e: React.MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
               >
-                <GithubIcon className="text-color" />
-              </a>
+                <GithubIcon fontSize="small"/>
+              </IconButton>
             </Tooltip>
           </div>
 

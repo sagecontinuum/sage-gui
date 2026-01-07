@@ -5,7 +5,10 @@ const keys = [
   'sage-table-columns-/all-nodes',
   'sage-table-columns-/sensors',
   'sage-table-columns-task-listing',
-  'sage-assistant'
+  'sage-assistant',
+  'mui-color-scheme-dark',
+  'mui-color-scheme-light',
+  'mui-mode'
 ]
 
 

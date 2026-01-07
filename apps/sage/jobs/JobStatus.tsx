@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import { Button, IconButton, Tooltip } from '@mui/material'
 import { ViewTimelineOutlined, AddRounded } from '@mui/icons-material'
@@ -521,32 +521,26 @@ export default function JobStatus() {
 
 
 
-const Root = styled.div`
+const Root = styled('div')`
   width: 100%;
   margin-bottom: 20px;
 `
 
-const MapContainer = styled.div`
+const MapContainer = styled('div')`
   width: 100%;
   height:  350px;
-  border: 1px solid #ddd;
-  background: #f2f2f2;
+  border: 1px solid ${props => props.theme.palette.divider};
 `
 
-const TableContainer = styled.div`
+const TableContainer = styled('div')`
   margin-top: 1em;
 
   & .MuiInputBase-root {
     max-width: 100%;
-    background: #fff;
-  }
-
-  table {
-    background: #fff;
   }
 `
 
-const TableOptions = styled.div`
+const TableOptions = styled('div')`
   margin: 0 20px;
 `
 

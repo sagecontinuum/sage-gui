@@ -1,6 +1,6 @@
 import IconButton from '@mui/material/IconButton'
 import SpaciousIcon from '@mui/icons-material/ViewStream'
-import ViewComfyIcom from '@mui/icons-material/ViewComfy'
+import ViewComfyIcon from '@mui/icons-material/ViewComfy'
 
 
 type Layout = 'compact' | 'spacious'
@@ -17,14 +17,18 @@ export default function LayoutToggle(props: LayoutToggleProps) {
     <div className="flex">
       <IconButton
         onClick={() => onClick('compact')}
-        style={{color: layout == 'compact' ? '#000' : '#ccc'}}
+        sx={{
+          color: layout === 'compact' ? 'text.primary' : 'text.disabled'
+        }}
         size="small"
       >
-        <ViewComfyIcom />
+        <ViewComfyIcon />
       </IconButton>
       <IconButton
         onClick={() => onClick('spacious')}
-        style={{color: layout == 'spacious' ? '#000' : '#ccc'}}
+        sx={{
+          color: layout === 'spacious' ? 'text.primary' : 'text.disabled'
+        }}
         size="small"
       >
         <SpaciousIcon />

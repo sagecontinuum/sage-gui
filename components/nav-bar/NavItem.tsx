@@ -1,7 +1,7 @@
 
 import { useRef } from 'react'
 import { NavLink, useMatch, useLocation } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import CaretIcon from '@mui/icons-material/ArrowDropDownRounded'
 import MenuItem from '@mui/material/MenuItem'
@@ -28,7 +28,7 @@ export default function NavItem(props: Props) {
   const isActive = path.includes(root)
 
   return (
-    <Root ref={ref} className="flex items-center">
+    <Root ref={ref} className="nav-item flex items-center">
       {to &&
         <NavLink to={to} className={`flex ${isActive ? 'active' : ''}`}>
           {label} {menu && <CaretIcon />}
@@ -51,7 +51,7 @@ export default function NavItem(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled('div')(({ theme }) => `
   position: relative;
   margin: 0 15px;
 
@@ -59,7 +59,10 @@ const Root = styled.div`
     padding: 20px 0;
     user-select: none;
     z-index: 9999;
-    color: #000;
+    color: ${theme.palette.text.primary};
+  }
+
+  > a:hover {
     text-decoration: none;
   }
 
@@ -89,13 +92,13 @@ const Root = styled.div`
     height: 8px;
     bottom: 0;
     left: 35%;
-    background: rgb(28, 140, 201);
+    background: ${theme.palette.primary.main};
     border-radius: 15px 15px 0 0;
   }
 
   .MuiMenuItem-root,
   .MuiMenuItem-root svg {
-    color: #444;
+    color: ${theme.palette.text.secondary};
   }
 
   .MuiMenuItem-root:after {
@@ -108,20 +111,20 @@ const Root = styled.div`
     width: 8px;
     height: 16px;
     left: 0;
-    background: rgb(28, 140, 201);
+    background: ${theme.palette.primary.main};
     border-radius: 0px 15px 15px 0;
   }
-`
+`)
 
-const MenuContainer = styled.div`
+const MenuContainer = styled('div')`
   position: absolute;
   top: 59px;
   left: 50%;
   transform: translateX(-50%) translateY(-10px);
   min-width: 150px;
-  background: #fff;
+  background: ${props => props.theme.palette.background.paper};
   box-shadow: 0px 5px 5px rgba(0, 0, 0, .05);
-  border: solid #ccc;
+  border: solid ${props => props.theme.palette.divider};
   border-width: 0 1px 1px 1px;
   z-index: 8999;
 
@@ -131,7 +134,7 @@ const MenuContainer = styled.div`
   transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 
   /* Show on hover */
-  ${Root}:hover & {
+  .nav-item:hover & {
     opacity: 1;
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);

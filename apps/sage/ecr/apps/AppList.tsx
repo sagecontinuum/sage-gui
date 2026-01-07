@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useSearchParams, useNavigate, useMatch } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -276,15 +276,15 @@ export default function AppList() {
 }
 
 
-const Root = styled.div`
+const Root = styled('div')`
   position: relative;
 `
 
-const Controls = styled.div`
-  background-color: #fff;
+const Controls = styled('div')`
+  background-color: ${props => props.theme.palette.background.paper};
 
   padding: 20px 0 15px 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid ${props => props.theme.palette.divider};
 
   .MuiButton-root,
   .MuiFormControlLabel-root {
@@ -292,7 +292,7 @@ const Controls = styled.div`
   }
 `
 
-const NoneFound = styled.div`
+const NoneFound = styled('div')`
   font-size: 2.0em;
   padding-top: 100px;
 

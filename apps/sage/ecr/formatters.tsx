@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
-import styled from 'styled-components'
 import { Link } from 'react-router-dom'
+import { styled } from '@mui/material'
 import GithubIcon from '@mui/icons-material/GitHub'
 import Tooltip from '@mui/material/Tooltip'
 
@@ -54,7 +54,7 @@ export const formatters = {
 
     return (
       <a href={url} target="_blank" rel="noreferrer" className="flex items-center">
-        <GithubIcon fontSize="small" className="text-color" />&nbsp;
+        <GithubIcon fontSize="small"/>&nbsp;&nbsp;
         {url.slice(url.lastIndexOf('/') + 1).replace('.git', '')}
       </a>
     )
@@ -65,7 +65,7 @@ export const formatters = {
 }
 
 
-export const Thumb = styled.div`
+export const Thumb = styled('div')`
   img, svg {
     width: 125px;
     height: 125px;
@@ -82,7 +82,7 @@ export const Thumb = styled.div`
 `
 
 
-export const Dot = styled.div`
+export const Dot = styled('div')`
   margin: 0 10px;
   :before {
     content: "·";

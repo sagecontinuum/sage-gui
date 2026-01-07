@@ -4,7 +4,7 @@ import {
   MouseEvent, ChangeEvent
 } from 'react'
 
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 
 import TableContainer from '@mui/material/TableContainer'
 import Table from '@mui/material/Table'
@@ -227,7 +227,7 @@ const TableRowComponent = styled(TableRow)`
 `
 
 // todo(nc)?: remove more button option
-const More = styled.span`
+const More = styled('span')`
   position: absolute;
   background: #f5f5f5;
   padding: 0 20px;
@@ -259,7 +259,7 @@ const getSortArrow = (colID, sort) =>
     {colID in sort && (sort[colID] == 'dsc' ? <ArrowDown /> : <ArrowUp />)}
   </SortArrow>
 
-const SortArrow = styled.span`
+const SortArrow = styled('span')`
   position: absolute;
   & svg {
     width: .9em;
@@ -777,10 +777,10 @@ export default function TableComponent(props: Props) {
 
 
 
-const Root = styled.div`
+const Root = styled('div')`
 `
 
-const CtrlContainer = styled.div`
+const CtrlContainer = styled('div')`
   padding-bottom: 10px;
   display: flex;
   align-items: center;
@@ -791,7 +791,7 @@ const CtrlContainer = styled.div`
   }
 `
 
-const MiddleComponent = styled.div`
+const MiddleComponent = styled('div')`
   flex: 1;
 `
 
@@ -823,32 +823,32 @@ const Container = styled(TableContainer)<StylingProps>`
     visibility: visible;
   }
 
-
   td {
     font-size: 13px;
   }
 
-  ${props => props.$stripes &&
+  ${props => {
+    return props.$stripes &&
     `& tr:nth-child(odd) {
-      background: #fafafa;
-    }`}
+      background: ${props.theme.palette.mode === 'dark' ? '#151515' : '#fafafa'};
+    }`}}
 
   td.MuiTableCell-sizeSmall {
     padding: 6px 12px;
   }
 
   tr.MuiTableRow-root:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.theme.palette.action.hover || 'rgba(0, 0, 0, 0.04)'};
   }
 
   tr.MuiTableRow-root.Mui-selected,
   tr.MuiTableRow-root.Mui-selected:hover {
-    background-color: #ecf4fb;
+    background-color: ${props => props.theme.palette.action.selected || 'rgba(0, 0, 0, 0.08)'};
   }
 
   ${props => !props.$userselect &&
     `& tr { user-select: none;
-     background#b7b7b7fa; }`}
+     background: #b7b7b7fa; }`}
 
   /* todo(nc): workaround for production build styling issue.
     similar to: https://github.com/gregnb/mui-datatables/issues/1074 */
@@ -857,19 +857,18 @@ const Container = styled(TableContainer)<StylingProps>`
     left: 0;
     z-index: 2;
     position: sticky;
-    background-color: #fff;
     user-select: none;
     padding: 0px 12px 6px 12px;
     font-weight: 800;
   }
 `
 
-const TableOption = styled.div`
+const TableOption = styled('div')`
   display: flex;
   margin-left: auto;
 `
 
-const NoneFoundNotice = styled.div`
+const NoneFoundNotice = styled('div')`
   display: flex;
   justify-content: center;
   transform: translate(0%, 20%);

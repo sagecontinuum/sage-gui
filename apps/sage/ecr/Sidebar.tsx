@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { NavLink } from 'react-router-dom'
 
 
@@ -33,14 +33,14 @@ export default function Sidebar(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled('div')`
   padding-top: 18px;
-  border-right: 1px solid #f1f1f1;
-  background: #f8f8f8;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  background: ${({ theme }) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f8f8f8'};
   max-width: 75px;
 `
 
-const Divider = styled.div`
+const Divider = styled('div')`
   height: 1px;
   background: #ddd;
   margin: 10px 0;
@@ -56,9 +56,9 @@ const Item = styled(NavLink)`
   text-align: center;
   padding: 10px;
   width: 100%;
-  color: #444;
+  color: ${({ theme }) => theme.palette.mode === 'dark' ? '#bbb' : '#444'};
   font-size: .9em;
-  border-right: 3px solid #f5f5f5;
+  border-right: 3px solid ${({ theme }) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5'};
 
   svg {
     font-size: 2.5em;
@@ -69,16 +69,16 @@ const Item = styled(NavLink)`
   }
 
   :hover:not(.active) {
-    color: #000;
+    color: ${({ theme }) => theme.palette.mode === 'dark' ? '#fff' : '#000'};
   }
 
   &.active {
     border-right: 3px solid ${primaryColor};
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+    border-top: 1px solid ${({ theme }) => theme.palette.mode === 'dark' ? '#333' : '#eee'};
+    border-bottom: 1px solid ${({ theme }) => theme.palette.mode === 'dark' ? '#333' : '#eee'};
     margin-top: -1px;
     margin-bottom: -1px;
-    background: rgb(255, 255, 255);
+    background: ${({ theme }) => theme.palette.mode === 'dark' ? '#2a2a2a' : 'rgb(255, 255, 255)'};
     font-weight: 800;
   }
 
