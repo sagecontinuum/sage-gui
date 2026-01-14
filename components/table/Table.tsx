@@ -731,8 +731,18 @@ export default function TableComponent(props: Props) {
 
       <Container
         offset={offsetHeight ? offsetHeight : '0px'}
-        $stripes={stripes}
-        $userselect={userSelect}
+        sx={{
+          ...(stripes && {
+            '& tr:nth-of-type(odd)': {
+              background: (theme) => theme.palette.mode === 'dark' ? '#161616' : '#fafafa'
+            }
+          }),
+          ...(!userSelect && {
+            '& tr': {
+              userSelect: 'none'
+            }
+          })
+        }}
       >
         <Table stickyHeader aria-label="table" size="small" ref={tableRef}>
           <TableHead>
@@ -803,8 +813,6 @@ const Pagination = styled(TablePagination)`
 
 type StylingProps = {
   offset?: string | boolean
-  $stripes?: boolean
-  $userselect?: boolean
 }
 
 const Container = styled(TableContainer)<StylingProps>`
@@ -827,12 +835,6 @@ const Container = styled(TableContainer)<StylingProps>`
     font-size: 13px;
   }
 
-  ${props => {
-    return props.$stripes &&
-    `& tr:nth-child(odd) {
-      background: ${props.theme.palette.mode === 'dark' ? '#161616' : '#fafafa'};
-    }`}}
-
   td.MuiTableCell-sizeSmall {
     padding: 6px 12px;
   }
@@ -845,10 +847,6 @@ const Container = styled(TableContainer)<StylingProps>`
   tr.MuiTableRow-root.Mui-selected:hover {
     background-color: ${props => props.theme.palette.action.selected || 'rgba(0, 0, 0, 0.08)'};
   }
-
-  ${props => !props.$userselect &&
-    `& tr { user-select: none;
-     background: #b7b7b7fa; }`}
 
   /* todo(nc): workaround for production build styling issue.
     similar to: https://github.com/gregnb/mui-datatables/issues/1074 */
