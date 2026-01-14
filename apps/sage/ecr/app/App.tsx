@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useSearchParams } from 'react-router-dom'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import ScienceIcon from '@mui/icons-material/ScienceRounded'
 import InputIcon from '@mui/icons-material/InputRounded'
@@ -35,7 +35,7 @@ export default function App() {
 
   const { loading, setLoading } = useProgress()
   const [repo, setRepo] = useState<ECR.Repo>(null)
-  const [isPublic, setIsPublic] = useState(null)
+  const [isPublic] = useState(null)
   const [sciHtml, setSciHtml] = useState(null)
 
   const [error, setError] = useState(null)
@@ -202,7 +202,7 @@ export default function App() {
 
 
 
-const Root = styled.div`
+const Root = styled('div')`
   padding: 20px 0px;
 `
 
@@ -210,15 +210,15 @@ const HR = styled(Divider)`
   margin: 2em 0 0 0;
 `
 
-const Details = styled.div`
+const Details = styled('div')`
 `
 
 
-const Main = styled.div`
+const Main = styled('div')`
   width: 100%;
 `
 
-const Science = styled.div`
+const Science = styled('div')`
   position: relative;
   width: 100%;
 `

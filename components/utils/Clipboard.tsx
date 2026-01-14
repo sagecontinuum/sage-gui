@@ -39,6 +39,7 @@ const Root = styled('pre')`
     overflow-x: scroll;
     padding-bottom: 15px;
   }
+
   background: ${({ theme }) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f8f8f8'};
   border: 1px solid ${props => props.theme.palette.divider};
 `

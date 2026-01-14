@@ -65,20 +65,20 @@ const theme = createTheme({
     },
     MuiTabs: {
       styleOverrides: {
-        root: {
-          borderBottom: '1px solid #e8e8e8',
-        }
+        root: ({ theme }) => ({
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        })
       }
     },
     MuiTab: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           fontWeight: 500,
           '&:not(.Mui-selected):hover': {
-            color: '#222',
+            color: theme.palette.text.primary,
             opacity: 1,
           }
-        }
+        })
       }
     },
     MuiButtonBase: {

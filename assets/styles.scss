@@ -253,6 +253,15 @@ pre {
   padding: 10px;
 }
 
+/* Remove extra padding when prism-code is present */
+pre:has(.prism-code) {
+  padding: 0;
+}
+
+.clipboard-content:has(.prism-code) {
+  padding-bottom: 0;
+}
+
 .mono-term, p > code {
   padding: 0px 2px;
   color: #c52700;

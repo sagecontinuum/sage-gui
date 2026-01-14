@@ -1,4 +1,3 @@
-import styled from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 
 import { Tabs, Tab } from './Tabs'
@@ -25,7 +24,7 @@ export default function Tabber(props: Props) {
 
 
   return (
-    <Root>
+    <>
       <Tabs
         value={path || defaultValue}
         aria-label={ariaLabel}
@@ -56,10 +55,6 @@ export default function Tabber(props: Props) {
           )
         })}
       </Tabs>
-    </Root>
+    </>
   )
 }
-
-const Root = styled.div`
-
-`

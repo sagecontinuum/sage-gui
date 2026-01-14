@@ -387,7 +387,7 @@ const TopShadow = styled('div')`
   top: 0; left: 0; right: 0;
   height: 16px;
   pointer-events: none;
-  background: #fff;
+  background: ${props => props.theme.palette.background.paper};
   box-shadow: 2px 8px 10px 0px rgba(0, 0, 0, 0.18);
   z-index: 2;
 `

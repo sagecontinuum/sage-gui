@@ -1,24 +1,13 @@
-import { useState, forwardRef } from 'react'
-import { Box, Typography, Chip, IconButton, Tooltip, Dialog, DialogContent, Popover, Slide } from '@mui/material'
-import DownloadIcon from '@mui/icons-material/Download'
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import FullscreenIcon from '@mui/icons-material/Fullscreen'
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
+import { useState } from 'react'
+import {
+  Box, Typography, Chip, IconButton, Tooltip, Dialog,
+  DialogContent, Popover, useTheme
+} from '@mui/material'
+
+import { Download, InfoOutlined, Fullscreen, ChatBubbleOutline } from '@mui/icons-material'
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
-import { TransitionProps } from '@mui/material/transitions'
-
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />
-})
 
 
-
-// Reusable component for caption and keywords
 export function CaptionWithKeywords({ caption, sx }: { caption: string, sx?: object }) {
   let captionText = caption
   let keywords: string[] = []
@@ -44,6 +33,7 @@ export function CaptionWithKeywords({ caption, sx }: { caption: string, sx?: obj
 }
 
 export function ImageCard({ obj }) {
+  const theme = useTheme()
   const [showCaption, setShowCaption] = useState(false)
   const [captionAnchor, setCaptionAnchor] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
@@ -70,9 +60,9 @@ export function ImageCard({ obj }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: '1px solid #eee',
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: 2,
-        background: '#fafafa',
+        background: theme.palette.background.paper,
         overflow: 'hidden',
         position: 'relative',
         '&:hover .image-actions': { opacity: 1 },
@@ -101,7 +91,7 @@ export function ImageCard({ obj }) {
           gap: 1,
           opacity: 0,
           transition: 'opacity 0.2s',
-          background: 'rgba(0,0,0,0.7)',
+          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.7)',
           borderRadius: 2,
           padding: '4px 12px',
           alignItems: 'center',
@@ -109,7 +99,7 @@ export function ImageCard({ obj }) {
       >
         <Tooltip title="Download image">
           <IconButton size="small" onClick={handleDownload} sx={{ color: '#fff' }}>
-            <DownloadIcon fontSize="small" />
+            <Download fontSize="small" />
           </IconButton>
         </Tooltip>
 
@@ -123,13 +113,13 @@ export function ImageCard({ obj }) {
               }}
               sx={{ color: '#fff' }}
             >
-              <ChatBubbleOutlineIcon fontSize="small" sx={{ color: '#fff' }} />
+              <ChatBubbleOutline fontSize="small" sx={{ color: '#fff' }} />
             </IconButton>
           </Tooltip>
         }
         <Tooltip title="Full screen">
           <IconButton size="small" onClick={() => setFullscreen(true)} sx={{ color: '#fff' }}>
-            <FullscreenIcon fontSize="small" />
+            <Fullscreen fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Show all details">
@@ -140,7 +130,7 @@ export function ImageCard({ obj }) {
             }}
             sx={{ color: '#fff' }}
           >
-            <InfoOutlinedIcon fontSize="small" />
+            <InfoOutlined fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -168,7 +158,14 @@ export function ImageCard({ obj }) {
                 <img
                   src={obj.link}
                   alt={obj.caption || 'image'}
-                  style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 8, boxShadow: '0 2px 8px #0002' }}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: 300,
+                    borderRadius: 8,
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? '0 2px 8px rgba(0,0,0,0.5)'
+                      : '0 2px 8px rgba(0,0,0,0.13)'
+                  }}
                 />
               </Box>
               <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>

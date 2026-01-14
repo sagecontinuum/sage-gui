@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { Outlet, useLocation, Link } from 'react-router-dom'
 
 import { Tabs, Tab } from '/components/tabs/Tabs'
@@ -42,7 +42,7 @@ export default function NodeTabs(props: Props) {
     <Root>
       <Tabs
         value={tab}
-        aria-label="node tabs by node phase"
+        aria-label="node related tabs"
       >
         <Tab
           label={label(search.includes('show_all') ? <RuleIcon/> : <CheckIcon /> , 'Node Status')}
@@ -74,6 +74,6 @@ export default function NodeTabs(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled('div')`
   margin: 0 10px 10px 10px;
 `

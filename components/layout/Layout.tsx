@@ -8,10 +8,6 @@ export const Item = styled(MuiCard)`
   position: relative;
   margin: 20px 1px; // 1px left/right for sticky header
   padding: 10px 15px;
-  border: 1px solid ${props => props.theme.palette.divider};
-  border-radius: 5px;
-  box-shadow: 0px 0px 1px 1px ${props => props.theme.palette.grey[100]};
-  color: ${props => props.theme.palette.text.primary};
 
   :hover {
     text-decoration: none;
@@ -21,7 +17,6 @@ export const Item = styled(MuiCard)`
   .actions {
     position: absolute;
     display: none;
-    background: ${props => props.theme.palette.background.paper};
     bottom: .5rem;
     right: .6rem;
   }

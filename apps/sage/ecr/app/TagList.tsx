@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
-
-import withStyles from '@mui/styles/withStyles'
 
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
@@ -11,13 +8,11 @@ import Accordion, { useAccordionStyles } from '/components/layout/Accordion'
 import Tooltip from '@mui/material/Tooltip'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import MoreIcon from '@mui/icons-material/UnfoldMoreOutlined'
-import LessIcon from '@mui/icons-material/UnfoldLessOutlined'
-import DeleteIcon from '@mui/icons-material/DeleteOutlineRounded'
-import BuildIcon from '@mui/icons-material/BuildRounded'
-import LaunchIcon from '@mui/icons-material/LaunchRounded'
-import GithubIcon from '@mui/icons-material/GitHub'
+import { useTheme } from '@mui/material/styles'
+import {
+  ExpandMore, UnfoldMoreOutlined, UnfoldLessOutlined, DeleteOutlineRounded,
+  BuildRounded, LaunchRounded, GitHub, LibraryAddCheckOutlined
+} from '@mui/icons-material'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import ToggleButton from '@mui/material/ToggleButton'
 import Divider from '@mui/material/Divider'
@@ -31,29 +26,13 @@ import useWithBuildStatus from '../hooks/useWithBuildStatus'
 import BuildIndicator from '../BuildIndicator'
 import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
 import Clipboard from '/components/utils/Clipboard'
+import { Highlight, themes } from 'prism-react-renderer'
 
 import * as ECR from '/components/apis/ecr'
 import Auth from '/components/auth/auth'
 
 import config from '/config'
-import { LibraryAddCheckOutlined } from '@mui/icons-material'
 const docker = config.dockerRegistry
-
-
-
-
-const StyledToggleButtonGroup = withStyles((theme) => ({
-  grouped: {
-    margin: theme.spacing(0.5),
-    border: 'none',
-    '&:not(:first-child)': {
-      borderRadius: theme.shape.borderRadius,
-    },
-    '&:first-child': {
-      borderRadius: theme.shape.borderRadius,
-    },
-  },
-}))(ToggleButtonGroup)
 
 
 
@@ -64,10 +43,11 @@ type Props = {
 
 export default function TagList(props: Props) {
   const { enqueueSnackbar } = useSnackbar()
+  const theme = useTheme()
 
   const classes = useAccordionStyles()
 
-  const [versions, setVersions] = useWithBuildStatus()
+  const [versions, setVersions] = useWithBuildStatus<ECR.AppDetails[]>()
 
   const [cfgMap, setCfgMap] = useState({})
   const [format, setFormat] = useState<'yaml' | 'json'>('yaml')
@@ -96,7 +76,9 @@ export default function TagList(props: Props) {
       })
       .finally(() => setLoadingConfigs(false))
 
-    setVersions(props.versions)
+    if (typeof setVersions === 'function') {
+      setVersions(props.versions)
+    }
   }, [props.versions, setVersions])
 
 
@@ -117,7 +99,9 @@ export default function TagList(props: Props) {
     ECR.build(app)
       .then(() => {
         enqueueSnackbar('Build started')
-        setVersions(prev => prev)
+        if (typeof setVersions === 'function') {
+          setVersions(prev => prev)
+        }
       }).catch(error => {
         enqueueSnackbar(`${error.message}  Please contact us for help.`, {variant: 'error'})
       }).finally(() => setBuildSubmitted(false))
@@ -125,7 +109,11 @@ export default function TagList(props: Props) {
 
   // after confirmation handle
   const handleDelete = () => {
-    return ECR.deleteApp(deleteTag)
+    return ECR.deleteApp({
+      namespace: deleteTag.namespace || '',
+      name: deleteTag.name,
+      version: deleteTag.version
+    })
       .then(() =>
         enqueueSnackbar('Tag deleted!', {variant: 'success'})
       ).catch(() =>
@@ -135,8 +123,8 @@ export default function TagList(props: Props) {
 
 
   return (
-    <Root>
-      {versions && versions.map((ver, i) => {
+    <>
+      {versions && (versions as ECR.AppDetails[]).map((ver, i) => {
         const {
           namespace,
           name,
@@ -159,7 +147,7 @@ export default function TagList(props: Props) {
           >
 
             <AccordionSummary
-              expandIcon={<ExpandMoreIcon className="caret"/>}
+              expandIcon={<ExpandMore className="caret"/>}
               aria-controls={`${panel}-content`}
               id={`${panel}-content`}
             >
@@ -183,7 +171,11 @@ export default function TagList(props: Props) {
                           color="primary"
                           disabled={isBuilding || buildSubmitted}
                           component={Link}
-                          to={`/apps/create-app?url=${ver.source.url}&branch=${ver.source.branch || ver.source.tag}`}
+                          to={
+                            `/apps/create-app?url=${ver.source.url}&branch=${
+                              ver.source.branch || (ver.source as {tag?: string}).tag
+                            }`
+                          }
                         >
                           {buildSubmitted ? 'Submitting...' : 'New'}
                         </Button>
@@ -191,7 +183,7 @@ export default function TagList(props: Props) {
                       <Tooltip title="Rebuild this tagged version">
                         <Button
                           onClick={(evt) => onClickBuild(evt, ver)}
-                          size="small" startIcon={<BuildIcon/>}
+                          size="small" startIcon={<BuildRounded/>}
                           variant="contained"
                           color="primary"
                           disabled={isBuilding || buildSubmitted}
@@ -204,7 +196,7 @@ export default function TagList(props: Props) {
                           onClick={(evt) => onClickDeleteTag(evt, ver)}
                           size="small"
                           className="delete"
-                          startIcon={<DeleteIcon />}
+                          startIcon={<DeleteOutlineRounded />}
                           variant="outlined"
                           style={{color: 'rgb(145, 35, 65)', border: '1px solid rgb(145, 35, 65)'}}
                         >
@@ -216,15 +208,17 @@ export default function TagList(props: Props) {
                   }
 
                   <Tooltip
-                    title={<>GitHub <LaunchIcon style={{fontSize: '1.1em'}}/></>}
+                    title={<>GitHub <LaunchRounded style={{fontSize: '1.1em'}}/></>}
                   >
-                    <IconButton href={ver.source.url}
+                    <IconButton
+                      component="a"
+                      href={ver.source.url}
                       target="_blank"
                       rel="noreferrer"
                       onClick={e => e.stopPropagation()}
                       size="small"
                     >
-                      <GithubIcon fontSize="small"/>
+                      <GitHub fontSize="small"/>
                     </IconButton>
                   </Tooltip>
                 </div>
@@ -235,7 +229,7 @@ export default function TagList(props: Props) {
               <p className="no-margin">{description}</p><br/>
 
               <div className="flex items-end justify-between">
-                <StyledToggleButtonGroup
+                <ToggleButtonGroup
                   size="small"
                   value={format}
                   exclusive
@@ -243,19 +237,19 @@ export default function TagList(props: Props) {
                   aria-label="display config format"
                 >
                   <ToggleButton value="yaml" aria-label="yaml">
-                    <YAMLIcon height="18" width="18" />
+                    <YAMLIcon {...{height: 18, width: 18} as React.SVGProps<SVGSVGElement>} />
                   </ToggleButton>
                   <ToggleButton value="json" aria-label="json">
                     <span className="text-color">{'{'}</span>
                         json
                     <span className="text-color">{'}'}</span>
                   </ToggleButton>
-                </StyledToggleButtonGroup>
+                </ToggleButtonGroup>
 
                 <div>
                   <Tooltip title={showFullConfig ? 'Show only app config' : 'Show all details'}>
                     <IconButton onClick={() => setShowFullConfig(!showFullConfig)} size="small">
-                      {showFullConfig ? <LessIcon /> : <MoreIcon />}
+                      {showFullConfig ? <UnfoldLessOutlined /> : <UnfoldMoreOutlined />}
                     </IconButton>
                   </Tooltip>
                 </div>
@@ -267,15 +261,48 @@ export default function TagList(props: Props) {
               {version in cfgMap &&
                 <Clipboard
                   content={
-                    !showFullConfig ?
-                      (format == 'yaml' ?
-                        stringify(cfgMap[version]) :
-                        JSON.stringify(cfgMap[version], null, 4)
-                      ) :
-                      (format == 'yaml' ?
-                        stringify(versions.filter(ver => ver.version == version)[0]):
-                        JSON.stringify(versions.filter(ver => ver.version == version)[0], null, 4)
-                      )
+                    <Highlight
+                      theme={theme.palette.mode === 'dark' ? themes.vsDark : themes.github}
+                      language={format === 'yaml' ? 'yaml' : 'json'}
+                      code={
+                        !showFullConfig ?
+                          (format == 'yaml' ?
+                            stringify(cfgMap[version]) :
+                            JSON.stringify(cfgMap[version], null, 4)
+                          ) :
+                          (format == 'yaml' ?
+                            stringify(
+                              (versions as ECR.AppDetails[] || []).filter(ver => ver.version == version)[0]
+                            ):
+                            JSON.stringify(
+                              (versions as ECR.AppDetails[] || []).filter(ver => ver.version == version)[0],
+                              null,
+                              4
+                            )
+                          )
+                      }
+                    >
+                      {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                        <pre
+                          className={className}
+                          style={{
+                            ...style,
+                            background: theme.palette.mode === 'dark'
+                              ? theme.palette.background.paper
+                              : theme.palette.background.default,
+                            margin: 0,
+                          }}
+                        >
+                          {tokens.map((line, i) => (
+                            <div key={i} {...getLineProps({ line, key: i })}>
+                              {line.map((token, key) => (
+                                <span key={key} {...getTokenProps({ token, key })} />
+                              ))}
+                            </div>
+                          ))}
+                        </pre>
+                      )}
+                    </Highlight>
                   }
                 />
               }
@@ -294,17 +321,14 @@ export default function TagList(props: Props) {
 
       {deleteTag &&
         <ConfirmationDialog
-          title={<>Are you sure you want to delete tag <b>{deleteTag.version}</b>?</>}
+          title={`Are you sure you want to delete tag ${deleteTag.version}?`}
           content={<>This action cannot be undone!</>}
           confirmBtnText="Delete"
           confirmBtnStyle={{background: '#c70000'}}
           onConfirm={handleDelete}
           onClose={() => setDeleteTag(null)} />
       }
-    </Root>
+    </>
   )
 }
 
-
-const Root = styled.div`
-`

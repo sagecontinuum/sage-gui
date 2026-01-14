@@ -92,7 +92,7 @@ const getGeoSpec = (data: Data[]) => {
 }
 
 
-const layerStyle: SymbolLayer = {
+const getLayerStyle = (isDark: boolean): SymbolLayer => ({
   'id': 'marker-labels',
   'type': 'symbol',
   'source': 'geoSpec',
@@ -112,9 +112,9 @@ const layerStyle: SymbolLayer = {
     ],
   },
   paint: {
-    'text-color': '#444'
+    'text-color': isDark ? '#ddd' : '#444'
   }
-}
+})
 
 
 
@@ -218,6 +218,9 @@ export default function MapGL(props: Props) {
   const {mode, systemMode} = useColorScheme()
   const mapRef = useRef<MapRef>(null)
   const [popup, setPopup] = useState(null)
+
+  const isDarkMode = (mode === 'system' ? systemMode : mode) === 'dark'
+  const layerStyle = getLayerStyle(isDarkMode)
 
   const [geoData, setGeoData] = useState(null)
   const [markers, setMarkers] = useState<Data[]>([])
