@@ -4,7 +4,9 @@ import React from 'react'
 export default function highlightText(text, query) {
   if (!text) return ''
 
-  const parts = String(text).split(new RegExp(`(${query})`, 'gi'))
+  // Escape special regex characters in the query
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const parts = String(text).split(new RegExp(`(${escapedQuery})`, 'gi'))
   return (
     <span>
       { parts.map((part, i) =>

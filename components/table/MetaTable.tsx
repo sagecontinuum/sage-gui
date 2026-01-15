@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import {startCase} from 'lodash'
 
 type Props = {
@@ -42,15 +42,22 @@ export default function MetaTable(props:Props) {
 }
 
 
-const Table = styled.table`
+const Table = styled('table')`
   thead th {
-    color: #fff;
+    color: ${props => props.theme.palette.primary.contrastText};
     background: #4e2a84;
   }
 
   tbody td:first-child {
     width: 100px;
     text-align: right;
+  }
+
+  tr:not(:first-child) {
+    border-top: 1px solid ${props => props.theme.palette.divider};
+  }
+  thead tr {
+    border-top: 1px solid ${props => props.theme.palette.divider};
   }
 `
 

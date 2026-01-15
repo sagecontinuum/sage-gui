@@ -50,13 +50,25 @@ const getStartTime = (str) =>
     subDays(new Date(), str.replace(/-|d/g, ''))
 
 
-const getFacets = (data, name) =>
-  chain(data)
-    .countBy(name) // returns string 'undefined' if undefined
-    .map((count, name) =>
-      ({name: name == 'undefined' || !name || !name.length ? NO_ASSIGNMENT : name, count})
-    )
-    .value()
+const getFacets = (data, name) => {
+  if (name === 'vsn' && data && typeof data === 'object' && !Array.isArray(data)) {
+    // Handle node dictionary case for VSN facet with site_id
+    return chain(data)
+      .map((node, vsn) => ({
+        name: String(vsn),
+        displayName: node.site_id ? `${node.site_id} (${vsn})` : vsn
+      }))
+      .value()
+  } else {
+    // Default behavior for other facets
+    return chain(data)
+      .countBy(name) // returns string 'undefined' if undefined
+      .map((count, name) =>
+        ({name: name == 'undefined' || !name || !name.length ? NO_ASSIGNMENT : name, count})
+      )
+      .value()
+  }
+}
 
 
 export const stdColor = (val) =>
@@ -96,7 +108,7 @@ const getDownloadLink = (path) =>
 
 
 
-type FacetItem = {name: string, count: number}
+type FacetItem = {name: string, displayName?: string, count?: number}
 
 type Facets = {
   [name: string]: {title: string, items: FacetItem[], hide?: boolean}

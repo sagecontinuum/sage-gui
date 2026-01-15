@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { IconButton, styled } from '@mui/material'
 import { Link } from 'react-router-dom'
 
 import Tooltip from '@mui/material/Tooltip'
@@ -49,11 +49,11 @@ export default function SpaciousLayout(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled('div')`
   margin-top: 1em;
 `
 
-const Rows = styled.div`
+const Rows = styled('div')`
   margin-top: 1em;
 `
 
@@ -164,13 +164,13 @@ function Row(props) {
           placement="top"
           className="external-link hover"
         >
-          <a href={data.source.url}
+          <IconButton href={data.source.url}
             target="_blank"
             rel="noreferrer"
-            onClick={e => e.stopPropagation()}
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
           >
-            <GithubIcon className="text-color" />
-          </a>
+            <GithubIcon />
+          </IconButton>
         </Tooltip>
 
       </div>

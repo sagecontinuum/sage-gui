@@ -1,7 +1,7 @@
 import { useEffect, useState, memo } from 'react'
 import { Link } from 'react-router-dom'
 
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 
 import Tooltip from '@mui/material/Tooltip'
 import InfoIcon from '@mui/icons-material/InfoOutlined'
@@ -208,7 +208,7 @@ export default memo(function RecentDataTable(props: Props) {
   )
 }, (prev, next) => prev.items != next.items)
 
-const Root = styled.div`
+const Root = styled('div')`
   thead th {
     color: #fff;
     background: #4e2a84;
@@ -218,6 +218,13 @@ const Root = styled.div`
 
   table thead th:not(:first-child) {
     color: #e9dbff;
+  }
+
+  tr:not(:first-child) {
+    border-top: 1px solid ${props => props.theme.palette.divider};
+  }
+  thead tr {
+    border-top: 1px solid ${props => props.theme.palette.divider};
   }
 
   .value {
@@ -232,7 +239,7 @@ const HelpIcon = styled(InfoIcon)`
   color: #1c8cc9;
 `
 
-const SparkLineLink = styled.div`
+const SparkLineLink = styled('div')`
   &:hover canvas {
     background-color: rgba(0, 0, 0, .3);
   }

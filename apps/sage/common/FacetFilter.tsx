@@ -25,7 +25,7 @@ const sortOptions = (options, checked) =>
 
 type Props = {
   title: string
-  data: {name: string, count: number}[]
+  data: {name: string, displayName?: string, count: number}[]
   checked: string[]
   hideSearchIcon?: boolean
   hideSelectAll?: boolean
@@ -75,7 +75,7 @@ export default function Filter(props: Props) {
     if (!allData) return
 
     const filteredData = allData.filter(obj =>
-      obj.name?.toLowerCase().includes(query.toLowerCase())
+      (obj.displayName || obj.name)?.toLowerCase().includes(query.toLowerCase())
     )
 
     // sort checked to the top, and sort rest
@@ -200,7 +200,7 @@ export default function Filter(props: Props) {
 
       <Filters>
         {data.slice(0, showAll ? data.length : shownCount)
-          .map(({name, count, icon}) =>
+          .map(({name, displayName, count, icon}) =>
             <div key={name}>
               <CBContainer
                 control={
@@ -213,11 +213,11 @@ export default function Filter(props: Props) {
                 label={
                   <>
                     <FacetLabel>
-                      {highlightText(name, query)}
+                      {highlightText(displayName || name, query)}
                       {icon}
                     </FacetLabel>
                     <Count>
-                      {count.toLocaleString()}
+                      {count && count.toLocaleString()}
                     </Count>
                   </>
                 }

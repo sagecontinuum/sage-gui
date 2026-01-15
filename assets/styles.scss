@@ -97,13 +97,6 @@ table.simple th {
 table.simple:not(.dense) td:not(.icon) {
   padding: .5em;
 }
-table.simple tr:not(:first-child) {
-  border-top: 1px solid #dee2e6;
-}
-table.simple thead tr {
-  border-bottom: 1px solid #dee2e6;
-}
-
 
 table.simple.table-hover tr:not(.no-hover):not(.selected):hover {
   background: #f5f5f5;

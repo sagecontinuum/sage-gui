@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { Link } from 'react-router-dom'
 
 import { Button, Tooltip, IconButton } from '@mui/material'
@@ -488,7 +488,7 @@ export default function NodeOverview(props: Props) {
 }
 
 
-const NodeInfo = styled.div`
+const NodeInfo = styled('div')`
   position: relative;
 
   & .MuiIconButton-root  {

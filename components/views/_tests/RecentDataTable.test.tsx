@@ -3,7 +3,7 @@ import {setupServer} from 'msw/node'
 import {render, waitFor, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
 
-import RecentDataTable from './RecentDataTable'
+import RecentDataTable from '../RecentDataTable'
 
 import config from '/config'
 const url = config.beehive

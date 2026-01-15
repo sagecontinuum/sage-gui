@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { useEffect, useState, useMemo } from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 
 import { Alert } from '@mui/material'
@@ -390,7 +390,7 @@ export default function NodeView(props: Props) {
 }
 
 
-const Root = styled.div`
+const Root = styled('div')`
   h2 {
     margin-top: 0;
   }
@@ -418,23 +418,23 @@ const Root = styled.div`
   }
 `
 
-const Imgs = styled.div`
+const Imgs = styled('div')`
   img {
     max-width: 380px;
     object-fit: contain;
   }
 `
 
-const LeftSide = styled.div`
+const LeftSide = styled('div')`
   margin: 20px;
   flex: 2 1 auto;
 `
 
-const RightSide = styled.div`
+const RightSide = styled('div')`
   margin: 20px 20px 20px 15px;
 `
 
-export const TableContainer = styled.div`
+export const TableContainer = styled('div')`
   padding: 0 1rem 1rem 1rem;
 `
 
