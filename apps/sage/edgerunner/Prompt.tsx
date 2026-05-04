@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 import { IconButton, TextField } from '@mui/material'
 import { SendRounded, ClearRounded } from '@mui/icons-material'
 
@@ -19,6 +19,12 @@ export default function Prompt(props: Props) {
         id="prompt-input"
         value={value}
         onChange={(evt) => onChange(evt.target.value)}
+        onKeyDown={(evt) => {
+          if (evt.key === 'Enter' && !evt.shiftKey) {
+            evt.preventDefault()
+            onSubmit()
+          }
+        }}
         slotProps={{
           input: {
             endAdornment:
@@ -38,13 +44,12 @@ export default function Prompt(props: Props) {
       >
         <SendRounded />
       </IconButton>
-
     </InputRoot>
   )
 }
 
 
-const InputRoot = styled.div`
+const InputRoot = styled('div')`
   margin: 25px 0 15px 0;
 `
 

@@ -1,12 +1,17 @@
-import React from 'react'
+import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import LinearProgress from '@mui/material/LinearProgress'
 
 
-const ProgressContext = React.createContext(null)
+interface ProgressContextType {
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const ProgressContext = React.createContext<ProgressContextType | null>(null)
 
 
-function ProgressProvider(props) {
+function ProgressProvider(props: { children: ReactNode }) {
 
   const [loading, setLoading] = React.useState(false)
 
@@ -31,7 +36,7 @@ const Progress = styled(LinearProgress)`
 
 function useProgress() {
   const context = React.useContext(ProgressContext)
-  if (context == undefined) {
+  if (context == null) {
     throw new Error('useProgress must be used within a ProgressProvider')
   }
   return context

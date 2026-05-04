@@ -50,7 +50,7 @@ import Devices from '/components/account/Devices'
 import DevAccess from '/components/account/DevAccess'
 import RequestAccess from './request-access/RequestAccess'
 
-import Assistant from './assist/Assistant'
+import EdgeRunner from './edgerunner/EdgeRunner'
 import Dashboard from './dashboard/Dashboard'
 
 import TestDownload from './fiddle/test-download'
@@ -286,7 +286,7 @@ export default function Sage() {
 
                       <Route path="data-commons-demo" element={<DataProductSearch />} />
 
-                      <Route path="assistant" element={<Assistant />} />
+                      <Route path="edgerunner" element={<RequireAuth><EdgeRunner /></RequireAuth>} />
 
                       <Route path="fiddle/test-download" element={<TestDownload />} />
 

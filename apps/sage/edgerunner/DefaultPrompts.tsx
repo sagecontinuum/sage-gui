@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 import { Chip } from '@mui/material'
 import { defaultPrompt } from './default-job'
 
@@ -25,7 +25,6 @@ export default function DefaultPrompts(props: Props) {
 }
 
 
-const Root = styled.div`
-
+const Root = styled('div')`
   margin-right: 50px;
 `

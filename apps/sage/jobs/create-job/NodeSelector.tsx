@@ -82,10 +82,11 @@ type Props = {
   selected: BK.VSN[]
   onSelected: (nodes: BK.VSN[]) => void
   checkPerms?: boolean
+  project?: BK.Node['project']
 }
 
 export default function NodeSelector(props: Props) {
-  const { selected = [], onSelected, checkPerms = false } = props
+  const { selected = [], onSelected, checkPerms = false, project } = props
 
   const [data, setData] = useState<BK.Node[]>()
   const [query, setQuery] = useState<string>('')
@@ -100,7 +101,7 @@ export default function NodeSelector(props: Props) {
 
 
   useEffect(() => {
-    const p1 = BK.getNodes()
+    const p1 = BK.getNodes({project})
     const p2 = isSchedulable ? User.listNodesWithPerm('schedule') : null
 
     Promise.all(isSchedulable ? [p1, p2] : [p1])

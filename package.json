@@ -17,6 +17,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@playwright/test": "^1.45.1",
+    "@types/marked": "^5.0.2",
     "@types/node": "^20.14.10",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
     "@typescript-eslint/parser": "^5.33.1",

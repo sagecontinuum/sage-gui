@@ -79,8 +79,8 @@ export function msToTime(ms: number) {
   const mins = Number( (ms / (1000 * 60)).toFixed(1) )
   const hours = Number( (ms / (1000 * 60 * 60)).toFixed(1) )
   const days = Number( (ms / (1000 * 60 * 60 * 24)).toFixed(1) )
-  if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
-  else if (mins < 60) return mins + ' min ago'
+  if (secs < 60) return `${secs} sec${secs > 1 ? 's' : ''}  ago`
+  else if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`
   else if (hours < 24) return hours + ' hrs ago'
   else return days + ' days ago'
 }
@@ -92,10 +92,10 @@ export function msToTimeApprox(ms: number) {
   const mins = Math.floor( (ms / (1000 * 60)))
   const hours = Math.floor( (ms / (1000 * 60 * 60)))
   const days = Math.floor( (ms / (1000 * 60 * 60 * 24)))
-  if (secs < 60) return `${secs} sec${secs != 1 ? 's' : ''}  ago`
-  else if (mins < 60) return `${mins} min${mins != 1 ? 's' : ''} ago`
-  else if (hours < 24) return `${hours} hr${hours != 1 ? 's' : ''} ago`
-  else return `${days} day${days != 1 ? 's' : ''} ago`
+  if (secs < 60) return `${secs} sec${secs > 1 ? 's' : ''}  ago`
+  else if (mins < 60) return `${mins} min${mins > 1 ? 's' : ''} ago`
+  else if (hours < 24) return `${hours} hr${hours > 1 ? 's' : ''} ago`
+  else return `${days} day${days > 1 ? 's' : ''} ago`
 }
 
 

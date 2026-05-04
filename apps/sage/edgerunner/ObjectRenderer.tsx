@@ -5,6 +5,8 @@
 import { useEffect, useState } from 'react'
 import * as BH from '/components/apis/beehive'
 
+import { WaveText } from './Feed'
+
 type Props = {
   url: string
   retry?: boolean
@@ -30,7 +32,7 @@ export default function ObjectRenderer(props: Props) {
     <>
       {!retry && <img src={url} />}
       {ready && <img src={url} />}
-      {retry && !ready && 'loading...'}
+      {retry && !ready && <span>Looking for the image...</span>}
     </>
   )
 }
