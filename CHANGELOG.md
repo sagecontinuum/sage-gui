@@ -3,6 +3,20 @@
 The following are some notable changes to the UI
 
 
+## [3.6.0](https://github.com/sagecontinuum/sage-gui/compare/v3.5.0...v3.6.0) (2026-05-05)
+
+
+### Features
+
+* **edgerunner:** release edgerunner UI MVP (v0.1) ([9996a76](https://github.com/sagecontinuum/sage-gui/commit/9996a762b0a3935a13b4d0306c941025ee559947))
+* **jobs:** enhance JobDetails component with YAML viewer and improved layout ([8c0a216](https://github.com/sagecontinuum/sage-gui/commit/8c0a2167a79c21e704b624191225049be67dbba1))
+
+
+### Bug Fixes
+
+* **nodes:** prevent unnecessary map bounds reset on data polls ([d8c5983](https://github.com/sagecontinuum/sage-gui/commit/d8c5983fbfda01a918c4cd3d7517082ed70bce8d))
+* **timeline:** enhance tooltip positioning and interaction in Timeline component ([c3dbb19](https://github.com/sagecontinuum/sage-gui/commit/c3dbb19539d37c94c20034559bbe2a2bc2d9b78f))
+
 ## [3.5.0](https://github.com/sagecontinuum/sage-gui/compare/v3.3.0...v3.5.0) (2026-03-27)
 
 
