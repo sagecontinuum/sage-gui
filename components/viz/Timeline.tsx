@@ -204,7 +204,7 @@ function renderSVGCells(args) {
     onCellClick,
     colorCell,
     tooltip,
-    tooltipPos,
+    // tooltipPos,
     colorScale
   } = args
 
@@ -228,21 +228,6 @@ function renderSVGCells(args) {
     .attr('stroke-width', 2)
     // .attr('opacity', .5)
     .attr('fill', (d) => getFill(d, colorCell, colorScale))
-    .on('mouseenter', function(evt, data) {
-      // showGuide(this, svg, y)
-      d3.select(this)
-        .attr('opacity', 0.85)
-        .attr('stroke-width', 2)
-        .attr('stroke', '#444')
-      showTooltip(evt, data)
-    })
-    .on('mouseleave', function() {
-      d3.select('.guide').remove()
-      d3.select(this)
-        .attr('opacity', 1.0)
-        .attr('stroke', null)
-      tt.style('display', 'none')
-    })
     .on('click', (evt, data) => {
       if (!onCellClick) return
       onCellClick(data)
@@ -251,32 +236,54 @@ function renderSVGCells(args) {
   /**
    * tooltip
    */
+  d3.select(domEle)  // ensure SVG children stack above fixed tooltip
+    .style('position', 'relative')
+
   const tt = d3.select(domEle)
     .selectAll('#tooltip')
     .data([null])
     .join('div')
     .attr('id', 'tooltip')
-    .style('position', 'absolute')
+    .style('position', 'fixed')
     .style('display', 'none')
+    .style('pointer-events', 'none')
     .style('background', '#000')
     .style('color', '#fff')
     .style('padding', '1em')
 
-  const showTooltip = (evt, data) => {
+  // cellClientCx: horizontal center of the cell in viewport (clientX) space
+  // cellClientTopY: top edge of the cell in viewport (clientY) space
+  const showTooltip = (cellClientCx: number, cellClientTopY: number, data) => {
     tt.html(tooltip ? tooltip(data) :
       `${new Date(data.timestamp).toDateString()} ` +
       `${new Date(data.timestamp).toLocaleTimeString()}<br>
        ${data.value == 0 ? 'passed' : (data.meta.severity == 'warning' ? 'warning' : 'failed')}<br>
        value: ${data.value}`
     )
-      .style('top', tooltipPos == 'bottom' ? `${evt.pageY + 15}px` : `${evt.pageY - 265}px`)
-      .style('left', `${evt.pageX - 80}px`)
-      .style('z-index', 999)
+      .style('display', null)
+      .style('z-index', 99999)
 
-    tt.style('display', null)
+    // position fixed against the viewport, clamped to stay on screen
+    const ttNode = tt.node() as HTMLElement
+    const ttWidth = ttNode.offsetWidth
+    const ttHeight = ttNode.offsetHeight
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+
+    // prefer above the cell; flip below if not enough room
+    let top = cellClientTopY >= ttHeight + 10
+      ? cellClientTopY - ttHeight - 6
+      : cellClientTopY + (cellHeight - 2 * cellPad) + 6
+
+    // clamp to viewport
+    top = Math.max(0, Math.min(top, vh - ttHeight))
+    const left = Math.max(0, Math.min(cellClientCx - ttWidth / 2, vw - ttWidth))
+
+    tt.style('top', `${top}px`)
+      .style('left', `${left}px`)
   }
 
-  return cells
+  return { cells, tt, showTooltip }
 }
 
 
@@ -354,16 +361,100 @@ function drawChart(
     .call(xAxis)
 
   const useCanvas = false
-  let cells, context
+  let cells, context, tt, showTooltip
   if (useCanvas) {
     context = renderCanvasCells({
       svg, domEle, data, x, y, width, height, tooltip, tooltipPos,
       computeWidth, onCellClick, colorCell, colorScale
     })
   } else {
-    cells = renderSVGCells({
+    const svgResult = renderSVGCells({
       svg, domEle, data, x, y, width, tooltip, tooltipPos,
       computeWidth, onCellClick, colorCell, colorScale
+    })
+    cells = svgResult.cells
+    tt = svgResult.tt
+    showTooltip = svgResult.showTooltip
+  }
+
+  // track current x scale (updated on zoom) and nearest-cell hover state
+  let currentX = x
+  let hoveredDatum = null
+
+  if (!useCanvas) {
+    svg.on('mousemove', (evt) => {
+      const [mx, my] = d3.pointer(evt)
+
+      // only activate within the cells area
+      if (my < margin.top || my > margin.top + height) {
+        if (hoveredDatum) {
+          cells.selectAll('.cell').filter(d => d === hoveredDatum)
+            .attr('opacity', 1.0).attr('stroke', null)
+          hoveredDatum = null
+        }
+        tt.style('display', 'none')
+        return
+      }
+
+      const relX = mx - margin.left
+      const relY = my - margin.top
+
+      // snap to nearest row by y midpoint
+      let closestRow = null
+      let minRowDist = Infinity
+      yLabels.forEach(rowKey => {
+        const dist = Math.abs(relY - (y(rowKey) + y.bandwidth() / 2))
+        if (dist < minRowDist) { minRowDist = dist; closestRow = rowKey }
+      })
+
+      // find nearest cell in that row by x center
+      let closestDatum = null
+      let minXDist = Infinity
+      let closestRenderOrder = -1
+      data.filter(d => d.row === closestRow).forEach((d, renderOrder) => {
+        const cellX = currentX(new Date(d.timestamp))
+        const cellW = computeWidth(d, currentX)
+        const cellRight = cellX + cellW
+        // Distance to the cell interval: 0 when cursor is inside the cell.
+        const dist = relX < cellX ? cellX - relX : (relX > cellRight ? relX - cellRight : 0)
+        if (dist < minXDist || (dist === minXDist && renderOrder > closestRenderOrder)) {
+          minXDist = dist
+          closestDatum = d
+          closestRenderOrder = renderOrder
+        }
+      })
+
+      if (closestDatum !== hoveredDatum) {
+        if (hoveredDatum) {
+          cells.selectAll('.cell').filter(d => d === hoveredDatum)
+            .attr('opacity', 1.0).attr('stroke', null)
+        }
+        if (closestDatum) {
+          cells.selectAll('.cell').filter(d => d === closestDatum)
+            .attr('opacity', 0.85).attr('stroke-width', 2).attr('stroke', '#444')
+        }
+        hoveredDatum = closestDatum
+      }
+
+      if (closestDatum) {
+        // compute the cell's screen coordinates from the SVG bounding rect
+        const svgRect = (svg.node() as SVGSVGElement).getBoundingClientRect()
+        const cellSvgX = margin.left + currentX(new Date(closestDatum.timestamp))
+        const cellWidth = computeWidth(closestDatum, currentX)
+        const cellSvgTopY = margin.top + y(closestDatum.row) + cellPad
+        const cellClientCx = svgRect.left + cellSvgX + cellWidth / 2
+        const cellClientTopY = svgRect.top + cellSvgTopY
+        showTooltip(cellClientCx, cellClientTopY, closestDatum)
+      }
+    })
+
+    svg.on('mouseleave', () => {
+      if (hoveredDatum) {
+        cells.selectAll('.cell').filter(d => d === hoveredDatum)
+          .attr('opacity', 1.0).attr('stroke', null)
+        hoveredDatum = null
+      }
+      tt.style('display', 'none')
     })
   }
 
@@ -399,6 +490,7 @@ function drawChart(
 
   function zoomed(e) {
     const newScale = e.transform.rescaleX(x)
+    currentX = newScale
 
     if (useCanvas) {
       context.clearRect(0, 0, width, height)
