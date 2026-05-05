@@ -244,7 +244,7 @@ export default function MapGL(props: Props) {
     setGeoData(geoData)
     setMarkers(d)
 
-    if (autoFitBounds && mapRef.current && coords.length) {
+    if (autoFitBounds && mapRef.current && coords.length && lastID !== updateID) {
       mapRef.current.on('load', () => {
         mapRef.current.fitBounds(bbox, { padding: fitBoundsPadding, maxZoom: 10 })
       })

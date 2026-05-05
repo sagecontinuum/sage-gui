@@ -95,6 +95,7 @@ export default function Nodes() {
   const phase = params.get('phase') as BK.PhaseTabs
   const query = params.get('query') || ''
   const show_all = params.get('show_all') === 'true'
+  const paramsKey = params.toString()
 
   // Derive SAGE/SGT project filter from URL param
   const projectFilter = useMemo((): 'all' | 'SAGE' | 'SGT' => {
@@ -310,8 +311,13 @@ export default function Nodes() {
     }
 
     setFiltered(result)
-    setUpdateID(prev => prev + 1)
   }, [data, phase, show_all, all_nodes, query, params, isMyNodes, myNodesReady])
+
+
+  // Reset map bounds only when user-initiated filter params change, not on data polls
+  useEffect(() => {
+    setUpdateID(prev => prev + 1)
+  }, [pathname, paramsKey])
 
 
   // Compute columns based on current state
@@ -375,9 +381,7 @@ export default function Nodes() {
   }, [selected])
 
 
-  useEffect(() => {
-    setUpdateID(prev => prev + 1)
-  }, [show_all])
+
 
 
   // Event handlers
