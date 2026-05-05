@@ -1,9 +1,9 @@
 // @ts-nocheck -- type checking for timeline is still a todo
 import { useEffect, useState } from 'react'
 import { styled } from '@mui/material'
-import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import { Button, Divider, FormControlLabel, IconButton, Tooltip } from '@mui/material'
+import { Button, ButtonGroup, Divider, Drawer, FormControlLabel, IconButton, Tooltip } from '@mui/material'
 import EditIcon from '@mui/icons-material/EditRounded'
 import TerminalRounded from '@mui/icons-material/TerminalRounded'
 import TableView from '@mui/icons-material/TableViewRounded'
@@ -11,17 +11,17 @@ import CloudDownloadOutlined from '@mui/icons-material/CloudDownloadOutlined'
 
 import ParamDetails from './ParamDetails'
 
-import ConfirmationDialog from '/components/dialogs/ConfirmationDialog'
+import CloseIcon from '@mui/icons-material/CloseRounded'
 import MetaTable from '/components/table/MetaTable'
-import Clipboard from '/components/utils/Clipboard'
 import Checkbox from '/components/input/Checkbox'
-import { useProgress } from '/components/progress/ProgressProvider'
+import { Card } from '/components/layout/Layout'
+
+import YamlViewer from './YamlViewer'
 
 import { formatters } from './JobStatus'
 
 import TimelineIcon from '@mui/icons-material/ViewTimelineOutlined'
 import ListIcon from '@mui/icons-material/ListAltRounded'
-import { Tabs, Tab } from '/components/tabs/Tabs'
 import JobTimeline from './JobTimeline'
 import ListTasks from './ListTasks'
 
@@ -50,7 +50,6 @@ type Options = {
 }
 
 
-type Tabs = 'timeline' | 'tasks'
 
 
 type Props = {
@@ -62,11 +61,18 @@ type Props = {
 export default function JobDetails(props: Props) {
   const {job, nodeMetaByVSN, handleCloseDialog} = props
 
-  const {pathname} = useLocation()
-  const [params] = useSearchParams()
-  const tab = params.get('tab') || 'timeline'
+  const [tab, setTab] = useState<'timeline' | 'tasks'>('timeline')
+  const [view, setView] = useState<'yaml' | 'table'>('yaml')
 
   const [yaml, setYaml] = useState<string>()
+
+  // fetch YAML by default when job changes
+  useEffect(() => {
+    if (!job) return
+    ES.getTemplate(job.job_id, 'yaml')
+      .then(y => setYaml(y as string))
+      .catch(() => setYaml(null))
+  }, [job])
 
   const [eventsByNode, setEventsByNode] = useState<ES.EventsByNode>()
   const [errorsByGoalID, setErrorsByGoalID] = useState<ES.ErrorsByGoalID>()
@@ -81,7 +87,7 @@ export default function JobDetails(props: Props) {
     window: TAIL_DAYS
   })
 
-  const {loading, setLoading} = useProgress()
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!job) return
@@ -96,7 +102,7 @@ export default function JobDetails(props: Props) {
       })
       .catch(error => setError(error.message))
       .finally(() => setLoading(false))
-  }, [job, setLoading, opts])
+  }, [job, opts])
 
 
   useEffect(() => {
@@ -118,17 +124,6 @@ export default function JobDetails(props: Props) {
   }, [job, eventsByNode, showAllTasks])
 
 
-  const handleViewYaml = () => {
-    if (yaml) {
-      setYaml(null)
-      return
-    }
-
-    ES.getTemplate(job.job_id, 'yaml')
-      .then(yaml => setYaml(yaml as string))
-      .catch(error => setYaml(error.message))
-  }
-
   const handleOptionChange = (name, val) => {
     if (name == 'window') {
       setOpts(prev => ({
@@ -144,16 +139,30 @@ export default function JobDetails(props: Props) {
     ES.downloadTemplate(job.job_id)
   }
 
+  // build lookup sets for linking
+  const nodeSet = new Set<string>(job.nodes || [])
+
 
   const dayCount = opts.window.replace(/-|d/g, '')
 
   return (
-    <ConfirmationDialog
-      title={
-        <div className="flex items-center">
-          <div>
+    <Drawer
+      anchor="right"
+      open={!!job}
+      onClose={handleCloseDialog}
+      PaperProps={{sx: {
+        width: {xs: '100%', md: '90%', lg: '85%'},
+        marginTop: '60px',
+        height: 'calc(100% - 60px)',
+        overflowY: 'auto',
+      }}}
+      slotProps={{backdrop: {sx: {backgroundColor: 'rgba(0,0,0,0.12)'}}}}
+    >
+      <DrawerHeader className="flex items-center">
+        <div className="flex items-center" style={{flex: 1}}>
+          <h2 className="no-margin">
             Job Overview
-          </div>
+          </h2>
           <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
           <Button
             component={Link}
@@ -164,98 +173,114 @@ export default function JobDetails(props: Props) {
             Recreate or edit job
           </Button>
           <Divider orientation="vertical" flexItem sx={{margin: '5px 10px'}}/>
-          <Tooltip title={yaml ? 'Show table' : 'Show YAML'}>
-            <IconButton onClick={handleViewYaml}>
-              {yaml ? <TableView /> : <TerminalRounded />}
-            </IconButton>
-          </Tooltip>
           <Tooltip title="Download spec">
             <IconButton onClick={handleDownload}>
               <CloudDownloadOutlined />
             </IconButton>
           </Tooltip>
         </div>
-      }
-      fullScreen
-      onConfirm={handleCloseDialog}
-      onClose={handleCloseDialog}
-      confirmBtnText="Close"
-      content={
-        <Content>
-          <JobMetaContainer>
-            {yaml &&
-              <Clipboard content={yaml} />
-            }
-
-            {!yaml &&
-              <MetaTable
-                rows={[
-                  {
-                    id: 'job_id',
-                    label: 'Job ID'
-                  }, {
-                    id: 'user',
-                    label: 'User'
-                  }, {
-                    id: 'apps',
-                    label: `Apps (${job.plugins.length})`,
-                    format: formatters.apps
-                  }, {
-                    id: 'nodes',
-                    label: `Nodes (${job.nodes.length})`,
-                    format: formatters.nodes
-                  }, {
-                    id: 'node_tags',
-                    label: `Node Tags`,
-                    format: (v) => (v || []).join(', ')
-                  }, {
-                    id: 'params',
-                    label: `Params`,
-                    format: (v, obj) => <ParamDetails data={obj.plugins} />
-                  }, {
-                    id: 'science_rules',
-                    label: `Science Rules`,
-                    format: (v) => <pre>{(v || []).join('\n')}</pre>
-                  }, {
-                    id: 'success_criteria',
-                    label: `Success Criteria`,
-                    format: (v) => <pre>{(v || []).join('\n')}</pre>
-                  }
-                ]}
-                data={job}
+        <Tooltip title="Close">
+          <IconButton onClick={handleCloseDialog}>
+            <CloseIcon />
+          </IconButton>
+        </Tooltip>
+      </DrawerHeader>
+      <Content>
+        <Card>
+          <SectionHeader>
+            <SectionTitle>
+              Job Spec
+            </SectionTitle>
+            <HeaderDivider />
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                onClick={() => setView('yaml')}
+                variant={view === 'yaml' ? 'contained' : 'outlined'}
+                startIcon={<TerminalRounded />}
+              >
+                YAML
+              </Button>
+              <Button
+                onClick={() => setView('table')}
+                variant={view === 'table' ? 'contained' : 'outlined'}
+                startIcon={<TableView />}
+              >
+                Table
+              </Button>
+            </ButtonGroup>
+          </SectionHeader>
+          <JobMetaBody>
+            {view === 'yaml' && yaml &&
+              <YamlViewer
+                code={yaml}
+                nodeSet={nodeSet}
               />
             }
-          </JobMetaContainer>
 
-          <br/>
+            {view === 'table' &&
+            <MetaTable
+              rows={[
+                {
+                  id: 'job_id',
+                  label: 'Job ID'
+                }, {
+                  id: 'user',
+                  label: 'User'
+                }, {
+                  id: 'apps',
+                  label: `Apps (${job.plugins.length})`,
+                  format: formatters.apps
+                }, {
+                  id: 'nodes',
+                  label: `Nodes (${job.nodes.length})`,
+                  format: formatters.nodes
+                }, {
+                  id: 'node_tags',
+                  label: `Node Tags`,
+                  format: (v) => (v || []).join(', ')
+                }, {
+                  id: 'params',
+                  label: `Params`,
+                  format: (v, obj) => <ParamDetails data={obj.plugins} />
+                }, {
+                  id: 'science_rules',
+                  label: `Science Rules`,
+                  format: (v) => <pre>{(v || []).join('\n')}</pre>
+                }, {
+                  id: 'success_criteria',
+                  label: `Success Criteria`,
+                  format: (v) => <pre>{(v || []).join('\n')}</pre>
+                }
+              ]}
+              data={job}
+            />
+            }
+          </JobMetaBody>
+        </Card>
 
-          <Tabs
-            value={tab}
-            aria-label="timeline or table"
-          >
-            <Tab
-              label={
-                <div className="flex items-center">
-                  <TimelineIcon/>&nbsp;Timeline
-                </div>
-              }
-              value="timeline"
-              component={Link}
-              to={`${pathname}?job=${job.job_id}&tab=timeline`}
-              replace
-            />
-            <Tab
-              label={
-                <div className="flex items-center">
-                  <ListIcon/>&nbsp;Task List
-                </div>
-              }
-              value="tasks"
-              component={Link}
-              to={`${pathname}?job=${job.job_id}&tab=tasks`}
-              replace
-            />
-          </Tabs>
+        <Card>
+          <SectionHeader>
+            <SectionTitle>
+              Events
+            </SectionTitle>
+            <HeaderDivider />
+            <ButtonGroup size="small" variant="outlined">
+              <Button
+                onClick={() => setTab('timeline')}
+                variant={tab === 'timeline' ? 'contained' : 'outlined'}
+                startIcon={<TimelineIcon />}
+              >
+                Timeline
+              </Button>
+              <Button
+                onClick={() => setTab('tasks')}
+                variant={tab === 'tasks' ? 'contained' : 'outlined'}
+                startIcon={<ListIcon />}
+              >
+                Task List
+              </Button>
+            </ButtonGroup>
+          </SectionHeader>
 
           <div className="timeline-title flex items-center gap">
             <h2 className="no-margin">
@@ -328,15 +353,14 @@ export default function JobDetails(props: Props) {
               })
           }
 
-        </Content>
-      }
-    />
+        </Card>
+      </Content>
+    </Drawer>
   )
 }
 
 
-
-const JobMetaContainer = styled('div')`
+const JobMetaBody = styled('div')`
   tbody td:first-child {
     width: 120px;
     text-align: right;
@@ -348,8 +372,56 @@ const JobMetaContainer = styled('div')`
   }
 `
 
+const DrawerHeader = styled('div')`
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: ${({ theme }) => theme.palette.background.paper};
+  border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+  margin-bottom: 16px;
+`
+
 const Content = styled('div')`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 16px 16px;
+
   .timeline-title {
-    margin-top: 2rem;
+    margin-top: 1rem;
+  }
+`
+
+const SectionHeader = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: -16px -16px 1.25rem -16px;
+  padding: 0.85rem 1.25rem;
+  background: ${({ theme }) => theme.palette.mode === 'dark' ? '#2a2a2a' : '#f8f9fa'};
+  border-bottom: 2px solid ${({ theme }) => theme.palette.primary.main};
+  border-radius: 4px 4px 0 0;
+`
+
+const HeaderDivider = styled('div')`
+  width: 1px;
+  height: 1.4em;
+  background: ${({ theme }) => theme.palette.divider};
+  flex-shrink: 0;
+`
+
+const SectionTitle = styled('h2')`
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1em;
+  color: ${({ theme }) => theme.palette.mode === 'dark' ? '#fff' : '#333'};
+
+  svg {
+    color: ${({ theme }) => theme.palette.primary.main};
   }
 `

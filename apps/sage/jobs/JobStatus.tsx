@@ -69,7 +69,7 @@ const jobCols = [{
   id: 'name',
   label: 'Name',
   format: (val, row) => {
-    return <Link to={`/jobs/all-jobs?job=${row.id}`}>{val}</Link>
+    return <Link to={`/jobs/all-jobs?job=${row.id}`} onClick={e => e.stopPropagation()}>{val}</Link>
   }
 }, {
   id: 'id',
@@ -138,7 +138,7 @@ const myJobCols = [{
   id: 'name',
   label: 'Name',
   format: (val, row) => {
-    return <Link to={`/jobs/my-jobs?job=${row.id}`}>{val}</Link>
+    return <Link to={`/jobs/my-jobs?job=${row.id}`} onClick={e => e.stopPropagation()}>{val}</Link>
   }
 },
 ...jobCols.slice(1)
