@@ -28,6 +28,7 @@ import MetricsJobs from './views/metrics/MetricsJobs'
 import MetricsAccounts from './views/metrics/MetricsAccounts'
 import MetricsUploads from './views/metrics/MetricsUploads'
 import MetricsAtAGlance from './views/metrics/MetricsAtAGlance'
+import SGTDeployments from './views/sgt-deployments/SGTDeployments'
 
 import MonitorIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ImageIcon from '@mui/icons-material/ImageOutlined'
@@ -60,7 +61,7 @@ const NavMenu = () => {
   return (
     <NavItems>
       <NavItem label="Nodes" to="/nodes?phase=deployed" />
-      <NavItem label="Factory" to="/surya" />
+      <NavItem label="SGT Deployments" to="/sgt-deployments" />
       <NavItem label="Metrics" to="/metrics/accounts" />
       {/* <NavItem label="Experiments" to="/ai/experiments" /> */}
       <NavItem
@@ -134,6 +135,7 @@ export default function App() {
                         <Route path="at-a-glance" element={<MetricsAtAGlance />} />
                       </Route>
 
+                      <Route path="sgt-deployments" element={<SGTDeployments />} />
 
                       <Route path="surya" element={<Navigate to="/surya/phase2" replace />} />
                       <Route path="surya/:phase" element={<SuryaStatus />} />

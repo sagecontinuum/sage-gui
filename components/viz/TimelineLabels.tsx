@@ -9,10 +9,11 @@ type Props = {
   data: TimelineProps['data']
   formatter: TimelineProps['yFormat']
   margin: {left?: number}
+  rowHeightPx?: number
 }
 
 export default function TimelineLabels(props: Props) {
-  const {formatter} = props
+  const {formatter, rowHeightPx = 15} = props
 
   const [labels, setLabels] = useState(props.labels)
 
@@ -22,7 +23,7 @@ export default function TimelineLabels(props: Props) {
 
 
   return (
-    <Root>
+    <Root rowHeightPx={rowHeightPx}>
       <div className="labels">
         {labels.map(label =>
           <div key={label} className="label">
@@ -34,14 +35,17 @@ export default function TimelineLabels(props: Props) {
   )
 }
 
-const Root = styled.div`
+const Root = styled.div<{rowHeightPx: number}>`
   margin: -1px 2px 0 0;
   white-space: nowrap;
   text-align: end;
   font-weight: bold;
 
   .label {
-    height: 15px;
+    height: ${(props) => props.rowHeightPx}px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     font-size: .8rem;
   }
 `

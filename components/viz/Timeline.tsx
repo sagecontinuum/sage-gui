@@ -184,7 +184,7 @@ function renderCanvasCells(args) {
       x(new Date(d.timestamp)),
       y(d.row) + cellPad,
       computeWidth(d, x),
-      10,
+      Math.max(y.bandwidth() - cellPad, 1),
       getFill(d, colorCell, colorScale)
     )
   })
@@ -204,6 +204,7 @@ function renderSVGCells(args) {
     onCellClick,
     colorCell,
     tooltip,
+    rowHeight,
     // tooltipPos,
     colorScale
   } = args
@@ -230,7 +231,7 @@ function renderSVGCells(args) {
     .attr('fill', (d) => getFill(d, colorCell, colorScale))
     .on('click', (evt, data) => {
       if (!onCellClick) return
-      onCellClick(data)
+      onCellClick(data, evt)
     })
 
   /**
@@ -273,7 +274,7 @@ function renderSVGCells(args) {
     // prefer above the cell; flip below if not enough room
     let top = cellClientTopY >= ttHeight + 10
       ? cellClientTopY - ttHeight - 6
-      : cellClientTopY + (cellHeight - 2 * cellPad) + 6
+      : cellClientTopY + (rowHeight - 2 * cellPad) + 6
 
     // clamp to viewport
     top = Math.max(0, Math.min(top, vh - ttHeight))
@@ -309,15 +310,19 @@ function drawChart(
     tooltipPos = 'bottom',
     useD3YAxis,
     colorCell,
+    touchIntervals,
+    cellHeightPx,
+    tooltipAnchorVisibleCenter = true,
     onCellClick,
     onRowClick
   } = params
 
 
   const cellUnit = params.cellUnit ? CELL_UNITS[params.cellUnit] : CELL_UNITS.hour
+  const rowHeight = cellHeightPx || cellHeight
 
   const [start, end] = getDomain(data, cellUnit)
-  const height = computeCanvasHeight(yLabels.length, cellHeight)
+  const height = computeCanvasHeight(yLabels.length, rowHeight)
 
   const zoom = d3.zoom()
     .filter((evt) => evt.type === 'wheel' ? evt.ctrlKey : true)
@@ -369,7 +374,7 @@ function drawChart(
     })
   } else {
     const svgResult = renderSVGCells({
-      svg, domEle, data, x, y, width, tooltip, tooltipPos,
+      svg, domEle, data, x, y, width, tooltip, tooltipPos, rowHeight,
       computeWidth, onCellClick, colorCell, colorScale
     })
     cells = svgResult.cells
@@ -439,10 +444,27 @@ function drawChart(
       if (closestDatum) {
         // compute the cell's screen coordinates from the SVG bounding rect
         const svgRect = (svg.node() as SVGSVGElement).getBoundingClientRect()
-        const cellSvgX = margin.left + currentX(new Date(closestDatum.timestamp))
+        const cellSvgLeft = margin.left + currentX(new Date(closestDatum.timestamp))
         const cellWidth = computeWidth(closestDatum, currentX)
+        const cellSvgRight = cellSvgLeft + cellWidth
+        const plotLeft = margin.left
+        const plotRight = margin.left + width
+
+        const anchorSvgX = tooltipAnchorVisibleCenter
+          ? (() => {
+            const visibleLeft = Math.max(cellSvgLeft, plotLeft)
+            const visibleRight = Math.min(cellSvgRight, plotRight)
+
+            if (visibleRight > visibleLeft)
+              return (visibleLeft + visibleRight) / 2
+
+            // If the cell is entirely outside the viewport, clamp to chart edge.
+            return Math.max(plotLeft, Math.min((cellSvgLeft + cellSvgRight) / 2, plotRight))
+          })()
+          : (cellSvgLeft + cellSvgRight) / 2
+
         const cellSvgTopY = margin.top + y(closestDatum.row) + cellPad
-        const cellClientCx = svgRect.left + cellSvgX + cellWidth / 2
+        const cellClientCx = svgRect.left + anchorSvgX
         const cellClientTopY = svgRect.top + cellSvgTopY
         showTooltip(cellClientCx, cellClientTopY, closestDatum)
       }
@@ -495,7 +517,14 @@ function drawChart(
     if (useCanvas) {
       context.clearRect(0, 0, width, height)
       data.forEach(function(d) {
-        drawRect(context, newScale(new Date(d.timestamp)), y(d.row) + cellPad, computeWidth(d, newScale), 10)
+        drawRect(
+          context,
+          newScale(new Date(d.timestamp)),
+          y(d.row) + cellPad,
+          computeWidth(d, newScale),
+          Math.max(y.bandwidth() - cellPad, 1),
+          getFill(d, colorCell, colorScale)
+        )
       })
     } else {
       cells.selectAll('.cell')
@@ -513,6 +542,9 @@ function drawChart(
     const w = d.end ?
       x(new Date(d.end).getTime()) - x(new Date(d.timestamp)) :
       x(new Date(d.timestamp).getTime() + cellUnit) - x(new Date(d.timestamp))
+
+    if (touchIntervals)
+      return Math.max(w, 0)
 
     return w > cellPad ? w - cellPad : cellPad
   }
@@ -608,6 +640,7 @@ export type TimelineProps = {
   data: Data
   startTime?: Date
   endTime?: Date
+  cellHeightPx?: number
   scaleExtent?: [number, number]
   labelWidth?: number
   showLegend?: boolean
@@ -617,8 +650,10 @@ export type TimelineProps = {
   yFormat?: (label: string) => string | JSX.Element
   useD3YAxis?: boolean
   onRowClick?: (label: string, items: Record[]) => void
-  onCellClick?: (Record) => void
+  onCellClick?: (item: Record, evt?: MouseEvent) => void
   colorCell?: (val: number, item: Record) => string
+  touchIntervals?: boolean
+  tooltipAnchorVisibleCenter?: boolean
   tooltip?: (item: Record) => string  // update to use React.FC?
   tooltipPos?: 'top' | 'bottom'       // todo(nc): there is surely a better general
                                       // solution for tooltip placement as well
@@ -628,6 +663,7 @@ export type TimelineProps = {
 function Chart(props: TimelineProps) {
   const {
     data,
+    cellHeightPx,
     labelWidth,
     showLegend,
     showButtons = true,
@@ -635,6 +671,8 @@ function Chart(props: TimelineProps) {
     useD3YAxis = false,
     ...rest
   } = props
+
+  const rowHeight = cellHeightPx || cellHeight
 
   const [showAllRows, setShowAllRows] = useState(false)
   const [totalRows, setTotalRows] = useState(0)
@@ -691,6 +729,7 @@ function Chart(props: TimelineProps) {
         yLabels,
         width,
         size,
+        cellHeightPx,
         labelWidth,
         useD3YAxis,
         ...rest
@@ -739,6 +778,7 @@ function Chart(props: TimelineProps) {
               data={data}
               formatter={props.yFormat}
               margin={margin}
+              rowHeightPx={rowHeight}
             />
           </div>
         }
@@ -782,27 +822,55 @@ export default memo(function TimelineContainer(props: TimelineProps) {
 
 const Root = styled.div<{colorLinks: boolean}>`
   width: 100%;
+  --timeline-btn-border: rgba(128, 128, 128, 0.48);
+  --timeline-btn-bg: transparent;
+  --timeline-btn-hover-border: currentColor;
+  --timeline-btn-hover-fg: inherit;
+  --timeline-btn-shadow: none;
+  --timeline-btn-hover-shadow: 0 0 0 1px currentColor;
+  --timeline-btn-focus: rgba(128, 128, 128, 0.45);
+
+  [data-mui-color-scheme='dark'] & {
+    --timeline-btn-border: rgba(255, 255, 255, 0.48);
+    --timeline-btn-fg: rgba(255, 255, 255, 0.56);
+    --timeline-btn-bg: transparent;
+    --timeline-btn-hover-border: rgba(255, 255, 255, 0.9);
+    --timeline-btn-hover-fg: rgba(255, 255, 255, 0.72);
+    --timeline-btn-shadow: none;
+    --timeline-btn-hover-shadow: 0 0 0 1px currentColor;
+    --timeline-btn-focus: rgba(255, 255, 255, 0.45);
+  }
+
   .timeline {
     display: flex;
   }
 
   button {
     margin: 0 2px;
-    background: none;
+    background: var(--timeline-btn-bg);
     border-radius: 3px;
     cursor: pointer;
-    border: 1px solid rgba(0, 0, 0, .2);
-
-    :hover {
-      border: 1px solid #1d7198;
-      .MuiSvgIcon-root {
-        color: #1d7198;
-      }
-    }
+    border: 1px solid var(--timeline-btn-border);
+    color: var(--timeline-btn-fg);
 
     .MuiSvgIcon-root {
       font-size: 1.25rem;
       padding-top: 2px;
+      color: inherit;
+    }
+
+    :hover {
+      border: 1px solid var(--timeline-btn-hover-border);
+      color: var(--timeline-btn-hover-fg);
+
+      .MuiSvgIcon-root {
+        color: var(--timeline-btn-hover-fg);
+      }
+    }
+
+    :focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--timeline-btn-focus), var(--timeline-btn-hover-shadow);
     }
   }
 
