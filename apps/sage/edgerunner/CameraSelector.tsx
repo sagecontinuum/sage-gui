@@ -1,6 +1,7 @@
 
-import { ListSubheader, MenuItem, Select } from '@mui/material'
-import { compactHeaderSx, compactMenuItemSx, compactSelectSx } from './selectStyles'
+import { MenuItem, Select } from '@mui/material'
+import { ListSubheader } from '/components/layout/Layout'
+import { compactMenuItemSx, compactSelectSx } from './selectStyles'
 
 type CameraOption = {
   label: string
@@ -72,9 +73,7 @@ export default function CameraSelector(props: Props) {
         }
       }}
     >
-      <ListSubheader sx={compactHeaderSx}>
-        camera source
-      </ListSubheader>
+      <ListSubheader>camera source</ListSubheader>
       {filteredCameraOptions.map((camera) => (
         <MenuItem key={camera.value} value={camera.value} sx={compactMenuItemSx}>
           <div>

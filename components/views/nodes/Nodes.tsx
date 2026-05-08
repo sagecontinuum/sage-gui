@@ -487,7 +487,7 @@ export default function Nodes() {
                   <p>No nodes found for this query</p>
                   {!isMyNodes &&
                     <small>
-                      Please try using the tab <Link to="/nodes/all">
+                      Please try using the tab <Link to="/all-nodes">
                       View All Nodes</Link>, or
                       the checkbox ( <FormControlLabel
                         control={

@@ -4,10 +4,11 @@ import SageLogo from './SageLogo'
 import NavItem, { Item } from './NavItem'
 import ThemeSelector from './ThemeSelector'
 import Divider from '@mui/material/Divider'
+import { ListSubheader } from '/components/layout/Layout'
 
 import {
-  DeskRounded,
-  MailOutlineRounded, ForumOutlined,
+  DeskRounded, MailOutlineRounded, ForumOutlined, EmojiNatureRounded, ImageSearchRounded,
+  ScienceOutlined, ArrowRight
 } from '@mui/icons-material'
 
 import config from '/config'
@@ -55,13 +56,37 @@ export default function NavBar(props: Props) {
               />
             }
             <NavItem
-              label="Labs"
-              href={config.labs as string}
-            />
-            <NavItem
               label="Docs"
               href={`${config.docs}/about/overview`}
             />
+            {!hasPortalLink &&
+              <NavItem
+                label="Labs"
+                // href={config.labs as string}
+                menu={
+                  <div>
+                    <ListSubheader>Experimental apps</ListSubheader>
+                    <Item
+                      icon={<EmojiNatureRounded />}
+                      to="/edgerunner"
+                      label="EdgeRunner"
+                    />
+                    <Item
+                      icon={<ImageSearchRounded />}
+                      to="/labs/image-search"
+                      label="Image Search"
+                    />
+                    <Divider sx={{ my: 1 }} />
+                    <Item
+                      icon={<ScienceOutlined />}
+                      component="a"
+                      href={config.labs as string}
+                      label={<>Other lab projects{' '}<ArrowRight fontSize="small" /></>}
+                    />
+                  </div>
+                }
+              />
+            }
             <NavItem
               label="Help"
               to={config.contactUs as string}

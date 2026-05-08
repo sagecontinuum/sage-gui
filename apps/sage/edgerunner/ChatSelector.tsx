@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button, Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItemButton, ListItemText, ListSubheader, Divider,
+  List, ListItemButton, ListItemText, Divider,
   Typography, CircularProgress, Box, Chip
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { ListSubheader } from '/components/layout/Layout'
 import * as SES from '/components/apis/ses'
 import Auth from '/components/auth/auth'
-import { compactHeaderSx } from './selectStyles'
 
 const PLUGIN_NAME_PREFIX = 'edgerunner-demo'
 
@@ -132,7 +132,7 @@ export default function ChatSelector({ currentJobId, onSelect, onNew, openSignal
               {myChats.length > 0 && (
                 <>
                   <br/>
-                  <ListSubheader sx={compactHeaderSx}>My chats</ListSubheader>
+                  <ListSubheader>My chats</ListSubheader>
                   {myChats.map(job => (
                     <ListItemButton
                       key={job.job_id}
@@ -168,7 +168,7 @@ export default function ChatSelector({ currentJobId, onSelect, onNew, openSignal
                 <>
                   <br/>
                   <Divider />
-                  <ListSubheader sx={compactHeaderSx}>Others' chats</ListSubheader>
+                  <ListSubheader>Others' chats</ListSubheader>
                   {otherChats.map(job => (
                     <ListItemButton
                       key={job.job_id}
