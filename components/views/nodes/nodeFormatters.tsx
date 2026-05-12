@@ -1,11 +1,13 @@
-import { useState, memo } from 'react'
+import { forwardRef, useState, memo } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
 import {
   IconButton, Badge, Tooltip, Popper, ClickAwayListener,
-  List, ListItem, ListItemText, Button, ButtonGroup
+  List, ListItem, ListItemText, Button, ButtonGroup, SvgIcon
 } from '@mui/material'
+import type { SvgIconProps } from '@mui/material/SvgIcon'
+import { useTheme } from '@mui/material/styles'
 import {
   FilePresentOutlined,
   TerminalOutlined,
@@ -137,8 +139,6 @@ export const SensorIcons = memo(function SensorIcons({data, showOnlyPresent = fa
   // Count sensors by capability and track thermal cameras
   const capabilityCounts = new Map<string, typeof data>()
   const sensorCapabilityMap = new Map<string, Set<string>>()
-
-  if (!data || data.length === 0) return <>-</>
 
   data.forEach(sensor => {
     sensorCapabilityMap.set(sensor.hw_model, new Set(sensor.capabilities))
@@ -431,6 +431,43 @@ const phaseNotes = {
   Maintenance: 'In Maintenance'
 }
 
+const HalfStatusCheckIcon = forwardRef<SVGSVGElement, SvgIconProps>(function HalfStatusCheckIcon(props, ref) {
+  const theme = useTheme()
+  const isDarkMode = theme.palette.mode === 'dark'
+  const leftCheckFill = isDarkMode ? '#000' : '#fff'
+  const rightCheckFill = isDarkMode ? '#3ac37e' : '#3ac37e'
+
+  return (
+    <SvgIcon ref={ref} viewBox="0 0 24 24" {...props}>
+      <defs>
+        <linearGradient id="half-status-check-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="50%" stopColor={leftCheckFill} />
+          <stop offset="50%" stopColor={rightCheckFill} />
+        </linearGradient>
+      </defs>
+      <path d="M12 2a10 10 0 0 0 0 20V2z" fill="#3ac37e" />
+      <path
+        d="M12 2 A10 10 0 0 0 12 22"
+        fill="none"
+        stroke="#3ac37e"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 2 A10 10 0 0 1 12 22"
+        fill="none"
+        stroke="#3ac37e"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10 14.2 7.8 12a1 1 0 1 0-1.4 1.4l2.9 2.9a1 1 0 0 0 1.4 0l6.9-6.9a1 1 0 1 0-1.4-1.4z"
+        fill="url(#half-status-check-gradient)"
+      />
+    </SvgIcon>
+  )
+})
+
 export function statusWithPhase(val, obj) {
   const phase = obj.phase
   const phaseTitle = phaseNotes[phase] || phase
@@ -442,17 +479,20 @@ export function statusWithPhase(val, obj) {
     icon = <ErrorOutlineRounded className="failed status-icon" />
   else if (phase == 'Maintenance')
     icon = <ReportProblemOutlined className="in-progress status-icon" />
-  else if (phase == 'Awaiting Deployment')
+  else if ((phase == 'Awaiting Deployment' || phase == 'Pending') && val == 'reporting')
+    icon = <HalfStatusCheckIcon className="status-icon" />
+  else if ((phase == 'Awaiting Deployment' || phase == 'Pending') && val != 'reporting')
     icon = <PendingOutlined className="inactive status-icon" />
   else
     icon = <PendingOutlined className="inactive status-icon" />
+
 
   return (
     <Tooltip
       title={
         <>
           <b>{phaseTitle}</b><br/>
-          {phase == 'Deployed' &&
+          {(phase == 'Deployed' || phase == 'Awaiting Deployment' || phase == 'Shipment Pending') &&
             <div>
               <br/>
               Last reported metrics:<br/>

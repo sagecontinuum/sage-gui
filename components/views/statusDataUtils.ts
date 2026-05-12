@@ -84,15 +84,14 @@ function getMetricsByHost(
   metricName: string,
   latestOnly = true
 ) {
-
   const valueObj = {}
-  Object.keys(metrics).forEach(host => {
-    const suffixEnding = host.split('-')[1]  // example: '0123456789abcdef.ws-rpi' -> rpi
 
-    const serial = computes.find(o => o.name == suffixEnding)?.serial_no
-    if (!serial) return
+  // Match hosts by compute serial instead of name suffix to support blade naming (e.g. sb-core).
+  computes.forEach(({ serial_no }) => {
+    if (!serial_no) return
 
-    host = BK.findHostWithSerial(Object.keys(metrics), serial)
+    const host = BK.findHostWithSerial(Object.keys(metrics), serial_no)
+    if (!host) return
 
     const m = (metrics[host] || {})[metricName]
     if (!m) return
@@ -161,9 +160,9 @@ const determineStatus = (nodeObj: BK.Node, elapsedTimes: {[host: string]: number
     return !(host in elapsedTimes) || elapsedTimes[host] > ELAPSED_FAIL_THRES
   })
 
-  if (phase == 'Deployed' && notReporting)
+  if (notReporting)
     return 'not reporting'
-  else if (phase == 'Deployed' && !notReporting)
+  else if (!notReporting)
     return 'reporting'
   else
     return 'pending'

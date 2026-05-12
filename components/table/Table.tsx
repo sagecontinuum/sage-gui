@@ -70,6 +70,8 @@ export type Column<T = object> = {
   label?: string
   format?: (val: any, row: T) => string | number | JSX.Element | JSX.Element[]
   dlFormat?: (val: any, row: T) => string
+  sort?: (a: T, b: T, direction: 'asc' | 'dsc') => number
+  initialSortDirection?: 'asc' | 'dsc'
   hide?: boolean
   width?: string
   type?: 'number'
@@ -309,7 +311,18 @@ const indexData = (data) =>
 
 
 
-const clientSideSort = (data, id, direction) => {
+const clientSideSort = (
+  data: Record<string, any>[],
+  id: string,
+  direction: 'asc' | 'dsc',
+  columns: Column[] = []
+) => {
+  const col = columns.find(c => c.id === id)
+  if (col?.sort) {
+    data.sort((a, b) => col.sort(a, b, direction))
+    return data
+  }
+
   let isArrayCol, isObject, isNumeric
   try {
     isArrayCol = Array.isArray(data[0][id])
@@ -495,7 +508,7 @@ export default function TableComponent(props: Props) {
     const sortID = Object.keys(sortBy).length ?
       Object.keys(sortBy)[0] : null
     if (sortID) {
-      newRows = clientSideSort(newRows, sortID, sortBy[sortID])
+      newRows = clientSideSort(newRows, sortID, sortBy[sortID], props.columns)
     }
 
     if (pagination) {
@@ -599,7 +612,10 @@ export default function TableComponent(props: Props) {
 
   const handleSort = (colObj) => {
     const {id} = colObj
-    const direction = sortBy[id] == 'asc' ? 'dsc' : 'asc'
+    const currentDirection = sortBy[id]
+    const direction = currentDirection ?
+      (currentDirection == 'asc' ? 'dsc' : 'asc') :
+      (colObj.initialSortDirection || 'asc')
     const newState = {[id]: direction}
 
     // if server-side sorting
@@ -609,7 +625,7 @@ export default function TableComponent(props: Props) {
     // client-side sorting
     if (enableSorting) {
       let allRows = indexData(props.rows)
-      allRows = clientSideSort(allRows, id, direction)
+      allRows = clientSideSort(allRows, id, direction, props.columns)
 
       const newRows = pagination ?
         allRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : allRows
