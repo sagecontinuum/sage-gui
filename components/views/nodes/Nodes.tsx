@@ -88,7 +88,7 @@ export default function Nodes() {
 
   // Derived state from URL/pathname
   const isMyNodes = useMemo(() => {
-    return Auth.isSignedIn && !!pathname.match(/\/user\/[^/]+\/nodes/)
+    return Auth.isSignedIn && pathname.startsWith('/my-nodes')
   }, [pathname])
 
   const all_nodes = pathname.startsWith('/all-nodes')
@@ -107,7 +107,7 @@ export default function Nodes() {
   }, [sageProject])
 
   const projectBasePath = useMemo(() => {
-    if (isMyNodes) return `/user/${Auth.user}/nodes/project`
+    if (isMyNodes) return '/my-nodes/project'
     if (all_nodes) return '/all-nodes'
     return '/nodes/project'
   }, [isMyNodes, all_nodes])
@@ -347,7 +347,7 @@ export default function Nodes() {
             <>
               {projectNames.map((name, idx) => (
                 <span key={name}>
-                  <Link to={`/user/${Auth.user}/teams/${encodeURIComponent(name)}`}>{name}</Link>
+                  <Link to={`/my-teams/${encodeURIComponent(name)}`}>{name}</Link>
                   {idx < projectNames.length - 1 && ', '}
                 </span>
               ))}

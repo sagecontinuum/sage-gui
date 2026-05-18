@@ -9,7 +9,6 @@ import Table from '/components/table/Table'
 import * as User from '/components/apis/user'
 import ErrorMsg from '/apps/sage/ErrorMsg'
 
-import Auth from '/components/auth/auth'
 import config from '/config'
 const { contactUs } = config
 
@@ -18,21 +17,21 @@ const columns = [{
   id: 'name',
   label: 'Project Name',
   format: (name) =>
-    <Link to={`/user/${Auth.user}/teams/${encodeURIComponent(name)}`}>
+    <Link to={`/my-teams/${encodeURIComponent(name)}`}>
       <b>{name}</b>
     </Link>
 }, {
   id: 'nodes',
   label: 'Nodes',
   format: (nodes, obj) =>
-    <Link to={`/user/${Auth.user}/nodes?show_all=true&project=${encodeURIComponent(obj.name)}`}>
+    <Link to={`/my-nodes?show_all=true&project=${encodeURIComponent(obj.name)}`}>
       {nodes.length}
     </Link>
 }, {
   id: 'members',
   label: 'Team Members',
   format: (members, obj) =>
-    <Link to={`/user/${Auth.user}/teams/${encodeURIComponent(obj.name)}`}>
+    <Link to={`/my-teams/${encodeURIComponent(obj.name)}`}>
       {members.length} {members.length === 1 ? 'member' : 'members'}
     </Link>
 }]

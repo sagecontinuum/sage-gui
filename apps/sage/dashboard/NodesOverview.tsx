@@ -16,7 +16,6 @@ import SageProjectFilter from './SageProjectFilter'
 
 import * as BK from '/components/apis/beekeeper'
 import * as User from '/components/apis/user'
-import Auth from '/components/auth/auth'
 
 
 type NodesOverviewProps = {
@@ -84,7 +83,7 @@ const sensorColumns = [{
   id: 'vsns',
   label: 'My Nodes',
   format: (vsns: BK.VSN[], obj) => (
-    <Link to={`/user/${Auth.user}/nodes?show_all=true&sensor="${obj.hw_model}"`}>
+    <Link to={`/my-nodes?show_all=true&sensor="${obj.hw_model}"`}>
       {vsns.length} node{vsns.length !== 1 ? 's' : ''}
     </Link>
   )
@@ -227,7 +226,7 @@ export default function NodesOverview({
                   <HubOutlined /> My Nodes
                 </SectionTitle>
                 {tableNodes && tableNodes.length > 0 &&
-                <ViewAllLink to={`/user/${Auth.user}/nodes`}>
+                <ViewAllLink to="/my-nodes">
                   View All <ArrowForwardRounded fontSize="small" />
                 </ViewAllLink>
                 }

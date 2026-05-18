@@ -14,7 +14,6 @@ import Table from '/components/table/Table'
 import MetricStatCard from '/components/layout/MetricStatCard'
 import * as User from '/components/apis/user'
 import ErrorMsg from '/apps/sage/ErrorMsg'
-import Auth from '/components/auth/auth'
 
 
 type Member = {
@@ -63,7 +62,7 @@ export default function Members() {
   return (
     <Root>
       <Breadcrumbs aria-label="breadcrumb">
-        <MuiLink component={Link} underline="hover" to={`/user/${Auth.user}/projects`}>
+        <MuiLink component={Link} underline="hover" to="/my-projects">
           <span className="flex items-center">
             <WorkOutlineIcon sx={{ mr: 0.5 }} fontSize="inherit" /> Projects
           </span>

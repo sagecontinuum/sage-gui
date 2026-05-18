@@ -80,12 +80,12 @@ const NavMenu = () => {
       {Auth.isSignedIn &&
         <NavItem
           label="Dash"
-          to={`/user/${Auth.user}/dash`}
+          to="/my-dash"
         />
       }
       <NavItem
         label={Auth.isSignedIn ? 'My Nodes' : 'Nodes'}
-        to={Auth.isSignedIn ? `/user/${Auth.user}/nodes` : '/nodes'}
+        to={Auth.isSignedIn ? '/my-nodes' : '/nodes'}
       />
       <NavItem
         label="App Catalog"
@@ -243,15 +243,15 @@ export default function Sage() {
                         <Route path="sensors" element={<SensorList project={project} />} />
                         <Route path="sensors/:name" element={<Sensor />} />
 
-                        <Route path="user/:user/dash" element={<RequireAuth><Dashboard /></RequireAuth>} />
-                        <Route path="user/:user/nodes" element={<RequireAuth><Nodes /></RequireAuth>} />
+                        <Route path="my-dash" element={<RequireAuth><Dashboard /></RequireAuth>} />
+                        <Route path="my-nodes" element={<RequireAuth><Nodes /></RequireAuth>} />
                         <Route
-                          path="user/:user/nodes/project/:sageProject?"
+                          path="my-nodes/project/:sageProject?"
                           element={<RequireAuth><Nodes /></RequireAuth>}
                         />
-                        <Route path="user/:user/projects" element={<RequireAuth><MyProjects /></RequireAuth>} />
-                        <Route path="user/:user/teams" element={<RequireAuth><MyTeams /></RequireAuth>} />
-                        <Route path="user/:user/teams/:projectName" element={<RequireAuth><Members /></RequireAuth>} />
+                        <Route path="my-projects" element={<RequireAuth><MyProjects /></RequireAuth>} />
+                        <Route path="my-teams" element={<RequireAuth><MyTeams /></RequireAuth>} />
+                        <Route path="my-teams/:projectName" element={<RequireAuth><Members /></RequireAuth>} />
 
                       </Route>
 

@@ -1,4 +1,5 @@
 import { Badge, styled } from '@mui/material'
+import type { Theme } from '@mui/material/styles'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import {
@@ -11,11 +12,10 @@ import {
 import HardDriveIcon from '/assets/hard-drive.svg'
 import Auth from '/components/auth/auth'
 import CollapsibleNavSidebar, { NavItem } from '/components/layout/CollapsibleNavSidebar'
-import { useState } from 'react'
 
 const userBadgeSx = {
   '& .MuiBadge-badge': {
-    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
+    backgroundColor: (theme: Theme) => theme.palette.mode === 'dark' ? '#1e1e1e' : '#f5f5f5',
     color: 'inherit',
     right: 6,
     top: 4,
@@ -30,13 +30,12 @@ const userBadgeSx = {
   }
 }
 
-const getNavItems = (includeSensors, search) => {
+const getNavItems = (includeSensors: boolean, search: string) => {
   let items: NavItem[] = [
     {
       to: `all-nodes`,
       icon: <SelectAll />,
       label: 'All Nodes',
-      tooltip: 'All Nodes',
       expandable: true,
       expanded: false
     },
@@ -52,7 +51,8 @@ const getNavItems = (includeSensors, search) => {
           <HardDriveIcon />
         </Badge>,
       label: <>SGT</>,
-      tooltip: 'Sage Grande Testbed Nodes',
+      submenuLabel: 'Sage Grande',
+      submenuMetaLabel: 'SGT',
       minimizedLabel: 'SGT',
       indent: true,
       parentId: 'all-nodes'
@@ -61,7 +61,8 @@ const getNavItems = (includeSensors, search) => {
       to: `all-nodes/sage`,
       icon: <HardDriveIcon />,
       label: <>Sage</>,
-      tooltip: 'Sage Nodes',
+      submenuLabel: 'Sage',
+      submenuMetaLabel: 'legacy',
       indent: true,
       parentId: 'all-nodes'
     },
@@ -78,7 +79,7 @@ const getNavItems = (includeSensors, search) => {
           <ListAlt />
         </Badge>,
       label: 'Status',
-      tooltip: 'Node Status',
+      submenuLabel: 'All Status',
       expandable: true,
       expanded: true
     },
@@ -94,7 +95,8 @@ const getNavItems = (includeSensors, search) => {
           <HardDriveIcon />
         </Badge>,
       label: <>SGT</>,
-      tooltip: 'Sage Grande Testbed Nodes',
+      submenuLabel: 'Sage Grande',
+      submenuMetaLabel: 'SGT',
       minimizedLabel: 'SGT',
       indent: true,
       parentId: 'nodes'
@@ -111,7 +113,8 @@ const getNavItems = (includeSensors, search) => {
           <HardDriveIcon />
         </Badge>,
       label: <>Sage</>,
-      tooltip: 'Sage Nodes',
+      submenuLabel: 'Sage',
+      submenuMetaLabel: 'legacy',
       indent: true,
       parentId: 'nodes'
     }
@@ -132,20 +135,21 @@ const getNavItems = (includeSensors, search) => {
   items = [...items,
     'divider',
     {
-      to: `user/${Auth.user}/dash`,
+      to: 'my-dash',
       icon: <DashboardOutlined />,
       label: 'Dash',
       tooltip: 'My Dashboard'
     },
     {
-      to: `user/${Auth.user}/nodes?show_all=true`,
+      to: 'my-nodes?show_all=true',
       icon: <AccountCircleOutlined />,
       label: 'My Nodes',
+      submenuLabel: 'Nodes',
       expandable: true,
       expanded: false
     },
     {
-      to: `user/${Auth.user}/nodes/project/sgt?show_all=true`,
+      to: 'my-nodes/project/sgt?show_all=true',
       icon: (
         <Badge
           badgeContent={<AccountCircleOutlined style={{fontSize: '1.4em'}} />}
@@ -157,13 +161,15 @@ const getNavItems = (includeSensors, search) => {
         </Badge>
       ),
       label: <>SGT</>,
+      submenuLabel: 'Sage Grande',
+      submenuMetaLabel: 'SGT',
       tooltip: 'My SGT Nodes',
       minimizedLabel: 'My SGT Nodes',
       indent: true,
-      parentId: 'user/nodes', // ignore query params and user-specific paths for active state
+      parentId: 'my-nodes',
     },
     {
-      to: `user/${Auth.user}/nodes/project/sage?show_all=true`,
+      to: 'my-nodes/project/sage?show_all=true',
       icon: (
         <Badge
           badgeContent={<AccountCircleOutlined style={{fontSize: '1.4em'}} />}
@@ -175,23 +181,25 @@ const getNavItems = (includeSensors, search) => {
         </Badge>
       ),
       label: <>Sage</>,
+      submenuLabel: 'Sage',
+      submenuMetaLabel: 'legacy',
       tooltip: 'My Sage Nodes',
       minimizedLabel: 'My Sage Nodes',
       indent: true,
-      parentId: 'user/nodes',
+      parentId: 'my-nodes',
     },
   ]
 
   if (Auth.isSignedIn) {
     items = [...items,
       {
-        to: `user/${Auth.user}/projects`,
+        to: 'my-projects',
         icon: <WorkOutline />,
         label: 'Projects',
         tooltip: 'My Projects'
       },
       {
-        to: `user/${Auth.user}/teams`,
+        to: 'my-teams',
         icon: <GroupOutlined />,
         label: 'Members',
         tooltip: 'My Teams'
@@ -221,7 +229,6 @@ type Props = {
 export default function NodeTabs(props: Props) {
   const {includeSensors = true} = props
   const {search} = useLocation()
-  const [minimized, setMinimized] = useState(false)
 
   const navItems = getNavItems(includeSensors, search)
 
@@ -231,18 +238,16 @@ export default function NodeTabs(props: Props) {
         navItems={navItems}
         storageKey="nodes.sidebar.state"
         defaultMinimized={true}
-        defaultExpanded={{
-          'nodes': false,
-          'user/nodes': false
-        }}
+        forceMinimized={true}
+        collapsible={false}
+        submenuMode="popover"
+        submenuTrigger="hover-or-click"
         itemIdGenerator={(item) => {
           if (item === 'divider') return ''
-          // ignore query params and user-specific paths for active state
-          return item.to?.split('?')[0]?.replace(`user/${Auth.user}/nodes`, 'user/nodes') || ''
+          return item.to?.split('?')[0] || ''
         }}
-        onMinimizedChange={setMinimized}
       />
-      <Main $minimized={minimized}>
+      <Main>
         <Outlet />
       </Main>
     </Root>
@@ -254,10 +259,9 @@ const Root = styled('div')`
   height: 100%;
 `
 
-const Main = styled('div')<{ $minimized: boolean }>`
+const Main = styled('div')`
   padding: 0 20px;
   flex-grow: 1;
   overflow-y: auto;
-  margin-left: ${({ $minimized }) => $minimized ? '75px' : '160px'};
-  transition: margin-left .5s ease;
+  margin-left: 75px;
 `

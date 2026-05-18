@@ -5,7 +5,6 @@ import {
   PlaylistAddCheckRounded, GroupOutlined
 } from '@mui/icons-material'
 
-import Auth from '/components/auth/auth'
 import MetricStatCard from '/components/layout/MetricStatCard'
 
 
@@ -43,21 +42,21 @@ export default function StatsOverview({
           icon={<HubOutlined />}
           value={formatValue(uniqueNodes)}
           label={`My Node${isLoaded(uniqueNodes) && uniqueNodes !== 1 ? 's' : ''}`}
-          to={`/user/${Auth.user}/nodes`}
+          to="/my-nodes"
         />
 
         <MetricStatCard
           icon={<WorkOutline />}
           value={formatValue(totalProjects)}
           label={`Project${isLoaded(totalProjects) && totalProjects !== 1 ? 's' : ''}`}
-          to={`/user/${Auth.user}/projects`}
+          to="/my-projects"
         />
 
         <MetricStatCard
           icon={<GroupOutlined />}
           value={formatValue(uniqueMembers)}
           label={`Team Member${isLoaded(uniqueMembers) && uniqueMembers !== 1 ? 's' : ''}`}
-          to={`/user/${Auth.user}/projects`}
+          to="/my-projects"
         />
 
         <MetricStatCard

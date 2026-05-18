@@ -6,7 +6,6 @@ import { Card } from '/components/layout/Layout'
 import Table from '/components/table/Table'
 import TableSkeleton from '/components/table/TableSkeleton'
 import * as User from '/components/apis/user'
-import Auth from '/components/auth/auth'
 
 import config from '/config'
 const { contactUs } = config
@@ -20,7 +19,7 @@ type ProjectsSectionProps = {
 const projectColumns = [{
   id: 'name',
   label: 'Project',
-  format: (name, obj) => <Link to={`/user/${Auth.user}/teams/${obj.name}`}><b>{name}</b></Link>
+  format: (name, obj) => <Link to={`/my-teams/${obj.name}`}><b>{name}</b></Link>
 }, {
   id: 'nodes',
   label: 'Nodes',
@@ -29,7 +28,7 @@ const projectColumns = [{
   id: 'members',
   label: 'Members',
   format: (members, obj) =>
-    <Link to={`/user/${Auth.user}/teams/${obj.name}`}>
+    <Link to={`/my-teams/${obj.name}`}>
       {members.length}
     </Link>
 }]
@@ -44,7 +43,7 @@ export default function ProjectsSection({ projects }: ProjectsSectionProps) {
             <WorkOutline /> My Projects
           </SectionTitle>
           {projects && projects.length > 0 &&
-            <ViewAllLink to={`/user/${Auth.user}/projects`}>
+            <ViewAllLink to="/my-projects">
               View All <ArrowForwardRounded fontSize="small" />
             </ViewAllLink>
           }
