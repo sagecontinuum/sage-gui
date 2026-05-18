@@ -30,7 +30,7 @@ import * as utils from '/components/utils/units'
 import * as BK from '/components/apis/beekeeper'
 import type { AccessPerm } from '/components/apis/user'
 import config from '/config'
-import { Box } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 
 
 export function GPSIcon(props: {obj: BK.Node}) {
@@ -194,7 +194,14 @@ export const SensorIcons = memo(function SensorIcons({data, showOnlyPresent = fa
 
   return (
     <>
-      <div style={{display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center'}}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          rowGap: { xs: 0.5, sm: 0.75 }
+        }}
+      >
         {Object.keys(capabilityIcons).map(capability => {
           const Icon = capabilityIcons[capability]
           const sensors = capabilityCounts.get(capability)
@@ -331,7 +338,7 @@ export const SensorIcons = memo(function SensorIcons({data, showOnlyPresent = fa
             </Tooltip>
           )
         })}
-      </div>
+      </Box>
 
       <ClickAwayListener onClickAway={handleClose}>
         <Popper
@@ -683,7 +690,7 @@ const HardwareRoot = styled.ul`
   }
 `
 
-const capabilityAbbrev = {
+const capabilityAbbrev: Record<string, string> = {
   'Temperature': 'Temp',
   'Humidity': 'RH',
   'Pressure': 'Pa',
@@ -702,27 +709,42 @@ export function HardwareList(props: SensorsProps) {
   if (!data.length) return <>-</>
 
   return (
-    <HardwareRoot style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
+    <Box
+      component="ul"
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(2, minmax(0, 1fr))',
+          md: 'repeat(4, minmax(0, 1fr))'
+        },
+        columnGap: { xs: 1.25, sm: 1.5, md: 2 },
+        rowGap: { xs: 0.75, sm: 1 },
+        listStyle: 'none',
+        p: 0,
+        m: 0,
+        fontSize: '9pt'
+      }}
+    >
       {data.map((sensor, i) => {
         const {hw_model, name, capabilities} = sensor
         return (
-          <div key={i}>
+          <Box component="li" key={`${hw_model}-${i}`} sx={{minWidth: 0}}>
             <Tooltip placement="top" title={name}>
               {path ?
                 <Link to={`${path}${hw_model}`}>
                   {hw_model}
                 </Link> :
-                <span>{hw_model}</span>
+                <Box component="span" sx={{whiteSpace: 'nowrap'}}>{hw_model}</Box>
               }
-            </Tooltip><br/>
-            <span className="muted" style={{fontSize: '8pt'}}>
+            </Tooltip>
+            <Typography className="muted" sx={{fontSize: '8pt', lineHeight: 1.2, mt: 0.25}}>
               {capabilities.map(v => capabilityAbbrev[v] || v).join(', ')}
-            </span>
-          </div>
+            </Typography>
+          </Box>
         )
       })
       }
-    </HardwareRoot>
+    </Box>
   )
 }
 
