@@ -44,6 +44,7 @@
     "react-router": "^6.27.0",
     "react-router-dom": "^6.12.1",
     "styled-components": "^5.2.1",
+    "svgo": "^3.3.2",
     "wavesurfer.js": "^5.2.0"
   },
   "devDependencies": {

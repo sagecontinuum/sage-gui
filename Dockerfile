@@ -1,5 +1,5 @@
 # build
-FROM node:24.7-alpine AS build
+FROM node:24-alpine AS build
 ARG SAGE_UI_APP=sage
 ARG SAGE_UI_PROJECT
 ARG SAGE_UI_SERVICE_CONFIG
@@ -12,7 +12,7 @@ ENV MAPBOX_TOKEN=${MAPBOX_TOKEN}
 WORKDIR /app
 COPY apps/${SAGE_UI_APP}/package.json ./apps/${SAGE_UI_APP}/package.json
 COPY package*.json .
-RUN npm install -g npm@11.10.0
+RUN npm install -g npm@11.14.1
 RUN npx update-browserslist-db@latest
 RUN npm install -w ${SAGE_UI_APP} --omit=dev
 COPY . .
@@ -20,7 +20,7 @@ COPY . .
 RUN npm run build -w ${SAGE_UI_APP}
 
 # server
-FROM nginx:1.27.2-alpine
+FROM nginx:stable-alpine
 ARG SAGE_UI_APP=sage
 
 WORKDIR /usr/share/nginx/html
