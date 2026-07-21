@@ -271,7 +271,7 @@ export default memo(function Feed(props: Props) {
         onError: () => {
           if (destroyed) return
           log('error', 'stream disconnected')
-          setFeedError('Live feed disconnected. Reconnecting...')
+          setFeedError('Live feed disconnected. Attempting to reconnect...')
           currentSource?.close()
           retryHandle = setTimeout(() => {
             if (!destroyed) connect()

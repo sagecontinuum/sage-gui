@@ -16,24 +16,29 @@ type Props = {
   onChange: (value: string) => void
 }
 
-export const cameraOptions: CameraOption[] = [{
-  label: 'PTZ (Pan-Tilt-Zoom) Camera',
-  value: 'rtsp://10.31.81.27:554/profile1/media.smp',
-  description: 'A versatile camera that can pan, tilt, and zoom to capture a wide range of views. '
+export const cameraOptions: CameraOption[] = [
+  {
+    label: 'Hummingbird Camera',
+    value: 'http://10.107.0.221:10000/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=abc123&user=sage&password=SageCam!',
+    description: 'A camera located at the hummingbird feeder .',
+    nodes: ['H00F']
+  }, {
+    label: 'PTZ (Pan-Tilt-Zoom) Camera',
+    value: 'rtsp://10.31.81.27:554/profile1/media.smp',
+    description: 'A versatile camera that can pan, tilt, and zoom to capture a wide range of views. '
     + 'Ideal for monitoring large areas or tracking moving subjects.',
-  nodes: ['H00F']
-}, {
-  label: 'Remote HTTP-Connected Camera',
-  value: 'rtsp://130.202.23.153:554/profile1/media.smp',
-  description: 'A camera located at ATMOS.',
-  nodes: ['H00F']
-
-}, {
-  label: 'Reolink E1 Pro Cam',
-  value: 'rtsp://camera:0Bscura%23@10.31.81.44:554/Preview_01_main',
-  description: 'Camera for BCN Demo',
-  nodes: ['H015']
-}]
+    nodes: ['H00F']
+  }, {
+    label: 'Remote HTTP-Connected Camera',
+    value: 'rtsp://130.202.23.153:554/profile1/media.smp',
+    description: 'A camera located at ATMOS.',
+    nodes: ['H00F']
+  }, {
+    label: 'Reolink E1 Pro Cam',
+    value: 'rtsp://camera:0Bscura%23@10.31.81.44:554/Preview_01_main',
+    description: 'Camera for BCN Demo',
+    nodes: ['H015']
+  }]
 
 export const getCameraOptionsForNode = (node: string): CameraOption[] =>
   cameraOptions.filter((camera) => camera.nodes.includes(node))

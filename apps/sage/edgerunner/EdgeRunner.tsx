@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { styled } from '@mui/material/styles'
 import Sidebar from '/components/layout/WideSidebar'
 import { Select, MenuItem, Box, ListSubheader, Button, Tooltip } from '@mui/material'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import Prompt from './Prompt'
 
@@ -42,6 +43,14 @@ type PersistedAssistantState = {
   tasks: Task[]
   selectedNode?: string
 }
+
+const toTask = (job: SES.Job): Task => ({
+  job_id: String(job.job_id),
+  job_name: job.name,
+  prompt: getPromptArg(job.plugins?.[0]?.plugin_spec?.args),
+  state: job.state?.last_state || '',
+  fullJobSpec: job
+})
 
 const getPromptArg = (args?: string[]): string => {
   if (!Array.isArray(args) || !args.length) {
@@ -144,6 +153,10 @@ type InnerProps = {
 function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const {enqueueSnackbar} = useSnackbar()
   const { log } = useLogger()
+  const navigate = useNavigate()
+  const { chatId: routeChatId } = useParams<{ chatId?: string }>()
+  const initialChatIdRef = useRef<string | null>(routeChatId || null)
+  const [hasResolvedInitialChat, setHasResolvedInitialChat] = useState(false)
 
   const [prompt, setPrompt] = useState<string>('')
   const [selectedModel, setSelectedModel] = useState<string>(
@@ -186,26 +199,56 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   }, [selectedNode])
 
   useEffect(() => {
-    const restoreSavedChat = async () => {
-      const savedTasks = getTasks()
-      const savedJobId = savedTasks[0]?.job_id
-      if (!savedJobId) return
+    if (!hasResolvedInitialChat) {
+      return
+    }
 
+    const nextChatId = activeJobId ? String(activeJobId) : null
+    const onChatRoute = routeChatId || null
+
+    if (onChatRoute === nextChatId) {
+      return
+    }
+
+    if (nextChatId) {
+      navigate(`/edgerunner/chats/${nextChatId}`, { replace: true })
+    } else {
+      navigate('/edgerunner', { replace: true })
+    }
+  }, [activeJobId, hasResolvedInitialChat, navigate, routeChatId])
+
+  useEffect(() => {
+    const restoreSavedChat = async () => {
       try {
-        const job = await SES.getJobStatus(String(savedJobId))
-        const restoredTask: Task = {
-          job_id: String(job.job_id),
-          job_name: job.name,
-          prompt: getPromptArg(job.plugins[0]?.plugin_spec?.args),
-          state: job.state.last_state,
-          fullJobSpec: job
+        const sharedChatId = initialChatIdRef.current
+        if (sharedChatId) {
+          try {
+            const job = await SES.getJobStatus(sharedChatId)
+            const restoredTask = toTask(job)
+
+            persistAssistantState([restoredTask], selectedNodeRef.current)
+            setTasks([restoredTask])
+            setLastUpdate(new Date())
+            return
+          } catch (err) {
+            console.log('restoreSharedChat err', err)
+          }
         }
+
+        const savedTasks = getTasks()
+        const savedJobId = savedTasks[0]?.job_id
+        if (!savedJobId) return
+
+        const job = await SES.getJobStatus(String(savedJobId))
+        const restoredTask = toTask(job)
 
         persistAssistantState([restoredTask], selectedNodeRef.current)
         setTasks([restoredTask])
         setLastUpdate(new Date())
       } catch (err) {
         console.log('restoreSavedChat err', err)
+      } finally {
+        setHasResolvedInitialChat(true)
       }
     }
 
@@ -370,13 +413,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const handleSelectChat = (job: SES.Job) => {
     persistAssistantState([], selectedNode)
     setTasks([])
-    const task: Task = {
-      job_id: String(job.job_id),
-      job_name: job.name,
-      prompt: getPromptArg(job.plugins?.[0]?.plugin_spec?.args),
-      state: job.state?.last_state || '',
-      fullJobSpec: job
-    }
+    const task = toTask(job)
     persistAssistantState([task], selectedNode)
     setTasks([task])
   }

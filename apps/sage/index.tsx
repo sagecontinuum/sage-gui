@@ -285,6 +285,7 @@ export default function Sage() {
                       <Route path="data-commons-demo" element={<DataProductSearch />} />
 
                       <Route path="edgerunner" element={<RequireAuth><EdgeRunner /></RequireAuth>} />
+                      <Route path="edgerunner/chats/:chatId" element={<RequireAuth><EdgeRunner /></RequireAuth>} />
 
                       <Route path="fiddle/test-download" element={<TestDownload />} />
 
