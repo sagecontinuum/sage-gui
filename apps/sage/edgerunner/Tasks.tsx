@@ -7,7 +7,9 @@ import { IconButton, Popover, Tooltip } from '@mui/material'
 
 import {
   PauseCircleOutlineRounded, PlayCircleOutlineRounded,
-  InfoOutlined}  from '@mui/icons-material'
+  InfoOutlined, SmartToyOutlined, Schedule, PinDropOutlined,
+  CameraAltOutlined
+} from '@mui/icons-material'
 
 import * as ES from '/components/apis/ses'
 
@@ -17,6 +19,8 @@ import { useProgress } from '/components/progress/ProgressProvider'
 import { Highlight, themes } from 'prism-react-renderer'
 import { VSN } from '/components/apis/beekeeper'
 import { modelOptions } from './models'
+import { cameraOptions } from './CameraSelector'
+import EllipsisText from '/components/utils/EllipsisText'
 
 type Props = {
   value: Task[]
@@ -55,6 +59,48 @@ const getTaskModelLabel = (task: Task): string => {
   }
 
   return modelOptions.find((option) => option.value == selectedModel)?.label || selectedModel
+}
+
+const getTaskCameraLabel = (task: Task): string => {
+  const plugin = task.fullJobSpec?.plugins?.[0]
+  const args = plugin?.plugin_spec?.args || []
+  const selectedCamera = [...args].reverse().find((arg) => arg && !arg.startsWith('--')) || ''
+
+  if (!selectedCamera) {
+    return 'unknown camera'
+  }
+
+  return cameraOptions.find((option) => option.value == selectedCamera)?.label || selectedCamera
+}
+
+const getTaskScheduleLabel = (task: Task): string => {
+  const scienceRules = task.fullJobSpec?.science_rules || []
+
+  for (const rule of scienceRules) {
+    const match = rule.match(/cronjob\("[^"]*",\s*"([^"]+)"\)/)
+    if (!match?.[1]) {
+      continue
+    }
+
+    const cronExpr = match[1]
+    const everyMatch = cronExpr.match(/^\*\/(\d+) \* \* \* \*$/)
+    if (everyMatch?.[1]) {
+      const mins = Number(everyMatch[1])
+      return mins < 60 && 60 % mins == 0
+        ? `run every ${mins}m`
+        : mins % 60 == 0
+          ? `run every ${mins / 60}h`
+          : `run every ${mins}m`
+    }
+
+    if (cronExpr == '* * * * *') {
+      return 'run every 1m'
+    }
+
+    return cronExpr
+  }
+
+  return 'unknown schedule'
 }
 
 export default function Tasks(props: Props) {
@@ -174,17 +220,40 @@ export default function Tasks(props: Props) {
           return null
         }
 
-        const node = Object.keys(fullJobSpec.nodes) // todo(nc): support multiple
+        const node = Object.keys(fullJobSpec.nodes)[0] || 'unknown node' // todo(nc): support multiple
         const modelLabel = getTaskModelLabel(task)
+        const scheduleLabel = getTaskScheduleLabel(task)
+        const cameraLabel = getTaskCameraLabel(task)
 
         return (
           <li key={task.job_id}>
             <Card style={{paddingBottom: 5}}>
               <div className="flex justify-between items-start">
-                <div style={{flex: 1}}>
+                <div style={{flex: 1, minWidth: 0}}>
                   <div>{task.prompt || 'No prompt specified'}</div>
-                  <div className="text-xs muted">Model: {modelLabel}</div>
-                  <div className="text-xs muted">Node: {node}</div>
+
+                  <MetadataBlock className="text-xs muted">
+                    <MetadataRow>
+                      <MetadataItem>
+                        <SmartToyOutlined sx={{fontSize: '0.95rem'}} style={{marginRight: '0.25rem'}} />
+                        <EllipsisText title={modelLabel}>{modelLabel}</EllipsisText>
+                      </MetadataItem>
+                      <MetadataItem>
+                        <Schedule sx={{fontSize: '0.95rem'}} style={{marginRight: '0.25rem'}} />
+                        <EllipsisText title={scheduleLabel}>{scheduleLabel}</EllipsisText>
+                      </MetadataItem>
+                    </MetadataRow>
+                    <MetadataRow>
+                      <MetadataItem>
+                        <PinDropOutlined sx={{fontSize: '0.95rem'}} style={{marginRight: '0.25rem'}} />
+                        <EllipsisText title={node}>{node}</EllipsisText>
+                      </MetadataItem>
+                      <MetadataItem align="end">
+                        <CameraAltOutlined sx={{fontSize: '0.95rem'}} style={{marginRight: '0.25rem'}} />
+                        <EllipsisText title={cameraLabel}>{cameraLabel}</EllipsisText>
+                      </MetadataItem>
+                    </MetadataRow>
+                  </MetadataBlock>
                 </div>
 
                 <Tooltip title="Show task details..." placement="right">
@@ -343,6 +412,30 @@ const TaskList = styled('ul')`
     visibility: visible;
   }
 `
+
+const MetadataBlock = styled('div')`
+  min-width: 0;
+  margin: 8px 0;
+`
+
+const MetadataRow = styled('div')`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  & + & {
+    margin-top: 4px;
+  }
+`
+
+const MetadataItem = styled('div')<{ align?: 'start' | 'end' }>(({ align = 'start' }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  minWidth: 0,
+  flex: '1 1 0',
+  justifyContent: align == 'end' ? 'flex-end' : 'flex-start'
+}))
 
 /* todo(nc): advanced node selector
 const NodeSelectorContainer = styled('div')`

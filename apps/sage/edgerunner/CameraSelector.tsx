@@ -2,6 +2,7 @@
 import { MenuItem, Select } from '@mui/material'
 import { ListSubheader } from '/components/layout/Layout'
 import { compactMenuItemSx, compactSelectSx } from './selectStyles'
+import { summerCampNodes } from './NodeSelector'
 
 type CameraOption = {
   label: string
@@ -38,6 +39,56 @@ export const cameraOptions: CameraOption[] = [
     value: 'rtsp://camera:0Bscura%23@10.31.81.44:554/Preview_01_main',
     description: 'Camera for BCN Demo',
     nodes: ['H015']
+  }, {
+    label: 'EVL 1',
+    value: 'rtsp://lookup.sage/camera/evl-1',
+    description: 'Summer camp EVL camera 1.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 2',
+    value: 'rtsp://lookup.sage/camera/evl-2',
+    description: 'Summer camp EVL camera 2.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 3',
+    value: 'rtsp://lookup.sage/camera/evl-3',
+    description: 'Summer camp EVL camera 3.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 4',
+    value: 'rtsp://lookup.sage/camera/evl-4',
+    description: 'Summer camp EVL camera 4.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 5',
+    value: 'rtsp://lookup.sage/camera/evl-5',
+    description: 'Summer camp EVL camera 5.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 6',
+    value: 'rtsp://lookup.sage/camera/evl-6',
+    description: 'Summer camp EVL camera 6.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 7',
+    value: 'rtsp://lookup.sage/camera/evl-7',
+    description: 'Summer camp EVL camera 7.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL 8',
+    value: 'rtsp://lookup.sage/camera/evl-8',
+    description: 'Summer camp EVL camera 8.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'EVL Eye',
+    value: 'rtsp://lookup.sage/camera/evl-eye',
+    description: 'Summer camp EVL eye camera.',
+    nodes: [...summerCampNodes]
+  }, {
+    label: 'Eye',
+    value: 'rtsp://lookup.sage/camera/eye',
+    description: 'Summer camp eye camera.',
+    nodes: [...summerCampNodes]
   }]
 
 export const getCameraOptionsForNode = (node: string): CameraOption[] =>

@@ -1,6 +1,6 @@
-import  { useState, useRef, ReactNode } from 'react'
+import  { useState, useRef } from 'react'
 import { styled } from '@mui/material'
-import { SxProps, Theme } from '@mui/material'
+import { type SxProps, type Theme } from '@mui/material'
 
 const Container = styled('div')`
   display: flex;
@@ -29,7 +29,7 @@ const Resizer = styled('div')`
 `
 
 type Props = {
-  children: ReactNode,
+  children: React.ReactNode,
   sx?: SxProps<Theme>
   width?: number
 }

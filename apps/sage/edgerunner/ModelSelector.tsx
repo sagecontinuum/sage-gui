@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Divider, MenuItem, Select } from '@mui/material'
 import { experimentalModelOptions, modelOptions, sageRecommendedModelOptions } from './models'
 import { ListSubheader, SearchListSubheader, ExpandableListSubheader } from '/components/layout/Layout'
@@ -27,6 +27,7 @@ export default function ModelSelector(props: Props) {
   const [showOtherModels, setShowOtherModels] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const keepMenuOpenRef = useRef(false)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleKeepMenuOpen = (keepOpen: boolean) => {
     keepMenuOpenRef.current = keepOpen
@@ -51,6 +52,11 @@ export default function ModelSelector(props: Props) {
   const visibleOtherModels = useMemo(() => {
     return filterModelOptions(otherModelOptions, searchQuery)
   }, [otherModelOptions, searchQuery])
+
+  useEffect(() => {
+    if (!isOpen) return
+    requestAnimationFrame(() => searchInputRef.current?.focus())
+  }, [isOpen])
 
   return (
     <Select
@@ -92,6 +98,7 @@ export default function ModelSelector(props: Props) {
         onSearchChange={setSearchQuery}
         placeholder="Search models"
         keepMenuOpen={handleKeepMenuOpen}
+        inputRef={searchInputRef}
       />
 
       <ListSubheader>

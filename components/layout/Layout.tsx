@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode } from 'react'
+import { type ReactElement, type Ref } from 'react'
 
 import { styled, GlobalStyles } from '@mui/material'
 import MuiDivider from '@mui/material/Divider'
@@ -103,7 +103,7 @@ export const Card = (props: Props) => {
  * List subheader with consistent styling (blue background, bold text).
  * Used in select menus and dropdowns throughout the app.
  */
-export const ListSubheader = ({ children }: { children: ReactNode }) => (
+export const ListSubheader = ({ children }: { children: React.ReactNode }) => (
   <MuiListSubheader sx={{
     fontSize: '0.75rem',
     fontWeight: 'bold',
@@ -126,12 +126,14 @@ type SearchListSubheaderProps = {
   onSearchChange: (value: string) => void
   placeholder?: string
   keepMenuOpen: (open: boolean) => void
+  inputRef?: Ref<HTMLInputElement>
 }
 
 export const SearchListSubheader = ({
   searchQuery,
   onSearchChange,
-  placeholder = 'Search'
+  placeholder = 'Search',
+  inputRef
 }: SearchListSubheaderProps) => (
   <MuiListSubheader sx={(theme: Theme) => ({
     position: 'sticky',
@@ -146,6 +148,7 @@ export const SearchListSubheader = ({
     px: 1
   })}>
     <TextField
+      inputRef={inputRef}
       value={searchQuery}
       onChange={(event) => onSearchChange(event.target.value)}
       slotProps={{
@@ -181,7 +184,7 @@ export const SearchListSubheader = ({
 type ExpandableListSubheaderProps = {
   isExpanded: boolean
   onToggle: () => void
-  children: ReactNode
+  children: React.ReactNode
   keepMenuOpen: (open: boolean) => void
 }
 

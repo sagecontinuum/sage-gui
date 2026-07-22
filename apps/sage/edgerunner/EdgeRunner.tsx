@@ -1,8 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { styled } from '@mui/material/styles'
 import Sidebar from '/components/layout/WideSidebar'
-import { Select, MenuItem, Box, ListSubheader, Button, Tooltip } from '@mui/material'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Select, MenuItem, Box, Button, Tooltip } from '@mui/material'
+import {
+  Schedule,
+  PinDropOutlined,
+  CameraAltOutlined,
+  SmartToyOutlined
+} from '@mui/icons-material'
+
+import { ListSubheader } from '/components/layout/Layout'
 
 import Prompt from './Prompt'
 
@@ -15,15 +22,17 @@ import { type VSN } from '/components/apis/beekeeper'
 import DefaultPrompts from './DefaultPrompts'
 import Tasks from './Tasks'
 import ModelSelector from './ModelSelector'
+import NodeSelector, { nodeOptions } from './NodeSelector'
 import CameraSelector, { getDefaultCameraValue, getCameraOptionsForNode } from './CameraSelector'
 import ChatSelector from './ChatSelector'
 import AssistLogger, { LoggerProvider, useLogger, type LogEntry } from './EdgeRunnerLogger'
 import { useSnackbar } from 'notistack'
 import { modelOptions, sageRecommendedModelOptions } from './models'
-import { compactHeaderSx, compactMenuItemSx, compactSelectSx } from './selectStyles'
+import { compactMenuItemSx, compactSelectSx } from './selectStyles'
 
 import Feed from './Feed'
 import { AddRounded } from '@mui/icons-material'
+import { useNavigate, useParams } from 'react-router-dom'
 
 
 
@@ -43,14 +52,6 @@ type PersistedAssistantState = {
   tasks: Task[]
   selectedNode?: string
 }
-
-const toTask = (job: SES.Job): Task => ({
-  job_id: String(job.job_id),
-  job_name: job.name,
-  prompt: getPromptArg(job.plugins?.[0]?.plugin_spec?.args),
-  state: job.state?.last_state || '',
-  fullJobSpec: job
-})
 
 const getPromptArg = (args?: string[]): string => {
   if (!Array.isArray(args) || !args.length) {
@@ -116,8 +117,6 @@ const getFrequencyLabel = (mins: number): string => {
   return `${mins}m`
 }
 
-const nodeOptions = ['H00F', 'H015'] as const
-
 const getStoredNode = (): string => {
   const savedNode = getPersistedAssistantState().selectedNode
   return savedNode && nodeOptions.includes(savedNode as typeof nodeOptions[number])
@@ -154,9 +153,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const {enqueueSnackbar} = useSnackbar()
   const { log } = useLogger()
   const navigate = useNavigate()
-  const { chatId: routeChatId } = useParams<{ chatId?: string }>()
-  const initialChatIdRef = useRef<string | null>(routeChatId || null)
-  const [hasResolvedInitialChat, setHasResolvedInitialChat] = useState(false)
+  const { chatId } = useParams<{ chatId?: string }>()
 
   const [prompt, setPrompt] = useState<string>('')
   const [selectedModel, setSelectedModel] = useState<string>(
@@ -199,61 +196,32 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   }, [selectedNode])
 
   useEffect(() => {
-    if (!hasResolvedInitialChat) {
-      return
-    }
+    const restoreActiveChat = async () => {
+      const savedTasks = getTasks()
+      const savedJobId = savedTasks[0]?.job_id
+      const targetJobId = chatId || savedJobId
+      if (!targetJobId) return
 
-    const nextChatId = activeJobId ? String(activeJobId) : null
-    const onChatRoute = routeChatId || null
-
-    if (onChatRoute === nextChatId) {
-      return
-    }
-
-    if (nextChatId) {
-      navigate(`/edgerunner/chats/${nextChatId}`, { replace: true })
-    } else {
-      navigate('/edgerunner', { replace: true })
-    }
-  }, [activeJobId, hasResolvedInitialChat, navigate, routeChatId])
-
-  useEffect(() => {
-    const restoreSavedChat = async () => {
       try {
-        const sharedChatId = initialChatIdRef.current
-        if (sharedChatId) {
-          try {
-            const job = await SES.getJobStatus(sharedChatId)
-            const restoredTask = toTask(job)
-
-            persistAssistantState([restoredTask], selectedNodeRef.current)
-            setTasks([restoredTask])
-            setLastUpdate(new Date())
-            return
-          } catch (err) {
-            console.log('restoreSharedChat err', err)
-          }
+        const job = await SES.getJobStatus(String(targetJobId))
+        const restoredTask: Task = {
+          job_id: String(job.job_id),
+          job_name: job.name,
+          prompt: getPromptArg(job.plugins[0]?.plugin_spec?.args),
+          state: job.state.last_state,
+          fullJobSpec: job
         }
-
-        const savedTasks = getTasks()
-        const savedJobId = savedTasks[0]?.job_id
-        if (!savedJobId) return
-
-        const job = await SES.getJobStatus(String(savedJobId))
-        const restoredTask = toTask(job)
 
         persistAssistantState([restoredTask], selectedNodeRef.current)
         setTasks([restoredTask])
         setLastUpdate(new Date())
       } catch (err) {
-        console.log('restoreSavedChat err', err)
-      } finally {
-        setHasResolvedInitialChat(true)
+        console.log('restoreActiveChat err', err)
       }
     }
 
-    restoreSavedChat()
-  }, [])
+    restoreActiveChat()
+  }, [chatId])
 
   useEffect(() => {
     const id = activeJobId
@@ -386,6 +354,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
           }
           persistAssistantState([newRecord], selectedNode)
           setTasks([newRecord])
+          navigate(`/edgerunner/chats/${job.job_id}`)
         })
         .catch(err => {
           log('error', 'submitJob failed', err?.message || String(err))
@@ -413,14 +382,22 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const handleSelectChat = (job: SES.Job) => {
     persistAssistantState([], selectedNode)
     setTasks([])
-    const task = toTask(job)
+    const task: Task = {
+      job_id: String(job.job_id),
+      job_name: job.name,
+      prompt: getPromptArg(job.plugins?.[0]?.plugin_spec?.args),
+      state: job.state?.last_state || '',
+      fullJobSpec: job
+    }
     persistAssistantState([task], selectedNode)
     setTasks([task])
+    navigate(`/edgerunner/chats/${job.job_id}`)
   }
 
   const handleNewChat = () => {
     persistAssistantState([], selectedNode)
     setTasks([])
+    navigate('/edgerunner')
   }
 
   return (
@@ -447,7 +424,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
           <div className="flex items-center">
             <h3>EdgeRunner</h3>
             <Tooltip title="New chat" placement="bottom">
-              <Button onClick={handleNewChat} sx={{ mr: 2,  color: 'text.secondary' }}
+              <Button onClick={handleNewChat} sx={{ mr: 2, color: 'text.secondary' }}
                 startIcon={<AddRounded fontSize="small" />}>
                 New chat
               </Button>
@@ -470,7 +447,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
         />
 
         {/* stick prompt box at bottom */}
-        <PromptContainer >
+        <PromptContainer>
           {isViewingForeignChat && (
             <InputLockOverlay>
               <strong>This chat belongs to {activeTaskOwner}.</strong>
@@ -486,64 +463,57 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
             </InputLockOverlay>
           )}
           <div className="flex column w-full">
-            <DefaultPrompts
-              onClick={handleDefaultPrompt}
-            />
+            <DefaultPrompts onClick={handleDefaultPrompt} />
             <Prompt
               value={prompt}
-              onChange={(val) => setPrompt(val) }
+              onChange={(val) => setPrompt(val)}
               onSubmit={handleSubmit}
               loading={submitting || isViewingForeignChat}
             />
-            <ControlsRow className="flex justify-between">
-              <div>
-                <ModelSelector value={selectedModel} onChange={setSelectedModel} />
-                <Select
-                  value={selectedFrequency}
-                  onChange={(e) => setSelectedFrequency(e.target.value as number)}
-                  variant="standard"
-                  disableUnderline
-                  renderValue={(value) => `run every ${getFrequencyLabel(Number(value))}`}
-                  sx={{
-                    ...compactSelectSx,
-                    minWidth: 100
-                  }}
-                >
-                  <ListSubheader sx={compactHeaderSx}>
-                    run every...
-                  </ListSubheader>
-                  <MenuItem value={1} sx={compactMenuItemSx}>1m</MenuItem>
-                  <MenuItem value={5} sx={compactMenuItemSx}>5m</MenuItem>
-                  <MenuItem value={10} sx={compactMenuItemSx}>10m</MenuItem>
-                  <MenuItem value={15} sx={compactMenuItemSx}>15m</MenuItem>
-                  <MenuItem value={30} sx={compactMenuItemSx}>30m</MenuItem>
-                  <MenuItem value={60} sx={compactMenuItemSx}>1h</MenuItem>
-                  <MenuItem value={120} sx={compactMenuItemSx}>2h</MenuItem>
-                  <MenuItem value={240} sx={compactMenuItemSx}>4h</MenuItem>
-                  <MenuItem value={480} sx={compactMenuItemSx}>8h</MenuItem>
-                </Select>
-              </div>
-              <div>
-                <Select
-                  value={selectedNode}
-                  onChange={(e) => setSelectedNode(e.target.value as string)}
-                  variant="standard"
-                  disableUnderline
-                  renderValue={(value) => `node ${value}`}
-                  sx={{
-                    ...compactSelectSx,
-                    minWidth: 92
-                  }}
-                >
-                  <ListSubheader sx={compactHeaderSx}>
-                    node
-                  </ListSubheader>
-                  {nodeOptions.map((node) => (
-                    <MenuItem key={node} value={node} sx={compactMenuItemSx}>{node}</MenuItem>
-                  ))}
-                </Select>
+            <ControlsRow className="flex items-center justify-between">
+              <div className="flex items-center gap">
+                <div className="flex items-center">
+                  <SmartToyOutlined sx={{ fontSize: '1.2rem' }} />
+                  <ModelSelector value={selectedModel} onChange={setSelectedModel} />
+                </div>
 
-                <CameraSelector node={selectedNode} value={selectedCamera} onChange={setSelectedCamera} />
+                <div className="flex items-center">
+                  <Schedule sx={{ fontSize: '1.2rem' }} />
+                  <Select
+                    value={selectedFrequency}
+                    onChange={(e) => setSelectedFrequency(e.target.value as number)}
+                    variant="standard"
+                    disableUnderline
+                    renderValue={(value) => `run every ${getFrequencyLabel(Number(value))}`}
+                    sx={{
+                      ...compactSelectSx,
+                      minWidth: 100
+                    }}
+                  >
+                    <ListSubheader>run every...</ListSubheader>
+                    <MenuItem value={1} sx={compactMenuItemSx}>1m</MenuItem>
+                    <MenuItem value={5} sx={compactMenuItemSx}>5m</MenuItem>
+                    <MenuItem value={10} sx={compactMenuItemSx}>10m</MenuItem>
+                    <MenuItem value={15} sx={compactMenuItemSx}>15m</MenuItem>
+                    <MenuItem value={30} sx={compactMenuItemSx}>30m</MenuItem>
+                    <MenuItem value={60} sx={compactMenuItemSx}>1h</MenuItem>
+                    <MenuItem value={120} sx={compactMenuItemSx}>2h</MenuItem>
+                    <MenuItem value={240} sx={compactMenuItemSx}>4h</MenuItem>
+                    <MenuItem value={480} sx={compactMenuItemSx}>8h</MenuItem>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex items-center gap">
+                <div className="flex items-center">
+                  <PinDropOutlined sx={{ fontSize: '1.2rem' }} />
+                  <NodeSelector value={selectedNode} onChange={setSelectedNode} />
+                </div>
+
+                <div className="flex items-center">
+                  <CameraAltOutlined sx={{ fontSize: '1.2rem' }} />
+                  <CameraSelector node={selectedNode} value={selectedCamera} onChange={setSelectedCamera} />
+                </div>
               </div>
             </ControlsRow>
           </div>
@@ -569,6 +539,9 @@ const ControlsRow = styled(Box)`
 
   .MuiInputBase-root {
     min-width: 20px;
+  }
+  .MuiSvgIcon-root {
+    margin-right: .2rem;
   }
 `
 
