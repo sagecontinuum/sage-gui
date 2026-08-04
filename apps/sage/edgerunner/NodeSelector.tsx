@@ -3,11 +3,9 @@ import { Divider, MenuItem, Select } from '@mui/material'
 import { ListSubheader, SearchListSubheader } from '/components/layout/Layout'
 import { compactMenuItemSx, compactSelectSx } from './selectStyles'
 
-export const nodeOptions = ['H00F', 'H00B'] as const
+const otherNodes = ['H00F', 'H00B'] as const
 
 export const summerCampNodes = [
-  'H00F',
-  'H00B',
   'H01D',
   'H01E',
   'H01F',
@@ -41,6 +39,8 @@ export const summerCampNodes = [
   'H043'
 ] as const
 
+export const nodeOptions = [...summerCampNodes, ...otherNodes] as const
+
 type Props = {
   value: string
   onChange: (value: string) => void
@@ -71,11 +71,8 @@ export default function NodeSelector(props: Props) {
     return filterNodes(summerCampNodes, searchQuery)
   }, [searchQuery])
 
-  const visibleNodeOptions = useMemo(() => {
-    const nodes = nodeOptions.filter((node) => {
-      return !summerCampNodes.includes(node as typeof summerCampNodes[number])
-    })
-    return filterNodes(nodes, searchQuery)
+  const visibleOtherNodes = useMemo(() => {
+    return filterNodes(otherNodes, searchQuery)
   }, [searchQuery])
 
   useEffect(() => {
@@ -133,10 +130,10 @@ export default function NodeSelector(props: Props) {
         </MenuItem>
       ))}
 
-      {!!visibleSummerCampNodes.length && !!visibleNodeOptions.length && <Divider />}
+      {!!visibleSummerCampNodes.length && !!visibleOtherNodes.length && <Divider />}
 
       <ListSubheader>Other nodes</ListSubheader>
-      {visibleNodeOptions.map((node) => (
+      {visibleOtherNodes.map((node) => (
         <MenuItem key={node} value={node} sx={compactMenuItemSx}>
           {node}
         </MenuItem>

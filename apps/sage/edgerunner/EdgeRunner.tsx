@@ -22,7 +22,7 @@ import { type VSN } from '/components/apis/beekeeper'
 import DefaultPrompts from './DefaultPrompts'
 import Tasks from './Tasks'
 import ModelSelector from './ModelSelector'
-import NodeSelector, { nodeOptions } from './NodeSelector'
+import NodeSelector from './NodeSelector'
 import CameraSelector, { getDefaultCameraValue, getCameraOptionsForNode } from './CameraSelector'
 import ChatSelector from './ChatSelector'
 import AssistLogger, { LoggerProvider, useLogger, type LogEntry } from './EdgeRunnerLogger'
@@ -51,6 +51,7 @@ export type Task = {
 type PersistedAssistantState = {
   tasks: Task[]
   selectedNode?: string
+  selectedCamera?: string
 }
 
 const getPromptArg = (args?: string[]): string => {
@@ -74,7 +75,7 @@ const getPromptArg = (args?: string[]): string => {
   return ''
 }
 
-const getPersistedAssistantState = () : PersistedAssistantState => {
+const getPersistedState = () : PersistedAssistantState => {
   const raw = LS.get(storageKey)
   if (!raw) return {tasks: []}
 
@@ -85,10 +86,13 @@ const getPersistedAssistantState = () : PersistedAssistantState => {
       return {tasks: parsed}
     }
 
+    console.log('parsed persisted state', parsed)
+
     if (parsed && typeof parsed == 'object') {
       return {
         tasks: Array.isArray(parsed.tasks) ? parsed.tasks : [],
-        selectedNode: typeof parsed.selectedNode == 'string' ? parsed.selectedNode : undefined
+        selectedNode: typeof parsed.selectedNode == 'string' ? parsed.selectedNode : undefined,
+        selectedCamera: typeof parsed.selectedCamera == 'string' ? parsed.selectedCamera : undefined
       }
     }
 
@@ -98,7 +102,7 @@ const getPersistedAssistantState = () : PersistedAssistantState => {
   }
 }
 
-const getTasks = () : Task[] => getPersistedAssistantState().tasks
+const getTasks = () : Task[] => getPersistedState().tasks
 
 const toError = (err: unknown): Error => {
   if (err instanceof Error) return err
@@ -117,15 +121,8 @@ const getFrequencyLabel = (mins: number): string => {
   return `${mins}m`
 }
 
-const getStoredNode = (): string => {
-  const savedNode = getPersistedAssistantState().selectedNode
-  return savedNode && nodeOptions.includes(savedNode as typeof nodeOptions[number])
-    ? savedNode
-    : 'H00F'
-}
-
-const persistAssistantState = (tasks: Task[], selectedNode: string) => {
-  LS.set(storageKey, {tasks, selectedNode})
+const persistState = (tasks: Task[], selectedNode: string, selectedCamera: string) => {
+  LS.set(storageKey, {tasks, selectedNode, selectedCamera})
 }
 
 
@@ -155,12 +152,22 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const navigate = useNavigate()
   const { chatId } = useParams<{ chatId?: string }>()
 
+  const [persistedState] = useState<PersistedAssistantState>(() => getPersistedState())
+  const initialSelectedNode = persistedState.selectedNode || 'H00F'
+
+  console.log('persistedState', persistedState, 'initialSelectedNode', initialSelectedNode)
+  const initialSelectedCamera =
+    persistedState.selectedCamera &&
+    getCameraOptionsForNode(initialSelectedNode).some((camera) => camera.value == persistedState.selectedCamera)
+      ? persistedState.selectedCamera
+      : getDefaultCameraValue(initialSelectedNode)
+
   const [prompt, setPrompt] = useState<string>('')
   const [selectedModel, setSelectedModel] = useState<string>(
     sageRecommendedModelOptions[0]?.value || modelOptions[0]?.value || 'gemma4:e2b'
   )
-  const [selectedNode, setSelectedNode] = useState<string>(() => getStoredNode())
-  const [selectedCamera, setSelectedCamera] = useState<string>(getDefaultCameraValue('H00F'))
+  const [selectedNode, setSelectedNode] = useState<string>(initialSelectedNode)
+  const [selectedCamera, setSelectedCamera] = useState<string>(initialSelectedCamera)
   const [selectedFrequency, setSelectedFrequency] = useState<number>(1)
 
   const [submitting, setSubmitting] = useState(false)
@@ -171,6 +178,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const selectedNodeRef = useRef(selectedNode)
+  const selectedCameraRef = useRef(selectedCamera)
   const [chatSelectorOpenSignal, setChatSelectorOpenSignal] = useState(0)
 
   // const [showNodeSelector, setShowNodeSelector] = useState(false)
@@ -191,9 +199,10 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
 
   useEffect(() => {
     selectedNodeRef.current = selectedNode
+    selectedCameraRef.current = selectedCamera
     const savedTasks = getTasks()
-    persistAssistantState(savedTasks, selectedNode)
-  }, [selectedNode])
+    persistState(savedTasks, selectedNode, selectedCamera)
+  }, [selectedNode, selectedCamera])
 
   useEffect(() => {
     const restoreActiveChat = async () => {
@@ -212,7 +221,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
           fullJobSpec: job
         }
 
-        persistAssistantState([restoredTask], selectedNodeRef.current)
+        persistState([restoredTask], selectedNodeRef.current, selectedCameraRef.current)
         setTasks([restoredTask])
         setLastUpdate(new Date())
       } catch (err) {
@@ -245,7 +254,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
           fullJobSpec: job
         }
 
-        persistAssistantState([newRecord], selectedNodeRef.current)
+        persistState([newRecord], selectedNodeRef.current, selectedCameraRef.current)
         setTasks([newRecord])
       } catch (err) {
         if (done) return
@@ -299,7 +308,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
           const oldRecords = getTasks() || []
           const newRecord = {...res, prompt: submittedPrompt}
           const records = [...oldRecords, newRecord]
-          persistAssistantState(records, selectedNode)
+          persistState(records, selectedNode, selectedCamera)
           setTasks(records)
 
           // todo(nc): look into possible race condition
@@ -352,7 +361,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
             state: job.state.last_state,
             fullJobSpec: job
           }
-          persistAssistantState([newRecord], selectedNode)
+          persistState([newRecord], selectedNode, selectedCamera)
           setTasks([newRecord])
           navigate(`/edgerunner/chats/${job.job_id}`)
         })
@@ -371,7 +380,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   }
 
   const handleTaskChange = (tasks: Task[]) => {
-    persistAssistantState(tasks, selectedNode)
+    persistState(tasks, selectedNode, selectedCamera)
     setTasks(tasks)
   }
 
@@ -380,7 +389,7 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
   }
 
   const handleSelectChat = (job: SES.Job) => {
-    persistAssistantState([], selectedNode)
+    persistState([], selectedNode, selectedCamera)
     setTasks([])
     const task: Task = {
       job_id: String(job.job_id),
@@ -389,13 +398,13 @@ function AssistantInner({ logEntries, onClearLogs }: InnerProps) {
       state: job.state?.last_state || '',
       fullJobSpec: job
     }
-    persistAssistantState([task], selectedNode)
+    persistState([task], selectedNode, selectedCamera)
     setTasks([task])
     navigate(`/edgerunner/chats/${job.job_id}`)
   }
 
   const handleNewChat = () => {
-    persistAssistantState([], selectedNode)
+    persistState([], selectedNode, selectedCamera)
     setTasks([])
     navigate('/edgerunner')
   }

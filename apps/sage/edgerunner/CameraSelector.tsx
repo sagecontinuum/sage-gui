@@ -2,7 +2,7 @@
 import { MenuItem, Select } from '@mui/material'
 import { ListSubheader } from '/components/layout/Layout'
 import { compactMenuItemSx, compactSelectSx } from './selectStyles'
-import { summerCampNodes } from './NodeSelector'
+import { nodeOptions } from './NodeSelector'
 
 type CameraOption = {
   label: string
@@ -41,54 +41,54 @@ export const cameraOptions: CameraOption[] = [
     nodes: ['H015']
   }, {
     label: 'EVL 1',
-    value: 'rtsp://lookup.sage/camera/evl-1',
+    value: 'rtsp://10.107.0.1/camera/evl-1',
     description: 'Summer camp EVL camera 1.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 2',
-    value: 'rtsp://lookup.sage/camera/evl-2',
+    value: 'rtsp://10.107.0.1/camera/evl-2',
     description: 'Summer camp EVL camera 2.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 3',
-    value: 'rtsp://lookup.sage/camera/evl-3',
+    value: 'rtsp://10.107.0.1/camera/evl-3',
     description: 'Summer camp EVL camera 3.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 4',
-    value: 'rtsp://lookup.sage/camera/evl-4',
+    value: 'rtsp://10.107.0.1/camera/evl-4',
     description: 'Summer camp EVL camera 4.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 5',
-    value: 'rtsp://lookup.sage/camera/evl-5',
+    value: 'rtsp://10.107.0.1/camera/evl-5',
     description: 'Summer camp EVL camera 5.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 6',
-    value: 'rtsp://lookup.sage/camera/evl-6',
+    value: 'rtsp://10.107.0.1/camera/evl-6',
     description: 'Summer camp EVL camera 6.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 7',
-    value: 'rtsp://lookup.sage/camera/evl-7',
+    value: 'rtsp://10.107.0.1/camera/evl-7',
     description: 'Summer camp EVL camera 7.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL 8',
-    value: 'rtsp://lookup.sage/camera/evl-8',
+    value: 'rtsp://10.107.0.1/camera/evl-8',
     description: 'Summer camp EVL camera 8.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'EVL Eye',
-    value: 'rtsp://lookup.sage/camera/evl-eye',
+    value: 'rtsp://10.107.0.1/camera/evl-eye',
     description: 'Summer camp EVL eye camera.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }, {
     label: 'Eye',
-    value: 'rtsp://lookup.sage/camera/eye',
+    value: 'rtsp://10.107.0.1/camera/eye',
     description: 'Summer camp eye camera.',
-    nodes: [...summerCampNodes]
+    nodes: [...nodeOptions]
   }]
 
 export const getCameraOptionsForNode = (node: string): CameraOption[] =>
