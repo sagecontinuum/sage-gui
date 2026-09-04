@@ -28,7 +28,7 @@ const mockNodeData = {
     {
       name: 'camera',
       hw_model: 'IMX219',
-      capabilities: ['camera'],
+      capabilities: ['Camera'],
       is_active: true
     }
   ],
@@ -146,6 +146,7 @@ test('displays sensor data tables', async () => {
 
   expect(screen.getByRole('table')).toBeInTheDocument()
   expect(screen.getByText('BME680')).toBeInTheDocument()
+  expect(screen.queryByText('IMX219')).not.toBeInTheDocument()
 
   unmount()
 })
