@@ -64,7 +64,7 @@ const getInActive = (data: BK.Node) => [
 
 const getSensorList = (data: BK.Node) => {
   const sensors = data?.sensors.filter(o =>
-    !o.capabilities.includes('camera') &&
+    !o.capabilities.some(capability => capability.toLowerCase() == 'camera') &&
     !skipSensorPreview.includes(o.name)
   )
 

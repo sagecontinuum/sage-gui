@@ -1,3 +1,40 @@
+const em500Co2Measurements = {
+  names: [
+    { name: 'co2', label: 'CO₂', units: 'ppm' },
+    { name: 'temperature', label: 'Temperature', units: '°C' },
+    { name: 'humidity', label: 'Humidity', units: '%RH' },
+    { name: 'pressure', label: 'Pressure', units: 'hPa' },
+    { name: 'battery', label: 'Battery', units: '%' },
+  ],
+}
+
+const draginoSingleProbeMeasurements = {
+  names: [
+    { name: 'water_soil', label: 'Soil moisture', units: '%' },
+    { name: 'temp_soil', label: 'Soil temperature', units: '°C' },
+    { name: 'conduct_soil', label: 'Soil conductivity', units: 'µS/cm' },
+    { name: 'batv', label: 'Battery voltage', units: 'V' },
+  ],
+}
+
+const draginoMultiProbeMeasurements = {
+  names: [
+    ...[1, 2, 3, 4].flatMap(index => [
+      { name: `water_soil${index}`, label: `Soil moisture ${index}`, units: '%' },
+      { name: `temp_soil${index}`, label: `Soil temperature ${index}`, units: '°C' },
+      { name: `conduct_soil${index}`, label: `Soil conductivity ${index}`, units: 'µS/cm' },
+    ]),
+    { name: 'batv', label: 'Battery voltage', units: 'V' },
+  ],
+}
+
+const sdi12Measurements = {
+  names: [
+    { name: 'matric_potential', label: 'Matric potential', units: 'kPa' },
+    { name: 'temp', label: 'Probe temperature', units: '°C' },
+    { name: 'batv', label: 'Battery voltage', units: 'V' },
+  ],
+}
 
 const measurements = {
   AQT530: {
@@ -113,6 +150,46 @@ const measurements = {
     names: [
       { name: 'env.humidity.hut', label: 'Hut Humidity' },
       { name: 'env.temperature.hut', label: 'Hut Temperature' },
+    ],
+  },
+
+  'EM500-PP-4842_-_Pipe_Pressure_': {
+    names: [
+      { name: 'pressure', label: 'Pressure', units: 'kPa' },
+      { name: 'battery', label: 'Battery', units: '%' },
+    ],
+  },
+
+  'EM500-CO2_-_CO2,_temperature,_': em500Co2Measurements,
+  'EM500-CO2_-_DR0-DR2_ADR_pilot': em500Co2Measurements,
+
+  'EM300-DI': {
+    names: [
+      { name: 'temperature', label: 'Temperature', units: '°C' },
+      { name: 'humidity', label: 'Humidity', units: '%RH' },
+      { name: 'gpio', label: 'GPIO' },
+      { name: 'pulse', label: 'Pulse count' },
+      { name: 'battery', label: 'Battery', units: '%' },
+    ],
+  },
+
+  'SenseCAP_S2103_-_CO2,_Temperat': {
+    names: [
+      { name: 'messages_0_measurementvalue', label: 'Temperature', units: '°C' },
+      { name: 'messages_1_measurementvalue', label: 'Humidity', units: '%RH' },
+      { name: 'messages_2_measurementvalue', label: 'CO₂', units: 'ppm' },
+      { name: 'messages_3_battery', label: 'Battery', units: '%' },
+    ],
+  },
+
+  'SE01-LS': draginoSingleProbeMeasurements,
+  'SE0X-LS': draginoMultiProbeMeasurements,
+  'SDI-12-LS': sdi12Measurements,
+
+  'SDI-12-LS-Apogee': {
+    names: [
+      { name: 'uv_a_irradiance_w_m2', label: 'UV-A irradiance', units: 'W/m²' },
+      { name: 'batv', label: 'Battery voltage', units: 'V' },
     ],
   },
 
@@ -295,6 +372,7 @@ const skipSensorPreview = [
   'lorawan',
   'Device_2',
   'MFR_node_MNLA4O102',
+  'Seismic_Sensor',
 ]
 
 
